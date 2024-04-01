@@ -50,24 +50,17 @@ inline_for_extraction noextract
 let m_spec = Core.m_spec
 
 inline_for_extraction noextract
-let key_size_t (a : alg) =
-  key_size:U32.t{U32.v key_size <= Spec.max_key a}
+let index = Params.index
 
 inline_for_extraction noextract
-let output_size_t (a : alg) = Lib.IntTypes.(s:size_t { 1 <= v s /\ v s <= Spec.max_output a })
-
-inline_for_extraction noextract
-let index a = key_size_t a & output_size_t a
-
-inline_for_extraction noextract
-let singleton x' = x:U32.t { x == x' }
+let singleton x' = x:UInt8.t { x == x' }
 
 /// The stateful state: (wv, hash)
 inline_for_extraction noextract
 let s (a : alg) (i: index a) (m : m_spec) = singleton (fst i) & singleton (snd i) & Core.(state_p a m & state_p a m)
 
 inline_for_extraction noextract
-let t (a : alg) = key_size_t a & output_size_t a & Spec.state a
+let t (a : alg) = Spec.key_length_t a & Spec.digest_length_t a & Spec.state a
 
 (* In the internal state, we keep wv, the working vector. It's essentially
 temporary scratch space that the Blake2 implementation expects to receive. (Why
@@ -156,37 +149,41 @@ let key_size (a : alg) = kk:nat{kk <= Spec.max_key a}
 
 /// Defining stateful keys
 inline_for_extraction noextract
-let stateful_key_t (a : alg) (kk: key_size_t a): Type =
-  singleton kk & P.params a & (b:B.buffer uint8 { B.len b == kk})
+let stateful_key_t (a : alg) (i: index a): Type =
+  P.params a i & (b:B.buffer uint8 { B.length b == UInt8.v (fst i)})
 
 let key_footprint =
-  fun #a (#i: index a) h (s: stateful_key_t a (fst i)) ->
-    let kk, p, s = s in
+  fun #a (#i: index a) h (s: stateful_key_t a i) ->
+    let p, s = s in
     P.footprint #a h p `B.loc_union` (
-    if kk = 0ul then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8))
+    if fst i = 0uy then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8))
 
 let key_invariant =
-  fun #a (#i: index a) h (s: stateful_key_t a (fst i)) ->
-      let kk, p, s = s in
-      P.invariant #a h p /\
-      UInt8.v (P.v #a h p).digest_length == UInt32.v (snd i) /\
-      UInt8.v (P.v #a h p).key_length == UInt32.v (fst i) /\ (
-      kk <> 0ul ==>
-        B.live h (s <: B.buffer uint8) /\
-        B.loc_disjoint (B.loc_addr_of_buffer (s <: B.buffer uint8)) (P.footprint #a h p))
+  fun #a (#i: index a) h (s: stateful_key_t a i) ->
+    let kk, nn = i in
+    let p = fst s in
+    let s = snd s in
+    P.invariant #a #i h p /\
+    (kk <> 0uy ==>
+      B.live h (s <: B.buffer uint8) /\
+      B.loc_disjoint (B.loc_addr_of_buffer (s <: B.buffer uint8)) (P.footprint #a h p))
 
 let key_freeable =
-  fun #a (#i: index a) h (s: stateful_key_t a (fst i)) ->
-    let kk, p, s = s in
+  fun #a (#i: index a) h (s: stateful_key_t a i) ->
+    let kk, nn = i in
+    let p, s = s in
     P.freeable #a h p /\ (
-    if kk = 0ul then True else B.freeable (s <: B.buffer uint8))
+    if kk = 0uy then True else B.freeable (s <: B.buffer uint8))
+
+let params_t a (i: index a) =
+  p:Spec.blake2_params a { p.key_length == fst i /\ p.digest_length == snd i }
 
 let key_t #a (i: index a) =
-  Spec.blake2_params a & s:S.seq uint8 { S.length s == U32.v (fst i) }
+  params_t a i & s:S.seq uint8 { S.length s == UInt8.v (fst i) }
 
-let key_v #a (i: index a) h (s: stateful_key_t a (fst i)): GTot (key_t i) =
-    let kk', p, s = s in
-    P.v #a h p, (if fst i = 0ul then S.empty #uint8 else B.as_seq h (s <: B.buffer uint8))
+let key_v #a (i: index a) h (s: stateful_key_t a i): GTot (key_t i) =
+  let p, s = s in
+  P.v #a h p, (if fst i = 0uy then S.empty #uint8 else B.as_seq h (s <: B.buffer uint8))
 
 /// Keeps the key and its length at run-time, for extraction, but makes sure the
 /// parameter is ghost to let the functor decide, via the index, which APIs need
@@ -198,7 +195,7 @@ inline_for_extraction noextract
 let stateful_key (a : alg):
   I.stateful (index a) =
   I.Stateful
-    (fun i -> stateful_key_t a (fst i))
+    (fun i -> stateful_key_t a i)
     (* footprint *)
     (key_footprint #a)
     (* freeable *)
@@ -210,39 +207,35 @@ let stateful_key (a : alg):
     (* v *)
     (key_v #a)
     (fun #i h s ->
-      let kk, p, s = s in
+      let p, s = s in
       P.invariant_loc_in_footprint #a h p) (* invariant_loc_in_footprint *)
-    (fun #kk l (s: stateful_key_t a (fst kk)) h0 h1 ->
-      let _, p, _ = s in
+    (fun #i l (s: stateful_key_t a i) h0 h1 ->
+      let p, _ = s in
       P.frame_invariant #a l p h0 h1) (* frame_invariant *)
     (fun #_ l s h0 h1 ->
-      let _, p, _ = s in
+      let p, _ = s in
       P.frame_freeable #a l p h0 h1) (* frame_freeable *)
 
     (* alloca *)
     (fun i ->
-      if fst i = 0ul then
+      if fst i = 0uy then
         let h0 = ST.get () in
-        let p = P.alloca a in
-        P.set_digest_length p (FStar.Int.Cast.uint32_to_uint8 (snd i));
-        P.set_key_length p (FStar.Int.Cast.uint32_to_uint8 (fst i));
+        let p = P.alloca a i in
         let s = B.null #uint8 in
-        let s = 0ul, p, s in
+        let s = p, s in
         let h1 = ST.get () in
         assert (key_footprint #a #i h1 s == P.footprint h1 p);
         s
       else
         let h0 = ST.get () in
-        let p = P.alloca a in
+        let p = P.alloca a i in
         let h00 = ST.get () in
         assert P.(invariant h00 p);
-        P.set_digest_length p (FStar.Int.Cast.uint32_to_uint8 (snd i));
-        P.set_key_length p (FStar.Int.Cast.uint32_to_uint8 (fst i));
         let h01 = ST.get () in
         assert P.(invariant h01 p);
 
-        let s_ = B.alloca (Lib.IntTypes.u8 0) (fst i) in
-        let s = fst i, p, s_ in
+        let s_ = B.alloca (Lib.IntTypes.u8 0) (FStar.Int.Cast.uint8_to_uint32 (fst i)) in
+        let s = p, s_ in
         let h1 = ST.get () in
         assert B.(modifies loc_none h0 h01);
         assert B.(modifies loc_none h01 h1);
@@ -255,24 +248,20 @@ let stateful_key (a : alg):
 
     (* create_in *)
     (fun i r ->
-      if fst i = 0ul then
+      if fst i = 0uy then
         let h0 = ST.get () in
-        let p = P.create_in a r in
-        P.set_digest_length p (FStar.Int.Cast.uint32_to_uint8 (snd i));
-        P.set_key_length p (FStar.Int.Cast.uint32_to_uint8 (fst i));
+        let p = P.create_in a i r in
         let s = B.null #uint8 in
-        let s = 0ul, p, s in
+        let s = p, s in
         let h1 = ST.get () in
         assert (key_footprint #a #i h1 s == P.footprint h1 p);
         s
       else
         let h0 = ST.get () in
-        let p = P.create_in a r in
-        P.set_digest_length p (FStar.Int.Cast.uint32_to_uint8 (snd i));
-        P.set_key_length p (FStar.Int.Cast.uint32_to_uint8 (fst i));
+        let p = P.create_in a i r in
         let h01 = ST.get () in
-        let s_ = B.malloc r (Lib.IntTypes.u8 0) (fst i) in
-        let s = fst i, p, s_ in
+        let s_ = B.malloc r (Lib.IntTypes.u8 0) (FStar.Int.Cast.uint8_to_uint32 (fst i)) in
+        let s = p, s_ in
         let h1 = ST.get () in
         P.frame_invariant #a B.loc_none p h01 h1;
         assert B.(key_footprint #a #i h1 s == P.footprint h1 p `loc_union` (loc_addr_of_buffer (s_ <: B.buffer uint8)));
@@ -285,19 +274,23 @@ let stateful_key (a : alg):
         s)
 
     (* free *)
-    (fun i (s: stateful_key_t a (fst i)) ->
-      let i, p, s = s in
+    (fun i (s: stateful_key_t a i) ->
+      let p, s = s in
+      let kk = (P.get_params p).key_length in
+      assert (kk = fst i);
       P.free #a p;
-      if i = 0ul then () else B.free (s <: B.buffer uint8))
+      if kk = 0uy then () else B.free (s <: B.buffer uint8))
 
     (* copy *)
-    (fun i (s_src': stateful_key_t a (fst i)) (s_dst': stateful_key_t a (fst i)) ->
-      let kk, p_src, s_src = s_src' in
-      let _, p_dst, s_dst = s_dst' in
+    (fun i (s_src': stateful_key_t a i) (s_dst': stateful_key_t a i) ->
+      let p_src, s_src = s_src' in
+      let kk = (P.get_params p_src).key_length in
+      assert (kk = fst i);
+      let p_dst, s_dst = s_dst' in
       let h0 = ST.get () in
-      if kk <> 0ul then begin
+      if kk <> 0uy then begin
         B.blit (s_src <: B.buffer uint8) 0ul
-          (s_dst <: B.buffer uint8) 0ul kk;
+          (s_dst <: B.buffer uint8) 0ul (FStar.Int.Cast.uint8_to_uint32 kk);
         let h1 = ST.get () in
         P.frame_invariant #a (B.loc_addr_of_buffer s_dst) p_src h0 h1;
         P.frame_invariant #a (B.loc_addr_of_buffer s_dst) p_dst h0 h1;
@@ -573,7 +566,7 @@ let spec_is_incremental a p k input0 =
 #pop-options
 
 inline_for_extraction noextract
-val init_key_block (a : alg) (i : index a) (k : stateful_key_t a (fst i))
+val init_key_block (a : alg) (i : index a) (k : stateful_key_t a i)
   (buf_: B.buffer uint8 { B.length buf_ = Spec.size_block a }) :
   ST.Stack unit
   (requires fun h0 ->
@@ -585,14 +578,14 @@ val init_key_block (a : alg) (i : index a) (k : stateful_key_t a (fst i))
     B.(modifies (loc_buffer buf_) h0 h1) /\
     begin
     let _, k = (stateful_key a).v i h0 k in
-    let input_length = if fst i <> 0ul then Spec.size_block a else 0 in
-    let input = if fst i <> 0ul then Spec.blake2_key_block a (U32.v (fst i)) k else S.empty in
+    let input_length = if fst i <> 0uy then Spec.size_block a else 0 in
+    let input = if fst i <> 0uy then Spec.blake2_key_block a (UInt8.v (fst i)) k else S.empty in
     S.equal (S.slice (B.as_seq h1 buf_) 0 input_length) input
     end)
 
 let init_key_block a i k buf_ =
-  let kk = fst i in
-  let _, _, k' = k in
+  let kk = FStar.Int.Cast.uint8_to_uint32 (fst i) in
+  let _, k' = k in
   if kk = 0ul then ()
   else
     begin
@@ -638,18 +631,13 @@ let init_key_block a i k buf_ =
 /// Runtime
 /// -------
 
-let override #a (i: index a) (p: Spec.blake2_params a) =
-  { p with
-    Spec.digest_length = FStar.Int.Cast.uint32_to_uint8 (snd i);
-    Spec.key_length = FStar.Int.Cast.uint32_to_uint8 (fst i) }
-
 let _: squash (inversion Spec.alg) = allow_inversion Spec.alg
 
-#push-options "--ifuel 0 --fuel 0 --z3rlimit 300"// --z3cliopt smt.arith.nl=false"
+#push-options "--ifuel 2 --fuel 2 --z3rlimit 300"// --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
 let blake2 (a : alg)
            (m : valid_m_spec a)
-           (init : blake2_init_st a m)
+           (init : blake2_init_with_params_st a m)
            (update_multi : blake2_update_multi_st a m)
            (update_last : blake2_update_last_st a m)
            (finish : blake2_finish_st a m) :
@@ -664,15 +652,15 @@ let blake2 (a : alg)
     unit (* output_length_t *)
 
     (fun _ -> max_input_len a) (* max_input_length *)
-    (fun i _ -> UInt32.v (snd i)) (* output_len *)
+    (fun i _ -> UInt8.v (snd i)) (* output_len *)
     (fun _ -> block_len a) (* block_len *)
     (fun _ -> block_len a) (* blocks_state_len *)
-    (fun i -> let kk = fst i in if kk <> 0ul then block_len a else 0ul) (* init_input_len *)
+    (fun i -> let kk = fst i in if kk <> 0uy then block_len a else 0ul) (* init_input_len *)
 
     (fun i (_, k) ->
-      let kk = fst i in if kk <> 0ul then Spec.blake2_key_block a (U32.v kk) k else S.empty) (* init_input_s *)
+      let kk = fst i in if kk <> 0uy then Spec.blake2_key_block a (UInt8.v kk) k else S.empty) (* init_input_s *)
     (fun i (p, _k) ->
-      let kk = fst i in kk, snd i, init_s a (override i p)) (* init_s *)
+      let kk = fst i in kk, snd i, init_s a p) (* init_s *)
 
     (fun _ (kk, nn, acc) prevlen input -> kk, nn, update_multi_s acc prevlen input) (* update_multi_s *)
     (fun _ (kk, nn, acc) prevlen input -> kk, nn, update_last_s acc prevlen input) (* update_last_s *)
@@ -680,10 +668,10 @@ let blake2 (a : alg)
       // Don't know at this stage that the parameters contain the right value
       // for the key length since the v of the key does not have a stateful
       // invariant -- dang.
-      finish_s #a (override i p) acc) (* finish_s *)
+      finish_s #a p acc) (* finish_s *)
     (fun i k input l ->
       let p, k = k in
-      spec_s a (override i p) k input) (* spec_s *)
+      spec_s a p k input) (* spec_s *)
 
     (* update_multi_zero *)
     (fun _ (kk, _, acc) prevlen -> update_multi_zero #a acc prevlen)
@@ -692,42 +680,52 @@ let blake2 (a : alg)
     (fun _ (kk, _, acc) prevlen1 prevlen2 input1 input2 ->
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
     (fun i (p, k) input _ ->
-      spec_is_incremental a (override i p) k input) (* spec_is_incremental *)
+      spec_is_incremental a p k input) (* spec_is_incremental *)
     (fun _ (kk, nn, _) -> (kk, nn)) (* index_of_state *)
 
     (* init *)
     (fun i k' buf_ acc ->
-      let kk, p, k = k' in
-      let l = (P.get_params p).digest_length in
+      let p, k = k' in
+      let kk = (P.get_params p).key_length in
+      let nn = (P.get_params p).digest_length in
       assert (kk == fst i);
-      assert (FStar.Int.Cast.uint8_to_uint32 l == snd i);
-      admit ();
-      let i: index a = kk, FStar.Int.Cast.uint8_to_uint32 l in
+      assert (nn == snd i);
+      let kk', nn', s = acc in
+      assert (kk == kk');
+      assert (nn == nn');
+      let i: index a = kk, nn in
       [@inline_let] let wv = get_wv #a #i #m acc in
       [@inline_let] let h = get_state_p #a #i acc in
+      let h0 = ST.get () in
+      assert (key_invariant h0 k');
       init_key_block a i k' buf_;
-      init h kk (snd i))
+      let h1 = ST.get () in
+      assert (key_invariant h1 k');
+      let pv = P.get_params p in
+      init h pv;
+      let h2 = ST.get () in
+      P.frame_invariant (Lib.Buffer.loc h) p h1 h2;
+      assert (key_invariant h2 k')
+      )
 
     (* update_multi *)
     (fun _ (kk, _, acc) prevlen blocks len ->
-      admit ();
       let wv, hash = acc in
       let nb = len `U32.div` Core.size_block a in
       update_multi #len wv hash (blake2_prevlen a prevlen) blocks nb)
 
     (* update_last *)
     (fun _ (kk, _, acc) prevlen last last_len ->
-      admit ();
       let wv, hash = acc in
       update_last #last_len wv hash (blake2_prevlen a prevlen) last_len last)
 
     (* finish *)
     (fun _ k s dst _ ->
-      admit ();
+      // Requires fuel and ifuel. Ideally, flesh out the proof instead.
       let kk, nn, acc = s in
       [@inline_let] let wv = get_wv #a #(kk, nn) #m s in
       [@inline_let] let h = get_state_p #a #(kk, nn) s in
-      finish nn dst h)
+      finish (FStar.Int.Cast.uint8_to_uint32 nn) dst h)
 #pop-options
 
 

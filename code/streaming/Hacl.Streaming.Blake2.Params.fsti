@@ -9,26 +9,33 @@ open FStar.HyperStack.ST
 module Spec = Spec.Blake2
 module Core = Hacl.Impl.Blake2.Core
 
-inline_for_extraction noextract
-val params (a: Spec.alg) : Type0
+val _align: unit
 
 inline_for_extraction noextract
-val footprint (#a: Spec.alg) (h: HS.mem) (p: params a) : GTot B.loc
+let index (a: Spec.alg) = Spec.key_length_t a & Spec.digest_length_t a
 
 inline_for_extraction noextract
-val freeable (#a: Spec.alg) (h: HS.mem) (p: params a) : GTot prop
+val params (a: Spec.alg) (i: index a): Type0
 
 inline_for_extraction noextract
-val invariant (#a: Spec.alg) (h: HS.mem) (p: params a) : GTot prop
+val footprint (#a: Spec.alg) #i (h: HS.mem) (p: params a i) : GTot B.loc
 
-val v (#a: Spec.alg) (h: HS.mem) (p: params a) : GTot (Spec.blake2_params a)
+inline_for_extraction noextract
+val freeable (#a: Spec.alg) #i (h: HS.mem) (p: params a i) : GTot prop
 
-val invariant_loc_in_footprint: #a: Spec.alg -> h:HS.mem -> s:params a -> Lemma
+inline_for_extraction noextract
+val invariant (#a: Spec.alg) #i (h: HS.mem) (p: params a i) : GTot prop
+
+val v (#a: Spec.alg) #i (h: HS.mem) (p: params a i) : GTot (p:Spec.blake2_params a{
+  p.key_length == fst i /\ p.digest_length == snd i
+})
+
+val invariant_loc_in_footprint: #a: Spec.alg -> #i:index a -> h:HS.mem -> s:params a i -> Lemma
     (requires (invariant h s))
     (ensures (B.loc_in (footprint h s) h))
     [ SMTPat (invariant h s) ]
 
-val frame_invariant: #a: Spec.alg -> l:B.loc -> s: params a -> h0:HS.mem -> h1:HS.mem -> Lemma
+val frame_invariant: #a: Spec.alg -> #i:index a -> l:B.loc -> s: params a i -> h0:HS.mem -> h1:HS.mem -> Lemma
     (requires (
       invariant h0 s /\
       B.loc_disjoint l (footprint h0 s) /\
@@ -39,7 +46,7 @@ val frame_invariant: #a: Spec.alg -> l:B.loc -> s: params a -> h0:HS.mem -> h1:H
       footprint h1 s == footprint h0 s))
     [ SMTPat (invariant h1 s); SMTPat (B.modifies l h0 h1) ]
 
-val frame_freeable: #a: Spec.alg -> l:B.loc -> s:params a -> h0:HS.mem -> h1:HS.mem -> Lemma
+val frame_freeable: #a: Spec.alg -> #i:index a -> l:B.loc -> s:params a i -> h0:HS.mem -> h1:HS.mem -> Lemma
     (requires (
       invariant h0 s /\
       freeable h0 s /\
@@ -50,7 +57,9 @@ val frame_freeable: #a: Spec.alg -> l:B.loc -> s:params a -> h0:HS.mem -> h1:HS.
     [ SMTPat (freeable h1 s); SMTPat (B.modifies l h0 h1) ]
 
 inline_for_extraction noextract
-val get_params: #a: Spec.alg -> s: params a -> ST (Core.blake2_params a)
+val get_params: #a: Spec.alg -> #i:G.erased (index a) -> s: params a i -> ST (p:Core.blake2_params a {
+  p.key_length == fst i /\ p.digest_length == snd i
+  })
   (requires fun h -> invariant h s)
   (ensures fun h0 p h1 ->
     h0 == h1 /\
@@ -59,7 +68,7 @@ val get_params: #a: Spec.alg -> s: params a -> ST (Core.blake2_params a)
     Core.blake2_params_v h1 p == v h1 s)
 
 inline_for_extraction noextract
-val alloca: a: Spec.alg -> StackInline (params a)
+val alloca: a: Spec.alg -> i:index a -> StackInline (params a i)
   (requires (fun _ -> True))
   (ensures (fun h0 s h1 ->
     invariant h1 s /\
@@ -68,7 +77,7 @@ val alloca: a: Spec.alg -> StackInline (params a)
     B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint h1 s))))
 
 inline_for_extraction noextract
-val create_in: a: Spec.alg -> r:HS.rid -> ST (params a)
+val create_in: a: Spec.alg -> i:index a -> r:HS.rid -> ST (params a i)
   (requires (fun h0 ->
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
@@ -79,7 +88,7 @@ val create_in: a: Spec.alg -> r:HS.rid -> ST (params a)
     freeable h1 s))
 
 inline_for_extraction noextract
-val free: #a: Spec.alg -> s:params a -> ST unit
+val free: #a: Spec.alg -> #i:G.erased (index a) -> s:params a i -> ST unit
     (requires fun h0 ->
       freeable h0 s /\
       invariant h0 s)
@@ -87,33 +96,7 @@ val free: #a: Spec.alg -> s:params a -> ST unit
       B.(modifies (footprint h0 s) h0 h1))
 
 inline_for_extraction noextract
-val set_digest_length: #a:Spec.alg -> s:params a ->
-  d:Spec.digest_length_t a ->
-    Stack unit
-      (requires (fun h0 ->
-        invariant h0 s))
-      (ensures fun h0 _ h1 ->
-        B.(modifies (footprint h0 s) h0 h1) /\
-        footprint h0 s == footprint h1 s /\
-        (freeable h0 s ==> freeable h1 s) /\
-        invariant h1 s /\
-        v h1 s == { v h0 s with Spec.digest_length = d })
-
-inline_for_extraction noextract
-val set_key_length: #a:Spec.alg -> s:params a ->
-  d:Spec.key_length_t a ->
-    Stack unit
-      (requires (fun h0 ->
-        invariant h0 s))
-      (ensures fun h0 _ h1 ->
-        B.(modifies (footprint h0 s) h0 h1) /\
-        footprint h0 s == footprint h1 s /\
-        (freeable h0 s ==> freeable h1 s) /\
-        invariant h1 s /\
-        v h1 s == { v h0 s with Spec.key_length = d })
-
-inline_for_extraction noextract
-val copy: #a:Spec.alg -> s_src:params a -> s_dst:params a ->
+val copy: #a:Spec.alg -> #i:G.erased (index a) -> s_src:params a i -> s_dst:params a i ->
     Stack unit
       (requires (fun h0 ->
         invariant h0 s_src /\

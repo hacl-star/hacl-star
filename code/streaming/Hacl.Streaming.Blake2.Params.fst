@@ -5,9 +5,21 @@ open Lib.Buffer
 open LowStar.BufferOps
 
 module B = LowStar.Buffer
+module ST = FStar.HyperStack.ST
+module HS = FStar.HyperStack
 
-let params a =
-  B.pointer (Core.blake2_params a)
+let _align = ()
+
+// MUST BE A SEPARATE TYPE ABBREVIATION
+// nothing works if inlined underneath B.pointer, below
+let blake2_params a (i: index a) =
+  x:Core.blake2_params a {
+      x.digest_length == snd i /\
+      x.key_length == fst i
+    }
+
+let params (a: Spec.alg) (i: index a) =
+  B.pointer (blake2_params a i)
 
 let footprint #a h s =
   B.(loc_union (loc_addr_of_buffer s) (Core.blake2_params_loc (B.deref h s)))
@@ -18,7 +30,7 @@ let freeable_s (#a: Spec.alg) (p: Core.blake2_params a) : GTot prop =
 let freeable #a h s =
   B.freeable s /\ freeable_s (B.deref h s)
 
-let invariant #a h s =
+let invariant #a #i h s =
   B.live h s /\
   B.(loc_disjoint (loc_addr_of_buffer s) (Core.blake2_params_loc (B.deref h s))) /\
   Core.blake2_params_inv h (B.deref h s)
@@ -31,16 +43,18 @@ let invariant_loc_in_footprint #a h s = ()
 let frame_invariant #a l s h0 h1 = ()
 let frame_freeable #a l s h0 h1 = ()
 
-let get_params #a s = B.index s 0ul
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+let get_params #a #i s =
+  B.index s 0ul
 
-let alloca a =
+let alloca a i =
   let open Core in
   let salt = create (salt_len a) (u8 0) in
   let personal = create (personal_len a) (u8 0) in
   let _ = allow_inversion Spec.Blake2.alg in
   let p = {
-    digest_length = 32uy;
-    key_length = 0uy;
+    digest_length = snd i;
+    key_length = fst i;
     fanout = u8 1;
     depth = u8 1;
     leaf_length = u32 0;
@@ -51,13 +65,13 @@ let alloca a =
  in B.alloca p 1ul
 
 #push-options "--z3rlimit 20"
-let create_in a r =
+let create_in a i r =
   let open Core in
   let salt: buffer uint8 = B.malloc r (u8 0) (salt_len a) in
   let personal: buffer uint8 = B.malloc r (u8 0) (personal_len a) in
   let p = {
-    digest_length = 32uy;
-    key_length = 0uy;
+    digest_length = snd i;
+    key_length = fst i;
     fanout = u8 1;
     depth = u8 1;
     leaf_length = u32 0;
@@ -72,17 +86,6 @@ let free #a s =
   B.free (p.salt <: B.buffer uint8);
   B.free (p.personal <: B.buffer uint8);
   B.free s
-
-let set_digest_length #a s d =
-  let open Core in
-  let uu__ = !*s in
-  s *= { uu__ with digest_length = d }
-
-let set_key_length #a s d =
-  let open Core in
-  let uu__ = !*s in
-  s *= { uu__ with key_length = d }
-
 
 let copy #a s_src s_dst =
   let p_src = B.index s_src 0ul in
