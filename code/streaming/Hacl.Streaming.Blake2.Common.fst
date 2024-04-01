@@ -273,17 +273,20 @@ let stateful_key (a : alg):
     (fun i (s_src': stateful_key_t a (fst i)) (s_dst': stateful_key_t a (fst i)) ->
       let kk, p_src, s_src = s_src' in
       let _, p_dst, s_dst = s_dst' in
+      let h0 = ST.get () in
       if kk <> 0ul then begin
-        let h0 = ST.get () in
         B.blit (s_src <: B.buffer uint8) 0ul
           (s_dst <: B.buffer uint8) 0ul kk;
         let h1 = ST.get () in
         P.frame_invariant #a (B.loc_addr_of_buffer s_dst) p_src h0 h1;
         P.frame_invariant #a (B.loc_addr_of_buffer s_dst) p_dst h0 h1;
-        assert (key_invariant #a #i h1 s_dst');
-        assume (key_v #a i h1 s_dst' == key_v #a i h0 s_src')
+        assert (key_invariant #a #i h1 s_dst')
       end;
-      P.copy p_src p_dst)
+      P.copy p_src p_dst;
+      let h2 = ST.get () in
+      assert (B.as_seq h0 s_src `Seq.equal` B.as_seq h2 s_dst);
+      assert (key_v #a i h2 s_dst' == key_v #a i h0 s_src')
+      )
 
 inline_for_extraction noextract
 let k = stateful_key
