@@ -193,37 +193,66 @@ let reset_with_key_and_params i s p k () =
   let i = index_of_state i s in
   reset_raw i s (p, k)
 
-(*
 [@ (Comment " Re-initialization function when there is a key. Note that the key
 size is not allowed to change, which is why this function does not take a key
 length -- the key has to be same key size that was originally passed to
 `malloc_with_key`")]
-val reset_with_key: (i: G.erased (Common.key_size_t Spec.Blake2B)) -> (
+val reset_with_key: (i: G.erased (Common.index Spec.Blake2B)) -> (
   let open F in
   let c = blake2b_32 in
-  let t: Type0 = c.state.s (G.reveal i) in
-  let t': Type0 = I.optional_key (G.reveal i) c.km c.key in
-  state:state c (G.reveal i) t t' ->
-  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.len k == G.reveal i} -> (
-  let key: Common.stateful_key_t Spec.Blake2B (G.reveal i) = G.reveal i, k in
+  let i: Common.index Spec.Blake2B = G.reveal i in
+  let t: Type0 = c.state.s i in
+  let t': Type0 = I.optional_key i c.km c.key in
+  state:state c i t t' ->
+  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v (fst i)} -> (
   unit ->
   Stack unit
   (requires (fun h0 ->
-    blake2b_32.key.invariant #i h0 key /\
-    B.loc_disjoint (blake2b_32.key.footprint #i h0 key) (footprint c i h0 state) /\
+    B.live h0 k /\
+//    blake2b_32.key.invariant #i h0 key /\
+    B.loc_disjoint (B.loc_addr_of_buffer k) (footprint c i h0 state) /\
     invariant c i h0 state))
   (ensures (fun h0 _ h1 ->
     invariant c i h1 state /\
     seen c i h1 state == S.empty /\
-    reveal_key c i h1 state == blake2b_32.key.v i h0 key /\
+    reveal_key blake2b_32 i h1 state ==
+      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (fst i); Spec.digest_length = (snd i) },
+      (if fst i = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))) /\
     footprint c i h0 state == footprint c i h1 state /\
     B.(modifies (footprint c i h0 state) h0 h1) /\
     preserves_freeable c i state h0 h1))))
 
-let reset_with_key (i: G.erased (Common.key_size_t Spec.Blake2B)) s k () =
-  let kk = index_of_state i s in
-  reset_raw i s (kk, k)
+let reset_with_key (i: G.erased (Common.index Spec.Blake2B)) s k () =
+  let hi = ST.get () in
+  push_frame();
+  let h0 = ST.get () in
+  let idx = index_of_state i s in
+  let p = P.alloca Spec.Blake2B idx in
 
+  let h1 = ST.get () in
+  assert (blake2b_32.key.footprint #i h1 (p, k) == P.footprint h1 p `B.loc_union` (if fst idx = 0uy then B.loc_none else B.loc_addr_of_buffer k));
+  F.frame_invariant blake2b_32 i (P.footprint h1 p) s h0 h1;
+
+  assert (B.loc_disjoint (blake2b_32.key.footprint #i h1 (p, k)) (F.footprint blake2b_32 i h1 s));
+
+//  reset_with_key_and_params i s p k ();
+  reset_raw idx s (p, k);
+  let h2 = ST.get () in
+
+  assume (F.reveal_key blake2b_32 i h2 s ==
+   ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (fst i); Spec.digest_length = (snd i) },
+      (if fst i = 0uy then S.empty #F.uint8 else B.as_seq h0 (k <: B.buffer F.uint8))));
+
+  // AF: Not strong enough, need to manually reason about push/pop_frame
+  assume (F.footprint blake2b_32 i h0 s == F.footprint blake2b_32 i h2 s);
+  assume (F.preserves_freeable blake2b_32 i s h0 h2);
+
+  pop_frame();
+  let hf = ST.get() in
+  assume (F.preserves_freeable blake2b_32 i s hi hf);
+  assume (F.footprint blake2b_32 i hi s == F.footprint blake2b_32 i hf s)
+
+(*
 [@ (Comment "  Re-initialization function when there is no key")]
 val reset: (
   let i: Common.key_size_t Spec.Blake2B = 0ul in
