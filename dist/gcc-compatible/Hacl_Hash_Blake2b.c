@@ -1339,12 +1339,10 @@ field `key_length` of your `params`. The behavior is unspecified otherwise.
 void
 Hacl_Hash_Blake2b_hash_with_key_and_paramas(
   uint8_t *output,
-  uint32_t output_len,
   uint8_t *input,
   uint32_t input_len,
   Hacl_Hash_Blake2b_blake2_params params,
-  uint8_t *key,
-  uint32_t key_len
+  uint8_t *key
 )
 {
   uint64_t b[16U] = { 0U };
@@ -1428,8 +1426,8 @@ Hacl_Hash_Blake2b_hash_with_key_and_paramas(
   r1[1U] = iv5_;
   r1[2U] = iv6_;
   r1[3U] = iv7_;
-  update(b1, b, key_len, key, input_len, input);
-  Hacl_Hash_Blake2b_finish(output_len, output, b);
+  update(b1, b, (uint32_t)params.key_length, key, input_len, input);
+  Hacl_Hash_Blake2b_finish((uint32_t)params.digest_length, output, b);
   Lib_Memzero0_memzero(b1, 16U, uint64_t, void *);
   Lib_Memzero0_memzero(b, 16U, uint64_t, void *);
 }
