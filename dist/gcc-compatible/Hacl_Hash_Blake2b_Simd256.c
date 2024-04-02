@@ -775,6 +775,37 @@ Hacl_Hash_Blake2b_Simd256_reset_with_key_and_params(
 }
 
 /**
+ Re-initialization function when there is a key. Note that the key
+size is not allowed to change, which is why this function does not take a key
+length -- the key has to be same key size that was originally passed to
+`malloc_with_key`
+*/
+void Hacl_Hash_Blake2b_Simd256_reset_with_key(Hacl_Hash_Blake2b_Simd256_state_t *s, uint8_t *k)
+{
+  K___uint8_t_uint8_t idx = index_of_state(s);
+  uint8_t salt[16U] = { 0U };
+  uint8_t personal[16U] = { 0U };
+  Hacl_Hash_Blake2b_blake2_params
+  p =
+    {
+      .digest_length = FStar_Pervasives_Native_snd__uint8_t_uint8_t(idx),
+      .key_length = FStar_Pervasives_Native_fst__uint8_t_uint8_t(idx), .fanout = 1U, .depth = 1U,
+      .leaf_length = 0U, .node_offset = 0ULL, .node_depth = 0U, .inner_length = 0U, .salt = salt,
+      .personal = personal
+    };
+  Hacl_Hash_Blake2b_blake2_params p0 = p;
+  reset_raw(s, ((K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t_){ .fst = &p0, .snd = k }));
+}
+
+/**
+  Re-initialization function when there is no key
+*/
+void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *s)
+{
+  Hacl_Hash_Blake2b_Simd256_reset_with_key(s, NULL);
+}
+
+/**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code

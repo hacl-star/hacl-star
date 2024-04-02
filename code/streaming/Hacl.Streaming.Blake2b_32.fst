@@ -208,9 +208,8 @@ val reset_with_key: (i: G.erased (Common.index Spec.Blake2B)) -> (
   unit ->
   Stack unit
   (requires (fun h0 ->
-    B.live h0 k /\
 //    blake2b_32.key.invariant #i h0 key /\
-    B.loc_disjoint (B.loc_addr_of_buffer k) (footprint c i h0 state) /\
+    (fst i <> 0uy ==> B.live h0 k /\ B.loc_disjoint (B.loc_addr_of_buffer k) (footprint c i h0 state)) /\
     invariant c i h0 state))
   (ensures (fun h0 _ h1 ->
     invariant c i h1 state /\
@@ -222,6 +221,7 @@ val reset_with_key: (i: G.erased (Common.index Spec.Blake2B)) -> (
     B.(modifies (footprint c i h0 state) h0 h1) /\
     preserves_freeable c i state h0 h1))))
 
+#push-options "--z3rlimit 400"
 let reset_with_key (i: G.erased (Common.index Spec.Blake2B)) s k () =
   let hi = ST.get () in
   push_frame();
@@ -260,36 +260,52 @@ let reset_with_key (i: G.erased (Common.index Spec.Blake2B)) s k () =
   pop_frame();
   let hf = ST.get() in
   // The modifies below is obtained from B.popped_modifies
-  F.frame_invariant blake2b_32 i (B.loc_region_only false (HS.get_tip h2)) s h2 hf
+  F.frame_invariant blake2b_32 i (B.loc_region_only false (HS.get_tip h2)) s h2 hf;
 
-(*
+  B.modifies_fresh_frame_popped hi h0 (F.footprint blake2b_32 (G.reveal i) hi s) h2 hf;
+  let h0 = hi in
+  let h1 = ST.get () in
+  let c = blake2b_32 in
+  let i = G.reveal i in
+  let s = s in
+  let open F in
+  assert (invariant c i h1 s);
+  assert (seen c i h1 s == S.empty);
+  assert (
+    reveal_key blake2b_32 i h1 s ==
+      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (fst i); Spec.digest_length = (snd i) },
+      (if fst i = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))));
+  assert (footprint c i h0 s == footprint c i h1 s);
+  assert (preserves_freeable c i s h0 h1);
+  assert B.(modifies (footprint c i h0 s) h0 h1)
+#pop-options
+
 [@ (Comment "  Re-initialization function when there is no key")]
-val reset: (
-  let i: Common.key_size_t Spec.Blake2B = 0ul in
+val reset: (i: G.erased (Common.index Spec.Blake2B)) -> (
   let open F in
   let c = blake2b_32 in
+  let i = G.reveal i in
   let t: Type0 = c.state.s i in
   let t': Type0 = I.optional_key i c.km c.key in
-  let k:LowStar.Buffer.buffer Lib.IntTypes.uint8 = B.null in
-  let key: Common.stateful_key_t Spec.Blake2B i = i, k in
   state:state c i t t' ->
   Stack unit
   (requires (fun h0 ->
-    // WHAT THE HECK. Using `c` here breaks typing?!!!
-    blake2b_32.key.invariant #i h0 key /\
-    B.loc_disjoint (blake2b_32.key.footprint #i h0 key) (footprint c i h0 state) /\
+    // No invariants required for key or params since there are none, EXCEPT
+    // this function may only be called when there is no key.
+    fst i = 0uy /\
     invariant c i h0 state))
   (ensures (fun h0 _ h1 ->
     invariant c i h1 state /\
     seen c i h1 state == S.empty /\
-    reveal_key c i h1 state == blake2b_32.key.v i h0 key /\
+    reveal_key blake2b_32 i h1 state ==
+      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = fst i; Spec.digest_length = snd i },
+      Seq.empty #Lib.IntTypes.uint8) /\
     footprint c i h0 state == footprint c i h1 state /\
     B.(modifies (footprint c i h0 state) h0 h1) /\
     preserves_freeable c i state h0 h1)))
 
-let reset s =
-  reset_with_key (G.hide 0ul) s B.null ()
-*)
+let reset i s =
+  reset_with_key i s B.null ()
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let update (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =

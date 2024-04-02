@@ -110,6 +110,19 @@ Hacl_Hash_Blake2b_reset_with_key_and_params(
 );
 
 /**
+ Re-initialization function when there is a key. Note that the key
+size is not allowed to change, which is why this function does not take a key
+length -- the key has to be same key size that was originally passed to
+`malloc_with_key`
+*/
+void Hacl_Hash_Blake2b_reset_with_key(Hacl_Hash_Blake2b_state_t *s, uint8_t *k);
+
+/**
+  Re-initialization function when there is no key
+*/
+void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *s);
+
+/**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code
