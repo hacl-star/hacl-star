@@ -28,6 +28,7 @@ let blake2b_32 =
 /// Type abbreviations - makes Karamel use pretty names in the generated code
 
 let block_state_t (kk: G.erased (Common.index Spec.Blake2B)) = Common.s Spec.Blake2B kk Core.M32
+
 let state_t (kk: G.erased (Common.index Spec.Blake2B)) =
   F.state_s blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
@@ -52,7 +53,7 @@ that key_length does not exceed max_key (32 for S, 64 for B).)")]
 val malloc_with_params_and_key:
   i:G.erased (P.index Spec.Blake2B) ->
   p:P.params Spec.Blake2B i ->
-  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v (fst i) } -> (
+  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v ((G.reveal i).key_length) } -> (
   let open F in
   let c = blake2b_32 in
   let t: Type0 = c.state.s i in
@@ -75,7 +76,7 @@ val malloc_with_params_and_key:
 
 let malloc_with_params_and_key i p k r =
   let pv = P.get_params p in
-  let i = pv.Core.key_length, pv.Core.digest_length in
+  let i = { P.key_length = pv.Core.key_length; digest_length = pv.Core.digest_length } in
   malloc_raw i (p, k) r
 
 [@ (Comment " State allocation function when there is just a custom key. All
@@ -86,7 +87,7 @@ val malloc_with_key:
   kk:Spec.key_length_t Spec.Blake2B { LowStar.Buffer.length k == UInt8.v kk } -> (
   let open F in
   let c = blake2b_32 in
-  let i: Common.index Spec.Blake2B = kk, UInt8.uint_to_t (Spec.max_output Spec.Blake2B) in
+  let i: Common.index Spec.Blake2B = { P.key_length = kk; digest_length = UInt8.uint_to_t (Spec.max_output Spec.Blake2B) } in
   let t: Type0 = c.state.s i in
   let t': Type0 = I.optional_key (G.reveal i) c.km c.key in
   r: HS.rid ->
@@ -102,7 +103,7 @@ val malloc_with_key:
     seen c i h1 s == S.empty /\
     reveal_key blake2b_32 i h1 s ==
       ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk },
-      (if fst i = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))) /\
+      (if i.key_length = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))) /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
@@ -113,7 +114,7 @@ module ST = FStar.HyperStack.ST
 let malloc_with_key k kk r =
   let _ = allow_inversion Spec.alg in
   let nn = UInt8.uint_to_t (Spec.max_output Spec.Blake2B) in
-  let i: Common.index Spec.Blake2B = kk, nn in
+  let i: Common.index Spec.Blake2B = { key_length = kk; digest_length = nn } in
   let h00 = ST.get () in
 
   let p = P.create_in Spec.Blake2B i r in
@@ -131,11 +132,11 @@ let malloc_with_key k kk r =
   (==) { }
     Common.key_v i h0 (p, k);
   (==) { _ by (FStar.Tactics.trefl ()) }
-    P.v #Spec.Blake2B h0 p, (if fst i = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
+    P.v #Spec.Blake2B h0 p, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
   (==) { }
-    { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk; Spec.digest_length = nn }, (if fst i = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
+    { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk; Spec.digest_length = nn }, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
   (==) { }
-    { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk }, (if fst i = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
+    { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk }, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
   };
   assert (P.invariant h1 p);
   P.invariant_loc_in_footprint h1 p;
@@ -173,7 +174,7 @@ val reset_with_key_and_params: (i: G.erased (Common.index Spec.Blake2B)) -> (
   let t': Type0 = I.optional_key (G.reveal i) c.km c.key in
   state:state c (G.reveal i) t t' ->
   p:P.params Spec.Blake2B i ->
-  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v (fst i) } -> (
+  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v ((G.reveal i).key_length) } -> (
   let key: Common.stateful_key_t Spec.Blake2B (G.reveal i) = (p, k) in
   unit ->
   Stack unit
@@ -204,19 +205,19 @@ val reset_with_key: (i: G.erased (Common.index Spec.Blake2B)) -> (
   let t: Type0 = c.state.s i in
   let t': Type0 = I.optional_key i c.km c.key in
   state:state c i t t' ->
-  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v (fst i)} -> (
+  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v (i.key_length)} -> (
   unit ->
   Stack unit
   (requires (fun h0 ->
 //    blake2b_32.key.invariant #i h0 key /\
-    (fst i <> 0uy ==> B.live h0 k /\ B.loc_disjoint (B.loc_addr_of_buffer k) (footprint c i h0 state)) /\
+    (i.key_length <> 0uy ==> B.live h0 k /\ B.loc_disjoint (B.loc_addr_of_buffer k) (footprint c i h0 state)) /\
     invariant c i h0 state))
   (ensures (fun h0 _ h1 ->
     invariant c i h1 state /\
     seen c i h1 state == S.empty /\
     reveal_key blake2b_32 i h1 state ==
-      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (fst i); Spec.digest_length = (snd i) },
-      (if fst i = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))) /\
+      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (i.key_length); Spec.digest_length = (i.digest_length) },
+      (if i.key_length = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))) /\
     footprint c i h0 state == footprint c i h1 state /\
     B.(modifies (footprint c i h0 state) h0 h1) /\
     preserves_freeable c i state h0 h1))))
@@ -243,15 +244,15 @@ let reset_with_key (i: G.erased (Common.index Spec.Blake2B)) s k () =
   (==) { }
     Common.key_v idx h1 (p, k);
   (==) { _ by (FStar.Tactics.trefl())  }
-    P.v #Spec.Blake2B h1 p, (if fst idx = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h1 (k <: B.buffer Lib.IntTypes.uint8));
+    P.v #Spec.Blake2B h1 p, (if idx.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h1 (k <: B.buffer Lib.IntTypes.uint8));
   (==) { }
-    { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (fst idx); Spec.digest_length = (snd idx) }, (if fst idx = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h1 (k <: B.buffer Lib.IntTypes.uint8));
+    { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = idx.key_length; Spec.digest_length = idx.digest_length }, (if idx.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h1 (k <: B.buffer Lib.IntTypes.uint8));
   };
 
   assert (G.reveal i == idx);
   assert (F.reveal_key blake2b_32 i h2 s ==
-   ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (fst i); Spec.digest_length = (snd i) },
-      (if fst i = 0uy then S.empty #F.uint8 else B.as_seq h0 (k <: B.buffer F.uint8))));
+   ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (G.reveal i).key_length; Spec.digest_length = (G.reveal i).digest_length },
+      (if (G.reveal i).key_length = 0uy then S.empty #F.uint8 else B.as_seq h0 (k <: B.buffer F.uint8))));
 
   // AF: Not strong enough, need to manually reason about push/pop_frame
   assert (F.footprint blake2b_32 i hi s == F.footprint blake2b_32 i h2 s);
@@ -273,8 +274,8 @@ let reset_with_key (i: G.erased (Common.index Spec.Blake2B)) s k () =
   assert (seen c i h1 s == S.empty);
   assert (
     reveal_key blake2b_32 i h1 s ==
-      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (fst i); Spec.digest_length = (snd i) },
-      (if fst i = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))));
+      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (i.key_length); Spec.digest_length = (i.digest_length) },
+      (if i.key_length = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))));
   assert (footprint c i h0 s == footprint c i h1 s);
   assert (preserves_freeable c i s h0 h1);
   assert B.(modifies (footprint c i h0 s) h0 h1)
@@ -292,13 +293,13 @@ val reset: (i: G.erased (Common.index Spec.Blake2B)) -> (
   (requires (fun h0 ->
     // No invariants required for key or params since there are none, EXCEPT
     // this function may only be called when there is no key.
-    fst i = 0uy /\
+    i.key_length = 0uy /\
     invariant c i h0 state))
   (ensures (fun h0 _ h1 ->
     invariant c i h1 state /\
     seen c i h1 state == S.empty /\
     reveal_key blake2b_32 i h1 state ==
-      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = fst i; Spec.digest_length = snd i },
+      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = i.key_length; Spec.digest_length = i.digest_length },
       Seq.empty #Lib.IntTypes.uint8) /\
     footprint c i h0 state == footprint c i h1 state /\
     B.(modifies (footprint c i h0 state) h0 h1) /\

@@ -1301,6 +1301,15 @@ Hacl_MAC_Poly1305_Simd128_poly1305_finish(
   store64_le(tag + 8U, f31);
 }
 
+typedef struct Hacl_MAC_Poly1305_Simd128_state_t_s
+{
+  Lib_IntVector_Intrinsics_vec128 *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+  uint8_t *p_key;
+}
+Hacl_MAC_Poly1305_Simd128_state_t;
+
 Hacl_MAC_Poly1305_Simd128_state_t *Hacl_MAC_Poly1305_Simd128_malloc(uint8_t *key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));

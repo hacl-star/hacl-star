@@ -14,8 +14,8 @@ let _align = ()
 // nothing works if inlined underneath B.pointer, below
 let blake2_params a (i: index a) =
   x:Core.blake2_params a {
-      x.digest_length == snd i /\
-      x.key_length == fst i
+      x.digest_length == i.digest_length /\
+      x.key_length == i.key_length
     }
 
 let params (a: Spec.alg) (i: index a) =
@@ -53,8 +53,8 @@ let alloca a i =
   let personal = create (personal_len a) (u8 0) in
   let _ = allow_inversion Spec.Blake2.alg in
   let p = {
-    digest_length = snd i;
-    key_length = fst i;
+    digest_length = i.digest_length;
+    key_length = i.key_length;
     fanout = u8 1;
     depth = u8 1;
     leaf_length = u32 0;
@@ -70,8 +70,8 @@ let create_in a i r =
   let salt: buffer uint8 = B.malloc r (u8 0) (salt_len a) in
   let personal: buffer uint8 = B.malloc r (u8 0) (personal_len a) in
   let p = {
-    digest_length = snd i;
-    key_length = fst i;
+    digest_length = i.digest_length;
+    key_length = i.key_length;
     fanout = u8 1;
     depth = u8 1;
     leaf_length = u32 0;

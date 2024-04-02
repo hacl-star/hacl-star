@@ -11,8 +11,11 @@ module Core = Hacl.Impl.Blake2.Core
 
 val _align: unit
 
-inline_for_extraction noextract
-let index (a: Spec.alg) = Spec.key_length_t a & Spec.digest_length_t a
+inline_for_extraction
+type index (a: Spec.alg) = {
+  key_length: Spec.key_length_t a;
+  digest_length: Spec.digest_length_t a;
+}
 
 inline_for_extraction noextract
 val params (a: Spec.alg) (i: index a): Type0
@@ -27,7 +30,7 @@ inline_for_extraction noextract
 val invariant (#a: Spec.alg) #i (h: HS.mem) (p: params a i) : GTot prop
 
 val v (#a: Spec.alg) #i (h: HS.mem) (p: params a i) : GTot (p:Spec.blake2_params a{
-  p.key_length == fst i /\ p.digest_length == snd i
+  p.key_length == i.key_length /\ p.digest_length == i.digest_length
 })
 
 val invariant_loc_in_footprint: #a: Spec.alg -> #i:index a -> h:HS.mem -> s:params a i -> Lemma
@@ -58,7 +61,7 @@ val frame_freeable: #a: Spec.alg -> #i:index a -> l:B.loc -> s:params a i -> h0:
 
 inline_for_extraction noextract
 val get_params: #a: Spec.alg -> #i:G.erased (index a) -> s: params a i -> ST (p:Core.blake2_params a {
-  p.key_length == fst i /\ p.digest_length == snd i
+  p.key_length == i.key_length /\ p.digest_length == i.digest_length
   })
   (requires fun h -> invariant h s)
   (ensures fun h0 p h1 ->
@@ -72,7 +75,7 @@ val alloca: a: Spec.alg -> i:index a -> StackInline (params a i)
   (requires (fun _ -> True))
   (ensures (fun h0 s h1 ->
     invariant h1 s /\
-    v h1 s == { Spec.blake2_default_params a with Spec.key_length = fst i; Spec.digest_length = snd i } /\
+    v h1 s == { Spec.blake2_default_params a with Spec.key_length = i.key_length; Spec.digest_length = i.digest_length } /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint h1 s))))
@@ -83,7 +86,7 @@ val create_in: a: Spec.alg -> i:index a -> r:HS.rid -> ST (params a i)
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     invariant h1 s /\
-    v h1 s == { Spec.blake2_default_params a with Spec.key_length = fst i; Spec.digest_length = snd i } /\
+    v h1 s == { Spec.blake2_default_params a with Spec.key_length = i.key_length; Spec.digest_length = i.digest_length } /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\

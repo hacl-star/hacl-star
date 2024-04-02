@@ -57,7 +57,7 @@ let singleton x' = x:UInt8.t { x == x' }
 
 /// The stateful state: (wv, hash)
 inline_for_extraction noextract
-let s (a : alg) (i: index a) (m : m_spec) = singleton (fst i) & singleton (snd i) & Core.(state_p a m & state_p a m)
+let s (a : alg) (i: index a) (m : m_spec) = singleton (i.key_length) & singleton (i.digest_length) & Core.(state_p a m & state_p a m)
 
 inline_for_extraction noextract
 let t (a : alg) = Spec.key_length_t a & Spec.digest_length_t a & Spec.state a
@@ -123,12 +123,12 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful (index a) =
     (fun i ->
       let wv = Core.alloc_state a m in
       let b = Core.alloc_state a m in
-      fst i, snd i, (wv, b))
+      i.key_length, i.digest_length, (wv, b))
     (* create_in *)
     (fun i r ->
       let wv = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
       let b = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
-      fst i, snd i, (wv, b))
+      i.key_length, i.digest_length, (wv, b))
     (* free *)
     (fun _ acc ->
       match acc with _, _, (wv, b) ->
@@ -150,17 +150,18 @@ let key_size (a : alg) = kk:nat{kk <= Spec.max_key a}
 /// Defining stateful keys
 inline_for_extraction noextract
 let stateful_key_t (a : alg) (i: index a): Type =
-  P.params a i & (b:B.buffer uint8 { B.length b == UInt8.v (fst i)})
+  P.params a i & (b:B.buffer uint8 { B.length b == UInt8.v (i.key_length)})
 
 let key_footprint =
   fun #a (#i: index a) h (s: stateful_key_t a i) ->
     let p, s = s in
     P.footprint #a h p `B.loc_union` (
-    if fst i = 0uy then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8))
+    if i.key_length = 0uy then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8))
 
 let key_invariant =
   fun #a (#i: index a) h (s: stateful_key_t a i) ->
-    let kk, nn = i in
+    let kk = i.key_length in
+    let nn = i.digest_length in
     let p = fst s in
     let s = snd s in
     P.invariant #a #i h p /\
@@ -170,20 +171,21 @@ let key_invariant =
 
 let key_freeable =
   fun #a (#i: index a) h (s: stateful_key_t a i) ->
-    let kk, nn = i in
+    let kk = i.key_length in
+    let nn = i.digest_length in
     let p, s = s in
     P.freeable #a h p /\ (
     if kk = 0uy then True else B.freeable (s <: B.buffer uint8))
 
 let params_t a (i: index a) =
-  p:Spec.blake2_params a { p.key_length == fst i /\ p.digest_length == snd i }
+  p:Spec.blake2_params a { p.key_length == i.key_length /\ p.digest_length == i.digest_length }
 
 let key_t #a (i: index a) =
-  params_t a i & s:S.seq uint8 { S.length s == UInt8.v (fst i) }
+  params_t a i & s:S.seq uint8 { S.length s == UInt8.v (i.key_length) }
 
 let key_v #a (i: index a) h (s: stateful_key_t a i): GTot (key_t i) =
   let p, s = s in
-  P.v #a h p, (if fst i = 0uy then S.empty #uint8 else B.as_seq h (s <: B.buffer uint8))
+  P.v #a h p, (if i.key_length = 0uy then S.empty #uint8 else B.as_seq h (s <: B.buffer uint8))
 
 /// Keeps the key and its length at run-time, for extraction, but makes sure the
 /// parameter is ghost to let the functor decide, via the index, which APIs need
@@ -218,7 +220,7 @@ let stateful_key (a : alg):
 
     (* alloca *)
     (fun i ->
-      if fst i = 0uy then
+      if i.key_length = 0uy then
         let h0 = ST.get () in
         let p = P.alloca a i in
         let s = B.null #uint8 in
@@ -234,7 +236,7 @@ let stateful_key (a : alg):
         let h01 = ST.get () in
         assert P.(invariant h01 p);
 
-        let s_ = B.alloca (Lib.IntTypes.u8 0) (FStar.Int.Cast.uint8_to_uint32 (fst i)) in
+        let s_ = B.alloca (Lib.IntTypes.u8 0) (FStar.Int.Cast.uint8_to_uint32 (i.key_length)) in
         let s = p, s_ in
         let h1 = ST.get () in
         assert B.(modifies loc_none h0 h01);
@@ -248,7 +250,7 @@ let stateful_key (a : alg):
 
     (* create_in *)
     (fun i r ->
-      if fst i = 0uy then
+      if i.key_length = 0uy then
         let h0 = ST.get () in
         let p = P.create_in a i r in
         let s = B.null #uint8 in
@@ -260,7 +262,7 @@ let stateful_key (a : alg):
         let h0 = ST.get () in
         let p = P.create_in a i r in
         let h01 = ST.get () in
-        let s_ = B.malloc r (Lib.IntTypes.u8 0) (FStar.Int.Cast.uint8_to_uint32 (fst i)) in
+        let s_ = B.malloc r (Lib.IntTypes.u8 0) (FStar.Int.Cast.uint8_to_uint32 (i.key_length)) in
         let s = p, s_ in
         let h1 = ST.get () in
         P.frame_invariant #a B.loc_none p h01 h1;
@@ -274,10 +276,10 @@ let stateful_key (a : alg):
         s)
 
     (* free *)
-    (fun i (s: stateful_key_t a i) ->
+    (fun (i: G.erased (index a)) (s: stateful_key_t a i) ->
       let p, s = s in
       let kk = (P.get_params p).key_length in
-      assert (kk = fst i);
+      assert (kk = (G.reveal i).key_length);
       P.free #a p;
       if kk = 0uy then () else B.free (s <: B.buffer uint8))
 
@@ -285,7 +287,7 @@ let stateful_key (a : alg):
     (fun i (s_src': stateful_key_t a i) (s_dst': stateful_key_t a i) ->
       let p_src, s_src = s_src' in
       let kk = (P.get_params p_src).key_length in
-      assert (kk = fst i);
+      assert (kk = (G.reveal i).key_length);
       let p_dst, s_dst = s_dst' in
       let h0 = ST.get () in
       if kk <> 0uy then begin
@@ -578,13 +580,13 @@ val init_key_block (a : alg) (i : index a) (k : stateful_key_t a i)
     B.(modifies (loc_buffer buf_) h0 h1) /\
     begin
     let _, k = (stateful_key a).v i h0 k in
-    let input_length = if fst i <> 0uy then Spec.size_block a else 0 in
-    let input = if fst i <> 0uy then Spec.blake2_key_block a (UInt8.v (fst i)) k else S.empty in
+    let input_length = if i.key_length <> 0uy then Spec.size_block a else 0 in
+    let input = if i.key_length <> 0uy then Spec.blake2_key_block a (UInt8.v (i.key_length)) k else S.empty in
     S.equal (S.slice (B.as_seq h1 buf_) 0 input_length) input
     end)
 
 let init_key_block a i k buf_ =
-  let kk = FStar.Int.Cast.uint8_to_uint32 (fst i) in
+  let kk = FStar.Int.Cast.uint8_to_uint32 (i.key_length) in
   let _, k' = k in
   if kk = 0ul then ()
   else
@@ -652,15 +654,15 @@ let blake2 (a : alg)
     unit (* output_length_t *)
 
     (fun _ -> max_input_len a) (* max_input_length *)
-    (fun i _ -> UInt8.v (snd i)) (* output_len *)
+    (fun i _ -> UInt8.v (i.digest_length)) (* output_len *)
     (fun _ -> block_len a) (* block_len *)
     (fun _ -> block_len a) (* blocks_state_len *)
-    (fun i -> let kk = fst i in if kk <> 0uy then block_len a else 0ul) (* init_input_len *)
+    (fun i -> let kk = i.key_length in if kk <> 0uy then block_len a else 0ul) (* init_input_len *)
 
     (fun i (_, k) ->
-      let kk = fst i in if kk <> 0uy then Spec.blake2_key_block a (UInt8.v kk) k else S.empty) (* init_input_s *)
+      let kk = i.key_length in if kk <> 0uy then Spec.blake2_key_block a (UInt8.v kk) k else S.empty) (* init_input_s *)
     (fun i (p, _k) ->
-      let kk = fst i in kk, snd i, init_s a p) (* init_s *)
+      let kk = i.key_length in kk, i.digest_length, init_s a p) (* init_s *)
 
     (fun _ (kk, nn, acc) prevlen input -> kk, nn, update_multi_s acc prevlen input) (* update_multi_s *)
     (fun _ (kk, nn, acc) prevlen input -> kk, nn, update_last_s acc prevlen input) (* update_last_s *)
@@ -678,19 +680,19 @@ let blake2 (a : alg)
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
     (fun i (p, k) input _ ->
       spec_is_incremental a p k input) (* spec_is_incremental *)
-    (fun _ (kk, nn, _) -> (kk, nn)) (* index_of_state *)
+    (fun _ (kk, nn, _) -> { key_length = kk; digest_length = nn }) (* index_of_state *)
 
     (* init *)
     (fun i k' buf_ acc ->
       let p, k = k' in
       let kk = (P.get_params p).key_length in
       let nn = (P.get_params p).digest_length in
-      assert (kk == fst i);
-      assert (nn == snd i);
+      assert (kk == (G.reveal i).key_length);
+      assert (nn == (G.reveal i).digest_length);
       let kk', nn', s = acc in
       assert (kk == kk');
       assert (nn == nn');
-      let i: index a = kk, nn in
+      let i: index a = { key_length = kk; digest_length = nn } in
       [@inline_let] let wv = get_wv #a #i #m acc in
       [@inline_let] let h = get_state_p #a #i acc in
       let h0 = ST.get () in
@@ -720,8 +722,9 @@ let blake2 (a : alg)
     (fun _ k s dst _ ->
       // Requires fuel and ifuel. Ideally, flesh out the proof instead.
       let kk, nn, acc = s in
-      [@inline_let] let wv = get_wv #a #(kk, nn) #m s in
-      [@inline_let] let h = get_state_p #a #(kk, nn) s in
+      let i: index a = { key_length = kk; digest_length = nn } in
+      [@inline_let] let wv = get_wv #a #i #m s in
+      [@inline_let] let h = get_state_p #a #i s in
       finish (FStar.Int.Cast.uint8_to_uint32 nn) dst h)
 #pop-options
 

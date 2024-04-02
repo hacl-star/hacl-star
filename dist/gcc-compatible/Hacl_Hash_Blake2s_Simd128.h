@@ -39,28 +39,7 @@ extern "C" {
 #include "Hacl_Hash_Blake2b.h"
 #include "libintvector.h"
 
-typedef struct K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128__s
-{
-  Lib_IntVector_Intrinsics_vec128 *fst;
-  Lib_IntVector_Intrinsics_vec128 *snd;
-}
-K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_;
-
-typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
-{
-  uint8_t fst;
-  uint8_t snd;
-  K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_ thd;
-}
-Hacl_Hash_Blake2s_Simd128_block_state_t;
-
-typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s
-{
-  Hacl_Hash_Blake2s_Simd128_block_state_t block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Hash_Blake2s_Simd128_state_t;
+typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s Hacl_Hash_Blake2s_Simd128_state_t;
 
 /**
  State allocation function when there are parameters and a key. The

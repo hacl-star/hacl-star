@@ -38,14 +38,7 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 
-typedef struct Hacl_MAC_Poly1305_state_t_s
-{
-  uint64_t *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-  uint8_t *p_key;
-}
-Hacl_MAC_Poly1305_state_t;
+typedef struct Hacl_MAC_Poly1305_state_t_s Hacl_MAC_Poly1305_state_t;
 
 Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key);
 

@@ -46,17 +46,9 @@ extern "C" {
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
 
-typedef struct EverCrypt_Hash_state_s_s EverCrypt_Hash_state_s;
-
 uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
 
-typedef struct EverCrypt_Hash_Incremental_state_t_s
-{
-  EverCrypt_Hash_state_s *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-EverCrypt_Hash_Incremental_state_t;
+typedef struct EverCrypt_Hash_Incremental_state_t_s EverCrypt_Hash_Incremental_state_t;
 
 /**
 Allocate initial state for the agile hash. The argument `a` stands for the

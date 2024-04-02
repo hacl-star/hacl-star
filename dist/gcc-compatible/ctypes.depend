@@ -107,10 +107,10 @@ lib/Hacl_AEAD_Chacha20Poly1305_bindings.cmx:
 lib/Hacl_AEAD_Chacha20Poly1305_bindings.cmo: 
 lib_gen/Hacl_AEAD_Chacha20Poly1305_gen.cmx: lib/Hacl_AEAD_Chacha20Poly1305_bindings.cmx
 lib_gen/Hacl_AEAD_Chacha20Poly1305_gen.exe: lib/Hacl_AEAD_Chacha20Poly1305_bindings.cmx lib_gen/Hacl_AEAD_Chacha20Poly1305_gen.cmx 
-lib/Hacl_MAC_Poly1305_Simd128_bindings.cmx: 
-lib/Hacl_MAC_Poly1305_Simd128_bindings.cmo: 
+lib/Hacl_MAC_Poly1305_Simd128_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
+lib/Hacl_MAC_Poly1305_Simd128_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
 lib_gen/Hacl_MAC_Poly1305_Simd128_gen.cmx: lib/Hacl_MAC_Poly1305_Simd128_bindings.cmx
-lib_gen/Hacl_MAC_Poly1305_Simd128_gen.exe: lib/Hacl_MAC_Poly1305_Simd128_bindings.cmx lib_gen/Hacl_MAC_Poly1305_Simd128_gen.cmx 
+lib_gen/Hacl_MAC_Poly1305_Simd128_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_MAC_Poly1305_Simd128_bindings.cmx lib_gen/Hacl_MAC_Poly1305_Simd128_gen.cmx 
 lib/Hacl_Chacha20_Vec128_bindings.cmx: 
 lib/Hacl_Chacha20_Vec128_bindings.cmo: 
 lib_gen/Hacl_Chacha20_Vec128_gen.cmx: lib/Hacl_Chacha20_Vec128_bindings.cmx
@@ -119,10 +119,10 @@ lib/Hacl_AEAD_Chacha20Poly1305_Simd128_bindings.cmx:
 lib/Hacl_AEAD_Chacha20Poly1305_Simd128_bindings.cmo: 
 lib_gen/Hacl_AEAD_Chacha20Poly1305_Simd128_gen.cmx: lib/Hacl_AEAD_Chacha20Poly1305_Simd128_bindings.cmx
 lib_gen/Hacl_AEAD_Chacha20Poly1305_Simd128_gen.exe: lib/Hacl_AEAD_Chacha20Poly1305_Simd128_bindings.cmx lib_gen/Hacl_AEAD_Chacha20Poly1305_Simd128_gen.cmx 
-lib/Hacl_MAC_Poly1305_Simd256_bindings.cmx: 
-lib/Hacl_MAC_Poly1305_Simd256_bindings.cmo: 
+lib/Hacl_MAC_Poly1305_Simd256_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
+lib/Hacl_MAC_Poly1305_Simd256_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
 lib_gen/Hacl_MAC_Poly1305_Simd256_gen.cmx: lib/Hacl_MAC_Poly1305_Simd256_bindings.cmx
-lib_gen/Hacl_MAC_Poly1305_Simd256_gen.exe: lib/Hacl_MAC_Poly1305_Simd256_bindings.cmx lib_gen/Hacl_MAC_Poly1305_Simd256_gen.cmx 
+lib_gen/Hacl_MAC_Poly1305_Simd256_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_MAC_Poly1305_Simd256_bindings.cmx lib_gen/Hacl_MAC_Poly1305_Simd256_gen.cmx 
 lib/Hacl_Chacha20_Vec256_bindings.cmx: 
 lib/Hacl_Chacha20_Vec256_bindings.cmo: 
 lib_gen/Hacl_Chacha20_Vec256_gen.cmx: lib/Hacl_Chacha20_Vec256_bindings.cmx
