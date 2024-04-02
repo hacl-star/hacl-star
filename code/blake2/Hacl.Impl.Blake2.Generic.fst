@@ -1026,20 +1026,19 @@ let blake2_update #al #ms blake2_update_key blake2_update_blocks
 inline_for_extraction noextract
 let blake2_with_params_st (al:Spec.alg) (ms:m_spec) =
     output: buffer_t MUT uint8
-  -> output_len: size_t{v output_len == length output /\ 1 <= v output_len /\ v output_len <= Spec.max_output al}
   -> input: buffer_t MUT uint8
   -> input_len: size_t{v input_len == length input}
   -> params: blake2_params al
-  -> key: buffer_t MUT uint8
-  -> key_len: size_t{v key_len == length key /\ v key_len <= Spec.max_key al} ->
+  -> key: buffer_t MUT uint8 ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h key /\ blake2_params_inv h params
                    /\ disjoint output input /\ disjoint output key /\ disjoint input key /\
-                   UInt8.v params.key_length == v key_len /\
-                   UInt8.v params.digest_length == v output_len /\
+                   UInt8.v params.key_length == length key /\ length key <= Spec.max_key al /\
+                   UInt8.v params.digest_length == length output /\
+                   1 <= length output /\ length output <= Spec.max_output al /\
                    True))
     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
-                         /\ h1.[|(output <: lbuffer uint8 output_len)|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (blake2_params_v h0 params) h0.[|(key <: lbuffer uint8 key_len)|]))
+                         /\ h1.[|(output <: lbuffer uint8 (UInt32.uint_to_t (length output)))|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (blake2_params_v h0 params) h0.[|(key <: lbuffer uint8 (UInt32.uint_to_t (length key)))|]))
 
 inline_for_extraction noextract
 val blake2_with_params:
@@ -1051,14 +1050,14 @@ val blake2_with_params:
   -> blake2_with_params_st al ms
 
 #push-options "--z3rlimit 100"
-let blake2_with_params #al #ms blake2_init blake2_update blake2_finish output output_len input input_len params key key_len =
+let blake2_with_params #al #ms blake2_init blake2_update blake2_finish output input input_len params key =
   [@inline_let]
   let stlen = le_sigh al ms in
   [@inline_let]
   let stzero = zero_element al ms in
   let h0 = ST.get() in
   [@inline_let]
-  let spec _ h1 = h1.[|output <: lbuffer uint8 output_len|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (blake2_params_v h0 params) h0.[|key <: lbuffer uint8 key_len|] in
+  let spec _ h1 = h1.[|output <: lbuffer uint8 (UInt32.uint_to_t (length output))|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (blake2_params_v h0 params) h0.[|key <: lbuffer uint8 (UInt32.uint_to_t (length key))|] in
   salloc1 h0 stlen stzero (Ghost.hide (loc output)) spec
   (fun h ->
     assert (max_size_t <= Spec.max_limb al);
@@ -1066,8 +1065,8 @@ let blake2_with_params #al #ms blake2_init blake2_update blake2_finish output ou
     salloc1 h1 stlen stzero (Ghost.hide (loc output |+| loc h)) spec
     (fun wv ->
       blake2_init_with_params h params;
-      blake2_update wv h key_len key input_len input;
-      blake2_finish output_len output h))
+      blake2_update wv h (cast #U8 #PUB U32 PUB params.key_length) key input_len input;
+      blake2_finish (cast #U8 #PUB U32 PUB params.digest_length) output h))
 #pop-options
 
 inline_for_extraction noextract
