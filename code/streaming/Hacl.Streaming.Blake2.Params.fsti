@@ -72,6 +72,7 @@ val alloca: a: Spec.alg -> i:index a -> StackInline (params a i)
   (requires (fun _ -> True))
   (ensures (fun h0 s h1 ->
     invariant h1 s /\
+    v h1 s == { Spec.blake2_default_params a with Spec.key_length = fst i; Spec.digest_length = snd i } /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint h1 s))))
@@ -82,6 +83,7 @@ val create_in: a: Spec.alg -> i:index a -> r:HS.rid -> ST (params a i)
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     invariant h1 s /\
+    v h1 s == { Spec.blake2_default_params a with Spec.key_length = fst i; Spec.digest_length = snd i } /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\

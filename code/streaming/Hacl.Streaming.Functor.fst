@@ -248,6 +248,9 @@ let frame_invariant #index c i l s h0 h1 =
 let frame_seen #_ _ _ _ _ _ _ =
   ()
 
+let frame_key #_ _ _ _ _ _ _ =
+  ()
+
 /// Stateful API
 /// ============
 
