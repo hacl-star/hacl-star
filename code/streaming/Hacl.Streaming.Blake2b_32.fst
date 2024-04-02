@@ -230,27 +230,37 @@ let reset_with_key (i: G.erased (Common.index Spec.Blake2B)) s k () =
   let p = P.alloca Spec.Blake2B idx in
 
   let h1 = ST.get () in
-  assert (blake2b_32.key.footprint #i h1 (p, k) == P.footprint h1 p `B.loc_union` (if fst idx = 0uy then B.loc_none else B.loc_addr_of_buffer k));
-  F.frame_invariant blake2b_32 i (P.footprint h1 p) s h0 h1;
 
-  assert (B.loc_disjoint (blake2b_32.key.footprint #i h1 (p, k)) (F.footprint blake2b_32 i h1 s));
+  F.frame_invariant blake2b_32 i (P.footprint h1 p) s hi h1;
 
-//  reset_with_key_and_params i s p k ();
   reset_raw idx s (p, k);
   let h2 = ST.get () in
 
-  assume (F.reveal_key blake2b_32 i h2 s ==
+  calc (==) {
+    F.reveal_key blake2b_32 idx h2 s;
+  (==) { }
+    blake2b_32.key.v idx h1 (p, k);
+  (==) { }
+    Common.key_v idx h1 (p, k);
+  (==) { _ by (FStar.Tactics.trefl())  }
+    P.v #Spec.Blake2B h1 p, (if fst idx = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h1 (k <: B.buffer Lib.IntTypes.uint8));
+  (==) { }
+    { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (fst idx); Spec.digest_length = (snd idx) }, (if fst idx = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h1 (k <: B.buffer Lib.IntTypes.uint8));
+  };
+
+  assert (G.reveal i == idx);
+  assert (F.reveal_key blake2b_32 i h2 s ==
    ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = (fst i); Spec.digest_length = (snd i) },
       (if fst i = 0uy then S.empty #F.uint8 else B.as_seq h0 (k <: B.buffer F.uint8))));
 
   // AF: Not strong enough, need to manually reason about push/pop_frame
-  assume (F.footprint blake2b_32 i h0 s == F.footprint blake2b_32 i h2 s);
-  assume (F.preserves_freeable blake2b_32 i s h0 h2);
+  assert (F.footprint blake2b_32 i hi s == F.footprint blake2b_32 i h2 s);
+  assert (F.preserves_freeable blake2b_32 i s hi h2);
 
   pop_frame();
   let hf = ST.get() in
-  assume (F.preserves_freeable blake2b_32 i s hi hf);
-  assume (F.footprint blake2b_32 i hi s == F.footprint blake2b_32 i hf s)
+  // The modifies below is obtained from B.popped_modifies
+  F.frame_invariant blake2b_32 i (B.loc_region_only false (HS.get_tip h2)) s h2 hf
 
 (*
 [@ (Comment "  Re-initialization function when there is no key")]
