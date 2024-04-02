@@ -845,8 +845,8 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint8_t
 {
   uint8_t nn = 64U;
   Hacl_Hash_Blake2b_index i = { .key_length = kk, .digest_length = nn };
-  uint8_t *salt = (uint8_t *)KRML_HOST_CALLOC(16U, sizeof (uint8_t));
-  uint8_t *personal = (uint8_t *)KRML_HOST_CALLOC(16U, sizeof (uint8_t));
+  uint8_t salt[16U] = { 0U };
+  uint8_t personal[16U] = { 0U };
   Hacl_Hash_Blake2b_blake2_params
   p =
     {
@@ -854,15 +854,8 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint8_t
       .leaf_length = 0U, .node_offset = 0ULL, .node_depth = 0U, .inner_length = 0U, .salt = salt,
       .personal = personal
     };
-  Hacl_Hash_Blake2b_blake2_params
-  *p0 =
-    (Hacl_Hash_Blake2b_blake2_params *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2b_blake2_params));
-  p0[0U] = p;
-  Hacl_Hash_Blake2b_state_t *s = Hacl_Hash_Blake2b_malloc_with_params_and_key(p0, k);
-  Hacl_Hash_Blake2b_blake2_params p1 = p0[0U];
-  KRML_HOST_FREE(p1.salt);
-  KRML_HOST_FREE(p1.personal);
-  KRML_HOST_FREE(p0);
+  Hacl_Hash_Blake2b_blake2_params p0 = p;
+  Hacl_Hash_Blake2b_state_t *s = Hacl_Hash_Blake2b_malloc_with_params_and_key(&p0, k);
   return s;
 }
 
