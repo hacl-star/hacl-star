@@ -38,6 +38,21 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 
+typedef struct Hacl_Hash_Blake2b_blake2_params_s
+{
+  uint8_t digest_length;
+  uint8_t key_length;
+  uint8_t fanout;
+  uint8_t depth;
+  uint32_t leaf_length;
+  uint64_t node_offset;
+  uint8_t node_depth;
+  uint8_t inner_length;
+  uint8_t *salt;
+  uint8_t *personal;
+}
+Hacl_Hash_Blake2b_blake2_params;
+
 typedef struct K____uint64_t___uint64_t__s
 {
   uint64_t *fst;
@@ -47,8 +62,9 @@ K____uint64_t___uint64_t_;
 
 typedef struct Hacl_Hash_Blake2b_block_state_t_s
 {
-  uint32_t fst;
-  K____uint64_t___uint64_t_ snd;
+  uint8_t fst;
+  uint8_t snd;
+  K____uint64_t___uint64_t_ thd;
 }
 Hacl_Hash_Blake2b_block_state_t;
 
@@ -61,9 +77,20 @@ typedef struct Hacl_Hash_Blake2b_state_t_s
 Hacl_Hash_Blake2b_state_t;
 
 /**
-  State allocation function when there is a key
+ State allocation function when there are parameters and a key. The
+length of the key k MUST match the value of the field key_length in the
+parameters. Furthermore, there is a static (not dynamically checked) requirement
+that key_length does not exceed max_key (32 for S, 64 for B).)
 */
-Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint32_t kk);
+Hacl_Hash_Blake2b_state_t
+*Hacl_Hash_Blake2b_malloc_with_params_and_key(Hacl_Hash_Blake2b_blake2_params *p, uint8_t *k);
+
+/**
+ State allocation function when there is just a custom key. All
+other parameters are set to their respective default values, meaning the output
+length is the maximum allowed output (32 for S, 64 for B).
+*/
+Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint8_t kk);
 
 /**
   State allocation function when there is no key
@@ -71,17 +98,16 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint32_
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void);
 
 /**
- Re-initialization function when there is a key. Note that the key
-size is not allowed to change, which is why this function does not take a key
-length -- the key has to be same key size that was originally passed to
-`malloc_with_key`
+ Re-initialization function. The reinitialization API is tricky --
+you MUST reuse the same original parameters for digest (output) length and key
+length.
 */
-void Hacl_Hash_Blake2b_reset_with_key(Hacl_Hash_Blake2b_state_t *s, uint8_t *k);
-
-/**
-  Re-initialization function when there is no key
-*/
-void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *s);
+void
+Hacl_Hash_Blake2b_reset_with_key_and_params(
+  Hacl_Hash_Blake2b_state_t *s,
+  Hacl_Hash_Blake2b_blake2_params *p,
+  uint8_t *k
+);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
@@ -120,6 +146,17 @@ Hacl_Hash_Blake2b_hash_with_key(
   uint32_t output_len,
   uint8_t *input,
   uint32_t input_len,
+  uint8_t *key,
+  uint32_t key_len
+);
+
+void
+Hacl_Hash_Blake2b_hash_with_key_and_paramas(
+  uint8_t *output,
+  uint32_t output_len,
+  uint8_t *input,
+  uint32_t input_len,
+  Hacl_Hash_Blake2b_blake2_params params,
   uint8_t *key,
   uint32_t key_len
 );
