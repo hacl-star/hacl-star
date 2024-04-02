@@ -248,8 +248,18 @@ let frame_invariant #index c i l s h0 h1 =
 let frame_seen #_ _ _ _ _ _ _ =
   ()
 
-let frame_key #_ _ _ _ _ _ _ =
-  ()
+let frame_key #index c i l s h0 h1 =
+  let state_t = B.deref h0 s in
+  let State block_state _ _ _ p_key = state_t in
+  c.state.frame_invariant #i l block_state h0 h1;
+  stateful_frame_preserves_freeable #index #c.state #i l block_state h0 h1;
+  allow_inversion key_management;
+  match c.km with
+  | Erased -> ()
+  | Runtime ->
+      stateful_frame_preserves_freeable #index #c.key #i l p_key h0 h1;
+      c.key.frame_invariant #i l p_key h0 h1
+
 
 /// Stateful API
 /// ============
