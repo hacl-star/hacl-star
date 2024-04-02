@@ -96,7 +96,6 @@ change this parameter is to allocate a new object.
 The caller must satisfy the following requirements.
 - The key_length must not exceed 32 for S, 64 for B.
 ")]
-
 val malloc_with_key:
   k:LowStar.Buffer.buffer Lib.IntTypes.uint8 ->
   kk:Spec.key_length_t Spec.Blake2B { LowStar.Buffer.length k == UInt8.v kk } -> (
@@ -127,12 +126,14 @@ val malloc_with_key:
 module ST = FStar.HyperStack.ST
 
 let malloc_with_key k kk r =
+  let hi = ST.get () in
+  push_frame ();
   let _ = allow_inversion Spec.alg in
   let nn = UInt8.uint_to_t (Spec.max_output Spec.Blake2B) in
   let i: Common.index Spec.Blake2B = { key_length = kk; digest_length = nn } in
   let h00 = ST.get () in
 
-  let p = P.create_in Spec.Blake2B i r in
+  let p = P.alloca Spec.Blake2B i in
   let h0 = ST.get () in
   assert B.(as_seq h00 k == as_seq h0 k);
 
@@ -153,14 +154,9 @@ let malloc_with_key k kk r =
   (==) { }
     { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk }, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
   };
-  assert (P.invariant h1 p);
-  P.invariant_loc_in_footprint h1 p;
-  assert B.(loc_disjoint (P.footprint h1 p) (F.footprint blake2b_32 i h1 s));
-  P.free p;
-  let h2 = ST.get () in
-  F.frame_invariant blake2b_32 i (P.footprint h1 p) s h1 h2;
-  F.frame_seen blake2b_32 i (P.footprint h1 p) s h1 h2;
-  assert F.(freeable blake2b_32 i h2 s);
+  pop_frame ();
+  let hf = ST.get () in
+  F.frame_invariant blake2b_32 i (B.loc_region_only false (HS.get_tip h1)) s h1 hf;
   s
 
 // I generally don't like skipping signatures since there's a danger that a
