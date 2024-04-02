@@ -55,7 +55,13 @@ let index = Params.index
 inline_for_extraction noextract
 let singleton x' = x:UInt8.t { x == x' }
 
-/// The stateful state: (wv, hash)
+/// The stateful state: (wv, hash).
+///
+/// This CANNOT be turned into a struct because right now, this type undergoes
+/// monomorphization because state_p a is truly indexed over a. (If it were a
+/// struct, we'd have to use the same trick we've used elsewhere, where two
+/// dummy type arguments are added in order to make sure it monomorphizes à la
+/// ML).
 inline_for_extraction noextract
 let s (a : alg) (i: index a) (m : m_spec) = singleton (i.key_length) & singleton (i.digest_length) & Core.(state_p a m & state_p a m)
 

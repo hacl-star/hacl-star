@@ -38,7 +38,14 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "libintvector.h"
 
-typedef struct Hacl_MAC_Poly1305_Simd128_state_t_s Hacl_MAC_Poly1305_Simd128_state_t;
+typedef struct Hacl_MAC_Poly1305_Simd128_state_t_s
+{
+  Lib_IntVector_Intrinsics_vec128 *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+  uint8_t *p_key;
+}
+Hacl_MAC_Poly1305_Simd128_state_t;
 
 Hacl_MAC_Poly1305_Simd128_state_t *Hacl_MAC_Poly1305_Simd128_malloc(uint8_t *key);
 

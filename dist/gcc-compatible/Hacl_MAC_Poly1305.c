@@ -440,15 +440,6 @@ void Hacl_MAC_Poly1305_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx
   store64_le(tag + 8U, f31);
 }
 
-typedef struct Hacl_MAC_Poly1305_state_t_s
-{
-  uint64_t *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-  uint8_t *p_key;
-}
-Hacl_MAC_Poly1305_state_t;
-
 Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(16U, sizeof (uint8_t));

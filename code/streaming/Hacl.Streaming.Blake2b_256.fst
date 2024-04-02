@@ -27,9 +27,8 @@ let blake2b_256 =
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code
 
-private
 let block_state_t (kk: G.erased (Common.index Spec.Blake2B)) = Common.s Spec.Blake2B kk Core.M256
-[@CAbstractStruct]
+
 let state_t (kk: G.erased (Common.index Spec.Blake2B)) =
   F.state_s blake2b_256 kk (Common.s Spec.Blake2B kk Core.M256) (Common.blake_key Spec.Blake2B kk)
 

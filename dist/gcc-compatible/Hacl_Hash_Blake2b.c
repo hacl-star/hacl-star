@@ -761,29 +761,6 @@ void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
   Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
-typedef struct ___uint64_t___uint64_t__s
-{
-  uint64_t *fst;
-  uint64_t *snd;
-}
-___uint64_t___uint64_t_;
-
-typedef struct block_state_t_s
-{
-  uint8_t fst;
-  uint8_t snd;
-  ___uint64_t___uint64_t_ thd;
-}
-block_state_t;
-
-typedef struct Hacl_Hash_Blake2b_state_t_s
-{
-  block_state_t block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Hash_Blake2b_state_t;
-
 static Hacl_Hash_Blake2b_state_t
 *malloc_raw(
   Hacl_Hash_Blake2b_index kk,
@@ -793,7 +770,7 @@ static Hacl_Hash_Blake2b_state_t
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
   uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
-  block_state_t
+  Hacl_Hash_Blake2b_block_state_t
   block_state = { .fst = kk.key_length, .snd = kk.digest_length, .thd = { .fst = wv, .snd = b } };
   uint8_t kk10 = kk.key_length;
   uint32_t ite;
@@ -828,10 +805,19 @@ static Hacl_Hash_Blake2b_state_t
 }
 
 /**
- State allocation function when there are parameters and a key. The
-length of the key k MUST match the value of the field key_length in the
-parameters. Furthermore, there is a static (not dynamically checked) requirement
-that key_length does not exceed max_key (32 for S, 64 for B).)
+ General-purpose allocation function that gives control over all
+Blake2 parameters, including the key. Further resettings of the state SHALL be
+done with `reset_with_params_and_key`, and SHALL feature the exact same values
+for the `key_length` and `digest_length` fields as passed here. In other words,
+once you commit to a digest and key length, the only way to change these
+parameters is to allocate a new object.
+
+The caller must satisfy the following requirements.
+- The length of the key k MUST match the value of the field key_length in the
+  parameters.
+- The key_length must not exceed 32 for S, 64 for B.
+- The digest_length must not exceed 32 for S, 64 for B.
+
 */
 Hacl_Hash_Blake2b_state_t
 *Hacl_Hash_Blake2b_malloc_with_params_and_key(Hacl_Hash_Blake2b_blake2_params *p, uint8_t *k)
@@ -845,9 +831,15 @@ Hacl_Hash_Blake2b_state_t
 }
 
 /**
- State allocation function when there is just a custom key. All
-other parameters are set to their respective default values, meaning the output
-length is the maximum allowed output (32 for S, 64 for B).
+ Specialized allocation function that picks default values for all
+parameters, except for the key_length. Further resettings of the state SHALL be
+done with `reset_with_key`, and SHALL feature the exact same key length `kk` as
+passed here. In other words, once you commit to a key length, the only way to
+change this parameter is to allocate a new object.
+
+The caller must satisfy the following requirements.
+- The key_length must not exceed 32 for S, 64 for B.
+
 */
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint8_t kk)
 {
@@ -875,7 +867,9 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint8_t
 }
 
 /**
-  State allocation function when there is no key
+ Specialized allocation function that picks default values for all
+parameters, and has no key. Effectively, this is what you want if you intend to
+use Blake2 as a hash function. Further resettings of the state SHALL be done with `reset`.
 */
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void)
 {
@@ -884,7 +878,7 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void)
 
 static Hacl_Hash_Blake2b_index index_of_state(Hacl_Hash_Blake2b_state_t *s)
 {
-  block_state_t block_state = (*s).block_state;
+  Hacl_Hash_Blake2b_block_state_t block_state = (*s).block_state;
   uint8_t nn = block_state.snd;
   uint8_t kk1 = block_state.fst;
   return ((Hacl_Hash_Blake2b_index){ .key_length = kk1, .digest_length = nn });
@@ -898,7 +892,7 @@ reset_raw(
 {
   Hacl_Hash_Blake2b_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
-  block_state_t block_state = scrut.block_state;
+  Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
   uint8_t nn0 = block_state.snd;
   uint8_t kk10 = block_state.fst;
   Hacl_Hash_Blake2b_index i = { .key_length = kk10, .digest_length = nn0 };
@@ -933,9 +927,11 @@ reset_raw(
 }
 
 /**
- Re-initialization function. The reinitialization API is tricky --
-you MUST reuse the same original parameters for digest (output) length and key
-length.
+ General-purpose re-initialization function with parameters and
+key. You cannot change digest_length or key_length, meaning those values in
+the parameters object must be the same as originally decided via one of the
+malloc functions. All other values of the parameter can be changed. The behavior
+is unspecified if you violate this precondition.
 */
 void
 Hacl_Hash_Blake2b_reset_with_key_and_params(
@@ -949,10 +945,11 @@ Hacl_Hash_Blake2b_reset_with_key_and_params(
 }
 
 /**
- Re-initialization function when there is a key. Note that the key
-size is not allowed to change, which is why this function does not take a key
-length -- the key has to be same key size that was originally passed to
-`malloc_with_key`
+ Specialized-purpose re-initialization function with no parameters,
+and a key. The key length must be the same as originally decided via your choice
+of malloc function. All other parameters are reset to their default values. The
+original call to malloc MUST have set digest_length to the default value. The
+behavior is unspecified if you violate this precondition.
 */
 void Hacl_Hash_Blake2b_reset_with_key(Hacl_Hash_Blake2b_state_t *s, uint8_t *k)
 {
@@ -971,7 +968,12 @@ void Hacl_Hash_Blake2b_reset_with_key(Hacl_Hash_Blake2b_state_t *s, uint8_t *k)
 }
 
 /**
-  Re-initialization function when there is no key
+ Specialized-purpose re-initialization function with no parameters
+and no key. This is what you want if you intend to use Blake2 as a hash
+function. The key length and digest length must have been set to their
+respective default values via your choice of malloc function (always true if you
+used `malloc`). All other parameters are reset to their default values. The
+behavior is unspecified if you violate this precondition.
 */
 void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *s)
 {
@@ -979,7 +981,7 @@ void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *s)
 }
 
 /**
-  Update function when there is no key; 0 = success, 1 = max length exceeded
+  Update function; 0 = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint32_t chunk_len)
@@ -1002,7 +1004,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
   if (chunk_len <= 128U - sz)
   {
     Hacl_Hash_Blake2b_state_t s1 = *state;
-    block_state_t block_state1 = s1.block_state;
+    Hacl_Hash_Blake2b_block_state_t block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -1030,7 +1032,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
   else if (sz == 0U)
   {
     Hacl_Hash_Blake2b_state_t s1 = *state;
-    block_state_t block_state1 = s1.block_state;
+    Hacl_Hash_Blake2b_block_state_t block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -1045,7 +1047,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      ___uint64_t___uint64_t_ acc = block_state1.thd;
+      K____uint64_t___uint64_t_ acc = block_state1.thd;
       uint64_t *wv = acc.fst;
       uint64_t *hash = acc.snd;
       uint32_t nb = 1U;
@@ -1070,7 +1072,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    ___uint64_t___uint64_t_ acc = block_state1.thd;
+    K____uint64_t___uint64_t_ acc = block_state1.thd;
     uint64_t *wv = acc.fst;
     uint64_t *hash = acc.snd;
     uint32_t nb = data1_len / 128U;
@@ -1098,7 +1100,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
     Hacl_Hash_Blake2b_state_t s1 = *state;
-    block_state_t block_state10 = s1.block_state;
+    Hacl_Hash_Blake2b_block_state_t block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
     uint32_t sz10;
@@ -1123,7 +1125,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
         }
       );
     Hacl_Hash_Blake2b_state_t s10 = *state;
-    block_state_t block_state1 = s10.block_state;
+    Hacl_Hash_Blake2b_block_state_t block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
     uint32_t sz1;
@@ -1138,7 +1140,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      ___uint64_t___uint64_t_ acc = block_state1.thd;
+      K____uint64_t___uint64_t_ acc = block_state1.thd;
       uint64_t *wv = acc.fst;
       uint64_t *hash = acc.snd;
       uint32_t nb = 1U;
@@ -1164,7 +1166,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    ___uint64_t___uint64_t_ acc = block_state1.thd;
+    K____uint64_t___uint64_t_ acc = block_state1.thd;
     uint64_t *wv = acc.fst;
     uint64_t *hash = acc.snd;
     uint32_t nb = data1_len / 128U;
@@ -1190,16 +1192,22 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
 }
 
 /**
-  Finish function when there is no key
+ Digest function. This function expects the `output` array to hold
+at least `digest_length` bytes, where `digest_length` was determined by your
+choice of `malloc` function. Concretely, if you used `malloc` or
+`malloc_with_key`, then the expected length is 32 for S, or 64 for B (default
+digest length). If you used `malloc_with_params_and_key`, then the expected
+length is whatever you chose for the `digest_length` field of your
+parameters.
 */
 void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
 {
-  block_state_t block_state0 = (*state).block_state;
+  Hacl_Hash_Blake2b_block_state_t block_state0 = (*state).block_state;
   uint8_t nn = block_state0.snd;
   uint8_t kk1 = block_state0.fst;
   Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn };
   Hacl_Hash_Blake2b_state_t scrut = *state;
-  block_state_t block_state = scrut.block_state;
+  Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
   uint32_t r;
@@ -1214,7 +1222,7 @@ void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
   uint8_t *buf_1 = buf_;
   uint64_t wv0[16U] = { 0U };
   uint64_t b[16U] = { 0U };
-  block_state_t
+  Hacl_Hash_Blake2b_block_state_t
   tmp_block_state =
     { .fst = i.key_length, .snd = i.digest_length, .thd = { .fst = wv0, .snd = b } };
   uint64_t *src_b = block_state.thd.snd;
@@ -1232,7 +1240,7 @@ void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
-  ___uint64_t___uint64_t_ acc0 = tmp_block_state.thd;
+  K____uint64_t___uint64_t_ acc0 = tmp_block_state.thd;
   uint64_t *wv1 = acc0.fst;
   uint64_t *hash0 = acc0.snd;
   uint32_t nb = 0U;
@@ -1243,7 +1251,7 @@ void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
     buf_multi,
     nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
-  ___uint64_t___uint64_t_ acc = tmp_block_state.thd;
+  K____uint64_t___uint64_t_ acc = tmp_block_state.thd;
   uint64_t *wv = acc.fst;
   uint64_t *hash = acc.snd;
   Hacl_Hash_Blake2b_update_last(r,
@@ -1263,7 +1271,7 @@ void Hacl_Hash_Blake2b_free(Hacl_Hash_Blake2b_state_t *state)
 {
   Hacl_Hash_Blake2b_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
-  block_state_t block_state = scrut.block_state;
+  Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
   uint64_t *b = block_state.thd.snd;
   uint64_t *wv = block_state.thd.fst;
   KRML_HOST_FREE(wv);
@@ -1273,12 +1281,12 @@ void Hacl_Hash_Blake2b_free(Hacl_Hash_Blake2b_state_t *state)
 }
 
 /**
-  Copying. The key length (or absence thereof) must match between source and destination.
+  Copying. This preserves all parameters.
 */
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *state)
 {
   Hacl_Hash_Blake2b_state_t scrut = *state;
-  block_state_t block_state0 = scrut.block_state;
+  Hacl_Hash_Blake2b_block_state_t block_state0 = scrut.block_state;
   uint8_t *buf0 = scrut.buf;
   uint64_t total_len0 = scrut.total_len;
   uint8_t nn = block_state0.snd;
@@ -1288,7 +1296,7 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *sta
   memcpy(buf, buf0, 128U * sizeof (uint8_t));
   uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
-  block_state_t
+  Hacl_Hash_Blake2b_block_state_t
   block_state = { .fst = i.key_length, .snd = i.digest_length, .thd = { .fst = wv, .snd = b } };
   uint64_t *src_b = block_state0.thd.snd;
   uint64_t *dst_b = block_state.thd.snd;
@@ -1330,6 +1338,11 @@ Hacl_Hash_Blake2b_hash_with_key(
   Lib_Memzero0_memzero(b, 16U, uint64_t, void *);
 }
 
+/**
+Write the BLAKE2b digest of message `input` using key `key` and
+parameters `params` into `output`. Note that the key length `kk` MUST match the
+field `key_length` of your `params`. The behavior is unspecified otherwise.
+*/
 void
 Hacl_Hash_Blake2b_hash_with_key_and_paramas(
   uint8_t *output,

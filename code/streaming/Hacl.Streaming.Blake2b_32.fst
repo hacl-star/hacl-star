@@ -26,7 +26,6 @@ let blake2b_32 =
          Blake2b32.update_last Blake2b32.finish
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code
-
 let block_state_t (kk: G.erased (Common.index Spec.Blake2B)) = Common.s Spec.Blake2B kk Core.M32
 
 let state_t (kk: G.erased (Common.index Spec.Blake2B)) =
@@ -46,10 +45,19 @@ private
 let malloc_raw (kk: Common.index Spec.Blake2B): Tot _ =
   F.malloc blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
-[@ (Comment " State allocation function when there are parameters and a key. The
-length of the key k MUST match the value of the field key_length in the
-parameters. Furthermore, there is a static (not dynamically checked) requirement
-that key_length does not exceed max_key (32 for S, 64 for B).)")]
+[@ (Comment " General-purpose allocation function that gives control over all
+Blake2 parameters, including the key. Further resettings of the state SHALL be
+done with `reset_with_params_and_key`, and SHALL feature the exact same values
+for the `key_length` and `digest_length` fields as passed here. In other words,
+once you commit to a digest and key length, the only way to change these
+parameters is to allocate a new object.
+
+The caller must satisfy the following requirements.
+- The length of the key k MUST match the value of the field key_length in the
+  parameters.
+- The key_length must not exceed 32 for S, 64 for B.
+- The digest_length must not exceed 32 for S, 64 for B.
+")]
 val malloc_with_params_and_key:
   i:G.erased (P.index Spec.Blake2B) ->
   p:P.params Spec.Blake2B i ->
@@ -79,9 +87,16 @@ let malloc_with_params_and_key i p k r =
   let i = { P.key_length = pv.Core.key_length; digest_length = pv.Core.digest_length } in
   malloc_raw i (p, k) r
 
-[@ (Comment " State allocation function when there is just a custom key. All
-other parameters are set to their respective default values, meaning the output
-length is the maximum allowed output (32 for S, 64 for B).")]
+[@ (Comment " Specialized allocation function that picks default values for all
+parameters, except for the key_length. Further resettings of the state SHALL be
+done with `reset_with_key`, and SHALL feature the exact same key length `kk` as
+passed here. In other words, once you commit to a key length, the only way to
+change this parameter is to allocate a new object.
+
+The caller must satisfy the following requirements.
+- The key_length must not exceed 32 for S, 64 for B.
+")]
+
 val malloc_with_key:
   k:LowStar.Buffer.buffer Lib.IntTypes.uint8 ->
   kk:Spec.key_length_t Spec.Blake2B { LowStar.Buffer.length k == UInt8.v kk } -> (
@@ -152,7 +167,9 @@ let malloc_with_key k kk r =
 // partial application generates a GTot that later on gives errors that are hard
 // to debug (hence the Tot _ in this file), but this signature is just too
 // painful to write and the refinement seems to be sufficient, so, there we go.
-[@ (Comment "  State allocation function when there is no key")]
+[@ (Comment " Specialized allocation function that picks default values for all
+parameters, and has no key. Effectively, this is what you want if you intend to
+use Blake2 as a hash function. Further resettings of the state SHALL be done with `reset`.")]
 let malloc (r: HS.rid { HyperStack.ST.is_eternal_region r }) =
   malloc_with_key B.null 0uy r
 
@@ -164,9 +181,11 @@ private
 let reset_raw (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
   F.reset blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
-[@ (Comment " Re-initialization function. The reinitialization API is tricky --
-you MUST reuse the same original parameters for digest (output) length and key
-length.")]
+[@ (Comment " General-purpose re-initialization function with parameters and
+key. You cannot change digest_length or key_length, meaning those values in
+the parameters object must be the same as originally decided via one of the
+malloc functions. All other values of the parameter can be changed. The behavior
+is unspecified if you violate this precondition.")]
 val reset_with_key_and_params: (i: G.erased (Common.index Spec.Blake2B)) -> (
   let open F in
   let c = blake2b_32 in
@@ -194,10 +213,11 @@ let reset_with_key_and_params i s p k () =
   let i = index_of_state i s in
   reset_raw i s (p, k)
 
-[@ (Comment " Re-initialization function when there is a key. Note that the key
-size is not allowed to change, which is why this function does not take a key
-length -- the key has to be same key size that was originally passed to
-`malloc_with_key`")]
+[@ (Comment " Specialized-purpose re-initialization function with no parameters,
+and a key. The key length must be the same as originally decided via your choice
+of malloc function. All other parameters are reset to their default values. The
+original call to malloc MUST have set digest_length to the default value. The
+behavior is unspecified if you violate this precondition.")]
 val reset_with_key: (i: G.erased (Common.index Spec.Blake2B)) -> (
   let open F in
   let c = blake2b_32 in
@@ -281,7 +301,12 @@ let reset_with_key (i: G.erased (Common.index Spec.Blake2B)) s k () =
   assert B.(modifies (footprint c i h0 s) h0 h1)
 #pop-options
 
-[@ (Comment "  Re-initialization function when there is no key")]
+[@ (Comment " Specialized-purpose re-initialization function with no parameters
+and no key. This is what you want if you intend to use Blake2 as a hash
+function. The key length and digest length must have been set to their
+respective default values via your choice of malloc function (always true if you
+used `malloc`). All other parameters are reset to their default values. The
+behavior is unspecified if you violate this precondition.")]
 val reset: (i: G.erased (Common.index Spec.Blake2B)) -> (
   let open F in
   let c = blake2b_32 in
@@ -308,11 +333,17 @@ val reset: (i: G.erased (Common.index Spec.Blake2B)) -> (
 let reset i s =
   reset_with_key i s B.null ()
 
-[@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
+[@ (Comment "  Update function; 0 = success, 1 = max length exceeded")]
 let update (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
   F.update blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
-[@ (Comment "  Finish function when there is no key")]
+[@ (Comment " Digest function. This function expects the `output` array to hold
+at least `digest_length` bytes, where `digest_length` was determined by your
+choice of `malloc` function. Concretely, if you used `malloc` or
+`malloc_with_key`, then the expected length is 32 for S, or 64 for B (default
+digest length). If you used `malloc_with_params_and_key`, then the expected
+length is whatever you chose for the `digest_length` field of your
+parameters.")]
 let digest (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
   F.digest_erased blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
@@ -320,7 +351,7 @@ let digest (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
 let free (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
   F.free blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
-[@ (Comment "  Copying. The key length (or absence thereof) must match between source and destination.")]
+[@ (Comment "  Copying. This preserves all parameters.")]
 let copy (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
   F.copy blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
@@ -336,5 +367,8 @@ let copy (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
 let hash_with_key : Impl.blake2_st Spec.Blake2B Core.M32 =
   Impl.blake2 #Spec.Blake2B #Core.M32 Blake2b32.init Blake2b32.update Blake2b32.finish
 
+[@@ Comment "Write the BLAKE2b digest of message `input` using key `key` and
+parameters `params` into `output`. Note that the key length `kk` MUST match the
+field `key_length` of your `params`. The behavior is unspecified otherwise."]
 let hash_with_key_and_paramas : Impl.blake2_with_params_st Spec.Blake2B Core.M32 =
   Impl.blake2_with_params #Spec.Blake2B #Core.M32 Blake2b32.init_with_params Blake2b32.update Blake2b32.finish
