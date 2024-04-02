@@ -81,7 +81,7 @@ main()
   cycles cdiff1 = b - a;
 
   uint64_t count = ROUNDS * SIZE;
-  printf("Poly1305 (256-bit) PERF:\n");
+  printf("Poly1305 (256-bit) PERF: %"PRIu64"\n", res);
   print_time(count, tdiff1, cdiff1);
 
   if (ok)

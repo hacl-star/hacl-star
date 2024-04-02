@@ -14,7 +14,7 @@
 #include "poly1305_vectors.h"
 #include "test_helpers.h"
 
-typedef struct Hacl_MAC_Poly1305_Simd128_state_t poly1305_state;
+typedef Hacl_MAC_Poly1305_Simd128_state_t poly1305_state;
 
 int
 main()

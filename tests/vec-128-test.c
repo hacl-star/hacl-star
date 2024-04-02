@@ -56,7 +56,7 @@ static inline void
 print_vector64(unsigned char* msg, vec128 vec)
 {
   printf("[> %s:\n", msg);
-  printf("initialize_vector64(0x%lxUL,0x%lxUL);\n",
+  printf("initialize_vector64(0x%"PRIx64",0x%"PRIx64");\n",
          (uint64_t)Lib_IntVector_Intrinsics_vec128_extract64(vec, 0),
          (uint64_t)Lib_IntVector_Intrinsics_vec128_extract64(vec, 1));
 }
@@ -158,16 +158,15 @@ compare_and_print_vec32_(vec128 comp, vec128 exp)
 static inline bool
 compare_and_print_vec64_(vec128 comp, vec128 exp)
 {
-  unsigned int len = 2;
   printf("computed: ");
-  printf("[%lx], ",
+  printf("[%"PRIx64"], ",
          (uint64_t)Lib_IntVector_Intrinsics_vec128_extract64(comp, 0));
-  printf("[%lx]", (uint64_t)Lib_IntVector_Intrinsics_vec128_extract64(comp, 1));
+  printf("[%"PRIx64"]", (uint64_t)Lib_IntVector_Intrinsics_vec128_extract64(comp, 1));
   printf("\n");
   printf("expected: ");
-  printf("[%lx], ",
+  printf("[%"PRIx64"], ",
          (uint64_t)Lib_IntVector_Intrinsics_vec128_extract64(exp, 0));
-  printf("[%lx]", (uint64_t)Lib_IntVector_Intrinsics_vec128_extract64(exp, 1));
+  printf("[%"PRIx64"]", (uint64_t)Lib_IntVector_Intrinsics_vec128_extract64(exp, 1));
   printf("\n");
   bool ok = true;
   ok = ok & (Lib_IntVector_Intrinsics_vec128_extract64(comp, 0) ==
@@ -238,7 +237,7 @@ main()
   vec0 = initialize_vector64(0x00010203004050607, 0x08090a0b0c0d0e0f);
   x64 = Lib_IntVector_Intrinsics_vec128_extract64(vec0, 1);
   printf("extract64:\n");
-  printf("computed:%lx\n", x64);
+  printf("computed:%"PRIx64"\n", x64);
   printf("expected:%lx\n", 0x08090a0b0c0d0e0f);
   if (x64 == 0x08090a0b0c0d0e0f) {
     printf("Success!\n");

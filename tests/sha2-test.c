@@ -84,7 +84,6 @@ main()
                      vectors[i].tag_512);
   }
 
-  uint64_t len = SIZE;
   uint8_t plain[SIZE];
   cycles a, b;
   clock_t t1, t2;
