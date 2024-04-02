@@ -665,9 +665,6 @@ let blake2 (a : alg)
     (fun _ (kk, nn, acc) prevlen input -> kk, nn, update_multi_s acc prevlen input) (* update_multi_s *)
     (fun _ (kk, nn, acc) prevlen input -> kk, nn, update_last_s acc prevlen input) (* update_last_s *)
     (fun i (p, _k) (kk, _, acc) _ ->
-      // Don't know at this stage that the parameters contain the right value
-      // for the key length since the v of the key does not have a stateful
-      // invariant -- dang.
       finish_s #a p acc) (* finish_s *)
     (fun i k input l ->
       let p, k = k in
