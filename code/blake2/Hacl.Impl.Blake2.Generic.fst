@@ -1026,20 +1026,18 @@ let blake2_update #al #ms blake2_update_key blake2_update_blocks
 inline_for_extraction noextract
 let blake2_with_params_st (al:Spec.alg) (ms:m_spec) =
     output: buffer_t MUT uint8
-  -> output_len: size_t{v output_len == length output /\ 1 <= v output_len /\ v output_len <= Spec.max_output al}
   -> input: buffer_t MUT uint8
   -> input_len: size_t{v input_len == length input}
   -> params: blake2_params al
-  -> key: buffer_t MUT uint8
-  -> key_len: size_t{v key_len == length key /\ v key_len <= Spec.max_key al} ->
+  -> key: buffer_t MUT uint8 ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h key /\ blake2_params_inv h params
                    /\ disjoint output input /\ disjoint output key /\ disjoint input key /\
-                   UInt8.v params.key_length == v key_len /\
-                   UInt8.v params.digest_length == v output_len /\
+                   UInt8.v params.key_length == length key /\
+                   UInt8.v params.digest_length == length output /\
                    True))
     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
-                         /\ h1.[|(output <: lbuffer uint8 output_len)|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (blake2_params_v h0 params) h0.[|(key <: lbuffer uint8 key_len)|]))
+                         /\ h1.[|(output <: lbuffer uint8 (FStar.Int.Cast.uint8_to_uint32 params.digest_length))|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (blake2_params_v h0 params) h0.[|(key <: lbuffer uint8 (FStar.Int.Cast.uint8_to_uint32 params.key_length))|]))
 
 inline_for_extraction noextract
 val blake2_with_params:
@@ -1051,7 +1049,11 @@ val blake2_with_params:
   -> blake2_with_params_st al ms
 
 #push-options "--z3rlimit 100"
-let blake2_with_params #al #ms blake2_init blake2_update blake2_finish output output_len input input_len params key key_len =
+let blake2_with_params #al #ms blake2_init blake2_update blake2_finish output input input_len params key =
+  [@inline_let]
+  let output_len = FStar.Int.Cast.uint8_to_uint32 params.digest_length in
+  [@inline_let]
+  let key_len = FStar.Int.Cast.uint8_to_uint32 params.key_length in
   [@inline_let]
   let stlen = le_sigh al ms in
   [@inline_let]

@@ -364,7 +364,8 @@ let hash_with_key : Impl.blake2_st Spec.Blake2B Core.M32 =
   Impl.blake2 #Spec.Blake2B #Core.M32 Blake2b32.init Blake2b32.update Blake2b32.finish
 
 [@@ Comment "Write the BLAKE2b digest of message `input` using key `key` and
-parameters `params` into `output`. Note that the key length `kk` MUST match the
-field `key_length` of your `params`. The behavior is unspecified otherwise."]
+parameters `params` into `output`. The `key` array must be of length
+`params.key_length`. The `output` array must be of length
+`params.digest_length`. "]
 let hash_with_key_and_paramas : Impl.blake2_with_params_st Spec.Blake2B Core.M32 =
   Impl.blake2_with_params #Spec.Blake2B #Core.M32 Blake2b32.init_with_params Blake2b32.update Blake2b32.finish

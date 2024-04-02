@@ -1178,12 +1178,10 @@ Hacl_Hash_Blake2b_Simd256_hash_with_key(
 void
 Hacl_Hash_Blake2b_Simd256_hash_with_key_and_paramas(
   uint8_t *output,
-  uint32_t output_len,
   uint8_t *input,
   uint32_t input_len,
   Hacl_Hash_Blake2b_blake2_params params,
-  uint8_t *key,
-  uint32_t key_len
+  uint8_t *key
 )
 {
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b[4U] KRML_POST_ALIGN(32) = { 0U };
@@ -1255,8 +1253,8 @@ Hacl_Hash_Blake2b_Simd256_hash_with_key_and_paramas(
   uint64_t iv7_ = iv7 ^ tmp7;
   r0[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0_, iv1_, iv2_, iv3_);
   r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4_, iv5_, iv6_, iv7_);
-  update(b1, b, key_len, key, input_len, input);
-  Hacl_Hash_Blake2b_Simd256_finish(output_len, output, b);
+  update(b1, b, (uint32_t)params.key_length, key, input_len, input);
+  Hacl_Hash_Blake2b_Simd256_finish((uint32_t)params.digest_length, output, b);
   Lib_Memzero0_memzero(b1, 4U, Lib_IntVector_Intrinsics_vec256, void *);
   Lib_Memzero0_memzero(b, 4U, Lib_IntVector_Intrinsics_vec256, void *);
 }

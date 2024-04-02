@@ -151,12 +151,10 @@ Hacl_Hash_Blake2s_hash_with_key(
 void
 Hacl_Hash_Blake2s_hash_with_key_and_paramas(
   uint8_t *output,
-  uint32_t output_len,
   uint8_t *input,
   uint32_t input_len,
   Hacl_Hash_Blake2b_blake2_params params,
-  uint8_t *key,
-  uint32_t key_len
+  uint8_t *key
 );
 
 #if defined(__cplusplus)

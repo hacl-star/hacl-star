@@ -196,18 +196,17 @@ Hacl_Hash_Blake2b_hash_with_key(
 
 /**
 Write the BLAKE2b digest of message `input` using key `key` and
-parameters `params` into `output`. Note that the key length `kk` MUST match the
-field `key_length` of your `params`. The behavior is unspecified otherwise.
+parameters `params` into `output`. The `key` array must be of length
+`params.key_length`. The `output` array must be of length
+`params.digest_length`. 
 */
 void
 Hacl_Hash_Blake2b_hash_with_key_and_paramas(
   uint8_t *output,
-  uint32_t output_len,
   uint8_t *input,
   uint32_t input_len,
   Hacl_Hash_Blake2b_blake2_params params,
-  uint8_t *key,
-  uint32_t key_len
+  uint8_t *key
 );
 
 #if defined(__cplusplus)

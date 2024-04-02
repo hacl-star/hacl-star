@@ -1333,18 +1333,17 @@ Hacl_Hash_Blake2b_hash_with_key(
 
 /**
 Write the BLAKE2b digest of message `input` using key `key` and
-parameters `params` into `output`. Note that the key length `kk` MUST match the
-field `key_length` of your `params`. The behavior is unspecified otherwise.
+parameters `params` into `output`. The `key` array must be of length
+`params.key_length`. The `output` array must be of length
+`params.digest_length`. 
 */
 void
 Hacl_Hash_Blake2b_hash_with_key_and_paramas(
   uint8_t *output,
-  uint32_t output_len,
   uint8_t *input,
   uint32_t input_len,
   Hacl_Hash_Blake2b_blake2_params params,
-  uint8_t *key,
-  uint32_t key_len
+  uint8_t *key
 )
 {
   uint64_t b[16U] = { 0U };
@@ -1428,8 +1427,8 @@ Hacl_Hash_Blake2b_hash_with_key_and_paramas(
   r1[1U] = iv5_;
   r1[2U] = iv6_;
   r1[3U] = iv7_;
-  update(b1, b, key_len, key, input_len, input);
-  Hacl_Hash_Blake2b_finish(output_len, output, b);
+  update(b1, b, (uint32_t)params.key_length, key, input_len, input);
+  Hacl_Hash_Blake2b_finish((uint32_t)params.digest_length, output, b);
   Lib_Memzero0_memzero(b1, 16U, uint64_t, void *);
   Lib_Memzero0_memzero(b, 16U, uint64_t, void *);
 }

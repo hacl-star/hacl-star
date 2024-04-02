@@ -110,9 +110,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2s_hash_with_key_and_paramas =
       foreign "Hacl_Hash_Blake2s_hash_with_key_and_paramas"
         (ocaml_bytes @->
-           (uint32_t @->
-              (ocaml_bytes @->
-                 (uint32_t @->
-                    (hacl_Hash_Blake2b_blake2_params @->
-                       (ocaml_bytes @-> (uint32_t @-> (returning void))))))))
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (hacl_Hash_Blake2b_blake2_params @->
+                    (ocaml_bytes @-> (returning void))))))
   end
