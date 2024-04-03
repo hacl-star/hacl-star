@@ -963,18 +963,6 @@ let absorb_last #m rateInBytes rem delimitedSuffix b s =
        (rem =. (rateInBytes -! 1ul)) then state_permute m s;
   absorb_next #m rateInBytes s
 
-inline_for_extraction noextract
-val absorb_inner: #m:m_spec{is_supported m}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
-  -> b:multibuf (lanes m) 256ul
-  -> s:state_t m ->
-  Stack unit
-  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s /\
-    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
-      Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
-  (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
-    as_seq h1 s == V.absorb_inner #m (v rateInBytes) (as_seq_multi h0 b) (as_seq h0 s))
-
 let absorb_inner #m rateInBytes b s =
   loadState #m rateInBytes b s;
   state_permute m s
@@ -1130,18 +1118,6 @@ let absorb_inner_block_get #m rateInBytes len b b' i s =
   if (lanes m = 1) then loc_multi1 b' else loc_multi4 b';
   get_multiblock #m rateInBytes len b i b';
   absorb_inner #m rateInBytes b' s
-
-inline_for_extraction noextract
-val absorb_inner_block: #m:m_spec{is_supported m}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
-  -> len:size_t
-  -> b:multibuf (lanes m) len
-  -> i:size_t{v i < v len / v rateInBytes}
-  -> s:state_t m ->
-  Stack unit
-  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s)
-  (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
-    as_seq h1 s == V.absorb_inner_block #m (v rateInBytes) (v len) (as_seq_multi h0 b) (v i) (as_seq h0 s))
 
 let absorb_inner_block #m rateInBytes len b i s =
   let h0 = ST.get() in

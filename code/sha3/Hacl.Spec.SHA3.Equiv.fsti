@@ -1,6 +1,8 @@
 module Hacl.Spec.SHA3.Equiv
 
+open Lib.Sequence
 open Lib.IntTypes
+open Lib.IntVector
 open Lib.NTuple
 
 open Hacl.Spec.SHA3.Vec
@@ -80,3 +82,43 @@ val sha3_512_lemma_l:
   Lemma
    ((sha3_512 m inputByteLen input output).(|l|) ==
       Spec.sha3_512 inputByteLen input.(|l|))
+
+(* Lemmas to prove functions in Hacl.Hash.SHA3 module *)
+
+val absorb_inner_repeat_blocks_multi_lemma:
+  r:size_nat{r > 0 /\ r <= 200}
+  -> inputByteLen:nat{inputByteLen % r = 0}
+  -> input:multiseq 1 inputByteLen
+  -> s:lseq uint64 25 ->
+  Lemma
+   (reveal_vec_1 U64;
+    absorb_inner_nblocks #M32 r inputByteLen input s ==
+    repeat_blocks_multi r input.(|0|) (Spec.absorb_inner r) s)
+
+val absorb_inner_block_r_lemma:
+  r:size_nat{r > 0 /\ r <= 200}
+  -> input:multiseq 1 r
+  -> s:lseq uint64 25 ->
+  Lemma
+   (reveal_vec_1 U64;
+    absorb_inner_block #M32 r r input 0 s == Spec.absorb_inner r input.(|0|) s)
+
+val absorb_last_r_lemma:
+  delimitedSuffix:byte_t
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> inputByteLen:nat{inputByteLen < r}
+  -> input:multiseq 1 inputByteLen
+  -> s:lseq uint64 25 ->
+  Lemma
+   (reveal_vec_1 U64;
+    absorb_final #M32 s r inputByteLen input delimitedSuffix ==
+      Spec.absorb_last delimitedSuffix r inputByteLen input.(|0|) s)
+
+val squeeze_s_lemma:
+  s:lseq uint64 25
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> outputByteLen:size_nat
+  -> b:multiseq 1 outputByteLen ->
+  Lemma
+   (reveal_vec_1 U64;
+    (squeeze #M32 s r outputByteLen b).(|0|) == Spec.squeeze s r outputByteLen)

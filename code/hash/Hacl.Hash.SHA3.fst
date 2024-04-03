@@ -68,10 +68,15 @@ let update_multi_sha3_st (a:keccak_alg) =
 /// This function needs to be type-checked monomorphically (not with agile
 /// types) so as to extract to Low* as-is.
 let update_multi_sha3 (a: keccak_alg): update_multi_sha3_st a = fun s () blocks n_blocks ->
-  [@inline_let]
-  let spec_f = Spec.SHA3.absorb_inner (Spec.Hash.Definitions.rate a/8) in
-  let h0 = ST.get () in
-  Lib.Buffer.loop_blocks_multi (block_len a) n_blocks blocks spec_f (Hacl.Impl.SHA3.absorb_inner (block_len a)) s
+  let open Lib.NTuple in
+  let open Lib.MultiBuffer in
+  let open Hacl.Spec.SHA3.Vec.Common in
+  let h0 = ST.get() in
+  let l = block_len a *! n_blocks in
+  Lib.IntVector.reveal_vec_1 U64;
+  Hacl.Impl.SHA3.Vec.absorb_inner_nblocks #M32 (block_len a) l (ntup1 blocks) s;
+  Hacl.Spec.SHA3.Equiv.absorb_inner_repeat_blocks_multi_lemma (v (block_len a)) (v l)
+    (as_seq_multi h0 (ntup1 blocks)) (B.as_seq h0 s)
 
 /// There is a proof going here, that if your algorithm is of the keccak family,
 /// then the monomorphic, Low*-compatible signature above, is a refinement of
@@ -100,15 +105,34 @@ let update_last_st_sha3 (a: keccak_alg) =
                                           (prev_len_v prev_len)
                                           (B.as_seq h0 input)))
 
+#push-options "--z3rlimit 180"
 let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input input_len ->
   let open Lib.IntTypes in
+  let open Lib.NTuple in
+  let open Lib.MultiBuffer in
+  let open Hacl.Spec.SHA3.Vec.Common in
   let suffix = if is_shake a then byte 0x1f else byte 0x06 in
   let len = block_len a in
+  assert (v input_len <= v len);
+  Lib.IntVector.reveal_vec_1 U64;
   if input_len = len then begin
-    Hacl.Impl.SHA3.absorb_inner len input s;
-    Hacl.Impl.SHA3.absorb_last suffix len 0ul (B.sub input input_len 0ul) s
-  end else
-    Hacl.Impl.SHA3.absorb_last suffix len input_len input s
+    let h0 = ST.get() in
+    assert (v input_len == v len);
+    Hacl.Impl.SHA3.Vec.absorb_inner_block #M32 len len (ntup1 input) 0ul s;
+    Hacl.Spec.SHA3.Equiv.absorb_inner_block_r_lemma (v len)
+      (as_seq_multi h0 (ntup1 input)) (B.as_seq h0 s);
+    let h0' = ST.get() in
+    Hacl.Impl.SHA3.Vec.absorb_final #M32 len 0ul (ntup1 (B.sub input input_len 0ul)) suffix s;
+    Hacl.Spec.SHA3.Equiv.absorb_last_r_lemma suffix (v len) 0
+      (as_seq_multi #1 #0ul h0' (ntup1 (B.gsub input input_len 0ul))) (B.as_seq h0' s)
+  end else begin
+    let h0 = ST.get() in
+    assert (v input_len < v len);
+    Hacl.Impl.SHA3.Vec.absorb_final #M32 len input_len (ntup1 input) suffix s;
+    Hacl.Spec.SHA3.Equiv.absorb_last_r_lemma suffix (v len) (v input_len)
+      (as_seq_multi h0 (ntup1 input)) (B.as_seq h0 s)
+  end
+#pop-options
 
 let update_last = update_last_sha3
 
@@ -122,7 +146,18 @@ let hash a output input input_len =
   | SHA3_512 -> Hacl.SHA3.sha3_512 output input input_len
 
 let finish_keccak (a: keccak_alg): finish_st a = fun s dst l ->
-  if is_shake a then
-    Hacl.Impl.SHA3.squeeze s (block_len a) l dst
-  else
-    Hacl.Impl.SHA3.squeeze s (block_len a) (hash_len a) dst
+  let open Lib.NTuple in
+  let open Lib.MultiBuffer in
+  let open Hacl.Spec.SHA3.Vec.Common in
+  Lib.IntVector.reveal_vec_1 U64;
+  if is_shake a then begin
+    let h0 = ST.get() in
+    Hacl.Impl.SHA3.Vec.squeeze #M32 s (block_len a) l (ntup1 dst);
+    Hacl.Spec.SHA3.Equiv.squeeze_s_lemma (B.as_seq h0 s) (v (block_len a))
+      (v l) (as_seq_multi h0 (ntup1 dst))
+  end else begin
+    let h0 = ST.get() in
+    Hacl.Impl.SHA3.Vec.squeeze #M32 s (block_len a) (hash_len a) (ntup1 dst);
+    Hacl.Spec.SHA3.Equiv.squeeze_s_lemma (B.as_seq h0 s) (v (block_len a))
+      (v (hash_len a)) (as_seq_multi h0 (ntup1 dst))
+  end

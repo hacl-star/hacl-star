@@ -19,6 +19,18 @@ inline_for_extraction noextract
 let state_t (m:m_spec) = lbuffer (element_t m) 25ul
 
 inline_for_extraction noextract
+val absorb_inner_block: #m:m_spec{is_supported m}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> len:size_t
+  -> b:multibuf (lanes m) len
+  -> i:size_t{v i < v len / v rateInBytes}
+  -> s:state_t m ->
+  Stack unit
+  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s)
+  (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
+    as_seq h1 s == V.absorb_inner_block #m (v rateInBytes) (v len) (as_seq_multi h0 b) (v i) (as_seq h0 s))
+
+inline_for_extraction noextract
 val absorb_inner_nblocks: #m:m_spec{is_supported m}
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t

@@ -2,7 +2,6 @@ module Hacl.Spec.SHA3.Equiv
 
 open FStar.Mul
 open Lib.Sequence
-open Lib.IntVector
 open Lib.IntVector.Serialize
 open Lib.LoopCombinators
 
@@ -1430,3 +1429,64 @@ let sha3_384_lemma_l m inputByteLen input output l =
 
 let sha3_512_lemma_l m inputByteLen input output l =
   keccak_lemma_l #m 576 inputByteLen input (byte 0x06) 64 output l
+
+(* Lemmas to prove functions in Hacl.Hash.SHA3 module *)
+
+let absorb_inner_repeat_blocks_multi_lemma r inputByteLen input s =
+  reveal_vec_1 U64;
+  let aux_s (i:nat{i < 25}) : Lemma (s.[i] == (vec_v #U64 #1 s.[i]).[0]) =
+    reveal_vec_v_1 #U64 s.[i] in
+  let aux_n (i:nat{i < 25}) : Lemma ((absorb_inner_nblocks #M32 r inputByteLen input s).[i] == 
+    ((vec_v (absorb_inner_nblocks #M32 r inputByteLen input s).[i]).[0] <: vec_t U64 1)) =
+    reveal_vec_v_1 (absorb_inner_nblocks #M32 r inputByteLen input s).[i] in
+
+  Classical.forall_intro aux_s;
+  Classical.forall_intro aux_n;
+  eq_intro ((state_spec_v #M32 s).[0]) s;
+  eq_intro ((state_spec_v (absorb_inner_nblocks #M32 r inputByteLen input s)).[0])
+    (absorb_inner_nblocks #M32 r inputByteLen input s);
+  absorb_inner_nblocks_lemma_l #M32 r inputByteLen input s 0;
+  lemma_repeat_blocks_multi r input.(|0|) (Spec.absorb_inner r) s
+
+let absorb_inner_block_r_lemma r input s =
+  reveal_vec_1 U64;
+  let aux_s (i:nat{i < 25}) : Lemma (s.[i] == (vec_v #U64 #1 s.[i]).[0]) =
+    reveal_vec_v_1 #U64 s.[i] in
+  let aux_n (i:nat{i < 25}) : Lemma ((absorb_inner_block #M32 r r input 0 s).[i] == 
+    ((vec_v (absorb_inner_block #M32 r r input 0 s).[i]).[0] <: vec_t U64 1)) =
+    reveal_vec_v_1 (absorb_inner_block #M32 r r input 0 s).[i] in
+
+  Classical.forall_intro aux_s;
+  Classical.forall_intro aux_n;
+  eq_intro ((state_spec_v #M32 s).[0]) s;
+  eq_intro ((state_spec_v (absorb_inner_block #M32 r r input 0 s)).[0])
+    (absorb_inner_block #M32 r r input 0 s);
+  absorb_inner_block_lemma_l #M32 r r input 0 s 0
+
+let absorb_last_r_lemma delimitedSuffix r inputByteLen input s =
+  assert (inputByteLen / r == 0);
+  assert (inputByteLen % r == inputByteLen);
+  reveal_vec_1 U64;
+  let aux_s (i:nat{i < 25}) : Lemma (s.[i] == (vec_v #U64 #1 s.[i]).[0]) =
+    reveal_vec_v_1 #U64 s.[i] in
+  let aux_n (i:nat{i < 25}) : Lemma
+    ((absorb_final #M32 s r inputByteLen input delimitedSuffix).[i] == 
+      ((vec_v (absorb_final #M32 s r inputByteLen input
+      delimitedSuffix).[i]).[0] <: vec_t U64 1)) =
+    reveal_vec_v_1 (absorb_final #M32 s r inputByteLen input delimitedSuffix).[i] in
+
+  Classical.forall_intro aux_s;
+  Classical.forall_intro aux_n;
+  eq_intro ((state_spec_v #M32 s).[0]) s;
+  eq_intro ((state_spec_v (absorb_final #M32 s r inputByteLen input delimitedSuffix)).[0])
+    (absorb_final #M32 s r inputByteLen input delimitedSuffix);
+  absorb_final_lemma_l #M32 delimitedSuffix r inputByteLen input s 0
+
+let squeeze_s_lemma s r outputByteLen b =
+  reveal_vec_1 U64;
+  let aux_s (i:nat{i < 25}) : Lemma (s.[i] == (vec_v #U64 #1 s.[i]).[0]) =
+    reveal_vec_v_1 #U64 s.[i] in
+
+  Classical.forall_intro aux_s;
+  eq_intro ((state_spec_v #M32 s).[0]) s;
+  squeeze_lemma_l #M32 s r outputByteLen b 0
