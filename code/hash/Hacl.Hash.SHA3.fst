@@ -105,7 +105,6 @@ let update_last_st_sha3 (a: keccak_alg) =
                                           (prev_len_v prev_len)
                                           (B.as_seq h0 input)))
 
-#push-options "--z3rlimit 180"
 let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input input_len ->
   let open Lib.IntTypes in
   let open Lib.NTuple in
@@ -113,9 +112,10 @@ let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input inp
   let open Hacl.Spec.SHA3.Vec.Common in
   let suffix = if is_shake a then byte 0x1f else byte 0x06 in
   let len = block_len a in
+  assert (v len == rate a / 8);
   assert (v input_len <= v len);
   Lib.IntVector.reveal_vec_1 U64;
-  if input_len = len then begin
+  if v input_len = v len then begin
     let h0 = ST.get() in
     assert (v input_len == v len);
     Hacl.Impl.SHA3.Vec.absorb_inner_block #M32 len len (ntup1 input) 0ul s;
@@ -132,7 +132,6 @@ let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input inp
     Hacl.Spec.SHA3.Equiv.absorb_last_r_lemma suffix (v len) (v input_len)
       (as_seq_multi h0 (ntup1 input)) (B.as_seq h0 s)
   end
-#pop-options
 
 let update_last = update_last_sha3
 
