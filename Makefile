@@ -758,6 +758,7 @@ BUNDLE_FLAGS	=\
   $(STREAMING_BUNDLE) \
   $(INTTYPES_BUNDLE) \
   $(INTTYPES_128_BUNDLE) \
+  $(RSA_BUNDLE) \
   $(RSAPSS_BUNDLE) \
   $(FFDHE_BUNDLE) \
   $(LEGACY_BUNDLE)
@@ -831,6 +832,7 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 
 dist/wasm/Makefile.basic: CTR_BUNDLE =
+dist/wasm/Makefile.basic: RSA_BUNDLE = -bundle Hacl.RSA,Hacl.Impl.RSA.*,Hacl.Impl.RSA
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
 dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle EverCrypt.TargetConfig \

@@ -1,0 +1,123 @@
+/* MIT License
+ *
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+
+#ifndef __Hacl_RSA_H
+#define __Hacl_RSA_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
+#include "Hacl_Krmllib.h"
+
+/**
+Decrypt a message `cipher` and write the plaintext to `plain`.
+
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param skey Pointer to secret key created by `Hacl_RSA_new_rsa_load_skey`.
+@param cipher Pointer to `ceil(modBits - 1 / 8)` bytes where the ciphertext is read from.
+@param plain Pointer to `ceil(modBits / 8)` bytes where the plaintext is written to.
+
+@return Returns true if and only if decryption was successful.
+*/
+bool
+Hacl_RSA_rsa_dec(
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint64_t *skey,
+  uint8_t *cipher,
+  uint8_t *plain
+);
+
+/**
+Encrypt a message `plain` and write the ciphertext to `cipher`.
+
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param skey Pointer to secret key created by `Hacl_RSA_new_rsa_load_skey`.
+@param plain Pointer to `ceil(modBits / 8)` bytes where the plaintext is written to.
+@param cipher Pointer to `ceil(modBits - 1 / 8)` bytes where the ciphertext is read from.
+
+@return Returns true if and only if decryption was successful.
+*/
+bool
+Hacl_RSA_rsa_enc(
+  uint32_t modBits,
+  uint32_t eBits,
+  uint64_t *pkey,
+  uint8_t *plain,
+  uint8_t *cipher
+);
+
+/**
+Load a public key from key parts.
+
+@param modBits Count of bits in modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+
+@return Returns an allocated public key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
+*/
+uint64_t
+*Hacl_RSA_new_rsa_load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb);
+
+/**
+Load a secret key from key parts.
+
+@param modBits Count of bits in modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
+
+@return Returns an allocated secret key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
+*/
+uint64_t
+*Hacl_RSA_new_rsa_load_skey(
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db
+);
+
+#if defined(__cplusplus)
+}
+#endif
+
+#define __Hacl_RSA_H_DEFINED
+#endif
