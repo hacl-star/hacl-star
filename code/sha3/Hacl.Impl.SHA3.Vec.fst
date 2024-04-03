@@ -984,6 +984,7 @@ let get_multiblock_t (m:m_spec{is_supported m}) =
 inline_for_extraction noextract
 val get_multiblock_1: #m:m_spec{lanes m == 1} -> get_multiblock_t m
 
+#push-options "--max_ifuel 1 --max_fuel 1"
 let get_multiblock_1 #m rateInBytes len b i b' =
   let h0 = ST.get() in
   assert (v (i *! rateInBytes) == v i * v rateInBytes);
@@ -997,6 +998,7 @@ let get_multiblock_1 #m rateInBytes len b i b' =
   update_sub bl0 0ul rateInBytes (sub b0 (i *! rateInBytes) rateInBytes);
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b') (V.get_multiblock_spec #m (v rateInBytes) (v len) (as_seq_multi h0 b) (v i))
+#pop-options
 
 inline_for_extraction noextract
 val get_multiblock_4: #m:m_spec{lanes m == 4} -> get_multiblock_t m
