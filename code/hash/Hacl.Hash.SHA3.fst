@@ -141,10 +141,10 @@ let finish a = Hacl.Hash.PadFinish.finish (| a, () |)
 
 let hash a output input input_len =
   match a with
-  | SHA3_224 -> Hacl.SHA3.sha3_224 output input input_len
-  | SHA3_256 -> Hacl.SHA3.sha3_256 output input input_len
-  | SHA3_384 -> Hacl.SHA3.sha3_384 output input input_len
-  | SHA3_512 -> Hacl.SHA3.sha3_512 output input input_len
+  | SHA3_224 -> Hacl.Hash.SHA3.Scalar.sha3_224 output input input_len
+  | SHA3_256 -> Hacl.Hash.SHA3.Scalar.sha3_256 output input input_len
+  | SHA3_384 -> Hacl.Hash.SHA3.Scalar.sha3_384 output input input_len
+  | SHA3_512 -> Hacl.Hash.SHA3.Scalar.sha3_512 output input input_len
 
 let finish_keccak (a: keccak_alg): finish_st a = fun s dst l ->
   let open Lib.NTuple in

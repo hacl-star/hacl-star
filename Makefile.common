@@ -190,8 +190,7 @@ HASH_BUNDLE= \
 # therefore Hacl.Impl.SHA3 cannot be put on the right-hand side of the bundle
 # (which would eliminate internal helpers not used otherwise, such as absorb or
 # squeeze)
-SHA3_BUNDLE=-bundle Hacl.Streaming.Keccak+Hacl.SHA3+Hacl.Impl.SHA3=Hacl.Hash.SHA3[rename=Hacl_Hash_SHA3,rename-prefix]
-SHA3_SCALAR_BUNDLE=-bundle Hacl.Hash.SHA3.Scalar=Hacl.Spec.SHA3.Vec.*,Hacl.Impl.SHA3.Vec
+SHA3_BUNDLE=-bundle Hacl.Streaming.Keccak+Hacl.SHA3+Hacl.Hash.SHA3.Scalar=Hacl.Spec.SHA3.Vec.*,Hacl.Impl.SHA3.Vec
 SHA3_SIMD256_BUNDLE=-bundle Hacl.Hash.SHA3.Simd256=Hacl.Spec.SHA3.Vec.*,Hacl.Impl.SHA3.Vec
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
 SALSA20_BUNDLE=-bundle Hacl.Salsa20=Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.*,Hacl.Impl.HSalsa20
