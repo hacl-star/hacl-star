@@ -112,10 +112,12 @@ let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input inp
   let open Hacl.Spec.SHA3.Vec.Common in
   let suffix = if is_shake a then byte 0x1f else byte 0x06 in
   let len = block_len a in
+  Lib.IntVector.reveal_vec_1 U64;
   assert (v len == rate a / 8);
   assert (v input_len <= v len);
-  Lib.IntVector.reveal_vec_1 U64;
-  if v input_len = v len then begin
+  eq_lemma input_len len;
+  assert ((input_len = len) == (v input_len = v len));
+  if input_len = len then begin
     let h0 = ST.get() in
     assert (v input_len == v len);
     Hacl.Impl.SHA3.Vec.absorb_inner_block #M32 len len (ntup1 input) 0ul s;

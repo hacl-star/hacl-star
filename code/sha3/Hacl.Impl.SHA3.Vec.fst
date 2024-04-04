@@ -963,6 +963,18 @@ let absorb_last #m rateInBytes rem delimitedSuffix b s =
        (rem =. (rateInBytes -! 1ul)) then state_permute m s;
   absorb_next #m rateInBytes s
 
+inline_for_extraction noextract
+val absorb_inner: #m:m_spec{is_supported m}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> b:multibuf (lanes m) 256ul
+  -> s:state_t m ->
+  Stack unit
+  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s /\
+    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+      Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
+  (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
+    as_seq h1 s == V.absorb_inner #m (v rateInBytes) (as_seq_multi h0 b) (as_seq h0 s))
+
 let absorb_inner #m rateInBytes b s =
   loadState #m rateInBytes b s;
   state_permute m s
@@ -984,7 +996,7 @@ let get_multiblock_t (m:m_spec{is_supported m}) =
 inline_for_extraction noextract
 val get_multiblock_1: #m:m_spec{lanes m == 1} -> get_multiblock_t m
 
-#push-options "--max_ifuel 1 --max_fuel 1"
+#push-options "--ifuel 1 --fuel 1"
 let get_multiblock_1 #m rateInBytes len b i b' =
   let h0 = ST.get() in
   assert (v (i *! rateInBytes) == v i * v rateInBytes);
@@ -1003,7 +1015,7 @@ let get_multiblock_1 #m rateInBytes len b i b' =
 inline_for_extraction noextract
 val get_multiblock_4: #m:m_spec{lanes m == 4} -> get_multiblock_t m
 
-#push-options "--max_ifuel 1 --max_fuel 1"
+#push-options "--ifuel 1 --fuel 1"
 let get_multiblock_4 #m rateInBytes len b i b' =
   let h0 = ST.get() in
   assert (v (i *! rateInBytes) == v i * v rateInBytes);
