@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Hash_SHA3_H
-#define __internal_Hacl_Hash_SHA3_H
+#ifndef __internal_Hacl_Hash_SHA3_Scalar_H
+#define __internal_Hacl_Hash_SHA3_Scalar_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,28 +35,17 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Hash_SHA3_Scalar.h"
-#include "../Hacl_Hash_SHA3.h"
+#include "../Hacl_Hash_SHA3_Scalar.h"
 
-void
-Hacl_Hash_SHA3_update_multi_sha3(
-  Spec_Hash_Definitions_hash_alg a,
-  uint64_t *s,
-  uint8_t *blocks,
-  uint32_t n_blocks
-);
+extern const uint32_t Hacl_Impl_SHA3_Vec_keccak_rotc[24U];
 
-void
-Hacl_Hash_SHA3_update_last_sha3(
-  Spec_Hash_Definitions_hash_alg a,
-  uint64_t *s,
-  uint8_t *input,
-  uint32_t input_len
-);
+extern const uint32_t Hacl_Impl_SHA3_Vec_keccak_piln[24U];
+
+extern const uint64_t Hacl_Impl_SHA3_Vec_keccak_rndc[24U];
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Hash_SHA3_H_DEFINED
+#define __internal_Hacl_Hash_SHA3_Scalar_H_DEFINED
 #endif
