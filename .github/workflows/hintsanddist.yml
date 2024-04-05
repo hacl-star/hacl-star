@@ -5,6 +5,10 @@ on:
     - cron: '0 0 * * 0'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   regenerate-hints-and-dist:
     runs-on: self-hosted
@@ -39,7 +43,7 @@ jobs:
           git clean -xfd
 
       - name: create pull request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.HACL_BOT }}
           branch: "hints-and-dist-main"

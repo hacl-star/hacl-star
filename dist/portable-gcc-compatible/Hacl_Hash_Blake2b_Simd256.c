@@ -318,7 +318,7 @@ update_key(
   {
     update_block(wv, hash, false, lb, b);
   }
-  Lib_Memzero0_memzero(b, 128U, uint8_t);
+  Lib_Memzero0_memzero(b, 128U, uint8_t, void *);
 }
 
 /* SNIPPET_END: update_key */
@@ -367,7 +367,7 @@ Hacl_Hash_Blake2b_Simd256_update_last(
   FStar_UInt128_uint128
   totlen = FStar_UInt128_add_mod(prev, FStar_UInt128_uint64_to_uint128((uint64_t)len));
   update_block(wv, hash, true, totlen, b);
-  Lib_Memzero0_memzero(b, 128U, uint8_t);
+  Lib_Memzero0_memzero(b, 128U, uint8_t, void *);
 }
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_update_last */
@@ -455,7 +455,7 @@ Hacl_Hash_Blake2b_Simd256_finish(
   Lib_IntVector_Intrinsics_vec256_store64_le(second, row1[0U]);
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, 64U, uint8_t);
+  Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_finish */
@@ -942,8 +942,8 @@ Hacl_Hash_Blake2b_Simd256_hash_with_key(
   Hacl_Hash_Blake2b_Simd256_init(b, key_len, output_len);
   update(b1, b, key_len, key, input_len, input);
   Hacl_Hash_Blake2b_Simd256_finish(output_len, output, b);
-  Lib_Memzero0_memzero(b1, 4U, Lib_IntVector_Intrinsics_vec256);
-  Lib_Memzero0_memzero(b, 4U, Lib_IntVector_Intrinsics_vec256);
+  Lib_Memzero0_memzero(b1, 4U, Lib_IntVector_Intrinsics_vec256, void *);
+  Lib_Memzero0_memzero(b, 4U, Lib_IntVector_Intrinsics_vec256, void *);
 }
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_hash_with_key */

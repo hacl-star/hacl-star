@@ -4,6 +4,9 @@ on:
   pull_request_target:
     branches: [ main ]
 
+permissions:
+  pull-requests: write
+
 jobs:
   hacl-packages-create-branch:
     runs-on: ubuntu-latest
@@ -28,9 +31,10 @@ jobs:
           ./mach update -s ../hacl-star
       - name: push to hacl-packages
         working-directory: hacl-packages
+        env:
+          branch: hacl-star-${{ github.head_ref }}
+          token: ${{ secrets.HACL_BOT }}
         run: |
-          branch=hacl-star-${{ github.head_ref }}
-          token=${{ secrets.HACL_BOT }}
           git config --local user.name "Hacl Bot"
           git config --local user.email "hacl-star@mailo.com"
           git checkout -b $branch

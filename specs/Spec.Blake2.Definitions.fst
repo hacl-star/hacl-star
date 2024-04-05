@@ -8,6 +8,11 @@ open Lib.ByteSequence
 
 #set-options "--z3rlimit 50"
 
+(* Params specification taken from https://www.blake2.net/blake2.pdf.
+   Note that the reference implementation at https://github.com/BLAKE2/BLAKE2/
+   already implements the Blake2X version, which slightly changes the types
+   and serializing of parameters to add a XOF digest length *)
+
 type alg =
   | Blake2S
   | Blake2B
@@ -89,129 +94,44 @@ let personal_length (a:alg) : size_nat =
   | Blake2S -> 8
   | Blake2B -> 16
 
+inline_for_extraction
+let max_node_offset (a:alg) =
+  match a with
+  | Blake2S -> pow2 48 - 1
+  | Blake2B -> pow2 64 - 1
+
+/// The node offset is only 6 bytes for Blake2S. To have the same params
+/// type for both algorithms in C, we encode it as an uint64, with restricted
+/// length
+inline_for_extraction
+let node_offset_t (a:alg) : Type = n:uint64{v n <= max_node_offset a}
+
 noeq
-type blake2s_params = {
+type blake2_params (a: alg) = {
   digest_length: uint8;
   key_length: uint8;
   fanout: uint8;
   depth: uint8;
   leaf_length: uint32;
-  node_offset: uint32;
-  xof_length: uint16;
+  node_offset: node_offset_t a;
   node_depth: uint8;
   inner_length: uint8;
-  salt: lseq uint8 (salt_length Blake2S);
-  personal: lseq uint8 (personal_length Blake2S);
+  salt: lseq uint8 (salt_length a);
+  personal: lseq uint8 (personal_length a);
 }
 
-(* Need these helpers to cleanly work around field shadowing *)
-
-inline_for_extraction
-let set_blake2s_digest_length
-  (p: blake2s_params)
-  (nn: size_nat{1 <= nn /\ nn <= max_output Blake2S})
-  : blake2s_params =
-  {p with digest_length = u8 nn}
-
-inline_for_extraction
-let set_blake2s_key_length
-  (p: blake2s_params)
-  (kk: size_nat{kk <= max_key Blake2S})
-  : blake2s_params =
-  {p with key_length = u8 kk}
-
-inline_for_extraction
-let get_blake2s_salt (p:blake2s_params) = p.salt
-
-inline_for_extraction
-let get_blake2s_personal (p:blake2s_params) = p.personal
-
-noeq
-type blake2b_params = {
-  digest_length: uint8;
-  key_length: uint8;
-  fanout: uint8;
-  depth: uint8;
-  leaf_length: uint32;
-  node_offset: uint32;
-  xof_length: uint32;
-  node_depth: uint8;
-  inner_length: uint8;
-  // Blake2b also contains 14 reserved bytes here, but they seem
-  // unused and to only contain zeros, hence we do not expose them
-  salt: lseq uint8 (salt_length Blake2B);
-  personal: lseq uint8 (personal_length Blake2B);
-}
-
-inline_for_extraction
-let blake2_params (a: alg) =
-  match a with
-  | Blake2S -> blake2s_params
-  | Blake2B -> blake2b_params
-
-inline_for_extraction
-let set_digest_length (#a: alg)
-  (p: blake2_params a)
-  (nn: size_nat{1 <= nn /\ nn <= max_output a})
-  : blake2_params a =
-  match a with
-  | Blake2S -> set_blake2s_digest_length p nn
-  | Blake2B -> {p with digest_length = u8 nn}
-
-inline_for_extraction
-let set_key_length (#a: alg)
-  (p: blake2_params a)
-  (kk: size_nat{kk <= max_key a})
-  : blake2_params a =
-  match a with
-  | Blake2S -> set_blake2s_key_length p kk
-  | Blake2B -> {p with key_length = u8 kk}
-
-inline_for_extraction
-let get_salt (#a: alg) (p: blake2_params a) : lseq uint8 (salt_length a) =
-  match a with
-  | Blake2S -> get_blake2s_salt p
-  | Blake2B -> p.salt
-
-inline_for_extraction
-let get_personal (#a: alg) (p: blake2_params a) : lseq uint8 (personal_length a) =
-  match a with
-  | Blake2S -> get_blake2s_personal p
-  | Blake2B -> p.personal
-
-let blake2s_default_params: blake2s_params =
+let blake2_default_params (a: alg) : blake2_params a =
   { digest_length = u8 32;
     key_length = u8 0;
     fanout = u8 1;
     depth = u8 1;
     leaf_length = u32 0;
-    node_offset = u32 0;
-    xof_length = u16 0;
+    node_offset = u64 0;
     node_depth = u8 0;
     inner_length = u8 0;
-    salt = create 8 (u8 0);
-    personal = create 8 (u8 0);
+    salt = create (salt_length a) (u8 0);
+    personal = create (personal_length a) (u8 0);
   }
-
-let blake2b_default_params: blake2b_params =
-  { digest_length = u8 64;
-    key_length = u8 0;
-    fanout = u8 1;
-    depth = u8 1;
-    leaf_length = u32 0;
-    node_offset = u32 0;
-    xof_length = u32 0;
-    node_depth = u8 0;
-    inner_length = u8 0;
-    salt = create 16 (u8 0);
-    personal = create 16 (u8 0);
-  }
-
-inline_for_extraction
-let blake2_default_params (a: alg) : blake2_params a =
-  match a with
-  | Blake2S -> blake2s_default_params
-  | Blake2B -> blake2b_default_params
 
 inline_for_extraction
 type pub_word_t (a:alg) = uint_t (wt a) PUB

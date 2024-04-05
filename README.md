@@ -5,15 +5,23 @@ cryptographic algorithms, including Curve25519, Ed25519, AES-GCM,
 Chacha20, Poly1305, SHA-2, SHA-3, HMAC, and HKDF. This set of algorithms
 is enough to support the full NaCl API and several TLS 1.3 ciphersuites.
 The code for all of these algorithms is formally verified using the
-[F\*](https://fstarlang.github.io/) verification framework for memory
+[F\*](https://fstar-lang.org/) verification framework for memory
 safety, functional correctness, and secret independence (resistance to
 some types of timing side-channels).
 
-**Documentation**: More detailed documentation on the library and our verification method
-can be found at [hacl-star.github.io](https://hacl-star.github.io).
+## Status
+
+*Warning*: This is the research home of HACL\*. If you are looking for
+documentation, releases, language bindings and code that can be satisfactorily
+integrated into a production project, please check out [HACL
+packages](https://github.com/cryspen/hacl-packages/).
 
 The code in this repository is divided into three closely-related sub-projects,
 all developed as part of [Project Everest](https://project-everest.github.io/).
+
+We are actively developing and integrating our code on the
+[main](https://github.com/project-everest/hacl-star/tree/main/)
+branch, which tracks F\*'s `master` branch.
 
 ## HACL\*
 
@@ -47,18 +55,6 @@ depending on processor support and the target execution environment
 (*multiplexing*). Furthermore, EverCrypt offers an (*agile*) API that makes it
 simple to switch between algorithms (e.g., from SHA2 to SHA3).
 
-## Status
-
-*Warning*: This is a research project. Although some of our code is currently used in popular products like Mozilla Firefox and Wireguard,
-we highly recommend that users consult with the HACL\* maintainers before using this code in production systems.
-
-We are actively developing and integrating our code on the
-[master](https://github.com/project-everest/hacl-star/tree/master/)
-branch, which tracks F\*'s `master` branch. Ongoing developments on new
-cryptographic primitives happen in the [dev](https://github.com/project-everest/hacl-star/tree/dev/)
-branch, which runs a little ahead of master. You can find a current snapshot
-of our C and assembly code in the [dist](dist/) directory; stable releases of the full library
-can be found in the [releases](https://github.com/project-everest/hacl-star/releases) page.
 
 ## License
 
@@ -71,4 +67,3 @@ Contact the maintainers if you have other licensing requirements.
 This repository contains contributions from many students and researchers at INRIA, Microsoft Research, and Carnegie Mellon University,
 and it is under active development. The primary authors of each verified algorithm are noted in the corresponding AUTHORS.md file.
 For questions and comments, or if you want to contribute to the project, contact the current maintainers at hacl-star-maintainers@inria.fr.
-

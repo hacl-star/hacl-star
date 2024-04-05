@@ -582,7 +582,7 @@ static void update_key(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, ui
   {
     update_block(wv, hash, false, lb, b);
   }
-  Lib_Memzero0_memzero(b, 128U, uint8_t);
+  Lib_Memzero0_memzero(b, 128U, uint8_t, void *);
 }
 
 /* SNIPPET_END: update_key */
@@ -631,7 +631,7 @@ Hacl_Hash_Blake2b_update_last(
   FStar_UInt128_uint128
   totlen = FStar_UInt128_add_mod(prev, FStar_UInt128_uint64_to_uint128((uint64_t)len));
   update_block(wv, hash, true, totlen, b);
-  Lib_Memzero0_memzero(b, 128U, uint8_t);
+  Lib_Memzero0_memzero(b, 128U, uint8_t, void *);
 }
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_update_last */
@@ -707,7 +707,7 @@ void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
   KRML_MAYBE_FOR4(i, 0U, 4U, 1U, store64_le(second + i * 8U, row1[i]););
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, 64U, uint8_t);
+  Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_finish */
@@ -1072,8 +1072,8 @@ Hacl_Hash_Blake2b_hash_with_key(
   Hacl_Hash_Blake2b_init(b, key_len, output_len);
   update(b1, b, key_len, key, input_len, input);
   Hacl_Hash_Blake2b_finish(output_len, output, b);
-  Lib_Memzero0_memzero(b1, 16U, uint64_t);
-  Lib_Memzero0_memzero(b, 16U, uint64_t);
+  Lib_Memzero0_memzero(b1, 16U, uint64_t, void *);
+  Lib_Memzero0_memzero(b, 16U, uint64_t, void *);
 }
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_hash_with_key */

@@ -76,8 +76,9 @@ let make_ordered_hash_def (abcd efgh:quad32) :
     let g = to_uint32 efgh.hi2 in
     let h = to_uint32 efgh.hi3 in
     let l = [a; b; c; d; e; f; g; h] in
+    assert_norm (List.length l == 8);
     let hash = seq_of_list l in
-    assert_norm (length hash == 8);
+    assert (length hash == 8);
     elim_of_list l;
     hash
 [@"opaque_to_smt"] let make_ordered_hash = opaque_make make_ordered_hash_def
@@ -285,8 +286,9 @@ let make_seperated_hash_def (a b c d e f g h:nat32) :
     let g = to_uint32 g in
     let h = to_uint32 h in
     let l = [a; b; c; d; e; f; g; h] in
+    assert_norm (List.length l == 8);
     let hash = seq_of_list l in
-    assert_norm (length hash == 8);
+    assert (length hash == 8);
     elim_of_list l;
     hash
 [@"opaque_to_smt"] let make_seperated_hash = opaque_make make_seperated_hash_def
@@ -314,8 +316,9 @@ let make_seperated_hash_quad32_def (a b c d e f g h:quad32) :
     let g = to_uint32 g.hi3 in
     let h = to_uint32 h.hi3 in
     let l = [a; b; c; d; e; f; g; h] in
+    assert_norm (List.length l == 8);
     let hash = seq_of_list l in
-    assert_norm (length hash == 8);
+    assert (length hash == 8);
     elim_of_list l;
     hash
 [@"opaque_to_smt"] let make_seperated_hash_quad32 = opaque_make make_seperated_hash_quad32_def

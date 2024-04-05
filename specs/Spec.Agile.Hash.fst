@@ -17,8 +17,8 @@ let init a =
       Spec.MD5.init
   | SHA1 ->
       Spec.SHA1.init
-  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S Spec.Blake2.blake2s_default_params 0 32
-  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B Spec.Blake2.blake2b_default_params 0 64
+  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S (Spec.Blake2.blake2_default_params _) 0 32
+  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B (Spec.Blake2.blake2_default_params _) 0 64
   | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 ->
       Lib.Sequence.create 25 (u64 0)
 

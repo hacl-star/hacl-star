@@ -498,12 +498,11 @@ void Hacl_Hash_Blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn)
   r3[3U] = iv7;
   uint8_t salt[8U] = { 0U };
   uint8_t personal[8U] = { 0U };
-  Hacl_Hash_Blake2s_blake2s_params
+  Hacl_Hash_Blake2s_blake2_params
   p =
     {
       .digest_length = 32U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,
-      .node_offset = 0U, .xof_length = 0U, .node_depth = 0U, .inner_length = 0U, .salt = salt,
-      .personal = personal
+      .node_offset = 0ULL, .node_depth = 0U, .inner_length = 0U, .salt = salt, .personal = personal
     };
   KRML_MAYBE_FOR2(i,
     0U,
@@ -527,9 +526,9 @@ void Hacl_Hash_Blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn)
     os[i] = x;);
   tmp[0U] = nn ^ (kk << 8U ^ ((uint32_t)p.fanout << 16U ^ (uint32_t)p.depth << 24U));
   tmp[1U] = p.leaf_length;
-  tmp[2U] = p.node_offset;
+  tmp[2U] = (uint32_t)p.node_offset;
   tmp[3U] =
-    (uint32_t)p.xof_length
+    (uint32_t)(p.node_offset >> 32U)
     ^ ((uint32_t)p.node_depth << 16U ^ (uint32_t)p.inner_length << 24U);
   uint32_t tmp0 = tmp[0U];
   uint32_t tmp1 = tmp[1U];
@@ -570,7 +569,7 @@ static void update_key(uint32_t *wv, uint32_t *hash, uint32_t kk, uint8_t *k, ui
   {
     update_block(wv, hash, false, lb, b);
   }
-  Lib_Memzero0_memzero(b, 64U, uint8_t);
+  Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
 void
@@ -607,7 +606,7 @@ Hacl_Hash_Blake2s_update_last(
   memcpy(b, last, rem * sizeof (uint8_t));
   uint64_t totlen = prev + (uint64_t)len;
   update_block(wv, hash, true, totlen, b);
-  Lib_Memzero0_memzero(b, 64U, uint8_t);
+  Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
 static void
@@ -665,7 +664,7 @@ void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
   KRML_MAYBE_FOR4(i, 0U, 4U, 1U, store32_le(second + i * 4U, row1[i]););
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, 32U, uint8_t);
+  Lib_Memzero0_memzero(b, 32U, uint8_t, void *);
 }
 
 /**
@@ -976,7 +975,7 @@ Hacl_Hash_Blake2s_hash_with_key(
   Hacl_Hash_Blake2s_init(b, key_len, output_len);
   update(b1, b, key_len, key, input_len, input);
   Hacl_Hash_Blake2s_finish(output_len, output, b);
-  Lib_Memzero0_memzero(b1, 16U, uint32_t);
-  Lib_Memzero0_memzero(b, 16U, uint32_t);
+  Lib_Memzero0_memzero(b1, 16U, uint32_t, void *);
+  Lib_Memzero0_memzero(b, 16U, uint32_t, void *);
 }
 
