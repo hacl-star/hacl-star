@@ -242,9 +242,11 @@ val state_chi_inner0_lemma_l:
    ((state_spec_v (state_chi_inner0 m s_pi_rho y x s)).[l] ==
       Spec.state_chi_inner0 (state_spec_v s_pi_rho).[l] y x (state_spec_v s).[l])
 
+#push-options "--max_ifuel 1"
 let state_chi_inner0_lemma_l m s_pi_rho y x s l =
   eq_intro (state_spec_v (state_chi_inner0 m s_pi_rho y x s)).[l]
     (Spec.state_chi_inner0 (state_spec_v s_pi_rho).[l] y x (state_spec_v s).[l])
+#pop-options
 
 val state_chi_inner1_loop:
   m:m_spec

@@ -35,8 +35,13 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Hash_SHA3_Scalar.h"
 #include "../Hacl_Hash_SHA3.h"
+
+extern const uint32_t Hacl_Hash_SHA3_keccak_rotc[24U];
+
+extern const uint32_t Hacl_Hash_SHA3_keccak_piln[24U];
+
+extern const uint64_t Hacl_Hash_SHA3_keccak_rndc[24U];
 
 void
 Hacl_Hash_SHA3_update_multi_sha3(

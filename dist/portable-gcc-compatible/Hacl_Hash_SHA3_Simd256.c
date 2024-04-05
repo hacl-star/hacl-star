@@ -27,6 +27,8 @@
 
 #include "internal/Hacl_Hash_SHA3.h"
 
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_shake128 */
+
 void
 Hacl_Hash_SHA3_Simd256_shake128(
   uint8_t *output0,
@@ -1674,6 +1676,10 @@ Hacl_Hash_SHA3_Simd256_shake128(
   memcpy(b2 + outputByteLen - remOut, hbuf + 512U, remOut * sizeof (uint8_t));
   memcpy(b36 + outputByteLen - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_shake128 */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_shake256 */
 
 void
 Hacl_Hash_SHA3_Simd256_shake256(
@@ -3323,6 +3329,10 @@ Hacl_Hash_SHA3_Simd256_shake256(
   memcpy(b36 + outputByteLen - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_shake256 */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_sha3_224 */
+
 void
 Hacl_Hash_SHA3_Simd256_sha3_224(
   uint8_t *output0,
@@ -4969,6 +4979,10 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
   memcpy(b2 + 28U - remOut, hbuf + 512U, remOut * sizeof (uint8_t));
   memcpy(b36 + 28U - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_sha3_224 */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_sha3_256 */
 
 void
 Hacl_Hash_SHA3_Simd256_sha3_256(
@@ -6617,6 +6631,10 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
   memcpy(b36 + 32U - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_sha3_256 */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_sha3_384 */
+
 void
 Hacl_Hash_SHA3_Simd256_sha3_384(
   uint8_t *output0,
@@ -8263,6 +8281,10 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
   memcpy(b2 + 48U - remOut, hbuf + 512U, remOut * sizeof (uint8_t));
   memcpy(b36 + 48U - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_sha3_384 */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_sha3_512 */
 
 void
 Hacl_Hash_SHA3_Simd256_sha3_512(
@@ -9911,6 +9933,10 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
   memcpy(b36 + 64U - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_sha3_512 */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_state_malloc */
+
 /**
 Allocate quadruple state buffer (200-bytes for each)
 */
@@ -9924,6 +9950,10 @@ Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_SHA3_Simd256_state_malloc(void)
   return buf;
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_state_malloc */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_state_free */
+
 /**
 Free quadruple state buffer
 */
@@ -9931,6 +9961,10 @@ void Hacl_Hash_SHA3_Simd256_state_free(Lib_IntVector_Intrinsics_vec256 *s)
 {
   KRML_ALIGNED_FREE(s);
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_state_free */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_shake128_absorb_nblocks */
 
 /**
 Absorb number of blocks of 4 input buffers and write the output states
@@ -10337,6 +10371,10 @@ Hacl_Hash_SHA3_Simd256_shake128_absorb_nblocks(
     }
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_shake128_absorb_nblocks */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_shake128_absorb_final */
 
 /**
 Absorb a final partial blocks of 4 input buffers and write the output states
@@ -11032,6 +11070,10 @@ Hacl_Hash_SHA3_Simd256_shake128_absorb_final(
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_shake128_absorb_final */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks */
+
 /**
 Squeeze a quadruple hash state to 4 output buffers
 
@@ -11393,4 +11435,6 @@ Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks(
     }
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks */
 

@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Hash_SHA3_Scalar_H
-#define __internal_Hacl_Hash_SHA3_Scalar_H
+#ifndef __Hacl_SHA2_Types_H
+#define __Hacl_SHA2_Types_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,17 +35,29 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "../Hacl_Hash_SHA3_Scalar.h"
+#include "Hacl_Hash_SHA3_Simd256.h"
 
-extern const uint32_t Hacl_Impl_SHA3_Vec_keccak_rotc[24U];
+/* SNIPPET_START: Hacl_Hash_SHA2_uint8_2p */
 
-extern const uint32_t Hacl_Impl_SHA3_Vec_keccak_piln[24U];
+typedef K____uint8_t___uint8_t_ Hacl_Hash_SHA2_uint8_2p;
 
-extern const uint64_t Hacl_Impl_SHA3_Vec_keccak_rndc[24U];
+/* SNIPPET_END: Hacl_Hash_SHA2_uint8_2p */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_uint8_3p */
+
+typedef K____uint8_t__K____uint8_t___uint8_t_ Hacl_Hash_SHA2_uint8_3p;
+
+/* SNIPPET_END: Hacl_Hash_SHA2_uint8_3p */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_uint8_4p */
+
+typedef K____uint8_t___uint8_t____K____uint8_t___uint8_t_ Hacl_Hash_SHA2_uint8_4p;
+
+/* SNIPPET_END: Hacl_Hash_SHA2_uint8_4p */
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Hash_SHA3_Scalar_H_DEFINED
+#define __Hacl_SHA2_Types_H_DEFINED
 #endif

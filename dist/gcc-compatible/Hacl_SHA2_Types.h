@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_SHA2_Types_H
-#define __internal_Hacl_SHA2_Types_H
+#ifndef __Hacl_SHA2_Types_H
+#define __Hacl_SHA2_Types_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,53 +35,17 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "../Hacl_SHA2_Types.h"
+#include "Hacl_Hash_SHA3_Simd256.h"
 
-typedef struct Hacl_Hash_SHA2_uint8_5p_s
-{
-  uint8_t *fst;
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_ snd;
-}
-Hacl_Hash_SHA2_uint8_5p;
+typedef K____uint8_t___uint8_t_ Hacl_Hash_SHA2_uint8_2p;
 
-typedef struct Hacl_Hash_SHA2_uint8_6p_s
-{
-  uint8_t *fst;
-  Hacl_Hash_SHA2_uint8_5p snd;
-}
-Hacl_Hash_SHA2_uint8_6p;
+typedef K____uint8_t__K____uint8_t___uint8_t_ Hacl_Hash_SHA2_uint8_3p;
 
-typedef struct Hacl_Hash_SHA2_uint8_7p_s
-{
-  uint8_t *fst;
-  Hacl_Hash_SHA2_uint8_6p snd;
-}
-Hacl_Hash_SHA2_uint8_7p;
-
-typedef struct Hacl_Hash_SHA2_uint8_8p_s
-{
-  uint8_t *fst;
-  Hacl_Hash_SHA2_uint8_7p snd;
-}
-Hacl_Hash_SHA2_uint8_8p;
-
-typedef struct Hacl_Hash_SHA2_uint8_2x4p_s
-{
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_ fst;
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_ snd;
-}
-Hacl_Hash_SHA2_uint8_2x4p;
-
-typedef struct Hacl_Hash_SHA2_uint8_2x8p_s
-{
-  Hacl_Hash_SHA2_uint8_8p fst;
-  Hacl_Hash_SHA2_uint8_8p snd;
-}
-Hacl_Hash_SHA2_uint8_2x8p;
+typedef K____uint8_t___uint8_t____K____uint8_t___uint8_t_ Hacl_Hash_SHA2_uint8_4p;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_SHA2_Types_H_DEFINED
+#define __Hacl_SHA2_Types_H_DEFINED
 #endif
