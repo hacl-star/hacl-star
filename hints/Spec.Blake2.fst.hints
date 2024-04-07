@@ -1,5 +1,5 @@
 [
-  "¹Ô\u0002üy\u0010pgê¦ÓWêo¾\u0012",
+  "Ó¤ÑÐ\u0004ÃC\u0018d\u0014ò¬\b7ý\u0017",
   [
     [
       "Spec.Blake2.serialize_blake2s_params",
@@ -40,7 +40,7 @@
         "typing_tok_Spec.Blake2.Definitions.Blake2S@tok"
       ],
       0,
-      "7b735258d841d6f95cb42d37620494d9"
+      "9181ea872fb27943868779ce5d2e5d4b"
     ],
     [
       "Spec.Blake2.serialize_blake2b_params",
@@ -88,7 +88,7 @@
         "typing_tok_Spec.Blake2.Definitions.Blake2B@tok"
       ],
       0,
-      "40daf22640baeafbf7d70806fe473989"
+      "a2f7abd0c16d383fab82104590dac390"
     ],
     [
       "Spec.Blake2.serialize_blake2_params",
@@ -99,21 +99,26 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "constructor_distinct_Spec.Blake2.Definitions.Blake2S",
+        "constructor_distinct_Tm_unit",
         "disc_equation_Spec.Blake2.Definitions.Blake2B",
         "disc_equation_Spec.Blake2.Definitions.Blake2S",
         "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
         "equality_tok_Spec.Blake2.Definitions.Blake2S@tok",
-        "equation_Spec.Blake2.Definitions.blake2_params",
+        "equation_Lib.Sequence.lseq",
+        "equation_Spec.Blake2.Definitions.max_node_offset",
         "equation_Spec.Blake2.Definitions.personal_length",
         "equation_Spec.Blake2.Definitions.wt",
         "fuel_guarded_inversion_Spec.Blake2.Definitions.alg",
-        "projection_inverse_BoxBool_proj_0",
+        "fuel_guarded_inversion_Spec.Blake2.Definitions.blake2_params",
+        "int_inversion", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "typing_Spec.Blake2.Definitions.personal_length",
-        "typing_tok_Spec.Blake2.Definitions.Blake2S@tok"
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_Spec.Blake2.Definitions.max_node_offset",
+        "typing_Spec.Blake2.Definitions.personal_length"
       ],
       0,
-      "93e766a1191c5fdd73d4b6563d737a9e"
+      "e3f9ffeba391b45af17acb2a17930eda"
     ],
     [
       "Spec.Blake2.rTable_list_S",
@@ -152,7 +157,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2cf472f52fd82888d0f854534d363b53"
+      "66c48bbf708b97230322487a343eccbf"
     ],
     [
       "Spec.Blake2.rTable_list_B",
@@ -194,7 +199,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "5cd9e29bb504f465c85ba0f9aa415563"
+      "fe87b92d60d65baa2f7e2e6e8f316ca4"
     ],
     [
       "Spec.Blake2.rTable",
@@ -248,7 +253,7 @@
       1,
       [ "@query" ],
       0,
-      "43add07bcca0189af91d58ad995da1df"
+      "734247e0afc9f4a88088496939c4e9a4"
     ],
     [
       "Spec.Blake2.list_iv_B",
@@ -257,7 +262,7 @@
       1,
       [ "@query" ],
       0,
-      "5904d83222eed33e2b4812aca8a71ff2"
+      "4be607f6877384060c92d9665bf4d5f9"
     ],
     [
       "Spec.Blake2.list_iv",
@@ -278,7 +283,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "ff34c9163dbbf21f4afd49c0e5517ca2"
+      "0e87686e3e12aedc441cb43e8e1f6a21"
     ],
     [
       "Spec.Blake2.ivTable",
@@ -316,7 +321,7 @@
         "typing_Spec.Blake2.list_iv_B", "typing_Spec.Blake2.list_iv_S"
       ],
       0,
-      "89e71b7cb9179409347cfb09ce28b725"
+      "936fd6eaf2f0758f562a93d3ead27f8f"
     ],
     [
       "Spec.Blake2.list_sigma",
@@ -350,7 +355,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "161fa6c412e1e2b91d8c15cb8e5ae20e"
+      "97b174cd86ed8b901930362b615aeeb9"
     ],
     [
       "Spec.Blake2.sigmaTable",
@@ -363,7 +368,7 @@
         "typing_Spec.Blake2.Definitions.size_sigmaTable"
       ],
       0,
-      "ddb30f95cdb2a6c690b663db2d730e83"
+      "a848cc96f32c580492197ac4c11231b6"
     ],
     [
       "Spec.Blake2.g1",
@@ -386,7 +391,7 @@
         "refinement_interpretation_Tm_refine_7acf795d50ec256996534a97e12bfa61"
       ],
       0,
-      "c72928c3149f7dd51037eac97dff6e21"
+      "66157937d28fd6a298c4e2bf317a2b30"
     ],
     [
       "Spec.Blake2.g2",
@@ -404,7 +409,7 @@
         "refinement_interpretation_Tm_refine_7acf795d50ec256996534a97e12bfa61"
       ],
       0,
-      "7ff5e3598f88e82f4aa30451a2c9caf7"
+      "e81eef4ad639c0c4f9f8a7736f7a1e58"
     ],
     [
       "Spec.Blake2.g2z",
@@ -422,7 +427,7 @@
         "refinement_interpretation_Tm_refine_7acf795d50ec256996534a97e12bfa61"
       ],
       0,
-      "3900a8784f5d7ae16ea52e6499ad472b"
+      "d5df0507dd66b96bea37dcd73ddc5441"
     ],
     [
       "Spec.Blake2.blake2_mixing",
@@ -445,7 +450,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ccb7e4a7847d70ba7c7e430d29c00174"
+      "3a1c435543f09082b8f0cfbab0b0dd36"
     ],
     [
       "Spec.Blake2.diag",
@@ -471,7 +476,7 @@
         "refinement_interpretation_Tm_refine_def378b9e8354db161e14916f4783dba"
       ],
       0,
-      "4f723d85af733c5b5bf4510074807dd3"
+      "ac80841e3d28b9b4b574473f9e1827a3"
     ],
     [
       "Spec.Blake2.undiag",
@@ -497,7 +502,7 @@
         "refinement_interpretation_Tm_refine_f3b87898828a00fe674e000ccc9c3b0c"
       ],
       0,
-      "0e9822f9ea33c7c6407923ebe1f9b085"
+      "79885b99cfb3d6d0019b3f800f51c8e0"
     ],
     [
       "Spec.Blake2.gather_row",
@@ -524,7 +529,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8135f83398d209c996a24a9d60755682"
+      "028ca3d263044d9cc7c06458cc72ba9e"
     ],
     [
       "Spec.Blake2.gather_state",
@@ -546,7 +551,7 @@
         "typing_Spec.Blake2.Definitions.size_sigmaTable"
       ],
       0,
-      "2201a1ec93aeddd29be9eeab721d97d8"
+      "d41d9188894099b6f6ea0e1bee43beb4"
     ],
     [
       "Spec.Blake2.blake2_round",
@@ -638,7 +643,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9b7b39820a95b2bf6ea1dcadce2b7de2"
+      "a5c92365eb9491e2d99f40186c0d47e5"
     ],
     [
       "Spec.Blake2.blake2_compress2",
@@ -656,7 +661,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3a5f3b60ee3ee9facc82ad79a0cc4c8a"
+      "cc54cb0ee7ec6f4663df1699e1457b89"
     ],
     [
       "Spec.Blake2.blake2_compress3",
@@ -681,7 +686,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "6fa71b059998de93348bc79f68e0f910"
+      "66c7456a9e7d8746f35ca1bea59f746e"
     ],
     [
       "Spec.Blake2.blake2_update_block",
@@ -706,7 +711,7 @@
         "typing_Lib.IntTypes.unsigned", "typing_Spec.Blake2.Definitions.wt"
       ],
       0,
-      "dd0f00b640ccc5598cba3d8566ddf874"
+      "ad78cca9461a8407b96a01575f97e76e"
     ],
     [
       "Spec.Blake2.blake2_update1",
@@ -733,7 +738,7 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "34e3dc7cb635b46574873f6dcaa37e0e"
+      "a386b0b33079319b2304a39d25d4d279"
     ],
     [
       "Spec.Blake2.get_blocki",
@@ -775,7 +780,7 @@
         "typing_Spec.Blake2.Definitions.wt"
       ],
       0,
-      "1f4984e3fb86c1c7bd155dc66e63b01e"
+      "281ee840492db5245dad89590a64bf6f"
     ],
     [
       "Spec.Blake2.get_blocki",
@@ -815,7 +820,7 @@
         "typing_Spec.Blake2.Definitions.wt"
       ],
       0,
-      "416cbf31909d93189c95935c7e48eaf1"
+      "9c440a9e141392dd07b717c63644293b"
     ],
     [
       "Spec.Blake2.blake2_update1",
@@ -866,7 +871,7 @@
         "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
-      "2200299277d1955b7117026cad65f995"
+      "1077cff5a702f32ef5956a39e319712d"
     ],
     [
       "Spec.Blake2.blake2_update1",
@@ -920,7 +925,7 @@
         "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
-      "9abb7350e85f052e9135f42136299cdb"
+      "b934e386283c138d741be9b655ce85f4"
     ],
     [
       "Spec.Blake2.get_last_padded_block",
@@ -962,7 +967,7 @@
         "typing_Spec.Blake2.Definitions.wt", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0a1f9257df23c37398c5dbcbdace806a"
+      "70294f0384a09bfe22af732155467863"
     ],
     [
       "Spec.Blake2.blake2_update_last",
@@ -976,7 +981,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3a3c6d034f44560d755418b5f27a4400"
+      "4910d4a987f5cd8773dcb95746b02367"
     ],
     [
       "Spec.Blake2.split",
@@ -1013,7 +1018,7 @@
         "typing_Lib.UpdateMulti.split_at_last_nb_rem"
       ],
       0,
-      "7abc86d70585f364ceedaa0add3b1d13"
+      "1cc6a66aee802293cef1c7af92051ef3"
     ],
     [
       "Spec.Blake2.blake2_update_blocks",
@@ -1071,7 +1076,7 @@
         "typing_Spec.Blake2.Definitions.wt", "typing_Spec.Blake2.split"
       ],
       0,
-      "d2fcc3d3ef190c2564e9b133dea62ece"
+      "192a77472f1ce59f4591638d3d48428f"
     ],
     [
       "Spec.Blake2.blake2_init_hash",
@@ -1081,25 +1086,38 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "bool_inversion", "constructor_distinct_Prims.Cons",
-        "constructor_distinct_Prims.Nil",
-        "constructor_distinct_Spec.Blake2.Definitions.Blake2S",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
+        "data_elim_Spec.Blake2.Definitions.Mkblake2_params",
         "data_typing_intro_Prims.Cons@tok",
         "data_typing_intro_Prims.Nil@tok",
-        "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Spec.Blake2.Definitions.Blake2S@tok",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "equation_Spec.Blake2.Definitions.max_key",
+        "equation_Spec.Blake2.Definitions.max_output",
         "equation_Spec.Blake2.Definitions.personal_length",
+        "equation_Spec.Blake2.Definitions.pub_word_t",
         "equation_Spec.Blake2.Definitions.wt",
+        "equation_Spec.Blake2.ivTable",
         "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "fuel_guarded_inversion_Spec.Blake2.Definitions.alg",
+        "fuel_guarded_inversion_Spec.Blake2.Definitions.blake2_params",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Prims.Cons_a",
         "projection_inverse_Prims.Cons_hd",
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
         "refinement_interpretation_Tm_refine_09ed2b31611aeb121dd91d621454bef2",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_46b3eb88e7f6ab44bab1f1627be99e55",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_66067612745f4f2f90725654151a4278",
         "refinement_interpretation_Tm_refine_b47780fdbc72292acd8ef9c653b6cf66",
         "refinement_interpretation_Tm_refine_be735b9586a9d40d203adf16282e0dd3",
@@ -1108,15 +1126,17 @@
         "refinement_interpretation_Tm_refine_cddf0a7185c8f9af48fd5708850db5bb",
         "refinement_interpretation_Tm_refine_cfb025e1d64df83f771759c419d83492",
         "refinement_interpretation_Tm_refine_d69be46fb772be41e8ae6f02b0d4449f",
+        "refinement_interpretation_Tm_refine_d8907758ad696d1879c4d7e5c1c77bf4",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_kinding_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.IntTypes.unsigned",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.unsigned",
         "typing_Spec.Blake2.Definitions.create_row",
         "typing_Spec.Blake2.Definitions.personal_length",
-        "typing_Spec.Blake2.Definitions.wt",
-        "typing_tok_Spec.Blake2.Definitions.Blake2S@tok"
+        "typing_Spec.Blake2.Definitions.pub_word_t",
+        "typing_Spec.Blake2.Definitions.wt", "typing_Spec.Blake2.ivTable"
       ],
       0,
-      "5c5e1c03df0e8fbf4a9b4a28845e78e2"
+      "1ce166a0f4db582ed7d12afebaf2863c"
     ],
     [
       "Spec.Blake2.blake2_key_block",
@@ -1161,7 +1181,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c28b6e9bb19182e5842e0127e16e9a93"
+      "aa67846d971b65e7ba25794489187094"
     ],
     [
       "Spec.Blake2.blake2_update_key",
@@ -1207,7 +1227,7 @@
         "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e3a28e1cb56350753fb5a7773e89bf9c"
+      "1ba7f26b19ea71f63990c9568f654b68"
     ],
     [
       "Spec.Blake2.blake2_update",
@@ -1237,7 +1257,7 @@
         "typing_Spec.Blake2.Definitions.wt"
       ],
       0,
-      "4abcb5464bd8d4c09fc57927713c78f7"
+      "42b9bdbfd137ad3815f997515cfbf5b7"
     ],
     [
       "Spec.Blake2.blake2_finish",
@@ -1269,7 +1289,7 @@
         "refinement_interpretation_Tm_refine_cfb025e1d64df83f771759c419d83492"
       ],
       0,
-      "7e51ccaf3783a2a3272abbf2c42242d9"
+      "f87a2f2bcbc684780f2830bac0856327"
     ],
     [
       "Spec.Blake2.blake2",
@@ -1281,7 +1301,7 @@
         "refinement_interpretation_Tm_refine_934581a44f12a6e5c0336d3bc1155e42"
       ],
       0,
-      "d35c74485cd8980233755a062794b962"
+      "d8d6d66e4ae17f9bc52d89730577d38c"
     ],
     [
       "Spec.Blake2.blake2s",
@@ -1317,7 +1337,7 @@
         "refinement_interpretation_Tm_refine_e12389100feb435dd3afe53138a9329a"
       ],
       0,
-      "43a842a5079bc41f5fb9dd5c92a36b5a"
+      "1cee3d468c9da4d200615a2a067b96dd"
     ],
     [
       "Spec.Blake2.blake2b",
@@ -1355,7 +1375,7 @@
         "refinement_interpretation_Tm_refine_9c806ce7ac4f15c7bad5db56e456a9af"
       ],
       0,
-      "b073da18f36a67d8a585450fb4a97aee"
+      "4e19f534836f89f8b8e0daca838ae954"
     ]
   ]
 ]
