@@ -269,12 +269,14 @@ val aes_enc:
     uints_to_bytes_be (vec_v (LSeq.index st'' 3)) ==
       Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index st' 3))))))
 
+#push-options "--z3rlimit 40"
 let aes_enc st key =
   let h0 = ST.get() in
   st.(size 0) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 0)));
   st.(size 1) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 1)));
   st.(size 2) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 2)));
   st.(size 3) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 3)));
+  let h1 = ST.get() in
   vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 key) 0));
   vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 0));
   vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 1));
@@ -289,6 +291,7 @@ let aes_enc st key =
   uints_bytes_be_lemma (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 1))));
   uints_bytes_be_lemma (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 2))));
   uints_bytes_be_lemma (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 3))))
+#pop-options
 
 
 inline_for_extraction noextract
@@ -310,6 +313,7 @@ val aes_enc_last:
     uints_to_bytes_be (vec_v (LSeq.index st'' 3)) ==
       Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index st' 3))))))
 
+#push-options "--z3rlimit 40"
 let aes_enc_last st key =
   let h0 = ST.get() in
   st.(size 0) <- cast U128 1 (vec_aes_enc_last (cast U8 16 key.(size 0)) (cast U8 16 st.(size 0)));
@@ -330,6 +334,7 @@ let aes_enc_last st key =
   uints_bytes_be_lemma (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 1))));
   uints_bytes_be_lemma (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 2))));
   uints_bytes_be_lemma (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 3))))
+#pop-options
 
 inline_for_extraction noextract
 val aes_keygen_assist0:
