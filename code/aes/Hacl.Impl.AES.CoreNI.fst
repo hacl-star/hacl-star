@@ -276,7 +276,6 @@ let aes_enc st key =
   st.(size 1) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 1)));
   st.(size 2) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 2)));
   st.(size 3) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 3)));
-  let h1 = ST.get() in
   vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 key) 0));
   vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 0));
   vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 1));
