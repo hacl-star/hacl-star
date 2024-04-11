@@ -62,7 +62,7 @@ endif
 CFLAGS += -I$(KRML_HOME)/include -I../dist/gcc-compatible \
   -I$(KRML_HOME)/krmllib/dist/minimal \
   -I../secure_api/merkle_tree \
-  -O3 $(USER_CFLAGS) -Werror -Wall -Wno-deprecated-declarations -Wno-unused-function
+  -O3 $(USER_CFLAGS) -Werror -Wall -Wno-deprecated-declarations -Wno-unused
 
 all: $(TARGETS)
 
