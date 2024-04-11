@@ -28,7 +28,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "5d4d8ff7e39b5bf3dab2210ba23f7855"
+      "1f9e16af445f897c1a639a81571a3dcb"
     ],
     [
       "Spec.SHA2.Lemmas.shuffle_core_",
@@ -66,7 +66,7 @@
         "typing_Spec.SHA2.k0", "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "b5d7cc5b44b026c38361c8310c585a03"
+      "e601a66d4b0b36ed57482c237fdcddd2"
     ],
     [
       "Spec.SHA2.Lemmas.shuffle_aux",
@@ -80,7 +80,7 @@
         "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "e3509ac58415b61acfe6a55cbc9a8998"
+      "0d0addd55534f8773bc177f293f6c3f6"
     ],
     [
       "Spec.SHA2.Lemmas.shuffle_is_shuffle_pre",
@@ -93,7 +93,10 @@
         "@fuel_correspondence_Spec.Loops.repeat_range.fuel_instrumented",
         "@fuel_correspondence_Spec.SHA2.Lemmas.ws_aux.fuel_instrumented",
         "@fuel_irrelevance_Spec.SHA2.Lemmas.ws_aux.fuel_instrumented",
-        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "@query",
+        "FStar.Seq.Base_interpretation_Tm_arrow_1910ef5262f2ee8e712b6609a232b1ea",
+        "Lib.IntTypes_interpretation_Tm_arrow_b6c7b131dcab59a8eb8f50c70226d5b9",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Spec.Loops_interpretation_Tm_arrow_991012978bfe18b65525b7a05d6a8a37",
         "Spec.SHA2_interpretation_Tm_arrow_046d31b7ca1b5af90ba995ae3917b5cb",
         "Spec.SHA2_interpretation_Tm_arrow_5114bb93a23375880e0690cfe93800b7",
@@ -111,7 +114,6 @@
         "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.uint32",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Hash.Definitions.block_word_length",
@@ -131,7 +133,8 @@
         "equation_Spec.SHA2.wsi_pre_inner",
         "equation_with_fuel_Spec.Loops.repeat_range.fuel_instrumented",
         "equation_with_fuel_Spec.SHA2.Lemmas.ws_aux.fuel_instrumented",
-        "function_token_typing_Lib.IntTypes.uint32",
+        "function_token_typing_FStar.Seq.Base.index",
+        "function_token_typing_Lib.IntTypes.add_mod",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Spec.SHA2.Lemmas.shuffle_core",
@@ -149,6 +152,7 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_15f0687264c581284bdf37108526e858",
+        "refinement_interpretation_Tm_refine_24eb2ad676c31363fa5040e4c9ff8256",
         "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_3fd3f47329ef3febab1cd16885681be0",
@@ -156,7 +160,6 @@
         "refinement_interpretation_Tm_refine_4a4ab588228a913e9d5ea6883796e91b",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_571d9f74016be5357787170b42ecf913",
-        "refinement_interpretation_Tm_refine_6fbf1fd2a0cae78eabe7368b62a0e651",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7aa74b9f65b69e8b4de33386e835b0ca",
         "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
@@ -175,7 +178,9 @@
         "token_correspondence_Spec.SHA2.shuffle_core_pre_",
         "token_correspondence_Spec.SHA2.ws_pre_",
         "typing_FStar.Seq.Base.index", "typing_Lib.IntTypes.add_mod",
-        "typing_Prims.pow2", "typing_Spec.Hash.Definitions.is_sha2",
+        "typing_Prims.pow2",
+        "typing_Spec.Hash.Definitions.block_word_length",
+        "typing_Spec.Hash.Definitions.is_sha2",
         "typing_Spec.Hash.Definitions.word",
         "typing_Spec.Loops.repeat_range", "typing_Spec.SHA2.Lemmas.ws",
         "typing_Spec.SHA2._sigma0", "typing_Spec.SHA2._sigma1",
@@ -184,7 +189,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "eb65f8ccb3b495c806301e74fae4b2bd"
+      "3d702af0a3ca81d42062b8ec9781bfab"
     ],
     [
       "Spec.SHA2.Lemmas.update_aux",
@@ -228,7 +233,7 @@
         "typing_Spec.SHA2.size_k_w", "unit_typing"
       ],
       0,
-      "78481801f57c21934db19b32bdbad75f"
+      "fd42dfd351b817a581a4f598dda353e4"
     ],
     [
       "Spec.SHA2.Lemmas.update_aux",
@@ -276,7 +281,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "ad02c74ad097204d663c9cd861cc27bb"
+      "904513fdd915adbdb25525c1e43b2f2b"
     ],
     [
       "Spec.SHA2.Lemmas.update_is_update_pre",
@@ -337,7 +342,7 @@
         "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "5560cacf49ae9f29642a343fd12c5b08"
+      "e1722fd621b3b2648265a5beeaf554c8"
     ],
     [
       "Spec.SHA2.Lemmas.update_is_update_pre",
@@ -402,7 +407,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "05d0906ed8b7809fdb7b82503b9e78e1"
+      "9308ed2623b52af0121d69ab35433801"
     ],
     [
       "Spec.SHA2.Lemmas.update_is_update_pre",
@@ -467,7 +472,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "ab40e17b0591bff14dd9af2415fc77f2"
+      "de950eb1cac09f49b8e008f9ed23042d"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -504,7 +509,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "a62bf804d8fcd1dfbe713531fb1dfa96"
+      "39d00ea52e3c07832956f2f7ca8a0f86"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -596,9 +601,9 @@
         "refinement_interpretation_Tm_refine_4a4ab588228a913e9d5ea6883796e91b",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_571d9f74016be5357787170b42ecf913",
-        "refinement_interpretation_Tm_refine_5dc7242a309d25d6c7dfee57adbfa89c",
-        "refinement_interpretation_Tm_refine_7ef0920cc13a95125c883a9d2b51da7b",
+        "refinement_interpretation_Tm_refine_7ca982198649ae7adabc283869356634",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_9a3443fe49f61d6871a5f3988c310930",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_c7fd27793ec1dae0cb682593d434ce63",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
@@ -625,7 +630,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "bec4746b7677d6fde3623770e5915f0d"
+      "f8788f326faa702d3f86c57c6272bc12"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -747,7 +752,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "9069646e62d93e1c57b2e1268a254d9f"
+      "5b15817b83fee74accbb5bb158b646dc"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_update",
@@ -819,7 +824,7 @@
         "typing_Spec.Hash.Definitions.words_state", "unit_typing"
       ],
       0,
-      "923bdcb823a0f7ea271aebb3efa3381f"
+      "131c4c4abb73440b5b85fa4506ed90c9"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -857,7 +862,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "2e61ff48afb8716662d1fefd2a8ac60d"
+      "b7ba6aae8b4d166f32ffff4857ba774c"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -933,7 +938,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "930d6a507e4c8ebed9f4b838fb1866d2"
+      "f43e3f77e2d60ab1010d81ad1a931e07"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -974,7 +979,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "a14b5b2657f60bf6779bdeadfddc09ec"
+      "9a2f0acb164bf9a6d5bd2c0c4269ab9b"
     ],
     [
       "Spec.SHA2.Lemmas.update_last_224_256",
@@ -1025,7 +1030,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "170ebabee9bd69aac6cd5125867bd62d"
+      "b340cb8492c773610a49c85bd492556f"
     ],
     [
       "Spec.SHA2.Lemmas.update_last_224_256",
@@ -1098,7 +1103,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "3f0b94b302cb2f70f63c12668101e74d"
+      "f155a84f95682005d577423c1af94214"
     ],
     [
       "Spec.SHA2.Lemmas.update_384_512",
@@ -1137,7 +1142,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "a0afc5237410eafd4a9cc93994f15aa8"
+      "a30a612c84e22892b7515fd9a30fc508"
     ],
     [
       "Spec.SHA2.Lemmas.update_384_512",
@@ -1222,17 +1227,17 @@
         "refinement_interpretation_Tm_refine_16da5dd636ef303f4b4402f063fe1ef3",
         "refinement_interpretation_Tm_refine_1f63517e3c884d4167c7e685b2fc6e5e",
         "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
-        "refinement_interpretation_Tm_refine_34e9e57f3eca4853d972db3990d8c868",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_4944af447337fa89079b7791c0e829d2",
         "refinement_interpretation_Tm_refine_4a4ab588228a913e9d5ea6883796e91b",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_571d9f74016be5357787170b42ecf913",
-        "refinement_interpretation_Tm_refine_705477c1619f429bd1c14b63792bbf87",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_c7fd27793ec1dae0cb682593d434ce63",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_dbdbdea92f497c44afa3603cccf3bf91",
+        "refinement_interpretation_Tm_refine_f54827dc678bbdf85bb566d22fc3429b",
         "token_correspondence_Lib.IntTypes.add_mod",
         "token_correspondence_Spec.Agile.Hash.update",
         "token_correspondence_Spec.Hash.Definitions.words_of_bytes",
@@ -1255,7 +1260,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "46981dd007ae432c74d3fa0eae4fd760"
+      "ee0bc3923a67ba89aa8a2b87775e9dc2"
     ],
     [
       "Spec.SHA2.Lemmas.update_384_512",
@@ -1374,7 +1379,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "11ddc4c93f6105744304d49b883e1524"
+      "3f65f582a6d2ee4327b726f12d5306e8"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_384_512",
@@ -1414,7 +1419,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "78670eec6805e0134f867f5926c31b54"
+      "043515d119f7e5e768517af09c48f4cc"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_384_512",
@@ -1487,7 +1492,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "277b4678e8828b2698dbc25c58781fcd"
+      "47c0348e3488d3a31217b56dffeabf72"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_384_512",
@@ -1530,7 +1535,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "32c01fa4257a76dbe94173701995e76a"
+      "32982ef4fb8ca507b1864606619e74ec"
     ],
     [
       "Spec.SHA2.Lemmas.update_last_384_512",
@@ -1583,7 +1588,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "79e0ba7b5939278893174569ccde67c5"
+      "b259430f29b794959be4b4022451c55d"
     ],
     [
       "Spec.SHA2.Lemmas.update_last_384_512",
@@ -1655,7 +1660,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "3cdf4e1ae2539fc97cd8188878383ac8"
+      "4418e841c960510e68263dc598e2b2e2"
     ]
   ]
 ]
