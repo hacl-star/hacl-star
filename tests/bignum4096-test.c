@@ -129,7 +129,7 @@ main()
                               vectors_be[i].resBytes);
   }
 
-  for (int i = 0; i < sizeof(vectors) / sizeof(bignum4096_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors) / sizeof(bignum4096_test_vector); ++i) {
     ok &= print_test(vectors[i].n,
                      vectors[i].a,
                      vectors[i].bBits,
