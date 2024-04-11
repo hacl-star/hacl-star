@@ -109,7 +109,7 @@ main()
 {
 
   bool ok = true;
-  for (int i = 0;
+  for (size_t i = 0;
        i < sizeof(vectors_be) / sizeof(bignum4096_bytes_be_test_vector);
        ++i) {
     ok &= print_test_bytes_be_precomp(vectors_be[i].nBytes,
@@ -119,7 +119,7 @@ main()
                                       vectors_be[i].resBytes);
   }
 
-  for (int i = 0;
+  for (size_t i = 0;
        i < sizeof(vectors_be) / sizeof(bignum4096_bytes_be_test_vector);
        ++i) {
     ok &= print_test_bytes_be(vectors_be[i].nBytes,
