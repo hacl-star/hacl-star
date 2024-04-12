@@ -550,13 +550,18 @@ pub fn randombytes_(len: u32, res: &mut [u8]) -> ()
         let u: u64 = crate::lowstar::endianness::load64_le(&mut v8);
         let x: u64 = u;
         let x0: u64 = x;
-        for i0 in 0u32..8u32
-        {
-            let rk: u64 =
-                x0.wrapping_shr(b.wrapping_mul(i0)) & 1u64.wrapping_shl(b).wrapping_sub(1u64);
-            res[i.wrapping_mul(n).wrapping_add(i0) as usize] =
-                (rk as u16).wrapping_shl(logq.wrapping_sub(b))
-        }
+        krml::unroll_for!(
+            8,
+            "i0",
+            0u32,
+            1u32,
+            {
+                let rk: u64 =
+                    x0.wrapping_shr(b.wrapping_mul(i0)) & 1u64.wrapping_shl(b).wrapping_sub(1u64);
+                res[i.wrapping_mul(n).wrapping_add(i0) as usize] =
+                    (rk as u16).wrapping_shl(logq.wrapping_sub(b))
+            }
+        )
     }
 }
 
@@ -566,20 +571,25 @@ pub fn randombytes_(len: u32, res: &mut [u8]) -> ()
     for i in 0u32..n
     {
         let mut templong: [u64; 1] = [0u64; 1usize];
-        for i0 in 0u32..8u32
-        {
-            let aik: u16 = a[i.wrapping_mul(n).wrapping_add(i0) as usize];
-            let res1: u16 =
-                aik.wrapping_add(1u16.wrapping_shl(logq.wrapping_sub(b).wrapping_sub(1u32))).wrapping_shr(
-                    logq.wrapping_sub(b)
-                );
-            (&mut templong)[0usize] =
-                (&mut templong)[0usize]
-                |
-                ((res1 & 1u16.wrapping_shl(b).wrapping_sub(1u16)) as u64).wrapping_shl(
-                    b.wrapping_mul(i0)
-                )
-        };
+        krml::unroll_for!(
+            8,
+            "i0",
+            0u32,
+            1u32,
+            {
+                let aik: u16 = a[i.wrapping_mul(n).wrapping_add(i0) as usize];
+                let res1: u16 =
+                    aik.wrapping_add(1u16.wrapping_shl(logq.wrapping_sub(b).wrapping_sub(1u32))).wrapping_shr(
+                        logq.wrapping_sub(b)
+                    );
+                (&mut templong)[0usize] =
+                    (&mut templong)[0usize]
+                    |
+                    ((res1 & 1u16.wrapping_shl(b).wrapping_sub(1u16)) as u64).wrapping_shl(
+                        b.wrapping_mul(i0)
+                    )
+            }
+        );
         let templong0: u64 = (&mut templong)[0usize];
         let mut v8: [u8; 8] = [0u8; 8usize];
         crate::lowstar::endianness::store64_le(&mut v8, templong0);

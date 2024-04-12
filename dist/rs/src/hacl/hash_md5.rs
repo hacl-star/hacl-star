@@ -22,7 +22,7 @@ const _t: [u32; 64] =
         0xf7537e82u32, 0xbd3af235u32, 0x2ad7d2bbu32, 0xeb86d391u32];
 
 pub fn init(s: &mut [u32]) -> ()
-{ for i in 0u32..4u32 { s[i as usize] = (&mut _h0)[i as usize] } }
+{ krml::unroll_for!(4, "i", 0u32, 1u32, s[i as usize] = (&mut _h0)[i as usize]) }
 
 fn update(abcd: &mut [u32], x: &mut [u8]) -> ()
 {
@@ -1281,13 +1281,16 @@ fn pad(len: u64, dst: &mut [u8]) -> ()
 
 pub fn finish(s: &mut [u32], dst: &mut [u8]) -> ()
 {
-    for i in 0u32..4u32
-    {
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store32_le(
             &mut dst[i.wrapping_mul(4u32) as usize..],
             (&mut s[0usize..])[i as usize]
         )
-    }
+    )
 }
 
 pub fn update_multi(s: &mut [u32], blocks: &mut [u8], n_blocks: u32) -> ()

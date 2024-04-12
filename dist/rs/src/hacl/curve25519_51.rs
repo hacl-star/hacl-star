@@ -278,13 +278,16 @@ fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&(&mut tmp)[0usize..5usize]);
     crate::hacl::bignum25519_51::fmul(&mut tmp, &mut f1_copy, z.0, &mut tmp_w);
     crate::hacl::bignum25519_51::store_felem(&mut u64s, &mut tmp);
-    for i0 in 0u32..4u32
-    {
+    krml::unroll_for!(
+        4,
+        "i0",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store64_le(
             &mut o[i0.wrapping_mul(8u32) as usize..],
             (&mut u64s)[i0 as usize]
         )
-    }
+    )
 }
 
 pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
@@ -292,15 +295,20 @@ pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
     let mut init: [u64; 10] = [0u64; 10usize];
     let mut init_copy: [u64; 10] = [0u64; 10usize];
     let mut tmp: [u64; 4] = [0u64; 4usize];
-    for i in 0u32..4u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = r#pub.split_at_mut(i.wrapping_mul(8u32) as usize);
-        let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
-        let r: u64 = u;
-        let x: u64 = r;
-        let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = r#pub.split_at_mut(i.wrapping_mul(8u32) as usize);
+            let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
+            let r: u64 = u;
+            let x: u64 = r;
+            let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let tmp3: u64 = (&mut tmp)[3usize];
     (&mut tmp)[3usize] = tmp3 & 0x7fffffffffffffffu64;
     let x: (&mut [u64], &mut [u64]) = (&mut init).split_at_mut(0usize);

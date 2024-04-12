@@ -16,15 +16,20 @@
     ()
 {
     let mut m_w: [u32; 16] = [0u32; 16usize];
-    for i in 0u32..16u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = d.split_at_mut(i.wrapping_mul(4u32) as usize);
-        let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = (&mut m_w).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        16,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = d.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut m_w).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let mut mask: [u32; 4] = [0u32; 4usize];
     let wv_14: u32 = if flag { 0xFFFFFFFFu32 } else { 0u32 };
     let wv_15: u32 = 0u32;
@@ -34,391 +39,593 @@
     (&mut mask)[3usize] = wv_15;
     (wv[0usize..16usize]).copy_from_slice(&hash[0usize..16usize]);
     let wv3: (&mut [u32], &mut [u32]) = wv.split_at_mut(12usize);
-    for i in 0u32..4u32
-    {
-        let x: u32 = wv3.1[i as usize] ^ (&mut mask)[i as usize];
-        let os: (&mut [u32], &mut [u32]) = wv3.1.split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
-    for i in 0u32..10u32
-    {
-        let start_idx: u32 = i.wrapping_rem(10u32).wrapping_mul(16u32);
-        let mut m_st: [u32; 16] = [0u32; 16usize];
-        let r0: (&mut [u32], &mut [u32]) = (&mut m_st).split_at_mut(0usize);
-        let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
-        let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
-        let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
-        let s0: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(0u32) as usize];
-        let s1: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(1u32) as usize];
-        let s2: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(2u32) as usize];
-        let s3: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(3u32) as usize];
-        let s4: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(4u32) as usize];
-        let s5: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(5u32) as usize];
-        let s6: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(6u32) as usize];
-        let s7: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(7u32) as usize];
-        let s8: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(8u32) as usize];
-        let s9: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(9u32) as usize];
-        let s10: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(10u32) as usize];
-        let s11: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(11u32) as usize];
-        let s12: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(12u32) as usize];
-        let s13: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(13u32) as usize];
-        let s14: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(14u32) as usize];
-        let s15: u32 =
-            (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(15u32) as usize];
-        let uu____0: u32 = (&mut m_w)[s2 as usize];
-        let uu____1: u32 = (&mut m_w)[s4 as usize];
-        let uu____2: u32 = (&mut m_w)[s6 as usize];
-        r1.0[0usize] = (&mut m_w)[s0 as usize];
-        r1.0[1usize] = uu____0;
-        r1.0[2usize] = uu____1;
-        r1.0[3usize] = uu____2;
-        let uu____3: u32 = (&mut m_w)[s3 as usize];
-        let uu____4: u32 = (&mut m_w)[s5 as usize];
-        let uu____5: u32 = (&mut m_w)[s7 as usize];
-        r2.0[0usize] = (&mut m_w)[s1 as usize];
-        r2.0[1usize] = uu____3;
-        r2.0[2usize] = uu____4;
-        r2.0[3usize] = uu____5;
-        let uu____6: u32 = (&mut m_w)[s10 as usize];
-        let uu____7: u32 = (&mut m_w)[s12 as usize];
-        let uu____8: u32 = (&mut m_w)[s14 as usize];
-        r3.0[0usize] = (&mut m_w)[s8 as usize];
-        r3.0[1usize] = uu____6;
-        r3.0[2usize] = uu____7;
-        r3.0[3usize] = uu____8;
-        let uu____9: u32 = (&mut m_w)[s11 as usize];
-        let uu____10: u32 = (&mut m_w)[s13 as usize];
-        let uu____11: u32 = (&mut m_w)[s15 as usize];
-        r3.1[0usize] = (&mut m_w)[s9 as usize];
-        r3.1[1usize] = uu____9;
-        r3.1[2usize] = uu____10;
-        r3.1[3usize] = uu____11;
-        let x: (&mut [u32], &mut [u32]) = r1.0.split_at_mut(0usize);
-        let y: (&mut [u32], &mut [u32]) = r2.0.split_at_mut(0usize);
-        let z: (&mut [u32], &mut [u32]) = r3.0.split_at_mut(0usize);
-        let w: (&mut [u32], &mut [u32]) = r3.1.split_at_mut(0usize);
-        let wv_a: (&mut [u32], &mut [u32]) = wv3.0.split_at_mut(0usize);
-        let wv_b: (&mut [u32], &mut [u32]) = wv_a.1.split_at_mut(4usize);
-        for i0 in 0u32..4u32
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
         {
-            let x1: u32 = (wv_b.0[i0 as usize]).wrapping_add(wv_b.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_b.0.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        for i0 in 0u32..4u32
+            let x: u32 = wv3.1[i as usize] ^ (&mut mask)[i as usize];
+            let os: (&mut [u32], &mut [u32]) = wv3.1.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
+    krml::unroll_for!(
+        10,
+        "i",
+        0u32,
+        1u32,
         {
-            let x1: u32 = (wv_b.0[i0 as usize]).wrapping_add(x.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_b.0.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        let wv_a0: (&mut [u32], &mut [u32]) = wv3.1.split_at_mut(0usize);
-        let wv_b0: (&mut [u32], &mut [u32]) = wv_b.0.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = wv_a0.1[i0 as usize] ^ wv_b0.1[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = wv_a0.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        let r10: &mut [u32] = wv_a0.1;
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = r10[i0 as usize];
-            let x10: u32 = x1.wrapping_shr(16u32) | x1.wrapping_shl(16u32);
-            let os: (&mut [u32], &mut [u32]) = r10.split_at_mut(0usize);
-            os.1[i0 as usize] = x10
-        };
-        let wv_a1: (&mut [u32], &mut [u32]) = wv_b.1.split_at_mut(4usize);
-        let wv_b1: (&mut [u32], &mut [u32]) = wv_a0.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = (wv_a1.1[i0 as usize]).wrapping_add(wv_b1.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a1.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        let wv_a2: (&mut [u32], &mut [u32]) = wv_a1.0.split_at_mut(0usize);
-        let wv_b2: (&mut [u32], &mut [u32]) = wv_a1.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = wv_a2.1[i0 as usize] ^ wv_b2.1[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = wv_a2.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        let r11: &mut [u32] = wv_a2.1;
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = r11[i0 as usize];
-            let x10: u32 = x1.wrapping_shr(12u32) | x1.wrapping_shl(20u32);
-            let os: (&mut [u32], &mut [u32]) = r11.split_at_mut(0usize);
-            os.1[i0 as usize] = x10
-        };
-        let wv_a3: (&mut [u32], &mut [u32]) = wv_b0.1.split_at_mut(0usize);
-        let wv_b3: (&mut [u32], &mut [u32]) = wv_a2.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = (wv_a3.1[i0 as usize]).wrapping_add(wv_b3.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a3.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = (wv_a3.1[i0 as usize]).wrapping_add(y.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a3.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        let wv_a4: (&mut [u32], &mut [u32]) = wv_b1.1.split_at_mut(0usize);
-        let wv_b4: (&mut [u32], &mut [u32]) = wv_a3.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = wv_a4.1[i0 as usize] ^ wv_b4.1[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = wv_a4.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        let r12: &mut [u32] = wv_a4.1;
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = r12[i0 as usize];
-            let x10: u32 = x1.wrapping_shr(8u32) | x1.wrapping_shl(24u32);
-            let os: (&mut [u32], &mut [u32]) = r12.split_at_mut(0usize);
-            os.1[i0 as usize] = x10
-        };
-        let wv_a5: (&mut [u32], &mut [u32]) = wv_b2.1.split_at_mut(0usize);
-        let wv_b5: (&mut [u32], &mut [u32]) = wv_a4.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = (wv_a5.1[i0 as usize]).wrapping_add(wv_b5.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a5.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        let wv_a6: (&mut [u32], &mut [u32]) = wv_b3.1.split_at_mut(0usize);
-        let wv_b6: (&mut [u32], &mut [u32]) = wv_a5.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = wv_a6.1[i0 as usize] ^ wv_b6.1[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = wv_a6.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x1
-        };
-        let r13: &mut [u32] = wv_a6.1;
-        for i0 in 0u32..4u32
-        {
-            let x1: u32 = r13[i0 as usize];
-            let x10: u32 = x1.wrapping_shr(7u32) | x1.wrapping_shl(25u32);
-            let os: (&mut [u32], &mut [u32]) = r13.split_at_mut(0usize);
-            os.1[i0 as usize] = x10
-        };
-        let r14: (&mut [u32], &mut [u32]) = wv_a6.1.split_at_mut(0usize);
-        let r20: (&mut [u32], &mut [u32]) = wv_b6.1.split_at_mut(0usize);
-        let r30: (&mut [u32], &mut [u32]) = wv_b5.1.split_at_mut(0usize);
-        let r110: &mut [u32] = r14.1;
-        let x0: u32 = r110[1usize];
-        let x1: u32 = r110[2usize];
-        let x2: u32 = r110[3usize];
-        let x3: u32 = r110[0usize];
-        r110[0usize] = x0;
-        r110[1usize] = x1;
-        r110[2usize] = x2;
-        r110[3usize] = x3;
-        let r111: &mut [u32] = r20.1;
-        let x00: u32 = r111[2usize];
-        let x10: u32 = r111[3usize];
-        let x20: u32 = r111[0usize];
-        let x30: u32 = r111[1usize];
-        r111[0usize] = x00;
-        r111[1usize] = x10;
-        r111[2usize] = x20;
-        r111[3usize] = x30;
-        let r112: &mut [u32] = r30.1;
-        let x01: u32 = r112[3usize];
-        let x11: u32 = r112[0usize];
-        let x21: u32 = r112[1usize];
-        let x31: u32 = r112[2usize];
-        r112[0usize] = x01;
-        r112[1usize] = x11;
-        r112[2usize] = x21;
-        r112[3usize] = x31;
-        let wv_a7: (&mut [u32], &mut [u32]) = wv_b4.1.split_at_mut(0usize);
-        let wv_b7: (&mut [u32], &mut [u32]) = r14.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = (wv_a7.1[i0 as usize]).wrapping_add(wv_b7.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a7.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = (wv_a7.1[i0 as usize]).wrapping_add(z.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a7.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        let wv_a8: (&mut [u32], &mut [u32]) = r30.1.split_at_mut(0usize);
-        let wv_b8: (&mut [u32], &mut [u32]) = wv_a7.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = wv_a8.1[i0 as usize] ^ wv_b8.1[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = wv_a8.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        let r15: &mut [u32] = wv_a8.1;
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = r15[i0 as usize];
-            let x13: u32 = x12.wrapping_shr(16u32) | x12.wrapping_shl(16u32);
-            let os: (&mut [u32], &mut [u32]) = r15.split_at_mut(0usize);
-            os.1[i0 as usize] = x13
-        };
-        let wv_a9: (&mut [u32], &mut [u32]) = r20.1.split_at_mut(0usize);
-        let wv_b9: (&mut [u32], &mut [u32]) = wv_a8.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = (wv_a9.1[i0 as usize]).wrapping_add(wv_b9.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a9.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        let wv_a10: (&mut [u32], &mut [u32]) = wv_b7.1.split_at_mut(0usize);
-        let wv_b10: (&mut [u32], &mut [u32]) = wv_a9.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = wv_a10.1[i0 as usize] ^ wv_b10.1[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = wv_a10.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        let r16: &mut [u32] = wv_a10.1;
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = r16[i0 as usize];
-            let x13: u32 = x12.wrapping_shr(12u32) | x12.wrapping_shl(20u32);
-            let os: (&mut [u32], &mut [u32]) = r16.split_at_mut(0usize);
-            os.1[i0 as usize] = x13
-        };
-        let wv_a11: (&mut [u32], &mut [u32]) = wv_b8.1.split_at_mut(0usize);
-        let wv_b11: (&mut [u32], &mut [u32]) = wv_a10.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = (wv_a11.1[i0 as usize]).wrapping_add(wv_b11.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a11.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = (wv_a11.1[i0 as usize]).wrapping_add(w.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a11.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        let wv_a12: (&mut [u32], &mut [u32]) = wv_b9.1.split_at_mut(0usize);
-        let wv_b12: (&mut [u32], &mut [u32]) = wv_a11.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = wv_a12.1[i0 as usize] ^ wv_b12.1[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = wv_a12.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        let r17: &mut [u32] = wv_a12.1;
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = r17[i0 as usize];
-            let x13: u32 = x12.wrapping_shr(8u32) | x12.wrapping_shl(24u32);
-            let os: (&mut [u32], &mut [u32]) = r17.split_at_mut(0usize);
-            os.1[i0 as usize] = x13
-        };
-        let wv_a13: (&mut [u32], &mut [u32]) = wv_b10.1.split_at_mut(0usize);
-        let wv_b13: (&mut [u32], &mut [u32]) = wv_a12.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = (wv_a13.1[i0 as usize]).wrapping_add(wv_b13.1[i0 as usize]);
-            let os: (&mut [u32], &mut [u32]) = wv_a13.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        let wv_a14: (&mut [u32], &mut [u32]) = wv_b11.1.split_at_mut(0usize);
-        let wv_b14: (&mut [u32], &mut [u32]) = wv_a13.1.split_at_mut(0usize);
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = wv_a14.1[i0 as usize] ^ wv_b14.1[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = wv_a14.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x12
-        };
-        let r18: &mut [u32] = wv_a14.1;
-        for i0 in 0u32..4u32
-        {
-            let x12: u32 = r18[i0 as usize];
-            let x13: u32 = x12.wrapping_shr(7u32) | x12.wrapping_shl(25u32);
-            let os: (&mut [u32], &mut [u32]) = r18.split_at_mut(0usize);
-            os.1[i0 as usize] = x13
-        };
-        let r19: (&mut [u32], &mut [u32]) = wv_a14.1.split_at_mut(0usize);
-        let r21: (&mut [u32], &mut [u32]) = wv_b14.1.split_at_mut(0usize);
-        let r31: (&mut [u32], &mut [u32]) = wv_b13.1.split_at_mut(0usize);
-        let r113: &mut [u32] = r19.1;
-        let x02: u32 = r113[3usize];
-        let x12: u32 = r113[0usize];
-        let x22: u32 = r113[1usize];
-        let x32: u32 = r113[2usize];
-        r113[0usize] = x02;
-        r113[1usize] = x12;
-        r113[2usize] = x22;
-        r113[3usize] = x32;
-        let r114: &mut [u32] = r21.1;
-        let x03: u32 = r114[2usize];
-        let x13: u32 = r114[3usize];
-        let x23: u32 = r114[0usize];
-        let x33: u32 = r114[1usize];
-        r114[0usize] = x03;
-        r114[1usize] = x13;
-        r114[2usize] = x23;
-        r114[3usize] = x33;
-        let r115: &mut [u32] = r31.1;
-        let x04: u32 = r115[1usize];
-        let x14: u32 = r115[2usize];
-        let x24: u32 = r115[3usize];
-        let x34: u32 = r115[0usize];
-        r115[0usize] = x04;
-        r115[1usize] = x14;
-        r115[2usize] = x24;
-        r115[3usize] = x34
-    };
+            let start_idx: u32 = i.wrapping_rem(10u32).wrapping_mul(16u32);
+            let mut m_st: [u32; 16] = [0u32; 16usize];
+            let r0: (&mut [u32], &mut [u32]) = (&mut m_st).split_at_mut(0usize);
+            let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
+            let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
+            let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
+            let s0: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(0u32)
+                as
+                usize];
+            let s1: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(1u32)
+                as
+                usize];
+            let s2: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(2u32)
+                as
+                usize];
+            let s3: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(3u32)
+                as
+                usize];
+            let s4: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(4u32)
+                as
+                usize];
+            let s5: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(5u32)
+                as
+                usize];
+            let s6: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(6u32)
+                as
+                usize];
+            let s7: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(7u32)
+                as
+                usize];
+            let s8: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(8u32)
+                as
+                usize];
+            let s9: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(9u32)
+                as
+                usize];
+            let s10: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(10u32)
+                as
+                usize];
+            let s11: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(11u32)
+                as
+                usize];
+            let s12: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(12u32)
+                as
+                usize];
+            let s13: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(13u32)
+                as
+                usize];
+            let s14: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(14u32)
+                as
+                usize];
+            let s15: u32 =
+                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(15u32)
+                as
+                usize];
+            let uu____0: u32 = (&mut m_w)[s2 as usize];
+            let uu____1: u32 = (&mut m_w)[s4 as usize];
+            let uu____2: u32 = (&mut m_w)[s6 as usize];
+            r1.0[0usize] = (&mut m_w)[s0 as usize];
+            r1.0[1usize] = uu____0;
+            r1.0[2usize] = uu____1;
+            r1.0[3usize] = uu____2;
+            let uu____3: u32 = (&mut m_w)[s3 as usize];
+            let uu____4: u32 = (&mut m_w)[s5 as usize];
+            let uu____5: u32 = (&mut m_w)[s7 as usize];
+            r2.0[0usize] = (&mut m_w)[s1 as usize];
+            r2.0[1usize] = uu____3;
+            r2.0[2usize] = uu____4;
+            r2.0[3usize] = uu____5;
+            let uu____6: u32 = (&mut m_w)[s10 as usize];
+            let uu____7: u32 = (&mut m_w)[s12 as usize];
+            let uu____8: u32 = (&mut m_w)[s14 as usize];
+            r3.0[0usize] = (&mut m_w)[s8 as usize];
+            r3.0[1usize] = uu____6;
+            r3.0[2usize] = uu____7;
+            r3.0[3usize] = uu____8;
+            let uu____9: u32 = (&mut m_w)[s11 as usize];
+            let uu____10: u32 = (&mut m_w)[s13 as usize];
+            let uu____11: u32 = (&mut m_w)[s15 as usize];
+            r3.1[0usize] = (&mut m_w)[s9 as usize];
+            r3.1[1usize] = uu____9;
+            r3.1[2usize] = uu____10;
+            r3.1[3usize] = uu____11;
+            let x: (&mut [u32], &mut [u32]) = r1.0.split_at_mut(0usize);
+            let y: (&mut [u32], &mut [u32]) = r2.0.split_at_mut(0usize);
+            let z: (&mut [u32], &mut [u32]) = r3.0.split_at_mut(0usize);
+            let w: (&mut [u32], &mut [u32]) = r3.1.split_at_mut(0usize);
+            let wv_a: (&mut [u32], &mut [u32]) = wv3.0.split_at_mut(0usize);
+            let wv_b: (&mut [u32], &mut [u32]) = wv_a.1.split_at_mut(4usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = (wv_b.0[i0 as usize]).wrapping_add(wv_b.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_b.0.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = (wv_b.0[i0 as usize]).wrapping_add(x.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_b.0.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            let wv_a0: (&mut [u32], &mut [u32]) = wv3.1.split_at_mut(0usize);
+            let wv_b0: (&mut [u32], &mut [u32]) = wv_b.0.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = wv_a0.1[i0 as usize] ^ wv_b0.1[i0 as usize];
+                    let os: (&mut [u32], &mut [u32]) = wv_a0.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            let r10: &mut [u32] = wv_a0.1;
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = r10[i0 as usize];
+                    let x10: u32 = x1.wrapping_shr(16u32) | x1.wrapping_shl(16u32);
+                    let os: (&mut [u32], &mut [u32]) = r10.split_at_mut(0usize);
+                    os.1[i0 as usize] = x10
+                }
+            );
+            let wv_a1: (&mut [u32], &mut [u32]) = wv_b.1.split_at_mut(4usize);
+            let wv_b1: (&mut [u32], &mut [u32]) = wv_a0.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = (wv_a1.1[i0 as usize]).wrapping_add(wv_b1.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a1.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            let wv_a2: (&mut [u32], &mut [u32]) = wv_a1.0.split_at_mut(0usize);
+            let wv_b2: (&mut [u32], &mut [u32]) = wv_a1.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = wv_a2.1[i0 as usize] ^ wv_b2.1[i0 as usize];
+                    let os: (&mut [u32], &mut [u32]) = wv_a2.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            let r11: &mut [u32] = wv_a2.1;
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = r11[i0 as usize];
+                    let x10: u32 = x1.wrapping_shr(12u32) | x1.wrapping_shl(20u32);
+                    let os: (&mut [u32], &mut [u32]) = r11.split_at_mut(0usize);
+                    os.1[i0 as usize] = x10
+                }
+            );
+            let wv_a3: (&mut [u32], &mut [u32]) = wv_b0.1.split_at_mut(0usize);
+            let wv_b3: (&mut [u32], &mut [u32]) = wv_a2.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = (wv_a3.1[i0 as usize]).wrapping_add(wv_b3.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a3.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = (wv_a3.1[i0 as usize]).wrapping_add(y.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a3.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            let wv_a4: (&mut [u32], &mut [u32]) = wv_b1.1.split_at_mut(0usize);
+            let wv_b4: (&mut [u32], &mut [u32]) = wv_a3.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = wv_a4.1[i0 as usize] ^ wv_b4.1[i0 as usize];
+                    let os: (&mut [u32], &mut [u32]) = wv_a4.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            let r12: &mut [u32] = wv_a4.1;
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = r12[i0 as usize];
+                    let x10: u32 = x1.wrapping_shr(8u32) | x1.wrapping_shl(24u32);
+                    let os: (&mut [u32], &mut [u32]) = r12.split_at_mut(0usize);
+                    os.1[i0 as usize] = x10
+                }
+            );
+            let wv_a5: (&mut [u32], &mut [u32]) = wv_b2.1.split_at_mut(0usize);
+            let wv_b5: (&mut [u32], &mut [u32]) = wv_a4.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = (wv_a5.1[i0 as usize]).wrapping_add(wv_b5.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a5.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            let wv_a6: (&mut [u32], &mut [u32]) = wv_b3.1.split_at_mut(0usize);
+            let wv_b6: (&mut [u32], &mut [u32]) = wv_a5.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = wv_a6.1[i0 as usize] ^ wv_b6.1[i0 as usize];
+                    let os: (&mut [u32], &mut [u32]) = wv_a6.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x1
+                }
+            );
+            let r13: &mut [u32] = wv_a6.1;
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x1: u32 = r13[i0 as usize];
+                    let x10: u32 = x1.wrapping_shr(7u32) | x1.wrapping_shl(25u32);
+                    let os: (&mut [u32], &mut [u32]) = r13.split_at_mut(0usize);
+                    os.1[i0 as usize] = x10
+                }
+            );
+            let r14: (&mut [u32], &mut [u32]) = wv_a6.1.split_at_mut(0usize);
+            let r20: (&mut [u32], &mut [u32]) = wv_b6.1.split_at_mut(0usize);
+            let r30: (&mut [u32], &mut [u32]) = wv_b5.1.split_at_mut(0usize);
+            let r110: &mut [u32] = r14.1;
+            let x0: u32 = r110[1usize];
+            let x1: u32 = r110[2usize];
+            let x2: u32 = r110[3usize];
+            let x3: u32 = r110[0usize];
+            r110[0usize] = x0;
+            r110[1usize] = x1;
+            r110[2usize] = x2;
+            r110[3usize] = x3;
+            let r111: &mut [u32] = r20.1;
+            let x00: u32 = r111[2usize];
+            let x10: u32 = r111[3usize];
+            let x20: u32 = r111[0usize];
+            let x30: u32 = r111[1usize];
+            r111[0usize] = x00;
+            r111[1usize] = x10;
+            r111[2usize] = x20;
+            r111[3usize] = x30;
+            let r112: &mut [u32] = r30.1;
+            let x01: u32 = r112[3usize];
+            let x11: u32 = r112[0usize];
+            let x21: u32 = r112[1usize];
+            let x31: u32 = r112[2usize];
+            r112[0usize] = x01;
+            r112[1usize] = x11;
+            r112[2usize] = x21;
+            r112[3usize] = x31;
+            let wv_a7: (&mut [u32], &mut [u32]) = wv_b4.1.split_at_mut(0usize);
+            let wv_b7: (&mut [u32], &mut [u32]) = r14.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = (wv_a7.1[i0 as usize]).wrapping_add(wv_b7.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a7.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = (wv_a7.1[i0 as usize]).wrapping_add(z.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a7.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            let wv_a8: (&mut [u32], &mut [u32]) = r30.1.split_at_mut(0usize);
+            let wv_b8: (&mut [u32], &mut [u32]) = wv_a7.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = wv_a8.1[i0 as usize] ^ wv_b8.1[i0 as usize];
+                    let os: (&mut [u32], &mut [u32]) = wv_a8.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            let r15: &mut [u32] = wv_a8.1;
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = r15[i0 as usize];
+                    let x13: u32 = x12.wrapping_shr(16u32) | x12.wrapping_shl(16u32);
+                    let os: (&mut [u32], &mut [u32]) = r15.split_at_mut(0usize);
+                    os.1[i0 as usize] = x13
+                }
+            );
+            let wv_a9: (&mut [u32], &mut [u32]) = r20.1.split_at_mut(0usize);
+            let wv_b9: (&mut [u32], &mut [u32]) = wv_a8.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = (wv_a9.1[i0 as usize]).wrapping_add(wv_b9.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a9.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            let wv_a10: (&mut [u32], &mut [u32]) = wv_b7.1.split_at_mut(0usize);
+            let wv_b10: (&mut [u32], &mut [u32]) = wv_a9.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = wv_a10.1[i0 as usize] ^ wv_b10.1[i0 as usize];
+                    let os: (&mut [u32], &mut [u32]) = wv_a10.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            let r16: &mut [u32] = wv_a10.1;
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = r16[i0 as usize];
+                    let x13: u32 = x12.wrapping_shr(12u32) | x12.wrapping_shl(20u32);
+                    let os: (&mut [u32], &mut [u32]) = r16.split_at_mut(0usize);
+                    os.1[i0 as usize] = x13
+                }
+            );
+            let wv_a11: (&mut [u32], &mut [u32]) = wv_b8.1.split_at_mut(0usize);
+            let wv_b11: (&mut [u32], &mut [u32]) = wv_a10.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = (wv_a11.1[i0 as usize]).wrapping_add(wv_b11.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a11.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = (wv_a11.1[i0 as usize]).wrapping_add(w.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a11.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            let wv_a12: (&mut [u32], &mut [u32]) = wv_b9.1.split_at_mut(0usize);
+            let wv_b12: (&mut [u32], &mut [u32]) = wv_a11.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = wv_a12.1[i0 as usize] ^ wv_b12.1[i0 as usize];
+                    let os: (&mut [u32], &mut [u32]) = wv_a12.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            let r17: &mut [u32] = wv_a12.1;
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = r17[i0 as usize];
+                    let x13: u32 = x12.wrapping_shr(8u32) | x12.wrapping_shl(24u32);
+                    let os: (&mut [u32], &mut [u32]) = r17.split_at_mut(0usize);
+                    os.1[i0 as usize] = x13
+                }
+            );
+            let wv_a13: (&mut [u32], &mut [u32]) = wv_b10.1.split_at_mut(0usize);
+            let wv_b13: (&mut [u32], &mut [u32]) = wv_a12.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = (wv_a13.1[i0 as usize]).wrapping_add(wv_b13.1[i0 as usize]);
+                    let os: (&mut [u32], &mut [u32]) = wv_a13.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            let wv_a14: (&mut [u32], &mut [u32]) = wv_b11.1.split_at_mut(0usize);
+            let wv_b14: (&mut [u32], &mut [u32]) = wv_a13.1.split_at_mut(0usize);
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = wv_a14.1[i0 as usize] ^ wv_b14.1[i0 as usize];
+                    let os: (&mut [u32], &mut [u32]) = wv_a14.1.split_at_mut(0usize);
+                    os.1[i0 as usize] = x12
+                }
+            );
+            let r18: &mut [u32] = wv_a14.1;
+            krml::unroll_for!(
+                4,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x12: u32 = r18[i0 as usize];
+                    let x13: u32 = x12.wrapping_shr(7u32) | x12.wrapping_shl(25u32);
+                    let os: (&mut [u32], &mut [u32]) = r18.split_at_mut(0usize);
+                    os.1[i0 as usize] = x13
+                }
+            );
+            let r19: (&mut [u32], &mut [u32]) = wv_a14.1.split_at_mut(0usize);
+            let r21: (&mut [u32], &mut [u32]) = wv_b14.1.split_at_mut(0usize);
+            let r31: (&mut [u32], &mut [u32]) = wv_b13.1.split_at_mut(0usize);
+            let r113: &mut [u32] = r19.1;
+            let x02: u32 = r113[3usize];
+            let x12: u32 = r113[0usize];
+            let x22: u32 = r113[1usize];
+            let x32: u32 = r113[2usize];
+            r113[0usize] = x02;
+            r113[1usize] = x12;
+            r113[2usize] = x22;
+            r113[3usize] = x32;
+            let r114: &mut [u32] = r21.1;
+            let x03: u32 = r114[2usize];
+            let x13: u32 = r114[3usize];
+            let x23: u32 = r114[0usize];
+            let x33: u32 = r114[1usize];
+            r114[0usize] = x03;
+            r114[1usize] = x13;
+            r114[2usize] = x23;
+            r114[3usize] = x33;
+            let r115: &mut [u32] = r31.1;
+            let x04: u32 = r115[1usize];
+            let x14: u32 = r115[2usize];
+            let x24: u32 = r115[3usize];
+            let x34: u32 = r115[0usize];
+            r115[0usize] = x04;
+            r115[1usize] = x14;
+            r115[2usize] = x24;
+            r115[3usize] = x34
+        }
+    );
     let s0: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
     let s1: (&mut [u32], &mut [u32]) = s0.1.split_at_mut(4usize);
     let r0: (&mut [u32], &mut [u32]) = wv3.0.split_at_mut(0usize);
     let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
     let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
     let r3: (&mut [u32], &mut [u32]) = wv3.1.split_at_mut(0usize);
-    for i in 0u32..4u32
-    {
-        let x: u32 = s1.0[i as usize] ^ r1.0[i as usize];
-        let os: (&mut [u32], &mut [u32]) = s1.0.split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
-    for i in 0u32..4u32
-    {
-        let x: u32 = s1.0[i as usize] ^ r2.1[i as usize];
-        let os: (&mut [u32], &mut [u32]) = s1.0.split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
-    for i in 0u32..4u32
-    {
-        let x: u32 = s1.1[i as usize] ^ r2.0[i as usize];
-        let os: (&mut [u32], &mut [u32]) = s1.1.split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
-    for i in 0u32..4u32
-    {
-        let x: u32 = s1.1[i as usize] ^ r3.1[i as usize];
-        let os: (&mut [u32], &mut [u32]) = s1.1.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = s1.0[i as usize] ^ r1.0[i as usize];
+            let os: (&mut [u32], &mut [u32]) = s1.0.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = s1.0[i as usize] ^ r2.1[i as usize];
+            let os: (&mut [u32], &mut [u32]) = s1.0.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = s1.1[i as usize] ^ r2.0[i as usize];
+            let os: (&mut [u32], &mut [u32]) = s1.1.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = s1.1[i as usize] ^ r3.1[i as usize];
+            let os: (&mut [u32], &mut [u32]) = s1.1.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 pub fn init(hash: &mut [u32], kk: u32, nn: u32) -> ()
@@ -446,41 +653,50 @@ pub fn init(hash: &mut [u32], kk: u32, nn: u32) -> ()
     r3.1[3usize] = iv7;
     let mut salt: [u8; 8] = [0u8; 8usize];
     let mut personal: [u8; 8] = [0u8; 8usize];
-    let p: crate::hacl::hash_blake2b::blake2s_params =
-        crate::hacl::hash_blake2b::blake2s_params
+    let p: crate::hacl::hash_blake2b::blake2_params =
+        crate::hacl::hash_blake2b::blake2_params
         {
             digest_length: 32u8,
             key_length: 0u8,
             fanout: 1u8,
             depth: 1u8,
             leaf_length: 0u32,
-            node_offset: 0u32,
-            xof_length: 0u16,
+            node_offset: 0u64,
             node_depth: 0u8,
             inner_length: 0u8,
             salt: &mut salt,
             personal: &mut personal
         };
     let uu____0: (&mut [u32], &mut [u32]) = (&mut tmp).split_at_mut(4usize);
-    for i in 0u32..2u32
-    {
-        let bj: &mut [u8] = &mut p.salt[i.wrapping_mul(4u32) as usize..];
-        let u: u32 = crate::lowstar::endianness::load32_le(bj);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        2,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: &mut [u8] = &mut p.salt[i.wrapping_mul(4u32) as usize..];
+            let u: u32 = crate::lowstar::endianness::load32_le(bj);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
-    for i in 0u32..2u32
-    {
-        let bj: &mut [u8] = &mut p.personal[i.wrapping_mul(4u32) as usize..];
-        let u: u32 = crate::lowstar::endianness::load32_le(bj);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        2,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: &mut [u8] = &mut p.personal[i.wrapping_mul(4u32) as usize..];
+            let u: u32 = crate::lowstar::endianness::load32_le(bj);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     (&mut tmp)[0usize] =
         nn
         ^
@@ -488,9 +704,9 @@ pub fn init(hash: &mut [u32], kk: u32, nn: u32) -> ()
         ^
         ((p.fanout as u32).wrapping_shl(16u32) ^ (p.depth as u32).wrapping_shl(24u32)));
     (&mut tmp)[1usize] = p.leaf_length;
-    (&mut tmp)[2usize] = p.node_offset;
+    (&mut tmp)[2usize] = p.node_offset as u32;
     (&mut tmp)[3usize] =
-        p.xof_length as u32
+        p.node_offset.wrapping_shr(32u32) as u32
         ^
         ((p.node_depth as u32).wrapping_shl(16u32) ^ (p.inner_length as u32).wrapping_shl(24u32));
     let tmp0: u32 = (&mut tmp)[0usize];
@@ -606,20 +822,26 @@ pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u32]) -> ()
     let second: (&mut [u8], &mut [u8]) = first.1.split_at_mut(16usize);
     let row0: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
     let row1: (&mut [u32], &mut [u32]) = row0.1.split_at_mut(4usize);
-    for i in 0u32..4u32
-    {
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store32_le(
             &mut second.0[i.wrapping_mul(4u32) as usize..],
             row1.0[i as usize]
         )
-    };
-    for i in 0u32..4u32
-    {
+    );
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store32_le(
             &mut second.1[i.wrapping_mul(4u32) as usize..],
             row1.1[i as usize]
         )
-    };
+    );
     crate::lowstar::ignore::ignore::<&mut [u8]>(&mut b);
     let r#final: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
     (output[0usize..nn as usize]).copy_from_slice(&r#final.1[0usize..nn as usize]);

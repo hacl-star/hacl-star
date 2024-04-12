@@ -10,7 +10,7 @@ const _h0: [u32; 5] =
     [0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32, 0xc3d2e1f0u32];
 
 pub fn init(s: &mut [u32]) -> ()
-{ for i in 0u32..5u32 { s[i as usize] = (&mut _h0)[i as usize] } }
+{ krml::unroll_for!(5, "i", 0u32, 1u32, s[i as usize] = (&mut _h0)[i as usize]) }
 
 fn update(h: &mut [u32], l: &mut [u8]) -> ()
 {
@@ -110,13 +110,16 @@ fn pad(len: u64, dst: &mut [u8]) -> ()
 
 pub fn finish(s: &mut [u32], dst: &mut [u8]) -> ()
 {
-    for i in 0u32..5u32
-    {
+    krml::unroll_for!(
+        5,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store32_be(
             &mut dst[i.wrapping_mul(4u32) as usize..],
             (&mut s[0usize..])[i as usize]
         )
-    }
+    )
 }
 
 pub fn update_multi(s: &mut [u32], blocks: &mut [u8], n_blocks: u32) -> ()

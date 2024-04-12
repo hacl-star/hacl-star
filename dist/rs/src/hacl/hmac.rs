@@ -139,12 +139,17 @@ pub fn compute_sha2_256(
         (&mut opad)[i as usize] = xi ^ yi
     };
     let mut st: [u32; 8] = [0u32; 8usize];
-    for i in 0u32..8u32
-    {
-        let x: u32 = (&crate::hacl::hash_sha2::h256)[i as usize];
-        let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = (&crate::hacl::hash_sha2::h256)[i as usize];
+            let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let s: &mut [u32] = &mut st;
     if data_len == 0u32
     {
@@ -249,12 +254,17 @@ pub fn compute_sha2_384(
         (&mut opad)[i as usize] = xi ^ yi
     };
     let mut st: [u64; 8] = [0u64; 8usize];
-    for i in 0u32..8u32
-    {
-        let x: u64 = (&crate::hacl::hash_sha2::h384)[i as usize];
-        let os: (&mut [u64], &mut [u64]) = (&mut st).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u64 = (&crate::hacl::hash_sha2::h384)[i as usize];
+            let os: (&mut [u64], &mut [u64]) = (&mut st).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let s: &mut [u64] = &mut st;
     if data_len == 0u32
     {
@@ -374,12 +384,17 @@ pub fn compute_sha2_512(
         (&mut opad)[i as usize] = xi ^ yi
     };
     let mut st: [u64; 8] = [0u64; 8usize];
-    for i in 0u32..8u32
-    {
-        let x: u64 = (&crate::hacl::hash_sha2::h512)[i as usize];
-        let os: (&mut [u64], &mut [u64]) = (&mut st).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u64 = (&crate::hacl::hash_sha2::h512)[i as usize];
+            let os: (&mut [u64], &mut [u64]) = (&mut st).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let s: &mut [u64] = &mut st;
     if data_len == 0u32
     {

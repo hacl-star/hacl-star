@@ -439,8 +439,11 @@ pub fn state_permute(s: &mut [u64]) -> ()
     for i in 0u32..24u32
     {
         let mut _C: [u64; 5] = [0u64; 5usize];
-        for i0 in 0u32..5u32
-        {
+        krml::unroll_for!(
+            5,
+            "i0",
+            0u32,
+            1u32,
             (&mut _C)[i0 as usize] =
                 s[i0.wrapping_add(0u32) as usize]
                 ^
@@ -449,20 +452,28 @@ pub fn state_permute(s: &mut [u64]) -> ()
                 (s[i0.wrapping_add(10u32) as usize]
                 ^
                 (s[i0.wrapping_add(15u32) as usize] ^ s[i0.wrapping_add(20u32) as usize])))
-        };
-        for i0 in 0u32..5u32
-        {
-            let uu____0: u64 = (&mut _C)[i0.wrapping_add(1u32).wrapping_rem(5u32) as usize];
-            let _D: u64 =
-                (&mut _C)[i0.wrapping_add(4u32).wrapping_rem(5u32) as usize]
-                ^
-                (uu____0.wrapping_shl(1u32) | uu____0.wrapping_shr(63u32));
-            for i1 in 0u32..5u32
+        );
+        krml::unroll_for!(
+            5,
+            "i0",
+            0u32,
+            1u32,
             {
-                s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] =
-                    s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^ _D
+                let uu____0: u64 = (&mut _C)[i0.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                let _D: u64 =
+                    (&mut _C)[i0.wrapping_add(4u32).wrapping_rem(5u32) as usize]
+                    ^
+                    (uu____0.wrapping_shl(1u32) | uu____0.wrapping_shr(63u32));
+                krml::unroll_for!(
+                    5,
+                    "i1",
+                    0u32,
+                    1u32,
+                    s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] =
+                        s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^ _D
+                )
             }
-        };
+        );
         let x: u64 = s[1usize];
         let mut current: [u64; 1] = [x; 1usize];
         for i0 in 0u32..24u32
@@ -474,44 +485,49 @@ pub fn state_permute(s: &mut [u64]) -> ()
             s[_Y as usize] = uu____1.wrapping_shl(r) | uu____1.wrapping_shr(64u32.wrapping_sub(r));
             (&mut current)[0usize] = temp
         };
-        for i0 in 0u32..5u32
-        {
-            let v0: u64 =
-                s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            let v1: u64 =
-                s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            let v2: u64 =
-                s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            let v3: u64 =
-                s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            let v4: u64 =
-                s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v0;
-            s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v1;
-            s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v2;
-            s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v3;
-            s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
-        };
+        krml::unroll_for!(
+            5,
+            "i0",
+            0u32,
+            1u32,
+            {
+                let v0: u64 =
+                    s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    ^
+                    ! s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    &
+                    s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                let v1: u64 =
+                    s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    ^
+                    ! s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    &
+                    s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                let v2: u64 =
+                    s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    ^
+                    ! s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    &
+                    s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                let v3: u64 =
+                    s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    ^
+                    ! s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    &
+                    s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                let v4: u64 =
+                    s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    ^
+                    ! s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                    &
+                    s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v0;
+                s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v1;
+                s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v2;
+                s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v3;
+                s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
+            }
+        );
         let c: u64 = (&keccak_rndc)[i as usize];
         s[0usize] = s[0usize] ^ c
     }

@@ -707,12 +707,17 @@ pub fn sealBase(
         let s: u64 = o_ctx.ctx_seq[0usize];
         let mut enc: [u8; 12] = [0u8; 12usize];
         crate::lowstar::endianness::store64_be(&mut (&mut enc)[4usize..], s);
-        for i in 0u32..12u32
-        {
-            let xi: u8 = (&mut enc)[i as usize];
-            let yi: u8 = o_ctx.ctx_nonce[i as usize];
-            (&mut nonce)[i as usize] = xi ^ yi
-        };
+        krml::unroll_for!(
+            12,
+            "i",
+            0u32,
+            1u32,
+            {
+                let xi: u8 = (&mut enc)[i as usize];
+                let yi: u8 = o_ctx.ctx_nonce[i as usize];
+                (&mut nonce)[i as usize] = xi ^ yi
+            }
+        );
         let cipher: (&mut [u8], &mut [u8]) = o_ct.split_at_mut(0usize);
         let tag: (&mut [u8], &mut [u8]) = cipher.1.split_at_mut(plainlen as usize);
         crate::hacl::aead_chacha20poly1305::encrypt(
@@ -775,12 +780,17 @@ pub fn openBase(
         let s: u64 = o_ctx.ctx_seq[0usize];
         let mut enc: [u8; 12] = [0u8; 12usize];
         crate::lowstar::endianness::store64_be(&mut (&mut enc)[4usize..], s);
-        for i in 0u32..12u32
-        {
-            let xi: u8 = (&mut enc)[i as usize];
-            let yi: u8 = o_ctx.ctx_nonce[i as usize];
-            (&mut nonce)[i as usize] = xi ^ yi
-        };
+        krml::unroll_for!(
+            12,
+            "i",
+            0u32,
+            1u32,
+            {
+                let xi: u8 = (&mut enc)[i as usize];
+                let yi: u8 = o_ctx.ctx_nonce[i as usize];
+                (&mut nonce)[i as usize] = xi ^ yi
+            }
+        );
         let cipher: (&mut [u8], &mut [u8]) = ct.split_at_mut(0usize);
         let tag: (&mut [u8], &mut [u8]) = cipher.1.split_at_mut(ctlen.wrapping_sub(16u32) as usize);
         let res1: u32 =

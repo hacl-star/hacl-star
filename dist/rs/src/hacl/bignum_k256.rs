@@ -59,15 +59,20 @@
 #[inline] pub fn load_felem(f: &mut [u64], b: &mut [u8]) -> ()
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
-    for i in 0u32..4u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = b.split_at_mut(i.wrapping_mul(8u32) as usize);
-        let u: u64 = crate::lowstar::endianness::load64_be(bj.1);
-        let r: u64 = u;
-        let x: u64 = r;
-        let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = b.split_at_mut(i.wrapping_mul(8u32) as usize);
+            let u: u64 = crate::lowstar::endianness::load64_be(bj.1);
+            let r: u64 = u;
+            let x: u64 = r;
+            let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let s0: u64 = (&mut tmp)[3usize];
     let s1: u64 = (&mut tmp)[2usize];
     let s2: u64 = (&mut tmp)[1usize];
@@ -126,13 +131,16 @@
     (&mut tmp)[1usize] = f20;
     (&mut tmp)[2usize] = f10;
     (&mut tmp)[3usize] = f00;
-    for i in 0u32..4u32
-    {
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store64_be(
             &mut b[i.wrapping_mul(8u32) as usize..],
             (&mut tmp)[i as usize]
         )
-    }
+    )
 }
 
 #[inline] pub fn fmul_small_num(out: &mut [u64], f: &mut [u64], num: u64) -> ()

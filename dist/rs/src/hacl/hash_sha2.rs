@@ -59,12 +59,17 @@ pub const k384_512: [u64; 80] =
 
 pub fn sha256_init(hash: &mut [u32]) -> ()
 {
-    for i in 0u32..8u32
-    {
-        let x: u32 = (&h256)[i as usize];
-        let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = (&h256)[i as usize];
+            let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha256_update(b: &mut [u8], hash: &mut [u32]) -> ()
@@ -105,80 +110,107 @@ pub fn sha256_init(hash: &mut [u32]) -> ()
     (&mut ws)[14usize] = u13;
     let u14: u32 = crate::lowstar::endianness::load32_be(&mut b1[60usize..]);
     (&mut ws)[15usize] = u14;
-    for i in 0u32..4u32
-    {
-        for i0 in 0u32..16u32
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
         {
-            let k_t: u32 = (&k224_256)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
-            let ws_t: u32 = (&mut ws)[i0 as usize];
-            let a0: u32 = hash[0usize];
-            let b0: u32 = hash[1usize];
-            let c0: u32 = hash[2usize];
-            let d0: u32 = hash[3usize];
-            let e0: u32 = hash[4usize];
-            let f0: u32 = hash[5usize];
-            let g0: u32 = hash[6usize];
-            let h02: u32 = hash[7usize];
-            let k_e_t: u32 = k_t;
-            let t1: u32 =
-                h02.wrapping_add(
-                    (e0.wrapping_shl(26u32) | e0.wrapping_shr(6u32))
-                    ^
-                    ((e0.wrapping_shl(21u32) | e0.wrapping_shr(11u32))
-                    ^
-                    (e0.wrapping_shl(7u32) | e0.wrapping_shr(25u32)))
-                ).wrapping_add(e0 & f0 ^ ! e0 & g0).wrapping_add(k_e_t).wrapping_add(ws_t);
-            let t2: u32 =
-                ((a0.wrapping_shl(30u32) | a0.wrapping_shr(2u32))
-                ^
-                ((a0.wrapping_shl(19u32) | a0.wrapping_shr(13u32))
-                ^
-                (a0.wrapping_shl(10u32) | a0.wrapping_shr(22u32)))).wrapping_add(
-                    a0 & b0 ^ (a0 & c0 ^ b0 & c0)
-                );
-            let a1: u32 = t1.wrapping_add(t2);
-            let b10: u32 = a0;
-            let c1: u32 = b0;
-            let d1: u32 = c0;
-            let e1: u32 = d0.wrapping_add(t1);
-            let f1: u32 = e0;
-            let g1: u32 = f0;
-            let h12: u32 = g0;
-            hash[0usize] = a1;
-            hash[1usize] = b10;
-            hash[2usize] = c1;
-            hash[3usize] = d1;
-            hash[4usize] = e1;
-            hash[5usize] = f1;
-            hash[6usize] = g1;
-            hash[7usize] = h12
-        };
-        if i < 3u32
-        {
-            for i0 in 0u32..16u32
+            krml::unroll_for!(
+                16,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let k_t: u32 = (&k224_256)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
+                    let ws_t: u32 = (&mut ws)[i0 as usize];
+                    let a0: u32 = hash[0usize];
+                    let b0: u32 = hash[1usize];
+                    let c0: u32 = hash[2usize];
+                    let d0: u32 = hash[3usize];
+                    let e0: u32 = hash[4usize];
+                    let f0: u32 = hash[5usize];
+                    let g0: u32 = hash[6usize];
+                    let h02: u32 = hash[7usize];
+                    let k_e_t: u32 = k_t;
+                    let t1: u32 =
+                        h02.wrapping_add(
+                            (e0.wrapping_shl(26u32) | e0.wrapping_shr(6u32))
+                            ^
+                            ((e0.wrapping_shl(21u32) | e0.wrapping_shr(11u32))
+                            ^
+                            (e0.wrapping_shl(7u32) | e0.wrapping_shr(25u32)))
+                        ).wrapping_add(e0 & f0 ^ ! e0 & g0).wrapping_add(k_e_t).wrapping_add(ws_t);
+                    let t2: u32 =
+                        ((a0.wrapping_shl(30u32) | a0.wrapping_shr(2u32))
+                        ^
+                        ((a0.wrapping_shl(19u32) | a0.wrapping_shr(13u32))
+                        ^
+                        (a0.wrapping_shl(10u32) | a0.wrapping_shr(22u32)))).wrapping_add(
+                            a0 & b0 ^ (a0 & c0 ^ b0 & c0)
+                        );
+                    let a1: u32 = t1.wrapping_add(t2);
+                    let b10: u32 = a0;
+                    let c1: u32 = b0;
+                    let d1: u32 = c0;
+                    let e1: u32 = d0.wrapping_add(t1);
+                    let f1: u32 = e0;
+                    let g1: u32 = f0;
+                    let h12: u32 = g0;
+                    hash[0usize] = a1;
+                    hash[1usize] = b10;
+                    hash[2usize] = c1;
+                    hash[3usize] = d1;
+                    hash[4usize] = e1;
+                    hash[5usize] = f1;
+                    hash[6usize] = g1;
+                    hash[7usize] = h12
+                }
+            );
+            if i < 3u32
             {
-                let t16: u32 = (&mut ws)[i0 as usize];
-                let t15: u32 = (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
-                let t7: u32 = (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
-                let t2: u32 = (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
-                let s1: u32 =
-                    (t2.wrapping_shl(15u32) | t2.wrapping_shr(17u32))
-                    ^
-                    ((t2.wrapping_shl(13u32) | t2.wrapping_shr(19u32)) ^ t2.wrapping_shr(10u32));
-                let s0: u32 =
-                    (t15.wrapping_shl(25u32) | t15.wrapping_shr(7u32))
-                    ^
-                    ((t15.wrapping_shl(14u32) | t15.wrapping_shr(18u32)) ^ t15.wrapping_shr(3u32));
-                (&mut ws)[i0 as usize] = s1.wrapping_add(t7).wrapping_add(s0).wrapping_add(t16)
+                krml::unroll_for!(
+                    16,
+                    "i0",
+                    0u32,
+                    1u32,
+                    {
+                        let t16: u32 = (&mut ws)[i0 as usize];
+                        let t15: u32 =
+                            (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
+                        let t7: u32 = (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
+                        let t2: u32 =
+                            (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
+                        let s1: u32 =
+                            (t2.wrapping_shl(15u32) | t2.wrapping_shr(17u32))
+                            ^
+                            ((t2.wrapping_shl(13u32) | t2.wrapping_shr(19u32))
+                            ^
+                            t2.wrapping_shr(10u32));
+                        let s0: u32 =
+                            (t15.wrapping_shl(25u32) | t15.wrapping_shr(7u32))
+                            ^
+                            ((t15.wrapping_shl(14u32) | t15.wrapping_shr(18u32))
+                            ^
+                            t15.wrapping_shr(3u32));
+                        (&mut ws)[i0 as usize] =
+                            s1.wrapping_add(t7).wrapping_add(s0).wrapping_add(t16)
+                    }
+                )
             }
         }
-    };
-    for i in 0u32..8u32
-    {
-        let x: u32 = (hash[i as usize]).wrapping_add((&mut hash_old)[i as usize]);
-        let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    );
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = (hash[i as usize]).wrapping_add((&mut hash_old)[i as usize]);
+            let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 pub fn sha256_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32]) -> ()
@@ -221,24 +253,32 @@ pub fn sha256_update_last(totlen: u64, len: u32, b: &mut [u8], hash: &mut [u32])
 pub fn sha256_finish(st: &mut [u32], h: &mut [u8]) -> ()
 {
     let mut hbuf: [u8; 32] = [0u8; 32usize];
-    for i in 0u32..8u32
-    {
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store32_be(
             &mut (&mut hbuf)[i.wrapping_mul(4u32) as usize..],
             st[i as usize]
         )
-    };
+    );
     (h[0usize..32usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..32usize])
 }
 
 pub fn sha224_init(hash: &mut [u32]) -> ()
 {
-    for i in 0u32..8u32
-    {
-        let x: u32 = (&h224)[i as usize];
-        let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = (&h224)[i as usize];
+            let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha224_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32]) -> ()
@@ -250,24 +290,32 @@ pub fn sha224_update_last(totlen: u64, len: u32, b: &mut [u8], st: &mut [u32]) -
 pub fn sha224_finish(st: &mut [u32], h: &mut [u8]) -> ()
 {
     let mut hbuf: [u8; 32] = [0u8; 32usize];
-    for i in 0u32..8u32
-    {
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store32_be(
             &mut (&mut hbuf)[i.wrapping_mul(4u32) as usize..],
             st[i as usize]
         )
-    };
+    );
     (h[0usize..28usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..28usize])
 }
 
 pub fn sha512_init(hash: &mut [u64]) -> ()
 {
-    for i in 0u32..8u32
-    {
-        let x: u64 = (&h512)[i as usize];
-        let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u64 = (&h512)[i as usize];
+            let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha512_update(b: &mut [u8], hash: &mut [u64]) -> ()
@@ -308,80 +356,107 @@ pub fn sha512_init(hash: &mut [u64]) -> ()
     (&mut ws)[14usize] = u13;
     let u14: u64 = crate::lowstar::endianness::load64_be(&mut b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    for i in 0u32..5u32
-    {
-        for i0 in 0u32..16u32
+    krml::unroll_for!(
+        5,
+        "i",
+        0u32,
+        1u32,
         {
-            let k_t: u64 = (&k384_512)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
-            let ws_t: u64 = (&mut ws)[i0 as usize];
-            let a0: u64 = hash[0usize];
-            let b0: u64 = hash[1usize];
-            let c0: u64 = hash[2usize];
-            let d0: u64 = hash[3usize];
-            let e0: u64 = hash[4usize];
-            let f0: u64 = hash[5usize];
-            let g0: u64 = hash[6usize];
-            let h02: u64 = hash[7usize];
-            let k_e_t: u64 = k_t;
-            let t1: u64 =
-                h02.wrapping_add(
-                    (e0.wrapping_shl(50u32) | e0.wrapping_shr(14u32))
-                    ^
-                    ((e0.wrapping_shl(46u32) | e0.wrapping_shr(18u32))
-                    ^
-                    (e0.wrapping_shl(23u32) | e0.wrapping_shr(41u32)))
-                ).wrapping_add(e0 & f0 ^ ! e0 & g0).wrapping_add(k_e_t).wrapping_add(ws_t);
-            let t2: u64 =
-                ((a0.wrapping_shl(36u32) | a0.wrapping_shr(28u32))
-                ^
-                ((a0.wrapping_shl(30u32) | a0.wrapping_shr(34u32))
-                ^
-                (a0.wrapping_shl(25u32) | a0.wrapping_shr(39u32)))).wrapping_add(
-                    a0 & b0 ^ (a0 & c0 ^ b0 & c0)
-                );
-            let a1: u64 = t1.wrapping_add(t2);
-            let b10: u64 = a0;
-            let c1: u64 = b0;
-            let d1: u64 = c0;
-            let e1: u64 = d0.wrapping_add(t1);
-            let f1: u64 = e0;
-            let g1: u64 = f0;
-            let h12: u64 = g0;
-            hash[0usize] = a1;
-            hash[1usize] = b10;
-            hash[2usize] = c1;
-            hash[3usize] = d1;
-            hash[4usize] = e1;
-            hash[5usize] = f1;
-            hash[6usize] = g1;
-            hash[7usize] = h12
-        };
-        if i < 4u32
-        {
-            for i0 in 0u32..16u32
+            krml::unroll_for!(
+                16,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let k_t: u64 = (&k384_512)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
+                    let ws_t: u64 = (&mut ws)[i0 as usize];
+                    let a0: u64 = hash[0usize];
+                    let b0: u64 = hash[1usize];
+                    let c0: u64 = hash[2usize];
+                    let d0: u64 = hash[3usize];
+                    let e0: u64 = hash[4usize];
+                    let f0: u64 = hash[5usize];
+                    let g0: u64 = hash[6usize];
+                    let h02: u64 = hash[7usize];
+                    let k_e_t: u64 = k_t;
+                    let t1: u64 =
+                        h02.wrapping_add(
+                            (e0.wrapping_shl(50u32) | e0.wrapping_shr(14u32))
+                            ^
+                            ((e0.wrapping_shl(46u32) | e0.wrapping_shr(18u32))
+                            ^
+                            (e0.wrapping_shl(23u32) | e0.wrapping_shr(41u32)))
+                        ).wrapping_add(e0 & f0 ^ ! e0 & g0).wrapping_add(k_e_t).wrapping_add(ws_t);
+                    let t2: u64 =
+                        ((a0.wrapping_shl(36u32) | a0.wrapping_shr(28u32))
+                        ^
+                        ((a0.wrapping_shl(30u32) | a0.wrapping_shr(34u32))
+                        ^
+                        (a0.wrapping_shl(25u32) | a0.wrapping_shr(39u32)))).wrapping_add(
+                            a0 & b0 ^ (a0 & c0 ^ b0 & c0)
+                        );
+                    let a1: u64 = t1.wrapping_add(t2);
+                    let b10: u64 = a0;
+                    let c1: u64 = b0;
+                    let d1: u64 = c0;
+                    let e1: u64 = d0.wrapping_add(t1);
+                    let f1: u64 = e0;
+                    let g1: u64 = f0;
+                    let h12: u64 = g0;
+                    hash[0usize] = a1;
+                    hash[1usize] = b10;
+                    hash[2usize] = c1;
+                    hash[3usize] = d1;
+                    hash[4usize] = e1;
+                    hash[5usize] = f1;
+                    hash[6usize] = g1;
+                    hash[7usize] = h12
+                }
+            );
+            if i < 4u32
             {
-                let t16: u64 = (&mut ws)[i0 as usize];
-                let t15: u64 = (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
-                let t7: u64 = (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
-                let t2: u64 = (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
-                let s1: u64 =
-                    (t2.wrapping_shl(45u32) | t2.wrapping_shr(19u32))
-                    ^
-                    ((t2.wrapping_shl(3u32) | t2.wrapping_shr(61u32)) ^ t2.wrapping_shr(6u32));
-                let s0: u64 =
-                    (t15.wrapping_shl(63u32) | t15.wrapping_shr(1u32))
-                    ^
-                    ((t15.wrapping_shl(56u32) | t15.wrapping_shr(8u32)) ^ t15.wrapping_shr(7u32));
-                (&mut ws)[i0 as usize] = s1.wrapping_add(t7).wrapping_add(s0).wrapping_add(t16)
+                krml::unroll_for!(
+                    16,
+                    "i0",
+                    0u32,
+                    1u32,
+                    {
+                        let t16: u64 = (&mut ws)[i0 as usize];
+                        let t15: u64 =
+                            (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
+                        let t7: u64 = (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
+                        let t2: u64 =
+                            (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
+                        let s1: u64 =
+                            (t2.wrapping_shl(45u32) | t2.wrapping_shr(19u32))
+                            ^
+                            ((t2.wrapping_shl(3u32) | t2.wrapping_shr(61u32))
+                            ^
+                            t2.wrapping_shr(6u32));
+                        let s0: u64 =
+                            (t15.wrapping_shl(63u32) | t15.wrapping_shr(1u32))
+                            ^
+                            ((t15.wrapping_shl(56u32) | t15.wrapping_shr(8u32))
+                            ^
+                            t15.wrapping_shr(7u32));
+                        (&mut ws)[i0 as usize] =
+                            s1.wrapping_add(t7).wrapping_add(s0).wrapping_add(t16)
+                    }
+                )
             }
         }
-    };
-    for i in 0u32..8u32
-    {
-        let x: u64 = (hash[i as usize]).wrapping_add((&mut hash_old)[i as usize]);
-        let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    );
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u64 = (hash[i as usize]).wrapping_add((&mut hash_old)[i as usize]);
+            let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 pub fn sha512_update_nblocks(len: u32, b: &mut [u8], st: &mut [u64]) -> ()
@@ -432,24 +507,32 @@ pub fn sha512_update_last(
 pub fn sha512_finish(st: &mut [u64], h: &mut [u8]) -> ()
 {
     let mut hbuf: [u8; 64] = [0u8; 64usize];
-    for i in 0u32..8u32
-    {
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store64_be(
             &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
             st[i as usize]
         )
-    };
+    );
     (h[0usize..64usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..64usize])
 }
 
 pub fn sha384_init(hash: &mut [u64]) -> ()
 {
-    for i in 0u32..8u32
-    {
-        let x: u64 = (&h384)[i as usize];
-        let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u64 = (&h384)[i as usize];
+            let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 pub fn sha384_update_nblocks(len: u32, b: &mut [u8], st: &mut [u64]) -> ()
@@ -467,13 +550,16 @@ pub fn sha384_update_last(
 pub fn sha384_finish(st: &mut [u64], h: &mut [u8]) -> ()
 {
     let mut hbuf: [u8; 64] = [0u8; 64usize];
-    for i in 0u32..8u32
-    {
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store64_be(
             &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
             st[i as usize]
         )
-    };
+    );
     (h[0usize..48usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..48usize])
 }
 

@@ -8,19 +8,24 @@
 
 #[inline] fn sha224_init8(hash: &mut [crate::lib::intvector_intrinsics::vec256]) -> ()
 {
-    for i in 0u32..8u32
-    {
-        let hi: u32 = (&crate::hacl::hash_sha2::h224)[i as usize];
-        let x: crate::lib::intvector_intrinsics::vec256 =
-            crate::lib::intvector_intrinsics::vec256_load32(hi);
-        let
-        os:
-        (&mut [crate::lib::intvector_intrinsics::vec256],
-        &mut [crate::lib::intvector_intrinsics::vec256])
-        =
-            hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let hi: u32 = (&crate::hacl::hash_sha2::h224)[i as usize];
+            let x: crate::lib::intvector_intrinsics::vec256 =
+                crate::lib::intvector_intrinsics::vec256_load32(hi);
+            let
+            os:
+            (&mut [crate::lib::intvector_intrinsics::vec256],
+            &mut [crate::lib::intvector_intrinsics::vec256])
+            =
+                hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha224_update8(
@@ -266,147 +271,187 @@
     (&mut ws)[13usize] = ws13;
     (&mut ws)[14usize] = ws14;
     (&mut ws)[15usize] = ws15;
-    for i in 0u32..4u32
-    {
-        for i0 in 0u32..16u32
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
         {
-            let k_t: u32 =
-                (&crate::hacl::hash_sha2::k224_256)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
-            let ws_t: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
-            let a0: crate::lib::intvector_intrinsics::vec256 = hash[0usize];
-            let b00: crate::lib::intvector_intrinsics::vec256 = hash[1usize];
-            let c0: crate::lib::intvector_intrinsics::vec256 = hash[2usize];
-            let d0: crate::lib::intvector_intrinsics::vec256 = hash[3usize];
-            let e0: crate::lib::intvector_intrinsics::vec256 = hash[4usize];
-            let f0: crate::lib::intvector_intrinsics::vec256 = hash[5usize];
-            let g0: crate::lib::intvector_intrinsics::vec256 = hash[6usize];
-            let h02: crate::lib::intvector_intrinsics::vec256 = hash[7usize];
-            let k_e_t: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_load32(k_t);
-            let t1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add32(
-                    crate::lib::intvector_intrinsics::vec256_add32(
+            krml::unroll_for!(
+                16,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let k_t: u32 =
+                        (&crate::hacl::hash_sha2::k224_256)[16u32.wrapping_mul(i).wrapping_add(i0)
+                        as
+                        usize];
+                    let ws_t: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
+                    let a0: crate::lib::intvector_intrinsics::vec256 = hash[0usize];
+                    let b00: crate::lib::intvector_intrinsics::vec256 = hash[1usize];
+                    let c0: crate::lib::intvector_intrinsics::vec256 = hash[2usize];
+                    let d0: crate::lib::intvector_intrinsics::vec256 = hash[3usize];
+                    let e0: crate::lib::intvector_intrinsics::vec256 = hash[4usize];
+                    let f0: crate::lib::intvector_intrinsics::vec256 = hash[5usize];
+                    let g0: crate::lib::intvector_intrinsics::vec256 = hash[6usize];
+                    let h02: crate::lib::intvector_intrinsics::vec256 = hash[7usize];
+                    let k_e_t: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_load32(k_t);
+                    let t1: crate::lib::intvector_intrinsics::vec256 =
                         crate::lib::intvector_intrinsics::vec256_add32(
                             crate::lib::intvector_intrinsics::vec256_add32(
-                                h02,
-                                crate::lib::intvector_intrinsics::vec256_xor(
-                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
-                                        e0,
-                                        6u32
+                                crate::lib::intvector_intrinsics::vec256_add32(
+                                    crate::lib::intvector_intrinsics::vec256_add32(
+                                        h02,
+                                        crate::lib::intvector_intrinsics::vec256_xor(
+                                            crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                                e0,
+                                                6u32
+                                            ),
+                                            crate::lib::intvector_intrinsics::vec256_xor(
+                                                crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                                    e0,
+                                                    11u32
+                                                ),
+                                                crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                                    e0,
+                                                    25u32
+                                                )
+                                            )
+                                        )
                                     ),
                                     crate::lib::intvector_intrinsics::vec256_xor(
-                                        crate::lib::intvector_intrinsics::vec256_rotate_right32(
-                                            e0,
-                                            11u32
-                                        ),
-                                        crate::lib::intvector_intrinsics::vec256_rotate_right32(
-                                            e0,
-                                            25u32
+                                        crate::lib::intvector_intrinsics::vec256_and(e0, f0),
+                                        crate::lib::intvector_intrinsics::vec256_and(
+                                            crate::lib::intvector_intrinsics::vec256_lognot(e0),
+                                            g0
                                         )
+                                    )
+                                ),
+                                k_e_t
+                            ),
+                            ws_t
+                        );
+                    let t2: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add32(
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right32(a0, 2u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                        a0,
+                                        13u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                        a0,
+                                        22u32
                                     )
                                 )
                             ),
                             crate::lib::intvector_intrinsics::vec256_xor(
-                                crate::lib::intvector_intrinsics::vec256_and(e0, f0),
-                                crate::lib::intvector_intrinsics::vec256_and(
-                                    crate::lib::intvector_intrinsics::vec256_lognot(e0),
-                                    g0
+                                crate::lib::intvector_intrinsics::vec256_and(a0, b00),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_and(a0, c0),
+                                    crate::lib::intvector_intrinsics::vec256_and(b00, c0)
                                 )
                             )
-                        ),
-                        k_e_t
-                    ),
-                    ws_t
-                );
-            let t2: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add32(
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right32(a0, 2u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right32(a0, 13u32),
-                            crate::lib::intvector_intrinsics::vec256_rotate_right32(a0, 22u32)
-                        )
-                    ),
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_and(a0, b00),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_and(a0, c0),
-                            crate::lib::intvector_intrinsics::vec256_and(b00, c0)
-                        )
-                    )
-                );
-            let a1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add32(t1, t2);
-            let b10: crate::lib::intvector_intrinsics::vec256 = a0;
-            let c1: crate::lib::intvector_intrinsics::vec256 = b00;
-            let d1: crate::lib::intvector_intrinsics::vec256 = c0;
-            let e1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add32(d0, t1);
-            let f1: crate::lib::intvector_intrinsics::vec256 = e0;
-            let g1: crate::lib::intvector_intrinsics::vec256 = f0;
-            let h12: crate::lib::intvector_intrinsics::vec256 = g0;
-            hash[0usize] = a1;
-            hash[1usize] = b10;
-            hash[2usize] = c1;
-            hash[3usize] = d1;
-            hash[4usize] = e1;
-            hash[5usize] = f1;
-            hash[6usize] = g1;
-            hash[7usize] = h12
-        };
-        if i < 3u32
-        {
-            for i0 in 0u32..16u32
+                        );
+                    let a1: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add32(t1, t2);
+                    let b10: crate::lib::intvector_intrinsics::vec256 = a0;
+                    let c1: crate::lib::intvector_intrinsics::vec256 = b00;
+                    let d1: crate::lib::intvector_intrinsics::vec256 = c0;
+                    let e1: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add32(d0, t1);
+                    let f1: crate::lib::intvector_intrinsics::vec256 = e0;
+                    let g1: crate::lib::intvector_intrinsics::vec256 = f0;
+                    let h12: crate::lib::intvector_intrinsics::vec256 = g0;
+                    hash[0usize] = a1;
+                    hash[1usize] = b10;
+                    hash[2usize] = c1;
+                    hash[3usize] = d1;
+                    hash[4usize] = e1;
+                    hash[5usize] = f1;
+                    hash[6usize] = g1;
+                    hash[7usize] = h12
+                }
+            );
+            if i < 3u32
             {
-                let t16: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
-                let t15: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
-                let t7: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
-                let t2: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
-                let s1: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right32(t2, 17u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right32(t2, 19u32),
-                            crate::lib::intvector_intrinsics::vec256_shift_right32(t2, 10u32)
-                        )
-                    );
-                let s0: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right32(t15, 7u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right32(t15, 18u32),
-                            crate::lib::intvector_intrinsics::vec256_shift_right32(t15, 3u32)
-                        )
-                    );
-                (&mut ws)[i0 as usize] =
-                    crate::lib::intvector_intrinsics::vec256_add32(
-                        crate::lib::intvector_intrinsics::vec256_add32(
-                            crate::lib::intvector_intrinsics::vec256_add32(s1, t7),
-                            s0
-                        ),
-                        t16
-                    )
+                krml::unroll_for!(
+                    16,
+                    "i0",
+                    0u32,
+                    1u32,
+                    {
+                        let t16: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
+                        let t15: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
+                        let t7: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
+                        let t2: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
+                        let s1: crate::lib::intvector_intrinsics::vec256 =
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right32(t2, 17u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                        t2,
+                                        19u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_shift_right32(
+                                        t2,
+                                        10u32
+                                    )
+                                )
+                            );
+                        let s0: crate::lib::intvector_intrinsics::vec256 =
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right32(t15, 7u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                        t15,
+                                        18u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_shift_right32(
+                                        t15,
+                                        3u32
+                                    )
+                                )
+                            );
+                        (&mut ws)[i0 as usize] =
+                            crate::lib::intvector_intrinsics::vec256_add32(
+                                crate::lib::intvector_intrinsics::vec256_add32(
+                                    crate::lib::intvector_intrinsics::vec256_add32(s1, t7),
+                                    s0
+                                ),
+                                t16
+                            )
+                    }
+                )
             }
         }
-    };
-    for i in 0u32..8u32
-    {
-        let x: crate::lib::intvector_intrinsics::vec256 =
-            crate::lib::intvector_intrinsics::vec256_add32(
-                hash[i as usize],
-                (&mut hash_old)[i as usize]
-            );
-        let
-        os:
-        (&mut [crate::lib::intvector_intrinsics::vec256],
-        &mut [crate::lib::intvector_intrinsics::vec256])
-        =
-            hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    );
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: crate::lib::intvector_intrinsics::vec256 =
+                crate::lib::intvector_intrinsics::vec256_add32(
+                    hash[i as usize],
+                    (&mut hash_old)[i as usize]
+                );
+            let
+            os:
+            (&mut [crate::lib::intvector_intrinsics::vec256],
+            &mut [crate::lib::intvector_intrinsics::vec256])
+            =
+                hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha224_update_nblocks8(
@@ -754,13 +799,16 @@
     st[5usize] = st5·;
     st[6usize] = st6·;
     st[7usize] = st7·;
-    for i in 0u32..8u32
-    {
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
         crate::lib::intvector_intrinsics::vec256_store32_be(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
             st[i as usize]
         )
-    };
+    );
     let b7: &mut [u8] = h.snd.snd.snd.snd.snd.snd.snd;
     let b6: &mut [u8] = h.snd.snd.snd.snd.snd.snd.fst;
     let b5: &mut [u8] = h.snd.snd.snd.snd.snd.fst;
@@ -922,19 +970,24 @@ pub fn sha224_8(
 
 #[inline] fn sha256_init8(hash: &mut [crate::lib::intvector_intrinsics::vec256]) -> ()
 {
-    for i in 0u32..8u32
-    {
-        let hi: u32 = (&crate::hacl::hash_sha2::h256)[i as usize];
-        let x: crate::lib::intvector_intrinsics::vec256 =
-            crate::lib::intvector_intrinsics::vec256_load32(hi);
-        let
-        os:
-        (&mut [crate::lib::intvector_intrinsics::vec256],
-        &mut [crate::lib::intvector_intrinsics::vec256])
-        =
-            hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let hi: u32 = (&crate::hacl::hash_sha2::h256)[i as usize];
+            let x: crate::lib::intvector_intrinsics::vec256 =
+                crate::lib::intvector_intrinsics::vec256_load32(hi);
+            let
+            os:
+            (&mut [crate::lib::intvector_intrinsics::vec256],
+            &mut [crate::lib::intvector_intrinsics::vec256])
+            =
+                hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha256_update8(
@@ -1180,147 +1233,187 @@ pub fn sha224_8(
     (&mut ws)[13usize] = ws13;
     (&mut ws)[14usize] = ws14;
     (&mut ws)[15usize] = ws15;
-    for i in 0u32..4u32
-    {
-        for i0 in 0u32..16u32
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
         {
-            let k_t: u32 =
-                (&crate::hacl::hash_sha2::k224_256)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
-            let ws_t: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
-            let a0: crate::lib::intvector_intrinsics::vec256 = hash[0usize];
-            let b00: crate::lib::intvector_intrinsics::vec256 = hash[1usize];
-            let c0: crate::lib::intvector_intrinsics::vec256 = hash[2usize];
-            let d0: crate::lib::intvector_intrinsics::vec256 = hash[3usize];
-            let e0: crate::lib::intvector_intrinsics::vec256 = hash[4usize];
-            let f0: crate::lib::intvector_intrinsics::vec256 = hash[5usize];
-            let g0: crate::lib::intvector_intrinsics::vec256 = hash[6usize];
-            let h02: crate::lib::intvector_intrinsics::vec256 = hash[7usize];
-            let k_e_t: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_load32(k_t);
-            let t1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add32(
-                    crate::lib::intvector_intrinsics::vec256_add32(
+            krml::unroll_for!(
+                16,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let k_t: u32 =
+                        (&crate::hacl::hash_sha2::k224_256)[16u32.wrapping_mul(i).wrapping_add(i0)
+                        as
+                        usize];
+                    let ws_t: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
+                    let a0: crate::lib::intvector_intrinsics::vec256 = hash[0usize];
+                    let b00: crate::lib::intvector_intrinsics::vec256 = hash[1usize];
+                    let c0: crate::lib::intvector_intrinsics::vec256 = hash[2usize];
+                    let d0: crate::lib::intvector_intrinsics::vec256 = hash[3usize];
+                    let e0: crate::lib::intvector_intrinsics::vec256 = hash[4usize];
+                    let f0: crate::lib::intvector_intrinsics::vec256 = hash[5usize];
+                    let g0: crate::lib::intvector_intrinsics::vec256 = hash[6usize];
+                    let h02: crate::lib::intvector_intrinsics::vec256 = hash[7usize];
+                    let k_e_t: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_load32(k_t);
+                    let t1: crate::lib::intvector_intrinsics::vec256 =
                         crate::lib::intvector_intrinsics::vec256_add32(
                             crate::lib::intvector_intrinsics::vec256_add32(
-                                h02,
-                                crate::lib::intvector_intrinsics::vec256_xor(
-                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
-                                        e0,
-                                        6u32
+                                crate::lib::intvector_intrinsics::vec256_add32(
+                                    crate::lib::intvector_intrinsics::vec256_add32(
+                                        h02,
+                                        crate::lib::intvector_intrinsics::vec256_xor(
+                                            crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                                e0,
+                                                6u32
+                                            ),
+                                            crate::lib::intvector_intrinsics::vec256_xor(
+                                                crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                                    e0,
+                                                    11u32
+                                                ),
+                                                crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                                    e0,
+                                                    25u32
+                                                )
+                                            )
+                                        )
                                     ),
                                     crate::lib::intvector_intrinsics::vec256_xor(
-                                        crate::lib::intvector_intrinsics::vec256_rotate_right32(
-                                            e0,
-                                            11u32
-                                        ),
-                                        crate::lib::intvector_intrinsics::vec256_rotate_right32(
-                                            e0,
-                                            25u32
+                                        crate::lib::intvector_intrinsics::vec256_and(e0, f0),
+                                        crate::lib::intvector_intrinsics::vec256_and(
+                                            crate::lib::intvector_intrinsics::vec256_lognot(e0),
+                                            g0
                                         )
+                                    )
+                                ),
+                                k_e_t
+                            ),
+                            ws_t
+                        );
+                    let t2: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add32(
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right32(a0, 2u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                        a0,
+                                        13u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                        a0,
+                                        22u32
                                     )
                                 )
                             ),
                             crate::lib::intvector_intrinsics::vec256_xor(
-                                crate::lib::intvector_intrinsics::vec256_and(e0, f0),
-                                crate::lib::intvector_intrinsics::vec256_and(
-                                    crate::lib::intvector_intrinsics::vec256_lognot(e0),
-                                    g0
+                                crate::lib::intvector_intrinsics::vec256_and(a0, b00),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_and(a0, c0),
+                                    crate::lib::intvector_intrinsics::vec256_and(b00, c0)
                                 )
                             )
-                        ),
-                        k_e_t
-                    ),
-                    ws_t
-                );
-            let t2: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add32(
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right32(a0, 2u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right32(a0, 13u32),
-                            crate::lib::intvector_intrinsics::vec256_rotate_right32(a0, 22u32)
-                        )
-                    ),
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_and(a0, b00),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_and(a0, c0),
-                            crate::lib::intvector_intrinsics::vec256_and(b00, c0)
-                        )
-                    )
-                );
-            let a1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add32(t1, t2);
-            let b10: crate::lib::intvector_intrinsics::vec256 = a0;
-            let c1: crate::lib::intvector_intrinsics::vec256 = b00;
-            let d1: crate::lib::intvector_intrinsics::vec256 = c0;
-            let e1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add32(d0, t1);
-            let f1: crate::lib::intvector_intrinsics::vec256 = e0;
-            let g1: crate::lib::intvector_intrinsics::vec256 = f0;
-            let h12: crate::lib::intvector_intrinsics::vec256 = g0;
-            hash[0usize] = a1;
-            hash[1usize] = b10;
-            hash[2usize] = c1;
-            hash[3usize] = d1;
-            hash[4usize] = e1;
-            hash[5usize] = f1;
-            hash[6usize] = g1;
-            hash[7usize] = h12
-        };
-        if i < 3u32
-        {
-            for i0 in 0u32..16u32
+                        );
+                    let a1: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add32(t1, t2);
+                    let b10: crate::lib::intvector_intrinsics::vec256 = a0;
+                    let c1: crate::lib::intvector_intrinsics::vec256 = b00;
+                    let d1: crate::lib::intvector_intrinsics::vec256 = c0;
+                    let e1: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add32(d0, t1);
+                    let f1: crate::lib::intvector_intrinsics::vec256 = e0;
+                    let g1: crate::lib::intvector_intrinsics::vec256 = f0;
+                    let h12: crate::lib::intvector_intrinsics::vec256 = g0;
+                    hash[0usize] = a1;
+                    hash[1usize] = b10;
+                    hash[2usize] = c1;
+                    hash[3usize] = d1;
+                    hash[4usize] = e1;
+                    hash[5usize] = f1;
+                    hash[6usize] = g1;
+                    hash[7usize] = h12
+                }
+            );
+            if i < 3u32
             {
-                let t16: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
-                let t15: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
-                let t7: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
-                let t2: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
-                let s1: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right32(t2, 17u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right32(t2, 19u32),
-                            crate::lib::intvector_intrinsics::vec256_shift_right32(t2, 10u32)
-                        )
-                    );
-                let s0: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right32(t15, 7u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right32(t15, 18u32),
-                            crate::lib::intvector_intrinsics::vec256_shift_right32(t15, 3u32)
-                        )
-                    );
-                (&mut ws)[i0 as usize] =
-                    crate::lib::intvector_intrinsics::vec256_add32(
-                        crate::lib::intvector_intrinsics::vec256_add32(
-                            crate::lib::intvector_intrinsics::vec256_add32(s1, t7),
-                            s0
-                        ),
-                        t16
-                    )
+                krml::unroll_for!(
+                    16,
+                    "i0",
+                    0u32,
+                    1u32,
+                    {
+                        let t16: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
+                        let t15: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
+                        let t7: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
+                        let t2: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
+                        let s1: crate::lib::intvector_intrinsics::vec256 =
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right32(t2, 17u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                        t2,
+                                        19u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_shift_right32(
+                                        t2,
+                                        10u32
+                                    )
+                                )
+                            );
+                        let s0: crate::lib::intvector_intrinsics::vec256 =
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right32(t15, 7u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right32(
+                                        t15,
+                                        18u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_shift_right32(
+                                        t15,
+                                        3u32
+                                    )
+                                )
+                            );
+                        (&mut ws)[i0 as usize] =
+                            crate::lib::intvector_intrinsics::vec256_add32(
+                                crate::lib::intvector_intrinsics::vec256_add32(
+                                    crate::lib::intvector_intrinsics::vec256_add32(s1, t7),
+                                    s0
+                                ),
+                                t16
+                            )
+                    }
+                )
             }
         }
-    };
-    for i in 0u32..8u32
-    {
-        let x: crate::lib::intvector_intrinsics::vec256 =
-            crate::lib::intvector_intrinsics::vec256_add32(
-                hash[i as usize],
-                (&mut hash_old)[i as usize]
-            );
-        let
-        os:
-        (&mut [crate::lib::intvector_intrinsics::vec256],
-        &mut [crate::lib::intvector_intrinsics::vec256])
-        =
-            hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    );
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: crate::lib::intvector_intrinsics::vec256 =
+                crate::lib::intvector_intrinsics::vec256_add32(
+                    hash[i as usize],
+                    (&mut hash_old)[i as usize]
+                );
+            let
+            os:
+            (&mut [crate::lib::intvector_intrinsics::vec256],
+            &mut [crate::lib::intvector_intrinsics::vec256])
+            =
+                hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha256_update_nblocks8(
@@ -1668,13 +1761,16 @@ pub fn sha224_8(
     st[5usize] = st5·;
     st[6usize] = st6·;
     st[7usize] = st7·;
-    for i in 0u32..8u32
-    {
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
         crate::lib::intvector_intrinsics::vec256_store32_be(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
             st[i as usize]
         )
-    };
+    );
     let b7: &mut [u8] = h.snd.snd.snd.snd.snd.snd.snd;
     let b6: &mut [u8] = h.snd.snd.snd.snd.snd.snd.fst;
     let b5: &mut [u8] = h.snd.snd.snd.snd.snd.fst;
@@ -1836,19 +1932,24 @@ pub fn sha256_8(
 
 #[inline] fn sha384_init4(hash: &mut [crate::lib::intvector_intrinsics::vec256]) -> ()
 {
-    for i in 0u32..8u32
-    {
-        let hi: u64 = (&crate::hacl::hash_sha2::h384)[i as usize];
-        let x: crate::lib::intvector_intrinsics::vec256 =
-            crate::lib::intvector_intrinsics::vec256_load64(hi);
-        let
-        os:
-        (&mut [crate::lib::intvector_intrinsics::vec256],
-        &mut [crate::lib::intvector_intrinsics::vec256])
-        =
-            hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let hi: u64 = (&crate::hacl::hash_sha2::h384)[i as usize];
+            let x: crate::lib::intvector_intrinsics::vec256 =
+                crate::lib::intvector_intrinsics::vec256_load64(hi);
+            let
+            os:
+            (&mut [crate::lib::intvector_intrinsics::vec256],
+            &mut [crate::lib::intvector_intrinsics::vec256])
+            =
+                hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha384_update4(
@@ -1994,147 +2095,184 @@ pub fn sha256_8(
     (&mut ws)[13usize] = ws13;
     (&mut ws)[14usize] = ws14;
     (&mut ws)[15usize] = ws15;
-    for i in 0u32..5u32
-    {
-        for i0 in 0u32..16u32
+    krml::unroll_for!(
+        5,
+        "i",
+        0u32,
+        1u32,
         {
-            let k_t: u64 =
-                (&crate::hacl::hash_sha2::k384_512)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
-            let ws_t: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
-            let a0: crate::lib::intvector_intrinsics::vec256 = hash[0usize];
-            let b00: crate::lib::intvector_intrinsics::vec256 = hash[1usize];
-            let c0: crate::lib::intvector_intrinsics::vec256 = hash[2usize];
-            let d0: crate::lib::intvector_intrinsics::vec256 = hash[3usize];
-            let e0: crate::lib::intvector_intrinsics::vec256 = hash[4usize];
-            let f0: crate::lib::intvector_intrinsics::vec256 = hash[5usize];
-            let g0: crate::lib::intvector_intrinsics::vec256 = hash[6usize];
-            let h02: crate::lib::intvector_intrinsics::vec256 = hash[7usize];
-            let k_e_t: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_load64(k_t);
-            let t1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add64(
-                    crate::lib::intvector_intrinsics::vec256_add64(
+            krml::unroll_for!(
+                16,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let k_t: u64 =
+                        (&crate::hacl::hash_sha2::k384_512)[16u32.wrapping_mul(i).wrapping_add(i0)
+                        as
+                        usize];
+                    let ws_t: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
+                    let a0: crate::lib::intvector_intrinsics::vec256 = hash[0usize];
+                    let b00: crate::lib::intvector_intrinsics::vec256 = hash[1usize];
+                    let c0: crate::lib::intvector_intrinsics::vec256 = hash[2usize];
+                    let d0: crate::lib::intvector_intrinsics::vec256 = hash[3usize];
+                    let e0: crate::lib::intvector_intrinsics::vec256 = hash[4usize];
+                    let f0: crate::lib::intvector_intrinsics::vec256 = hash[5usize];
+                    let g0: crate::lib::intvector_intrinsics::vec256 = hash[6usize];
+                    let h02: crate::lib::intvector_intrinsics::vec256 = hash[7usize];
+                    let k_e_t: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_load64(k_t);
+                    let t1: crate::lib::intvector_intrinsics::vec256 =
                         crate::lib::intvector_intrinsics::vec256_add64(
                             crate::lib::intvector_intrinsics::vec256_add64(
-                                h02,
-                                crate::lib::intvector_intrinsics::vec256_xor(
-                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
-                                        e0,
-                                        14u32
+                                crate::lib::intvector_intrinsics::vec256_add64(
+                                    crate::lib::intvector_intrinsics::vec256_add64(
+                                        h02,
+                                        crate::lib::intvector_intrinsics::vec256_xor(
+                                            crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                                e0,
+                                                14u32
+                                            ),
+                                            crate::lib::intvector_intrinsics::vec256_xor(
+                                                crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                                    e0,
+                                                    18u32
+                                                ),
+                                                crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                                    e0,
+                                                    41u32
+                                                )
+                                            )
+                                        )
                                     ),
                                     crate::lib::intvector_intrinsics::vec256_xor(
-                                        crate::lib::intvector_intrinsics::vec256_rotate_right64(
-                                            e0,
-                                            18u32
-                                        ),
-                                        crate::lib::intvector_intrinsics::vec256_rotate_right64(
-                                            e0,
-                                            41u32
+                                        crate::lib::intvector_intrinsics::vec256_and(e0, f0),
+                                        crate::lib::intvector_intrinsics::vec256_and(
+                                            crate::lib::intvector_intrinsics::vec256_lognot(e0),
+                                            g0
                                         )
+                                    )
+                                ),
+                                k_e_t
+                            ),
+                            ws_t
+                        );
+                    let t2: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add64(
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right64(a0, 28u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                        a0,
+                                        34u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                        a0,
+                                        39u32
                                     )
                                 )
                             ),
                             crate::lib::intvector_intrinsics::vec256_xor(
-                                crate::lib::intvector_intrinsics::vec256_and(e0, f0),
-                                crate::lib::intvector_intrinsics::vec256_and(
-                                    crate::lib::intvector_intrinsics::vec256_lognot(e0),
-                                    g0
+                                crate::lib::intvector_intrinsics::vec256_and(a0, b00),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_and(a0, c0),
+                                    crate::lib::intvector_intrinsics::vec256_and(b00, c0)
                                 )
                             )
-                        ),
-                        k_e_t
-                    ),
-                    ws_t
-                );
-            let t2: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add64(
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right64(a0, 28u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right64(a0, 34u32),
-                            crate::lib::intvector_intrinsics::vec256_rotate_right64(a0, 39u32)
-                        )
-                    ),
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_and(a0, b00),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_and(a0, c0),
-                            crate::lib::intvector_intrinsics::vec256_and(b00, c0)
-                        )
-                    )
-                );
-            let a1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add64(t1, t2);
-            let b10: crate::lib::intvector_intrinsics::vec256 = a0;
-            let c1: crate::lib::intvector_intrinsics::vec256 = b00;
-            let d1: crate::lib::intvector_intrinsics::vec256 = c0;
-            let e1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add64(d0, t1);
-            let f1: crate::lib::intvector_intrinsics::vec256 = e0;
-            let g1: crate::lib::intvector_intrinsics::vec256 = f0;
-            let h12: crate::lib::intvector_intrinsics::vec256 = g0;
-            hash[0usize] = a1;
-            hash[1usize] = b10;
-            hash[2usize] = c1;
-            hash[3usize] = d1;
-            hash[4usize] = e1;
-            hash[5usize] = f1;
-            hash[6usize] = g1;
-            hash[7usize] = h12
-        };
-        if i < 4u32
-        {
-            for i0 in 0u32..16u32
+                        );
+                    let a1: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add64(t1, t2);
+                    let b10: crate::lib::intvector_intrinsics::vec256 = a0;
+                    let c1: crate::lib::intvector_intrinsics::vec256 = b00;
+                    let d1: crate::lib::intvector_intrinsics::vec256 = c0;
+                    let e1: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add64(d0, t1);
+                    let f1: crate::lib::intvector_intrinsics::vec256 = e0;
+                    let g1: crate::lib::intvector_intrinsics::vec256 = f0;
+                    let h12: crate::lib::intvector_intrinsics::vec256 = g0;
+                    hash[0usize] = a1;
+                    hash[1usize] = b10;
+                    hash[2usize] = c1;
+                    hash[3usize] = d1;
+                    hash[4usize] = e1;
+                    hash[5usize] = f1;
+                    hash[6usize] = g1;
+                    hash[7usize] = h12
+                }
+            );
+            if i < 4u32
             {
-                let t16: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
-                let t15: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
-                let t7: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
-                let t2: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
-                let s1: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right64(t2, 19u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right64(t2, 61u32),
-                            crate::lib::intvector_intrinsics::vec256_shift_right64(t2, 6u32)
-                        )
-                    );
-                let s0: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right64(t15, 1u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right64(t15, 8u32),
-                            crate::lib::intvector_intrinsics::vec256_shift_right64(t15, 7u32)
-                        )
-                    );
-                (&mut ws)[i0 as usize] =
-                    crate::lib::intvector_intrinsics::vec256_add64(
-                        crate::lib::intvector_intrinsics::vec256_add64(
-                            crate::lib::intvector_intrinsics::vec256_add64(s1, t7),
-                            s0
-                        ),
-                        t16
-                    )
+                krml::unroll_for!(
+                    16,
+                    "i0",
+                    0u32,
+                    1u32,
+                    {
+                        let t16: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
+                        let t15: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
+                        let t7: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
+                        let t2: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
+                        let s1: crate::lib::intvector_intrinsics::vec256 =
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right64(t2, 19u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                        t2,
+                                        61u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_shift_right64(t2, 6u32)
+                                )
+                            );
+                        let s0: crate::lib::intvector_intrinsics::vec256 =
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right64(t15, 1u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                        t15,
+                                        8u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_shift_right64(
+                                        t15,
+                                        7u32
+                                    )
+                                )
+                            );
+                        (&mut ws)[i0 as usize] =
+                            crate::lib::intvector_intrinsics::vec256_add64(
+                                crate::lib::intvector_intrinsics::vec256_add64(
+                                    crate::lib::intvector_intrinsics::vec256_add64(s1, t7),
+                                    s0
+                                ),
+                                t16
+                            )
+                    }
+                )
             }
         }
-    };
-    for i in 0u32..8u32
-    {
-        let x: crate::lib::intvector_intrinsics::vec256 =
-            crate::lib::intvector_intrinsics::vec256_add64(
-                hash[i as usize],
-                (&mut hash_old)[i as usize]
-            );
-        let
-        os:
-        (&mut [crate::lib::intvector_intrinsics::vec256],
-        &mut [crate::lib::intvector_intrinsics::vec256])
-        =
-            hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    );
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: crate::lib::intvector_intrinsics::vec256 =
+                crate::lib::intvector_intrinsics::vec256_add64(
+                    hash[i as usize],
+                    (&mut hash_old)[i as usize]
+                );
+            let
+            os:
+            (&mut [crate::lib::intvector_intrinsics::vec256],
+            &mut [crate::lib::intvector_intrinsics::vec256])
+            =
+                hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha384_update_nblocks4(
@@ -2314,13 +2452,16 @@ pub fn sha256_8(
     st[5usize] = st6·;
     st[6usize] = st3·;
     st[7usize] = st7·;
-    for i in 0u32..8u32
-    {
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
         crate::lib::intvector_intrinsics::vec256_store64_be(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
             st[i as usize]
         )
-    };
+    );
     let b3: &mut [u8] = h.snd.snd.snd;
     let b2: &mut [u8] = h.snd.snd.fst;
     let b1: &mut [u8] = h.snd.fst;
@@ -2390,19 +2531,24 @@ pub fn sha384_4(
 
 #[inline] fn sha512_init4(hash: &mut [crate::lib::intvector_intrinsics::vec256]) -> ()
 {
-    for i in 0u32..8u32
-    {
-        let hi: u64 = (&crate::hacl::hash_sha2::h512)[i as usize];
-        let x: crate::lib::intvector_intrinsics::vec256 =
-            crate::lib::intvector_intrinsics::vec256_load64(hi);
-        let
-        os:
-        (&mut [crate::lib::intvector_intrinsics::vec256],
-        &mut [crate::lib::intvector_intrinsics::vec256])
-        =
-            hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let hi: u64 = (&crate::hacl::hash_sha2::h512)[i as usize];
+            let x: crate::lib::intvector_intrinsics::vec256 =
+                crate::lib::intvector_intrinsics::vec256_load64(hi);
+            let
+            os:
+            (&mut [crate::lib::intvector_intrinsics::vec256],
+            &mut [crate::lib::intvector_intrinsics::vec256])
+            =
+                hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha512_update4(
@@ -2548,147 +2694,184 @@ pub fn sha384_4(
     (&mut ws)[13usize] = ws13;
     (&mut ws)[14usize] = ws14;
     (&mut ws)[15usize] = ws15;
-    for i in 0u32..5u32
-    {
-        for i0 in 0u32..16u32
+    krml::unroll_for!(
+        5,
+        "i",
+        0u32,
+        1u32,
         {
-            let k_t: u64 =
-                (&crate::hacl::hash_sha2::k384_512)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
-            let ws_t: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
-            let a0: crate::lib::intvector_intrinsics::vec256 = hash[0usize];
-            let b00: crate::lib::intvector_intrinsics::vec256 = hash[1usize];
-            let c0: crate::lib::intvector_intrinsics::vec256 = hash[2usize];
-            let d0: crate::lib::intvector_intrinsics::vec256 = hash[3usize];
-            let e0: crate::lib::intvector_intrinsics::vec256 = hash[4usize];
-            let f0: crate::lib::intvector_intrinsics::vec256 = hash[5usize];
-            let g0: crate::lib::intvector_intrinsics::vec256 = hash[6usize];
-            let h02: crate::lib::intvector_intrinsics::vec256 = hash[7usize];
-            let k_e_t: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_load64(k_t);
-            let t1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add64(
-                    crate::lib::intvector_intrinsics::vec256_add64(
+            krml::unroll_for!(
+                16,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let k_t: u64 =
+                        (&crate::hacl::hash_sha2::k384_512)[16u32.wrapping_mul(i).wrapping_add(i0)
+                        as
+                        usize];
+                    let ws_t: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
+                    let a0: crate::lib::intvector_intrinsics::vec256 = hash[0usize];
+                    let b00: crate::lib::intvector_intrinsics::vec256 = hash[1usize];
+                    let c0: crate::lib::intvector_intrinsics::vec256 = hash[2usize];
+                    let d0: crate::lib::intvector_intrinsics::vec256 = hash[3usize];
+                    let e0: crate::lib::intvector_intrinsics::vec256 = hash[4usize];
+                    let f0: crate::lib::intvector_intrinsics::vec256 = hash[5usize];
+                    let g0: crate::lib::intvector_intrinsics::vec256 = hash[6usize];
+                    let h02: crate::lib::intvector_intrinsics::vec256 = hash[7usize];
+                    let k_e_t: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_load64(k_t);
+                    let t1: crate::lib::intvector_intrinsics::vec256 =
                         crate::lib::intvector_intrinsics::vec256_add64(
                             crate::lib::intvector_intrinsics::vec256_add64(
-                                h02,
-                                crate::lib::intvector_intrinsics::vec256_xor(
-                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
-                                        e0,
-                                        14u32
+                                crate::lib::intvector_intrinsics::vec256_add64(
+                                    crate::lib::intvector_intrinsics::vec256_add64(
+                                        h02,
+                                        crate::lib::intvector_intrinsics::vec256_xor(
+                                            crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                                e0,
+                                                14u32
+                                            ),
+                                            crate::lib::intvector_intrinsics::vec256_xor(
+                                                crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                                    e0,
+                                                    18u32
+                                                ),
+                                                crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                                    e0,
+                                                    41u32
+                                                )
+                                            )
+                                        )
                                     ),
                                     crate::lib::intvector_intrinsics::vec256_xor(
-                                        crate::lib::intvector_intrinsics::vec256_rotate_right64(
-                                            e0,
-                                            18u32
-                                        ),
-                                        crate::lib::intvector_intrinsics::vec256_rotate_right64(
-                                            e0,
-                                            41u32
+                                        crate::lib::intvector_intrinsics::vec256_and(e0, f0),
+                                        crate::lib::intvector_intrinsics::vec256_and(
+                                            crate::lib::intvector_intrinsics::vec256_lognot(e0),
+                                            g0
                                         )
+                                    )
+                                ),
+                                k_e_t
+                            ),
+                            ws_t
+                        );
+                    let t2: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add64(
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right64(a0, 28u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                        a0,
+                                        34u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                        a0,
+                                        39u32
                                     )
                                 )
                             ),
                             crate::lib::intvector_intrinsics::vec256_xor(
-                                crate::lib::intvector_intrinsics::vec256_and(e0, f0),
-                                crate::lib::intvector_intrinsics::vec256_and(
-                                    crate::lib::intvector_intrinsics::vec256_lognot(e0),
-                                    g0
+                                crate::lib::intvector_intrinsics::vec256_and(a0, b00),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_and(a0, c0),
+                                    crate::lib::intvector_intrinsics::vec256_and(b00, c0)
                                 )
                             )
-                        ),
-                        k_e_t
-                    ),
-                    ws_t
-                );
-            let t2: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add64(
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right64(a0, 28u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right64(a0, 34u32),
-                            crate::lib::intvector_intrinsics::vec256_rotate_right64(a0, 39u32)
-                        )
-                    ),
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_and(a0, b00),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_and(a0, c0),
-                            crate::lib::intvector_intrinsics::vec256_and(b00, c0)
-                        )
-                    )
-                );
-            let a1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add64(t1, t2);
-            let b10: crate::lib::intvector_intrinsics::vec256 = a0;
-            let c1: crate::lib::intvector_intrinsics::vec256 = b00;
-            let d1: crate::lib::intvector_intrinsics::vec256 = c0;
-            let e1: crate::lib::intvector_intrinsics::vec256 =
-                crate::lib::intvector_intrinsics::vec256_add64(d0, t1);
-            let f1: crate::lib::intvector_intrinsics::vec256 = e0;
-            let g1: crate::lib::intvector_intrinsics::vec256 = f0;
-            let h12: crate::lib::intvector_intrinsics::vec256 = g0;
-            hash[0usize] = a1;
-            hash[1usize] = b10;
-            hash[2usize] = c1;
-            hash[3usize] = d1;
-            hash[4usize] = e1;
-            hash[5usize] = f1;
-            hash[6usize] = g1;
-            hash[7usize] = h12
-        };
-        if i < 4u32
-        {
-            for i0 in 0u32..16u32
+                        );
+                    let a1: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add64(t1, t2);
+                    let b10: crate::lib::intvector_intrinsics::vec256 = a0;
+                    let c1: crate::lib::intvector_intrinsics::vec256 = b00;
+                    let d1: crate::lib::intvector_intrinsics::vec256 = c0;
+                    let e1: crate::lib::intvector_intrinsics::vec256 =
+                        crate::lib::intvector_intrinsics::vec256_add64(d0, t1);
+                    let f1: crate::lib::intvector_intrinsics::vec256 = e0;
+                    let g1: crate::lib::intvector_intrinsics::vec256 = f0;
+                    let h12: crate::lib::intvector_intrinsics::vec256 = g0;
+                    hash[0usize] = a1;
+                    hash[1usize] = b10;
+                    hash[2usize] = c1;
+                    hash[3usize] = d1;
+                    hash[4usize] = e1;
+                    hash[5usize] = f1;
+                    hash[6usize] = g1;
+                    hash[7usize] = h12
+                }
+            );
+            if i < 4u32
             {
-                let t16: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
-                let t15: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
-                let t7: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
-                let t2: crate::lib::intvector_intrinsics::vec256 =
-                    (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
-                let s1: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right64(t2, 19u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right64(t2, 61u32),
-                            crate::lib::intvector_intrinsics::vec256_shift_right64(t2, 6u32)
-                        )
-                    );
-                let s0: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(
-                        crate::lib::intvector_intrinsics::vec256_rotate_right64(t15, 1u32),
-                        crate::lib::intvector_intrinsics::vec256_xor(
-                            crate::lib::intvector_intrinsics::vec256_rotate_right64(t15, 8u32),
-                            crate::lib::intvector_intrinsics::vec256_shift_right64(t15, 7u32)
-                        )
-                    );
-                (&mut ws)[i0 as usize] =
-                    crate::lib::intvector_intrinsics::vec256_add64(
-                        crate::lib::intvector_intrinsics::vec256_add64(
-                            crate::lib::intvector_intrinsics::vec256_add64(s1, t7),
-                            s0
-                        ),
-                        t16
-                    )
+                krml::unroll_for!(
+                    16,
+                    "i0",
+                    0u32,
+                    1u32,
+                    {
+                        let t16: crate::lib::intvector_intrinsics::vec256 = (&mut ws)[i0 as usize];
+                        let t15: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(1u32).wrapping_rem(16u32) as usize];
+                        let t7: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(9u32).wrapping_rem(16u32) as usize];
+                        let t2: crate::lib::intvector_intrinsics::vec256 =
+                            (&mut ws)[i0.wrapping_add(14u32).wrapping_rem(16u32) as usize];
+                        let s1: crate::lib::intvector_intrinsics::vec256 =
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right64(t2, 19u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                        t2,
+                                        61u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_shift_right64(t2, 6u32)
+                                )
+                            );
+                        let s0: crate::lib::intvector_intrinsics::vec256 =
+                            crate::lib::intvector_intrinsics::vec256_xor(
+                                crate::lib::intvector_intrinsics::vec256_rotate_right64(t15, 1u32),
+                                crate::lib::intvector_intrinsics::vec256_xor(
+                                    crate::lib::intvector_intrinsics::vec256_rotate_right64(
+                                        t15,
+                                        8u32
+                                    ),
+                                    crate::lib::intvector_intrinsics::vec256_shift_right64(
+                                        t15,
+                                        7u32
+                                    )
+                                )
+                            );
+                        (&mut ws)[i0 as usize] =
+                            crate::lib::intvector_intrinsics::vec256_add64(
+                                crate::lib::intvector_intrinsics::vec256_add64(
+                                    crate::lib::intvector_intrinsics::vec256_add64(s1, t7),
+                                    s0
+                                ),
+                                t16
+                            )
+                    }
+                )
             }
         }
-    };
-    for i in 0u32..8u32
-    {
-        let x: crate::lib::intvector_intrinsics::vec256 =
-            crate::lib::intvector_intrinsics::vec256_add64(
-                hash[i as usize],
-                (&mut hash_old)[i as usize]
-            );
-        let
-        os:
-        (&mut [crate::lib::intvector_intrinsics::vec256],
-        &mut [crate::lib::intvector_intrinsics::vec256])
-        =
-            hash.split_at_mut(0usize);
-        os.1[i as usize] = x
-    }
+    );
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: crate::lib::intvector_intrinsics::vec256 =
+                crate::lib::intvector_intrinsics::vec256_add64(
+                    hash[i as usize],
+                    (&mut hash_old)[i as usize]
+                );
+            let
+            os:
+            (&mut [crate::lib::intvector_intrinsics::vec256],
+            &mut [crate::lib::intvector_intrinsics::vec256])
+            =
+                hash.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    )
 }
 
 #[inline] fn sha512_update_nblocks4(
@@ -2868,13 +3051,16 @@ pub fn sha384_4(
     st[5usize] = st6·;
     st[6usize] = st3·;
     st[7usize] = st7·;
-    for i in 0u32..8u32
-    {
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
         crate::lib::intvector_intrinsics::vec256_store64_be(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
             st[i as usize]
         )
-    };
+    );
     let b3: &mut [u8] = h.snd.snd.snd;
     let b2: &mut [u8] = h.snd.snd.fst;
     let b1: &mut [u8] = h.snd.fst;
