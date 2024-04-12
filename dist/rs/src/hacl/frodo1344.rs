@@ -285,13 +285,18 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &mut [u8], sk: &mut [u8]) -> u32
     let mask: u16 = b1 & b2;
     let mask0: u16 = mask;
     let mut kp_s: [u8; 32] = [0u8; 32usize];
-    for i in 0u32..32u32
-    {
-        let uu____0: u8 = pk.0[i as usize];
-        let x: u8 = uu____0 ^ mask0 as u8 & (kp.1[i as usize] ^ uu____0);
-        let os: (&mut [u8], &mut [u8]) = (&mut kp_s).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        32,
+        "i",
+        0u32,
+        1u32,
+        {
+            let uu____0: u8 = pk.0[i as usize];
+            let x: u8 = uu____0 ^ mask0 as u8 & (kp.1[i as usize] ^ uu____0);
+            let os: (&mut [u8], &mut [u8]) = (&mut kp_s).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let ss_init_len: u32 = 21664u32;
     let mut ss_init: Vec<u8> = vec![0u8; ss_init_len as usize];
     ((&mut ss_init)[0usize..21632usize]).copy_from_slice(&ct[0usize..21632usize]);

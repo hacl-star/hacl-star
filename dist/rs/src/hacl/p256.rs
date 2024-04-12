@@ -790,12 +790,17 @@
     ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
     fmul(tmp2.0, &mut x_copy5, tmp1.0);
     (tmp1.0[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for _i in 0u32..32u32
-    {
-        let mut x_copy6: [u64; 4] = [0u64; 4usize];
-        ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
-        fsqr(tmp1.0, &mut x_copy6)
-    };
+    krml::unroll_for!(
+        32,
+        "_i",
+        0u32,
+        1u32,
+        {
+            let mut x_copy6: [u64; 4] = [0u64; 4usize];
+            ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+            fsqr(tmp1.0, &mut x_copy6)
+        }
+    );
     let mut x_copy6: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
     fmul(tmp1.0, &mut x_copy6, a);
@@ -808,21 +813,31 @@
     let mut x_copy7: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy7)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
     fmul(tmp1.0, &mut x_copy7, tmp2.0);
-    for _i in 0u32..32u32
-    {
-        let mut x_copy8: [u64; 4] = [0u64; 4usize];
-        ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
-        fsqr(tmp1.0, &mut x_copy8)
-    };
+    krml::unroll_for!(
+        32,
+        "_i",
+        0u32,
+        1u32,
+        {
+            let mut x_copy8: [u64; 4] = [0u64; 4usize];
+            ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+            fsqr(tmp1.0, &mut x_copy8)
+        }
+    );
     let mut x_copy8: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
     fmul(tmp1.0, &mut x_copy8, tmp2.0);
-    for _i in 0u32..30u32
-    {
-        let mut x_copy9: [u64; 4] = [0u64; 4usize];
-        ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
-        fsqr(tmp1.0, &mut x_copy9)
-    };
+    krml::unroll_for!(
+        30,
+        "_i",
+        0u32,
+        1u32,
+        {
+            let mut x_copy9: [u64; 4] = [0u64; 4usize];
+            ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+            fsqr(tmp1.0, &mut x_copy9)
+        }
+    );
     let mut x_copy9: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
     fmul(tmp1.0, &mut x_copy9, x2.0);
@@ -916,12 +931,17 @@
     ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
     fmul(tmp2.0, &mut x_copy3, tmp2.1);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for _i in 0u32..32u32
-    {
-        let mut x_copy4: [u64; 4] = [0u64; 4usize];
-        ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-        fsqr(tmp2.1, &mut x_copy4)
-    };
+    krml::unroll_for!(
+        32,
+        "_i",
+        0u32,
+        1u32,
+        {
+            let mut x_copy4: [u64; 4] = [0u64; 4usize];
+            ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+            fsqr(tmp2.1, &mut x_copy4)
+        }
+    );
     let mut x_copy4: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
     fmul(tmp2.1, &mut x_copy4, a);
@@ -2026,12 +2046,17 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key
     let mut x_copy2: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
     qmul(&mut tmp1, &mut x_copy2, x_11.0);
-    for _i in 0u32..32u32
-    {
-        let mut x_copy3: [u64; 4] = [0u64; 4usize];
-        ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
-        qsqr(&mut tmp1, &mut x_copy3)
-    };
+    krml::unroll_for!(
+        32,
+        "_i",
+        0u32,
+        1u32,
+        {
+            let mut x_copy3: [u64; 4] = [0u64; 4usize];
+            ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+            qsqr(&mut tmp1, &mut x_copy3)
+        }
+    );
     let mut x_copy3: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
     qmul(&mut tmp1, &mut x_copy3, x_11.0);

@@ -1927,78 +1927,83 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u64], q: &mut [u64]) -> ()
     ((&mut p_copy1)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
     point_add(out, &mut p_copy1, &mut tmp0);
     let mut tmp2: [u64; 15] = [0u64; 15usize];
-    for i3 in 0u32..25u32
-    {
-        krml::unroll_for!(
-            5,
-            "_i",
-            0u32,
-            1u32,
-            {
-                let mut p_copy2: [u64; 15] = [0u64; 15usize];
-                ((&mut p_copy2)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
-                point_double(out, &mut p_copy2)
-            }
-        );
-        let k: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
-        let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r4, k, 5u32);
-        crate::lowstar::ignore::ignore::<&[u64]>(&mut table2);
-        let bits_l323: u32 = bits_l as u32;
-        let a_bits_l3: (&[u64], &[u64]) =
-            (&mut table2).split_at(bits_l323.wrapping_mul(15u32) as usize);
-        ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l3.1[0usize..15usize]);
-        point_negate_conditional_vartime(&mut tmp2, is_negate4);
-        point_mul_lambda_inplace(&mut tmp2);
-        let mut p_copy2: [u64; 15] = [0u64; 15usize];
-        ((&mut p_copy2)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
-        point_add(out, &mut p_copy2, &mut tmp2);
-        let k0: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
-        let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r3, k0, 5u32);
-        crate::lowstar::ignore::ignore::<&[u64]>(&mut table2);
-        let bits_l324: u32 = bits_l0 as u32;
-        let a_bits_l4: (&[u64], &[u64]) =
-            (&mut table2).split_at(bits_l324.wrapping_mul(15u32) as usize);
-        ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l4.1[0usize..15usize]);
-        point_negate_conditional_vartime(&mut tmp2, is_negate3);
-        let mut p_copy3: [u64; 15] = [0u64; 15usize];
-        ((&mut p_copy3)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
-        point_add(out, &mut p_copy3, &mut tmp2);
-        let k1: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
-        let bits_l1: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r2, k1, 5u32);
-        crate::lowstar::ignore::ignore::<&[u64]>(
-            &crate::hacl::k256_precomptable::precomp_basepoint_table_w5
-        );
-        let bits_l325: u32 = bits_l1 as u32;
-        let a_bits_l5: &[u64] =
-            &(&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l325.wrapping_mul(
-                15u32
-            )
-            as
-            usize..];
-        ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l5[0usize..15usize]);
-        point_negate_conditional_vartime(&mut tmp2, is_negate2);
-        point_mul_lambda_inplace(&mut tmp2);
-        let mut p_copy4: [u64; 15] = [0u64; 15usize];
-        ((&mut p_copy4)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
-        point_add(out, &mut p_copy4, &mut tmp2);
-        let k2: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
-        let bits_l2: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r1, k2, 5u32);
-        crate::lowstar::ignore::ignore::<&[u64]>(
-            &crate::hacl::k256_precomptable::precomp_basepoint_table_w5
-        );
-        let bits_l326: u32 = bits_l2 as u32;
-        let a_bits_l6: &[u64] =
-            &(&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l326.wrapping_mul(
-                15u32
-            )
-            as
-            usize..];
-        ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l6[0usize..15usize]);
-        point_negate_conditional_vartime(&mut tmp2, is_negate1);
-        let mut p_copy5: [u64; 15] = [0u64; 15usize];
-        ((&mut p_copy5)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
-        point_add(out, &mut p_copy5, &mut tmp2)
-    }
+    krml::unroll_for!(
+        25,
+        "i3",
+        0u32,
+        1u32,
+        {
+            krml::unroll_for!(
+                5,
+                "_i",
+                0u32,
+                1u32,
+                {
+                    let mut p_copy2: [u64; 15] = [0u64; 15usize];
+                    ((&mut p_copy2)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
+                    point_double(out, &mut p_copy2)
+                }
+            );
+            let k: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
+            let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r4, k, 5u32);
+            crate::lowstar::ignore::ignore::<&[u64]>(&mut table2);
+            let bits_l323: u32 = bits_l as u32;
+            let a_bits_l3: (&[u64], &[u64]) =
+                (&mut table2).split_at(bits_l323.wrapping_mul(15u32) as usize);
+            ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l3.1[0usize..15usize]);
+            point_negate_conditional_vartime(&mut tmp2, is_negate4);
+            point_mul_lambda_inplace(&mut tmp2);
+            let mut p_copy2: [u64; 15] = [0u64; 15usize];
+            ((&mut p_copy2)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
+            point_add(out, &mut p_copy2, &mut tmp2);
+            let k0: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
+            let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r3, k0, 5u32);
+            crate::lowstar::ignore::ignore::<&[u64]>(&mut table2);
+            let bits_l324: u32 = bits_l0 as u32;
+            let a_bits_l4: (&[u64], &[u64]) =
+                (&mut table2).split_at(bits_l324.wrapping_mul(15u32) as usize);
+            ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l4.1[0usize..15usize]);
+            point_negate_conditional_vartime(&mut tmp2, is_negate3);
+            let mut p_copy3: [u64; 15] = [0u64; 15usize];
+            ((&mut p_copy3)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
+            point_add(out, &mut p_copy3, &mut tmp2);
+            let k1: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
+            let bits_l1: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r2, k1, 5u32);
+            crate::lowstar::ignore::ignore::<&[u64]>(
+                &crate::hacl::k256_precomptable::precomp_basepoint_table_w5
+            );
+            let bits_l325: u32 = bits_l1 as u32;
+            let a_bits_l5: &[u64] =
+                &(&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l325.wrapping_mul(
+                    15u32
+                )
+                as
+                usize..];
+            ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l5[0usize..15usize]);
+            point_negate_conditional_vartime(&mut tmp2, is_negate2);
+            point_mul_lambda_inplace(&mut tmp2);
+            let mut p_copy4: [u64; 15] = [0u64; 15usize];
+            ((&mut p_copy4)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
+            point_add(out, &mut p_copy4, &mut tmp2);
+            let k2: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
+            let bits_l2: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r1, k2, 5u32);
+            crate::lowstar::ignore::ignore::<&[u64]>(
+                &crate::hacl::k256_precomptable::precomp_basepoint_table_w5
+            );
+            let bits_l326: u32 = bits_l2 as u32;
+            let a_bits_l6: &[u64] =
+                &(&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l326.wrapping_mul(
+                    15u32
+                )
+                as
+                usize..];
+            ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l6[0usize..15usize]);
+            point_negate_conditional_vartime(&mut tmp2, is_negate1);
+            let mut p_copy5: [u64; 15] = [0u64; 15usize];
+            ((&mut p_copy5)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
+            point_add(out, &mut p_copy5, &mut tmp2)
+        }
+    )
 }
 
 #[inline] fn check_ecmult_endo_split(

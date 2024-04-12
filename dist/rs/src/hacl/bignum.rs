@@ -1068,17 +1068,22 @@ pub fn mod_inv_uint32(n0: u32) -> u32
     let mut vb: [u32; 1] = [0u32; 1usize];
     (&mut ub)[0usize] = 1u32;
     (&mut vb)[0usize] = 0u32;
-    for _i in 0u32..32u32
-    {
-        let us: u32 = (&mut ub)[0usize];
-        let vs: u32 = (&mut vb)[0usize];
-        let u_is_odd: u32 = 0u32.wrapping_sub(us & 1u32);
-        let beta_if_u_is_odd: u32 = beta & u_is_odd;
-        (&mut ub)[0usize] =
-            (us ^ beta_if_u_is_odd).wrapping_shr(1u32).wrapping_add(us & beta_if_u_is_odd);
-        let alpha_if_u_is_odd: u32 = alpha & u_is_odd;
-        (&mut vb)[0usize] = vs.wrapping_shr(1u32).wrapping_add(alpha_if_u_is_odd)
-    };
+    krml::unroll_for!(
+        32,
+        "_i",
+        0u32,
+        1u32,
+        {
+            let us: u32 = (&mut ub)[0usize];
+            let vs: u32 = (&mut vb)[0usize];
+            let u_is_odd: u32 = 0u32.wrapping_sub(us & 1u32);
+            let beta_if_u_is_odd: u32 = beta & u_is_odd;
+            (&mut ub)[0usize] =
+                (us ^ beta_if_u_is_odd).wrapping_shr(1u32).wrapping_add(us & beta_if_u_is_odd);
+            let alpha_if_u_is_odd: u32 = alpha & u_is_odd;
+            (&mut vb)[0usize] = vs.wrapping_shr(1u32).wrapping_add(alpha_if_u_is_odd)
+        }
+    );
     (&mut vb)[0usize]
 }
 

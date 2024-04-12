@@ -339,12 +339,17 @@ pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
 pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8]) -> ()
 {
     let mut basepoint: [u8; 32] = [0u8; 32usize];
-    for i in 0u32..32u32
-    {
-        let x: u8 = (&g25519)[i as usize];
-        let os: (&mut [u8], &mut [u8]) = (&mut basepoint).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        32,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u8 = (&g25519)[i as usize];
+            let os: (&mut [u8], &mut [u8]) = (&mut basepoint).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     scalarmult(r#pub, r#priv, &mut basepoint)
 }
 
@@ -353,11 +358,17 @@ pub fn ecdh(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> bool
     let mut zeros: [u8; 32] = [0u8; 32usize];
     scalarmult(out, r#priv, r#pub);
     let mut res: [u8; 1] = [255u8; 1usize];
-    for i in 0u32..32u32
-    {
-        let uu____0: u8 = crate::fstar::uint8::eq_mask(out[i as usize], (&mut zeros)[i as usize]);
-        (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
-    };
+    krml::unroll_for!(
+        32,
+        "i",
+        0u32,
+        1u32,
+        {
+            let uu____0: u8 =
+                crate::fstar::uint8::eq_mask(out[i as usize], (&mut zeros)[i as usize]);
+            (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
+        }
+    );
     let z: u8 = (&mut res)[0usize];
     let r: bool = z == 255u8;
     ! r

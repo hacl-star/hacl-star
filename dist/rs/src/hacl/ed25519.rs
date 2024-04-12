@@ -1439,12 +1439,17 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
                 let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
                 let res_j: (&[u64], &[u64]) =
                     (&mut table).split_at(i0.wrapping_add(1u32).wrapping_mul(20u32) as usize);
-                for i1 in 0u32..20u32
-                {
-                    let x: u64 = c & res_j.1[i1 as usize] | ! c & (&mut tmp0)[i1 as usize];
-                    let os: (&mut [u64], &mut [u64]) = (&mut tmp0).split_at_mut(0usize);
-                    os.1[i1 as usize] = x
-                }
+                krml::unroll_for!(
+                    20,
+                    "i1",
+                    0u32,
+                    1u32,
+                    {
+                        let x: u64 = c & res_j.1[i1 as usize] | ! c & (&mut tmp0)[i1 as usize];
+                        let os: (&mut [u64], &mut [u64]) = (&mut tmp0).split_at_mut(0usize);
+                        os.1[i1 as usize] = x
+                    }
+                )
             }
         );
         let mut p_copy: [u64; 20] = [0u64; 20usize];
@@ -1465,12 +1470,17 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
             let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i.wrapping_add(1u32) as u64);
             let res_j: (&[u64], &[u64]) =
                 table.split_at(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
-            for i0 in 0u32..20u32
-            {
-                let x: u64 = c & res_j.1[i0 as usize] | ! c & tmp[i0 as usize];
-                let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
-                os.1[i0 as usize] = x
-            }
+            krml::unroll_for!(
+                20,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let x: u64 = c & res_j.1[i0 as usize] | ! c & tmp[i0 as usize];
+                    let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
+                    os.1[i0 as usize] = x
+                }
+            )
         }
     )
 }

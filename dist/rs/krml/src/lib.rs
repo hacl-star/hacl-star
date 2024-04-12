@@ -34,19 +34,11 @@ pub fn unroll_for(ts: TokenStream) -> TokenStream {
     let chunks =
         (0..n_loops).map(|i| {
             let chunks = [
-                if i == 0 {
-                    format!("let mut {} = {};", var, start).parse().unwrap()
-                } else {
-                    "();".parse().unwrap()
-                },
+                format!("const {}: u32 = {} + {} * {};", var, start, i, increment).parse().unwrap(),
                 TokenStream::from(grouped_body.clone()),
-                if i != n_loops - 1 {
-                    format!("{} += {};", var, increment).parse().unwrap()
-                } else {
-                    "();".parse().unwrap()
-                }
+                ";".parse().unwrap()
             ];
-            chunks
+            TokenStream::from(brace(TokenStream::from_iter(chunks)))
         })
     ;
     TokenStream::from(brace(TokenStream::from_iter(chunks.into_iter().flatten())))

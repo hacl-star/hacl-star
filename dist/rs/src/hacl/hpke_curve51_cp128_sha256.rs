@@ -27,14 +27,22 @@ pub fn setupBaseS(
             let mut zeros: [u8; 32] = [0u8; 32usize];
             crate::hacl::curve25519_51::scalarmult(&mut o_dh, skE, pkR);
             let mut res: [u8; 1] = [255u8; 1usize];
-            for i in 0u32..32u32
-            {
-                let uu____0: u8 =
-                    crate::fstar::uint8::eq_mask((&mut o_dh)[i as usize], (&mut zeros)[i as usize]);
-                (&mut res)[0usize] = uu____0 & (&mut res)[0usize];
-                ();
-                ()
-            };
+            krml::unroll_for!(
+                32,
+                "i",
+                0u32,
+                1u32,
+                {
+                    let uu____0: u8 =
+                        crate::fstar::uint8::eq_mask(
+                            (&mut o_dh)[i as usize],
+                            (&mut zeros)[i as usize]
+                        );
+                    (&mut res)[0usize] = uu____0 & (&mut res)[0usize];
+                    ();
+                    ()
+                }
+            );
             let z: u8 = (&mut res)[0usize];
             let res0: u32 = if z == 255u8 { 1u32 } else { 0u32 };
             let res2: u32 = res0;
@@ -354,12 +362,17 @@ pub fn setupBaseR(
         let mut zeros: [u8; 32] = [0u8; 32usize];
         crate::hacl::curve25519_51::scalarmult(&mut dh, skR, pkE);
         let mut res: [u8; 1] = [255u8; 1usize];
-        for i in 0u32..32u32
-        {
-            let uu____0: u8 =
-                crate::fstar::uint8::eq_mask((&mut dh)[i as usize], (&mut zeros)[i as usize]);
-            (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
-        };
+        krml::unroll_for!(
+            32,
+            "i",
+            0u32,
+            1u32,
+            {
+                let uu____0: u8 =
+                    crate::fstar::uint8::eq_mask((&mut dh)[i as usize], (&mut zeros)[i as usize]);
+                (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
+            }
+        );
         let z: u8 = (&mut res)[0usize];
         let res0: u32 = if z == 255u8 { 1u32 } else { 0u32 };
         let res11: u32 = res0;
