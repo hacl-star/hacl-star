@@ -301,10 +301,10 @@ let load_blocks (#m:m_spec) (b:multiblock_spec m) : ws_spec m =
   createi 32 (get_wsi #m b)
 
 noextract
-let transpose_ws1 (#m:m_spec{lanes m == 1}) (ws:ws_spec m) : ws_spec m = ws
+let transpose_ws1 (#m:m_spec{m == M32}) (ws:ws_spec m) : ws_spec m = ws
 
 noextract
-let transpose_ws4_0 (#m:m_spec{lanes m == 4}) (ws:ws_spec m) 
+let transpose_ws4_0 (#m:m_spec{m == M256}) (ws:ws_spec m) 
   : vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4 &
     vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4
   =
@@ -315,7 +315,7 @@ let transpose_ws4_0 (#m:m_spec{lanes m == 4}) (ws:ws_spec m)
   (ws0,ws1,ws2,ws3,ws4,ws5,ws6,ws7)
 
 noextract
-let transpose_ws4_1 (#m:m_spec{lanes m == 4}) (ws:ws_spec m) 
+let transpose_ws4_1 (#m:m_spec{m == M256}) (ws:ws_spec m) 
   : vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4 &
     vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4
   =
@@ -326,7 +326,7 @@ let transpose_ws4_1 (#m:m_spec{lanes m == 4}) (ws:ws_spec m)
   (ws8,ws9,ws10,ws11,ws12,ws13,ws14,ws15)
 
 noextract
-let transpose_ws4_2 (#m:m_spec{lanes m == 4}) (ws:ws_spec m) 
+let transpose_ws4_2 (#m:m_spec{m == M256}) (ws:ws_spec m) 
   : vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4 &
     vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4
   =
@@ -337,7 +337,7 @@ let transpose_ws4_2 (#m:m_spec{lanes m == 4}) (ws:ws_spec m)
   (ws16,ws17,ws18,ws19,ws20,ws21,ws22,ws23)
 
 noextract
-let transpose_ws4_3 (#m:m_spec{lanes m == 4}) (ws:ws_spec m) 
+let transpose_ws4_3 (#m:m_spec{m == M256}) (ws:ws_spec m) 
   : vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4 &
     vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4
   =
@@ -348,7 +348,7 @@ let transpose_ws4_3 (#m:m_spec{lanes m == 4}) (ws:ws_spec m)
   (ws24,ws25,ws26,ws27,ws28,ws29,ws30,ws31)
 
 noextract
-let transpose_ws4 (#m:m_spec{lanes m == 4}) (ws:ws_spec m) : ws_spec m =
+let transpose_ws4 (#m:m_spec{m == M256}) (ws:ws_spec m) : ws_spec m =
   let (ws0,ws1,ws2,ws3,ws4,ws5,ws6,ws7) = transpose_ws4_0 ws in
   let (ws8,ws9,ws10,ws11,ws12,ws13,ws14,ws15) = transpose_ws4_1 ws in
   let (ws16,ws17,ws18,ws19,ws20,ws21,ws22,ws23) = transpose_ws4_2 ws in
@@ -357,13 +357,13 @@ let transpose_ws4 (#m:m_spec{lanes m == 4}) (ws:ws_spec m) : ws_spec m =
     ws16 ws17 ws18 ws19 ws20 ws21 ws22 ws23 ws24 ws25 ws26 ws27 ws28 ws29 ws30 ws31
 
 noextract
-let transpose_ws (#m:m_spec{is_supported m}) (ws:ws_spec m) : ws_spec m =
-  match lanes m with
-  | 1 -> transpose_ws1 #m ws
-  | 4 -> transpose_ws4 #m ws
+let transpose_ws (#m:m_spec) (ws:ws_spec m) : ws_spec m =
+  match m with
+  | M32 -> transpose_ws1 #m ws
+  | M256 -> transpose_ws4 #m ws
 
 noextract
-let load_ws (#m:m_spec{is_supported m}) (b:multiblock_spec m) : ws_spec m =
+let load_ws (#m:m_spec) (b:multiblock_spec m) : ws_spec m =
   let ws = load_blocks #m b in
   transpose_ws #m ws
 
@@ -371,7 +371,7 @@ let loadState_inner (m:m_spec) (ws:ws_spec m) (j:size_nat{j < 25}) (s:state_spec
   s.[j] <- s.[j] ^| ws.[j]
 
 let loadState
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
   (b:multiblock_spec m{forall l. l < lanes m ==> 
     (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)})
@@ -381,7 +381,7 @@ let loadState
   repeati 25 (loadState_inner m ws) s
 
 noextract
-let transpose_s_ws4 (#m:m_spec{lanes m == 4}) (ws:ws_spec m) : ws_spec m =
+let transpose_s_ws4 (#m:m_spec{m == M256}) (ws:ws_spec m) : ws_spec m =
   let (ws0,ws1,ws2,ws3,ws4,ws5,ws6,ws7) = transpose_ws4_0 ws in
   let (ws8,ws9,ws10,ws11,ws12,ws13,ws14,ws15) = transpose_ws4_1 ws in
   let (ws16,ws17,ws18,ws19,ws20,ws21,ws22,ws23) = transpose_ws4_2 ws in
@@ -390,13 +390,13 @@ let transpose_s_ws4 (#m:m_spec{lanes m == 4}) (ws:ws_spec m) : ws_spec m =
     ws2 ws6 ws10 ws14 ws18 ws22 ws26 ws30 ws3 ws7 ws11 ws15 ws19 ws23 ws27 ws31
 
 noextract
-let transpose_s_ws (#m:m_spec{is_supported m}) (ws:ws_spec m) : ws_spec m =
-  match lanes m with
-  | 1 -> ws
-  | 4 -> transpose_s_ws4 #m ws
+let transpose_s_ws (#m:m_spec) (ws:ws_spec m) : ws_spec m =
+  match m with
+  | M32 -> ws
+  | M256 -> transpose_s_ws4 #m ws
 
 noextract
-let storeState (#m:m_spec{is_supported m}) (s:state_spec m) :
+let storeState (#m:m_spec) (s:state_spec m) :
                 lseq uint8 (lanes m * 32 * 8) =
   let ws = create 32 (zero_element m) in
   let ws = update_sub ws 0 25 s in
@@ -410,7 +410,7 @@ let next_blocks (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
   b.[rateInBytes - 1] <- u8 0x80
 
 noextract
-let next_block1 (#m:m_spec{lanes m == 1})
+let next_block1 (#m:m_spec{m == M32})
                 (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                 (b:multiseq (lanes m) 256) :
                 multiseq (lanes m) 256 =
@@ -418,7 +418,7 @@ let next_block1 (#m:m_spec{lanes m == 1})
   ntup1 (next_blocks rateInBytes b)
 
 noextract
-let next_block4 (#m:m_spec{lanes m == 4})
+let next_block4 (#m:m_spec{m == M256})
                 (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                 (b:multiseq (lanes m) 256) :
                 multiseq (lanes m) 256 =
@@ -433,15 +433,15 @@ let next_block4 (#m:m_spec{lanes m == 4})
   ntup4 (l0, (l1, (l2, l3)))
 
 noextract
-let next_block (#m:m_spec{is_supported m})
+let next_block (#m:m_spec)
                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                (b:multiseq (lanes m) 256) :
                multiseq (lanes m) 256 =
-  match lanes m with
-  | 1 -> next_block1 #m rateInBytes b
-  | 4 -> next_block4 #m rateInBytes b
+  match m with
+  | M32 -> next_block1 #m rateInBytes b
+  | M256 -> next_block4 #m rateInBytes b
 
-let absorb_next (#m:m_spec{is_supported m})
+let absorb_next (#m:m_spec)
                 (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                 (s:state_spec m) : Tot (state_spec m) =
   let nextBlock = next_block #m rateInBytes (next_block_seq_zero m) in
@@ -459,7 +459,7 @@ let load_last_blocks (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200
   lastBlock.[rem] <- byte_to_uint8 delimitedSuffix
 
 noextract
-let load_last_block1 (#m:m_spec{lanes m == 1})
+let load_last_block1 (#m:m_spec{m == M32})
                      (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                      (rem:size_nat{rem < rateInBytes})
                      (delimitedSuffix:byte_t)
@@ -471,7 +471,7 @@ let load_last_block1 (#m:m_spec{lanes m == 1})
   ntup1 (load_last_blocks rateInBytes rem delimitedSuffix b)
 
 noextract
-let load_last_block4 (#m:m_spec{lanes m == 4})
+let load_last_block4 (#m:m_spec{m == M256})
                      (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                      (rem:size_nat{rem < rateInBytes})
                      (delimitedSuffix:byte_t)
@@ -486,7 +486,7 @@ let load_last_block4 (#m:m_spec{lanes m == 4})
   ntup4 (l0, (l1, (l2, l3)))
 
 noextract
-let load_last_block (#m:m_spec{is_supported m})
+let load_last_block (#m:m_spec)
                     (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                     (rem:size_nat{rem < rateInBytes})
                     (delimitedSuffix:byte_t)
@@ -494,12 +494,12 @@ let load_last_block (#m:m_spec{is_supported m})
                        (forall i. (i >= rem /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)}) :
                     b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
                       (forall i. (i >= (rem + 1) /\ i < 256) ==> Seq.index b'.(|l|) i == u8 0)} =
-  match lanes m with
-  | 1 -> load_last_block1 #m rateInBytes rem delimitedSuffix b
-  | 4 -> load_last_block4 #m rateInBytes rem delimitedSuffix b
+  match m with
+  | M32 -> load_last_block1 #m rateInBytes rem delimitedSuffix b
+  | M256 -> load_last_block4 #m rateInBytes rem delimitedSuffix b
 
 val absorb_last:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> delimitedSuffix:byte_t
   -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
   -> rem:size_nat{rem < rateInBytes}
@@ -518,7 +518,7 @@ let absorb_last #m delimitedSuffix rateInBytes rem input s =
   absorb_next #m rateInBytes s
 
 let absorb_inner
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (b:multiblock_spec m{forall l. l < lanes m ==> 
      (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)})
@@ -579,7 +579,7 @@ let get_multilast_spec (#m:m_spec)
     b'
 
 let absorb_inner_block
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
@@ -590,7 +590,7 @@ let absorb_inner_block
   absorb_inner #m rateInBytes mb s
 
 let absorb_inner_nblocks
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
@@ -601,7 +601,7 @@ let absorb_inner_nblocks
   s
 
 let absorb_final
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (s:state_spec m)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (inputByteLen:nat)
@@ -615,7 +615,7 @@ let absorb_final
   s
 
 let absorb
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (s:state_spec m)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (inputByteLen:nat)
@@ -627,7 +627,7 @@ let absorb
   absorb_final #m s rateInBytes inputByteLen input delimitedSuffix
 
 noextract
-let update_b1 (#m:m_spec{lanes m == 1})
+let update_b1 (#m:m_spec{m == M32})
               (block:lseq uint8 (lanes m * 256))
               (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
               (outputByteLen:size_nat)
@@ -644,7 +644,7 @@ let update_b1 (#m:m_spec{lanes m == 1})
   ntup1 l
 
 noextract
-let update_b4 (#m:m_spec{lanes m == 4})
+let update_b4 (#m:m_spec{m == M256})
               (block:lseq uint8 (lanes m * 256))
               (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
               (outputByteLen:size_nat)
@@ -667,19 +667,19 @@ let update_b4 (#m:m_spec{lanes m == 4})
   ntup4 (l0, (l1, (l2, l3)))
 
 noextract
-let update_b (#m:m_spec{is_supported m})
+let update_b (#m:m_spec)
              (block:lseq uint8 (lanes m * 256))
              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
              (outputByteLen:size_nat)
              (i:size_nat{i < outputByteLen / rateInBytes})
              (b:multiseq (lanes m) outputByteLen):
              multiseq (lanes m) outputByteLen =
-  match lanes m with
-  | 1 -> update_b1 #m block rateInBytes outputByteLen i b
-  | 4 -> update_b4 #m block rateInBytes outputByteLen i b
+  match m with
+  | M32 -> update_b1 #m block rateInBytes outputByteLen i b
+  | M256 -> update_b4 #m block rateInBytes outputByteLen i b
 
 noextract
-let update_b_last1 (#m:m_spec{lanes m == 1})
+let update_b_last1 (#m:m_spec{m == M32})
               (block:lseq uint8 (lanes m * 256))
               (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
               (outputByteLen:size_nat)
@@ -692,7 +692,7 @@ let update_b_last1 (#m:m_spec{lanes m == 1})
   ntup1 l
 
 noextract
-let update_b_last4 (#m:m_spec{lanes m == 4})
+let update_b_last4 (#m:m_spec{m == M256})
               (block:lseq uint8 (lanes m * 256))
               (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
               (outputByteLen:size_nat)
@@ -711,19 +711,19 @@ let update_b_last4 (#m:m_spec{lanes m == 4})
   ntup4 (l0, (l1, (l2, l3)))
 
 noextract
-let update_b_last (#m:m_spec{is_supported m})
+let update_b_last (#m:m_spec)
              (block:lseq uint8 (lanes m * 256))
              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
              (outputByteLen:size_nat)
              (outRem:size_nat{outRem == outputByteLen % rateInBytes})
              (b:multiseq (lanes m) outputByteLen):
              multiseq (lanes m) outputByteLen =
-  match lanes m with
-  | 1 -> update_b_last1 #m block rateInBytes outputByteLen outRem b
-  | 4 -> update_b_last4 #m block rateInBytes outputByteLen outRem b
+  match m with
+  | M32 -> update_b_last1 #m block rateInBytes outputByteLen outRem b
+  | M256 -> update_b_last4 #m block rateInBytes outputByteLen outRem b
 
 let squeeze_inner
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
   (i:size_nat{i < outputByteLen / rateInBytes})
@@ -741,7 +741,7 @@ val squeeze_s:
 let squeeze_s m rateInBytes outputByteLen i = (state_spec m) & (multiseq (lanes m) outputByteLen)
 
 let squeeze_nblocks
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
   (s, b) :
@@ -751,7 +751,7 @@ let squeeze_nblocks
     (squeeze_inner #m rateInBytes outputByteLen) (s, b)
 
 let squeeze_last
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (s:state_spec m)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
@@ -762,7 +762,7 @@ let squeeze_last
   update_b_last #m block rateInBytes outputByteLen remOut b
 
 let squeeze
-  (#m:m_spec{is_supported m})
+  (#m:m_spec)
   (s:state_spec m)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
@@ -772,7 +772,7 @@ let squeeze
   squeeze_last #m s rateInBytes outputByteLen b
 
 val keccak:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
@@ -788,7 +788,7 @@ let keccak #m rate inputByteLen input delimitedSuffix outputByteLen b =
   squeeze #m s rateInBytes outputByteLen b
 
 let shake128
-  (m:m_spec{is_supported m})
+  (m:m_spec)
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
   (outputByteLen:size_nat)
@@ -798,7 +798,7 @@ let shake128
   keccak #m 1344 inputByteLen input (byte 0x1F) outputByteLen output
 
 let shake256
-  (m:m_spec{is_supported m})
+  (m:m_spec)
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
   (outputByteLen:size_nat)
@@ -808,7 +808,7 @@ let shake256
   keccak #m 1088 inputByteLen input (byte 0x1F) outputByteLen output
 
 let sha3_224
-  (m:m_spec{is_supported m})
+  (m:m_spec)
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
   (output:multiseq (lanes m) 28) :
@@ -817,7 +817,7 @@ let sha3_224
   keccak #m 1152 inputByteLen input (byte 0x06) 28 output
 
 let sha3_256
-  (m:m_spec{is_supported m})
+  (m:m_spec)
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
   (output:multiseq (lanes m) 32) :
@@ -826,7 +826,7 @@ let sha3_256
   keccak #m 1088 inputByteLen input (byte 0x06) 32 output
 
 let sha3_384
-  (m:m_spec{is_supported m})
+  (m:m_spec)
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
   (output:multiseq (lanes m) 48) :
@@ -835,7 +835,7 @@ let sha3_384
   keccak #m 832 inputByteLen input (byte 0x06) 48 output
 
 let sha3_512
-  (m:m_spec{is_supported m})
+  (m:m_spec)
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
   (output:multiseq (lanes m) 64) :

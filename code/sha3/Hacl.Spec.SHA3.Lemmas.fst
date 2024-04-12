@@ -13,7 +13,7 @@ open Hacl.Spec.SHA3.Vec.Common
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 1"
 
 val transpose_ws4_lemma_ij:
-  #m:m_spec{lanes m == 4} // lanes m * lanes m = 32
+  #m:m_spec{m == M256} // lanes m * lanes m = 32
   -> ws:ws_spec m
   -> j:nat{j < lanes m}
   -> i:nat{i < 32} ->
@@ -35,7 +35,7 @@ let transpose_ws4_lemma_ij #m ws j i =
   assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v ws.[i_sub * l + j]).[j_sub])
 
 val transpose_ws_lemma_ij:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> ws:ws_spec m
   -> j:nat{j < lanes m}
   -> i:nat{i < 32} ->
@@ -45,9 +45,9 @@ val transpose_ws_lemma_ij:
 
 let transpose_ws_lemma_ij #m ws j i =
   assert (((ws_spec_v #m (transpose_ws ws)).[j]).[i] == (vec_v (transpose_ws ws).[i]).[j]);
-  match lanes m with
-  | 1 -> ()
-  | 4 -> transpose_ws4_lemma_ij #m ws j i
+  match m with
+  | M32 -> ()
+  | M256 -> transpose_ws4_lemma_ij #m ws j i
 
 val transpose_s4_lemma:
     #m:m_spec{lanes m == 4}
@@ -79,7 +79,7 @@ let transpose_s4_lemma #m ws _ _ =
   transpose4x4_lemma (sub ws 28 4)
 
 val transpose_s_lemma_ij:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> ws:ws_spec m
   -> j:nat{j < lanes m}
   -> i:nat{i < 32 * 8} ->
@@ -90,6 +90,6 @@ val transpose_s_lemma_ij:
     Seq.index (ws_spec_v ws).[j] (i / 8))
 
 let transpose_s_lemma_ij #m ws j i =
-  match lanes m with
-  | 1 -> ()
-  | 4 -> transpose_s4_lemma #m ws j i
+  match m with
+  | M32 -> ()
+  | M256 -> transpose_s4_lemma #m ws j i

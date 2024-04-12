@@ -12,7 +12,7 @@ module Spec = Spec.SHA3
 (* shake128 *)
 
 val shake128_lemma_l:
-  m:m_spec{is_supported m}
+  m:m_spec
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
   -> outputByteLen:size_nat
@@ -25,7 +25,7 @@ val shake128_lemma_l:
 (* shake256 *)
 
 val shake256_lemma_l:
-  m:m_spec{is_supported m}
+  m:m_spec
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
   -> outputByteLen:size_nat
@@ -38,7 +38,7 @@ val shake256_lemma_l:
 (* sha3_224 *)
 
 val sha3_224_lemma_l:
-  m:m_spec{is_supported m}
+  m:m_spec
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
   -> output:multiseq (lanes m) 28
@@ -50,7 +50,7 @@ val sha3_224_lemma_l:
 (* sha3_256 *)
 
 val sha3_256_lemma_l:
-  m:m_spec{is_supported m}
+  m:m_spec
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
   -> output:multiseq (lanes m) 32
@@ -62,7 +62,7 @@ val sha3_256_lemma_l:
 (* sha3_384 *)
 
 val sha3_384_lemma_l:
-  m:m_spec{is_supported m}
+  m:m_spec
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
   -> output:multiseq (lanes m) 48
@@ -74,7 +74,7 @@ val sha3_384_lemma_l:
 (* sha3_512 *)
 
 val sha3_512_lemma_l:
-  m:m_spec{is_supported m}
+  m:m_spec
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
   -> output:multiseq (lanes m) 64

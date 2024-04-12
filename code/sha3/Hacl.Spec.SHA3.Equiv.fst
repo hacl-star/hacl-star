@@ -459,7 +459,7 @@ let load_blocks_lemma_ij_subst #m b j i =
     }
 
 val load_ws_lemma_l:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> b:multiblock_spec m
   -> l:nat{l < lanes m}
   -> i:nat{i < 25} ->
@@ -473,7 +473,7 @@ let load_ws_lemma_l #m b l i =
   load_blocks_lemma_ij_subst #m b l i
 
 val loadState_inner_lemma_l:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> b:multiblock_spec m
   -> s:state_spec m
   -> l:nat{l < lanes m}
@@ -487,7 +487,7 @@ let loadState_inner_lemma_l #m b s l i =
     (Spec.loadState_inner (Seq.slice b.(|l|) 0 200) i (state_spec_v s).[l])
 
 val loadState_loop_full:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> b:multiblock_spec m
   -> s:state_spec m
@@ -514,7 +514,7 @@ let rec loadState_loop_full #m r b s l n =
     () end
 
 val update_sub_b_lemma:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> b:multiblock_spec m
   -> l:nat{l < lanes m} ->
@@ -530,7 +530,7 @@ let update_sub_b_lemma #m r b l =
   eq_intro (Seq.slice b.(|l|) 0 200) (update_sub (create 200 (u8 0)) 0 r (Seq.slice b.(|l|) 0 r))
 
 val loadState_loop:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> b:multiblock_spec m
   -> s:state_spec m
@@ -548,7 +548,7 @@ let loadState_loop #m r b s l n =
   update_sub_b_lemma #m r b l
 
 val loadState_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> b:multiblock_spec m
   -> s:state_spec m
@@ -565,7 +565,7 @@ let loadState_lemma_l  #m r b s l = loadState_loop #m r b s l 25
 (* storeState *)
 
 val storeState_lemma_ij:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> s:state_spec m
   -> j:nat{j < lanes m}
   -> i:nat{i < 25 * 8} ->
@@ -618,7 +618,7 @@ let storeState_lemma_ij #m s j i =
     }
 
 val storeState_lemma_ij_sub:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> s:state_spec m
   -> j:nat{j < lanes m}
   -> i:nat{i < 25} ->
@@ -701,7 +701,7 @@ let storeState_inner_loop s =
   unfold_repeati 25 (Spec.storeState_inner s) block 24
 
 val storeState_inner_unroll_sub_0_6:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> s:Spec.state
   -> i:nat{i < 6} ->
   Lemma
@@ -760,7 +760,7 @@ let storeState_inner_unroll_sub_0_6 #m s i =
   eq_intro (sub block 40 8) (BSeq.uint_to_bytes_le #U64 s.[5])
 
 val storeState_inner_unroll_sub_6_12:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> s:Spec.state
   -> i:nat{i >= 6 /\ i < 12} ->
   Lemma
@@ -814,7 +814,7 @@ let storeState_inner_unroll_sub_6_12 #m s i =
   eq_intro (sub block 88 8) (BSeq.uint_to_bytes_le #U64 s.[11])
 
 val storeState_inner_unroll_sub_12_18:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> s:Spec.state
   -> i:nat{i >= 12 /\ i < 18} ->
   Lemma
@@ -865,7 +865,7 @@ let storeState_inner_unroll_sub_12_18 #m s i =
   eq_intro (sub block 136 8) (BSeq.uint_to_bytes_le #U64 s.[17])
 
 val storeState_inner_unroll_sub_18_25:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> s:Spec.state
   -> i:nat{i >= 18 /\ i < 25} ->
   Lemma
@@ -890,7 +890,7 @@ let storeState_inner_unroll_sub_18_25 #m s i =
   eq_intro (sub block 192 8) (BSeq.uint_to_bytes_le #U64 s.[24])
 
 val storeState_inner_unroll_sub:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> s:Spec.state
   -> i:nat{i < 25} ->
   Lemma
@@ -943,7 +943,7 @@ let sub_word_length_lemma l0 l1 =
   eq_intro l0 l1
 
 val storeState_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r <= 200}
   -> s:state_spec m
   -> l:nat{l < lanes m} ->
@@ -964,7 +964,7 @@ let storeState_lemma_l  #m r s l =
   storeState_inner_loop (state_spec_v s).[l]
 
 val storeState_update_b_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> outputByteLen:size_nat
   -> i:size_nat{i < outputByteLen / r}
@@ -987,7 +987,7 @@ let storeState_update_b_lemma_l #m r outputByteLen i b s l =
   storeState_lemma_l #m r s l
 
 val storeState_update_b_last_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> outputByteLen:size_nat
   -> outRem:size_nat{outRem == outputByteLen % r}
@@ -1022,7 +1022,7 @@ let storeState_update_b_last_lemma_l #m r outputByteLen outRem b s l =
 (* absorb_inner *)
 
 val absorb_inner_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> input:multiseq (lanes m) 256{forall l. l < lanes m ==> 
      (forall i. (i >= r /\ i < 256) ==> Seq.index input.(|l|) i == u8 0)}
@@ -1040,7 +1040,7 @@ let absorb_inner_lemma_l #m r input s l =
 (* absorb_inner_block *)
 
 val absorb_inner_block_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
@@ -1062,7 +1062,7 @@ let absorb_inner_block_lemma_l #m r inputByteLen input i s l =
 (* absorb_inner_nblocks *)
 
 val absorb_inner_loop:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
@@ -1087,7 +1087,7 @@ let rec absorb_inner_loop #m r inputByteLen input s l n =
     () end
 
 val absorb_inner_nblocks_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
@@ -1103,7 +1103,7 @@ let absorb_inner_nblocks_lemma_l #m r inputByteLen input s l =
 (* absorb_next *)
 
 val next_block_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> l:nat{l < lanes m} ->
   Lemma
@@ -1115,7 +1115,7 @@ let next_block_lemma_l #m r l =
     ((create r (u8 0)).[r - 1] <- u8 0x80)
 
 val absorb_next_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> s:state_spec m
   -> l:nat{l < lanes m} ->
@@ -1133,7 +1133,7 @@ let absorb_next_lemma_l  #m r s l =
 (* absorb_last *)
 
 val load_last_block_lemma_helper:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> delimitedSuffix:byte_t
   -> r:size_nat{r > 0 /\ r <= 200}
   -> rem:size_nat{rem < r}
@@ -1155,7 +1155,7 @@ let load_last_block_lemma_helper #m delimitedSuffix r rem input =
   assert (forall j. (j >= (rem + 1) /\ j < r) ==> (j - (rem + 1) >= 0))
 
   val load_last_block_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> delimitedSuffix:byte_t
   -> r:size_nat{r > 0 /\ r <= 200}
   -> rem:size_nat{rem < r}
@@ -1174,7 +1174,7 @@ let load_last_block_lemma_l #m delimitedSuffix r rem input l =
     (b.[rem] <- byte_to_uint8 delimitedSuffix)
 
 val absorb_last_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> delimitedSuffix:byte_t
   -> r:size_nat{r > 0 /\ r <= 200}
   -> rem:size_nat{rem < r}
@@ -1206,7 +1206,7 @@ let absorb_last_lemma_l #m delimitedSuffix r rem input s l =
 (* absorb_final *)
 
 val absorb_final_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> delimitedSuffix:byte_t
   -> r:size_nat{r > 0 /\ r <= 200}
   -> inputByteLen:nat
@@ -1232,7 +1232,7 @@ let absorb_final_lemma_l #m delimitedSuffix r inputByteLen input s l =
 (* absorb *)
 
 val absorb_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> s:state_spec m
   -> r:size_nat{r > 0 /\ r <= 200}
   -> inputByteLen:nat
@@ -1253,7 +1253,7 @@ let absorb_lemma_l #m s r inputByteLen input delimitedSuffix l =
 (* squeeze_inner *)
 
 val squeeze_inner_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> outputByteLen:size_nat
   -> i:size_nat{i < outputByteLen / r}
@@ -1280,7 +1280,7 @@ let squeeze_inner_lemma_l #m r outputByteLen i s b s_pre l =
 (* squeeze_nblocks *)
 
 val lemma_generate_squeeze_inner_loop:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> outputByteLen:size_nat
   -> n:nat{n <= outputByteLen}
@@ -1322,7 +1322,7 @@ let rec lemma_generate_squeeze_inner_loop #m r outputByteLen n s b l =
     () end
 
 val squeeze_nblocks_lemma_l:
-    #m:m_spec{is_supported m}
+    #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> outputByteLen:size_nat
   -> s:state_spec m
@@ -1340,7 +1340,7 @@ let squeeze_nblocks_lemma_l #m r outputByteLen s b l =
 (* squeeze_last *)
 
 val squeeze_last_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
   -> outputByteLen:size_nat
   -> s:state_spec m
@@ -1361,7 +1361,7 @@ let squeeze_last_lemma_l #m r outputByteLen s b l =
 (* squeeze *)
 
 val squeeze_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> s:state_spec m
   -> r:size_nat{r > 0 /\ r <= 200}
   -> outputByteLen:size_nat
@@ -1382,7 +1382,7 @@ let squeeze_lemma_l #m s r outputByteLen b l =
 (* keccak *)
 
 val keccak_lemma_l:
-  #m:m_spec{is_supported m}
+  #m:m_spec
   -> rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen

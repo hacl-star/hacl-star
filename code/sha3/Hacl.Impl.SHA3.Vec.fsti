@@ -19,7 +19,7 @@ inline_for_extraction noextract
 let state_t (m:m_spec) = lbuffer (element_t m) 25ul
 
 inline_for_extraction noextract
-val absorb_inner_block: #m:m_spec{is_supported m}
+val absorb_inner_block: #m:m_spec
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
@@ -31,7 +31,7 @@ val absorb_inner_block: #m:m_spec{is_supported m}
     as_seq h1 s == V.absorb_inner_block #m (v rateInBytes) (v len) (as_seq_multi h0 b) (v i) (as_seq h0 s))
 
 inline_for_extraction noextract
-val absorb_inner_nblocks: #m:m_spec{is_supported m}
+val absorb_inner_nblocks: #m:m_spec
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
@@ -42,7 +42,7 @@ val absorb_inner_nblocks: #m:m_spec{is_supported m}
     as_seq h1 s == V.absorb_inner_nblocks #m (v rateInBytes) (v len) (as_seq_multi h0 b) (as_seq h0 s))
 
 inline_for_extraction noextract
-val absorb_final: #m:m_spec{is_supported m}
+val absorb_final: #m:m_spec
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
@@ -55,7 +55,7 @@ val absorb_final: #m:m_spec{is_supported m}
       V.absorb_final #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
 
 inline_for_extraction noextract
-val absorb: #m:m_spec{is_supported m}
+val absorb: #m:m_spec
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
@@ -67,7 +67,7 @@ val absorb: #m:m_spec{is_supported m}
     as_seq h1 s == V.absorb #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
 
 inline_for_extraction noextract
-val squeeze_nblocks: #m:m_spec{is_supported m}
+val squeeze_nblocks: #m:m_spec
   -> s:state_t m
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
@@ -83,7 +83,7 @@ val squeeze_nblocks: #m:m_spec{is_supported m}
         as_seq_multi h1 b == b'))
 
 inline_for_extraction noextract
-val squeeze_last: #m:m_spec{is_supported m}
+val squeeze_last: #m:m_spec
   -> s:state_t m
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
@@ -96,7 +96,7 @@ val squeeze_last: #m:m_spec{is_supported m}
       as_seq_multi h1 b == V.squeeze_last #m (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq_multi h0 b))
 
 inline_for_extraction noextract
-val squeeze: #m:m_spec{is_supported m}
+val squeeze: #m:m_spec
   -> s:state_t m
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
@@ -109,7 +109,7 @@ val squeeze: #m:m_spec{is_supported m}
       as_seq_multi h1 b == V.squeeze #m (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq_multi h0 b))
 
 inline_for_extraction noextract
-val keccak: #m:m_spec{is_supported m}
+val keccak: #m:m_spec
   -> rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}
   -> inputByteLen:size_t
   -> input:multibuf (lanes m) inputByteLen
