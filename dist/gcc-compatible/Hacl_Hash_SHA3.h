@@ -77,6 +77,8 @@ uint32_t Hacl_Hash_SHA3_hash_len(Hacl_Hash_SHA3_state_t *s);
 
 bool Hacl_Hash_SHA3_is_shake(Hacl_Hash_SHA3_state_t *s);
 
+void Hacl_Hash_SHA3_absorb_inner_32(uint32_t rateInBytes, uint8_t *b, uint64_t *s);
+
 void
 Hacl_Hash_SHA3_shake128(
   uint8_t *output,

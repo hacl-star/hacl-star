@@ -75,6 +75,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_SHA3_is_shake =
       foreign "Hacl_Hash_SHA3_is_shake"
         ((ptr hacl_Hash_SHA3_state_t) @-> (returning bool))
+    let hacl_Hash_SHA3_absorb_inner_32 =
+      foreign "Hacl_Hash_SHA3_absorb_inner_32"
+        (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
     let hacl_Hash_SHA3_shake128 =
       foreign "Hacl_Hash_SHA3_shake128"
         (ocaml_bytes @->

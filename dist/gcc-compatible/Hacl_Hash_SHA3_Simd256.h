@@ -59,6 +59,13 @@ typedef struct K____uint8_t___uint8_t____K____uint8_t___uint8_t__s
 K____uint8_t___uint8_t____K____uint8_t___uint8_t_;
 
 void
+Hacl_Hash_SHA3_Simd256_absorb_inner_256(
+  uint32_t rateInBytes,
+  K____uint8_t___uint8_t____K____uint8_t___uint8_t_ b,
+  Lib_IntVector_Intrinsics_vec256 *s
+);
+
+void
 Hacl_Hash_SHA3_Simd256_shake128(
   uint8_t *output0,
   uint8_t *output1,
