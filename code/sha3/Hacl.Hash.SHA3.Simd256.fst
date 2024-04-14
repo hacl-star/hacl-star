@@ -27,6 +27,8 @@ module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+let absorb_inner_256 rateInBytes b s = absorb_inner #M256 rateInBytes b s
+
 inline_for_extraction noextract
 let disjoint_in_out #len_in #len_out #a (b0 b1 b2 b3: lbuffer a len_in)
     (b4 b5 b6 b7: lbuffer a len_out) =
@@ -77,7 +79,7 @@ let shake128 _ output0 output1 output2 output3 outputByteLen
   assert (internally_disjoint rb);
   assert (disjoint_multi_multi ib rb);
   loc_multi4 rb;
-  keccak #M256 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  keccak #M256 absorb_inner_256 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
   let h1 = ST.get() in
   shake128_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0;
   shake128_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 1;
@@ -127,7 +129,7 @@ let shake256 _ output0 output1 output2 output3 outputByteLen
   assert (internally_disjoint rb);
   assert (disjoint_multi_multi ib rb);
   loc_multi4 rb;
-  keccak #M256 1088ul (* 512ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  keccak #M256 absorb_inner_256 1088ul (* 512ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
   let h1 = ST.get() in
   shake256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0;
   shake256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 1;
@@ -171,7 +173,7 @@ let sha3_224 output0 output1 output2 output3
   assert (internally_disjoint rb);
   assert (disjoint_multi_multi ib rb);
   loc_multi4 rb;
-  keccak #M256 1152ul (* 448ul *) inputByteLen ib (byte 0x06) 28ul rb;
+  keccak #M256 absorb_inner_256 1152ul (* 448ul *) inputByteLen ib (byte 0x06) 28ul rb;
   let h1 = ST.get() in
   sha3_224_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0;
   sha3_224_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 1;
@@ -215,7 +217,7 @@ let sha3_256 output0 output1 output2 output3
   assert (internally_disjoint rb);
   assert (disjoint_multi_multi ib rb);
   loc_multi4 rb;
-  keccak #M256 1088ul (* 512ul *) inputByteLen ib (byte 0x06) 32ul rb;
+  keccak #M256 absorb_inner_256 1088ul (* 512ul *) inputByteLen ib (byte 0x06) 32ul rb;
   let h1 = ST.get() in
   sha3_256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0;
   sha3_256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 1;
@@ -259,7 +261,7 @@ let sha3_384 output0 output1 output2 output3
   assert (internally_disjoint rb);
   assert (disjoint_multi_multi ib rb);
   loc_multi4 rb;
-  keccak #M256 832ul (* 768ul *) inputByteLen ib (byte 0x06) 48ul rb;
+  keccak #M256 absorb_inner_256 832ul (* 768ul *) inputByteLen ib (byte 0x06) 48ul rb;
   let h1 = ST.get() in
   sha3_384_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0;
   sha3_384_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 1;
@@ -303,7 +305,7 @@ let sha3_512 output0 output1 output2 output3
   assert (internally_disjoint rb);
   assert (disjoint_multi_multi ib rb);
   loc_multi4 rb;
-  keccak #M256 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb;
+  keccak #M256 absorb_inner_256 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb;
   let h1 = ST.get() in
   sha3_512_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0;
   sha3_512_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 1;
@@ -374,7 +376,7 @@ val shake128_absorb_nblocks:
        as_seq h1 state ==
           V.absorb_inner_nblocks #M256 168 (v inputByteLen) (as_seq_multi h0 (ntup4 (input0, (input1, (input2, input3))))) (as_seq h0 state))
 let shake128_absorb_nblocks state _ input0 input1 input2 input3 inputByteLen =
-  absorb_inner_nblocks #M256 168ul inputByteLen (ntup4 (input0, (input1, (input2, input3)))) state
+  absorb_inner_nblocks #M256 absorb_inner_256 168ul inputByteLen (ntup4 (input0, (input1, (input2, input3)))) state
 
 [@@ Comment "Absorb a final partial blocks of 4 input buffers and write the output states
 
@@ -411,7 +413,7 @@ val shake128_absorb_final:
        as_seq h1 state ==
          V.absorb_final #M256 (as_seq h0 state) 168 (v inputByteLen) (as_seq_multi h0 (ntup4 (input0, (input1, (input2, input3))))) (byte 0x1F))
 let shake128_absorb_final state _ input0 input1 input2 input3 inputByteLen =
-  absorb_final #M256 168ul inputByteLen (ntup4 (input0, (input1, (input2, input3)))) (byte 0x1F) state
+  absorb_final #M256 absorb_inner_256 168ul inputByteLen (ntup4 (input0, (input1, (input2, input3)))) (byte 0x1F) state
 
 [@@ Comment "Squeeze a quadruple hash state to 4 output buffers
 

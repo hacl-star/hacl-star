@@ -27,6 +27,8 @@ module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+let absorb_inner_32 rateInBytes b s = absorb_inner #M32 rateInBytes b s
+
 val shake128:
   output:buffer_t MUT uint8
   -> outputByteLen:size_t{v outputByteLen == length output}
@@ -43,7 +45,7 @@ let shake128 output outputByteLen input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #M32 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  keccak #M32 absorb_inner_32 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
   shake128_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0
 
 val shake256:
@@ -62,7 +64,7 @@ let shake256 output outputByteLen input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #M32 1088ul (* 512ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  keccak #M32 absorb_inner_32 1088ul (* 512ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
   shake256_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0
 
 val sha3_224:
@@ -80,7 +82,7 @@ let sha3_224 output input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #M32 1152ul (* 448ul *) inputByteLen ib (byte 0x06) 28ul rb;
+  keccak #M32 absorb_inner_32 1152ul (* 448ul *) inputByteLen ib (byte 0x06) 28ul rb;
   sha3_224_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 val sha3_256:
@@ -98,7 +100,7 @@ let sha3_256 output input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #M32 1088ul (* 512ul *) inputByteLen ib (byte 0x06) 32ul rb;
+  keccak #M32 absorb_inner_32 1088ul (* 512ul *) inputByteLen ib (byte 0x06) 32ul rb;
   sha3_256_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 val sha3_384:
@@ -116,7 +118,7 @@ let sha3_384 output input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #M32 832ul (* 768ul *) inputByteLen ib (byte 0x06) 48ul rb;
+  keccak #M32 absorb_inner_32 832ul (* 768ul *) inputByteLen ib (byte 0x06) 48ul rb;
   sha3_384_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 val sha3_512:
@@ -134,7 +136,7 @@ let sha3_512 output input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #M32 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb;
+  keccak #M32 absorb_inner_32 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb;
   sha3_512_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 [@@ Comment "Allocate state buffer of 200-bytes"]
@@ -187,7 +189,7 @@ val shake128_absorb_nblocks:
        as_seq h1 state ==
           V.absorb_inner_nblocks #M32 168 (v inputByteLen) (as_seq_multi h0 (ntup1 input)) (as_seq h0 state))
 let shake128_absorb_nblocks state input inputByteLen =
-  absorb_inner_nblocks #M32 168ul inputByteLen (ntup1 input) state
+  absorb_inner_nblocks #M32 absorb_inner_32 168ul inputByteLen (ntup1 input) state
 
 [@@ Comment "Absorb a final partial block of input and write the output state
 
@@ -214,7 +216,7 @@ val shake128_absorb_final:
        as_seq h1 state ==
          V.absorb_final #M32 (as_seq h0 state) 168 (v inputByteLen) (as_seq_multi h0 (ntup1 input)) (byte 0x1F))
 let shake128_absorb_final state input inputByteLen =
-  absorb_final #M32 168ul inputByteLen (ntup1 input) (byte 0x1F) state
+  absorb_final #M32 absorb_inner_32 168ul inputByteLen (ntup1 input) (byte 0x1F) state
 
 [@@ Comment "Squeeze a hash state to output buffer
 

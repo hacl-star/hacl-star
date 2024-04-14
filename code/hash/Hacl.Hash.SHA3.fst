@@ -15,6 +15,9 @@ friend Spec.Agile.Hash
 
 #push-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 
+let absorb_inner_32 rateInBytes b s = Hacl.Impl.SHA3.Vec.absorb_inner
+  #Hacl.Spec.SHA3.Vec.Common.M32 rateInBytes b s
+
 /// We name this function used in Lib.Sequence spec combinators to avoid Z3 reasoning on anonymous functions
 inline_for_extraction noextract
 let spec_l (a: keccak_alg)
@@ -74,7 +77,7 @@ let update_multi_sha3 (a: keccak_alg): update_multi_sha3_st a = fun s () blocks 
   let h0 = ST.get() in
   let l = block_len a *! n_blocks in
   Lib.IntVector.reveal_vec_1 U64;
-  Hacl.Impl.SHA3.Vec.absorb_inner_nblocks #M32 (block_len a) l (ntup1 blocks) s;
+  Hacl.Impl.SHA3.Vec.absorb_inner_nblocks #M32 absorb_inner_32 (block_len a) l (ntup1 blocks) s;
   Hacl.Spec.SHA3.Equiv.absorb_inner_repeat_blocks_multi_lemma (v (block_len a)) (v l)
     (as_seq_multi h0 (ntup1 blocks)) (B.as_seq h0 s)
 
@@ -120,17 +123,17 @@ let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input inp
   if input_len = len then begin
     let h0 = ST.get() in
     assert (v input_len == v len);
-    Hacl.Impl.SHA3.Vec.absorb_inner_block #M32 len len (ntup1 input) 0ul s;
+    Hacl.Impl.SHA3.Vec.absorb_inner_block #M32 absorb_inner_32 len len (ntup1 input) 0ul s;
     Hacl.Spec.SHA3.Equiv.absorb_inner_block_r_lemma (v len)
       (as_seq_multi h0 (ntup1 input)) (B.as_seq h0 s);
     let h0' = ST.get() in
-    Hacl.Impl.SHA3.Vec.absorb_final #M32 len 0ul (ntup1 (B.sub input input_len 0ul)) suffix s;
+    Hacl.Impl.SHA3.Vec.absorb_final #M32 absorb_inner_32 len 0ul (ntup1 (B.sub input input_len 0ul)) suffix s;
     Hacl.Spec.SHA3.Equiv.absorb_last_r_lemma suffix (v len) 0
       (as_seq_multi #1 #0ul h0' (ntup1 (B.gsub input input_len 0ul))) (B.as_seq h0' s)
   end else begin
     let h0 = ST.get() in
     assert (v input_len < v len);
-    Hacl.Impl.SHA3.Vec.absorb_final #M32 len input_len (ntup1 input) suffix s;
+    Hacl.Impl.SHA3.Vec.absorb_final #M32 absorb_inner_32 len input_len (ntup1 input) suffix s;
     Hacl.Spec.SHA3.Equiv.absorb_last_r_lemma suffix (v len) (v input_len)
       (as_seq_multi h0 (ntup1 input)) (B.as_seq h0 s)
   end
