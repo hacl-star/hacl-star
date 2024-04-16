@@ -736,27 +736,35 @@ let storeState_inner_unroll_sub_0_6 #m s i =
   let b24 = Spec.storeState_inner s 24 b23 in
   let block = storeState_inner_unroll s in
   //s.[0]
-  eq_intro (sub b10 0 8) (BSeq.uint_to_bytes_le #U64 s.[0]);
-  eq_intro (sub b20 0 8) (BSeq.uint_to_bytes_le #U64 s.[0]);
+  eq_intro (sub b6 0 8) (BSeq.uint_to_bytes_le #U64 s.[0]);
+  eq_intro (sub b12 0 8) (BSeq.uint_to_bytes_le #U64 s.[0]);
+  eq_intro (sub b18 0 8) (BSeq.uint_to_bytes_le #U64 s.[0]);
+  eq_intro (sub b24 0 8) (BSeq.uint_to_bytes_le #U64 s.[0]);
   eq_intro (sub block 0 8) (BSeq.uint_to_bytes_le #U64 s.[0]);
   //s.[1]
-  eq_intro (sub b11 8 8) (BSeq.uint_to_bytes_le #U64 s.[1]);
-  eq_intro (sub b21 8 8) (BSeq.uint_to_bytes_le #U64 s.[1]);
+  eq_intro (sub b7 8 8) (BSeq.uint_to_bytes_le #U64 s.[1]);
+  eq_intro (sub b13 8 8) (BSeq.uint_to_bytes_le #U64 s.[1]);
+  eq_intro (sub b19 8 8) (BSeq.uint_to_bytes_le #U64 s.[1]);
   eq_intro (sub block 8 8) (BSeq.uint_to_bytes_le #U64 s.[1]);
   //s.[2]
-  eq_intro (sub b12 16 8) (BSeq.uint_to_bytes_le #U64 s.[2]);
-  eq_intro (sub b22 16 8) (BSeq.uint_to_bytes_le #U64 s.[2]);
+  eq_intro (sub b8 16 8) (BSeq.uint_to_bytes_le #U64 s.[2]);
+  eq_intro (sub b14 16 8) (BSeq.uint_to_bytes_le #U64 s.[2]);
+  eq_intro (sub b20 16 8) (BSeq.uint_to_bytes_le #U64 s.[2]);
   eq_intro (sub block 16 8) (BSeq.uint_to_bytes_le #U64 s.[2]);
   //s.[3]
-  eq_intro (sub b13 24 8) (BSeq.uint_to_bytes_le #U64 s.[3]);
-  eq_intro (sub b23 24 8) (BSeq.uint_to_bytes_le #U64 s.[3]);
+  eq_intro (sub b9 24 8) (BSeq.uint_to_bytes_le #U64 s.[3]);
+  eq_intro (sub b15 24 8) (BSeq.uint_to_bytes_le #U64 s.[3]);
+  eq_intro (sub b21 24 8) (BSeq.uint_to_bytes_le #U64 s.[3]);
   eq_intro (sub block 24 8) (BSeq.uint_to_bytes_le #U64 s.[3]);
   //s.[4]
-  eq_intro (sub b14 32 8) (BSeq.uint_to_bytes_le #U64 s.[4]);
-  eq_intro (sub b24 32 8) (BSeq.uint_to_bytes_le #U64 s.[4]);
+  eq_intro (sub b10 32 8) (BSeq.uint_to_bytes_le #U64 s.[4]);
+  eq_intro (sub b16 32 8) (BSeq.uint_to_bytes_le #U64 s.[4]);
+  eq_intro (sub b22 32 8) (BSeq.uint_to_bytes_le #U64 s.[4]);
   eq_intro (sub block 32 8) (BSeq.uint_to_bytes_le #U64 s.[4]);
   //s.[5]
-  eq_intro (sub b15 40 8) (BSeq.uint_to_bytes_le #U64 s.[5]);
+  eq_intro (sub b11 40 8) (BSeq.uint_to_bytes_le #U64 s.[5]);
+  eq_intro (sub b17 40 8) (BSeq.uint_to_bytes_le #U64 s.[5]);
+  eq_intro (sub b23 40 8) (BSeq.uint_to_bytes_le #U64 s.[5]);
   eq_intro (sub block 40 8) (BSeq.uint_to_bytes_le #U64 s.[5])
 
 val storeState_inner_unroll_sub_6_12:
@@ -795,22 +803,29 @@ let storeState_inner_unroll_sub_6_12 #m s i =
   let b24 = Spec.storeState_inner s 24 b23 in
   let block = storeState_inner_unroll s in
   //s.[6]
-  eq_intro (sub b16 48 8) (BSeq.uint_to_bytes_le #U64 s.[6]);
+  eq_intro (sub b12 48 8) (BSeq.uint_to_bytes_le #U64 s.[6]);
+  eq_intro (sub b18 48 8) (BSeq.uint_to_bytes_le #U64 s.[6]);
+  eq_intro (sub b24 48 8) (BSeq.uint_to_bytes_le #U64 s.[6]);
   eq_intro (sub block 48 8) (BSeq.uint_to_bytes_le #U64 s.[6]);
   //s.[7]
-  eq_intro (sub b17 56 8) (BSeq.uint_to_bytes_le #U64 s.[7]);
+  eq_intro (sub b13 56 8) (BSeq.uint_to_bytes_le #U64 s.[7]);
+  eq_intro (sub b19 56 8) (BSeq.uint_to_bytes_le #U64 s.[7]);
   eq_intro (sub block 56 8) (BSeq.uint_to_bytes_le #U64 s.[7]);
   //s.[8]
-  eq_intro (sub b18 64 8) (BSeq.uint_to_bytes_le #U64 s.[8]);
+  eq_intro (sub b14 64 8) (BSeq.uint_to_bytes_le #U64 s.[8]);
+  eq_intro (sub b20 64 8) (BSeq.uint_to_bytes_le #U64 s.[8]);
   eq_intro (sub block 64 8) (BSeq.uint_to_bytes_le #U64 s.[8]);
   //s.[9]
-  eq_intro (sub b19 72 8) (BSeq.uint_to_bytes_le #U64 s.[9]);
+  eq_intro (sub b15 72 8) (BSeq.uint_to_bytes_le #U64 s.[9]);
+  eq_intro (sub b21 72 8) (BSeq.uint_to_bytes_le #U64 s.[9]);
   eq_intro (sub block 72 8) (BSeq.uint_to_bytes_le #U64 s.[9]);
   //s.[10]
-  eq_intro (sub b20 80 8) (BSeq.uint_to_bytes_le #U64 s.[10]);
+  eq_intro (sub b16 80 8) (BSeq.uint_to_bytes_le #U64 s.[10]);
+  eq_intro (sub b22 80 8) (BSeq.uint_to_bytes_le #U64 s.[10]);
   eq_intro (sub block 80 8) (BSeq.uint_to_bytes_le #U64 s.[10]);
   //s.[11]
-  eq_intro (sub b21 88 8) (BSeq.uint_to_bytes_le #U64 s.[11]);
+  eq_intro (sub b17 88 8) (BSeq.uint_to_bytes_le #U64 s.[11]);
+  eq_intro (sub b23 88 8) (BSeq.uint_to_bytes_le #U64 s.[11]);
   eq_intro (sub block 88 8) (BSeq.uint_to_bytes_le #U64 s.[11])
 
 val storeState_inner_unroll_sub_12_18:
@@ -849,19 +864,23 @@ let storeState_inner_unroll_sub_12_18 #m s i =
   let b24 = Spec.storeState_inner s 24 b23 in
   let block = storeState_inner_unroll s in
   //s.[12]
-  eq_intro (sub b22 96 8) (BSeq.uint_to_bytes_le #U64 s.[12]);
+  eq_intro (sub b18 96 8) (BSeq.uint_to_bytes_le #U64 s.[12]);
+  eq_intro (sub b24 96 8) (BSeq.uint_to_bytes_le #U64 s.[12]);
   eq_intro (sub block 96 8) (BSeq.uint_to_bytes_le #U64 s.[12]);
   //s.[13]
-  eq_intro (sub b23 104 8) (BSeq.uint_to_bytes_le #U64 s.[13]);
+  eq_intro (sub b19 104 8) (BSeq.uint_to_bytes_le #U64 s.[13]);
   eq_intro (sub block 104 8) (BSeq.uint_to_bytes_le #U64 s.[13]);
   //s.[14]
-  eq_intro (sub b24 112 8) (BSeq.uint_to_bytes_le #U64 s.[14]);
+  eq_intro (sub b20 112 8) (BSeq.uint_to_bytes_le #U64 s.[14]);
   eq_intro (sub block 112 8) (BSeq.uint_to_bytes_le #U64 s.[14]);
   //s.[15]
+  eq_intro (sub b21 112 8) (BSeq.uint_to_bytes_le #U64 s.[14]);
   eq_intro (sub block 120 8) (BSeq.uint_to_bytes_le #U64 s.[15]);
   //s.[16]
+  eq_intro (sub b22 112 8) (BSeq.uint_to_bytes_le #U64 s.[14]);
   eq_intro (sub block 128 8) (BSeq.uint_to_bytes_le #U64 s.[16]);
   //s.[17]
+  eq_intro (sub b23 112 8) (BSeq.uint_to_bytes_le #U64 s.[14]);
   eq_intro (sub block 136 8) (BSeq.uint_to_bytes_le #U64 s.[17])
 
 val storeState_inner_unroll_sub_18_25:
