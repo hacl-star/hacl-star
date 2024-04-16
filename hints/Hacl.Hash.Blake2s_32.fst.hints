@@ -55,7 +55,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "0b99e76a766995a003ac57efdffdfe5f"
+      "70ae6e155edb970497ac827119343096"
     ],
     [
       "Hacl.Hash.Blake2s_32.alloca",
@@ -197,7 +197,7 @@
         "typing_tok_Spec.Blake2.Definitions.Blake2S@tok"
       ],
       0,
-      "60e944a5581f6c3b3247d02f35ac05e1"
+      "eb920f263902549a9518059f7a8b41e6"
     ],
     [
       "Hacl.Hash.Blake2s_32.init",
@@ -216,11 +216,14 @@
         "constructor_distinct_FStar.Integers.W64",
         "constructor_distinct_FStar.Integers.W8",
         "constructor_distinct_FStar.Integers.Winfinite",
+        "constructor_distinct_Hacl.Impl.Blake2.Core.M128",
+        "constructor_distinct_Hacl.Impl.Blake2.Core.M32",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
@@ -256,6 +259,8 @@
         "equation_Hacl.Hash.Definitions.impl_word",
         "equation_Hacl.Hash.Definitions.m_spec",
         "equation_Hacl.Hash.Definitions.state",
+        "equation_Hacl.Impl.Blake2.Core.element_t",
+        "equation_Hacl.Impl.Blake2.Core.word_t",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
         "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
@@ -271,7 +276,7 @@
         "equation_Spec.Blake2.Definitions.wt",
         "equation_Spec.GaloisField.gf",
         "equation_Spec.Hash.Definitions.to_blake_alg",
-        "function_token_typing_FStar.Monotonic.Heap.heap", "int_typing",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
         "interpretation_Tm_abs_3d77c1d80c0e9e736cdcf018f4780b14",
         "kinding_Spec.Hash.Definitions.hash_alg@tok",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
@@ -283,10 +288,12 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Integers.Signed__0",
         "projection_inverse_FStar.Integers.Unsigned__0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_Prims.Mkdtuple2__1",
         "projection_inverse_Prims.Mkdtuple2__2",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_9868dc35eb400a2586ac48772cadcbf7",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
@@ -295,21 +302,26 @@
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
+        "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip", "typing_FStar.UInt32.v",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
         "typing_Hacl.Hash.Definitions.impl_word", "typing_Lib.IntTypes.bits",
         "typing_Lib.IntTypes.minint",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.length", "typing_Spec.AES.gf8",
+        "typing_Spec.Blake2.Definitions.max_key",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Tm_abs_3d77c1d80c0e9e736cdcf018f4780b14",
         "typing_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok",
+        "typing_tok_Spec.Blake2.Definitions.Blake2S@tok",
         "typing_tok_Spec.Hash.Definitions.Blake2S@tok"
       ],
       0,
-      "58ed5981368c6dd86a77bee598b22564"
+      "0b90a36067de9b11b439746d8d3ea7be"
     ],
     [
       "Hacl.Hash.Blake2s_32.update_multi",
@@ -551,7 +563,7 @@
         "typing_tok_Spec.Hash.Definitions.Blake2S@tok"
       ],
       0,
-      "50ef13cb5fc609ecd9d4739c289ce26d"
+      "521abeca79ee4d7f6d05845aa765343f"
     ],
     [
       "Hacl.Hash.Blake2s_32.update_last",
@@ -795,7 +807,7 @@
         "typing_tok_Spec.Hash.Definitions.Blake2S@tok"
       ],
       0,
-      "b2cf6263686369f832e4bfaca55899c2"
+      "9a02a90b30acf4f0e62269aecd1335ca"
     ],
     [
       "Hacl.Hash.Blake2s_32.update_last",
@@ -835,7 +847,7 @@
         "typing_tok_Spec.Hash.Definitions.Blake2S@tok"
       ],
       0,
-      "24f712c6158855ba025a012c23c8ba5f"
+      "80e66b48a0aa2dcd72e456adb942ff3a"
     ],
     [
       "Hacl.Hash.Blake2s_32.finish",
@@ -853,7 +865,7 @@
         "projection_inverse_Prims.Mkdtuple2__1"
       ],
       0,
-      "6b2fb0b42bc2ca5675e377cee00b0f0d"
+      "d8acde3a0509415648b493a56e91eeac"
     ],
     [
       "Hacl.Hash.Blake2s_32.finish",
@@ -960,7 +972,7 @@
         "typing_tok_Spec.Hash.Definitions.Blake2S@tok"
       ],
       0,
-      "d778011c927a8c3ab0b9b962be4d4d6b"
+      "086d7d069d0195f47d6ebe6d53ba168f"
     ],
     [
       "Hacl.Hash.Blake2s_32.finish",
@@ -1067,7 +1079,7 @@
         "typing_tok_Spec.Hash.Definitions.Blake2S@tok"
       ],
       0,
-      "25383426c116434d940673db2be040dd"
+      "50d15bdd03f2c1fd7186d9553a00d4d1"
     ],
     [
       "Hacl.Hash.Blake2s_32.hash",
@@ -1081,7 +1093,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "afa9036cddbc93367892a4981a3b41dd"
+      "51d089a88da805c49d8e893970695d66"
     ],
     [
       "Hacl.Hash.Blake2s_32.hash",
@@ -1177,7 +1189,7 @@
         "typing_tok_Spec.Blake2.Definitions.Blake2S@tok"
       ],
       0,
-      "106c8b0a0166f83780783aa5092d4d4a"
+      "b6dd66e1a99a2f7748941f094df56b27"
     ],
     [
       "Hacl.Hash.Blake2s_32.hash",
@@ -1191,7 +1203,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "aa47b731f2f85f1f4f35dbcca2dccad5"
+      "8839459cbf4cef9f3a37ecc40a3e5635"
     ]
   ]
 ]
