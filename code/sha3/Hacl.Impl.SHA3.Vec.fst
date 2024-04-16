@@ -22,13 +22,13 @@ let disjoint4_4 #len1 #len2 #a (b0 b1 b2 b3: lbuffer a len1) (b4 b5 b6 b7: lbuff
   disjoint b2 b4 /\ disjoint b2 b5 /\ disjoint b2 b6 /\ disjoint b2 b7 /\
   disjoint b3 b4 /\ disjoint b3 b5 /\ disjoint b3 b6 /\ disjoint b3 b7
 
-private let keccak_rotc :x:glbuffer rotc_t 24ul{witnessed x keccak_rotc /\ recallable x}
+let keccak_rotc :x:glbuffer rotc_t 24ul{witnessed x keccak_rotc /\ recallable x}
   = createL_global rotc_list
 
-private let keccak_piln :x:glbuffer piln_t 24ul{witnessed x keccak_piln /\ recallable x}
+let keccak_piln :x:glbuffer piln_t 24ul{witnessed x keccak_piln /\ recallable x}
   = createL_global piln_list
 
-private let keccak_rndc :x:glbuffer pub_uint64 24ul{witnessed x keccak_rndc /\ recallable x}
+let keccak_rndc :x:glbuffer pub_uint64 24ul{witnessed x keccak_rndc /\ recallable x}
   = createL_global rndc_list
 
 #set-options "--z3rlimit 80 --fuel 0 --ifuel 0"

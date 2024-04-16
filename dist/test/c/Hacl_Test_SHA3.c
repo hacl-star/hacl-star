@@ -25,11 +25,11 @@
 
 #include "Hacl_Test_SHA3.h"
 
-extern const uint32_t *Hacl_Impl_SHA3_Vec_keccak_rotc;
+extern uint32_t Hacl_Impl_SHA3_Vec_keccak_rotc[24];
 
-extern const uint32_t *Hacl_Impl_SHA3_Vec_keccak_piln;
+extern uint32_t Hacl_Impl_SHA3_Vec_keccak_piln[24];
 
-extern const uint64_t *Hacl_Impl_SHA3_Vec_keccak_rndc;
+extern uint64_t Hacl_Impl_SHA3_Vec_keccak_rndc[24];
 
 extern void C_String_print(Prims_string uu___);
 
