@@ -30,10 +30,10 @@
 typedef __m128i Lib_IntVector_Intrinsics_vec128;
 
 #define Lib_IntVector_Intrinsics_ni_aes_enc(x0, x1) \
-  (_mm_aesenc_si128(x0, x1))
+  (_mm_aesenc_si128(x1, x0))
 
 #define Lib_IntVector_Intrinsics_ni_aes_enc_last(x0, x1) \
-  (_mm_aesenclast_si128(x0, x1))
+  (_mm_aesenclast_si128(x1, x0))
 
 #define Lib_IntVector_Intrinsics_ni_aes_keygen_assist(x0, x1) \
   (_mm_aeskeygenassist_si128(x0, x1))
@@ -465,10 +465,10 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 #if defined(__ARM_FEATURE_AES)
 
 #define Lib_IntVector_Intrinsics_ni_aes_enc(x0, x1) \
-  ((uint32x4_t)(vaesmcq_u8(vaeseq_u8((uint8x16_t)x0, (uint8x16_t){})) ^ (uint8x16_t)x1))
+  ((uint32x4_t)(vaesmcq_u8(vaeseq_u8((uint8x16_t)x1, (uint8x16_t){})) ^ (uint8x16_t)x0))
 
 #define Lib_IntVector_Intrinsics_ni_aes_enc_last(x0, x1) \
-  ((uint32x4_t)(vaeseq_u8((uint8x16_t)x0, (uint8x16_t){}) ^ (uint8x16_t)x1))
+  ((uint32x4_t)(vaeseq_u8((uint8x16_t)x1, (uint8x16_t){}) ^ (uint8x16_t)x0))
 
 static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_ni_aes_keygen_assist (Lib_IntVector_Intrinsics_vec128 x0, uint8_t x1){
     uint8x16_t tmp = vaeseq_u8((uint8x16_t)x0, (uint8x16_t){});

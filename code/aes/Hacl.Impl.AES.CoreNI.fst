@@ -251,6 +251,29 @@ let xor_block out st inp =
 
 
 inline_for_extraction noextract
+val aes_enc_1:
+    st: state
+  -> key: key1
+  -> i:size_t{v i < 4} ->
+  Stack unit
+  (requires (fun h -> live h st /\ live h key /\ disjoint st key))
+  (ensures (fun h0 _ h1 -> modifies1 st h0 h1 /\
+    uints_to_bytes_be (vec_v (LSeq.index (as_seq h1 st) (v i))) ==
+      Spec.AES.aes_enc (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 key) 0)))
+      (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) (v i)))) /\
+    (forall (j: nat). j < v i ==> LSeq.index (as_seq h1 st) j == LSeq.index (as_seq h0 st) j) /\
+    (forall (j: nat). j > v i /\ j < 4 ==> LSeq.index (as_seq h1 st) j == LSeq.index (as_seq h0 st) j)))
+
+let aes_enc_1 st key i =
+  let h0 = ST.get() in
+  st.(i) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(i)));
+  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 key) 0));
+  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) (v i)));
+  let k = uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 key) 0)) in
+  vec_u8_16 (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) (v i)))));
+  uints_bytes_be_lemma (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) (v i)))))
+
+inline_for_extraction noextract
 val aes_enc:
     st: state
   -> key: key1 ->
@@ -269,29 +292,35 @@ val aes_enc:
     uints_to_bytes_be (vec_v (LSeq.index st'' 3)) ==
       Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index st' 3))))))
 
-#push-options "--z3rlimit 40"
 let aes_enc st key =
-  let h0 = ST.get() in
-  st.(size 0) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 0)));
-  st.(size 1) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 1)));
-  st.(size 2) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 2)));
-  st.(size 3) <- cast U128 1 (vec_aes_enc (cast U8 16 key.(size 0)) (cast U8 16 st.(size 3)));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 key) 0));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 0));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 1));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 2));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 3));
-  let k = uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 key) 0)) in
-  vec_u8_16 (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 0))));
-  vec_u8_16 (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 1))));
-  vec_u8_16 (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 2))));
-  vec_u8_16 (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 3))));
-  uints_bytes_be_lemma (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 0))));
-  uints_bytes_be_lemma (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 1))));
-  uints_bytes_be_lemma (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 2))));
-  uints_bytes_be_lemma (Spec.AES.aes_enc k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 3))))
-#pop-options
+  aes_enc_1 st key (size 0);
+  aes_enc_1 st key (size 1);
+  aes_enc_1 st key (size 2);
+  aes_enc_1 st key (size 3)
 
+
+inline_for_extraction noextract
+val aes_enc_last_1:
+    st: state
+  -> key: key1
+  -> i:size_t{v i < 4} ->
+  Stack unit
+  (requires (fun h -> live h st /\ live h key /\ disjoint st key))
+  (ensures (fun h0 _ h1 -> modifies1 st h0 h1 /\
+    uints_to_bytes_be (vec_v (LSeq.index (as_seq h1 st) (v i))) ==
+      Spec.AES.aes_enc_last (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 key) 0)))
+      (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) (v i)))) /\
+    (forall (j: nat). j < v i ==> LSeq.index (as_seq h1 st) j == LSeq.index (as_seq h0 st) j) /\
+    (forall (j: nat). j > v i /\ j < 4 ==> LSeq.index (as_seq h1 st) j == LSeq.index (as_seq h0 st) j)))
+
+let aes_enc_last_1 st key i =
+  let h0 = ST.get() in
+  st.(i) <- cast U128 1 (vec_aes_enc_last (cast U8 16 key.(size 0)) (cast U8 16 st.(i)));
+  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 key) 0));
+  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) (v i)));
+  let k = uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 key) 0)) in
+  vec_u8_16 (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) (v i)))));
+  uints_bytes_be_lemma (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) (v i)))))
 
 inline_for_extraction noextract
 val aes_enc_last:
@@ -312,28 +341,11 @@ val aes_enc_last:
     uints_to_bytes_be (vec_v (LSeq.index st'' 3)) ==
       Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index st' 3))))))
 
-#push-options "--z3rlimit 40"
 let aes_enc_last st key =
-  let h0 = ST.get() in
-  st.(size 0) <- cast U128 1 (vec_aes_enc_last (cast U8 16 key.(size 0)) (cast U8 16 st.(size 0)));
-  st.(size 1) <- cast U128 1 (vec_aes_enc_last (cast U8 16 key.(size 0)) (cast U8 16 st.(size 1)));
-  st.(size 2) <- cast U128 1 (vec_aes_enc_last (cast U8 16 key.(size 0)) (cast U8 16 st.(size 2)));
-  st.(size 3) <- cast U128 1 (vec_aes_enc_last (cast U8 16 key.(size 0)) (cast U8 16 st.(size 3)));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 key) 0));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 0));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 1));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 2));
-  vec_u128_to_u8 (vec_v (LSeq.index (as_seq h0 st) 3));
-  let k = uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 key) 0)) in
-  vec_u8_16 (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 0))));
-  vec_u8_16 (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 1))));
-  vec_u8_16 (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 2))));
-  vec_u8_16 (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 3))));
-  uints_bytes_be_lemma (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 0))));
-  uints_bytes_be_lemma (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 1))));
-  uints_bytes_be_lemma (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 2))));
-  uints_bytes_be_lemma (Spec.AES.aes_enc_last k (uints_to_bytes_be (vec_v (LSeq.index (as_seq h0 st) 3))))
-#pop-options
+  aes_enc_last_1 st key (size 0);
+  aes_enc_last_1 st key (size 1);
+  aes_enc_last_1 st key (size 2);
+  aes_enc_last_1 st key (size 3)
 
 inline_for_extraction noextract
 val aes_keygen_assist0:
