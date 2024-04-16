@@ -557,3 +557,4 @@ if $compile_vec256; then echo "COMPILE_VEC256 = 1" >> Makefile.config; fi
 if $compile_vale; then echo "COMPILE_VALE = 1" >> Makefile.config; fi
 if $compile_inline_asm; then echo "COMPILE_INLINE_ASM = 1" >> Makefile.config; fi
 if $compile_intrinsics; then echo "COMPILE_INTRINSICS = 1" >> Makefile.config; fi
+if $compile_aesni; then echo "COMPILE_AESNI = 1" >> Makefile.config; fi
