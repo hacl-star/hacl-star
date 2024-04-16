@@ -1282,16 +1282,16 @@ let test_vectors : list vec = [
   Vec S.Blake2S 18 test18_params test2_plaintext test2_key test18_expected;
   Vec S.Blake2S 19 test19_params test2_plaintext emp_key test19_expected;
   Vec S.Blake2S 23 test23_params test2_plaintext emp_key test23_expected;
-  Vec S.Blake2S 24 test24_params test1_plaintext emp_key test24_expected;
-  Vec S.Blake2S 26 test26_params test1_plaintext emp_key test26_expected;
-  Vec S.Blake2S 28 test28_params test1_plaintext emp_key test28_expected;
-  Vec S.Blake2S 30 test30_params test1_plaintext emp_key test30_expected;
-  Vec S.Blake2S 32 test32_params test1_plaintext emp_key test32_expected;
-  Vec S.Blake2S 34 test34_params test1_plaintext emp_key test34_expected;
-  Vec S.Blake2S 36 test36_params test1_plaintext emp_key test36_expected;
-  Vec S.Blake2S 38 test38_params test1_plaintext emp_key test38_expected;
-  Vec S.Blake2S 40 test40_params test1_plaintext emp_key test40_expected;
-  Vec S.Blake2S 42 test42_params test1_plaintext emp_key test42_expected;
+  Vec S.Blake2S 24 test24_params test2_plaintext emp_key test24_expected;
+  Vec S.Blake2S 26 test26_params test2_plaintext emp_key test26_expected;
+  Vec S.Blake2S 28 test28_params test2_plaintext emp_key test28_expected;
+  Vec S.Blake2S 30 test30_params test2_plaintext emp_key test30_expected;
+  Vec S.Blake2S 32 test32_params test2_plaintext emp_key test32_expected;
+  Vec S.Blake2S 34 test34_params test2_plaintext emp_key test34_expected;
+  Vec S.Blake2S 36 test36_params test2_plaintext emp_key test36_expected;
+  Vec S.Blake2S 38 test38_params test2_plaintext emp_key test38_expected;
+  Vec S.Blake2S 40 test40_params test2_plaintext emp_key test40_expected;
+  Vec S.Blake2S 42 test42_params test2_plaintext emp_key test42_expected;
 
   Vec S.Blake2B 0 (S.blake2_default_params _) test0_plaintext test0_key test0_expected;
   Vec S.Blake2B 5 (S.blake2_default_params _) test5_plaintext emp_key test5_expected;
@@ -1304,16 +1304,16 @@ let test_vectors : list vec = [
   Vec S.Blake2B 20 test20_params test2_plaintext emp_key test20_expected;
   Vec S.Blake2B 21 test21_params test1_plaintext test13_key test21_expected;
   Vec S.Blake2B 22 test22_params test1_plaintext test13_key test22_expected;
-  Vec S.Blake2B 25 test25_params test1_plaintext emp_key test25_expected;
-  Vec S.Blake2B 27 test27_params test1_plaintext emp_key test27_expected;
-  Vec S.Blake2B 29 test29_params test1_plaintext emp_key test29_expected;
-  Vec S.Blake2B 31 test31_params test1_plaintext emp_key test31_expected;
-  Vec S.Blake2B 33 test33_params test1_plaintext emp_key test33_expected;
-  Vec S.Blake2B 35 test35_params test1_plaintext emp_key test35_expected;
-  Vec S.Blake2B 37 test37_params test1_plaintext emp_key test37_expected;
-  Vec S.Blake2B 39 test39_params test1_plaintext emp_key test39_expected;
-  Vec S.Blake2B 41 test41_params test1_plaintext emp_key test41_expected;
-  Vec S.Blake2B 43 test43_params test1_plaintext emp_key test43_expected;
+  Vec S.Blake2B 25 test25_params test2_plaintext emp_key test25_expected;
+  Vec S.Blake2B 27 test27_params test2_plaintext emp_key test27_expected;
+  Vec S.Blake2B 29 test29_params test2_plaintext emp_key test29_expected;
+  Vec S.Blake2B 31 test31_params test2_plaintext emp_key test31_expected;
+  Vec S.Blake2B 33 test33_params test2_plaintext emp_key test33_expected;
+  Vec S.Blake2B 35 test35_params test2_plaintext emp_key test35_expected;
+  Vec S.Blake2B 37 test37_params test2_plaintext emp_key test37_expected;
+  Vec S.Blake2B 39 test39_params test2_plaintext emp_key test39_expected;
+  Vec S.Blake2B 41 test41_params test2_plaintext emp_key test41_expected;
+  Vec S.Blake2B 43 test43_params test2_plaintext emp_key test43_expected;
 ]
 
 #set-options "--ifuel 2"
