@@ -1192,6 +1192,7 @@ let absorb_final_core #m absorb_inner rateInBytes len b b' delimitedSuffix s =
   get_multilast #m rateInBytes len b b';
   absorb_last #m absorb_inner rateInBytes (len %. rateInBytes) delimitedSuffix b' s
 
+#push-options "--z3rlimit 120"
 let absorb_final #m absorb_inner rateInBytes len b delimitedSuffix s =
   let h0 = ST.get() in
   assert (v (len %. rateInBytes) == v len % v rateInBytes);
@@ -1217,6 +1218,7 @@ let absorb_final #m absorb_inner rateInBytes len b delimitedSuffix s =
   assert (modifies (loc s) h0 h1 /\
     as_seq h1 s ==
       V.absorb_final #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
+#pop-options
 
 let absorb #m absorb_inner rateInBytes len b delimitedSuffix s =
   let h0 = ST.get() in
