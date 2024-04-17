@@ -248,21 +248,21 @@ val blake2_compress1:
     a:alg
   -> s_iv:state a
   -> offset:limb_t a
-  -> flag:bool ->
+  -> flag:bool
+  -> last_node_flag:bool ->
   Tot (state a)
 
-let blake2_compress1 a s_iv offset flag =
+let blake2_compress1 a s_iv offset flag last_node_flag =
   let wv : state a = s_iv in
   let low_offset = limb_to_word a offset in
   let high_offset = limb_to_word a (shift_right #(limb_inttype a) offset (size (bits (wt a)))) in
   let m_12 = low_offset in
   let m_13 = high_offset in
   let m_14 = if flag then (ones (wt a) SEC) else zero a in
-  let m_15 = zero a in
+  let m_15 = if last_node_flag then (ones (wt a) SEC) else zero a in
   let mask = create_row m_12 m_13 m_14 m_15 in
   let wv = wv.[3] <- wv.[3] ^| mask in
   wv
-
 
 val blake2_compress2:
     a:alg
@@ -288,12 +288,13 @@ val blake2_compress:
   -> s_iv:state a
   -> m:block_s a
   -> offset:limb_t a
-  -> flag:bool ->
+  -> flag:bool
+  -> last_node_flag:bool ->
   Tot (state a)
 
-let blake2_compress a s_iv m offset flag =
+let blake2_compress a s_iv m offset flag last_node_flag =
   let m_w = blake2_compress0 a m in
-  let wv = blake2_compress1 a s_iv offset flag in
+  let wv = blake2_compress1 a s_iv offset flag last_node_flag in
   let wv = blake2_compress2 a wv m_w in
   let s_iv = blake2_compress3 a wv s_iv in
   s_iv
@@ -302,14 +303,15 @@ let blake2_compress a s_iv m offset flag =
 val blake2_update_block:
     a:alg
   -> flag:bool
+  -> last_node_flag:bool
   -> totlen:nat{totlen <= max_limb a}
   -> d:block_s a
   -> s_iv:state a ->
   Tot (state a)
 
-let blake2_update_block a flag totlen d s =
+let blake2_update_block a flag last_node_flag totlen d s =
   let offset = nat_to_limb a totlen in
-  blake2_compress a s d offset flag
+  blake2_compress a s d offset flag last_node_flag
 
 val blake2_update1:
     a:alg
@@ -325,10 +327,11 @@ let get_blocki (a:alg) (m:bytes) (i:nat{i < length m / size_block a}) : block_s 
 let blake2_update1 a prev m i s =
   let totlen = prev + (i+1) * size_block a in
   let d = get_blocki a m i in
-  blake2_update_block a false totlen d s
+  blake2_update_block a false false totlen d s
 
 val blake2_update_last:
     a:alg
+  -> last_node_flag: bool
   -> prev:nat
   -> rem:nat
   -> m:bytes{prev + length m <= max_limb a /\ rem <= length m /\ rem <= size_block a}
@@ -342,14 +345,15 @@ let get_last_padded_block (a:alg) (m:bytes)
   let last_block = update_sub last_block 0 rem last in
   last_block
 
-let blake2_update_last a prev rem m s =
+let blake2_update_last a last_node_flag prev rem m s =
   let inlen = length m in
   let totlen = prev + inlen in
   let last_block = get_last_padded_block a m rem in
-  blake2_update_block a true totlen last_block s
+  blake2_update_block a true last_node_flag totlen last_block s
 
 val blake2_update_blocks:
     a:alg
+  -> last_node_flag:bool
   -> prev:nat
   -> m:bytes{prev + length m <= max_limb a}
   -> s:state a ->
@@ -360,10 +364,10 @@ let split (a:alg) (len:nat)
 		   nb * size_block a + rem == len} =
   UpdateMulti.split_at_last_lazy_nb_rem (size_block a) len
 
-let blake2_update_blocks a prev m s =
+let blake2_update_blocks a last_node_flag prev m s =
   let (nb,rem) = split a (length m) in
   let s = repeati nb (blake2_update1 a prev m) s in
-  blake2_update_last a prev rem m s
+  blake2_update_last a last_node_flag prev rem m s
 
 
 val blake2_init_hash:
@@ -409,32 +413,34 @@ let blake2_key_block a kk k =
 /// This function must be called only if the key is non empty (see the precondition)
 val blake2_update_key:
     a:alg
+  -> last_node_flag: bool
   -> kk:size_nat{0 < kk /\ kk <= max_key a}
   -> k:lbytes kk
   -> ll:nat
   -> s:state a ->
   Tot (state a)
-let blake2_update_key a kk k ll s =
+let blake2_update_key a last_node_flag kk k ll s =
   let key_block = blake2_key_block a kk k in
   if ll = 0 then
-      blake2_update_block a true (size_block a) key_block s
+      blake2_update_block a true last_node_flag (size_block a) key_block s
   else
-      blake2_update_block a false (size_block a) key_block s
+      blake2_update_block a false false (size_block a) key_block s
 
 val blake2_update:
     a:alg
+  -> last_node: bool
   -> kk:size_nat{kk <= max_key a}
   -> k:lbytes kk
   -> d:bytes{if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a}
   -> s:state a ->
   Tot (state a)
-let blake2_update a kk k d s =
+let blake2_update a last_node kk k d s =
   let ll = length d in
   if kk > 0 then
-     let s = blake2_update_key a kk k ll s in
+     let s = blake2_update_key a last_node kk k ll s in
      if ll = 0 then s // Skip update_last if ll = 0 (but kk > 0)
-     else blake2_update_blocks a (size_block a) d s
-  else blake2_update_blocks a 0 d s
+     else blake2_update_blocks a last_node (size_block a) d s
+  else blake2_update_blocks a last_node 0 d s
 
 val blake2_finish:
     a:alg
@@ -449,6 +455,7 @@ let blake2_finish a s nn =
 // Full generality, with parameters
 val blake2:
     a:alg
+  -> last_node: bool
   -> d:bytes
   -> p:blake2_params a {
       let kk = p.key_length in
@@ -457,14 +464,14 @@ val blake2:
   -> k:lbytes (UInt8.v p.key_length) ->
   Tot (lbytes (UInt8.v p.digest_length))
 
-let blake2 a d p k =
+let blake2 a last_node d p k =
   let kk = UInt8.v p.key_length in
   let nn = UInt8.v p.digest_length in
   let s = blake2_init_hash a p in
-  let s = blake2_update a kk k d s in
+  let s = blake2_update a last_node kk k d s in
   blake2_finish a s nn
 
-// Simplified API, no parameters
+// Simplified API, no parameters, last_node set to false
 val blake2s:
     d:bytes
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d < pow2 64 else length d + 64 < pow2 64)}
@@ -472,7 +479,7 @@ val blake2s:
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
   Tot (lbytes nn)
 
-let blake2s d kk k n = blake2 Blake2S d { blake2_default_params Blake2S with key_length = UInt8.uint_to_t kk; digest_length = UInt8.uint_to_t n } k
+let blake2s d kk k n = blake2 Blake2S false d { blake2_default_params Blake2S with key_length = UInt8.uint_to_t kk; digest_length = UInt8.uint_to_t n } k
 
 val blake2b:
     d:bytes
@@ -481,5 +488,4 @@ val blake2b:
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)
 
-let blake2b d kk k n = blake2 Blake2B d { blake2_default_params Blake2B with key_length = UInt8.uint_to_t kk; digest_length = UInt8.uint_to_t n } k
-
+let blake2b d kk k n = blake2 Blake2B false d { blake2_default_params Blake2B with key_length = UInt8.uint_to_t kk; digest_length = UInt8.uint_to_t n } k
