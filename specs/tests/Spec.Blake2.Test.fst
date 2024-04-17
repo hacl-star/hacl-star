@@ -1263,68 +1263,69 @@ noeq type vec =
   | Vec :
     a:S.alg
     -> num:nat
+    -> last_node: bool
     -> params: S.blake2_params a { UInt8.v params.digest_length == blake2_length a }
     -> plain:bytes{length plain <= max_size_t}
     -> key:bytes{length key <= S.max_key a}
     -> hash:bytes{length hash = blake2_length a} -> vec
 
 let test_vectors : list vec = [
-  Vec S.Blake2S 1 (S.blake2_default_params _) test1_plaintext emp_key test1_expected;
-  Vec S.Blake2S 2 (S.blake2_default_params _) test2_plaintext test2_key test2_expected;
-  Vec S.Blake2S 3 (S.blake2_default_params _) test3_plaintext test3_key test3_expected;
-  Vec S.Blake2S 4 (S.blake2_default_params _) test4_plaintext test4_key test4_expected;
-  Vec S.Blake2S 7 (S.blake2_default_params _) test7_plaintext test7_key test7_expected;
-  Vec S.Blake2S 8 (S.blake2_default_params _) test8_plaintext test8_key test8_expected;
-  Vec S.Blake2S 9 (S.blake2_default_params _) test9_plaintext test9_key test9_expected;
-  Vec S.Blake2S 10 (S.blake2_default_params _) test10_plaintext test10_key test10_expected;
-  Vec S.Blake2S 11 (S.blake2_default_params _) test11_plaintext test11_key test11_expected;
-  Vec S.Blake2S 17 test17_params test1_plaintext emp_key test17_expected;
-  Vec S.Blake2S 18 test18_params test2_plaintext test2_key test18_expected;
-  Vec S.Blake2S 19 test19_params test2_plaintext emp_key test19_expected;
-  Vec S.Blake2S 23 test23_params test2_plaintext emp_key test23_expected;
-  Vec S.Blake2S 24 test24_params test2_plaintext emp_key test24_expected;
-  Vec S.Blake2S 26 test26_params test2_plaintext emp_key test26_expected;
-  Vec S.Blake2S 28 test28_params test2_plaintext emp_key test28_expected;
-  Vec S.Blake2S 30 test30_params test2_plaintext emp_key test30_expected;
-  Vec S.Blake2S 32 test32_params test2_plaintext emp_key test32_expected;
-  Vec S.Blake2S 34 test34_params test2_plaintext emp_key test34_expected;
-  Vec S.Blake2S 36 test36_params test2_plaintext emp_key test36_expected;
-  Vec S.Blake2S 38 test38_params test2_plaintext emp_key test38_expected;
-  Vec S.Blake2S 40 test40_params test2_plaintext emp_key test40_expected;
-  Vec S.Blake2S 42 test42_params test2_plaintext emp_key test42_expected;
+  Vec S.Blake2S 1 false (S.blake2_default_params _) test1_plaintext emp_key test1_expected;
+  Vec S.Blake2S 2 false (S.blake2_default_params _) test2_plaintext test2_key test2_expected;
+  Vec S.Blake2S 3 false (S.blake2_default_params _) test3_plaintext test3_key test3_expected;
+  Vec S.Blake2S 4 false (S.blake2_default_params _) test4_plaintext test4_key test4_expected;
+  Vec S.Blake2S 7 false (S.blake2_default_params _) test7_plaintext test7_key test7_expected;
+  Vec S.Blake2S 8 false (S.blake2_default_params _) test8_plaintext test8_key test8_expected;
+  Vec S.Blake2S 9 false (S.blake2_default_params _) test9_plaintext test9_key test9_expected;
+  Vec S.Blake2S 10 false (S.blake2_default_params _) test10_plaintext test10_key test10_expected;
+  Vec S.Blake2S 11 false (S.blake2_default_params _) test11_plaintext test11_key test11_expected;
+  Vec S.Blake2S 17 false test17_params test1_plaintext emp_key test17_expected;
+  Vec S.Blake2S 18 false test18_params test2_plaintext test2_key test18_expected;
+  Vec S.Blake2S 19 false test19_params test2_plaintext emp_key test19_expected;
+  Vec S.Blake2S 23 false test23_params test2_plaintext emp_key test23_expected;
+  Vec S.Blake2S 24 false test24_params test2_plaintext emp_key test24_expected;
+  Vec S.Blake2S 26 false test26_params test2_plaintext emp_key test26_expected;
+  Vec S.Blake2S 28 false test28_params test2_plaintext emp_key test28_expected;
+  Vec S.Blake2S 30 false test30_params test2_plaintext emp_key test30_expected;
+  Vec S.Blake2S 32 false test32_params test2_plaintext emp_key test32_expected;
+  Vec S.Blake2S 34 false test34_params test2_plaintext emp_key test34_expected;
+  Vec S.Blake2S 36 false test36_params test2_plaintext emp_key test36_expected;
+  Vec S.Blake2S 38 false test38_params test2_plaintext emp_key test38_expected;
+  Vec S.Blake2S 40 false test40_params test2_plaintext emp_key test40_expected;
+  Vec S.Blake2S 42 false test42_params test2_plaintext emp_key test42_expected;
 
-  Vec S.Blake2B 0 (S.blake2_default_params _) test0_plaintext test0_key test0_expected;
-  Vec S.Blake2B 5 (S.blake2_default_params _) test5_plaintext emp_key test5_expected;
-  Vec S.Blake2B 6 (S.blake2_default_params _) test6_plaintext test6_key test6_expected;
-  Vec S.Blake2B 12 (S.blake2_default_params _) test12_plaintext test12_key test12_expected;
-  Vec S.Blake2B 13 (S.blake2_default_params _) test13_plaintext test13_key test13_expected;
-  Vec S.Blake2B 14 (S.blake2_default_params _) test14_plaintext test14_key test14_expected;
-  Vec S.Blake2B 15 (S.blake2_default_params _) test15_plaintext test15_key test15_expected;
-  Vec S.Blake2B 16 (S.blake2_default_params _) test16_plaintext test16_key test16_expected;
-  Vec S.Blake2B 20 test20_params test2_plaintext emp_key test20_expected;
-  Vec S.Blake2B 21 test21_params test1_plaintext test13_key test21_expected;
-  Vec S.Blake2B 22 test22_params test1_plaintext test13_key test22_expected;
-  Vec S.Blake2B 25 test25_params test2_plaintext emp_key test25_expected;
-  Vec S.Blake2B 27 test27_params test2_plaintext emp_key test27_expected;
-  Vec S.Blake2B 29 test29_params test2_plaintext emp_key test29_expected;
-  Vec S.Blake2B 31 test31_params test2_plaintext emp_key test31_expected;
-  Vec S.Blake2B 33 test33_params test2_plaintext emp_key test33_expected;
-  Vec S.Blake2B 35 test35_params test2_plaintext emp_key test35_expected;
-  Vec S.Blake2B 37 test37_params test2_plaintext emp_key test37_expected;
-  Vec S.Blake2B 39 test39_params test2_plaintext emp_key test39_expected;
-  Vec S.Blake2B 41 test41_params test2_plaintext emp_key test41_expected;
-  Vec S.Blake2B 43 test43_params test2_plaintext emp_key test43_expected;
+  Vec S.Blake2B 0 false (S.blake2_default_params _) test0_plaintext test0_key test0_expected;
+  Vec S.Blake2B 5 false (S.blake2_default_params _) test5_plaintext emp_key test5_expected;
+  Vec S.Blake2B 6 false (S.blake2_default_params _) test6_plaintext test6_key test6_expected;
+  Vec S.Blake2B 12 false (S.blake2_default_params _) test12_plaintext test12_key test12_expected;
+  Vec S.Blake2B 13 false (S.blake2_default_params _) test13_plaintext test13_key test13_expected;
+  Vec S.Blake2B 14 false (S.blake2_default_params _) test14_plaintext test14_key test14_expected;
+  Vec S.Blake2B 15 false (S.blake2_default_params _) test15_plaintext test15_key test15_expected;
+  Vec S.Blake2B 16 false (S.blake2_default_params _) test16_plaintext test16_key test16_expected;
+  Vec S.Blake2B 20 false test20_params test2_plaintext emp_key test20_expected;
+  Vec S.Blake2B 21 false test21_params test1_plaintext test13_key test21_expected;
+  Vec S.Blake2B 22 false test22_params test1_plaintext test13_key test22_expected;
+  Vec S.Blake2B 25 false test25_params test2_plaintext emp_key test25_expected;
+  Vec S.Blake2B 27 false test27_params test2_plaintext emp_key test27_expected;
+  Vec S.Blake2B 29 false test29_params test2_plaintext emp_key test29_expected;
+  Vec S.Blake2B 31 false test31_params test2_plaintext emp_key test31_expected;
+  Vec S.Blake2B 33 false test33_params test2_plaintext emp_key test33_expected;
+  Vec S.Blake2B 35 false test35_params test2_plaintext emp_key test35_expected;
+  Vec S.Blake2B 37 false test37_params test2_plaintext emp_key test37_expected;
+  Vec S.Blake2B 39 false test39_params test2_plaintext emp_key test39_expected;
+  Vec S.Blake2B 41 false test41_params test2_plaintext emp_key test41_expected;
+  Vec S.Blake2B 43 false test43_params test2_plaintext emp_key test43_expected;
 ]
 
 #set-options "--ifuel 2"
 
 let test_one (v:vec) =
-  let Vec a num params plain key tag = v in
+  let Vec a num last_node params plain key tag = v in
   let expected = tag in
   let computed =
     match a with
-    | S.Blake2S -> S.blake2 S.Blake2S plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
-    | S.Blake2B -> S.blake2 S.Blake2B plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
+    | S.Blake2S -> S.blake2 S.Blake2S last_node plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
+    | S.Blake2B -> S.blake2 S.Blake2B last_node plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
    in
 
   IO.print_string ("\n\nTEST Blake2 "^(string_of_int num)^":");
