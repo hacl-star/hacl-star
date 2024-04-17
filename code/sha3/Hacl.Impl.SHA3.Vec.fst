@@ -1220,6 +1220,7 @@ let absorb_final #m absorb_inner rateInBytes len b delimitedSuffix s =
       V.absorb_final #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
 #pop-options
 
+#push-options "--z3rlimit 200"
 let absorb #m absorb_inner rateInBytes len b delimitedSuffix s =
   let h0 = ST.get() in
   if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
@@ -1230,6 +1231,7 @@ let absorb #m absorb_inner rateInBytes len b delimitedSuffix s =
     V.absorb #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix);
   assert (modifies (loc s) h0 h1 /\ as_seq h1 s ==
     V.absorb #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
+#pop-options
 
 inline_for_extraction noextract
 val update_output1:
