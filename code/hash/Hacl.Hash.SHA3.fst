@@ -108,6 +108,7 @@ let update_last_st_sha3 (a: keccak_alg) =
                                           (prev_len_v prev_len)
                                           (B.as_seq h0 input)))
 
+#push-options "--z3rlimit 100"
 let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input input_len ->
   let open Lib.IntTypes in
   let open Lib.NTuple in
@@ -137,6 +138,7 @@ let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input inp
     Hacl.Spec.SHA3.Equiv.absorb_last_r_lemma suffix (v len) (v input_len)
       (as_seq_multi h0 (ntup1 input)) (B.as_seq h0 s)
   end
+#pop-options
 
 let update_last = update_last_sha3
 
