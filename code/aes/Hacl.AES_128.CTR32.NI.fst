@@ -82,22 +82,6 @@ val aes128_set_nonce:
 let aes128_set_nonce ctx nonce = aes_set_nonce ctx nonce
 
 
-[@ CInline ]
-val aes128_key_block:
-    kb: lbuffer uint8 16ul
-  -> ctx:aes_ctx
-  -> counter:uint32 ->
-  Stack unit
-  (requires (fun h -> live h kb /\ live h ctx))
-  (ensures  (fun h0 _ h1 -> modifies1 kb h0 h1 /\
-    as_seq h1 kb == u8_16_to_le (Spec.aes_encrypt_block Spec.AES128
-      (get_kex_s MAES Spec.AES128 h0 ctx) (Spec.aes_ctr32_set_counter_LE
-      (get_nonce_s MAES Spec.AES128 h0 ctx) counter))))
-
-[@ CInline ]
-let aes128_key_block kb ctx counter = aes_key_block #MAES #Spec.AES128 kb ctx counter
-
-
 inline_for_extraction noextract
 val aes128_update4:
     out: lbuffer uint8 64ul

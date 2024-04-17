@@ -1430,33 +1430,6 @@ let aes_ctr32_key_block #m #a out kex nonce st counter =
   block_cipher #m #a st kex;
   store_block0 #m out st
 
-inline_for_extraction noextract
-val aes_key_block:
-    #m: m_spec
-  -> #a: Spec.variant
-  -> kb: lbuffer uint8 16ul
-  -> ctx: aes_ctx m a
-  -> counter: uint32 ->
-  Stack unit
-  (requires (fun h -> live h kb /\ live h ctx))
-  (ensures (fun h0 _ h1 -> modifies (loc kb) h0 h1 /\
-    as_seq h1 kb == u8_16_to_le (Spec.aes_encrypt_block a
-      (get_kex_s m a h0 ctx) (Spec.aes_ctr32_set_counter_LE
-      (get_nonce_s m a h0 ctx) counter))))
-
-let aes_key_block #m #a kb ctx counter =
-  assert (v ((nr a +! 1ul) *. klen m) == v (nr a +! 1ul) * v (klen m));
-  assert (v (nr a +! 1ul) == v (nr a) + 1);
-  assert (v (nr a) == Spec.num_rounds a);
-  push_frame();
-  let kex = get_kex ctx in
-  let n = get_nonce ctx in
-  let st = create_state #m in
-  assert (kex == gsub ctx (nlen m) ((nr a +! 1ul) *. klen m));
-  assert (n == gsub ctx 0ul (nlen m));
-  aes_ctr32_key_block #m #a kb kex n st counter;
-  pop_frame()
-
 
 val aes_ctr32_encrypt_block_lemma:
     #m:m_spec
