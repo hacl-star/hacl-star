@@ -29,6 +29,29 @@ unfold type keyr (m:m_spec) (v:Spec.variant) = lbuffer (stelem m) ((nr v -! 1ul)
 unfold type keyex (m:m_spec) (v:Spec.variant) = lbuffer (stelem m) ((nr v +! 1ul) *. klen m)
 unfold type aes_ctx (m:m_spec) (v:Spec.variant) = lbuffer (stelem m) (ctxlen m v)
 
+type nonce_s (m:m_spec) = LSeq.lseq uint8 16
+type keyr_s (m:m_spec) (a:Spec.variant) = LSeq.lseq uint8 ((Spec.AES.num_rounds a-1) * 16)
+type kex_s (m:m_spec) (a:Spec.variant) = LSeq.lseq uint8 ((Spec.AES.num_rounds a+1) * 16)
+
+inline_for_extraction noextract
+val get_nonce_s: m:m_spec -> a:Spec.variant -> mem -> aes_ctx m a -> GTot (nonce_s m)
+let get_nonce_s m _ h ctx = nonce_to_bytes m (LSeq.sub (as_seq h ctx) 0 (v (nlen m)))
+inline_for_extraction noextract
+val as_nonce: m:m_spec -> mem -> lbuffer (stelem m) (nlen m) -> GTot (nonce_s m)
+let as_nonce m h n = nonce_to_bytes m (as_seq h n)
+
+inline_for_extraction noextract
+val as_keyr: m:m_spec -> a:Spec.variant -> mem -> keyr m a -> GTot (keyr_s m a)
+let as_keyr m a h k = keys_to_bytes m a (as_seq h k)
+
+inline_for_extraction noextract
+val get_kex_s: m:m_spec -> a:Spec.variant -> mem -> aes_ctx m a -> GTot (kex_s m a)
+let get_kex_s m a h ctx = keyx_to_bytes m a (LSeq.sub (as_seq h ctx) (v (nlen m))
+  ((Spec.num_rounds a+1) * v (klen m)))
+inline_for_extraction noextract
+val as_kex: m:m_spec -> a:Spec.variant -> mem -> keyex m a -> GTot (kex_s m a)
+let as_kex m a h k = keyx_to_bytes m a (as_seq h k)
+
 let rcon_seq : x:LSeq.lseq uint8 11{
   LSeq.index x 0 == u8 0x8d /\ LSeq.index x 1 == u8 0x01 /\
   LSeq.index x 2 == u8 0x02 /\ LSeq.index x 3 == u8 0x04 /\
@@ -153,7 +176,7 @@ val enc_inner:
         state_to_bytes m (as_seq h0 s) 2, state_to_bytes m (as_seq h0 s) 3) in
       let state'' = (state_to_bytes m (as_seq h1 s) 0, state_to_bytes m (as_seq h1 s) 1,
         state_to_bytes m (as_seq h1 s) 2, state_to_bytes m (as_seq h1 s) 3) in
-      state'' == Spec.aes_enc_inner_4 a (keys_to_bytes m a (as_seq h0 key)) (v i) state'))
+      state'' == Spec.aes_enc_inner_4 a (as_keyr m a h0 key) (v i) state'))
 let enc_inner m a i s key =
   let h0 = ST.get () in
   key_to_bytes_lemma m a (as_seq h0 key) (v i);
@@ -171,7 +194,7 @@ val enc_rounds128:
       state_to_bytes m (as_seq h0 s) 2, state_to_bytes m (as_seq h0 s) 3) in
     let state'' = (state_to_bytes m (as_seq h1 s) 0, state_to_bytes m (as_seq h1 s) 1,
       state_to_bytes m (as_seq h1 s) 2, state_to_bytes m (as_seq h1 s) 3) in
-    state'' == Spec.aes_enc_rounds_4 Spec.AES128 (keys_to_bytes m Spec.AES128 (as_seq h0 key)) state')))
+    state'' == Spec.aes_enc_rounds_4 Spec.AES128 (as_keyr m Spec.AES128 h0 key) state')))
 
 let enc_rounds128 #m s key =
   [@ inline_let]
@@ -181,7 +204,7 @@ let enc_rounds128 #m s key =
   [@ inline_let]
   let footprint i = loc s in
   [@ inline_let]
-  let spec h0 = Spec.aes_enc_inner_4 Spec.AES128 (keys_to_bytes m Spec.AES128 (as_seq h0 key)) in
+  let spec h0 = Spec.aes_enc_inner_4 Spec.AES128 (as_keyr m Spec.AES128 h0 key) in
   let h0 = ST.get () in
   loop h0 9ul (Spec.aes_enc_rounds_4_s Spec.AES128) refl footprint spec
   (fun i ->
@@ -200,7 +223,7 @@ val enc_rounds256:
       state_to_bytes m (as_seq h0 s) 2, state_to_bytes m (as_seq h0 s) 3) in
     let state'' = (state_to_bytes m (as_seq h1 s) 0, state_to_bytes m (as_seq h1 s) 1,
       state_to_bytes m (as_seq h1 s) 2, state_to_bytes m (as_seq h1 s) 3) in
-    state'' == Spec.aes_enc_rounds_4 Spec.AES256 (keys_to_bytes m Spec.AES256 (as_seq h0 key)) state')))
+    state'' == Spec.aes_enc_rounds_4 Spec.AES256 (as_keyr m Spec.AES256 h0 key) state')))
 
 let enc_rounds256 #m s key =
   [@ inline_let]
@@ -210,7 +233,7 @@ let enc_rounds256 #m s key =
   [@ inline_let]
   let footprint i = loc s in
   [@ inline_let]
-  let spec h0 = Spec.aes_enc_inner_4 Spec.AES256 (keys_to_bytes m Spec.AES256 (as_seq h0 key)) in
+  let spec h0 = Spec.aes_enc_inner_4 Spec.AES256 (as_keyr m Spec.AES256 h0 key) in
   let h0 = ST.get () in
   loop h0 13ul (Spec.aes_enc_rounds_4_s Spec.AES256) refl footprint spec
   (fun i ->
@@ -230,7 +253,7 @@ val enc_rounds:
       state_to_bytes m (as_seq h0 s) 2, state_to_bytes m (as_seq h0 s) 3) in
     let state'' = (state_to_bytes m (as_seq h1 s) 0, state_to_bytes m (as_seq h1 s) 1,
       state_to_bytes m (as_seq h1 s) 2, state_to_bytes m (as_seq h1 s) 3) in
-    state'' == Spec.aes_enc_rounds_4 a (keys_to_bytes m a (as_seq h0 key)) state')))
+    state'' == Spec.aes_enc_rounds_4 a (as_keyr m a h0 key) state')))
 
 let enc_rounds #m #a s key =
   match a with
@@ -308,7 +331,7 @@ val block_cipher:
   -> Stack unit
   (requires (fun h -> live h st /\ live h key /\ disjoint st key))
   (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc st) h0 h1 /\
-    (let k = keyx_to_bytes m a (as_seq h0 key) in
+    (let k = as_kex m a h0 key in
     state_to_bytes m (as_seq h1 st) 0 ==
       Spec.aes_encrypt_block a k (state_to_bytes m (as_seq h0 st) 0) /\
     state_to_bytes m (as_seq h1 st) 1 ==
@@ -329,13 +352,13 @@ let block_cipher #m #a st key =
   keys_to_bytes_lemma m a (as_seq h0 key);
   keyx_to_bytes_lemma m a (as_seq h0 key) (Spec.num_rounds a);
   assert (key_to_bytes m (LSeq.sub (as_seq h0 key) 0 (v klen)) ==
-    LSeq.sub (keyx_to_bytes m a (as_seq h0 key)) 0 16);
+    LSeq.sub (as_kex m a h0 key) 0 16);
   assert (keys_to_bytes m a (LSeq.sub (as_seq h0 key) (v klen)
     ((Spec.num_rounds a - 1) * v klen)) ==
-      LSeq.sub (keyx_to_bytes m a (as_seq h0 key)) 16 ((Spec.num_rounds a-1) * 16));
+      LSeq.sub (as_kex m a h0 key) 16 ((Spec.num_rounds a-1) * 16));
   assert (key_to_bytes m (LSeq.sub (as_seq h0 key)
     (Spec.num_rounds a * (v klen)) (v klen)) ==
-      LSeq.sub (keyx_to_bytes m a (as_seq h0 key)) (Spec.num_rounds a * 16) 16);
+      LSeq.sub (as_kex m a h0 key) (Spec.num_rounds a * 16) 16);
   assert (disjoint st (gsub key (size 0) klen));
   let k0 = sub key (size 0) klen in
   let kr = sub key klen ((nr a -! 1ul) *. klen) in
@@ -406,12 +429,12 @@ val key_expansion128_step_helper1:
     modifies1 (gsub keyx (size (v (klen m) * i)) (klen m)) h0 h1))
   (ensures (
     forall (j:nat{(0 <= j /\ j < i) \/ (i < j /\ j < 11)}).
-      (LSeq.sub (keyx_to_bytes m Spec.AES128 (as_seq h0 keyx)) (j*16) 16 ==
-        LSeq.sub (keyx_to_bytes m Spec.AES128 (as_seq h1 keyx)) (j*16) 16)))
+      (LSeq.sub (as_kex m Spec.AES128 h0 keyx) (j*16) 16 ==
+        LSeq.sub (as_kex m Spec.AES128 h1 keyx) (j*16) 16)))
 
 let key_expansion128_step_helper1 m keyx h0 h1 i =
-  let l0 = keyx_to_bytes m Spec.AES128 (as_seq h0 keyx) in
-  let l1 = keyx_to_bytes m Spec.AES128 (as_seq h1 keyx) in
+  let l0 = as_kex m Spec.AES128 h0 keyx in
+  let l1 = as_kex m Spec.AES128 h1 keyx in
   let aux (j:nat{(0 <= j /\ j < i) \/ (i < j /\ j < 11)}) :
     Lemma (LSeq.sub l0 (j*16) 16 == LSeq.sub l1 (j*16) 16) =
     assert (disjoint (gsub keyx (size (v (klen m) * j)) (klen m)) 
@@ -459,8 +482,8 @@ val aes128_key_expansion_step:
   Stack unit
   (requires (fun h -> live h keyx /\ rcon == LSeq.index rcon_seq (i+1)))
   (ensures (fun h0 _ h1 -> modifies1 (gsub keyx (size (v (klen m) * (i + 1))) (klen m)) h0 h1 /\
-    keyx_to_bytes m Spec.AES128 (as_seq h1 keyx) ==
-      Spec.aes128_key_expansion_step_LE i (keyx_to_bytes m Spec.AES128 (as_seq h0 keyx))))
+    as_kex m Spec.AES128 h1 keyx ==
+      Spec.aes128_key_expansion_step_LE i (as_kex m Spec.AES128 h0 keyx)))
 
 [@ CInline ]
 let aes128_key_expansion_step #m keyx rcon i =
@@ -468,8 +491,8 @@ let aes128_key_expansion_step #m keyx rcon i =
   key_expansion128_step #m keyx rcon i;
   let h1 = ST.get() in
   key_expansion128_step_lemma m (as_seq h0 keyx) (as_seq h1 keyx) i;
-  let l0 = keyx_to_bytes m Spec.AES128 (as_seq h0 keyx) in
-  let l1 = keyx_to_bytes m Spec.AES128 (as_seq h1 keyx) in
+  let l0 = as_kex m Spec.AES128 h0 keyx in
+  let l1 = as_kex m Spec.AES128 h1 keyx in
   key_expansion128_step_helper1 m keyx h0 h1 (i + 1);
   key_expansion128_step_helper2 l0 l1 (i + 1);
   let p0 = LSeq.sub l0 (i * 16) 16 in
@@ -500,8 +523,8 @@ val aes128_load_key1:
   Stack unit
   (requires (fun h -> live h keyx /\ live h key))
   (ensures (fun h0 _ h1 -> modifies1 (gsub keyx (size 0) (klen m)) h0 h1 /\
-    keyx_to_bytes m Spec.AES128 (as_seq h1 keyx) ==
-      LSeq.update_sub (keyx_to_bytes m Spec.AES128 (as_seq h0 keyx)) 0 16 (u8_16_to_le (as_seq h0 key))))
+    as_kex m Spec.AES128 h1 keyx ==
+      LSeq.update_sub (as_kex m Spec.AES128 h0 keyx) 0 16 (u8_16_to_le (as_seq h0 key))))
 
 let aes128_load_key1 #m keyx key =
   let h0 = ST.get() in
@@ -509,8 +532,8 @@ let aes128_load_key1 #m keyx key =
   load_key1 (sub keyx (size 0) (klen m)) key;
   let h1 = ST.get() in
   load_key1_lemma m (as_seq h1 keyx) (as_seq h0 key);
-  let l0 = keyx_to_bytes m Spec.AES128 (as_seq h0 keyx) in
-  let l1 = keyx_to_bytes m Spec.AES128 (as_seq h1 keyx) in
+  let l0 = as_kex m Spec.AES128 h0 keyx in
+  let l1 = as_kex m Spec.AES128 h1 keyx in
   key_expansion128_step_helper1 m keyx h0 h1 0;
   key_expansion128_step_helper2 l0 l1 0;
   LSeq.lemma_update_sub l0 0 16 (u8_16_to_le (as_seq h0 key)) l1
@@ -582,9 +605,9 @@ val key_expansion128:
   -> key: lbuffer uint8 16ul ->
   Stack unit
   (requires (fun h -> live h keyx /\ live h key /\
-    keyx_to_bytes m Spec.AES128 (as_seq h keyx) == LSeq.create (11 * 16) (u8 0)))
+    as_kex m Spec.AES128 h keyx == LSeq.create (11 * 16) (u8 0)))
   (ensures (fun h0 _ h1 -> modifies1 keyx h0 h1 /\
-    keyx_to_bytes m Spec.AES128 (as_seq h1 keyx) ==
+    as_kex m Spec.AES128 h1 keyx ==
       Spec.aes128_key_expansion_LE (as_seq h0 key)))
 
 [@ CInline ]
@@ -766,12 +789,12 @@ val key_expansion256_step_helper1:
     modifies2 next0 next1 h0 h1)))
   (ensures (
     forall (j:nat{(0 <= j /\ j < i) \/ (i + 1 < j /\ j < 15)}).
-      (LSeq.sub (keyx_to_bytes m Spec.AES256 (as_seq h0 keyx)) (j*16) 16 ==
-        LSeq.sub (keyx_to_bytes m Spec.AES256 (as_seq h1 keyx)) (j*16) 16)))
+      (LSeq.sub (as_kex m Spec.AES256 h0 keyx) (j*16) 16 ==
+        LSeq.sub (as_kex m Spec.AES256 h1 keyx) (j*16) 16)))
 
 let key_expansion256_step_helper1 m keyx h0 h1 i =
-  let l0 = keyx_to_bytes m Spec.AES256 (as_seq h0 keyx) in
-  let l1 = keyx_to_bytes m Spec.AES256 (as_seq h1 keyx) in
+  let l0 = as_kex m Spec.AES256 h0 keyx in
+  let l1 = as_kex m Spec.AES256 h1 keyx in
   let aux (j:nat{(0 <= j /\ j < i) \/ (i + 1 < j /\ j < 15)}) :
     Lemma (LSeq.sub l0 (j*16) 16 == LSeq.sub l1 (j*16) 16) =
     assert (disjoint (gsub keyx (size (v (klen m) * j)) (klen m)) 
@@ -861,8 +884,8 @@ val aes256_key_expansion_step:
     let next0 = gsub keyx (size (v (klen m) * (2 * i + 2))) (klen m) in
     let next1 = gsub keyx (size (v (klen m) * (2 * i + 3))) (klen m) in
     modifies2 next0 next1 h0 h1 /\
-    keyx_to_bytes m Spec.AES256 (as_seq h1 keyx) ==
-      Spec.aes256_key_expansion_step_LE i (keyx_to_bytes m Spec.AES256 (as_seq h0 keyx)))))
+    as_kex m Spec.AES256 h1 keyx ==
+      Spec.aes256_key_expansion_step_LE i (as_kex m Spec.AES256 h0 keyx))))
 
 [@ CInline ]
 let aes256_key_expansion_step #m keyx rcon i =
@@ -870,8 +893,8 @@ let aes256_key_expansion_step #m keyx rcon i =
   key_expansion256_step #m keyx rcon i;
   let h1 = ST.get() in
   key_expansion256_step_lemma m (as_seq h0 keyx) (as_seq h1 keyx) i;
-  let l0 = keyx_to_bytes m Spec.AES256 (as_seq h0 keyx) in
-  let l1 = keyx_to_bytes m Spec.AES256 (as_seq h1 keyx) in
+  let l0 = as_kex m Spec.AES256 h0 keyx in
+  let l1 = as_kex m Spec.AES256 h1 keyx in
   key_expansion256_step_helper1 m keyx h0 h1 (2 * i + 2);
   key_expansion256_step_helper2 l0 l1 (2 * i + 2);
   key_expansion256_step_helper3 l0 l1 (2 * i + 2);
@@ -919,12 +942,12 @@ val key_expansion256_step_last_helper1:
     modifies1 (gsub keyx (size (v (klen m) * 14)) (klen m)) h0 h1))
   (ensures (
     forall (j:nat{0 <= j /\ j < 14}).
-      (LSeq.sub (keyx_to_bytes m Spec.AES256 (as_seq h0 keyx)) (j*16) 16 ==
-        LSeq.sub (keyx_to_bytes m Spec.AES256 (as_seq h1 keyx)) (j*16) 16)))
+      (LSeq.sub (as_kex m Spec.AES256 h0 keyx) (j*16) 16 ==
+        LSeq.sub (as_kex m Spec.AES256 h1 keyx) (j*16) 16)))
 
 let key_expansion256_step_last_helper1 m keyx h0 h1 =
-  let l0 = keyx_to_bytes m Spec.AES256 (as_seq h0 keyx) in
-  let l1 = keyx_to_bytes m Spec.AES256 (as_seq h1 keyx) in
+  let l0 = as_kex m Spec.AES256 h0 keyx in
+  let l1 = as_kex m Spec.AES256 h1 keyx in
   let aux (j:nat{0 <= j /\ j < 14}) :
     Lemma (LSeq.sub l0 (j*16) 16 == LSeq.sub l1 (j*16) 16) =
     assert (disjoint (gsub keyx (size (v (klen m) * j)) (klen m)) 
@@ -995,21 +1018,21 @@ val aes256_key_expansion_step_last:
   Stack unit
   (requires (fun h -> live h keyx))
   (ensures (fun h0 _ h1 -> (
-    let p0 = LSeq.sub (keyx_to_bytes m Spec.AES256 (as_seq h0 keyx)) (12*16) 16 in
-    let p1 = LSeq.sub (keyx_to_bytes m Spec.AES256 (as_seq h0 keyx)) (13*16) 16 in
+    let p0 = LSeq.sub (as_kex m Spec.AES256 h0 keyx) (12*16) 16 in
+    let p1 = LSeq.sub (as_kex m Spec.AES256 h0 keyx) (13*16) 16 in
     let a14 = Spec.keygen_assist0 (Spec.rcon_spec 7) p1 in
     let n14 = Spec.key_expansion_step_LE p0 a14 in
     modifies1 (gsub keyx (size (v (klen m) * 14)) (klen m)) h0 h1 /\
-    keyx_to_bytes m Spec.AES256 (as_seq h1 keyx) ==
-      LSeq.update_sub (keyx_to_bytes m Spec.AES256 (as_seq h0 keyx)) (14*16) 16 n14)))
+    as_kex m Spec.AES256 h1 keyx ==
+      LSeq.update_sub (as_kex m Spec.AES256 h0 keyx) (14*16) 16 n14)))
 
 let aes256_key_expansion_step_last #m keyx =
   let h0 = ST.get() in
   key_expansion256_step_last #m keyx;
   let h1 = ST.get() in
   key_expansion256_step_last_lemma m (as_seq h0 keyx) (as_seq h1 keyx);
-  let l0 = keyx_to_bytes m Spec.AES256 (as_seq h0 keyx) in
-  let l1 = keyx_to_bytes m Spec.AES256 (as_seq h1 keyx) in
+  let l0 = as_kex m Spec.AES256 h0 keyx in
+  let l1 = as_kex m Spec.AES256 h1 keyx in
   key_expansion256_step_last_helper1 m keyx h0 h1;
   key_expansion256_step_last_helper2 l0 l1;
   let p0 = LSeq.sub l0 (12*16) 16 in
@@ -1062,8 +1085,8 @@ val aes256_load_key1:
     let next0 = gsub keyx (size 0) (klen m) in
     let next1 = gsub keyx (klen m) (klen m) in
     modifies2 next0 next1 h0 h1 /\
-    keyx_to_bytes m Spec.AES256 (as_seq h1 keyx) ==
-      LSeq.update_sub (keyx_to_bytes m Spec.AES256 (as_seq h0 keyx)) 0 32 (u8_16_2_to_le (as_seq h0 key))))
+    as_kex m Spec.AES256 h1 keyx ==
+      LSeq.update_sub (as_kex m Spec.AES256 h0 keyx) 0 32 (u8_16_2_to_le (as_seq h0 key))))
 
 let aes256_load_key1 #m keyx key =
   let h0 = ST.get() in
@@ -1074,8 +1097,8 @@ let aes256_load_key1 #m keyx key =
   load_key1 next1 (sub key (size 16) (size 16));
   let h1 = ST.get() in
   load_key1_2_lemma m (as_seq h1 keyx) (as_seq h0 key);
-  let l0 = keyx_to_bytes m Spec.AES256 (as_seq h0 keyx) in
-  let l1 = keyx_to_bytes m Spec.AES256 (as_seq h1 keyx) in
+  let l0 = as_kex m Spec.AES256 h0 keyx in
+  let l1 = as_kex m Spec.AES256 h1 keyx in
   key_expansion256_step_helper1 m keyx h0 h1 0;
   key_expansion256_step_helper2 l0 l1 0;
   key_u8_16_2_to_le_lemma l1 (as_seq h0 key);
@@ -1163,9 +1186,9 @@ val key_expansion256:
   -> key: lbuffer uint8 32ul ->
   Stack unit
   (requires (fun h -> live h keyx /\ live h key /\ disjoint keyx key /\
-    keyx_to_bytes m Spec.AES256 (as_seq h keyx) == LSeq.create (15 * 16) (u8 0)))
+    as_kex m Spec.AES256 h keyx == LSeq.create (15 * 16) (u8 0)))
   (ensures (fun h0 _ h1 -> modifies1 keyx h0 h1 /\
-    keyx_to_bytes m Spec.AES256 (as_seq h1 keyx) ==
+    as_kex m Spec.AES256 h1 keyx ==
       Spec.aes256_key_expansion_LE (as_seq h0 key)))
 
 [@ CInline ]
@@ -1220,9 +1243,9 @@ val key_expansion:
   -> key: skey v ->
   Stack unit
   (requires (fun h -> live h keyx /\ live h key /\ disjoint keyx key /\
-    keyx_to_bytes m v (as_seq h keyx) == LSeq.create ((Spec.num_rounds v+1) * 16) (u8 0)))
+    as_kex m v h keyx == LSeq.create ((Spec.num_rounds v+1) * 16) (u8 0)))
   (ensures (fun h0 _ h1 -> modifies (loc keyx) h0 h1 /\
-    keyx_to_bytes m v (as_seq h1 keyx) ==
+    as_kex m v h1 keyx ==
       Spec.aes_key_expansion_LE v (as_seq h0 key)))
 
 let key_expansion #m #v keyx key =
@@ -1242,13 +1265,10 @@ val aes_init_:
     disjoint ctx key /\
     as_seq h ctx == Seq.create (size_v (ctxlen m a)) (elem_zero m)))
   (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1 /\
-    (let n = LSeq.sub (as_seq h1 ctx) 0 (v (nlen m)) in
-    let kex = LSeq.sub (as_seq h1 ctx)
-      (v (nlen m)) ((Spec.num_rounds a+1) * v (klen m)) in
-    let state = Spec.aes_ctr32_init_LE a (as_seq h0 key)
+    (let state = Spec.aes_ctr32_init_LE a (as_seq h0 key)
       (as_seq h0 nonce) in
-    nonce_to_bytes m n == state.block /\
-    keyx_to_bytes m a kex == state.key_ex)))
+    get_nonce_s m a h1 ctx == state.block /\
+    get_kex_s m a h1 ctx == state.key_ex)))
 
 let aes_init_ #m #a ctx key nonce =
   let kex = get_kex ctx in
@@ -1262,7 +1282,7 @@ let aes_init_ #m #a ctx key nonce =
   keyx_zero_lemma m a (as_seq h0 kex);
   load_nonce #m n nonce;
   let h1 = ST.get() in
-  u8_16_to_le_lemma (nonce_to_bytes m (as_seq h1 n));
+  u8_16_to_le_lemma (as_nonce m h1 n);
   key_expansion #m #a kex key
 
 (* BEGIN STANDARD PATTERN FOR AVOIDING INLINING *)
@@ -1275,13 +1295,10 @@ val aes128_ni_init:
   (requires (fun h -> live h ctx /\ live h nonce /\ live h key /\ disjoint ctx key /\
     as_seq h ctx == Seq.create (size_v (ctxlen MAES Spec.AES128)) (elem_zero MAES)))
   (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1 /\
-    (let n = LSeq.sub (as_seq h1 ctx) 0 (v (nlen MAES)) in
-    let kex = LSeq.sub (as_seq h1 ctx)
-      (v (nlen MAES)) ((Spec.num_rounds Spec.AES128+1) * v (klen MAES)) in
-    let state = Spec.aes_ctr32_init_LE Spec.AES128
+    (let state = Spec.aes_ctr32_init_LE Spec.AES128
       (as_seq h0 key) (as_seq h0 nonce) in
-    nonce_to_bytes MAES n == state.block /\
-    keyx_to_bytes MAES Spec.AES128 kex == state.key_ex)))
+    get_nonce_s MAES Spec.AES128 h1 ctx == state.block /\
+    get_kex_s MAES Spec.AES128 h1 ctx == state.key_ex)))
 
 let aes128_ni_init ctx key nonce = aes_init_ #MAES #Spec.AES128 ctx key nonce
 
@@ -1294,13 +1311,10 @@ val aes256_ni_init:
   (requires (fun h -> live h ctx /\ live h nonce /\ live h key /\ disjoint ctx key /\
     as_seq h ctx == Seq.create (size_v (ctxlen MAES Spec.AES256)) (elem_zero MAES)))
   (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1 /\
-    (let n = LSeq.sub (as_seq h1 ctx) 0 (v (nlen MAES)) in
-    let kex = LSeq.sub (as_seq h1 ctx)
-      (v (nlen MAES)) ((Spec.num_rounds Spec.AES256+1) * v (klen MAES)) in
-    let state = Spec.aes_ctr32_init_LE Spec.AES256
+    (let state = Spec.aes_ctr32_init_LE Spec.AES256
       (as_seq h0 key) (as_seq h0 nonce) in
-    nonce_to_bytes MAES n == state.block /\
-    keyx_to_bytes MAES Spec.AES256 kex == state.key_ex)))
+    get_nonce_s MAES Spec.AES256 h1 ctx == state.block /\
+    get_kex_s MAES Spec.AES256 h1 ctx == state.key_ex)))
 
 let aes256_ni_init ctx key nonce = aes_init_ #MAES #Spec.AES256 ctx key nonce
 
@@ -1316,13 +1330,10 @@ val aes_init:
     disjoint ctx key /\
     as_seq h ctx == Seq.create (size_v (ctxlen m a)) (elem_zero m)))
   (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1 /\
-    (let n = LSeq.sub (as_seq h1 ctx) 0 (v (nlen m)) in
-    let kex = LSeq.sub (as_seq h1 ctx)
-      (v (nlen m)) ((Spec.num_rounds a+1) * v (klen m)) in
-    let state = Spec.aes_ctr32_init_LE a (as_seq h0 key)
+    (let state = Spec.aes_ctr32_init_LE a (as_seq h0 key)
       (as_seq h0 nonce) in
-    nonce_to_bytes m n == state.block /\
-    keyx_to_bytes m a kex == state.key_ex)))
+    get_nonce_s m a h1 ctx == state.block /\
+    get_kex_s m a h1 ctx == state.key_ex)))
 
 let aes_init #m #a ctx key nonce =
   match m,a with
@@ -1340,7 +1351,7 @@ val aes_set_nonce:
   Stack unit
   (requires (fun h -> live h ctx /\ live h nonce))
   (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1 /\
-    nonce_to_bytes m (LSeq.sub (as_seq h1 ctx) 0 (v (nlen m))) ==
+    get_nonce_s m a h1 ctx ==
       u8_16_to_le (LSeq.update_sub
       (LSeq.create 16 (u8 0)) 0 12 (as_seq h0 nonce))))
 
@@ -1348,8 +1359,7 @@ let aes_set_nonce #m #a ctx nonce =
   let n = get_nonce ctx in
   load_nonce #m n nonce;
   let h0 = ST.get() in
-  u8_16_to_le_lemma (nonce_to_bytes m
-    (LSeq.sub (as_seq h0 ctx) 0 (v (nlen m))))
+  u8_16_to_le_lemma (get_nonce_s m a h0 ctx)
 
 inline_for_extraction noextract
 val aes_block_cipher0:
@@ -1364,7 +1374,7 @@ val aes_block_cipher0:
     live h st /\ disjoint st kex /\ disjoint st inp))
   (ensures (fun h0 _ h1 -> modifies2 out st h0 h1 /\
     as_seq h1 out == u8_16_to_le (Spec.aes_encrypt_block a
-      (keyx_to_bytes m a (as_seq h0 kex)) (u8_16_to_le (as_seq h0 inp)))))
+      (as_kex m a h0 kex) (u8_16_to_le (as_seq h0 inp)))))
 
 let aes_block_cipher0 #m #a out inp kex st =
   load_block0 #m st inp;
@@ -1383,10 +1393,8 @@ val aes_encrypt_block:
   Stack unit
   (requires (fun h -> live h ob /\ live h ctx /\ live h ib))
   (ensures (fun h0 _ h1 -> modifies (loc ob) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen m))
-      ((Spec.num_rounds a+1) * v (klen m)) in
-    as_seq h1 ob == u8_16_to_le (Spec.aes_encrypt_block a (keyx_to_bytes m a k)
-      (u8_16_to_le (as_seq h0 ib))))))
+    as_seq h1 ob == u8_16_to_le (Spec.aes_encrypt_block a (get_kex_s m a h0 ctx)
+      (u8_16_to_le (as_seq h0 ib)))))
 
 let aes_encrypt_block #m #a ob ctx ib =
   assert (v ((nr a +! 1ul) *. klen m) == v (nr a +! 1ul) * v (klen m));
@@ -1414,8 +1422,8 @@ val aes_ctr32_key_block:
     live h st /\ disjoint st kex))
   (ensures (fun h0 _ h1 -> modifies2 out st h0 h1 /\
     as_seq h1 out == u8_16_to_le (Spec.aes_encrypt_block a
-      (keyx_to_bytes m a (as_seq h0 kex)) (Spec.aes_ctr32_set_counter_LE
-      (nonce_to_bytes m (as_seq h0 nonce)) counter))))
+      (as_kex m a h0 kex) (Spec.aes_ctr32_set_counter_LE
+      (as_nonce m h0 nonce) counter))))
 
 let aes_ctr32_key_block #m #a out kex nonce st counter =
   load_state #m st nonce counter;
@@ -1432,12 +1440,9 @@ val aes_key_block:
   Stack unit
   (requires (fun h -> live h kb /\ live h ctx))
   (ensures (fun h0 _ h1 -> modifies (loc kb) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen m))
-      ((Spec.num_rounds a+1) * v (klen m)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen m)) in
     as_seq h1 kb == u8_16_to_le (Spec.aes_encrypt_block a
-      (keyx_to_bytes m a k) (Spec.aes_ctr32_set_counter_LE
-      (nonce_to_bytes m n) counter)))))
+      (get_kex_s m a h0 ctx) (Spec.aes_ctr32_set_counter_LE
+      (get_nonce_s m a h0 ctx) counter))))
 
 let aes_key_block #m #a kb ctx counter =
   assert (v ((nr a +! 1ul) *. klen m) == v (nr a +! 1ul) * v (klen m));
@@ -1537,11 +1542,9 @@ val aes_ctr32_encrypt_block:
   (requires (fun h -> live h out /\ live h inp /\ live h kex /\
     live h nonce /\ live h st /\ disjoint st kex /\ disjoint st inp))
   (ensures (fun h0 _ h1 -> modifies2 out st h0 h1 /\
-    (let k = as_seq h0 kex in
-    let n = as_seq h0 nonce in
     as_seq h1 out == Spec.aes_ctr32_encrypt_block_4_LE a 
-      (keyx_to_bytes m a k) (nonce_to_bytes m n)
-      counter (as_seq h0 inp))))
+      (as_kex m a h0 kex) (as_nonce m h0 nonce)
+      counter (as_seq h0 inp)))
 
 let aes_ctr32_encrypt_block #m #a out inp kex n st ctr =
   let h0 = ST.get() in
@@ -1575,12 +1578,9 @@ val aes_update4:
   -> Stack unit
   (requires (fun h -> live h out /\ live h inp /\ live h ctx))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen m))
-      ((Spec.num_rounds a+1) * v (klen m)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen m)) in
     as_seq h1 out == Spec.aes_ctr32_encrypt_block_4_LE a 
-      (keyx_to_bytes m a k) (nonce_to_bytes m n)
-      counter (as_seq h0 inp))))
+      (get_kex_s m a h0 ctx) (get_nonce_s m a h0 ctx)
+      counter (as_seq h0 inp)))
 
 let aes_update4 #m #a out inp ctx ctr =
   assert (v ((nr a +! 1ul) *. klen m) == v (nr a +! 1ul) * v (klen m));
@@ -1627,12 +1627,9 @@ val aes_update4_last:
   -> Stack unit
   (requires (fun h ->  live h ob /\ live h ib /\ live h ctx))
   (ensures (fun h0 _ h1 -> modifies1 ob h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen m))
-      ((Spec.num_rounds a+1) * v (klen m)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen m)) in
     as_seq h1 ob == Spec.aes_ctr32_encrypt_last_4_LE a
-      (keyx_to_bytes m a k) (nonce_to_bytes m n)
-      ctr (v rem) (as_seq h0 ib))))
+      (get_kex_s m a h0 ctx) (get_nonce_s m a h0 ctx)
+      ctr (v rem) (as_seq h0 ib)))
 
 let aes_update4_last #m #a rem ob ib ctx ctr =
   let h0_init = ST.get() in
@@ -1663,21 +1660,16 @@ val aes_ctr_:
   (requires (fun h -> live h out /\ live h inp /\ live h ctx /\
     disjoint out inp /\ disjoint out ctx))
   (ensures (fun h0 _ h1 -> modifies1 out h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen m))
-      ((Spec.num_rounds a+1) * v (klen m)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen m)) in
     as_seq h1 out == Spec.aes_ctr32_encrypt_stream_LE a
-      (keyx_to_bytes m a k) (nonce_to_bytes m n)
-      counter (as_seq h0 inp))))
+      (get_kex_s m a h0 ctx) (get_nonce_s m a h0 ctx)
+      counter (as_seq h0 inp)))
 
 let aes_ctr_ #m #a len out inp ctx counter =
   let rem = len %. size 64 in
   let h0 = ST.get() in
   map_blocks h0 len 64ul inp out
-    (fun h -> Spec.aes_ctr32_encrypt_block_incr_4_LE a (keyx_to_bytes m a (LSeq.sub (as_seq h0 ctx) (v (nlen m))
-      ((Spec.num_rounds a+1) * v (klen m)))) (nonce_to_bytes m (LSeq.sub (as_seq h0 ctx) 0 (v (nlen m)))) counter)
-    (fun h -> Spec.aes_ctr32_encrypt_last_incr_4_LE a (keyx_to_bytes m a (LSeq.sub (as_seq h0 ctx) (v (nlen m))
-      ((Spec.num_rounds a+1) * v (klen m)))) (nonce_to_bytes m (LSeq.sub (as_seq h0 ctx) 0 (v (nlen m)))) counter)
+    (fun h -> Spec.aes_ctr32_encrypt_block_incr_4_LE a (get_kex_s m a h0 ctx) (get_nonce_s m a h0 ctx) counter)
+    (fun h -> Spec.aes_ctr32_encrypt_last_incr_4_LE a (get_kex_s m a h0 ctx) (get_nonce_s m a h0 ctx) counter)
     (fun i -> (assert (v i == v (to_u32 i));
       aes_update4 #m #a (sub out (i *! size 64) (size 64)) (sub inp (i *! size 64) (size 64)) ctx (counter +. ((to_u32 i) *. u32 4))))
     (fun i -> (assert (v i == v (to_u32 i));
@@ -1696,12 +1688,9 @@ val aes128_ctr_ni:
   (requires (fun h -> live h out /\ live h inp /\ live h ctx /\
     disjoint out inp /\ disjoint out ctx))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen MAES))
-      ((Spec.num_rounds Spec.AES128+1) * v (klen MAES)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen MAES)) in
     as_seq h1 out == Spec.aes_ctr32_encrypt_stream_LE Spec.AES128
-      (keyx_to_bytes MAES Spec.AES128 k) (nonce_to_bytes MAES n)
-      counter (as_seq h0 inp))))
+      (get_kex_s MAES Spec.AES128 h0 ctx) (get_nonce_s MAES Spec.AES128 h0 ctx)
+      counter (as_seq h0 inp)))
 
 let aes128_ctr_ni len out inp ctx counter = aes_ctr_ #MAES #Spec.AES128 len out inp ctx counter 
 
@@ -1716,12 +1705,9 @@ val aes256_ctr_ni:
   (requires (fun h -> live h out /\ live h inp /\ live h ctx /\
     disjoint out inp /\ disjoint out ctx))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen MAES))
-      ((Spec.num_rounds Spec.AES256+1) * v (klen MAES)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen MAES)) in
     as_seq h1 out == Spec.aes_ctr32_encrypt_stream_LE Spec.AES256
-      (keyx_to_bytes MAES Spec.AES256 k) (nonce_to_bytes MAES n)
-      counter (as_seq h0 inp))))
+      (get_kex_s MAES Spec.AES256 h0 ctx) (get_nonce_s MAES Spec.AES256 h0 ctx)
+      counter (as_seq h0 inp)))
 
 let aes256_ctr_ni len out inp ctx counter = aes_ctr_ #MAES #Spec.AES256 len out inp ctx counter
 
@@ -1738,12 +1724,9 @@ val aes_ctr:
   (requires (fun h -> live h out /\ live h inp /\ live h ctx /\
     disjoint out inp /\ disjoint out ctx))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen m))
-      ((Spec.num_rounds a+1) * v (klen m)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen m)) in
     as_seq h1 out == Spec.aes_ctr32_encrypt_stream_LE a
-      (keyx_to_bytes m a k) (nonce_to_bytes m n)
-      counter (as_seq h0 inp))))
+      (get_kex_s m a h0 ctx) (get_nonce_s m a h0 ctx)
+      counter (as_seq h0 inp)))
 
 let aes_ctr #m #a len out inp ctx counter =
   match m,a with

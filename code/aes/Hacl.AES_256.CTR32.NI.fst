@@ -4,28 +4,49 @@ open FStar.HyperStack
 open FStar.HyperStack.All
 open FStar.Mul
 open Lib.IntTypes
+open Lib.IntVector
 open Lib.Buffer
 open Hacl.Impl.AES.Core
 open Hacl.Impl.AES.Generic
 open Hacl.AES.Common
 
 module ST = FStar.HyperStack.ST
+module M = LowStar.Modifies
+module B = LowStar.Buffer
 module LSeq = Lib.Sequence
 module Spec = Spec.AES
 
 let aes_ctx = aes_ctx MAES Spec.AES256
 let skey = skey Spec.AES256
 
-[@ CInline ]
-val create_ctx: unit ->
-  StackInline aes_ctx
-  (requires (fun h -> True))
-  (ensures  (fun h0 f h1 -> live h1 f /\
-    stack_allocated f h0 h1 (Seq.create (size_v (ctxlen MAES Spec.AES256))
-    (elem_zero MAES))))
+inline_for_extraction
+val state_malloc:
+    r:rid
+  -> ST.ST (s:buffer (stelem MAES) { length s = v (ctxlen MAES Spec.AES256) })
+  (requires (fun _ ->
+    ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    live h1 s /\
+    M.(modifies loc_none h0 h1) /\
+    B.fresh_loc (loc_addr_of_buffer s) h0 h1 /\
+    (M.loc_includes (M.loc_region_only true r) (loc_addr_of_buffer s)) /\
+    freeable s))
 
-[@ CInline ]
-let create_ctx () = create_ctx MAES Spec.AES256
+let state_malloc r =
+  assert (v (ctxlen MAES Spec.AES256) == 16);
+  B.malloc r (elem_zero MAES) (ctxlen MAES Spec.AES256)
+
+inline_for_extraction
+val state_free:
+    s:buffer (stelem MAES) { length s = v (ctxlen MAES Spec.AES256) }
+  -> ST.ST unit
+  (requires fun h0 ->
+    freeable s /\ live h0 s)
+  (ensures fun h0 _ h1 ->
+    M.modifies (loc_addr_of_buffer s) h0 h1)
+
+let state_free s =
+  B.free s
 
 
 [@ CInline ]
@@ -37,13 +58,10 @@ val aes256_init:
   (requires (fun h -> live h ctx /\ live h nonce /\ live h key /\ disjoint ctx key /\
     as_seq h ctx == Seq.create (size_v (ctxlen MAES Spec.AES256)) (elem_zero MAES)))
   (ensures  (fun h0 _ h1 -> modifies1 ctx h0 h1 /\
-    (let n = LSeq.sub (as_seq h1 ctx) 0 (v (nlen MAES)) in
-    let kex = LSeq.sub (as_seq h1 ctx)
-      (v (nlen MAES)) ((Spec.num_rounds Spec.AES256+1) * v (klen MAES)) in
-    let state = Spec.aes_ctr32_init_LE Spec.AES256
+    (let state = Spec.aes_ctr32_init_LE Spec.AES256
       (as_seq h0 key) (as_seq h0 nonce) in
-    nonce_to_bytes MAES n == state.block /\
-    keyx_to_bytes MAES Spec.AES256 kex == state.key_ex)))
+    get_nonce_s MAES Spec.AES256 h1 ctx == state.block /\
+    get_kex_s MAES Spec.AES256 h1 ctx == state.key_ex)))
 
 [@ CInline ]
 let aes256_init ctx key nonce = aes256_ni_init ctx key nonce
@@ -57,14 +75,11 @@ val aes256_encrypt_block:
   ST unit
   (requires (fun h -> live h ob /\ live h ctx /\ live h ib))
   (ensures (fun h0 _ h1 -> modifies (loc ob) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen MAES))
-      ((Spec.num_rounds Spec.AES256+1) * v (klen MAES)) in
     as_seq h1 ob == u8_16_to_le (Spec.aes_encrypt_block Spec.AES256
-      (keyx_to_bytes MAES Spec.AES256 k) (u8_16_to_le (as_seq h0 ib))))))
+      (get_kex_s MAES Spec.AES256 h0 ctx) (u8_16_to_le (as_seq h0 ib)))))
 
 let aes256_encrypt_block ob ctx ib =
     aes_encrypt_block #MAES #Spec.AES256 ob ctx ib
-
 
 
 [@ CInline ]
@@ -74,7 +89,7 @@ val aes256_set_nonce:
   Stack unit
   (requires (fun h -> live h ctx /\ live h nonce))
   (ensures  (fun h0 _ h1 -> modifies1 ctx h0 h1 /\
-    nonce_to_bytes MAES (LSeq.sub (as_seq h1 ctx) 0 (v (nlen MAES))) ==
+    get_nonce_s MAES Spec.AES256 h1 ctx ==
       u8_16_to_le (LSeq.update_sub
       (LSeq.create 16 (u8 0)) 0 12 (as_seq h0 nonce))))
 
@@ -90,12 +105,9 @@ val aes256_key_block:
   Stack unit
   (requires (fun h -> live h kb /\ live h ctx))
   (ensures  (fun h0 _ h1 -> modifies1 kb h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen MAES))
-      ((Spec.num_rounds Spec.AES256+1) * v (klen MAES)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen MAES)) in
     as_seq h1 kb == u8_16_to_le (Spec.aes_encrypt_block Spec.AES256
-      (keyx_to_bytes MAES Spec.AES256 k) (Spec.aes_ctr32_set_counter_LE
-      (nonce_to_bytes MAES n) counter)))))
+      (get_kex_s MAES Spec.AES256 h0 ctx) (Spec.aes_ctr32_set_counter_LE
+      (get_nonce_s MAES Spec.AES256 h0 ctx) counter))))
 
 [@ CInline ]
 let aes256_key_block kb ctx counter = aes_key_block #MAES #Spec.AES256 kb ctx counter
@@ -110,12 +122,10 @@ val aes256_update4:
   Stack unit
   (requires (fun h -> live h out /\ live h inp /\ live h ctx))
   (ensures  (fun h0 _ h1 -> modifies1 out h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen MAES))
-      ((Spec.num_rounds Spec.AES256+1) * v (klen MAES)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen MAES)) in
     as_seq h1 out == Spec.aes_ctr32_encrypt_block_4_LE Spec.AES256
-      (keyx_to_bytes MAES Spec.AES256 k) (nonce_to_bytes MAES n)
-      counter (as_seq h0 inp))))
+      (get_kex_s MAES Spec.AES256 h0 ctx)
+      (get_nonce_s MAES Spec.AES256 h0 ctx)
+      counter (as_seq h0 inp)))
 
 let aes256_update4 out inp ctx ctr = aes_update4 out inp ctx ctr
 
@@ -131,12 +141,10 @@ val aes256_ctr:
   (requires (fun h -> live h out /\ live h inp /\ live h ctx /\
     disjoint out inp /\ disjoint out ctx))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen MAES))
-      ((Spec.num_rounds Spec.AES256+1) * v (klen MAES)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen MAES)) in
     as_seq h1 out == Spec.aes_ctr32_encrypt_stream_LE Spec.AES256
-      (keyx_to_bytes MAES Spec.AES256 k) (nonce_to_bytes MAES n)
-      counter (as_seq h0 inp))))
+      (get_kex_s MAES Spec.AES256 h0 ctx)
+      (get_nonce_s MAES Spec.AES256 h0 ctx)
+      counter (as_seq h0 inp)))
 
 let aes256_ctr len out inp ctx c =  aes_ctr #MAES #Spec.AES256 len out inp ctx c
 
