@@ -709,25 +709,57 @@ static void finish(EverCrypt_Hash_state_s *s, uint8_t *dst)
   if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
-    Hacl_Hash_SHA3_squeeze0(p1, 144U, 28U, dst);
+    uint32_t remOut = 28U;
+    uint8_t hbuf[256U] = { 0U };
+    uint64_t ws[32U] = { 0U };
+    memcpy(ws, p1, 25U * sizeof (uint64_t));
+    for (uint32_t i = 0U; i < 32U; i++)
+    {
+      store64_le(hbuf + i * 8U, ws[i]);
+    }
+    memcpy(dst + 28U - remOut, hbuf, remOut * sizeof (uint8_t));
     return;
   }
   if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
-    Hacl_Hash_SHA3_squeeze0(p1, 136U, 32U, dst);
+    uint32_t remOut = 32U;
+    uint8_t hbuf[256U] = { 0U };
+    uint64_t ws[32U] = { 0U };
+    memcpy(ws, p1, 25U * sizeof (uint64_t));
+    for (uint32_t i = 0U; i < 32U; i++)
+    {
+      store64_le(hbuf + i * 8U, ws[i]);
+    }
+    memcpy(dst + 32U - remOut, hbuf, remOut * sizeof (uint8_t));
     return;
   }
   if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
-    Hacl_Hash_SHA3_squeeze0(p1, 104U, 48U, dst);
+    uint32_t remOut = 48U;
+    uint8_t hbuf[256U] = { 0U };
+    uint64_t ws[32U] = { 0U };
+    memcpy(ws, p1, 25U * sizeof (uint64_t));
+    for (uint32_t i = 0U; i < 32U; i++)
+    {
+      store64_le(hbuf + i * 8U, ws[i]);
+    }
+    memcpy(dst + 48U - remOut, hbuf, remOut * sizeof (uint8_t));
     return;
   }
   if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
-    Hacl_Hash_SHA3_squeeze0(p1, 72U, 64U, dst);
+    uint32_t remOut = 64U;
+    uint8_t hbuf[256U] = { 0U };
+    uint64_t ws[32U] = { 0U };
+    memcpy(ws, p1, 25U * sizeof (uint64_t));
+    for (uint32_t i = 0U; i < 32U; i++)
+    {
+      store64_le(hbuf + i * 8U, ws[i]);
+    }
+    memcpy(dst + 64U - remOut, hbuf, remOut * sizeof (uint8_t));
     return;
   }
   if (scrut.tag == Blake2S_s)

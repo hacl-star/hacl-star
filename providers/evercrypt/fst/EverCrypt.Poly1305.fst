@@ -47,7 +47,7 @@ let poly1305_vale
       // Call Vale
       let h1 = ST.get () in
       // Initial hash (0) is located at bytes [ 0; 24 )
-      assert (forall (i:int).{:pattern (Seq.index (B.as_seq h1 ctx) i)} 0 <= i /\ i < 24 ==>
+      assert_spinoff (forall (i:int).{:pattern (Seq.index (B.as_seq h1 ctx) i)} 0 <= i /\ i < 24 ==>
         Seq.index (Seq.slice (B.as_seq h1 ctx) 0 24) i == 0uy);
       Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
       let res = Vale.Wrapper.X64.Poly.x64_poly1305 ctx src (FStar.Int.Cast.Full.uint32_to_uint64 len) 1UL in

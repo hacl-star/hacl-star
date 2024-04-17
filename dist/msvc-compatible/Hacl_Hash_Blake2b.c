@@ -497,19 +497,18 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
   r3[3U] = iv7;
   uint8_t salt[16U] = { 0U };
   uint8_t personal[16U] = { 0U };
-  Hacl_Hash_Blake2s_blake2b_params
+  Hacl_Hash_Blake2s_blake2_params
   p =
     {
-      .digest_length1 = 64U, .key_length1 = 0U, .fanout1 = 1U, .depth1 = 1U, .leaf_length1 = 0U,
-      .node_offset1 = 0U, .xof_length1 = 0U, .node_depth1 = 0U, .inner_length1 = 0U, .salt1 = salt,
-      .personal1 = personal
+      .digest_length = 32U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,
+      .node_offset = 0ULL, .node_depth = 0U, .inner_length = 0U, .salt = salt, .personal = personal
     };
   KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
     uint64_t *os = tmp + 4U;
-    uint8_t *bj = p.salt1 + i * 8U;
+    uint8_t *bj = p.salt + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
@@ -519,7 +518,7 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
     2U,
     1U,
     uint64_t *os = tmp + 6U;
-    uint8_t *bj = p.personal1 + i * 8U;
+    uint8_t *bj = p.personal + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
@@ -529,9 +528,9 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
     ^
       ((uint64_t)kk
       << 8U
-      ^ ((uint64_t)p.fanout1 << 16U ^ ((uint64_t)p.depth1 << 24U ^ (uint64_t)p.leaf_length1 << 32U)));
-  tmp[1U] = (uint64_t)p.node_offset1 ^ (uint64_t)p.xof_length1 << 32U;
-  tmp[2U] = (uint64_t)p.node_depth1 ^ (uint64_t)p.inner_length1 << 8U;
+      ^ ((uint64_t)p.fanout << 16U ^ ((uint64_t)p.depth << 24U ^ (uint64_t)p.leaf_length << 32U)));
+  tmp[1U] = p.node_offset;
+  tmp[2U] = (uint64_t)p.node_depth ^ (uint64_t)p.inner_length << 8U;
   tmp[3U] = 0ULL;
   uint64_t tmp0 = tmp[0U];
   uint64_t tmp1 = tmp[1U];
