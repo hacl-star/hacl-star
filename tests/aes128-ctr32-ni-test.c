@@ -101,5 +101,8 @@ int main() {
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));
 
-
+  if (ok)
+    return EXIT_SUCCESS;
+  else
+    return EXIT_FAILURE;
 }
