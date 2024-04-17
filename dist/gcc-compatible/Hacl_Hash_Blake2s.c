@@ -524,7 +524,9 @@ void Hacl_Hash_Blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn)
     uint32_t r = u;
     uint32_t x = r;
     os[i] = x;);
-  tmp[0U] = nn ^ (kk << 8U ^ ((uint32_t)p.fanout << 16U ^ (uint32_t)p.depth << 24U));
+  tmp[0U] =
+    (uint32_t)(uint8_t)nn
+    ^ ((uint32_t)(uint8_t)kk << 8U ^ ((uint32_t)p.fanout << 16U ^ (uint32_t)p.depth << 24U));
   tmp[1U] = p.leaf_length;
   tmp[2U] = (uint32_t)p.node_offset;
   tmp[3U] =

@@ -235,9 +235,11 @@ Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t k
   Hacl_Hash_Blake2s_blake2_params
   p =
     {
-      .digest_length = 32U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,
+      .digest_length = 64U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,
       .node_offset = 0ULL, .node_depth = 0U, .inner_length = 0U, .salt = salt, .personal = personal
     };
+  uint8_t kk1 = (uint8_t)kk;
+  uint8_t nn1 = (uint8_t)nn;
   KRML_MAYBE_FOR2(i,
     0U,
     2U,
@@ -259,9 +261,9 @@ Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t k
     uint64_t x = r;
     os[i] = x;);
   tmp[0U] =
-    (uint64_t)nn
+    (uint64_t)nn1
     ^
-      ((uint64_t)kk
+      ((uint64_t)kk1
       << 8U
       ^ ((uint64_t)p.fanout << 16U ^ ((uint64_t)p.depth << 24U ^ (uint64_t)p.leaf_length << 32U)));
   tmp[1U] = p.node_offset;
