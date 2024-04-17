@@ -371,7 +371,7 @@ let update_last_s (#a : alg) (acc : Spec.state a)
                   (input : Seq.seq uint8{ S.length input + prevlen <= max_input_length a /\
                                           S.length input <= Spec.size_block a }) :
   Tot (Spec.state a) =
-  Spec.blake2_update_last a prevlen (S.length input) input acc
+  Spec.blake2_update_last a false prevlen (S.length input) input acc
 
 noextract
 let finish_s (#a : alg) (p: Spec.blake2_params a) (acc : Spec.state a) :
@@ -383,7 +383,7 @@ let spec_s (a : alg)
   (p: Spec.blake2_params a)
   (key : lbytes (UInt8.v p.key_length))
   (input : S.seq uint8{if p.key_length = 0uy then S.length input <= max_input_length a else S.length input + Spec.size_block a <= max_input_length a}) =
-  Spec.blake2 a input p key
+  Spec.blake2 a false input p key
 
 /// Interlude for spec proofs
 /// -------------------------
@@ -549,7 +549,7 @@ val spec_is_incremental :
   k: lbytes (UInt8.v p.key_length) ->
   input:S.seq uint8 { if p.key_length = 0uy then S.length input <= max_input_length a else  S.length input + (Spec.size_block a) <= max_input_length a } ->
   Lemma(
-    blake2_hash_incremental_s a p k input == Spec.blake2 a input p k)
+    blake2_hash_incremental_s a p k input == Spec.blake2 a false input p k)
 
 #restart-solver
 #push-options "--z3cliopt smt.arith.nl=false --z3rlimit 100"
@@ -570,7 +570,7 @@ let spec_is_incremental a p k input0 =
 
   S.lemma_eq_intro (S.slice input (S.length input - l_last) (S.length input)) last;
   S.lemma_eq_intro (S.slice last (S.length last - l_last) (S.length last)) last;
-  Spec.Blake2.Alternative.lemma_spec_equivalence_update a kk k input0 s
+  Spec.Blake2.Alternative.lemma_spec_equivalence_update a false kk k input0 s
 #pop-options
 
 inline_for_extraction noextract
