@@ -61,6 +61,7 @@ The caller must satisfy the following requirements.
 val malloc_with_params_and_key:
   i:G.erased (P.index Spec.Blake2B) ->
   p:P.params Spec.Blake2B i ->
+  last_node:bool{last_node = i.P.last_node} ->
   k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v ((G.reveal i).key_length) } -> (
   let open F in
   let c = blake2b_32 in
@@ -82,9 +83,9 @@ val malloc_with_params_and_key:
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 )
 
-let malloc_with_params_and_key i p k r =
+let malloc_with_params_and_key i p last_node k r =
   let pv = P.get_params p in
-  let i = { P.key_length = pv.Core.key_length; digest_length = pv.Core.digest_length } in
+  let i = { P.key_length = pv.Core.key_length; digest_length = pv.Core.digest_length; last_node } in
   malloc_raw i (p, k) r
 
 [@ (Comment " Specialized allocation function that picks default values for all
@@ -101,7 +102,7 @@ val malloc_with_key:
   kk:Spec.key_length_t Spec.Blake2B { LowStar.Buffer.length k == UInt8.v kk } -> (
   let open F in
   let c = blake2b_32 in
-  let i: Common.index Spec.Blake2B = { P.key_length = kk; digest_length = UInt8.uint_to_t (Spec.max_output Spec.Blake2B) } in
+  let i: Common.index Spec.Blake2B = { P.key_length = kk; digest_length = UInt8.uint_to_t (Spec.max_output Spec.Blake2B); last_node = false } in
   let t: Type0 = c.state.s i in
   let t': Type0 = I.optional_key (G.reveal i) c.km c.key in
   r: HS.rid ->
@@ -130,14 +131,14 @@ let malloc_with_key k kk r =
   push_frame ();
   let _ = allow_inversion Spec.alg in
   let nn = UInt8.uint_to_t (Spec.max_output Spec.Blake2B) in
-  let i: Common.index Spec.Blake2B = { key_length = kk; digest_length = nn } in
+  let i: Common.index Spec.Blake2B = { key_length = kk; digest_length = nn; last_node = false } in
   let h00 = ST.get () in
 
   let p = P.alloca Spec.Blake2B i in
   let h0 = ST.get () in
   assert B.(as_seq h00 k == as_seq h0 k);
 
-  let s = malloc_with_params_and_key (G.hide i) p k r in
+  let s = malloc_with_params_and_key (G.hide i) p false k r in
   let h1 = ST.get () in
   assert F.(freeable blake2b_32 i h1 s);
   assert (nn == (Spec.blake2_default_params Spec.Blake2B).digest_length);
