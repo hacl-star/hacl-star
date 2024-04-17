@@ -504,12 +504,11 @@ void Hacl_Hash_Blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn)
   r3[3U] = iv7;
   uint8_t salt[8U] = { 0U };
   uint8_t personal[8U] = { 0U };
-  Hacl_Hash_Blake2s_blake2s_params
+  Hacl_Hash_Blake2s_blake2_params
   p =
     {
       .digest_length = 32U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,
-      .node_offset = 0U, .xof_length = 0U, .node_depth = 0U, .inner_length = 0U, .salt = salt,
-      .personal = personal
+      .node_offset = 0ULL, .node_depth = 0U, .inner_length = 0U, .salt = salt, .personal = personal
     };
   KRML_MAYBE_FOR2(i,
     0U,
@@ -533,9 +532,9 @@ void Hacl_Hash_Blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn)
     os[i] = x;);
   tmp[0U] = nn ^ (kk << 8U ^ ((uint32_t)p.fanout << 16U ^ (uint32_t)p.depth << 24U));
   tmp[1U] = p.leaf_length;
-  tmp[2U] = p.node_offset;
+  tmp[2U] = (uint32_t)p.node_offset;
   tmp[3U] =
-    (uint32_t)p.xof_length
+    (uint32_t)(p.node_offset >> 32U)
     ^ ((uint32_t)p.node_depth << 16U ^ (uint32_t)p.inner_length << 24U);
   uint32_t tmp0 = tmp[0U];
   uint32_t tmp1 = tmp[1U];

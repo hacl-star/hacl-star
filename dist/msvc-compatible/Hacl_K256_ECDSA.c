@@ -571,10 +571,6 @@ static inline bool is_qelem_le_q_halved_vartime(uint64_t *f)
   {
     return true;
   }
-  if (a2 > 0xffffffffffffffffULL)
-  {
-    return false;
-  }
   if (a1 < 0x5d576e7357a4501dULL)
   {
     return true;

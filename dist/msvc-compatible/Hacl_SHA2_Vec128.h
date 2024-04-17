@@ -35,6 +35,8 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Hash_SHA3_Simd256.h"
+
 void
 Hacl_SHA2_Vec128_sha224_4(
   uint8_t *dst0,
