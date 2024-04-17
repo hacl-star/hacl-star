@@ -137,7 +137,7 @@ let blake2_is_hash_incremental a input =
   let a' = to_blake_alg a in
   let n_blocks, l_last = Spec.Blake2.split a' (S.length input) in
   let blocks, last = Lib.UpdateMulti.split_at_last_lazy (block_length a) input in
-  let s_i = Spec.Blake2.blake2_init_hash a' (Spec.Blake2.blake2_default_params a') 0 (Spec.Blake2.max_output (to_blake_alg a)) in
+  let s_i = Spec.Blake2.blake2_init_hash a' (Spec.Blake2.blake2_default_params a') in
   let s_i': words_state a = init a in
   assert (s_i == s_i');
 

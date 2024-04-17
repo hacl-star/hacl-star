@@ -160,8 +160,8 @@ CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
 # First, match the Blake2 stuff
 BLAKE2_BUNDLE_BASE= \
   -bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants \
-  -bundle 'Hacl.Streaming.Blake2b_32=Hacl.Blake2b_32,Hacl.Hash.Blake2b_32,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2b,rename-prefix]' \
-  -bundle 'Hacl.Streaming.Blake2s_32=Hacl.Blake2s_32,Hacl.Hash.Blake2s_32,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2s,rename-prefix]'
+  -bundle 'Hacl.Streaming.Blake2b_32=Hacl.Blake2b_32,Hacl.Hash.Blake2b_32,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2,Hacl.Streaming.Blake2.Params,Hacl.Streaming.Blake2.Common[rename=Hacl_Hash_Blake2b,rename-prefix]' \
+  -bundle 'Hacl.Streaming.Blake2s_32=Hacl.Blake2s_32,Hacl.Hash.Blake2s_32[rename=Hacl_Hash_Blake2s,rename-prefix]'
 BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
   -bundle Hacl.Streaming.Blake2b_256=Hacl.Blake2b_256,Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_Simd256,rename-prefix] \
   -bundle Hacl.Streaming.Blake2s_128=Hacl.Blake2s_128,Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_Simd128,rename-prefix]

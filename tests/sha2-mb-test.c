@@ -178,7 +178,7 @@ main()
   EverCrypt_AutoConfig2_init();
 
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors) / sizeof(sha2_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors) / sizeof(sha2_test_vector); ++i) {
     ok &= print_test1(vectors[i].input,
                       vectors[i].input_len,
                       vectors[i].tag_256,
@@ -225,7 +225,6 @@ main()
                           vectors_mb[3].tag_512);
   }
 
-  uint64_t len = SIZE;
   uint8_t plain[SIZE];
   cycles a, b;
   clock_t t1, t2;

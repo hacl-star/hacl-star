@@ -33,8 +33,8 @@ test_nist()
 
   printf("%s\n", "ECDH Initiator tests: \n");
 
-  for (int i = 0; i < sizeof(i_vectors) / sizeof(ecdhp256_tv_i); i++) {
-    printf("ECDH Initiator Test %d \n", i);
+  for (size_t i = 0; i < sizeof(i_vectors) / sizeof(ecdhp256_tv_i); i++) {
+    printf("ECDH Initiator Test %zu \n", i);
     bool success = Hacl_P256_dh_initiator(result, i_vectors[i].privateKey);
     ok = ok && success;
     ok = ok && compare_and_print(32, result, i_vectors[i].expectedPublicKeyX);
@@ -44,9 +44,9 @@ test_nist()
 
   printf("%s\n", "ECDH Responder tests: \n");
 
-  for (int i = 0; i < sizeof(i_vectors) / sizeof(ecdhp256_tv_i); i++) {
+  for (size_t i = 0; i < sizeof(i_vectors) / sizeof(ecdhp256_tv_i); i++) {
 
-    printf("ECDH Responder Test %d\n", i);
+    printf("ECDH Responder Test %zu\n", i);
     memcpy(pk, i_vectors[i].publicKeyX1, 32);
     memcpy(pk + 32, i_vectors[i].publicKeyY1, 32);
 
@@ -133,8 +133,8 @@ test_wycheproof()
 
   printf("%s\n", "Wycheproof tests ECDH: ");
 
-  for (int i = 0; i < sizeof(w_vectors) / sizeof(ecdhp256_w_i); i++) {
-    printf("ECDH Wycheproof Test %d \n", i);
+  for (size_t i = 0; i < sizeof(w_vectors) / sizeof(ecdhp256_w_i); i++) {
+    printf("ECDH Wycheproof Test %zu \n", i);
 
     bool flagDecompressSuccessful = Hacl_P256_decompression_not_compressed_form(
       w_vectors[i].publicKey, decompressedPoint);
@@ -167,15 +167,15 @@ test_wycheproof()
       ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
 
     if (!ok) {
-      printf("Test %d \n failed", i);
+      printf("Test %zu \n failed", i);
       break;
     }
   }
 
   printf("%s\n", "Wycheproof tests ECDSA: ");
 
-  for (int i = 0; i < sizeof(w_ecdsa_vectors) / sizeof(ecdsap256_w_i); i++) {
-    printf("ECDSA Wycheproof Test %d \n", i);
+  for (size_t i = 0; i < sizeof(w_ecdsa_vectors) / sizeof(ecdsap256_w_i); i++) {
+    printf("ECDSA Wycheproof Test %zu \n", i);
 
     uint32_t mLen = w_ecdsa_vectors[i].mLen;
 
@@ -197,7 +197,7 @@ test_wycheproof()
     }
 
     if (!ok) {
-      printf("\n Test %d failed \n", i);
+      printf("\n Test %zu failed \n", i);
       compare_and_print(32, w_ecdsa_vectors[i].r, w_ecdsa_vectors[i].r);
       compare_and_print(32, w_ecdsa_vectors[i].s, w_ecdsa_vectors[i].s);
       break;

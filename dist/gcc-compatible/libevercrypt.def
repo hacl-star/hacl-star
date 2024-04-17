@@ -5,22 +5,34 @@ EXPORTS
   Hacl_Hash_Blake2b_update_multi
   Hacl_Hash_Blake2b_update_last
   Hacl_Hash_Blake2b_finish
+  Hacl_Hash_Blake2b_malloc_with_params_and_key
+  Hacl_Hash_Blake2b_malloc_with_key
   Hacl_Hash_Blake2b_malloc
+  Hacl_Hash_Blake2b_reset_with_key_and_params
+  Hacl_Hash_Blake2b_reset_with_key
   Hacl_Hash_Blake2b_reset
   Hacl_Hash_Blake2b_update
   Hacl_Hash_Blake2b_digest
   Hacl_Hash_Blake2b_free
+  Hacl_Hash_Blake2b_copy
   Hacl_Hash_Blake2b_hash_with_key
+  Hacl_Hash_Blake2b_hash_with_key_and_paramas
   Hacl_Hash_Blake2s_init
   Hacl_Hash_Blake2s_update_multi
   Hacl_Hash_Blake2s_update_last
   Hacl_Hash_Blake2s_finish
+  Hacl_Hash_Blake2s_malloc_with_params_and_key
+  Hacl_Hash_Blake2s_malloc_with_key
   Hacl_Hash_Blake2s_malloc
+  Hacl_Hash_Blake2s_reset_with_key_and_params
+  Hacl_Hash_Blake2s_reset_with_key
   Hacl_Hash_Blake2s_reset
   Hacl_Hash_Blake2s_update
   Hacl_Hash_Blake2s_digest
   Hacl_Hash_Blake2s_free
+  Hacl_Hash_Blake2s_copy
   Hacl_Hash_Blake2s_hash_with_key
+  Hacl_Hash_Blake2s_hash_with_key_and_paramas
   Hacl_Hash_Blake2b_Simd256_init
   Hacl_Hash_Blake2b_Simd256_update_multi
   Hacl_Hash_Blake2b_Simd256_update_last
@@ -28,12 +40,18 @@ EXPORTS
   Hacl_Hash_Blake2b_Simd256_load_state256b_from_state32
   Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32
   Hacl_Hash_Blake2b_Simd256_malloc_with_key
+  Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key
+  Hacl_Hash_Blake2b_Simd256_malloc_with_key0
   Hacl_Hash_Blake2b_Simd256_malloc
+  Hacl_Hash_Blake2b_Simd256_reset_with_key_and_params
+  Hacl_Hash_Blake2b_Simd256_reset_with_key
   Hacl_Hash_Blake2b_Simd256_reset
   Hacl_Hash_Blake2b_Simd256_update
   Hacl_Hash_Blake2b_Simd256_digest
   Hacl_Hash_Blake2b_Simd256_free
+  Hacl_Hash_Blake2b_Simd256_copy
   Hacl_Hash_Blake2b_Simd256_hash_with_key
+  Hacl_Hash_Blake2b_Simd256_hash_with_key_and_paramas
   Hacl_Hash_Blake2s_Simd128_init
   Hacl_Hash_Blake2s_Simd128_update_multi
   Hacl_Hash_Blake2s_Simd128_update_last
@@ -41,12 +59,18 @@ EXPORTS
   Hacl_Hash_Blake2s_Simd128_store_state128s_to_state32
   Hacl_Hash_Blake2s_Simd128_load_state128s_from_state32
   Hacl_Hash_Blake2s_Simd128_malloc_with_key
+  Hacl_Hash_Blake2s_Simd128_malloc_with_params_and_key
+  Hacl_Hash_Blake2s_Simd128_malloc_with_key0
   Hacl_Hash_Blake2s_Simd128_malloc
+  Hacl_Hash_Blake2s_Simd128_reset_with_key_and_params
+  Hacl_Hash_Blake2s_Simd128_reset_with_key
   Hacl_Hash_Blake2s_Simd128_reset
   Hacl_Hash_Blake2s_Simd128_update
   Hacl_Hash_Blake2s_Simd128_digest
   Hacl_Hash_Blake2s_Simd128_free
+  Hacl_Hash_Blake2s_Simd128_copy
   Hacl_Hash_Blake2s_Simd128_hash_with_key
+  Hacl_Hash_Blake2s_Simd128_hash_with_key_and_paramas
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
