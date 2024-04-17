@@ -106,10 +106,16 @@ let max_node_offset (a:alg) =
 inline_for_extraction
 let node_offset_t (a:alg) : Type = n:uint64{v n <= max_node_offset a}
 
+let digest_length_t a =
+  digest_length: pub_int_t U8 { 1 <= UInt8.v digest_length /\ UInt8.v digest_length <= max_output a }
+
+let key_length_t a =
+  key_length: pub_int_t U8 { UInt8.v key_length <= max_key a }
+
 noeq
 type blake2_params (a: alg) = {
-  digest_length: digest_length: pub_int_t U8 { 1 <= UInt8.v digest_length /\ UInt8.v digest_length <= max_output a };
-  key_length: key_length: pub_int_t U8 { UInt8.v key_length <= max_key a };
+  digest_length: digest_length_t a;
+  key_length: key_length_t a;
   fanout: uint8;
   depth: uint8;
   leaf_length: uint32;

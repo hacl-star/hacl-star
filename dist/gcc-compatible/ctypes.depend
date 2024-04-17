@@ -11,18 +11,18 @@ lib/Hacl_Hash_Blake2b_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Ha
 lib/Hacl_Hash_Blake2b_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
 lib_gen/Hacl_Hash_Blake2b_gen.cmx: lib/Hacl_Hash_Blake2b_bindings.cmx
 lib_gen/Hacl_Hash_Blake2b_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Hash_Blake2b_bindings.cmx lib_gen/Hacl_Hash_Blake2b_gen.cmx 
-lib/Hacl_Hash_Blake2s_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
-lib/Hacl_Hash_Blake2s_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
+lib/Hacl_Hash_Blake2s_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Hash_Blake2b_bindings.cmx lib/Hacl_Hash_Blake2b_stubs.cmx 
+lib/Hacl_Hash_Blake2s_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo lib/Hacl_Hash_Blake2b_bindings.cmo lib/Hacl_Hash_Blake2b_stubs.cmo 
 lib_gen/Hacl_Hash_Blake2s_gen.cmx: lib/Hacl_Hash_Blake2s_bindings.cmx
-lib_gen/Hacl_Hash_Blake2s_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Hash_Blake2s_bindings.cmx lib_gen/Hacl_Hash_Blake2s_gen.cmx 
-lib/Hacl_Hash_Blake2b_Simd256_bindings.cmx: 
-lib/Hacl_Hash_Blake2b_Simd256_bindings.cmo: 
+lib_gen/Hacl_Hash_Blake2s_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Hash_Blake2b_bindings.cmx lib/Hacl_Hash_Blake2b_stubs.cmx lib/Hacl_Hash_Blake2b_c_stubs.o lib/Hacl_Hash_Blake2s_bindings.cmx lib_gen/Hacl_Hash_Blake2s_gen.cmx 
+lib/Hacl_Hash_Blake2b_Simd256_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Hash_Blake2b_bindings.cmx lib/Hacl_Hash_Blake2b_stubs.cmx 
+lib/Hacl_Hash_Blake2b_Simd256_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo lib/Hacl_Hash_Blake2b_bindings.cmo lib/Hacl_Hash_Blake2b_stubs.cmo 
 lib_gen/Hacl_Hash_Blake2b_Simd256_gen.cmx: lib/Hacl_Hash_Blake2b_Simd256_bindings.cmx
-lib_gen/Hacl_Hash_Blake2b_Simd256_gen.exe: lib/Hacl_Hash_Blake2b_Simd256_bindings.cmx lib_gen/Hacl_Hash_Blake2b_Simd256_gen.cmx 
-lib/Hacl_Hash_Blake2s_Simd128_bindings.cmx: 
-lib/Hacl_Hash_Blake2s_Simd128_bindings.cmo: 
+lib_gen/Hacl_Hash_Blake2b_Simd256_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Hash_Blake2b_bindings.cmx lib/Hacl_Hash_Blake2b_stubs.cmx lib/Hacl_Hash_Blake2b_c_stubs.o lib/Hacl_Hash_Blake2b_Simd256_bindings.cmx lib_gen/Hacl_Hash_Blake2b_Simd256_gen.cmx 
+lib/Hacl_Hash_Blake2s_Simd128_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Hash_Blake2b_bindings.cmx lib/Hacl_Hash_Blake2b_stubs.cmx 
+lib/Hacl_Hash_Blake2s_Simd128_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo lib/Hacl_Hash_Blake2b_bindings.cmo lib/Hacl_Hash_Blake2b_stubs.cmo 
 lib_gen/Hacl_Hash_Blake2s_Simd128_gen.cmx: lib/Hacl_Hash_Blake2s_Simd128_bindings.cmx
-lib_gen/Hacl_Hash_Blake2s_Simd128_gen.exe: lib/Hacl_Hash_Blake2s_Simd128_bindings.cmx lib_gen/Hacl_Hash_Blake2s_Simd128_gen.cmx 
+lib_gen/Hacl_Hash_Blake2s_Simd128_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Hash_Blake2b_bindings.cmx lib/Hacl_Hash_Blake2b_stubs.cmx lib/Hacl_Hash_Blake2b_c_stubs.o lib/Hacl_Hash_Blake2s_Simd128_bindings.cmx lib_gen/Hacl_Hash_Blake2s_Simd128_gen.cmx 
 lib/Hacl_Hash_Base_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
 lib/Hacl_Hash_Base_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
 lib_gen/Hacl_Hash_Base_gen.cmx: lib/Hacl_Hash_Base_bindings.cmx

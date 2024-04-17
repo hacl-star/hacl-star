@@ -200,8 +200,6 @@ val reveal_key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state'
 /// lemmas for invariant and hashed could be bundled together. If we committed
 /// to always heap allocating, then we could conceivably have a single framing
 /// lemma.
-///
-/// TODO: frame_key!
 
 val frame_invariant: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' c i -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
@@ -221,6 +219,14 @@ val frame_seen: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' 
     B.modifies l h0 h1))
   (ensures (seen c i h0 s == seen c i h1 s))
   [ SMTPat (seen c i h1 s); SMTPat (B.modifies l h0 h1) ]
+
+val frame_key: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' c i -> h0:HS.mem -> h1:HS.mem -> Lemma
+  (requires (
+    invariant c i h0 s /\
+    B.loc_disjoint l (footprint c i h0 s) /\
+    B.modifies l h0 h1))
+  (ensures (reveal_key c i h0 s == reveal_key c i h1 s))
+  [ SMTPat (reveal_key c i h1 s); SMTPat (B.modifies l h0 h1) ]
 
 
 /// Stateful API
