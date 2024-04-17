@@ -151,17 +151,30 @@ EXPORTS
   Hacl_Hash_SHA3_block_len
   Hacl_Hash_SHA3_hash_len
   Hacl_Hash_SHA3_is_shake
-  Hacl_Hash_SHA3_shake128_hacl
-  Hacl_Hash_SHA3_shake256_hacl
+  Hacl_Hash_SHA3_absorb_inner_32
+  Hacl_Hash_SHA3_shake128
+  Hacl_Hash_SHA3_shake256
   Hacl_Hash_SHA3_sha3_224
   Hacl_Hash_SHA3_sha3_256
   Hacl_Hash_SHA3_sha3_384
   Hacl_Hash_SHA3_sha3_512
-  Hacl_Hash_SHA3_state_permute
-  Hacl_Hash_SHA3_loadState
-  Hacl_Hash_SHA3_absorb_inner
-  Hacl_Hash_SHA3_squeeze0
-  Hacl_Hash_SHA3_keccak
+  Hacl_Hash_SHA3_state_malloc
+  Hacl_Hash_SHA3_state_free
+  Hacl_Hash_SHA3_shake128_absorb_nblocks
+  Hacl_Hash_SHA3_shake128_absorb_final
+  Hacl_Hash_SHA3_shake128_squeeze_nblocks
+  Hacl_Hash_SHA3_Simd256_absorb_inner_256
+  Hacl_Hash_SHA3_Simd256_shake128
+  Hacl_Hash_SHA3_Simd256_shake256
+  Hacl_Hash_SHA3_Simd256_sha3_224
+  Hacl_Hash_SHA3_Simd256_sha3_256
+  Hacl_Hash_SHA3_Simd256_sha3_384
+  Hacl_Hash_SHA3_Simd256_sha3_512
+  Hacl_Hash_SHA3_Simd256_state_malloc
+  Hacl_Hash_SHA3_Simd256_state_free
+  Hacl_Hash_SHA3_Simd256_shake128_absorb_nblocks
+  Hacl_Hash_SHA3_Simd256_shake128_absorb_final
+  Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks
   Hacl_Hash_MD5_init
   Hacl_Hash_MD5_finish
   Hacl_Hash_MD5_update_multi
