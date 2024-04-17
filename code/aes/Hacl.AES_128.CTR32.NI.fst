@@ -19,6 +19,17 @@ module Spec = Spec.AES
 let aes_ctx = aes_ctx MAES Spec.AES128
 let skey = skey Spec.AES128
 
+inline_for_extraction noextract
+val create_ctx: unit ->
+  StackInline aes_ctx
+  (requires (fun h -> True))
+  (ensures  (fun h0 f h1 -> live h1 f /\
+    stack_allocated f h0 h1 (Seq.create (size_v (ctxlen MAES Spec.AES128))
+    (elem_zero MAES))))
+
+inline_for_extraction noextract
+let create_ctx () = create_ctx MAES Spec.AES128
+
 inline_for_extraction
 val state_malloc:
     r:rid
