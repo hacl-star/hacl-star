@@ -705,6 +705,7 @@ let blake2 (a : alg)
       assert (key_invariant h0 k');
       init_key_block a i k' buf_;
       let h1 = ST.get () in
+      P.frame_invariant (B.loc_buffer buf_) p h0 h1;
       assert (key_invariant h1 k');
       let pv = P.get_params p in
       init h pv;
