@@ -1408,29 +1408,6 @@ let aes_encrypt_block #m #a ob ctx ib =
   pop_frame()
 
 
-inline_for_extraction noextract
-val aes_ctr32_key_block:
-    #m: m_spec
-  -> #a: Spec.variant
-  -> out: lbuffer uint8 16ul
-  -> kex: lbuffer (stelem m) ((nr a +! 1ul) *. klen m)
-  -> nonce: lbuffer (stelem m) (nlen m)
-  -> st: lbuffer (stelem m) (stlen m)
-  -> counter: uint32
-  -> Stack unit
-  (requires (fun h -> live h out /\ live h kex /\ live h nonce /\
-    live h st /\ disjoint st kex))
-  (ensures (fun h0 _ h1 -> modifies2 out st h0 h1 /\
-    as_seq h1 out == u8_16_to_le (Spec.aes_encrypt_block a
-      (as_kex m a h0 kex) (Spec.aes_ctr32_set_counter_LE
-      (as_nonce m h0 nonce) counter))))
-
-let aes_ctr32_key_block #m #a out kex nonce st counter =
-  load_state #m st nonce counter;
-  block_cipher #m #a st kex;
-  store_block0 #m out st
-
-
 val aes_ctr32_encrypt_block_lemma:
     #m:m_spec
   -> #a: Spec.variant
