@@ -179,7 +179,7 @@ let reset_raw (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
   F.reset blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment " General-purpose re-initialization function with parameters and
-key. You cannot change digest_length or key_length, meaning those values in
+key. You cannot change digest_length, key_length, or last_node, meaning those values in
 the parameters object must be the same as originally decided via one of the
 malloc functions. All other values of the parameter can be changed. The behavior
 is unspecified if you violate this precondition.")]

@@ -166,8 +166,8 @@ let reset_raw (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
   F.reset blake2b_256 kk (Common.s Spec.Blake2B kk Core.M256) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment " Re-initialization function. The reinitialization API is tricky --
-you MUST reuse the same original parameters for digest (output) length and key
-length.")]
+you MUST reuse the same original parameters for digest (output) length, key
+length, and last node.")]
 val reset_with_key_and_params: (i: G.erased (Common.index Spec.Blake2B)) -> (
   let open F in
   let c = blake2b_256 in
