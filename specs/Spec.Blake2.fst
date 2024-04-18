@@ -15,14 +15,16 @@ include Spec.Blake2.Definitions
 /// Serialize blake2s parameters to be xor'ed with the state during initialization
 /// As the state is represented using uint32, we need to serialize to uint32 instead
 /// of the more standard bytes representation
-let serialize_blake2s_params (p: blake2s_params) : lseq uint32 8 =
+let serialize_blake2s_params (p: blake2_params Blake2S) : lseq uint32 8 =
   let s0 = (u32 (v p.digest_length)) ^.
            (u32 (v p.key_length) <<. (size 8)) ^.
            (u32 (v p.fanout) <<. (size 16)) ^.
            (u32 (v p.depth) <<. (size 24)) in
   let s1 = p.leaf_length in
-  let s2 = p.node_offset in
-  let s3 = (u32 (v p.xof_length)) ^.
+  (* Take the first four bytes *)
+  let s2 = (to_u32 p.node_offset) in
+  (* Take the last four bytes of node_offset *)
+  let s3 = (to_u32 (p.node_offset >>. (size 32))) ^.
            (u32 (v p.node_depth) <<. (size 16)) ^.
            (u32 (v p.inner_length) <<. (size 24)) in
   let salt_u32: lseq uint32 2 = uints_from_bytes_le p.salt in
@@ -39,14 +41,13 @@ let serialize_blake2s_params (p: blake2s_params) : lseq uint32 8 =
 /// Serialize blake2b parameters to be xor'ed with the state during initialization
 /// As the state is represented using uint64, we need to serialize to uint64 instead
 /// of the more standard bytes representation
-let serialize_blake2b_params (p: blake2b_params) : lseq uint64 8 =
+let serialize_blake2b_params (p: blake2_params Blake2B) : lseq uint64 8 =
   let s0 = (u64 (v p.digest_length)) ^.
            (u64 (v p.key_length) <<. (size 8)) ^.
            (u64 (v p.fanout) <<. (size 16)) ^.
            (u64 (v p.depth) <<. (size 24)) ^.
            (u64 (v p.leaf_length) <<. (size 32)) in
-  let s1 = (u64 (v p.node_offset)) ^.
-           (u64 (v p.xof_length) <<. (size 32)) in
+  let s1 = p.node_offset in
   // The serialization corresponding to s2 contains node_depth and inner_length,
   // followed by the 14 reserved bytes which always seem to be zeros, and can hence
   // be ignored when building the corresponding uint64 using xor's
@@ -383,9 +384,7 @@ let blake2_init_hash a p kk nn =
   let iv7 = secret (ivTable a).[7] in
   let r0 = create_row #a iv0 iv1 iv2 iv3 in
   let r1 = create_row #a iv4 iv5 iv6 iv7 in
-  let p: blake2_params a =
-    set_key_length (set_digest_length p nn) kk
-  in
+  let p: blake2_params a = {p with key_length = u8 kk; digest_length = u8 nn } in
   let s = serialize_blake2_params p in
   let iv0' = iv0 ^. s.[0] in
   let iv1' = iv1 ^. s.[1] in

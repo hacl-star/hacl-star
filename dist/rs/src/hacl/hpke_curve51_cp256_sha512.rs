@@ -27,14 +27,22 @@ pub fn setupBaseS(
             let mut zeros: [u8; 32] = [0u8; 32usize];
             crate::hacl::curve25519_51::scalarmult(&mut o_dh, skE, pkR);
             let mut res: [u8; 1] = [255u8; 1usize];
-            for i in 0u32..32u32
-            {
-                let uu____0: u8 =
-                    crate::fstar::uint8::eq_mask((&mut o_dh)[i as usize], (&mut zeros)[i as usize]);
-                (&mut res)[0usize] = uu____0 & (&mut res)[0usize];
-                ();
-                ()
-            };
+            krml::unroll_for!(
+                32,
+                "i",
+                0u32,
+                1u32,
+                {
+                    let uu____0: u8 =
+                        crate::fstar::uint8::eq_mask(
+                            (&mut o_dh)[i as usize],
+                            (&mut zeros)[i as usize]
+                        );
+                    (&mut res)[0usize] = uu____0 & (&mut res)[0usize];
+                    ();
+                    ()
+                }
+            );
             let z: u8 = (&mut res)[0usize];
             let res0: u32 = if z == 255u8 { 1u32 } else { 0u32 };
             let res2: u32 = res0;
@@ -354,12 +362,17 @@ pub fn setupBaseR(
         let mut zeros: [u8; 32] = [0u8; 32usize];
         crate::hacl::curve25519_51::scalarmult(&mut dh, skR, pkE);
         let mut res: [u8; 1] = [255u8; 1usize];
-        for i in 0u32..32u32
-        {
-            let uu____0: u8 =
-                crate::fstar::uint8::eq_mask((&mut dh)[i as usize], (&mut zeros)[i as usize]);
-            (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
-        };
+        krml::unroll_for!(
+            32,
+            "i",
+            0u32,
+            1u32,
+            {
+                let uu____0: u8 =
+                    crate::fstar::uint8::eq_mask((&mut dh)[i as usize], (&mut zeros)[i as usize]);
+                (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
+            }
+        );
         let z: u8 = (&mut res)[0usize];
         let res0: u32 = if z == 255u8 { 1u32 } else { 0u32 };
         let res11: u32 = res0;
@@ -707,12 +720,17 @@ pub fn sealBase(
         let s: u64 = o_ctx.ctx_seq[0usize];
         let mut enc: [u8; 12] = [0u8; 12usize];
         crate::lowstar::endianness::store64_be(&mut (&mut enc)[4usize..], s);
-        for i in 0u32..12u32
-        {
-            let xi: u8 = (&mut enc)[i as usize];
-            let yi: u8 = o_ctx.ctx_nonce[i as usize];
-            (&mut nonce)[i as usize] = xi ^ yi
-        };
+        krml::unroll_for!(
+            12,
+            "i",
+            0u32,
+            1u32,
+            {
+                let xi: u8 = (&mut enc)[i as usize];
+                let yi: u8 = o_ctx.ctx_nonce[i as usize];
+                (&mut nonce)[i as usize] = xi ^ yi
+            }
+        );
         let cipher: (&mut [u8], &mut [u8]) = o_ct.split_at_mut(0usize);
         let tag: (&mut [u8], &mut [u8]) = cipher.1.split_at_mut(plainlen as usize);
         crate::hacl::aead_chacha20poly1305_simd256::encrypt(
@@ -775,12 +793,17 @@ pub fn openBase(
         let s: u64 = o_ctx.ctx_seq[0usize];
         let mut enc: [u8; 12] = [0u8; 12usize];
         crate::lowstar::endianness::store64_be(&mut (&mut enc)[4usize..], s);
-        for i in 0u32..12u32
-        {
-            let xi: u8 = (&mut enc)[i as usize];
-            let yi: u8 = o_ctx.ctx_nonce[i as usize];
-            (&mut nonce)[i as usize] = xi ^ yi
-        };
+        krml::unroll_for!(
+            12,
+            "i",
+            0u32,
+            1u32,
+            {
+                let xi: u8 = (&mut enc)[i as usize];
+                let yi: u8 = o_ctx.ctx_nonce[i as usize];
+                (&mut nonce)[i as usize] = xi ^ yi
+            }
+        );
         let cipher: (&mut [u8], &mut [u8]) = ct.split_at_mut(0usize);
         let tag: (&mut [u8], &mut [u8]) = cipher.1.split_at_mut(ctlen.wrapping_sub(16u32) as usize);
         let res1: u32 =

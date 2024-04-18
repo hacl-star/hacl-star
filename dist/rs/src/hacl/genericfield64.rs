@@ -214,40 +214,46 @@ pub fn exp_consttime(
         crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r2.0, (*uu____0).mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len1 as usize]).copy_from_slice(&(&mut aMc)[0usize..len1 as usize]);
         crate::lowstar::ignore::ignore::<&mut [u64]>(&mut table);
-        for i in 0u32..7u32
-        {
-            let t11: (&mut [u64], &mut [u64]) =
-                (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
-            let ctx_n0: (&mut [u64], &mut [u64]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, (*uu____0).mu, t11.1, &mut tmp);
-            ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
-                i
-            ).wrapping_add(2u32).wrapping_mul(len1)
-            as
-            usize
-            +
-            len1 as usize]).copy_from_slice(&(&mut tmp)[0usize..len1 as usize]);
-            let t2: (&mut [u64], &mut [u64]) =
-                (&mut table).split_at_mut(
-                    2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
+        krml::unroll_for!(
+            7,
+            "i",
+            0u32,
+            1u32,
+            {
+                let t11: (&mut [u64], &mut [u64]) =
+                    (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
+                let ctx_n0: (&mut [u64], &mut [u64]) =
+                    ctx_r2.1.split_at_mut(0usize - len1 as usize);
+                crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, (*uu____0).mu, t11.1, &mut tmp);
+                ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
+                    i
+                ).wrapping_add(2u32).wrapping_mul(len1)
+                as
+                usize
+                +
+                len1 as usize]).copy_from_slice(&(&mut tmp)[0usize..len1 as usize]);
+                let t2: (&mut [u64], &mut [u64]) =
+                    (&mut table).split_at_mut(
+                        2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
+                    );
+                let ctx_n1: (&mut [u64], &mut [u64]) = ctx_n0.1.split_at_mut(0usize);
+                crate::hacl::bignum::bn_mont_mul_u64(
+                    len1,
+                    ctx_n1.1,
+                    (*uu____0).mu,
+                    &mut aMc,
+                    t2.1,
+                    &mut tmp
                 );
-            let ctx_n1: (&mut [u64], &mut [u64]) = ctx_n0.1.split_at_mut(0usize);
-            crate::hacl::bignum::bn_mont_mul_u64(
-                len1,
-                ctx_n1.1,
-                (*uu____0).mu,
-                &mut aMc,
-                t2.1,
-                &mut tmp
-            );
-            ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
-                i
-            ).wrapping_add(3u32).wrapping_mul(len1)
-            as
-            usize
-            +
-            len1 as usize]).copy_from_slice(&(&mut tmp)[0usize..len1 as usize])
-        };
+                ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
+                    i
+                ).wrapping_add(3u32).wrapping_mul(len1)
+                as
+                usize
+                +
+                len1 as usize]).copy_from_slice(&(&mut tmp)[0usize..len1 as usize])
+            }
+        );
         if bBits.wrapping_rem(4u32) != 0u32
         {
             let i: u32 = bBits.wrapping_div(4u32).wrapping_mul(4u32);
@@ -257,18 +263,24 @@ pub fn exp_consttime(
                 as
                 usize]
             );
-            for i0 in 0u32..15u32
-            {
-                let c: u64 = crate::fstar::uint64::eq_mask(bits_c, i0.wrapping_add(1u32) as u64);
-                let res_j: (&[u64], &[u64]) =
-                    (&mut table).split_at(i0.wrapping_add(1u32).wrapping_mul(len1) as usize);
-                for i1 in 0u32..len1
+            krml::unroll_for!(
+                15,
+                "i0",
+                0u32,
+                1u32,
                 {
-                    let x: u64 = c & res_j.1[i1 as usize] | ! c & resM[i1 as usize];
-                    let os: (&mut [u64], &mut [u64]) = resM.split_at_mut(0usize);
-                    os.1[i1 as usize] = x
+                    let c: u64 =
+                        crate::fstar::uint64::eq_mask(bits_c, i0.wrapping_add(1u32) as u64);
+                    let res_j: (&[u64], &[u64]) =
+                        (&mut table).split_at(i0.wrapping_add(1u32).wrapping_mul(len1) as usize);
+                    for i1 in 0u32..len1
+                    {
+                        let x: u64 = c & res_j.1[i1 as usize] | ! c & resM[i1 as usize];
+                        let os: (&mut [u64], &mut [u64]) = resM.split_at_mut(0usize);
+                        os.1[i1 as usize] = x
+                    }
                 }
-            }
+            )
         }
         else
         {
@@ -279,12 +291,17 @@ pub fn exp_consttime(
         let mut tmp0: Vec<u64> = vec![0u64; len1 as usize];
         for i in 0u32..bBits.wrapping_div(4u32)
         {
-            for _i in 0u32..4u32
-            {
-                let ctx_n0: (&mut [u64], &mut [u64]) =
-                    ctx_r2.1.split_at_mut(0usize - len1 as usize);
-                crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, (*uu____0).mu, resM, resM)
-            };
+            krml::unroll_for!(
+                4,
+                "_i",
+                0u32,
+                1u32,
+                {
+                    let ctx_n0: (&mut [u64], &mut [u64]) =
+                        ctx_r2.1.split_at_mut(0usize - len1 as usize);
+                    crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, (*uu____0).mu, resM, resM)
+                }
+            );
             let k2: u32 =
                 bBits.wrapping_sub(bBits.wrapping_rem(4u32)).wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(
                     4u32
@@ -296,18 +313,24 @@ pub fn exp_consttime(
                 as
                 usize]
             );
-            for i0 in 0u32..15u32
-            {
-                let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
-                let res_j: (&[u64], &[u64]) =
-                    (&mut table).split_at(i0.wrapping_add(1u32).wrapping_mul(len1) as usize);
-                for i1 in 0u32..len1
+            krml::unroll_for!(
+                15,
+                "i0",
+                0u32,
+                1u32,
                 {
-                    let x: u64 = c & res_j.1[i1 as usize] | ! c & (&mut tmp0)[i1 as usize];
-                    let os: (&mut [u64], &mut [u64]) = (&mut tmp0).split_at_mut(0usize);
-                    os.1[i1 as usize] = x
+                    let c: u64 =
+                        crate::fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
+                    let res_j: (&[u64], &[u64]) =
+                        (&mut table).split_at(i0.wrapping_add(1u32).wrapping_mul(len1) as usize);
+                    for i1 in 0u32..len1
+                    {
+                        let x: u64 = c & res_j.1[i1 as usize] | ! c & (&mut tmp0)[i1 as usize];
+                        let os: (&mut [u64], &mut [u64]) = (&mut tmp0).split_at_mut(0usize);
+                        os.1[i1 as usize] = x
+                    }
                 }
-            };
+            );
             let ctx_n0: (&mut [u64], &mut [u64]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
             crate::hacl::bignum::bn_mont_mul_u64(
                 len1,
@@ -394,40 +417,46 @@ pub fn exp_vartime(
         crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r2.0, (*uu____0).mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len1 as usize]).copy_from_slice(&(&mut aMc)[0usize..len1 as usize]);
         crate::lowstar::ignore::ignore::<&mut [u64]>(&mut table);
-        for i in 0u32..7u32
-        {
-            let t11: (&mut [u64], &mut [u64]) =
-                (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
-            let ctx_n0: (&mut [u64], &mut [u64]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, (*uu____0).mu, t11.1, &mut tmp);
-            ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
-                i
-            ).wrapping_add(2u32).wrapping_mul(len1)
-            as
-            usize
-            +
-            len1 as usize]).copy_from_slice(&(&mut tmp)[0usize..len1 as usize]);
-            let t2: (&mut [u64], &mut [u64]) =
-                (&mut table).split_at_mut(
-                    2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
+        krml::unroll_for!(
+            7,
+            "i",
+            0u32,
+            1u32,
+            {
+                let t11: (&mut [u64], &mut [u64]) =
+                    (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
+                let ctx_n0: (&mut [u64], &mut [u64]) =
+                    ctx_r2.1.split_at_mut(0usize - len1 as usize);
+                crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, (*uu____0).mu, t11.1, &mut tmp);
+                ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
+                    i
+                ).wrapping_add(2u32).wrapping_mul(len1)
+                as
+                usize
+                +
+                len1 as usize]).copy_from_slice(&(&mut tmp)[0usize..len1 as usize]);
+                let t2: (&mut [u64], &mut [u64]) =
+                    (&mut table).split_at_mut(
+                        2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
+                    );
+                let ctx_n1: (&mut [u64], &mut [u64]) = ctx_n0.1.split_at_mut(0usize);
+                crate::hacl::bignum::bn_mont_mul_u64(
+                    len1,
+                    ctx_n1.1,
+                    (*uu____0).mu,
+                    &mut aMc,
+                    t2.1,
+                    &mut tmp
                 );
-            let ctx_n1: (&mut [u64], &mut [u64]) = ctx_n0.1.split_at_mut(0usize);
-            crate::hacl::bignum::bn_mont_mul_u64(
-                len1,
-                ctx_n1.1,
-                (*uu____0).mu,
-                &mut aMc,
-                t2.1,
-                &mut tmp
-            );
-            ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
-                i
-            ).wrapping_add(3u32).wrapping_mul(len1)
-            as
-            usize
-            +
-            len1 as usize]).copy_from_slice(&(&mut tmp)[0usize..len1 as usize])
-        };
+                ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
+                    i
+                ).wrapping_add(3u32).wrapping_mul(len1)
+                as
+                usize
+                +
+                len1 as usize]).copy_from_slice(&(&mut tmp)[0usize..len1 as usize])
+            }
+        );
         if bBits.wrapping_rem(4u32) != 0u32
         {
             let i: u32 = bBits.wrapping_div(4u32).wrapping_mul(4u32);
@@ -446,12 +475,17 @@ pub fn exp_vartime(
         let mut tmp0: Vec<u64> = vec![0u64; len1 as usize];
         for i in 0u32..bBits.wrapping_div(4u32)
         {
-            for _i in 0u32..4u32
-            {
-                let ctx_n0: (&mut [u64], &mut [u64]) =
-                    ctx_r2.1.split_at_mut(0usize - len1 as usize);
-                crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, (*uu____0).mu, resM, resM)
-            };
+            krml::unroll_for!(
+                4,
+                "_i",
+                0u32,
+                1u32,
+                {
+                    let ctx_n0: (&mut [u64], &mut [u64]) =
+                        ctx_r2.1.split_at_mut(0usize - len1 as usize);
+                    crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, (*uu____0).mu, resM, resM)
+                }
+            );
             let k2: u32 =
                 bBits.wrapping_sub(bBits.wrapping_rem(4u32)).wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(
                     4u32

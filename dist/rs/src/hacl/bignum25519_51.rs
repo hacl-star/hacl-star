@@ -809,10 +809,15 @@ pub fn store_felem(u64s: &mut [u64], f: &mut [u64]) -> ()
 #[inline] pub fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64]) -> ()
 {
     let mask: u64 = 0u64.wrapping_sub(bit);
-    for i in 0u32..10u32
-    {
-        let dummy: u64 = mask & (p1[i as usize] ^ p2[i as usize]);
-        p1[i as usize] = p1[i as usize] ^ dummy;
-        p2[i as usize] = p2[i as usize] ^ dummy
-    }
+    krml::unroll_for!(
+        10,
+        "i",
+        0u32,
+        1u32,
+        {
+            let dummy: u64 = mask & (p1[i as usize] ^ p2[i as usize]);
+            p1[i as usize] = p1[i as usize] ^ dummy;
+            p2[i as usize] = p2[i as usize] ^ dummy
+        }
+    )
 }

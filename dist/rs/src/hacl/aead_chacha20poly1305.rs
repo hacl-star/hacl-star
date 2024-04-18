@@ -560,12 +560,17 @@ pub fn decrypt(
     let key1: (&mut [u8], &mut [u8]) = (&mut tmp).split_at_mut(0usize);
     poly1305_do_32(key1.1, data_len, data, input_len, input, &mut computed_tag);
     let mut res: [u8; 1] = [255u8; 1usize];
-    for i in 0u32..16u32
-    {
-        let uu____0: u8 =
-            crate::fstar::uint8::eq_mask((&mut computed_tag)[i as usize], tag[i as usize]);
-        (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
-    };
+    krml::unroll_for!(
+        16,
+        "i",
+        0u32,
+        1u32,
+        {
+            let uu____0: u8 =
+                crate::fstar::uint8::eq_mask((&mut computed_tag)[i as usize], tag[i as usize]);
+            (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
+        }
+    );
     let z: u8 = (&mut res)[0usize];
     if z == 255u8
     {

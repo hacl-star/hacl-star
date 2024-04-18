@@ -72,12 +72,17 @@
     let ctr_u32: u32 = ctr;
     k[8usize] = (k[8usize]).wrapping_add(ctr_u32);
     rounds(k);
-    for i in 0u32..16u32
-    {
-        let x: u32 = (k[i as usize]).wrapping_add(ctx[i as usize]);
-        let os: (&mut [u32], &mut [u32]) = k.split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        16,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = (k[i as usize]).wrapping_add(ctx[i as usize]);
+            let os: (&mut [u32], &mut [u32]) = k.split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     k[8usize] = (k[8usize]).wrapping_add(ctr_u32)
 }
 
@@ -87,24 +92,34 @@
     let mut k: [u32; 16] = [0u32; 16usize];
     let mut k32: [u32; 8] = [0u32; 8usize];
     let mut n32: [u32; 2] = [0u32; 2usize];
-    for i in 0u32..8u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
-        let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
-    for i in 0u32..2u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
-        let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
+    krml::unroll_for!(
+        2,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     (&mut ctx)[0usize] = 0x61707865u32;
     let k0: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
     let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
@@ -117,13 +132,16 @@
     ((&mut ctx)[11usize..11usize + 4usize]).copy_from_slice(&k1.1[0usize..4usize]);
     (&mut ctx)[15usize] = 0x6b206574u32;
     salsa20_core(&mut k, &mut ctx, 0u32);
-    for i in 0u32..16u32
-    {
+    krml::unroll_for!(
+        16,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store32_le(
             &mut out[i.wrapping_mul(4u32) as usize..],
             (&mut k)[i as usize]
         )
-    }
+    )
 }
 
 #[inline] fn salsa20_encrypt(
@@ -139,24 +157,34 @@
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k32: [u32; 8] = [0u32; 8usize];
     let mut n32: [u32; 2] = [0u32; 2usize];
-    for i in 0u32..8u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
-        let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
-    for i in 0u32..2u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
-        let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
+    krml::unroll_for!(
+        2,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     (&mut ctx)[0usize] = 0x61707865u32;
     let k0: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
     let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
@@ -180,28 +208,42 @@
         let mut k10: [u32; 16] = [0u32; 16usize];
         salsa20_core(&mut k10, &mut ctx, i);
         let mut bl: [u32; 16] = [0u32; 16usize];
-        for i0 in 0u32..16u32
-        {
-            let bj: (&mut [u8], &mut [u8]) = uu____1.1.split_at_mut(i0.wrapping_mul(4u32) as usize);
-            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-            let r: u32 = u;
-            let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            os.1[i0 as usize] = x
-        };
-        for i0 in 0u32..16u32
-        {
-            let x: u32 = (&mut bl)[i0 as usize] ^ (&mut k10)[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            os.1[i0 as usize] = x
-        };
-        for i0 in 0u32..16u32
-        {
+        krml::unroll_for!(
+            16,
+            "i0",
+            0u32,
+            1u32,
+            {
+                let bj: (&mut [u8], &mut [u8]) =
+                    uu____1.1.split_at_mut(i0.wrapping_mul(4u32) as usize);
+                let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+                let r: u32 = u;
+                let x: u32 = r;
+                let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+                os.1[i0 as usize] = x
+            }
+        );
+        krml::unroll_for!(
+            16,
+            "i0",
+            0u32,
+            1u32,
+            {
+                let x: u32 = (&mut bl)[i0 as usize] ^ (&mut k10)[i0 as usize];
+                let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+                os.1[i0 as usize] = x
+            }
+        );
+        krml::unroll_for!(
+            16,
+            "i0",
+            0u32,
+            1u32,
             crate::lowstar::endianness::store32_le(
                 &mut uu____0.1[i0.wrapping_mul(4u32) as usize..],
                 (&mut bl)[i0 as usize]
             )
-        }
+        )
     };
     if rem1 > 0u32
     {
@@ -213,29 +255,42 @@
         let mut k10: [u32; 16] = [0u32; 16usize];
         salsa20_core(&mut k10, &mut ctx, nb);
         let mut bl: [u32; 16] = [0u32; 16usize];
-        for i in 0u32..16u32
-        {
-            let bj: (&mut [u8], &mut [u8]) =
-                (&mut plain).split_at_mut(i.wrapping_mul(4u32) as usize);
-            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-            let r: u32 = u;
-            let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            os.1[i as usize] = x
-        };
-        for i in 0u32..16u32
-        {
-            let x: u32 = (&mut bl)[i as usize] ^ (&mut k10)[i as usize];
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            os.1[i as usize] = x
-        };
-        for i in 0u32..16u32
-        {
+        krml::unroll_for!(
+            16,
+            "i",
+            0u32,
+            1u32,
+            {
+                let bj: (&mut [u8], &mut [u8]) =
+                    (&mut plain).split_at_mut(i.wrapping_mul(4u32) as usize);
+                let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+                let r: u32 = u;
+                let x: u32 = r;
+                let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+                os.1[i as usize] = x
+            }
+        );
+        krml::unroll_for!(
+            16,
+            "i",
+            0u32,
+            1u32,
+            {
+                let x: u32 = (&mut bl)[i as usize] ^ (&mut k10)[i as usize];
+                let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+                os.1[i as usize] = x
+            }
+        );
+        krml::unroll_for!(
+            16,
+            "i",
+            0u32,
+            1u32,
             crate::lowstar::endianness::store32_le(
                 &mut (&mut plain)[i.wrapping_mul(4u32) as usize..],
                 (&mut bl)[i as usize]
             )
-        };
+        );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
             &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
@@ -255,24 +310,34 @@
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k32: [u32; 8] = [0u32; 8usize];
     let mut n32: [u32; 2] = [0u32; 2usize];
-    for i in 0u32..8u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
-        let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
-    for i in 0u32..2u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
-        let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
+    krml::unroll_for!(
+        2,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     (&mut ctx)[0usize] = 0x61707865u32;
     let k0: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
     let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
@@ -296,28 +361,42 @@
         let mut k10: [u32; 16] = [0u32; 16usize];
         salsa20_core(&mut k10, &mut ctx, i);
         let mut bl: [u32; 16] = [0u32; 16usize];
-        for i0 in 0u32..16u32
-        {
-            let bj: (&mut [u8], &mut [u8]) = uu____1.1.split_at_mut(i0.wrapping_mul(4u32) as usize);
-            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-            let r: u32 = u;
-            let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            os.1[i0 as usize] = x
-        };
-        for i0 in 0u32..16u32
-        {
-            let x: u32 = (&mut bl)[i0 as usize] ^ (&mut k10)[i0 as usize];
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            os.1[i0 as usize] = x
-        };
-        for i0 in 0u32..16u32
-        {
+        krml::unroll_for!(
+            16,
+            "i0",
+            0u32,
+            1u32,
+            {
+                let bj: (&mut [u8], &mut [u8]) =
+                    uu____1.1.split_at_mut(i0.wrapping_mul(4u32) as usize);
+                let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+                let r: u32 = u;
+                let x: u32 = r;
+                let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+                os.1[i0 as usize] = x
+            }
+        );
+        krml::unroll_for!(
+            16,
+            "i0",
+            0u32,
+            1u32,
+            {
+                let x: u32 = (&mut bl)[i0 as usize] ^ (&mut k10)[i0 as usize];
+                let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+                os.1[i0 as usize] = x
+            }
+        );
+        krml::unroll_for!(
+            16,
+            "i0",
+            0u32,
+            1u32,
             crate::lowstar::endianness::store32_le(
                 &mut uu____0.1[i0.wrapping_mul(4u32) as usize..],
                 (&mut bl)[i0 as usize]
             )
-        }
+        )
     };
     if rem1 > 0u32
     {
@@ -329,29 +408,42 @@
         let mut k10: [u32; 16] = [0u32; 16usize];
         salsa20_core(&mut k10, &mut ctx, nb);
         let mut bl: [u32; 16] = [0u32; 16usize];
-        for i in 0u32..16u32
-        {
-            let bj: (&mut [u8], &mut [u8]) =
-                (&mut plain).split_at_mut(i.wrapping_mul(4u32) as usize);
-            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-            let r: u32 = u;
-            let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            os.1[i as usize] = x
-        };
-        for i in 0u32..16u32
-        {
-            let x: u32 = (&mut bl)[i as usize] ^ (&mut k10)[i as usize];
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            os.1[i as usize] = x
-        };
-        for i in 0u32..16u32
-        {
+        krml::unroll_for!(
+            16,
+            "i",
+            0u32,
+            1u32,
+            {
+                let bj: (&mut [u8], &mut [u8]) =
+                    (&mut plain).split_at_mut(i.wrapping_mul(4u32) as usize);
+                let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+                let r: u32 = u;
+                let x: u32 = r;
+                let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+                os.1[i as usize] = x
+            }
+        );
+        krml::unroll_for!(
+            16,
+            "i",
+            0u32,
+            1u32,
+            {
+                let x: u32 = (&mut bl)[i as usize] ^ (&mut k10)[i as usize];
+                let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+                os.1[i as usize] = x
+            }
+        );
+        krml::unroll_for!(
+            16,
+            "i",
+            0u32,
+            1u32,
             crate::lowstar::endianness::store32_le(
                 &mut (&mut plain)[i.wrapping_mul(4u32) as usize..],
                 (&mut bl)[i as usize]
             )
-        };
+        );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
             &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
@@ -363,24 +455,34 @@
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k32: [u32; 8] = [0u32; 8usize];
     let mut n32: [u32; 4] = [0u32; 4usize];
-    for i in 0u32..8u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
-        let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
-    for i in 0u32..4u32
-    {
-        let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
-        let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
-        let r: u32 = u;
-        let x: u32 = r;
-        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
+    krml::unroll_for!(
+        4,
+        "i",
+        0u32,
+        1u32,
+        {
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let r: u32 = u;
+            let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let k0: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
     let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
     (&mut ctx)[0usize] = 0x61707865u32;
@@ -400,13 +502,16 @@
     let r6: u32 = (&mut ctx)[8usize];
     let r7: u32 = (&mut ctx)[9usize];
     let mut res: [u32; 8] = [r0, r1, r2, r3, r4, r5, r6, r7];
-    for i in 0u32..8u32
-    {
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
         crate::lowstar::endianness::store32_le(
             &mut out[i.wrapping_mul(4u32) as usize..],
             (&mut res)[i as usize]
         )
-    }
+    )
 }
 
 pub fn salsa20_encrypt0(

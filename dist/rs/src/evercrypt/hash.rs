@@ -312,12 +312,17 @@ pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
 pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
     let mut st: [u32; 8] = [0u32; 8usize];
-    for i in 0u32..8u32
-    {
-        let x: u32 = (&crate::hacl::hash_sha2::h256)[i as usize];
-        let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = (&crate::hacl::hash_sha2::h256)[i as usize];
+            let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let s: &mut [u32] = &mut st;
     let blocks_n: u32 = input_len.wrapping_div(64u32);
     let blocks_n1: u32 =
@@ -347,12 +352,17 @@ pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
     let mut st: [u32; 8] = [0u32; 8usize];
-    for i in 0u32..8u32
-    {
-        let x: u32 = (&crate::hacl::hash_sha2::h224)[i as usize];
-        let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        8,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u32 = (&crate::hacl::hash_sha2::h224)[i as usize];
+            let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let s: &mut [u32] = &mut st;
     let blocks_n: u32 = input_len.wrapping_div(64u32);
     let blocks_n1: u32 =

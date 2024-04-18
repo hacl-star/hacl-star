@@ -216,11 +216,10 @@ pub fn ffdhe_secret_to_public_precomp(
     let nLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let mut g_n: Vec<u64> = vec![0u64; nLen as usize];
     let mut g: [u8; 1] = [0u8; 1usize];
-    for i in 0u32..1u32
     {
-        let x: u8 = (&crate::hacl::impl_ffdhe_constants::ffdhe_g2)[i as usize];
+        let x: u8 = (&crate::hacl::impl_ffdhe_constants::ffdhe_g2)[0usize];
         let os: (&mut [u8], &mut [u8]) = (&mut g).split_at_mut(0usize);
-        os.1[i as usize] = x
+        os.1[0usize] = x
     };
     crate::hacl::bignum_base::bn_from_bytes_be_uint64(1u32, &mut g, &mut (&mut g_n)[0usize..]);
     let mut sk_n: Vec<u64> = vec![0u64; nLen as usize];

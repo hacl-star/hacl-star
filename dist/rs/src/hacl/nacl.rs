@@ -38,12 +38,17 @@ fn secretbox_detached(
     let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut(mlen0 as usize);
     let mut block0: [u8; 32] = [0u8; 32usize];
     ((&mut block0)[0usize..mlen0 as usize]).copy_from_slice(&m1.0[0usize..mlen0 as usize]);
-    for i in 0u32..32u32
-    {
-        let x: u8 = (&mut block0)[i as usize] ^ ekey0.1[i as usize];
-        let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
-        os.1[i as usize] = x
-    };
+    krml::unroll_for!(
+        32,
+        "i",
+        0u32,
+        1u32,
+        {
+            let x: u8 = (&mut block0)[i as usize] ^ ekey0.1[i as usize];
+            let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
+            os.1[i as usize] = x
+        }
+    );
     let c0: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
     let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut(mlen0 as usize);
     (c1.0[0usize..mlen0 as usize]).copy_from_slice(
@@ -69,11 +74,17 @@ fn secretbox_open_detached(
     let mut tag·: [u8; 16] = [0u8; 16usize];
     crate::hacl::mac_poly1305::mac(&mut tag·, c, mlen, mkey.1);
     let mut res: [u8; 1] = [255u8; 1usize];
-    for i in 0u32..16u32
-    {
-        let uu____0: u8 = crate::fstar::uint8::eq_mask(tag[i as usize], (&mut tag·)[i as usize]);
-        (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
-    };
+    krml::unroll_for!(
+        16,
+        "i",
+        0u32,
+        1u32,
+        {
+            let uu____0: u8 =
+                crate::fstar::uint8::eq_mask(tag[i as usize], (&mut tag·)[i as usize]);
+            (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
+        }
+    );
     let z: u8 = (&mut res)[0usize];
     if z == 255u8
     {
@@ -86,12 +97,17 @@ fn secretbox_open_detached(
         let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut(mlen0 as usize);
         let mut block0: [u8; 32] = [0u8; 32usize];
         ((&mut block0)[0usize..mlen0 as usize]).copy_from_slice(&c1.0[0usize..mlen0 as usize]);
-        for i in 0u32..32u32
-        {
-            let x: u8 = (&mut block0)[i as usize] ^ ekey0.1[i as usize];
-            let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
-            os.1[i as usize] = x
-        };
+        krml::unroll_for!(
+            32,
+            "i",
+            0u32,
+            1u32,
+            {
+                let x: u8 = (&mut block0)[i as usize] ^ ekey0.1[i as usize];
+                let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
+                os.1[i as usize] = x
+            }
+        );
         let m0: (&mut [u8], &mut [u8]) = m.split_at_mut(0usize);
         let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut(mlen0 as usize);
         (m1.0[0usize..mlen0 as usize]).copy_from_slice(

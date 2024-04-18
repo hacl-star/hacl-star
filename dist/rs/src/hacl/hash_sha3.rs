@@ -436,85 +436,112 @@ const keccak_rndc: [u64; 24] =
 
 pub fn state_permute(s: &mut [u64]) -> ()
 {
-    for i in 0u32..24u32
-    {
-        let mut _C: [u64; 5] = [0u64; 5usize];
-        for i0 in 0u32..5u32
+    krml::unroll_for!(
+        24,
+        "i",
+        0u32,
+        1u32,
         {
-            (&mut _C)[i0 as usize] =
-                s[i0.wrapping_add(0u32) as usize]
-                ^
-                (s[i0.wrapping_add(5u32) as usize]
-                ^
-                (s[i0.wrapping_add(10u32) as usize]
-                ^
-                (s[i0.wrapping_add(15u32) as usize] ^ s[i0.wrapping_add(20u32) as usize])))
-        };
-        for i0 in 0u32..5u32
-        {
-            let uu____0: u64 = (&mut _C)[i0.wrapping_add(1u32).wrapping_rem(5u32) as usize];
-            let _D: u64 =
-                (&mut _C)[i0.wrapping_add(4u32).wrapping_rem(5u32) as usize]
-                ^
-                (uu____0.wrapping_shl(1u32) | uu____0.wrapping_shr(63u32));
-            for i1 in 0u32..5u32
-            {
-                s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] =
-                    s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^ _D
-            }
-        };
-        let x: u64 = s[1usize];
-        let mut current: [u64; 1] = [x; 1usize];
-        for i0 in 0u32..24u32
-        {
-            let _Y: u32 = (&keccak_piln)[i0 as usize];
-            let r: u32 = (&keccak_rotc)[i0 as usize];
-            let temp: u64 = s[_Y as usize];
-            let uu____1: u64 = (&mut current)[0usize];
-            s[_Y as usize] = uu____1.wrapping_shl(r) | uu____1.wrapping_shr(64u32.wrapping_sub(r));
-            (&mut current)[0usize] = temp
-        };
-        for i0 in 0u32..5u32
-        {
-            let v0: u64 =
-                s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            let v1: u64 =
-                s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            let v2: u64 =
-                s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            let v3: u64 =
-                s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            let v4: u64 =
-                s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                ^
-                ! s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
-                &
-                s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
-            s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v0;
-            s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v1;
-            s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v2;
-            s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v3;
-            s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
-        };
-        let c: u64 = (&keccak_rndc)[i as usize];
-        s[0usize] = s[0usize] ^ c
-    }
+            let mut _C: [u64; 5] = [0u64; 5usize];
+            krml::unroll_for!(
+                5,
+                "i0",
+                0u32,
+                1u32,
+                (&mut _C)[i0 as usize] =
+                    s[i0.wrapping_add(0u32) as usize]
+                    ^
+                    (s[i0.wrapping_add(5u32) as usize]
+                    ^
+                    (s[i0.wrapping_add(10u32) as usize]
+                    ^
+                    (s[i0.wrapping_add(15u32) as usize] ^ s[i0.wrapping_add(20u32) as usize])))
+            );
+            krml::unroll_for!(
+                5,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let uu____0: u64 = (&mut _C)[i0.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                    let _D: u64 =
+                        (&mut _C)[i0.wrapping_add(4u32).wrapping_rem(5u32) as usize]
+                        ^
+                        (uu____0.wrapping_shl(1u32) | uu____0.wrapping_shr(63u32));
+                    krml::unroll_for!(
+                        5,
+                        "i1",
+                        0u32,
+                        1u32,
+                        s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] =
+                            s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^ _D
+                    )
+                }
+            );
+            let x: u64 = s[1usize];
+            let mut current: [u64; 1] = [x; 1usize];
+            krml::unroll_for!(
+                24,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let _Y: u32 = (&keccak_piln)[i0 as usize];
+                    let r: u32 = (&keccak_rotc)[i0 as usize];
+                    let temp: u64 = s[_Y as usize];
+                    let uu____1: u64 = (&mut current)[0usize];
+                    s[_Y as usize] =
+                        uu____1.wrapping_shl(r) | uu____1.wrapping_shr(64u32.wrapping_sub(r));
+                    (&mut current)[0usize] = temp
+                }
+            );
+            krml::unroll_for!(
+                5,
+                "i0",
+                0u32,
+                1u32,
+                {
+                    let v0: u64 =
+                        s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        ^
+                        ! s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        &
+                        s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                    let v1: u64 =
+                        s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        ^
+                        ! s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        &
+                        s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                    let v2: u64 =
+                        s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        ^
+                        ! s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        &
+                        s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                    let v3: u64 =
+                        s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        ^
+                        ! s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        &
+                        s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                    let v4: u64 =
+                        s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        ^
+                        ! s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize]
+                        &
+                        s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize];
+                    s[0u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v0;
+                    s[1u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v1;
+                    s[2u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v2;
+                    s[3u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v3;
+                    s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
+                }
+            );
+            let c: u64 = (&keccak_rndc)[i as usize];
+            s[0usize] = s[0usize] ^ c
+        }
+    )
 }
 
 pub fn loadState(rateInBytes: u32, input: &mut [u8], s: &mut [u64]) -> ()
@@ -523,28 +550,38 @@ pub fn loadState(rateInBytes: u32, input: &mut [u8], s: &mut [u64]) -> ()
     ((&mut block)[0usize..rateInBytes as usize]).copy_from_slice(
         &input[0usize..rateInBytes as usize]
     );
-    for i in 0u32..25u32
-    {
-        let u: u64 =
-            crate::lowstar::endianness::load64_le(
-                &mut (&mut block)[i.wrapping_mul(8u32) as usize..]
-            );
-        let x: u64 = u;
-        s[i as usize] = s[i as usize] ^ x
-    }
+    krml::unroll_for!(
+        25,
+        "i",
+        0u32,
+        1u32,
+        {
+            let u: u64 =
+                crate::lowstar::endianness::load64_le(
+                    &mut (&mut block)[i.wrapping_mul(8u32) as usize..]
+                );
+            let x: u64 = u;
+            s[i as usize] = s[i as usize] ^ x
+        }
+    )
 }
 
 fn storeState(rateInBytes: u32, s: &mut [u64], res: &mut [u8]) -> ()
 {
     let mut block: [u8; 200] = [0u8; 200usize];
-    for i in 0u32..25u32
-    {
-        let sj: u64 = s[i as usize];
-        crate::lowstar::endianness::store64_le(
-            &mut (&mut block)[i.wrapping_mul(8u32) as usize..],
-            sj
-        )
-    };
+    krml::unroll_for!(
+        25,
+        "i",
+        0u32,
+        1u32,
+        {
+            let sj: u64 = s[i as usize];
+            crate::lowstar::endianness::store64_le(
+                &mut (&mut block)[i.wrapping_mul(8u32) as usize..],
+                sj
+            )
+        }
+    );
     (res[0usize..rateInBytes as usize]).copy_from_slice(
         &(&mut (&mut block)[0usize..])[0usize..rateInBytes as usize]
     )
