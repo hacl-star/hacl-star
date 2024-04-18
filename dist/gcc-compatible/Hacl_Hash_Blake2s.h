@@ -49,7 +49,8 @@ typedef struct Hacl_Hash_Blake2s_block_state_t_s
 {
   uint8_t fst;
   uint8_t snd;
-  K____uint32_t___uint32_t_ thd;
+  bool thd;
+  K____uint32_t___uint32_t_ f3;
 }
 Hacl_Hash_Blake2s_block_state_t;
 
@@ -68,7 +69,11 @@ parameters. Furthermore, there is a static (not dynamically checked) requirement
 that key_length does not exceed max_key (32 for S, 64 for B).)
 */
 Hacl_Hash_Blake2s_state_t
-*Hacl_Hash_Blake2s_malloc_with_params_and_key(Hacl_Hash_Blake2b_blake2_params *p, uint8_t *k);
+*Hacl_Hash_Blake2s_malloc_with_params_and_key(
+  Hacl_Hash_Blake2b_blake2_params *p,
+  bool last_node,
+  uint8_t *k
+);
 
 /**
  State allocation function when there is just a custom key. All

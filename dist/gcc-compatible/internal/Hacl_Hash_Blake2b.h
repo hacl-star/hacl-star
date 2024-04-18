@@ -42,6 +42,7 @@ typedef struct Hacl_Hash_Blake2b_index_s
 {
   uint8_t key_length;
   uint8_t digest_length;
+  bool last_node;
 }
 Hacl_Hash_Blake2b_index;
 

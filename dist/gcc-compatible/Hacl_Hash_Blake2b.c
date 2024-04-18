@@ -771,7 +771,13 @@ static Hacl_Hash_Blake2b_state_t
   uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   Hacl_Hash_Blake2b_block_state_t
-  block_state = { .fst = kk.key_length, .snd = kk.digest_length, .thd = { .fst = wv, .snd = b } };
+  block_state =
+    {
+      .fst = kk.key_length,
+      .snd = kk.digest_length,
+      .thd = kk.last_node,
+      .f3 = { .fst = wv, .snd = b }
+    };
   uint8_t kk10 = kk.key_length;
   uint32_t ite;
   if (kk10 != 0U)
@@ -790,7 +796,8 @@ static Hacl_Hash_Blake2b_state_t
   Hacl_Hash_Blake2b_blake2_params *p1 = key.fst;
   uint8_t kk1 = p1->key_length;
   uint8_t nn = p1->digest_length;
-  Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn };
+  bool last_node = block_state.thd;
+  Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn, .last_node = last_node };
   uint32_t kk2 = (uint32_t)i.key_length;
   uint8_t *k_1 = key.snd;
   if (!(kk2 == 0U))
@@ -800,7 +807,7 @@ static Hacl_Hash_Blake2b_state_t
     memcpy(buf, k_1, kk2 * sizeof (uint8_t));
   }
   Hacl_Hash_Blake2b_blake2_params pv = p1[0U];
-  init_with_params(block_state.thd.snd, pv);
+  init_with_params(block_state.f3.snd, pv);
   return p;
 }
 
@@ -820,11 +827,15 @@ The caller must satisfy the following requirements.
 
 */
 Hacl_Hash_Blake2b_state_t
-*Hacl_Hash_Blake2b_malloc_with_params_and_key(Hacl_Hash_Blake2b_blake2_params *p, uint8_t *k)
+*Hacl_Hash_Blake2b_malloc_with_params_and_key(
+  Hacl_Hash_Blake2b_blake2_params *p,
+  bool last_node,
+  uint8_t *k
+)
 {
   Hacl_Hash_Blake2b_blake2_params pv = p[0U];
   Hacl_Hash_Blake2b_index
-  i1 = { .key_length = pv.key_length, .digest_length = pv.digest_length };
+  i1 = { .key_length = pv.key_length, .digest_length = pv.digest_length, .last_node = last_node };
   return
     malloc_raw(i1,
       ((K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t_){ .fst = p, .snd = k }));
@@ -844,7 +855,7 @@ The caller must satisfy the following requirements.
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint8_t kk)
 {
   uint8_t nn = 64U;
-  Hacl_Hash_Blake2b_index i = { .key_length = kk, .digest_length = nn };
+  Hacl_Hash_Blake2b_index i = { .key_length = kk, .digest_length = nn, .last_node = false };
   uint8_t salt[16U] = { 0U };
   uint8_t personal[16U] = { 0U };
   Hacl_Hash_Blake2b_blake2_params
@@ -855,7 +866,7 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint8_t
       .personal = personal
     };
   Hacl_Hash_Blake2b_blake2_params p0 = p;
-  Hacl_Hash_Blake2b_state_t *s = Hacl_Hash_Blake2b_malloc_with_params_and_key(&p0, k);
+  Hacl_Hash_Blake2b_state_t *s = Hacl_Hash_Blake2b_malloc_with_params_and_key(&p0, false, k);
   return s;
 }
 
@@ -872,9 +883,11 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void)
 static Hacl_Hash_Blake2b_index index_of_state(Hacl_Hash_Blake2b_state_t *s)
 {
   Hacl_Hash_Blake2b_block_state_t block_state = (*s).block_state;
+  bool last_node = block_state.thd;
   uint8_t nn = block_state.snd;
   uint8_t kk1 = block_state.fst;
-  return ((Hacl_Hash_Blake2b_index){ .key_length = kk1, .digest_length = nn });
+  return
+    ((Hacl_Hash_Blake2b_index){ .key_length = kk1, .digest_length = nn, .last_node = last_node });
 }
 
 static void
@@ -886,14 +899,18 @@ reset_raw(
   Hacl_Hash_Blake2b_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
+  bool last_node0 = block_state.thd;
   uint8_t nn0 = block_state.snd;
   uint8_t kk10 = block_state.fst;
-  Hacl_Hash_Blake2b_index i = { .key_length = kk10, .digest_length = nn0 };
+  Hacl_Hash_Blake2b_index
+  i = { .key_length = kk10, .digest_length = nn0, .last_node = last_node0 };
   KRML_MAYBE_UNUSED_VAR(i);
   Hacl_Hash_Blake2b_blake2_params *p = key.fst;
   uint8_t kk1 = p->key_length;
   uint8_t nn = p->digest_length;
-  Hacl_Hash_Blake2b_index i1 = { .key_length = kk1, .digest_length = nn };
+  bool last_node = block_state.thd;
+  Hacl_Hash_Blake2b_index
+  i1 = { .key_length = kk1, .digest_length = nn, .last_node = last_node };
   uint32_t kk2 = (uint32_t)i1.key_length;
   uint8_t *k_1 = key.snd;
   if (!(kk2 == 0U))
@@ -903,7 +920,7 @@ reset_raw(
     memcpy(buf, k_1, kk2 * sizeof (uint8_t));
   }
   Hacl_Hash_Blake2b_blake2_params pv = p[0U];
-  init_with_params(block_state.thd.snd, pv);
+  init_with_params(block_state.f3.snd, pv);
   uint8_t kk11 = i.key_length;
   uint32_t ite;
   if (kk11 != 0U)
@@ -1040,7 +1057,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      K____uint64_t___uint64_t_ acc = block_state1.thd;
+      K____uint64_t___uint64_t_ acc = block_state1.f3;
       uint64_t *wv = acc.fst;
       uint64_t *hash = acc.snd;
       uint32_t nb = 1U;
@@ -1065,7 +1082,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    K____uint64_t___uint64_t_ acc = block_state1.thd;
+    K____uint64_t___uint64_t_ acc = block_state1.f3;
     uint64_t *wv = acc.fst;
     uint64_t *hash = acc.snd;
     uint32_t nb = data1_len / 128U;
@@ -1133,7 +1150,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      K____uint64_t___uint64_t_ acc = block_state1.thd;
+      K____uint64_t___uint64_t_ acc = block_state1.f3;
       uint64_t *wv = acc.fst;
       uint64_t *hash = acc.snd;
       uint32_t nb = 1U;
@@ -1159,7 +1176,7 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    K____uint64_t___uint64_t_ acc = block_state1.thd;
+    K____uint64_t___uint64_t_ acc = block_state1.f3;
     uint64_t *wv = acc.fst;
     uint64_t *hash = acc.snd;
     uint32_t nb = data1_len / 128U;
@@ -1196,9 +1213,10 @@ parameters.
 void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
 {
   Hacl_Hash_Blake2b_block_state_t block_state0 = (*state).block_state;
+  bool last_node = block_state0.thd;
   uint8_t nn = block_state0.snd;
   uint8_t kk1 = block_state0.fst;
-  Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn };
+  Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn, .last_node = last_node };
   Hacl_Hash_Blake2b_state_t scrut = *state;
   Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
@@ -1217,9 +1235,14 @@ void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
   uint64_t b[16U] = { 0U };
   Hacl_Hash_Blake2b_block_state_t
   tmp_block_state =
-    { .fst = i.key_length, .snd = i.digest_length, .thd = { .fst = wv0, .snd = b } };
-  uint64_t *src_b = block_state.thd.snd;
-  uint64_t *dst_b = tmp_block_state.thd.snd;
+    {
+      .fst = i.key_length,
+      .snd = i.digest_length,
+      .thd = i.last_node,
+      .f3 = { .fst = wv0, .snd = b }
+    };
+  uint64_t *src_b = block_state.f3.snd;
+  uint64_t *dst_b = tmp_block_state.f3.snd;
   memcpy(dst_b, src_b, 16U * sizeof (uint64_t));
   uint64_t prev_len = total_len - (uint64_t)r;
   uint32_t ite;
@@ -1233,7 +1256,7 @@ void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
-  K____uint64_t___uint64_t_ acc0 = tmp_block_state.thd;
+  K____uint64_t___uint64_t_ acc0 = tmp_block_state.f3;
   uint64_t *wv1 = acc0.fst;
   uint64_t *hash0 = acc0.snd;
   uint32_t nb = 0U;
@@ -1244,7 +1267,7 @@ void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
     buf_multi,
     nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
-  K____uint64_t___uint64_t_ acc = tmp_block_state.thd;
+  K____uint64_t___uint64_t_ acc = tmp_block_state.f3;
   uint64_t *wv = acc.fst;
   uint64_t *hash = acc.snd;
   Hacl_Hash_Blake2b_update_last(r,
@@ -1254,7 +1277,7 @@ void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
     r,
     buf_last);
   uint8_t nn0 = tmp_block_state.snd;
-  Hacl_Hash_Blake2b_finish((uint32_t)nn0, output, tmp_block_state.thd.snd);
+  Hacl_Hash_Blake2b_finish((uint32_t)nn0, output, tmp_block_state.f3.snd);
 }
 
 /**
@@ -1265,8 +1288,8 @@ void Hacl_Hash_Blake2b_free(Hacl_Hash_Blake2b_state_t *state)
   Hacl_Hash_Blake2b_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
-  uint64_t *b = block_state.thd.snd;
-  uint64_t *wv = block_state.thd.fst;
+  uint64_t *b = block_state.f3.snd;
+  uint64_t *wv = block_state.f3.fst;
   KRML_HOST_FREE(wv);
   KRML_HOST_FREE(b);
   KRML_HOST_FREE(buf);
@@ -1282,17 +1305,24 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *sta
   Hacl_Hash_Blake2b_block_state_t block_state0 = scrut.block_state;
   uint8_t *buf0 = scrut.buf;
   uint64_t total_len0 = scrut.total_len;
+  bool last_node = block_state0.thd;
   uint8_t nn = block_state0.snd;
   uint8_t kk1 = block_state0.fst;
-  Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn };
+  Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn, .last_node = last_node };
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
   memcpy(buf, buf0, 128U * sizeof (uint8_t));
   uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   Hacl_Hash_Blake2b_block_state_t
-  block_state = { .fst = i.key_length, .snd = i.digest_length, .thd = { .fst = wv, .snd = b } };
-  uint64_t *src_b = block_state0.thd.snd;
-  uint64_t *dst_b = block_state.thd.snd;
+  block_state =
+    {
+      .fst = i.key_length,
+      .snd = i.digest_length,
+      .thd = i.last_node,
+      .f3 = { .fst = wv, .snd = b }
+    };
+  uint64_t *src_b = block_state0.f3.snd;
+  uint64_t *dst_b = block_state.f3.snd;
   memcpy(dst_b, src_b, 16U * sizeof (uint64_t));
   Hacl_Hash_Blake2b_state_t
   s = { .block_state = block_state, .buf = buf, .total_len = total_len0 };

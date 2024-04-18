@@ -64,7 +64,8 @@ typedef struct Hacl_Hash_Blake2b_block_state_t_s
 {
   uint8_t fst;
   uint8_t snd;
-  K____uint64_t___uint64_t_ thd;
+  bool thd;
+  K____uint64_t___uint64_t_ f3;
 }
 Hacl_Hash_Blake2b_block_state_t;
 
@@ -92,7 +93,11 @@ The caller must satisfy the following requirements.
 
 */
 Hacl_Hash_Blake2b_state_t
-*Hacl_Hash_Blake2b_malloc_with_params_and_key(Hacl_Hash_Blake2b_blake2_params *p, uint8_t *k);
+*Hacl_Hash_Blake2b_malloc_with_params_and_key(
+  Hacl_Hash_Blake2b_blake2_params *p,
+  bool last_node,
+  uint8_t *k
+);
 
 /**
  Specialized allocation function that picks default values for all

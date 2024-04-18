@@ -51,7 +51,8 @@ typedef struct Hacl_Hash_Blake2b_Simd256_block_state_t_s
 {
   uint8_t fst;
   uint8_t snd;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ thd;
+  bool thd;
+  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ f3;
 }
 Hacl_Hash_Blake2b_Simd256_block_state_t;
 
@@ -72,6 +73,7 @@ that key_length does not exceed max_key (256 for S, 64 for B).)
 Hacl_Hash_Blake2b_Simd256_state_t
 *Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key(
   Hacl_Hash_Blake2b_blake2_params *p,
+  bool last_node,
   uint8_t *k
 );
 
