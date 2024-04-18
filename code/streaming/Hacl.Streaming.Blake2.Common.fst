@@ -369,12 +369,14 @@ let update_multi_s (#a : alg) (acc : Spec.state a)
   Lib.LoopCombinators.repeati nb (Spec.blake2_update1 a prevlen input) acc
 
 noextract
-let update_last_s (#a : alg) (acc : Spec.state a)
+let update_last_s (#a : alg)
+                  (last_node: bool)
+                  (acc : Spec.state a)
                   (prevlen : nat{prevlen % Spec.size_block a = 0})
                   (input : Seq.seq uint8{ S.length input + prevlen <= max_input_length a /\
                                           S.length input <= Spec.size_block a }) :
   Tot (Spec.state a) =
-  Spec.blake2_update_last a false prevlen (S.length input) input acc
+  Spec.blake2_update_last a last_node prevlen (S.length input) input acc
 
 noextract
 let finish_s (#a : alg) (p: Spec.blake2_params a) (acc : Spec.state a) :
@@ -384,9 +386,10 @@ let finish_s (#a : alg) (p: Spec.blake2_params a) (acc : Spec.state a) :
 noextract
 let spec_s (a : alg)
   (p: Spec.blake2_params a)
+  (last_node: bool)
   (key : lbytes (UInt8.v p.key_length))
   (input : S.seq uint8{if p.key_length = 0uy then S.length input <= max_input_length a else S.length input + Spec.size_block a <= max_input_length a}) =
-  Spec.blake2 a false input p key
+  Spec.blake2 a last_node input p key
 
 /// Interlude for spec proofs
 /// -------------------------
@@ -475,12 +478,13 @@ noextract
 val blake2_hash_incremental_s :
   a : alg ->
   p: Spec.blake2_params a ->
+  last_node: bool ->
   k: lbytes (UInt8.v p.key_length) ->
   input:S.seq uint8 { if p.key_length = 0uy then S.length input <= max_input_length a else S.length input + (Spec.size_block a) <= max_input_length a } ->
   output:S.seq uint8 { S.length output = UInt8.v p.digest_length }
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let blake2_hash_incremental_s a p k input0 =
+let blake2_hash_incremental_s a p last_node k input0 =
   let key_block = if UInt8.v p.key_length > 0 then Spec.blake2_key_block a (UInt8.v p.key_length) k else S.empty in
   let key_block_len = S.length key_block in
   let input = Seq.append key_block input0 in
@@ -489,7 +493,7 @@ let blake2_hash_incremental_s a p k input0 =
   let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
   let acc1 = init_s a p in
   let acc2 = update_multi_s #a acc1 0 bs in
-  let acc3 = update_last_s #a acc2 (S.length bs) l in
+  let acc3 = update_last_s #a last_node acc2 (S.length bs) l in
   let acc4 = finish_s #a p acc3 in
   acc4
 #pop-options
@@ -549,14 +553,15 @@ let repeati_split_at_eq a s input =
 val spec_is_incremental :
   a : alg ->
   p: Spec.blake2_params a ->
+  last_node: bool ->
   k: lbytes (UInt8.v p.key_length) ->
   input:S.seq uint8 { if p.key_length = 0uy then S.length input <= max_input_length a else  S.length input + (Spec.size_block a) <= max_input_length a } ->
   Lemma(
-    blake2_hash_incremental_s a p k input == Spec.blake2 a false input p k)
+    blake2_hash_incremental_s a p last_node k input == Spec.blake2 a last_node input p k)
 
 #restart-solver
 #push-options "--z3cliopt smt.arith.nl=false --z3rlimit 100"
-let spec_is_incremental a p k input0 =
+let spec_is_incremental a p last_node k input0 =
   let kk = UInt8.v p.key_length in
   let key_block = if kk > 0 then Spec.blake2_key_block a kk k else S.empty in
   let key_block_len = S.length key_block in
@@ -573,7 +578,7 @@ let spec_is_incremental a p k input0 =
 
   S.lemma_eq_intro (S.slice input (S.length input - l_last) (S.length input)) last;
   S.lemma_eq_intro (S.slice last (S.length last - l_last) (S.length last)) last;
-  Spec.Blake2.Alternative.lemma_spec_equivalence_update a false kk k input0 s
+  Spec.Blake2.Alternative.lemma_spec_equivalence_update a last_node kk k input0 s
 #pop-options
 
 inline_for_extraction noextract
@@ -674,12 +679,12 @@ let blake2 (a : alg)
       let kk = i.key_length in kk, i.digest_length, i.last_node,  init_s a p) (* init_s *)
 
     (fun _ (kk, nn, last_node, acc) prevlen input -> kk, nn, last_node, update_multi_s acc prevlen input) (* update_multi_s *)
-    (fun _ (kk, nn, last_node, acc) prevlen input -> kk, nn, last_node, update_last_s acc prevlen input) (* update_last_s *)
+    (fun _ (kk, nn, last_node, acc) prevlen input -> kk, nn, last_node, update_last_s last_node acc prevlen input) (* update_last_s *)
     (fun i (p, _k) (kk, _, _, acc) _ ->
       finish_s #a p acc) (* finish_s *)
     (fun i k input l ->
       let p, k = k in
-      spec_s a p k input) (* spec_s *)
+      spec_s a p i.last_node k input) (* spec_s *)
 
     (* update_multi_zero *)
     (fun _ (kk, _, _, acc) prevlen -> update_multi_zero #a acc prevlen)
@@ -688,7 +693,7 @@ let blake2 (a : alg)
     (fun _ (kk, _, _, acc) prevlen1 prevlen2 input1 input2 ->
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
     (fun i (p, k) input _ ->
-      spec_is_incremental a p k input) (* spec_is_incremental *)
+      spec_is_incremental a p i.last_node k input) (* spec_is_incremental *)
     (fun _ (kk, nn, last_node, _) -> { key_length = kk; digest_length = nn; last_node }) (* index_of_state *)
 
     (* init *)
@@ -724,9 +729,9 @@ let blake2 (a : alg)
       update_multi #len wv hash (blake2_prevlen a prevlen) blocks nb)
 
     (* update_last *)
-    (fun _ (kk, _, _, acc) prevlen last last_len ->
+    (fun _ (kk, _, last_node, acc) prevlen last last_len ->
       let wv, hash = acc in
-      update_last #last_len wv hash (blake2_prevlen a prevlen) last_len last)
+      update_last #last_len wv hash last_node (blake2_prevlen a prevlen) last_len last)
 
     (* finish *)
     (fun _ k s dst _ ->
