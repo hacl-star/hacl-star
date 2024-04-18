@@ -9,29 +9,9 @@
 #include <stdbool.h>
 #include <time.h>
 
-typedef uint64_t cycles;
+#include "Hacl_AES_128_CTR32_NI.h"
 
-static __inline__ cycles cpucycles_begin(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
-extern void Hacl_AES_128_CTR32_NI_aes128_ctr_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
+#include "test_helpers.h"
 
 #define ROUNDS 100000
 #define SIZE   16384
@@ -55,23 +35,10 @@ int main() {
     0xEB,0x2E,0x1E,0xFC,0x46,0xDA,0x57,0xC8,
     0xFC,0xE6,0x30,0xDF,0x91,0x41,0xBE,0x28};
   uint8_t comp[32] = {0};
-  bool ok = true;
 
   Hacl_AES_128_CTR32_NI_aes128_ctr_encrypt(in_len,comp,in,k,n,1);
-  printf("AES-NI computed:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",comp[i]);
-  printf("\n");
-  printf("AES_NI expected:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",exp[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 32; i++)
-    ok = ok & (exp[i] == comp[i]);
-  if (ok) printf("Success!\n");
+  bool ok = compare_and_print(in_len, comp, exp);
 
-  uint64_t len = SIZE;
   uint8_t plain[SIZE];
   uint8_t key[16];
   uint8_t nonce[12];
@@ -96,10 +63,7 @@ int main() {
   clock_t tdiff1 = t2 - t1;
   cycles cdiff1 = b - a;
 
-  printf("AES-NI PERF:\n");
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));
+  print_time(count, tdiff1, cdiff1);
 
   if (ok)
     return EXIT_SUCCESS;
