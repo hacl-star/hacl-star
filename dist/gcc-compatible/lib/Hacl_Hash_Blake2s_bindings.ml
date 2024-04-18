@@ -23,8 +23,9 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint32_t @->
            ((ptr uint32_t) @->
               ((ptr uint32_t) @->
-                 (uint64_t @->
-                    (uint32_t @-> (ocaml_bytes @-> (returning void)))))))
+                 (bool @->
+                    (uint64_t @->
+                       (uint32_t @-> (ocaml_bytes @-> (returning void))))))))
     let hacl_Hash_Blake2s_finish =
       foreign "Hacl_Hash_Blake2s_finish"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint32_t) @-> (returning void))))

@@ -63,6 +63,7 @@ Hacl_Hash_Blake2b_update_last(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
+  bool last_node,
   FStar_UInt128_uint128 prev,
   uint32_t rem,
   uint8_t *d

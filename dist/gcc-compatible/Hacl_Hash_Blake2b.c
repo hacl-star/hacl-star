@@ -29,7 +29,14 @@
 #include "lib_memzero0.h"
 
 static void
-update_block(uint64_t *wv, uint64_t *hash, bool flag, FStar_UInt128_uint128 totlen, uint8_t *d)
+update_block(
+  uint64_t *wv,
+  uint64_t *hash,
+  bool flag,
+  bool last_node,
+  FStar_UInt128_uint128 totlen,
+  uint8_t *d
+)
 {
   uint64_t m_w[16U] = { 0U };
   KRML_MAYBE_FOR16(i,
@@ -52,7 +59,15 @@ update_block(uint64_t *wv, uint64_t *hash, bool flag, FStar_UInt128_uint128 totl
   {
     wv_14 = 0ULL;
   }
-  uint64_t wv_15 = 0ULL;
+  uint64_t wv_15;
+  if (last_node)
+  {
+    wv_15 = 0xFFFFFFFFFFFFFFFFULL;
+  }
+  else
+  {
+    wv_15 = 0ULL;
+  }
   mask[0U] = FStar_UInt128_uint128_to_uint64(totlen);
   mask[1U] = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(totlen, 64U));
   mask[2U] = wv_14;
@@ -647,11 +662,11 @@ static void update_key(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, ui
   memcpy(b, k, kk * sizeof (uint8_t));
   if (ll == 0U)
   {
-    update_block(wv, hash, true, lb, b);
+    update_block(wv, hash, true, false, lb, b);
   }
   else
   {
-    update_block(wv, hash, false, lb, b);
+    update_block(wv, hash, false, false, lb, b);
   }
   Lib_Memzero0_memzero(b, 128U, uint8_t, void *);
 }
@@ -674,7 +689,7 @@ Hacl_Hash_Blake2b_update_multi(
       FStar_UInt128_add_mod(prev,
         FStar_UInt128_uint64_to_uint128((uint64_t)((i + 1U) * 128U)));
     uint8_t *b = blocks + i * 128U;
-    update_block(wv, hash, false, totlen, b);
+    update_block(wv, hash, false, false, totlen, b);
   }
 }
 
@@ -683,6 +698,7 @@ Hacl_Hash_Blake2b_update_last(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
+  bool last_node,
   FStar_UInt128_uint128 prev,
   uint32_t rem,
   uint8_t *d
@@ -693,7 +709,7 @@ Hacl_Hash_Blake2b_update_last(
   memcpy(b, last, rem * sizeof (uint8_t));
   FStar_UInt128_uint128
   totlen = FStar_UInt128_add_mod(prev, FStar_UInt128_uint64_to_uint128((uint64_t)len));
-  update_block(wv, hash, true, totlen, b);
+  update_block(wv, hash, true, last_node, totlen, b);
   Lib_Memzero0_memzero(b, 128U, uint8_t, void *);
 }
 
@@ -727,7 +743,7 @@ update_blocks(
     rem = rem0;
   }
   Hacl_Hash_Blake2b_update_multi(len, wv, hash, prev, blocks, nb);
-  Hacl_Hash_Blake2b_update_last(len, wv, hash, prev, rem, blocks);
+  Hacl_Hash_Blake2b_update_last(len, wv, hash, false, prev, rem, blocks);
 }
 
 static inline void
@@ -1213,10 +1229,11 @@ parameters.
 void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
 {
   Hacl_Hash_Blake2b_block_state_t block_state0 = (*state).block_state;
-  bool last_node = block_state0.thd;
+  bool last_node0 = block_state0.thd;
   uint8_t nn = block_state0.snd;
   uint8_t kk1 = block_state0.fst;
-  Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn, .last_node = last_node };
+  Hacl_Hash_Blake2b_index
+  i = { .key_length = kk1, .digest_length = nn, .last_node = last_node0 };
   Hacl_Hash_Blake2b_state_t scrut = *state;
   Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
@@ -1268,11 +1285,13 @@ void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output)
     nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   K____uint64_t___uint64_t_ acc = tmp_block_state.f3;
+  bool last_node = tmp_block_state.thd;
   uint64_t *wv = acc.fst;
   uint64_t *hash = acc.snd;
   Hacl_Hash_Blake2b_update_last(r,
     wv,
     hash,
+    last_node,
     FStar_UInt128_uint64_to_uint128(prev_len_last),
     r,
     buf_last);

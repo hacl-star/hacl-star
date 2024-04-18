@@ -30,7 +30,14 @@
 #include "lib_memzero0.h"
 
 static inline void
-update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *d)
+update_block(
+  uint32_t *wv,
+  uint32_t *hash,
+  bool flag,
+  bool last_node,
+  uint64_t totlen,
+  uint8_t *d
+)
 {
   uint32_t m_w[16U] = { 0U };
   KRML_MAYBE_FOR16(i,
@@ -53,7 +60,15 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
   {
     wv_14 = 0U;
   }
-  uint32_t wv_15 = 0U;
+  uint32_t wv_15;
+  if (last_node)
+  {
+    wv_15 = 0xFFFFFFFFU;
+  }
+  else
+  {
+    wv_15 = 0U;
+  }
   mask[0U] = (uint32_t)totlen;
   mask[1U] = (uint32_t)(totlen >> 32U);
   mask[2U] = wv_14;
@@ -642,11 +657,11 @@ static void update_key(uint32_t *wv, uint32_t *hash, uint32_t kk, uint8_t *k, ui
   memcpy(b, k, kk * sizeof (uint8_t));
   if (ll == 0U)
   {
-    update_block(wv, hash, true, lb, b);
+    update_block(wv, hash, true, false, lb, b);
   }
   else
   {
-    update_block(wv, hash, false, lb, b);
+    update_block(wv, hash, false, false, lb, b);
   }
   Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
@@ -666,7 +681,7 @@ Hacl_Hash_Blake2s_update_multi(
   {
     uint64_t totlen = prev + (uint64_t)((i + 1U) * 64U);
     uint8_t *b = blocks + i * 64U;
-    update_block(wv, hash, false, totlen, b);
+    update_block(wv, hash, false, false, totlen, b);
   }
 }
 
@@ -675,6 +690,7 @@ Hacl_Hash_Blake2s_update_last(
   uint32_t len,
   uint32_t *wv,
   uint32_t *hash,
+  bool last_node,
   uint64_t prev,
   uint32_t rem,
   uint8_t *d
@@ -684,7 +700,7 @@ Hacl_Hash_Blake2s_update_last(
   uint8_t *last = d + len - rem;
   memcpy(b, last, rem * sizeof (uint8_t));
   uint64_t totlen = prev + (uint64_t)len;
-  update_block(wv, hash, true, totlen, b);
+  update_block(wv, hash, true, last_node, totlen, b);
   Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
@@ -712,7 +728,7 @@ update_blocks(uint32_t len, uint32_t *wv, uint32_t *hash, uint64_t prev, uint8_t
     rem = rem0;
   }
   Hacl_Hash_Blake2s_update_multi(len, wv, hash, prev, blocks, nb);
-  Hacl_Hash_Blake2s_update_last(len, wv, hash, prev, rem, blocks);
+  Hacl_Hash_Blake2s_update_last(len, wv, hash, false, prev, rem, blocks);
 }
 
 static inline void
@@ -1154,10 +1170,11 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
 void Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *state, uint8_t *output)
 {
   Hacl_Hash_Blake2s_block_state_t block_state0 = (*state).block_state;
-  bool last_node = block_state0.thd;
+  bool last_node0 = block_state0.thd;
   uint8_t nn = block_state0.snd;
   uint8_t kk1 = block_state0.fst;
-  Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn, .last_node = last_node };
+  Hacl_Hash_Blake2b_index
+  i = { .key_length = kk1, .digest_length = nn, .last_node = last_node0 };
   Hacl_Hash_Blake2s_state_t scrut = *state;
   Hacl_Hash_Blake2s_block_state_t block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
@@ -1204,9 +1221,10 @@ void Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *state, uint8_t *output)
   Hacl_Hash_Blake2s_update_multi(0U, wv1, hash0, prev_len, buf_multi, nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   K____uint32_t___uint32_t_ acc = tmp_block_state.f3;
+  bool last_node = tmp_block_state.thd;
   uint32_t *wv = acc.fst;
   uint32_t *hash = acc.snd;
-  Hacl_Hash_Blake2s_update_last(r, wv, hash, prev_len_last, r, buf_last);
+  Hacl_Hash_Blake2s_update_last(r, wv, hash, last_node, prev_len_last, r, buf_last);
   uint8_t nn0 = tmp_block_state.snd;
   Hacl_Hash_Blake2s_finish((uint32_t)nn0, output, tmp_block_state.f3.snd);
 }
