@@ -61,7 +61,6 @@
           "dist/package-mozilla.sh"
           "dist/rs/Cargo.lock"
           "dist/rs/Cargo.toml"
-          "dist/rs/krml/Cargo.toml"
           "dist/rs/src/hacl.rs"
         ]
         || lib.any (lib.flip lib.hasPrefix relPath) [
@@ -74,6 +73,7 @@
           "tests"
           "tools"
           "vale"
+          "dist/rs/krml"
           "dist/rs/src/fstar"
           "dist/rs/src/lib"
           "dist/rs/src/lowstar"
