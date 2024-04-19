@@ -167,11 +167,12 @@ at least `digest_length` bytes, where `digest_length` was determined by your
 choice of `malloc` function. Concretely, if you used `malloc` or
 `malloc_with_key`, then the expected length is 256 for S, or 64 for B (default
 digest length). If you used `malloc_with_params_and_key`, then the expected
-length is whatever you chose for the `digest_length` field of your
-parameters.
+length is whatever you chose for the `digest_length` field of your parameters.
+For convenience, this function returns `digest_length`. When in doubt, callers
+can pass an array of size HACL_BLAKE2B_256_OUT_BYTES, then use the return value
+to see how many bytes were actually written. 
 */
-void
-Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8_t *output);
+uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, uint8_t *dst);
 
 /**
   Free state function when there is no key
@@ -211,7 +212,7 @@ parameters `params` into `output`. The `key` array must be of length
 `params.digest_length`. 
 */
 void
-Hacl_Hash_Blake2b_Simd256_hash_with_key_and_paramas(
+Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params(
   uint8_t *output,
   uint8_t *input,
   uint32_t input_len,

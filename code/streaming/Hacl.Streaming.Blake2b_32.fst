@@ -345,10 +345,38 @@ at least `digest_length` bytes, where `digest_length` was determined by your
 choice of `malloc` function. Concretely, if you used `malloc` or
 `malloc_with_key`, then the expected length is 32 for S, or 64 for B (default
 digest length). If you used `malloc_with_params_and_key`, then the expected
-length is whatever you chose for the `digest_length` field of your
-parameters.")]
-let digest (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
-  F.digest_erased blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
+length is whatever you chose for the `digest_length` field of your parameters.
+For convenience, this function returns `digest_length`. When in doubt, callers
+can pass an array of size HACL_BLAKE2B_32_OUT_BYTES, then use the return value
+to see how many bytes were actually written. ")]
+val digest: (i: G.erased (Common.index Spec.Blake2B)) -> (
+  let open F in
+  let c = blake2b_32 in
+  let i = G.reveal i in
+  let t: Type0 = c.state.s i in
+  let t': Type0 = I.optional_key i c.km c.key in
+  s:state c i t t' ->
+  dst:B.buffer uint8 ->
+  l:c.output_length_t { B.length dst == c.output_length i l } ->
+  Stack UInt8.t
+    (requires fun h0 ->
+      invariant c i h0 s /\
+      B.live h0 dst /\
+      B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
+    (ensures fun h0 s' h1 ->
+      s' == i.digest_length /\
+      invariant c i h1 s /\
+      seen c i h0 s == seen c i h1 s /\
+      reveal_key c i h1 s == reveal_key c i h0 s /\
+      footprint c i h0 s == footprint c i h1 s /\
+      B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
+      seen_bounded c i h0 s;
+      S.equal (B.as_seq h1 dst) (c.spec_s i (reveal_key c i h0 s) (seen c i h0 s) l)) /\
+      preserves_freeable c i s h0 h1)
+)
+let digest (i: G.erased (Common.index Spec.Blake2B)) s dst l =
+  F.digest_erased blake2b_32 i (Common.s Spec.Blake2B i Core.M32) (Common.blake_key Spec.Blake2B i) s dst l;
+  (F.index_of_state blake2b_32 i (Common.s Spec.Blake2B i Core.M32) (Common.blake_key Spec.Blake2B i) s).digest_length
 
 [@ (Comment "  Free state function when there is no key")]
 let free (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
@@ -374,5 +402,5 @@ let hash_with_key : Impl.blake2_st Spec.Blake2B Core.M32 =
 parameters `params` into `output`. The `key` array must be of length
 `params.key_length`. The `output` array must be of length
 `params.digest_length`. "]
-let hash_with_key_and_paramas : Impl.blake2_with_params_st Spec.Blake2B Core.M32 =
+let hash_with_key_and_params : Impl.blake2_with_params_st Spec.Blake2B Core.M32 =
   Impl.blake2_with_params #Spec.Blake2B #Core.M32 Blake2b32.init_with_params Blake2b32.update Blake2b32.finish

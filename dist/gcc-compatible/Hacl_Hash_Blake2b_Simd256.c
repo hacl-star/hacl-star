@@ -1065,19 +1065,20 @@ at least `digest_length` bytes, where `digest_length` was determined by your
 choice of `malloc` function. Concretely, if you used `malloc` or
 `malloc_with_key`, then the expected length is 256 for S, or 64 for B (default
 digest length). If you used `malloc_with_params_and_key`, then the expected
-length is whatever you chose for the `digest_length` field of your
-parameters.
+length is whatever you chose for the `digest_length` field of your parameters.
+For convenience, this function returns `digest_length`. When in doubt, callers
+can pass an array of size HACL_BLAKE2B_256_OUT_BYTES, then use the return value
+to see how many bytes were actually written. 
 */
-void
-Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8_t *output)
+uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, uint8_t *dst)
 {
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state0 = (*state).block_state;
+  Hacl_Hash_Blake2b_Simd256_block_state_t block_state0 = (*s).block_state;
   bool last_node0 = block_state0.thd;
-  uint8_t nn = block_state0.snd;
-  uint8_t kk1 = block_state0.fst;
+  uint8_t nn0 = block_state0.snd;
+  uint8_t kk0 = block_state0.fst;
   Hacl_Hash_Blake2b_index
-  i = { .key_length = kk1, .digest_length = nn, .last_node = last_node0 };
-  Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
+  i1 = { .key_length = kk0, .digest_length = nn0, .last_node = last_node0 };
+  Hacl_Hash_Blake2b_Simd256_state_t scrut = *s;
   Hacl_Hash_Blake2b_Simd256_block_state_t block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1096,9 +1097,9 @@ Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8
   Hacl_Hash_Blake2b_Simd256_block_state_t
   tmp_block_state =
     {
-      .fst = i.key_length,
-      .snd = i.digest_length,
-      .thd = i.last_node,
+      .fst = i1.key_length,
+      .snd = i1.digest_length,
+      .thd = i1.last_node,
       .f3 = { .fst = wv0, .snd = b }
     };
   Lib_IntVector_Intrinsics_vec256 *src_b = block_state.f3.snd;
@@ -1130,18 +1131,24 @@ Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8
   uint64_t prev_len_last = total_len - (uint64_t)r;
   K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
   acc = tmp_block_state.f3;
-  bool last_node = tmp_block_state.thd;
+  bool last_node1 = tmp_block_state.thd;
   Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
   Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
   Hacl_Hash_Blake2b_Simd256_update_last(r,
     wv,
     hash,
-    last_node,
+    last_node1,
     FStar_UInt128_uint64_to_uint128(prev_len_last),
     r,
     buf_last);
-  uint8_t nn0 = tmp_block_state.snd;
-  Hacl_Hash_Blake2b_Simd256_finish((uint32_t)nn0, output, tmp_block_state.f3.snd);
+  uint8_t nn1 = tmp_block_state.snd;
+  Hacl_Hash_Blake2b_Simd256_finish((uint32_t)nn1, dst, tmp_block_state.f3.snd);
+  Hacl_Hash_Blake2b_Simd256_block_state_t block_state1 = (*s).block_state;
+  bool last_node = block_state1.thd;
+  uint8_t nn = block_state1.snd;
+  uint8_t kk = block_state1.fst;
+  return
+    ((Hacl_Hash_Blake2b_index){ .key_length = kk, .digest_length = nn, .last_node = last_node }).digest_length;
 }
 
 /**
@@ -1244,7 +1251,7 @@ parameters `params` into `output`. The `key` array must be of length
 `params.digest_length`. 
 */
 void
-Hacl_Hash_Blake2b_Simd256_hash_with_key_and_paramas(
+Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params(
   uint8_t *output,
   uint8_t *input,
   uint32_t input_len,
