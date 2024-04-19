@@ -20,6 +20,12 @@ open FStar.HyperStack.ST
 
 #set-options "--fuel 0 --ifuel 0"
 
+[@ CMacro ] let block_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.size_block Spec.Blake2B)
+[@ CMacro ] let out_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.max_output Spec.Blake2B)
+[@ CMacro ] let key_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.max_key Spec.Blake2B)
+[@ CMacro ] let salt_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.salt_length Spec.Blake2B)
+[@ CMacro ] let personal_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.personal_length Spec.Blake2B)
+
 inline_for_extraction noextract
 let blake2b_32 =
   Common.blake2 Spec.Blake2B Core.M32 Blake2b32.init_with_params Blake2b32.update_multi

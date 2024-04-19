@@ -53,6 +53,16 @@ typedef struct Hacl_Hash_Blake2b_blake2_params_s
 }
 Hacl_Hash_Blake2b_blake2_params;
 
+#define HACL_HASH_BLAKE2B_BLOCK_BYTES (128U)
+
+#define HACL_HASH_BLAKE2B_OUT_BYTES (64U)
+
+#define HACL_HASH_BLAKE2B_KEY_BYTES (64U)
+
+#define HACL_HASH_BLAKE2B_SALT_BYTES (16U)
+
+#define HACL_HASH_BLAKE2B_PERSONAL_BYTES (16U)
+
 typedef struct K____uint64_t___uint64_t__s
 {
   uint64_t *fst;
@@ -121,7 +131,7 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void);
 
 /**
  General-purpose re-initialization function with parameters and
-key. You cannot change digest_length or key_length, meaning those values in
+key. You cannot change digest_length, key_length, or last_node, meaning those values in
 the parameters object must be the same as originally decided via one of the
 malloc functions. All other values of the parameter can be changed. The behavior
 is unspecified if you violate this precondition.

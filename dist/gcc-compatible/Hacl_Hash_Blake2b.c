@@ -954,7 +954,7 @@ reset_raw(
 
 /**
  General-purpose re-initialization function with parameters and
-key. You cannot change digest_length or key_length, meaning those values in
+key. You cannot change digest_length, key_length, or last_node, meaning those values in
 the parameters object must be the same as originally decided via one of the
 malloc functions. All other values of the parameter can be changed. The behavior
 is unspecified if you violate this precondition.
