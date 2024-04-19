@@ -378,6 +378,9 @@ let digest (i: G.erased (Common.index Spec.Blake2S)) s dst l =
   F.digest_erased blake2s_128 i (Common.s Spec.Blake2S i Core.M128) (Common.blake_key Spec.Blake2S i) s dst l;
   (F.index_of_state blake2s_128 i (Common.s Spec.Blake2S i Core.M128) (Common.blake_key Spec.Blake2S i) s).digest_length
 
+let info (i: G.erased (Common.index Spec.Blake2S)): Tot _ =
+  F.index_of_state blake2s_128 i (Common.s Spec.Blake2S i Core.M128) (Common.blake_key Spec.Blake2S i)
+
 [@ (Comment "  Free state function when there is no key")]
 let free (kk: G.erased (Common.index Spec.Blake2S)): Tot _ =
   F.free blake2s_128 kk (Common.s Spec.Blake2S kk Core.M128) (Common.blake_key Spec.Blake2S kk)

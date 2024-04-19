@@ -53,6 +53,14 @@ typedef struct Hacl_Hash_Blake2b_blake2_params_s
 }
 Hacl_Hash_Blake2b_blake2_params;
 
+typedef struct Hacl_Hash_Blake2b_index_s
+{
+  uint8_t key_length;
+  uint8_t digest_length;
+  bool last_node;
+}
+Hacl_Hash_Blake2b_index;
+
 #define HACL_HASH_BLAKE2B_BLOCK_BYTES (128U)
 
 #define HACL_HASH_BLAKE2B_OUT_BYTES (64U)
@@ -180,6 +188,8 @@ can pass an array of size HACL_BLAKE2B_32_OUT_BYTES, then use the return value
 to see how many bytes were actually written. 
 */
 uint8_t Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *s, uint8_t *dst);
+
+Hacl_Hash_Blake2b_index Hacl_Hash_Blake2b_info(Hacl_Hash_Blake2b_state_t *s);
 
 /**
   Free state function when there is no key

@@ -1151,6 +1151,16 @@ uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, u
     ((Hacl_Hash_Blake2b_index){ .key_length = kk, .digest_length = nn, .last_node = last_node }).digest_length;
 }
 
+Hacl_Hash_Blake2b_index Hacl_Hash_Blake2b_Simd256_info(Hacl_Hash_Blake2b_Simd256_state_t *s)
+{
+  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = (*s).block_state;
+  bool last_node = block_state.thd;
+  uint8_t nn = block_state.snd;
+  uint8_t kk = block_state.fst;
+  return
+    ((Hacl_Hash_Blake2b_index){ .key_length = kk, .digest_length = nn, .last_node = last_node });
+}
+
 /**
   Free state function when there is no key
 */

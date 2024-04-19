@@ -174,6 +174,8 @@ to see how many bytes were actually written.
 */
 uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, uint8_t *dst);
 
+Hacl_Hash_Blake2b_index Hacl_Hash_Blake2b_Simd256_info(Hacl_Hash_Blake2b_Simd256_state_t *s);
+
 /**
   Free state function when there is no key
 */

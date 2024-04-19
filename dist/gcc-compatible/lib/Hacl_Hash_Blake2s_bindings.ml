@@ -97,6 +97,10 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Hash_Blake2s_digest"
         ((ptr hacl_Hash_Blake2s_state_t) @->
            (ocaml_bytes @-> (returning uint8_t)))
+    let hacl_Hash_Blake2s_info =
+      foreign "Hacl_Hash_Blake2s_info"
+        ((ptr hacl_Hash_Blake2s_state_t) @->
+           (returning hacl_Hash_Blake2b_index))
     let hacl_Hash_Blake2s_free =
       foreign "Hacl_Hash_Blake2s_free"
         ((ptr hacl_Hash_Blake2s_state_t) @-> (returning void))
