@@ -70,6 +70,17 @@ K____uint8_t___uint8_t____K____uint8_t___uint8_t_;
 
 /* SNIPPET_END: K____uint8_t___uint8_t____K____uint8_t___uint8_t_ */
 
+/* SNIPPET_START: Hacl_Hash_SHA3_Simd256_absorb_inner_256 */
+
+void
+Hacl_Hash_SHA3_Simd256_absorb_inner_256(
+  uint32_t rateInBytes,
+  K____uint8_t___uint8_t____K____uint8_t___uint8_t_ b,
+  Lib_IntVector_Intrinsics_vec256 *s
+);
+
+/* SNIPPET_END: Hacl_Hash_SHA3_Simd256_absorb_inner_256 */
+
 /* SNIPPET_START: Hacl_Hash_SHA3_Simd256_shake128 */
 
 void
