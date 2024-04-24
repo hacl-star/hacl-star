@@ -1,6 +1,9 @@
 // This header contains test helpers to avoid ridiculous copy-paste between
 // various test files. Keep everything in there static inline.
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #pragma once
 
 static inline bool
