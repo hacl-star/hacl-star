@@ -35,13 +35,30 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Hash_SHA3_Simd256.h"
+typedef struct Hacl_Hash_SHA2_uint8_2p_s
+{
+  uint8_t *fst;
+  uint8_t *snd;
+}
+Hacl_Hash_SHA2_uint8_2p;
 
-typedef K____uint8_t___uint8_t_ Hacl_Hash_SHA2_uint8_2p;
+typedef struct Hacl_Hash_SHA2_uint8_3p_s
+{
+  uint8_t *fst;
+  Hacl_Hash_SHA2_uint8_2p snd;
+}
+Hacl_Hash_SHA2_uint8_3p;
 
-typedef K____uint8_t__K____uint8_t___uint8_t_ Hacl_Hash_SHA2_uint8_3p;
+typedef struct Hacl_Hash_SHA2_uint8_4p_s
+{
+  uint8_t *fst;
+  Hacl_Hash_SHA2_uint8_3p snd;
+}
+Hacl_Hash_SHA2_uint8_4p;
 
-typedef K____uint8_t___uint8_t____K____uint8_t___uint8_t_ Hacl_Hash_SHA2_uint8_4p;
+typedef uint8_t *Hacl_Hash_SHA2_bufx1;
+
+typedef Hacl_Hash_SHA2_uint8_4p Hacl_Hash_SHA2_bufx4;
 
 #if defined(__cplusplus)
 }

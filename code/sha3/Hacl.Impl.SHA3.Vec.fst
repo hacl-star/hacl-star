@@ -15,6 +15,8 @@ module LSeq = Lib.Sequence
 module Loop = Lib.LoopCombinators
 module V = Hacl.Spec.SHA3.Vec
 
+let code_quality_fake_dependency = Hacl.Impl.SHA2.Types.bufx4
+
 inline_for_extraction noextract
 let disjoint4_4 #len1 #len2 #a (b0 b1 b2 b3: lbuffer a len1) (b4 b5 b6 b7: lbuffer a len2) =
   disjoint b0 b4 /\ disjoint b0 b5 /\ disjoint b0 b6 /\ disjoint b0 b7 /\
