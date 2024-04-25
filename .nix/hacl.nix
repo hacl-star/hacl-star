@@ -40,6 +40,8 @@
   hacl = stdenv.mkDerivation {
     name = "hacl-star";
 
+    # We filter source to avoid unnecessarily re-compiling, for instance on dist
+    # updates. These lists specify the allowed files.
     src = lib.cleanSourceWith {
       src = ./..;
       filter = path: type: let
@@ -48,6 +50,7 @@
         type
         == "directory"
         || lib.elem relPath [
+          # individual files to allow in the source
           ".gitignore"
           "Makefile"
           "Makefile.common"
@@ -64,6 +67,7 @@
           "dist/rs/src/hacl.rs"
         ]
         || lib.any (lib.flip lib.hasPrefix relPath) [
+          # prefixes of paths to allow in the source
           "code"
           "hints"
           "lib"
