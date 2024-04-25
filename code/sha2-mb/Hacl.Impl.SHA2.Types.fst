@@ -16,3 +16,6 @@ let uint8_8p = uint8_1p & uint8_7p
 
 let uint8_2x4p = uint8_4p & uint8_4p
 let uint8_2x8p = uint8_8p & uint8_8p
+
+let bufx1 = Lib.MultiBuffer.multibuf 1 256ul
+let bufx4 = Lib.MultiBuffer.multibuf 4 256ul

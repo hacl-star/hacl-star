@@ -27,6 +27,17 @@ module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+val absorb_inner_256:
+    rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> b: Hacl.Impl.SHA2.Types.bufx4
+  -> s:state_t M256 ->
+  Stack unit
+  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s /\
+    (forall l. l < lanes M256 ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+      Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
+  (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
+    as_seq h1 s == V.absorb_inner #M256 (v rateInBytes) (as_seq_multi h0 b) (as_seq h0 s))
+
 let absorb_inner_256 rateInBytes b s = absorb_inner #M256 rateInBytes b s
 
 inline_for_extraction noextract
