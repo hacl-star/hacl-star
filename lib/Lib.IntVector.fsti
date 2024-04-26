@@ -20,7 +20,23 @@ val reveal_vec_1: t:v_inttype -> Lemma
   (ensures vec_t t 1 == sec_int_t t)
 
 inline_for_extraction
+val vec_t_v: #t:v_inttype -> #w:width -> vec_v_t t w -> vec_t t w
+
+inline_for_extraction
 val vec_v: #t:v_inttype -> #w:width -> vec_t t w -> vec_v_t t w
+
+val lemma_of_vec_t: #t:v_inttype -> #w:width -> f:vec_t t w -> Lemma
+  (ensures vec_t_v (vec_v f) == f)
+  [SMTPat (vec_t_v #t #w (vec_v #t #w f))]
+
+val lemma_of_vec_v_t: #t:v_inttype -> #w:width -> f:vec_v_t t w -> Lemma
+  (ensures vec_v (vec_t_v f) == f)
+  [SMTPat (vec_v #t #w (vec_t_v #t #w f))]
+
+val lemma_create_index_vec_w1: #t:v_inttype -> f:vec_t t 1 -> Lemma
+  (ensures
+    (let x:uint_t t SEC = mk_int (v (index (vec_v f) 0)) in
+    create 1 x == vec_v f))
 
 val vecv_extensionality: #t:v_inttype -> #w:width -> f1:vec_t t w -> f2:vec_t t w -> Lemma
   (requires vec_v f1 == vec_v f2)
@@ -242,6 +258,77 @@ val vec_shift_right_uint128_small2: v1:vec_t U64 4 -> s:shiftval U128{uint_v s %
       ((vec_v v1).[1] >>. s)
      (((vec_v v1).[2] >>. s) |. ((vec_v v1).[3] <<. (64ul -! s)))
       ((vec_v v1).[3] >>. s))
+
+val vec_cast_uint128: v1:vec_t U128 1 -> Lemma
+  (vec_v (cast U64 2 v1) == create2
+     (to_u64 (vec_v v1).[0])
+     (to_u64 ((vec_v v1).[0] >>. 64ul)))
+
+val vec_cast_2_uint64: v1:vec_t U64 2 -> Lemma
+  (vec_v (cast U128 1 v1) == create 1
+     (((to_u128 (vec_v v1).[1]) <<. 64ul) +! (to_u128 (vec_v v1).[0])))
+
+inline_for_extraction
+val vec_permute2: #t:v_inttype -> v1:vec_t t 2
+  -> i1:vec_index 2 -> i2:vec_index 2 ->
+  vec_t t 2
+
+inline_for_extraction
+val vec_permute2_lemma: #t:v_inttype -> v1:vec_t t 2
+  -> i1:vec_index 2 -> i2:vec_index 2 ->
+  Lemma (ensures (vec_v (vec_permute2 v1 i1 i2) == Lib.Sequence.create2 (vec_v v1).[v i1] (vec_v v1).[v i2]))
+	[SMTPat (vec_v (vec_permute2 v1 i1 i2))]
+
+
+inline_for_extraction
+val vec_permute4: #t:v_inttype -> v1:vec_t t 4
+  -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
+  vec_t t 4
+
+inline_for_extraction
+val vec_permute4_lemma: #t:v_inttype -> v1:vec_t t 4
+  -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
+  Lemma (ensures (vec_v (vec_permute4 v1 i1 i2 i3 i4) == Lib.Sequence.create4 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]))
+	[SMTPat (vec_v (vec_permute4 v1 i1 i2 i3 i4))]
+
+inline_for_extraction
+val vec_permute8: #t:v_inttype -> v1:vec_t t 8
+  -> i1:vec_index 8 -> i2:vec_index 8 -> i3:vec_index 8 -> i4:vec_index 8
+  -> i5:vec_index 8 -> i6:vec_index 8 -> i7:vec_index 8 -> i8:vec_index 8 ->
+  v2:vec_t t 8{vec_v v2 == Lib.Sequence.create8 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]
+                                   (vec_v v1).[v i5] (vec_v v1).[v i6] (vec_v v1).[v i7] (vec_v v1).[v i8]}
+
+inline_for_extraction
+val vec_permute16: #t:v_inttype -> v1:vec_t t 16
+  -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
+  -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
+  -> i9:vec_index 16  -> i10:vec_index 16 -> i11:vec_index 16 -> i12:vec_index 16
+  -> i13:vec_index 16 -> i14:vec_index 16 -> i15:vec_index 16 -> i16:vec_index 16 ->
+  v2:vec_t t 16{let vv1 = vec_v v1 in
+    vec_v v2 == Lib.Sequence.create16 vv1.[v i1] vv1.[v i2] vv1.[v i3] vv1.[v i4]
+                         vv1.[v i5] vv1.[v i6] vv1.[v i7] vv1.[v i8]
+                         vv1.[v i9] vv1.[v i10] vv1.[v i11] vv1.[v i12]
+                         vv1.[v i13] vv1.[v i14] vv1.[v i15] vv1.[v i16]}
+
+inline_for_extraction
+val vec_permute32: #t:v_inttype -> v1:vec_t t 32
+  -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
+  -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
+  -> i9:vec_index 16 -> i10:vec_index 16 -> i11:vec_index 16 -> i12:vec_index 16
+  -> i13:vec_index 16 -> i14:vec_index 16 -> i15:vec_index 16 -> i16:vec_index 16
+  -> i17:vec_index 16 -> i18:vec_index 16 -> i19:vec_index 16 -> i20:vec_index 16
+  -> i21:vec_index 16 -> i22:vec_index 16 -> i23:vec_index 16 -> i24:vec_index 16
+  -> i25:vec_index 16 -> i26:vec_index 16 -> i27:vec_index 16 -> i28:vec_index 16
+  -> i29:vec_index 16 -> i30:vec_index 16 -> i31:vec_index 16 -> i32:vec_index 16 ->
+  v2:vec_t t 32{let vv1 = vec_v v1 in
+    vec_v v2 == Lib.Sequence.create32 vv1.[v i1] vv1.[v i2] vv1.[v i3] vv1.[v i4]
+                         vv1.[v i5] vv1.[v i6] vv1.[v i7] vv1.[v i8]
+                         vv1.[v i9] vv1.[v i10] vv1.[v i11] vv1.[v i12]
+                         vv1.[v i13] vv1.[v i14] vv1.[v i15] vv1.[v i16]
+                         vv1.[v i17] vv1.[v i18] vv1.[v i19] vv1.[v i20]
+                         vv1.[v i21] vv1.[v i22] vv1.[v i23] vv1.[v i24]
+                         vv1.[v i25] vv1.[v i26] vv1.[v i27] vv1.[v i28]
+                         vv1.[v i29] vv1.[v i30] vv1.[v i31] vv1.[v i32]}
 
 inline_for_extraction
 val vec_rotate_right_lanes: #t:v_inttype -> #w:width
