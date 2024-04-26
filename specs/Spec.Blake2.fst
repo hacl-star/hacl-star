@@ -15,14 +15,16 @@ include Spec.Blake2.Definitions
 /// Serialize blake2s parameters to be xor'ed with the state during initialization
 /// As the state is represented using uint32, we need to serialize to uint32 instead
 /// of the more standard bytes representation
-let serialize_blake2s_params (p: blake2s_params) : lseq uint32 8 =
-  let s0 = (u32 (v p.digest_length)) ^.
-           (u32 (v p.key_length) <<. (size 8)) ^.
+let serialize_blake2s_params (p: blake2_params Blake2S) : lseq uint32 8 =
+  let s0 = (u32 (v #U8 #PUB p.digest_length)) ^.
+           (u32 (v #U8 #PUB p.key_length) <<. (size 8)) ^.
            (u32 (v p.fanout) <<. (size 16)) ^.
            (u32 (v p.depth) <<. (size 24)) in
   let s1 = p.leaf_length in
-  let s2 = p.node_offset in
-  let s3 = (u32 (v p.xof_length)) ^.
+  (* Take the first four bytes *)
+  let s2 = (to_u32 p.node_offset) in
+  (* Take the last four bytes of node_offset *)
+  let s3 = (to_u32 (p.node_offset >>. (size 32))) ^.
            (u32 (v p.node_depth) <<. (size 16)) ^.
            (u32 (v p.inner_length) <<. (size 24)) in
   let salt_u32: lseq uint32 2 = uints_from_bytes_le p.salt in
@@ -39,14 +41,13 @@ let serialize_blake2s_params (p: blake2s_params) : lseq uint32 8 =
 /// Serialize blake2b parameters to be xor'ed with the state during initialization
 /// As the state is represented using uint64, we need to serialize to uint64 instead
 /// of the more standard bytes representation
-let serialize_blake2b_params (p: blake2b_params) : lseq uint64 8 =
-  let s0 = (u64 (v p.digest_length)) ^.
-           (u64 (v p.key_length) <<. (size 8)) ^.
+let serialize_blake2b_params (p: blake2_params Blake2B) : lseq uint64 8 =
+  let s0 = (u64 (v #U8 #PUB p.digest_length)) ^.
+           (u64 (v #U8 #PUB p.key_length) <<. (size 8)) ^.
            (u64 (v p.fanout) <<. (size 16)) ^.
            (u64 (v p.depth) <<. (size 24)) ^.
            (u64 (v p.leaf_length) <<. (size 32)) in
-  let s1 = (u64 (v p.node_offset)) ^.
-           (u64 (v p.xof_length) <<. (size 32)) in
+  let s1 = p.node_offset in
   // The serialization corresponding to s2 contains node_depth and inner_length,
   // followed by the 14 reserved bytes which always seem to be zeros, and can hence
   // be ignored when building the corresponding uint64 using xor's
@@ -367,12 +368,10 @@ let blake2_update_blocks a prev m s =
 
 val blake2_init_hash:
     a:alg
-  -> p:blake2_params a
-  -> kk:size_nat{kk <= max_key a}
-  -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
+  -> blake2_params a ->
   Tot (state a)
 
-let blake2_init_hash a p kk nn =
+let blake2_init_hash a p =
   let iv0 = secret (ivTable a).[0] in
   let iv1 = secret (ivTable a).[1] in
   let iv2 = secret (ivTable a).[2] in
@@ -383,9 +382,6 @@ let blake2_init_hash a p kk nn =
   let iv7 = secret (ivTable a).[7] in
   let r0 = create_row #a iv0 iv1 iv2 iv3 in
   let r1 = create_row #a iv4 iv5 iv6 iv7 in
-  let p: blake2_params a =
-    set_key_length (set_digest_length p nn) kk
-  in
   let s = serialize_blake2_params p in
   let iv0' = iv0 ^. s.[0] in
   let iv1' = iv1 ^. s.[1] in
@@ -450,36 +446,40 @@ let blake2_finish a s nn =
   let full = (uints_to_bytes_le s.[0] @| uints_to_bytes_le s.[1]) in
   sub full 0 nn
 
+// Full generality, with parameters
 val blake2:
     a:alg
   -> d:bytes
-  -> p:blake2_params a
-  -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)}
-  -> k:lbytes kk
-  -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
-  Tot (lbytes nn)
+  -> p:blake2_params a {
+      let kk = p.key_length in
+      if kk = 0uy then length d <= max_limb a else length d + (size_block a) <= max_limb a
+  }
+  -> k:lbytes (UInt8.v p.key_length) ->
+  Tot (lbytes (UInt8.v p.digest_length))
 
-let blake2 a d p kk k nn =
-  let s = blake2_init_hash a p kk nn in
+let blake2 a d p k =
+  let kk = UInt8.v p.key_length in
+  let nn = UInt8.v p.digest_length in
+  let s = blake2_init_hash a p in
   let s = blake2_update a kk k d s in
   blake2_finish a s nn
 
+// Simplified API, no parameters
 val blake2s:
     d:bytes
-  -> p:blake2_params Blake2S
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d < pow2 64 else length d + 64 < pow2 64)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
   Tot (lbytes nn)
 
-let blake2s d p kk k n = blake2 Blake2S d p kk k n
+let blake2s d kk k n = blake2 Blake2S d { blake2_default_params Blake2S with key_length = UInt8.uint_to_t kk; digest_length = UInt8.uint_to_t n } k
 
 val blake2b:
     d:bytes
-  -> p:blake2_params Blake2B
   -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 128)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)
 
-let blake2b d p kk k n = blake2 Blake2B d p kk k n
+let blake2b d kk k n = blake2 Blake2B d { blake2_default_params Blake2B with key_length = UInt8.uint_to_t kk; digest_length = UInt8.uint_to_t n } k
+

@@ -44,7 +44,7 @@ main()
   EverCrypt_AutoConfig2_init();
 
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors) / sizeof(poly1305_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors) / sizeof(poly1305_test_vector); ++i) {
     ok &= print_test(
       vectors[i].input_len, vectors[i].input, vectors[i].key, vectors[i].tag);
   }
@@ -74,7 +74,7 @@ main()
   cycles cdiff1 = b - a;
 
   uint64_t count = ROUNDS * SIZE;
-  printf("Poly1305 (128-bit) PERF:\n");
+  printf("Poly1305 (128-bit) PERF: %"PRIu64"\n", res);
   print_time(count, tdiff1, cdiff1);
 
   if (ok)

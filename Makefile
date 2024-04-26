@@ -700,6 +700,8 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_Hash_Blake2b_Simd256:"libintvector.h"' \
   -add-include 'Hacl_MAC_Poly1305_Simd256:"libintvector.h"' \
   \
+  -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"' \
+  \
   -add-include 'Hacl_Gf128_NI:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
@@ -740,6 +742,7 @@ BUNDLE_FLAGS	=\
   $(BLAKE2_BUNDLE) \
   $(HMAC_BUNDLE) \
   $(SHA3_BUNDLE) \
+  $(SHA3_SIMD256_BUNDLE) \
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
   $(SHA2MB_BUNDLE) \
@@ -910,7 +913,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
-	  -no-prefix $(subst _,.,$*) \
+	  -no-prefix $(subst Hacl_Test_,Hacl.Test.,$*) \
           -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
 	  -add-include '"internal/Hacl_Hash_SHA2.h"' \
 	  -static-header Hacl.Impl.SHA2.Generic \
