@@ -217,7 +217,7 @@ static const uint32_t FStar_UInt128_u32_64 = (uint32_t)64U;
 
 inline static uint64_t
 FStar_UInt128_add_u64_shift_left(uint64_t hi, uint64_t lo, uint32_t s) {
-  return (hi << s) + (lo >> FStar_UInt128_u32_64 - s);
+  return (hi << s) + (lo >> (FStar_UInt128_u32_64 - s));
 }
 
 inline static uint64_t
@@ -241,7 +241,7 @@ inline static FStar_UInt128_uint128
 FStar_UInt128_shift_left_large(FStar_UInt128_uint128 a, uint32_t s) {
   FStar_UInt128_uint128 lit;
   lit.low = (uint64_t)0U;
-  lit.high = a.low << s - FStar_UInt128_u32_64;
+  lit.high = a.low << (s - FStar_UInt128_u32_64);
   return lit;
 }
 
@@ -267,7 +267,7 @@ FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s) {
 
 inline static uint64_t
 FStar_UInt128_add_u64_shift_right(uint64_t hi, uint64_t lo, uint32_t s) {
-  return (lo >> s) + (hi << FStar_UInt128_u32_64 - s);
+  return (lo >> s) + (hi << (FStar_UInt128_u32_64 - s));
 }
 
 inline static uint64_t
@@ -290,7 +290,7 @@ FStar_UInt128_shift_right_small(FStar_UInt128_uint128 a, uint32_t s) {
 inline static FStar_UInt128_uint128
 FStar_UInt128_shift_right_large(FStar_UInt128_uint128 a, uint32_t s) {
   FStar_UInt128_uint128 lit;
-  lit.low = a.high >> s - FStar_UInt128_u32_64;
+  lit.low = a.high >> (s - FStar_UInt128_u32_64);
   lit.high = (uint64_t)0U;
   return lit;
 }
@@ -488,7 +488,7 @@ FStar_UInt128_mul_wide_impl(uint64_t x, uint64_t y) {
           u1 * (y >> FStar_UInt128_u32_32) + FStar_UInt128_u64_mod_32(t_), w3);
   lit.high =
           x_ * (y >> FStar_UInt128_u32_32) + (t_ >> FStar_UInt128_u32_32) +
-          (u1 * (y >> FStar_UInt128_u32_32) + FStar_UInt128_u64_mod_32(t_) >>
+          ((u1 * (y >> FStar_UInt128_u32_32) + FStar_UInt128_u64_mod_32(t_)) >>
            FStar_UInt128_u32_32);
   return lit;
 }
