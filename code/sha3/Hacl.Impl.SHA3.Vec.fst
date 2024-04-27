@@ -992,7 +992,7 @@ let get_multiblock_t (m:m_spec) =
 inline_for_extraction noextract
 val get_multiblock_1: #m:m_spec{m == M32} -> get_multiblock_t m
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 let get_multiblock_1 #m rateInBytes len b i b' =
   let h0 = ST.get() in
   assert (v (i *! rateInBytes) == v i * v rateInBytes);
