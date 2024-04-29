@@ -80,12 +80,13 @@ let repeat_gen_blocks #inp_t #c blocksize mi hi inp a f l acc0 =
 
 let lemma_repeat_gen_blocks #inp_t #c blocksize mi hi inp a f l acc0 = ()
 
-
+#push-options "--z3rlimit_factor 2 --retry 2 --query_stats"
+#restart-solver
 let repeat_gen_blocks_multi_extensionality_zero #inp_t blocksize mi hi_f hi_g n inp a_f a_g f g acc0 =
   let f_rep = repeat_gen_blocks_f blocksize mi hi_f n inp a_f f in
   let g_rep = repeat_gen_blocks_f blocksize 0 hi_g n inp a_g g in
   repeat_gen_right_extensionality n mi a_g a_f g_rep f_rep acc0
-
+#pop-options
 
 let repeat_gen_blocks_extensionality_zero #inp_t #c blocksize mi hi_f hi_g n inp a_f a_g f l_f g l_g acc0 =
   let len = length inp in
