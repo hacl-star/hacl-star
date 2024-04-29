@@ -66,165 +66,49 @@ let personal_len (a:Spec.alg) : size_t =
   | Spec.Blake2B -> 16ul
 
 noeq
-type blake2s_params = {
-  digest_length: uint8;
-  key_length: uint8;
+inline_for_extraction // projectors
+type blake2_params (a:Spec.alg) = {
+  digest_length: digest_length: UInt8.t { 1 <= UInt8.v digest_length /\ UInt8.v digest_length <= Spec.max_output a };
+  key_length: key_length: UInt8.t { UInt8.v key_length <= Spec.max_key a };
   fanout: uint8;
   depth: uint8;
   leaf_length: uint32;
-  node_offset: uint32;
-  xof_length: uint16;
+  node_offset: Spec.node_offset_t a;
   node_depth: uint8;
   inner_length: uint8;
-  salt: lbuffer uint8 8ul;
-  personal: lbuffer uint8 8ul;
+  salt: lbuffer uint8 (salt_len a);
+  personal: lbuffer uint8 (personal_len a);
 }
 
-inline_for_extraction noextract
-let get_blake2s_salt (p: blake2s_params) = p.salt
+let blake2_params_inv (#a: Spec.alg) (h: mem) (p: blake2_params a): GTot prop =
+  live h p.salt /\ live h p.personal /\ LowStar.Buffer.loc_disjoint (loc_addr_of_buffer p.salt) (loc_addr_of_buffer p.personal)
 
-inline_for_extraction noextract
-let get_blake2s_personal (p: blake2s_params) = p.personal
+let blake2_params_loc (#a: Spec.alg) (p: blake2_params a) =
+  loc_addr_of_buffer p.salt `union` loc_addr_of_buffer p.personal
 
-inline_for_extraction noextract
-let set_blake2s_digest_length
-  (p: blake2s_params)
-  (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output Spec.Blake2S})
-  : blake2s_params =
-  {p with digest_length = to_u8 nn}
-
-inline_for_extraction noextract
-let set_blake2s_key_length
-  (p: blake2s_params)
-  (kk: size_t{v kk <= Spec.max_key Spec.Blake2S})
-  : blake2s_params =
-  {p with key_length = to_u8 kk}
-
-let blake2s_params_inv (h: mem) (p: blake2s_params): GTot prop =
-  live h p.salt /\ live h p.personal
-
-let blake2s_params_loc (p: blake2s_params) =
-  loc p.salt `union` loc p.personal
-
-let blake2s_params_v (h: mem) (p: blake2s_params): GTot Spec.blake2s_params =
-  Spec.Mkblake2s_params
+let blake2_params_v (#a: Spec.alg) (h: mem) (p: blake2_params a): GTot (Spec.blake2_params a) =
+  Spec.Mkblake2_params
     p.digest_length
     p.key_length
     p.fanout
     p.depth
     p.leaf_length
     p.node_offset
-    p.xof_length
     p.node_depth
     p.inner_length
     (as_seq h p.salt)
     (as_seq h p.personal)
 
-noeq
-type blake2b_params = {
-  digest_length: uint8;
-  key_length: uint8;
-  fanout: uint8;
-  depth: uint8;
-  leaf_length: uint32;
-  node_offset: uint32;
-  xof_length: uint32;
-  node_depth: uint8;
-  inner_length: uint8;
-  // Blake2b also contains 14 reserved bytes here, but they seem
-  // unused and to only contain zeros, hence we do not expose them
-  salt: lbuffer uint8 16ul;
-  personal: lbuffer uint8 16ul;
-}
-
-let blake2b_params_inv (h: mem) (p: blake2b_params): GTot prop =
-  live h p.salt /\ live h p.personal
-
-let blake2b_params_loc (p: blake2b_params) =
-  loc p.salt `union` loc p.personal
-
-let blake2b_params_v (h: mem) (p: blake2b_params): GTot Spec.blake2b_params =
-  Spec.Mkblake2b_params
-    p.digest_length
-    p.key_length
-    p.fanout
-    p.depth
-    p.leaf_length
-    p.node_offset
-    p.xof_length
-    p.node_depth
-    p.inner_length
-    (as_seq h p.salt)
-    (as_seq h p.personal)
-
-noextract inline_for_extraction
-let blake2_params (a:Spec.alg) =
-  match a with
-  | Spec.Blake2S -> blake2s_params
-  | Spec.Blake2B -> blake2b_params
-
 inline_for_extraction noextract
-let set_digest_length (#a: Spec.alg)
-  (p: blake2_params a)
-  (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output a})
-  : blake2_params a =
-  match a with
-  | Spec.Blake2S -> set_blake2s_digest_length p nn
-  | Spec.Blake2B -> {p with digest_length = to_u8 nn}
-
-inline_for_extraction noextract
-let set_key_length (#a: Spec.alg)
-  (p: blake2_params a)
-  (kk: size_t{v kk <= Spec.max_key a})
-  : blake2_params a =
-  match a with
-  | Spec.Blake2S -> set_blake2s_key_length p kk
-  | Spec.Blake2B -> {p with key_length = to_u8 kk}
-
-inline_for_extraction noextract
-let get_salt (#a: Spec.alg) (p: blake2_params a) : lbuffer uint8 (salt_len a) =
-  match a with
-  | Spec.Blake2S -> get_blake2s_salt p
-  | Spec.Blake2B -> p.salt
-
-inline_for_extraction noextract
-let get_personal (#a: Spec.alg) (p: blake2_params a) : lbuffer uint8 (personal_len a) =
-  match a with
-  | Spec.Blake2S -> get_blake2s_personal p
-  | Spec.Blake2B -> p.personal
-
-noextract inline_for_extraction
-let blake2_params_inv (#a:Spec.alg) (h: mem) (p: blake2_params a) =
-  match a with
-  | Spec.Blake2S -> blake2s_params_inv h p
-  | Spec.Blake2B -> blake2b_params_inv h p
-
-noextract inline_for_extraction
-let blake2_params_loc (#a:Spec.alg) (p: blake2_params a) =
-  match a with
-  | Spec.Blake2S -> blake2s_params_loc p
-  | Spec.Blake2B -> blake2b_params_loc p
-
-noextract inline_for_extraction
-let blake2_params_v (#a:Spec.alg) (h: mem) (p: blake2_params a) : GTot (Spec.blake2_params a) =
-  match a with
-  | Spec.Blake2S -> blake2s_params_v h p
-  | Spec.Blake2B -> blake2b_params_v h p
-
-noextract inline_for_extraction
-val create_default_params: a:Spec.alg ->
-  salt: lbuffer uint8 (salt_len a) ->
-  personal: lbuffer uint8 (personal_len a) ->
-  Stack (blake2_params a)
-    (requires fun h -> live h salt /\ live h personal /\
-      as_seq h salt == Seq.create (Spec.salt_length a) (u8 0) /\
-      as_seq h personal == Seq.create (Spec.personal_length a) (u8 0)
-    )
-    (ensures (fun h0 p h1 ->
-      h0 == h1 /\
-      blake2_params_loc p == loc salt `union` loc personal /\
-      blake2_params_inv h1 p /\
-      blake2_params_v h1 p == Spec.blake2_default_params a))
+val alloca_default_params: a: Spec.alg -> StackInline (blake2_params a)
+  (requires (fun _ -> True))
+  (ensures (fun h0 s h1 ->
+    blake2_params_inv h1 s /\
+    blake2_params_v h1 s == Spec.blake2_default_params a /\
+    LowStar.Buffer.(modifies loc_none h0 h1) /\
+    LowStar.Buffer.fresh_loc (blake2_params_loc s) h0 h1 /\
+    LowStar.Buffer.(loc_includes (loc_region_only true (FStar.HyperStack.get_tip h1))
+        (blake2_params_loc s))))
 
 noextract inline_for_extraction
 unfold let state_p (a:Spec.alg) (m:m_spec) =
@@ -393,7 +277,6 @@ val alloc_state: a:Spec.alg -> m:m_spec ->
 	  (requires (fun h -> True))
 	  (ensures (fun h0 r h1 -> stack_allocated r h0 h1 (Lib.Sequence.create (4 * v (row_len a m)) (zero_element a m)) /\
 				live h1 r))
-
 
 
 noextract inline_for_extraction

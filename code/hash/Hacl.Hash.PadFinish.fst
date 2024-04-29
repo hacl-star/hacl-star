@@ -241,7 +241,14 @@ friend Spec.Agile.Hash
 
 noextract inline_for_extraction
 let finish_sha3 (a: keccak_alg { not (is_shake a) }): finish_st (| a, () |) = fun s dst ->
-  Hacl.Impl.SHA3.squeeze s (block_len a) (hash_len a) dst
+  let open Lib.NTuple in
+  let open Lib.MultiBuffer in
+  let open Hacl.Spec.SHA3.Vec.Common in
+  let h0 = ST.get() in
+  Lib.IntVector.reveal_vec_1 U64;
+  Hacl.Impl.SHA3.Vec.squeeze #M32 s (block_len a) (hash_len a) (ntup1 dst);
+  Hacl.Spec.SHA3.Equiv.squeeze_s_lemma (B.as_seq h0 s) (v (block_len a))
+    (v (hash_len a)) (as_seq_multi h0 (ntup1 dst))
 
 noextract inline_for_extraction
 let finish i s dst =

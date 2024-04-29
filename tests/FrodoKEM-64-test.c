@@ -48,7 +48,7 @@ main()
     printf("[FrodoKEM] Self-test: FAIL\n");
   }
 
-  for (int i = 0; i < sizeof(vectors) / sizeof(frodo_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors) / sizeof(frodo_test_vector); ++i) {
     pass &= test_dec(vectors[i].sk, vectors[i].ct, vectors[i].ss);
   }
 
