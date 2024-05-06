@@ -39,6 +39,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       field hacl_Hash_Blake2b_index "key_length" uint8_t
     let hacl_Hash_Blake2b_index_digest_length =
       field hacl_Hash_Blake2b_index "digest_length" uint8_t
+    let hacl_Hash_Blake2b_index_last_node =
+      field hacl_Hash_Blake2b_index "last_node" bool
     let _ = seal hacl_Hash_Blake2b_index
     let hacl_Hash_Blake2b_init =
       foreign "Hacl_Hash_Blake2b_init"
@@ -65,7 +67,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_block_state_t_snd =
       field hacl_Hash_Blake2b_block_state_t "snd" uint8_t
     let hacl_Hash_Blake2b_block_state_t_thd =
-      field hacl_Hash_Blake2b_block_state_t "thd" k____uint64_t___uint64_t_
+      field hacl_Hash_Blake2b_block_state_t "thd" bool
+    let hacl_Hash_Blake2b_block_state_t_f3 =
+      field hacl_Hash_Blake2b_block_state_t "f3" k____uint64_t___uint64_t_
     let _ = seal hacl_Hash_Blake2b_block_state_t
     type hacl_Hash_Blake2b_state_t = [ `hacl_Hash_Blake2b_state_t ] structure
     let (hacl_Hash_Blake2b_state_t :
@@ -82,7 +86,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_malloc_with_params_and_key =
       foreign "Hacl_Hash_Blake2b_malloc_with_params_and_key"
         ((ptr hacl_Hash_Blake2b_blake2_params) @->
-           (ocaml_bytes @-> (returning (ptr hacl_Hash_Blake2b_state_t))))
+           (bool @->
+              (ocaml_bytes @-> (returning (ptr hacl_Hash_Blake2b_state_t)))))
     let hacl_Hash_Blake2b_malloc_with_key =
       foreign "Hacl_Hash_Blake2b_malloc_with_key"
         (ocaml_bytes @->
@@ -110,7 +115,11 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_digest =
       foreign "Hacl_Hash_Blake2b_digest"
         ((ptr hacl_Hash_Blake2b_state_t) @->
-           (ocaml_bytes @-> (returning void)))
+           (ocaml_bytes @-> (returning uint8_t)))
+    let hacl_Hash_Blake2b_info =
+      foreign "Hacl_Hash_Blake2b_info"
+        ((ptr hacl_Hash_Blake2b_state_t) @->
+           (returning hacl_Hash_Blake2b_index))
     let hacl_Hash_Blake2b_free =
       foreign "Hacl_Hash_Blake2b_free"
         ((ptr hacl_Hash_Blake2b_state_t) @-> (returning void))
@@ -125,8 +134,8 @@ module Bindings(F:Cstubs.FOREIGN) =
               (ocaml_bytes @->
                  (uint32_t @->
                     (ocaml_bytes @-> (uint32_t @-> (returning void)))))))
-    let hacl_Hash_Blake2b_hash_with_key_and_paramas =
-      foreign "Hacl_Hash_Blake2b_hash_with_key_and_paramas"
+    let hacl_Hash_Blake2b_hash_with_key_and_params =
+      foreign "Hacl_Hash_Blake2b_hash_with_key_and_params"
         (ocaml_bytes @->
            (ocaml_bytes @->
               (uint32_t @->
