@@ -83,4 +83,7 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_SHA2_uint8_2x8p_snd =
       field hacl_Hash_SHA2_uint8_2x8p "snd" hacl_Hash_SHA2_uint8_8p
     let _ = seal hacl_Hash_SHA2_uint8_2x8p
+    type hacl_Hash_SHA2_bufx4 = hacl_Hash_SHA2_uint8_4p
+    let hacl_Hash_SHA2_bufx4 =
+      typedef hacl_Hash_SHA2_uint8_4p "Hacl_Hash_SHA2_bufx4"
   end

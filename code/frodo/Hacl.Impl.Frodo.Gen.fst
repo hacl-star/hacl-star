@@ -20,7 +20,7 @@ module Loops = Lib.LoopCombinators
 
 module S = Spec.Frodo.Gen
 module Lemmas = Spec.Frodo.Lemmas
-module SHA3 = Hacl.SHA3
+module SHA3 = Hacl.Hash.SHA3.Scalar
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -80,7 +80,7 @@ val frodo_gen_matrix_shake1:
 
 let frodo_gen_matrix_shake1 n tmp_seed r i res =
   concat_ind_seed tmp_seed i;
-  SHA3.shake128_hacl 18ul tmp_seed (2ul *! n) r;
+  SHA3.shake128 r (2ul *! n) tmp_seed 18ul;
 
   [@ inline_let]
   let spec h0 = S.frodo_gen_matrix_shake0 (v n) (v i) (as_seq h0 r) in

@@ -66,9 +66,10 @@ let personal_len (a:Spec.alg) : size_t =
   | Spec.Blake2B -> 16ul
 
 noeq
+inline_for_extraction // projectors
 type blake2_params (a:Spec.alg) = {
-  digest_length: uint8;
-  key_length: uint8;
+  digest_length: digest_length: UInt8.t { 1 <= UInt8.v digest_length /\ UInt8.v digest_length <= Spec.max_output a };
+  key_length: key_length: UInt8.t { UInt8.v key_length <= Spec.max_key a };
   fanout: uint8;
   depth: uint8;
   leaf_length: uint32;
@@ -80,10 +81,10 @@ type blake2_params (a:Spec.alg) = {
 }
 
 let blake2_params_inv (#a: Spec.alg) (h: mem) (p: blake2_params a): GTot prop =
-  live h p.salt /\ live h p.personal
+  live h p.salt /\ live h p.personal /\ LowStar.Buffer.loc_disjoint (loc_addr_of_buffer p.salt) (loc_addr_of_buffer p.personal)
 
 let blake2_params_loc (#a: Spec.alg) (p: blake2_params a) =
-  loc p.salt `union` loc p.personal
+  loc_addr_of_buffer p.salt `union` loc_addr_of_buffer p.personal
 
 let blake2_params_v (#a: Spec.alg) (h: mem) (p: blake2_params a): GTot (Spec.blake2_params a) =
   Spec.Mkblake2_params
@@ -98,20 +99,16 @@ let blake2_params_v (#a: Spec.alg) (h: mem) (p: blake2_params a): GTot (Spec.bla
     (as_seq h p.salt)
     (as_seq h p.personal)
 
-noextract inline_for_extraction
-val create_default_params: a:Spec.alg ->
-  salt: lbuffer uint8 (salt_len a) ->
-  personal: lbuffer uint8 (personal_len a) ->
-  Stack (blake2_params a)
-    (requires fun h -> live h salt /\ live h personal /\
-      as_seq h salt == Seq.create (Spec.salt_length a) (u8 0) /\
-      as_seq h personal == Seq.create (Spec.personal_length a) (u8 0)
-    )
-    (ensures (fun h0 p h1 ->
-      h0 == h1 /\
-      blake2_params_loc p == loc salt `union` loc personal /\
-      blake2_params_inv h1 p /\
-      blake2_params_v h1 p == Spec.blake2_default_params a))
+inline_for_extraction noextract
+val alloca_default_params: a: Spec.alg -> StackInline (blake2_params a)
+  (requires (fun _ -> True))
+  (ensures (fun h0 s h1 ->
+    blake2_params_inv h1 s /\
+    blake2_params_v h1 s == Spec.blake2_default_params a /\
+    LowStar.Buffer.(modifies loc_none h0 h1) /\
+    LowStar.Buffer.fresh_loc (blake2_params_loc s) h0 h1 /\
+    LowStar.Buffer.(loc_includes (loc_region_only true (FStar.HyperStack.get_tip h1))
+        (blake2_params_loc s))))
 
 noextract inline_for_extraction
 unfold let state_p (a:Spec.alg) (m:m_spec) =

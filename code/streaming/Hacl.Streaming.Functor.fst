@@ -248,6 +248,19 @@ let frame_invariant #index c i l s h0 h1 =
 let frame_seen #_ _ _ _ _ _ _ =
   ()
 
+let frame_key #index c i l s h0 h1 =
+  let state_t = B.deref h0 s in
+  let State block_state _ _ _ p_key = state_t in
+  c.state.frame_invariant #i l block_state h0 h1;
+  stateful_frame_preserves_freeable #index #c.state #i l block_state h0 h1;
+  allow_inversion key_management;
+  match c.km with
+  | Erased -> ()
+  | Runtime ->
+      stateful_frame_preserves_freeable #index #c.key #i l p_key h0 h1;
+      c.key.frame_invariant #i l p_key h0 h1
+
+
 /// Stateful API
 /// ============
 
@@ -1799,6 +1812,10 @@ let digest #index c i t t' state output l =
   B.popped_modifies h6 h7;
   assert (B.(modifies mloc h0 h7))
 #pop-options
+
+let digest_erased #index c i t t' state output l =
+  let i = index_of_state #index c i t t' state in
+  digest #index c i t t' state output l
 
 let free #index c i t t' state =
   let _ = allow_inversion key_management in

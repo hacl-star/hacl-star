@@ -253,8 +253,7 @@ let uints_from_bytes_be #t #l #len o i =
   let h1 = ST.get() in
   assert (Seq.equal (as_seq h1 o) (BS.uints_from_bytes_be (as_seq h0 i)))
 
-#push-options "--z3rlimit 100 --retry 4" // This proof is pretty flaky
-
+#push-options "--z3rlimit 300" // This proof is pretty flaky
 let uints_to_bytes_le #t #l len o i =
   let h0 = ST.get () in
   [@ inline_let]

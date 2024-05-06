@@ -75,14 +75,17 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_SHA3_is_shake =
       foreign "Hacl_Hash_SHA3_is_shake"
         ((ptr hacl_Hash_SHA3_state_t) @-> (returning bool))
-    let hacl_Hash_SHA3_shake128_hacl =
-      foreign "Hacl_Hash_SHA3_shake128_hacl"
-        (uint32_t @->
-           (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void)))))
-    let hacl_Hash_SHA3_shake256_hacl =
-      foreign "Hacl_Hash_SHA3_shake256_hacl"
-        (uint32_t @->
-           (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void)))))
+    let hacl_Hash_SHA3_absorb_inner_32 =
+      foreign "Hacl_Hash_SHA3_absorb_inner_32"
+        (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_Hash_SHA3_shake128 =
+      foreign "Hacl_Hash_SHA3_shake128"
+        (ocaml_bytes @->
+           (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
+    let hacl_Hash_SHA3_shake256 =
+      foreign "Hacl_Hash_SHA3_shake256"
+        (ocaml_bytes @->
+           (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
     let hacl_Hash_SHA3_sha3_224 =
       foreign "Hacl_Hash_SHA3_sha3_224"
         (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
@@ -95,25 +98,19 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_SHA3_sha3_512 =
       foreign "Hacl_Hash_SHA3_sha3_512"
         (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
-    let hacl_Hash_SHA3_state_permute =
-      foreign "Hacl_Hash_SHA3_state_permute"
+    let hacl_Hash_SHA3_state_malloc =
+      foreign "Hacl_Hash_SHA3_state_malloc"
+        (void @-> (returning (ptr uint64_t)))
+    let hacl_Hash_SHA3_state_free =
+      foreign "Hacl_Hash_SHA3_state_free"
         ((ptr uint64_t) @-> (returning void))
-    let hacl_Hash_SHA3_loadState =
-      foreign "Hacl_Hash_SHA3_loadState"
-        (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Hash_SHA3_absorb_inner =
-      foreign "Hacl_Hash_SHA3_absorb_inner"
-        (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Hash_SHA3_squeeze0 =
-      foreign "Hacl_Hash_SHA3_squeeze0"
-        ((ptr uint64_t) @->
-           (uint32_t @-> (uint32_t @-> (ocaml_bytes @-> (returning void)))))
-    let hacl_Hash_SHA3_keccak =
-      foreign "Hacl_Hash_SHA3_keccak"
-        (uint32_t @->
-           (uint32_t @->
-              (uint32_t @->
-                 (ocaml_bytes @->
-                    (uint8_t @->
-                       (uint32_t @-> (ocaml_bytes @-> (returning void))))))))
+    let hacl_Hash_SHA3_shake128_absorb_nblocks =
+      foreign "Hacl_Hash_SHA3_shake128_absorb_nblocks"
+        ((ptr uint64_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+    let hacl_Hash_SHA3_shake128_absorb_final =
+      foreign "Hacl_Hash_SHA3_shake128_absorb_final"
+        ((ptr uint64_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+    let hacl_Hash_SHA3_shake128_squeeze_nblocks =
+      foreign "Hacl_Hash_SHA3_shake128_squeeze_nblocks"
+        ((ptr uint64_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
   end
