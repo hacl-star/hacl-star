@@ -1248,6 +1248,176 @@ let test43_expected : lbytes 64 =
   let res = of_list res_l in
   res
 
+let test44_params : S.blake2_params S.Blake2S =
+  let salt_l = List.Tot.map u8_from_UInt8 [0x06uy; 0xecuy; 0xebuy; 0xf8uy; 0xf2uy; 0xbeuy; 0x59uy; 0x79uy] in
+  assert_norm(FStar.List.length salt_l = 8);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0x7buy; 0x9auy; 0x3cuy; 0xdcuy; 0xcduy; 0x7duy; 0x5cuy; 0x2duy] in
+  assert_norm(FStar.List.length personal_l = 8);
+  let personal = of_list personal_l in
+  assert_norm(1362450295 <= pow2 32 - 1);
+  assert_norm(85615385538768 <= pow2 48 - 1);
+  {S.blake2_default_params S.Blake2S with fanout = u8 187; depth = u8 199; leaf_length = u32 1362450295; node_offset = u64 85615385538768; node_depth = u8 59; inner_length = u8 21; salt; personal}
+
+let test44_expected : lbytes 32 =
+  let res_l = List.Tot.map u8_from_UInt8 [0xd9uy; 0xafuy; 0xc8uy; 0x54uy; 0xc4uy; 0x69uy; 0xecuy; 0x72uy; 0x27uy; 0x56uy; 0x7buy; 0xf2uy; 0x1fuy; 0xfbuy; 0xa5uy; 0x22uy; 0x42uy; 0xacuy; 0xdfuy; 0xfduy; 0x57uy; 0xb2uy; 0x66uy; 0xe4uy; 0x16uy; 0x87uy; 0x83uy; 0x9cuy; 0xd2uy; 0x12uy; 0xfduy; 0xb2uy] in
+  assert_norm(FStar.List.length res_l = 32);
+  let res = of_list res_l in
+  res
+
+let test45_params : S.blake2_params S.Blake2B =
+  let salt_l = List.Tot.map u8_from_UInt8 [0xaauy; 0x5auy; 0x3cuy; 0xf5uy; 0xc2uy; 0xeauy; 0x51uy; 0x8auy; 0xd4uy; 0x0buy; 0x12uy; 0xabuy; 0x29uy; 0x50uy; 0xdduy; 0xeduy] in
+  assert_norm(FStar.List.length salt_l = 16);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0x7euy; 0xdduy; 0x80uy; 0x1duy; 0xd2uy; 0xe8uy; 0xbfuy; 0xdduy; 0x6euy; 0xbduy; 0xb4uy; 0x4duy; 0xdauy; 0x7buy; 0x8auy; 0x5fuy] in
+  assert_norm(FStar.List.length personal_l = 16);
+  let personal = of_list personal_l in
+  assert_norm(535009759 <= pow2 32 - 1);
+  assert_norm(16948333065836724301 <= pow2 64 - 1);
+  {S.blake2_default_params S.Blake2B with fanout = u8 77; depth = u8 75; leaf_length = u32 535009759; node_offset = u64 16948333065836724301; node_depth = u8 147; inner_length = u8 3; salt; personal}
+
+let test45_expected : lbytes 64 =
+  let res_l = List.Tot.map u8_from_UInt8 [0x57uy; 0xc4uy; 0x26uy; 0x89uy; 0xd0uy; 0x79uy; 0xbeuy; 0x20uy; 0x6auy; 0xb8uy; 0x1duy; 0x05uy; 0xf5uy; 0x54uy; 0x33uy; 0xf1uy; 0x71uy; 0x3euy; 0x1buy; 0x85uy; 0x86uy; 0x2duy; 0x34uy; 0xacuy; 0x0duy; 0xdduy; 0x71uy; 0x53uy; 0x28uy; 0x3duy; 0x2auy; 0xceuy; 0x74uy; 0xdeuy; 0xaduy; 0xc5uy; 0xb6uy; 0x85uy; 0x18uy; 0x2euy; 0xa6uy; 0x70uy; 0x8cuy; 0xacuy; 0xeduy; 0x28uy; 0x7fuy; 0x20uy; 0x08uy; 0x8cuy; 0xc1uy; 0x85uy; 0x51uy; 0x09uy; 0x7euy; 0x37uy; 0x56uy; 0xb7uy; 0xb1uy; 0xa4uy; 0x69uy; 0xf0uy; 0x08uy; 0x3duy] in
+  assert_norm(FStar.List.length res_l = 64);
+  let res = of_list res_l in
+  res
+
+let test46_params : S.blake2_params S.Blake2S =
+  let salt_l = List.Tot.map u8_from_UInt8 [0xbauy; 0xfbuy; 0xb5uy; 0x6duy; 0xa2uy; 0x6euy; 0xdcuy; 0x46uy] in
+  assert_norm(FStar.List.length salt_l = 8);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0xd5uy; 0x29uy; 0x0auy; 0x8euy; 0x07uy; 0xb6uy; 0xd9uy; 0xefuy] in
+  assert_norm(FStar.List.length personal_l = 8);
+  let personal = of_list personal_l in
+  assert_norm(899983631 <= pow2 32 - 1);
+  assert_norm(53385766424691 <= pow2 48 - 1);
+  {S.blake2_default_params S.Blake2S with fanout = u8 57; depth = u8 104; leaf_length = u32 899983631; node_offset = u64 53385766424691; node_depth = u8 68; inner_length = u8 21; salt; personal}
+
+let test46_expected : lbytes 32 =
+  let res_l = List.Tot.map u8_from_UInt8 [0x40uy; 0x98uy; 0xa1uy; 0xa5uy; 0x32uy; 0x74uy; 0x78uy; 0xc0uy; 0x0buy; 0xccuy; 0xaeuy; 0x87uy; 0xe2uy; 0x30uy; 0x8euy; 0xf3uy; 0xccuy; 0xe0uy; 0x6auy; 0x5cuy; 0xbeuy; 0x44uy; 0x59uy; 0xf9uy; 0xe2uy; 0x4buy; 0x51uy; 0xbbuy; 0xeeuy; 0xfauy; 0xe5uy; 0xacuy] in
+  assert_norm(FStar.List.length res_l = 32);
+  let res = of_list res_l in
+  res
+
+let test47_params : S.blake2_params S.Blake2B =
+  let salt_l = List.Tot.map u8_from_UInt8 [0x23uy; 0x8euy; 0xacuy; 0x5euy; 0x7buy; 0x38uy; 0x4auy; 0x16uy; 0x93uy; 0xcfuy; 0xc4uy; 0x0duy; 0xaauy; 0xdeuy; 0xccuy; 0xb4uy] in
+  assert_norm(FStar.List.length salt_l = 16);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0x7buy; 0x56uy; 0xdeuy; 0x8auy; 0x1buy; 0xfbuy; 0xdeuy; 0x82uy; 0x28uy; 0x6auy; 0x6duy; 0xbbuy; 0xfduy; 0x54uy; 0x01uy; 0x9buy] in
+  assert_norm(FStar.List.length personal_l = 16);
+  let personal = of_list personal_l in
+  assert_norm(4196837398 <= pow2 32 - 1);
+  assert_norm(13290506241594705849 <= pow2 64 - 1);
+  {S.blake2_default_params S.Blake2B with fanout = u8 90; depth = u8 20; leaf_length = u32 4196837398; node_offset = u64 13290506241594705849; node_depth = u8 193; inner_length = u8 4; salt; personal}
+
+let test47_expected : lbytes 64 =
+  let res_l = List.Tot.map u8_from_UInt8 [0x3duy; 0xdfuy; 0xc7uy; 0x59uy; 0xeauy; 0x6cuy; 0x18uy; 0x3cuy; 0xb0uy; 0x97uy; 0xf9uy; 0xe4uy; 0x64uy; 0x04uy; 0x5buy; 0x92uy; 0x23uy; 0x3duy; 0xa0uy; 0xc0uy; 0xd2uy; 0xa9uy; 0xc2uy; 0x4fuy; 0x2fuy; 0xfauy; 0x2fuy; 0x23uy; 0x7euy; 0xf6uy; 0xf6uy; 0xe5uy; 0xf1uy; 0x76uy; 0xd4uy; 0x57uy; 0x61uy; 0xe2uy; 0x0cuy; 0x58uy; 0x07uy; 0x55uy; 0x58uy; 0x85uy; 0x97uy; 0xa1uy; 0x71uy; 0xe4uy; 0x35uy; 0xd9uy; 0xd2uy; 0x03uy; 0x1fuy; 0x71uy; 0x14uy; 0x9buy; 0xdauy; 0x8duy; 0x20uy; 0x1buy; 0xd1uy; 0xdeuy; 0xe9uy; 0xe4uy] in
+  assert_norm(FStar.List.length res_l = 64);
+  let res = of_list res_l in
+  res
+
+let test48_params : S.blake2_params S.Blake2S =
+  let salt_l = List.Tot.map u8_from_UInt8 [0xbduy; 0xfcuy; 0x9buy; 0x4duy; 0x13uy; 0xd9uy; 0x9fuy; 0xc0uy] in
+  assert_norm(FStar.List.length salt_l = 8);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0xaduy; 0xfcuy; 0x6buy; 0xceuy; 0xafuy; 0xfeuy; 0xb7uy; 0xabuy] in
+  assert_norm(FStar.List.length personal_l = 8);
+  let personal = of_list personal_l in
+  assert_norm(1090015579 <= pow2 32 - 1);
+  assert_norm(30090896101163 <= pow2 48 - 1);
+  {S.blake2_default_params S.Blake2S with fanout = u8 127; depth = u8 193; leaf_length = u32 1090015579; node_offset = u64 30090896101163; node_depth = u8 130; inner_length = u8 32; salt; personal}
+
+let test48_expected : lbytes 32 =
+  let res_l = List.Tot.map u8_from_UInt8 [0x51uy; 0x76uy; 0x2fuy; 0xa0uy; 0x58uy; 0x73uy; 0xb8uy; 0x3duy; 0xdcuy; 0x60uy; 0x6fuy; 0xcbuy; 0x3auy; 0xaeuy; 0x0cuy; 0x15uy; 0xa6uy; 0x8buy; 0x02uy; 0xf4uy; 0x43uy; 0x7auy; 0xfduy; 0x78uy; 0x4auy; 0xaeuy; 0x19uy; 0xc8uy; 0x6fuy; 0x99uy; 0xffuy; 0x8euy] in
+  assert_norm(FStar.List.length res_l = 32);
+  let res = of_list res_l in
+  res
+
+let test49_params : S.blake2_params S.Blake2B =
+  let salt_l = List.Tot.map u8_from_UInt8 [0xaauy; 0xfeuy; 0xcauy; 0xefuy; 0xe6uy; 0xc0uy; 0x0duy; 0xbbuy; 0xccuy; 0xabuy; 0xfauy; 0x0euy; 0x9cuy; 0xd6uy; 0x2fuy; 0x46uy] in
+  assert_norm(FStar.List.length salt_l = 16);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0x2auy; 0xdcuy; 0xfcuy; 0x28uy; 0x3cuy; 0xc5uy; 0xb1uy; 0x09uy; 0xf8uy; 0x3duy; 0xb0uy; 0x4buy; 0xbfuy; 0x9cuy; 0x71uy; 0xeauy] in
+  assert_norm(FStar.List.length personal_l = 16);
+  let personal = of_list personal_l in
+  assert_norm(554420508 <= pow2 32 - 1);
+  assert_norm(5143949409786935983 <= pow2 64 - 1);
+  {S.blake2_default_params S.Blake2B with fanout = u8 97; depth = u8 221; leaf_length = u32 554420508; node_offset = u64 5143949409786935983; node_depth = u8 127; inner_length = u8 35; salt; personal}
+
+let test49_expected : lbytes 64 =
+  let res_l = List.Tot.map u8_from_UInt8 [0x5fuy; 0x49uy; 0x23uy; 0xa4uy; 0xa6uy; 0x6fuy; 0xb8uy; 0x37uy; 0x73uy; 0x7buy; 0x3buy; 0xa6uy; 0x32uy; 0x31uy; 0xc9uy; 0x91uy; 0x01uy; 0x42uy; 0x46uy; 0x4euy; 0xcbuy; 0xc5uy; 0xebuy; 0xfduy; 0x61uy; 0x4fuy; 0x04uy; 0xfduy; 0xfbuy; 0x60uy; 0x90uy; 0xf6uy; 0xf4uy; 0x7euy; 0x59uy; 0xb3uy; 0xf7uy; 0xd8uy; 0xfbuy; 0xf1uy; 0xd7uy; 0xffuy; 0x00uy; 0x6buy; 0x70uy; 0x47uy; 0x59uy; 0xd0uy; 0xacuy; 0xd3uy; 0x84uy; 0x0buy; 0x4fuy; 0x6duy; 0x88uy; 0xb4uy; 0xe8uy; 0xa0uy; 0x76uy; 0x3fuy; 0xcauy; 0x31uy; 0x34uy; 0x57uy] in
+  assert_norm(FStar.List.length res_l = 64);
+  let res = of_list res_l in
+  res
+
+let test50_params : S.blake2_params S.Blake2S =
+  let salt_l = List.Tot.map u8_from_UInt8 [0x8cuy; 0xb8uy; 0xfeuy; 0x1buy; 0xafuy; 0x46uy; 0x50uy; 0x02uy] in
+  assert_norm(FStar.List.length salt_l = 8);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0xeeuy; 0x5auy; 0x9buy; 0x4cuy; 0xc7uy; 0xdauy; 0xeeuy; 0xbbuy] in
+  assert_norm(FStar.List.length personal_l = 8);
+  let personal = of_list personal_l in
+  assert_norm(267445477 <= pow2 32 - 1);
+  assert_norm(109356526304376 <= pow2 48 - 1);
+  {S.blake2_default_params S.Blake2S with fanout = u8 150; depth = u8 96; leaf_length = u32 267445477; node_offset = u64 109356526304376; node_depth = u8 89; inner_length = u8 20; salt; personal}
+
+let test50_expected : lbytes 32 =
+  let res_l = List.Tot.map u8_from_UInt8 [0xb9uy; 0x1cuy; 0x86uy; 0x66uy; 0xb6uy; 0x13uy; 0xacuy; 0x6buy; 0xaeuy; 0x1duy; 0xb3uy; 0x88uy; 0x67uy; 0x3cuy; 0x09uy; 0xffuy; 0x9euy; 0xfduy; 0x3euy; 0xbauy; 0x92uy; 0xa5uy; 0x0cuy; 0x04uy; 0xa6uy; 0x47uy; 0x71uy; 0x5auy; 0x72uy; 0xe7uy; 0x50uy; 0xd6uy] in
+  assert_norm(FStar.List.length res_l = 32);
+  let res = of_list res_l in
+  res
+
+let test51_params : S.blake2_params S.Blake2B =
+  let salt_l = List.Tot.map u8_from_UInt8 [0xffuy; 0xe2uy; 0xe4uy; 0x79uy; 0xcauy; 0x8cuy; 0x34uy; 0x6auy; 0xebuy; 0x8euy; 0xe8uy; 0xf8uy; 0xf3uy; 0x8cuy; 0xb6uy; 0xaduy] in
+  assert_norm(FStar.List.length salt_l = 16);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0xc6uy; 0xb5uy; 0xbeuy; 0xccuy; 0xfauy; 0x9fuy; 0xdeuy; 0xa0uy; 0x05uy; 0x41uy; 0xa7uy; 0x8auy; 0xd1uy; 0xe1uy; 0xfcuy; 0xdfuy] in
+  assert_norm(FStar.List.length personal_l = 16);
+  let personal = of_list personal_l in
+  assert_norm(3767669315 <= pow2 32 - 1);
+  assert_norm(2936363865057842039 <= pow2 64 - 1);
+  {S.blake2_default_params S.Blake2B with fanout = u8 8; depth = u8 193; leaf_length = u32 3767669315; node_offset = u64 2936363865057842039; node_depth = u8 88; inner_length = u8 31; salt; personal}
+
+let test51_expected : lbytes 64 =
+  let res_l = List.Tot.map u8_from_UInt8 [0x67uy; 0x3fuy; 0xdauy; 0x63uy; 0x74uy; 0x8fuy; 0x36uy; 0x20uy; 0xebuy; 0xa7uy; 0x36uy; 0xb2uy; 0x01uy; 0x54uy; 0x5buy; 0xe1uy; 0x7auy; 0xfcuy; 0x5fuy; 0x3buy; 0xe9uy; 0x5auy; 0x48uy; 0xb5uy; 0x5buy; 0x67uy; 0xc4uy; 0x92uy; 0xdfuy; 0x8euy; 0x89uy; 0x6fuy; 0xabuy; 0x51uy; 0xe6uy; 0xbbuy; 0x3fuy; 0xfcuy; 0xa3uy; 0x53uy; 0x05uy; 0xdauy; 0x13uy; 0x2fuy; 0x0cuy; 0xf4uy; 0xd8uy; 0x18uy; 0x9duy; 0xceuy; 0x48uy; 0xd2uy; 0x31uy; 0xb4uy; 0x81uy; 0xf9uy; 0x03uy; 0x7fuy; 0x47uy; 0xdduy; 0xbauy; 0x44uy; 0x6fuy; 0x52uy] in
+  assert_norm(FStar.List.length res_l = 64);
+  let res = of_list res_l in
+  res
+
+let test52_params : S.blake2_params S.Blake2S =
+  let salt_l = List.Tot.map u8_from_UInt8 [0x7auy; 0xa3uy; 0x80uy; 0xf4uy; 0xdcuy; 0xe5uy; 0xbauy; 0xbbuy] in
+  assert_norm(FStar.List.length salt_l = 8);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0x9auy; 0xe2uy; 0x9duy; 0xdbuy; 0x9duy; 0xd6uy; 0x5duy; 0xeauy] in
+  assert_norm(FStar.List.length personal_l = 8);
+  let personal = of_list personal_l in
+  assert_norm(351931028 <= pow2 32 - 1);
+  assert_norm(194391997976753 <= pow2 48 - 1);
+  {S.blake2_default_params S.Blake2S with fanout = u8 179; depth = u8 71; leaf_length = u32 351931028; node_offset = u64 194391997976753; node_depth = u8 226; inner_length = u8 31; salt; personal}
+
+let test52_expected : lbytes 32 =
+  let res_l = List.Tot.map u8_from_UInt8 [0x7cuy; 0x81uy; 0x12uy; 0xeeuy; 0x42uy; 0x5auy; 0x71uy; 0xf4uy; 0x9auy; 0xccuy; 0x56uy; 0x4buy; 0x76uy; 0xe9uy; 0x28uy; 0x19uy; 0xd0uy; 0x37uy; 0xdfuy; 0x78uy; 0xd9uy; 0xf6uy; 0x33uy; 0x5cuy; 0xe6uy; 0x80uy; 0x5fuy; 0xeauy; 0x97uy; 0x72uy; 0x29uy; 0x9auy] in
+  assert_norm(FStar.List.length res_l = 32);
+  let res = of_list res_l in
+  res
+
+let test53_params : S.blake2_params S.Blake2B =
+  let salt_l = List.Tot.map u8_from_UInt8 [0xdduy; 0xb4uy; 0xe6uy; 0x9buy; 0x2fuy; 0xfcuy; 0xbcuy; 0x9duy; 0xebuy; 0xecuy; 0xd5uy; 0xffuy; 0xf9uy; 0x00uy; 0xd6uy; 0xfauy] in
+  assert_norm(FStar.List.length salt_l = 16);
+  let salt = of_list salt_l in
+  let personal_l = List.Tot.map u8_from_UInt8 [0xa4uy; 0xcfuy; 0x2fuy; 0x42uy; 0xd3uy; 0xa6uy; 0x8auy; 0x0cuy; 0x58uy; 0x1duy; 0xcauy; 0x6euy; 0xfduy; 0x14uy; 0x70uy; 0x5euy] in
+  assert_norm(FStar.List.length personal_l = 16);
+  let personal = of_list personal_l in
+  assert_norm(3106874137 <= pow2 32 - 1);
+  assert_norm(5732630434961472466 <= pow2 64 - 1);
+  {S.blake2_default_params S.Blake2B with fanout = u8 146; depth = u8 32; leaf_length = u32 3106874137; node_offset = u64 5732630434961472466; node_depth = u8 96; inner_length = u8 30; salt; personal}
+
+let test53_expected : lbytes 64 =
+  let res_l = List.Tot.map u8_from_UInt8 [0xb6uy; 0xfduy; 0x15uy; 0x03uy; 0x0duy; 0x9buy; 0x76uy; 0x94uy; 0x06uy; 0xb3uy; 0xbfuy; 0x94uy; 0x25uy; 0xdeuy; 0x02uy; 0x2euy; 0x1fuy; 0x9auy; 0x3buy; 0xd5uy; 0x93uy; 0x7auy; 0x5euy; 0x19uy; 0xb2uy; 0x2fuy; 0xd1uy; 0x60uy; 0x94uy; 0x94uy; 0xbauy; 0x3duy; 0xa8uy; 0x77uy; 0xeduy; 0x78uy; 0x96uy; 0x1duy; 0x77uy; 0x35uy; 0x7cuy; 0xb3uy; 0x14uy; 0x2euy; 0xd3uy; 0xe0uy; 0x44uy; 0x85uy; 0x57uy; 0x5euy; 0x41uy; 0x4buy; 0x5auy; 0xb7uy; 0x60uy; 0x16uy; 0xacuy; 0x59uy; 0x01uy; 0x80uy; 0x39uy; 0xaduy; 0x72uy; 0x93uy] in
+  assert_norm(FStar.List.length res_l = 64);
+  let res = of_list res_l in
+  res
+
 let emp_key : lbytes 0 =
   let l = List.Tot.map u8_from_UInt8 [] in
   assert_norm (List.Tot.length l == 0);
@@ -1263,68 +1433,83 @@ noeq type vec =
   | Vec :
     a:S.alg
     -> num:nat
+    -> last_node: bool
     -> params: S.blake2_params a { UInt8.v params.digest_length == blake2_length a }
     -> plain:bytes{length plain <= max_size_t}
     -> key:bytes{length key <= S.max_key a}
     -> hash:bytes{length hash = blake2_length a} -> vec
 
 let test_vectors : list vec = [
-  Vec S.Blake2S 1 (S.blake2_default_params _) test1_plaintext emp_key test1_expected;
-  Vec S.Blake2S 2 (S.blake2_default_params _) test2_plaintext test2_key test2_expected;
-  Vec S.Blake2S 3 (S.blake2_default_params _) test3_plaintext test3_key test3_expected;
-  Vec S.Blake2S 4 (S.blake2_default_params _) test4_plaintext test4_key test4_expected;
-  Vec S.Blake2S 7 (S.blake2_default_params _) test7_plaintext test7_key test7_expected;
-  Vec S.Blake2S 8 (S.blake2_default_params _) test8_plaintext test8_key test8_expected;
-  Vec S.Blake2S 9 (S.blake2_default_params _) test9_plaintext test9_key test9_expected;
-  Vec S.Blake2S 10 (S.blake2_default_params _) test10_plaintext test10_key test10_expected;
-  Vec S.Blake2S 11 (S.blake2_default_params _) test11_plaintext test11_key test11_expected;
-  Vec S.Blake2S 17 test17_params test1_plaintext emp_key test17_expected;
-  Vec S.Blake2S 18 test18_params test2_plaintext test2_key test18_expected;
-  Vec S.Blake2S 19 test19_params test2_plaintext emp_key test19_expected;
-  Vec S.Blake2S 23 test23_params test2_plaintext emp_key test23_expected;
-  Vec S.Blake2S 24 test24_params test2_plaintext emp_key test24_expected;
-  Vec S.Blake2S 26 test26_params test2_plaintext emp_key test26_expected;
-  Vec S.Blake2S 28 test28_params test2_plaintext emp_key test28_expected;
-  Vec S.Blake2S 30 test30_params test2_plaintext emp_key test30_expected;
-  Vec S.Blake2S 32 test32_params test2_plaintext emp_key test32_expected;
-  Vec S.Blake2S 34 test34_params test2_plaintext emp_key test34_expected;
-  Vec S.Blake2S 36 test36_params test2_plaintext emp_key test36_expected;
-  Vec S.Blake2S 38 test38_params test2_plaintext emp_key test38_expected;
-  Vec S.Blake2S 40 test40_params test2_plaintext emp_key test40_expected;
-  Vec S.Blake2S 42 test42_params test2_plaintext emp_key test42_expected;
+  Vec S.Blake2S 1 false (S.blake2_default_params _) test1_plaintext emp_key test1_expected;
+  Vec S.Blake2S 2 false (S.blake2_default_params _) test2_plaintext test2_key test2_expected;
+  Vec S.Blake2S 3 false (S.blake2_default_params _) test3_plaintext test3_key test3_expected;
+  Vec S.Blake2S 4 false (S.blake2_default_params _) test4_plaintext test4_key test4_expected;
+  Vec S.Blake2S 7 false (S.blake2_default_params _) test7_plaintext test7_key test7_expected;
+  Vec S.Blake2S 8 false (S.blake2_default_params _) test8_plaintext test8_key test8_expected;
+  Vec S.Blake2S 9 false (S.blake2_default_params _) test9_plaintext test9_key test9_expected;
+  Vec S.Blake2S 10 false (S.blake2_default_params _) test10_plaintext test10_key test10_expected;
+  Vec S.Blake2S 11 false (S.blake2_default_params _) test11_plaintext test11_key test11_expected;
+  Vec S.Blake2S 17 false test17_params test1_plaintext emp_key test17_expected;
+  Vec S.Blake2S 18 false test18_params test2_plaintext test2_key test18_expected;
+  Vec S.Blake2S 19 false test19_params test2_plaintext emp_key test19_expected;
+  Vec S.Blake2S 23 false test23_params test2_plaintext emp_key test23_expected;
+  Vec S.Blake2S 24 false test24_params test2_plaintext emp_key test24_expected;
+  Vec S.Blake2S 26 false test26_params test2_plaintext emp_key test26_expected;
+  Vec S.Blake2S 28 false test28_params test2_plaintext emp_key test28_expected;
+  Vec S.Blake2S 30 false test30_params test2_plaintext emp_key test30_expected;
+  Vec S.Blake2S 32 false test32_params test2_plaintext emp_key test32_expected;
+  Vec S.Blake2S 34 false test34_params test2_plaintext emp_key test34_expected;
+  Vec S.Blake2S 36 false test36_params test2_plaintext emp_key test36_expected;
+  Vec S.Blake2S 38 false test38_params test2_plaintext emp_key test38_expected;
+  Vec S.Blake2S 40 false test40_params test2_plaintext emp_key test40_expected;
+  Vec S.Blake2S 42 false test42_params test2_plaintext emp_key test42_expected;
 
-  Vec S.Blake2B 0 (S.blake2_default_params _) test0_plaintext test0_key test0_expected;
-  Vec S.Blake2B 5 (S.blake2_default_params _) test5_plaintext emp_key test5_expected;
-  Vec S.Blake2B 6 (S.blake2_default_params _) test6_plaintext test6_key test6_expected;
-  Vec S.Blake2B 12 (S.blake2_default_params _) test12_plaintext test12_key test12_expected;
-  Vec S.Blake2B 13 (S.blake2_default_params _) test13_plaintext test13_key test13_expected;
-  Vec S.Blake2B 14 (S.blake2_default_params _) test14_plaintext test14_key test14_expected;
-  Vec S.Blake2B 15 (S.blake2_default_params _) test15_plaintext test15_key test15_expected;
-  Vec S.Blake2B 16 (S.blake2_default_params _) test16_plaintext test16_key test16_expected;
-  Vec S.Blake2B 20 test20_params test2_plaintext emp_key test20_expected;
-  Vec S.Blake2B 21 test21_params test1_plaintext test13_key test21_expected;
-  Vec S.Blake2B 22 test22_params test1_plaintext test13_key test22_expected;
-  Vec S.Blake2B 25 test25_params test2_plaintext emp_key test25_expected;
-  Vec S.Blake2B 27 test27_params test2_plaintext emp_key test27_expected;
-  Vec S.Blake2B 29 test29_params test2_plaintext emp_key test29_expected;
-  Vec S.Blake2B 31 test31_params test2_plaintext emp_key test31_expected;
-  Vec S.Blake2B 33 test33_params test2_plaintext emp_key test33_expected;
-  Vec S.Blake2B 35 test35_params test2_plaintext emp_key test35_expected;
-  Vec S.Blake2B 37 test37_params test2_plaintext emp_key test37_expected;
-  Vec S.Blake2B 39 test39_params test2_plaintext emp_key test39_expected;
-  Vec S.Blake2B 41 test41_params test2_plaintext emp_key test41_expected;
-  Vec S.Blake2B 43 test43_params test2_plaintext emp_key test43_expected;
+  (* Last_node tests *)
+  Vec S.Blake2S 44 true test44_params test2_plaintext emp_key test44_expected;
+  Vec S.Blake2S 46 true test46_params test2_plaintext emp_key test46_expected;
+  Vec S.Blake2S 48 true test48_params test2_plaintext emp_key test48_expected;
+  Vec S.Blake2S 50 true test50_params test2_plaintext emp_key test50_expected;
+  Vec S.Blake2S 52 true test52_params test2_plaintext emp_key test52_expected;
+
+  Vec S.Blake2B 0 false (S.blake2_default_params _) test0_plaintext test0_key test0_expected;
+  Vec S.Blake2B 5 false (S.blake2_default_params _) test5_plaintext emp_key test5_expected;
+  Vec S.Blake2B 6 false (S.blake2_default_params _) test6_plaintext test6_key test6_expected;
+  Vec S.Blake2B 12 false (S.blake2_default_params _) test12_plaintext test12_key test12_expected;
+  Vec S.Blake2B 13 false (S.blake2_default_params _) test13_plaintext test13_key test13_expected;
+  Vec S.Blake2B 14 false (S.blake2_default_params _) test14_plaintext test14_key test14_expected;
+  Vec S.Blake2B 15 false (S.blake2_default_params _) test15_plaintext test15_key test15_expected;
+  Vec S.Blake2B 16 false (S.blake2_default_params _) test16_plaintext test16_key test16_expected;
+  Vec S.Blake2B 20 false test20_params test2_plaintext emp_key test20_expected;
+  Vec S.Blake2B 21 false test21_params test1_plaintext test13_key test21_expected;
+  Vec S.Blake2B 22 false test22_params test1_plaintext test13_key test22_expected;
+  Vec S.Blake2B 25 false test25_params test2_plaintext emp_key test25_expected;
+  Vec S.Blake2B 27 false test27_params test2_plaintext emp_key test27_expected;
+  Vec S.Blake2B 29 false test29_params test2_plaintext emp_key test29_expected;
+  Vec S.Blake2B 31 false test31_params test2_plaintext emp_key test31_expected;
+  Vec S.Blake2B 33 false test33_params test2_plaintext emp_key test33_expected;
+  Vec S.Blake2B 35 false test35_params test2_plaintext emp_key test35_expected;
+  Vec S.Blake2B 37 false test37_params test2_plaintext emp_key test37_expected;
+  Vec S.Blake2B 39 false test39_params test2_plaintext emp_key test39_expected;
+  Vec S.Blake2B 41 false test41_params test2_plaintext emp_key test41_expected;
+  Vec S.Blake2B 43 false test43_params test2_plaintext emp_key test43_expected;
+
+  (* Last_node tests *)
+  Vec S.Blake2B 45 true test45_params test2_plaintext emp_key test45_expected;
+  Vec S.Blake2B 47 true test47_params test2_plaintext emp_key test47_expected;
+  Vec S.Blake2B 49 true test49_params test2_plaintext emp_key test49_expected;
+  Vec S.Blake2B 51 true test51_params test2_plaintext emp_key test51_expected;
+  Vec S.Blake2B 53 true test53_params test2_plaintext emp_key test53_expected;
 ]
 
 #set-options "--ifuel 2"
 
 let test_one (v:vec) =
-  let Vec a num params plain key tag = v in
+  let Vec a num last_node params plain key tag = v in
   let expected = tag in
   let computed =
     match a with
-    | S.Blake2S -> S.blake2 S.Blake2S plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
-    | S.Blake2B -> S.blake2 S.Blake2B plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
+    | S.Blake2S -> S.blake2 S.Blake2S last_node plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
+    | S.Blake2B -> S.blake2 S.Blake2B last_node plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
    in
 
   IO.print_string ("\n\nTEST Blake2 "^(string_of_int num)^":");

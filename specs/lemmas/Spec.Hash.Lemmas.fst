@@ -142,9 +142,9 @@ let lemma_update_aux2 (a:blake_alg) (s1 s2:bytes) (nb1 nb2:nat) (prevlen1 prevle
     calc (==) {
       f1 (i + nb1) acc;
       (==) { }
-      blake2_update_block a' false totlen1 (get_blocki a' s (i + nb1)) acc;
+      blake2_update_block a' false false totlen1 (get_blocki a' s (i + nb1)) acc;
       (==) { lemma_blocki_aux2 a s1 s2 nb1 nb2 i }
-      blake2_update_block a' false totlen1 (get_blocki a' s2 i) acc;
+      blake2_update_block a' false false totlen1 (get_blocki a' s2 i) acc;
       (==) { }
       f2 i acc;
 
