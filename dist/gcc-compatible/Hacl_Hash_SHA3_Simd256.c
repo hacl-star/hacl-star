@@ -30,7 +30,7 @@
 void
 Hacl_Hash_SHA3_Simd256_absorb_inner_256(
   uint32_t rateInBytes,
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_ b,
+  Hacl_Hash_SHA2_uint8_4p b,
   Lib_IntVector_Intrinsics_vec256 *s
 )
 {
@@ -411,9 +411,9 @@ Hacl_Hash_SHA3_Simd256_shake128(
   uint32_t inputByteLen
 )
 {
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   rb = { .fst = output0, .snd = { .fst = output1, .snd = { .fst = output2, .snd = output3 } } };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 s[25U] KRML_POST_ALIGN(32) = { 0U };
   uint32_t rateInBytes1 = 168U;
@@ -423,7 +423,7 @@ Hacl_Hash_SHA3_Simd256_shake128(
     uint8_t b10[256U] = { 0U };
     uint8_t b20[256U] = { 0U };
     uint8_t b30[256U] = { 0U };
-    K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+    Hacl_Hash_SHA2_uint8_4p
     b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
     uint8_t *b3 = ib.snd.snd.snd;
     uint8_t *b2 = ib.snd.snd.fst;
@@ -443,7 +443,7 @@ Hacl_Hash_SHA3_Simd256_shake128(
   uint8_t b10[256U] = { 0U };
   uint8_t b20[256U] = { 0U };
   uint8_t b30[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b31 = ib.snd.snd.snd;
@@ -735,7 +735,7 @@ Hacl_Hash_SHA3_Simd256_shake128(
   uint8_t b14[256U] = { 0U };
   uint8_t b24[256U] = { 0U };
   uint8_t b34[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b = { .fst = b04, .snd = { .fst = b14, .snd = { .fst = b24, .snd = b34 } } };
   uint8_t *b3 = b.snd.snd.snd;
   uint8_t *b25 = b.snd.snd.fst;
@@ -1340,9 +1340,9 @@ Hacl_Hash_SHA3_Simd256_shake256(
   uint32_t inputByteLen
 )
 {
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   rb = { .fst = output0, .snd = { .fst = output1, .snd = { .fst = output2, .snd = output3 } } };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 s[25U] KRML_POST_ALIGN(32) = { 0U };
   uint32_t rateInBytes1 = 136U;
@@ -1352,7 +1352,7 @@ Hacl_Hash_SHA3_Simd256_shake256(
     uint8_t b10[256U] = { 0U };
     uint8_t b20[256U] = { 0U };
     uint8_t b30[256U] = { 0U };
-    K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+    Hacl_Hash_SHA2_uint8_4p
     b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
     uint8_t *b3 = ib.snd.snd.snd;
     uint8_t *b2 = ib.snd.snd.fst;
@@ -1372,7 +1372,7 @@ Hacl_Hash_SHA3_Simd256_shake256(
   uint8_t b10[256U] = { 0U };
   uint8_t b20[256U] = { 0U };
   uint8_t b30[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b31 = ib.snd.snd.snd;
@@ -1664,7 +1664,7 @@ Hacl_Hash_SHA3_Simd256_shake256(
   uint8_t b14[256U] = { 0U };
   uint8_t b24[256U] = { 0U };
   uint8_t b34[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b = { .fst = b04, .snd = { .fst = b14, .snd = { .fst = b24, .snd = b34 } } };
   uint8_t *b3 = b.snd.snd.snd;
   uint8_t *b25 = b.snd.snd.fst;
@@ -2268,9 +2268,9 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
   uint32_t inputByteLen
 )
 {
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   rb = { .fst = output0, .snd = { .fst = output1, .snd = { .fst = output2, .snd = output3 } } };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 s[25U] KRML_POST_ALIGN(32) = { 0U };
   uint32_t rateInBytes1 = 144U;
@@ -2280,7 +2280,7 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
     uint8_t b10[256U] = { 0U };
     uint8_t b20[256U] = { 0U };
     uint8_t b30[256U] = { 0U };
-    K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+    Hacl_Hash_SHA2_uint8_4p
     b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
     uint8_t *b3 = ib.snd.snd.snd;
     uint8_t *b2 = ib.snd.snd.fst;
@@ -2300,7 +2300,7 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
   uint8_t b10[256U] = { 0U };
   uint8_t b20[256U] = { 0U };
   uint8_t b30[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b31 = ib.snd.snd.snd;
@@ -2592,7 +2592,7 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
   uint8_t b14[256U] = { 0U };
   uint8_t b24[256U] = { 0U };
   uint8_t b34[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b = { .fst = b04, .snd = { .fst = b14, .snd = { .fst = b24, .snd = b34 } } };
   uint8_t *b3 = b.snd.snd.snd;
   uint8_t *b25 = b.snd.snd.fst;
@@ -3196,9 +3196,9 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
   uint32_t inputByteLen
 )
 {
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   rb = { .fst = output0, .snd = { .fst = output1, .snd = { .fst = output2, .snd = output3 } } };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 s[25U] KRML_POST_ALIGN(32) = { 0U };
   uint32_t rateInBytes1 = 136U;
@@ -3208,7 +3208,7 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
     uint8_t b10[256U] = { 0U };
     uint8_t b20[256U] = { 0U };
     uint8_t b30[256U] = { 0U };
-    K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+    Hacl_Hash_SHA2_uint8_4p
     b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
     uint8_t *b3 = ib.snd.snd.snd;
     uint8_t *b2 = ib.snd.snd.fst;
@@ -3228,7 +3228,7 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
   uint8_t b10[256U] = { 0U };
   uint8_t b20[256U] = { 0U };
   uint8_t b30[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b31 = ib.snd.snd.snd;
@@ -3520,7 +3520,7 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
   uint8_t b14[256U] = { 0U };
   uint8_t b24[256U] = { 0U };
   uint8_t b34[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b = { .fst = b04, .snd = { .fst = b14, .snd = { .fst = b24, .snd = b34 } } };
   uint8_t *b3 = b.snd.snd.snd;
   uint8_t *b25 = b.snd.snd.fst;
@@ -4124,9 +4124,9 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
   uint32_t inputByteLen
 )
 {
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   rb = { .fst = output0, .snd = { .fst = output1, .snd = { .fst = output2, .snd = output3 } } };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 s[25U] KRML_POST_ALIGN(32) = { 0U };
   uint32_t rateInBytes1 = 104U;
@@ -4136,7 +4136,7 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
     uint8_t b10[256U] = { 0U };
     uint8_t b20[256U] = { 0U };
     uint8_t b30[256U] = { 0U };
-    K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+    Hacl_Hash_SHA2_uint8_4p
     b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
     uint8_t *b3 = ib.snd.snd.snd;
     uint8_t *b2 = ib.snd.snd.fst;
@@ -4156,7 +4156,7 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
   uint8_t b10[256U] = { 0U };
   uint8_t b20[256U] = { 0U };
   uint8_t b30[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b31 = ib.snd.snd.snd;
@@ -4448,7 +4448,7 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
   uint8_t b14[256U] = { 0U };
   uint8_t b24[256U] = { 0U };
   uint8_t b34[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b = { .fst = b04, .snd = { .fst = b14, .snd = { .fst = b24, .snd = b34 } } };
   uint8_t *b3 = b.snd.snd.snd;
   uint8_t *b25 = b.snd.snd.fst;
@@ -5052,9 +5052,9 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
   uint32_t inputByteLen
 )
 {
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   rb = { .fst = output0, .snd = { .fst = output1, .snd = { .fst = output2, .snd = output3 } } };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 s[25U] KRML_POST_ALIGN(32) = { 0U };
   uint32_t rateInBytes1 = 72U;
@@ -5064,7 +5064,7 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
     uint8_t b10[256U] = { 0U };
     uint8_t b20[256U] = { 0U };
     uint8_t b30[256U] = { 0U };
-    K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+    Hacl_Hash_SHA2_uint8_4p
     b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
     uint8_t *b3 = ib.snd.snd.snd;
     uint8_t *b2 = ib.snd.snd.fst;
@@ -5084,7 +5084,7 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
   uint8_t b10[256U] = { 0U };
   uint8_t b20[256U] = { 0U };
   uint8_t b30[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b31 = ib.snd.snd.snd;
@@ -5376,7 +5376,7 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
   uint8_t b14[256U] = { 0U };
   uint8_t b24[256U] = { 0U };
   uint8_t b34[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b = { .fst = b04, .snd = { .fst = b14, .snd = { .fst = b24, .snd = b34 } } };
   uint8_t *b3 = b.snd.snd.snd;
   uint8_t *b25 = b.snd.snd.fst;
@@ -6016,7 +6016,7 @@ Hacl_Hash_SHA3_Simd256_shake128_absorb_nblocks(
     uint8_t b10[256U] = { 0U };
     uint8_t b20[256U] = { 0U };
     uint8_t b30[256U] = { 0U };
-    K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+    Hacl_Hash_SHA2_uint8_4p
     b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
     uint8_t *b0 = input0;
     uint8_t *b1 = input1;
@@ -6064,7 +6064,7 @@ Hacl_Hash_SHA3_Simd256_shake128_absorb_final(
   uint8_t b10[256U] = { 0U };
   uint8_t b20[256U] = { 0U };
   uint8_t b30[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b_ = { .fst = b00, .snd = { .fst = b10, .snd = { .fst = b20, .snd = b30 } } };
   uint32_t rem = inputByteLen % 168U;
   uint8_t *b01 = input0;
@@ -6356,7 +6356,7 @@ Hacl_Hash_SHA3_Simd256_shake128_absorb_final(
   uint8_t b14[256U] = { 0U };
   uint8_t b24[256U] = { 0U };
   uint8_t b34[256U] = { 0U };
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_
+  Hacl_Hash_SHA2_uint8_4p
   b = { .fst = b04, .snd = { .fst = b14, .snd = { .fst = b24, .snd = b34 } } };
   uint8_t *b3 = b.snd.snd.snd;
   uint8_t *b2 = b.snd.snd.fst;

@@ -50,7 +50,7 @@ include Makefile.basic
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
 
 Hacl_MAC_Poly1305_Simd128.o Hacl_Chacha20_Vec128.o Hacl_AEAD_Chacha20Poly1305_Simd128.o Hacl_Hash_Blake2s_Simd128.o Hacl_HMAC_Blake2s_128.o Hacl_HKDF_Blake2s_128.o Hacl_SHA2_Vec128.o: CFLAGS += $(CFLAGS_128)
-Hacl_MAC_Poly1305_Simd256.o Hacl_Chacha20_Vec256.o Hacl_AEAD_Chacha20Poly1305_Simd256.o Hacl_Hash_Blake2b_Simd256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_SHA2_Vec256.o: CFLAGS += $(CFLAGS_256)
+Hacl_MAC_Poly1305_Simd256.o Hacl_Chacha20_Vec256.o Hacl_AEAD_Chacha20Poly1305_Simd256.o Hacl_Hash_Blake2b_Simd256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_SHA2_Vec256.o Hacl_Hash_SHA3_Simd256.o: CFLAGS += $(CFLAGS_256)
 
 all: libevercrypt.$(SO)
 
