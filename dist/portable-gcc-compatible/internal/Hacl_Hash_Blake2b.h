@@ -38,45 +38,16 @@ extern "C" {
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "../Hacl_Hash_Blake2b.h"
 
-/* SNIPPET_START: Hacl_Hash_Blake2s_blake2s_params */
+/* SNIPPET_START: Hacl_Hash_Blake2b_index */
 
-typedef struct Hacl_Hash_Blake2s_blake2s_params_s
+typedef struct Hacl_Hash_Blake2b_index_s
 {
-  uint8_t digest_length;
   uint8_t key_length;
-  uint8_t fanout;
-  uint8_t depth;
-  uint32_t leaf_length;
-  uint32_t node_offset;
-  uint16_t xof_length;
-  uint8_t node_depth;
-  uint8_t inner_length;
-  uint8_t *salt;
-  uint8_t *personal;
+  uint8_t digest_length;
 }
-Hacl_Hash_Blake2s_blake2s_params;
+Hacl_Hash_Blake2b_index;
 
-/* SNIPPET_END: Hacl_Hash_Blake2s_blake2s_params */
-
-/* SNIPPET_START: Hacl_Hash_Blake2s_blake2b_params */
-
-typedef struct Hacl_Hash_Blake2s_blake2b_params_s
-{
-  uint8_t digest_length1;
-  uint8_t key_length1;
-  uint8_t fanout1;
-  uint8_t depth1;
-  uint32_t leaf_length1;
-  uint32_t node_offset1;
-  uint32_t xof_length1;
-  uint8_t node_depth1;
-  uint8_t inner_length1;
-  uint8_t *salt1;
-  uint8_t *personal1;
-}
-Hacl_Hash_Blake2s_blake2b_params;
-
-/* SNIPPET_END: Hacl_Hash_Blake2s_blake2b_params */
+/* SNIPPET_END: Hacl_Hash_Blake2b_index */
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_init */
 
@@ -117,6 +88,17 @@ Hacl_Hash_Blake2b_update_last(
 void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_finish */
+
+/* SNIPPET_START: K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t_ */
+
+typedef struct K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t__s
+{
+  Hacl_Hash_Blake2b_blake2_params *fst;
+  uint8_t *snd;
+}
+K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t_;
+
+/* SNIPPET_END: K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t_ */
 
 #if defined(__cplusplus)
 }

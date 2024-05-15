@@ -79,7 +79,6 @@ main()
   printf("computed4:\n");
   ok = ok && print_result(64, comp + 448, exp4);
 
-  uint64_t len = SIZE;
   uint8_t plain[SIZE];
   uint8_t key[16];
   uint8_t nonce[12];

@@ -12,5 +12,5 @@ val blake2_is_hash_incremental
   Lemma (
     S.equal (Spec.Blake2.blake2 (to_blake_alg a) input
               (Spec.Blake2.blake2_default_params (to_blake_alg a))
-              0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a)))
+              Seq.empty)
             (hash_incremental a input ()))

@@ -54,7 +54,7 @@ main()
   }
 
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors2b) / sizeof(blake2_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors2b) / sizeof(blake2_test_vector); ++i) {
     ok &= print_test2b(vectors2b[i].input_len,
                        vectors2b[i].input,
                        vectors2b[i].key_len,

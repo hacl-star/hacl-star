@@ -167,7 +167,7 @@ int
 main()
 {
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors) / sizeof(k256ecdsa_verify_test_vector);
+  for (size_t i = 0; i < sizeof(vectors) / sizeof(k256ecdsa_verify_test_vector);
        ++i) {
     ok &= print_test(vectors[i].pk_x,
                      vectors[i].pk_y,

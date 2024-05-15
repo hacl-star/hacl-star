@@ -200,8 +200,6 @@ val reveal_key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state'
 /// lemmas for invariant and hashed could be bundled together. If we committed
 /// to always heap allocating, then we could conceivably have a single framing
 /// lemma.
-///
-/// TODO: frame_key!
 
 val frame_invariant: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' c i -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
@@ -221,6 +219,14 @@ val frame_seen: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' 
     B.modifies l h0 h1))
   (ensures (seen c i h0 s == seen c i h1 s))
   [ SMTPat (seen c i h1 s); SMTPat (B.modifies l h0 h1) ]
+
+val frame_key: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' c i -> h0:HS.mem -> h1:HS.mem -> Lemma
+  (requires (
+    invariant c i h0 s /\
+    B.loc_disjoint l (footprint c i h0 s) /\
+    B.modifies l h0 h1))
+  (ensures (reveal_key c i h0 s == reveal_key c i h1 s))
+  [ SMTPat (reveal_key c i h1 s); SMTPat (B.modifies l h0 h1) ]
 
 
 /// Stateful API
@@ -471,6 +477,7 @@ let digest_st
 /// will generate a stack allocation at type ``state i`` via ``c.alloca``. If
 /// ``state`` is indexed over ``i``, then this function will not compile to C.
 /// (In other words: there's a reason why digest does *NOT* take i ghostly.)
+/// 20240328, JP: actually tried this. It's super ugly C code but it works.
 ///
 /// To work around this, it suffices to apply ``digest`` to each possible
 /// value for the index, then to abstract over ``i`` again if agility is
@@ -485,6 +492,19 @@ val digest:
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
   digest_st c i t t'
+
+/// Variant of the above that performs a runtime lookup via index_of_state,
+/// which in turn prevents specialization, but does not require an additional
+/// runtime parameter. Useful for Blake2.
+inline_for_extraction noextract
+val digest_erased:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index ->
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
+  digest_st c i t t'
+
 
 inline_for_extraction noextract
 let free_st

@@ -76,7 +76,7 @@ main()
 {
   EverCrypt_AutoConfig2_init();
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors2s) / sizeof(blake2_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors2s) / sizeof(blake2_test_vector); ++i) {
     ok &= print_test2s(vectors2s[i].input_len,
                        vectors2s[i].input,
                        vectors2s[i].key_len,
@@ -84,7 +84,7 @@ main()
                        vectors2s[i].expected_len,
                        vectors2s[i].expected);
   }
-  for (int i = 0; i < sizeof(vectors2b) / sizeof(blake2_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors2b) / sizeof(blake2_test_vector); ++i) {
     ok &= print_test2b(vectors2b[i].input_len,
                        vectors2b[i].input,
                        vectors2b[i].key_len,

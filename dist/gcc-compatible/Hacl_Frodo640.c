@@ -45,7 +45,7 @@ uint32_t Hacl_Frodo640_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
   uint8_t *seed_se = coins + 16U;
   uint8_t *z = coins + 32U;
   uint8_t *seed_a = pk;
-  Hacl_Hash_SHA3_shake128_hacl(16U, z, 16U, seed_a);
+  Hacl_Hash_SHA3_shake128(seed_a, 16U, z, 16U);
   uint8_t *b_bytes = pk + 16U;
   uint8_t *s_bytes = sk + 9632U;
   uint16_t s_matrix[5120U] = { 0U };
@@ -54,7 +54,7 @@ uint32_t Hacl_Frodo640_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
   uint8_t shake_input_seed_se[17U] = { 0U };
   shake_input_seed_se[0U] = 0x5fU;
   memcpy(shake_input_seed_se + 1U, seed_se, 16U * sizeof (uint8_t));
-  Hacl_Hash_SHA3_shake128_hacl(17U, shake_input_seed_se, 20480U, r);
+  Hacl_Hash_SHA3_shake128(r, 20480U, shake_input_seed_se, 17U);
   Lib_Memzero0_memzero(shake_input_seed_se, 17U, uint8_t, void *);
   Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(640U, 8U, r, s_matrix);
   Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(640U, 8U, r + 10240U, e_matrix);
@@ -72,7 +72,7 @@ uint32_t Hacl_Frodo640_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
   uint8_t *sk_p = sk;
   memcpy(sk_p, s, 16U * sizeof (uint8_t));
   memcpy(sk_p + 16U, pk, 9616U * sizeof (uint8_t));
-  Hacl_Hash_SHA3_shake128_hacl(9616U, pk, 16U, sk + slen1);
+  Hacl_Hash_SHA3_shake128(sk + slen1, 16U, pk, 9616U);
   Lib_Memzero0_memzero(coins, 48U, uint8_t, void *);
   return 0U;
 }
@@ -83,9 +83,9 @@ uint32_t Hacl_Frodo640_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
   randombytes_(16U, coins);
   uint8_t seed_se_k[32U] = { 0U };
   uint8_t pkh_mu[32U] = { 0U };
-  Hacl_Hash_SHA3_shake128_hacl(9616U, pk, 16U, pkh_mu);
+  Hacl_Hash_SHA3_shake128(pkh_mu, 16U, pk, 9616U);
   memcpy(pkh_mu + 16U, coins, 16U * sizeof (uint8_t));
-  Hacl_Hash_SHA3_shake128_hacl(32U, pkh_mu, 32U, seed_se_k);
+  Hacl_Hash_SHA3_shake128(seed_se_k, 32U, pkh_mu, 32U);
   uint8_t *seed_se = seed_se_k;
   uint8_t *k = seed_se_k + 16U;
   uint8_t *seed_a = pk;
@@ -97,7 +97,7 @@ uint32_t Hacl_Frodo640_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
   uint8_t shake_input_seed_se[17U] = { 0U };
   shake_input_seed_se[0U] = 0x96U;
   memcpy(shake_input_seed_se + 1U, seed_se, 16U * sizeof (uint8_t));
-  Hacl_Hash_SHA3_shake128_hacl(17U, shake_input_seed_se, 20608U, r);
+  Hacl_Hash_SHA3_shake128(r, 20608U, shake_input_seed_se, 17U);
   Lib_Memzero0_memzero(shake_input_seed_se, 17U, uint8_t, void *);
   Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(8U, 640U, r, sp_matrix);
   Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(8U, 640U, r + 10240U, ep_matrix);
@@ -131,7 +131,7 @@ uint32_t Hacl_Frodo640_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
   memset(shake_input_ss, 0U, ss_init_len * sizeof (uint8_t));
   memcpy(shake_input_ss, ct, 9720U * sizeof (uint8_t));
   memcpy(shake_input_ss + 9720U, k, 16U * sizeof (uint8_t));
-  Hacl_Hash_SHA3_shake128_hacl(ss_init_len, shake_input_ss, 16U, ss);
+  Hacl_Hash_SHA3_shake128(ss, 16U, shake_input_ss, ss_init_len);
   Lib_Memzero0_memzero(shake_input_ss, ss_init_len, uint8_t, void *);
   Lib_Memzero0_memzero(seed_se_k, 32U, uint8_t, void *);
   Lib_Memzero0_memzero(coins, 16U, uint8_t, void *);
@@ -164,7 +164,7 @@ uint32_t Hacl_Frodo640_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint8_t *pkh = sk + 19872U;
   memcpy(pkh_mu_decode, pkh, 16U * sizeof (uint8_t));
   memcpy(pkh_mu_decode + 16U, mu_decode, 16U * sizeof (uint8_t));
-  Hacl_Hash_SHA3_shake128_hacl(pkh_mu_decode_len, pkh_mu_decode, 32U, seed_se_k);
+  Hacl_Hash_SHA3_shake128(seed_se_k, 32U, pkh_mu_decode, pkh_mu_decode_len);
   uint8_t *seed_se = seed_se_k;
   uint8_t *kp = seed_se_k + 16U;
   uint8_t *s = sk;
@@ -177,7 +177,7 @@ uint32_t Hacl_Frodo640_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint8_t shake_input_seed_se[17U] = { 0U };
   shake_input_seed_se[0U] = 0x96U;
   memcpy(shake_input_seed_se + 1U, seed_se, 16U * sizeof (uint8_t));
-  Hacl_Hash_SHA3_shake128_hacl(17U, shake_input_seed_se, 20608U, r);
+  Hacl_Hash_SHA3_shake128(r, 20608U, shake_input_seed_se, 17U);
   Lib_Memzero0_memzero(shake_input_seed_se, 17U, uint8_t, void *);
   Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(8U, 640U, r, sp_matrix);
   Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(8U, 640U, r + 10240U, ep_matrix);
@@ -223,7 +223,7 @@ uint32_t Hacl_Frodo640_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   memset(ss_init, 0U, ss_init_len * sizeof (uint8_t));
   memcpy(ss_init, ct, 9720U * sizeof (uint8_t));
   memcpy(ss_init + 9720U, kp_s, 16U * sizeof (uint8_t));
-  Hacl_Hash_SHA3_shake128_hacl(ss_init_len, ss_init, 16U, ss);
+  Hacl_Hash_SHA3_shake128(ss, 16U, ss_init, ss_init_len);
   Lib_Memzero0_memzero(ss_init, ss_init_len, uint8_t, void *);
   Lib_Memzero0_memzero(kp_s, 16U, uint8_t, void *);
   Lib_Memzero0_memzero(seed_se_k, 32U, uint8_t, void *);

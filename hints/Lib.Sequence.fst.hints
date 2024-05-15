@@ -1,5 +1,5 @@
 [
-  "\u0000ÏΩ¶îÅ\u0000•∆\u0005Ú\u001eR\u001eØx",
+  "\u0014´?\u0006´ÀÅ[µ“\u001aØágL\u001f",
   [
     [
       "Lib.Sequence.to_lseq",
@@ -1964,7 +1964,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "c9815347b0974b7cf4d972eb3e38b6e0"
+      "7da626b64a7a04fc0e1192170df7c25c"
     ],
     [
       "Lib.Sequence.block",
@@ -2524,7 +2524,7 @@
         "unit_typing"
       ],
       0,
-      "a0f9ba73ed4ea73a4bc70cdde2e07490"
+      "d4cba2c7946ce59b5f30ab8558a1cfda"
     ],
     [
       "Lib.Sequence.create2",
@@ -2753,6 +2753,63 @@
       ],
       0,
       "7c7da67f127c94d0984ff4c201c696f3"
+    ],
+    [
+      "Lib.Sequence.create32",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "429e5920d6ea4ee44226548abc4a53f5"
+    ],
+    [
+      "Lib.Sequence.create32",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "582fa2959e053751453465128217c2d7"
+    ],
+    [
+      "Lib.Sequence.create32_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "42aaa2e3eaec91c9fd23e9a32c9d512f"
+    ],
+    [
+      "Lib.Sequence.create32_lemma",
+      2,
+      0,
+      0,
+      [
+        "@query", "equation_Lib.Sequence.create32",
+        "equation_Lib.Sequence.index", "equation_Lib.Sequence.of_list"
+      ],
+      0,
+      "f6d7d3e17ede18ef9db2aa8d77121490"
     ]
   ]
 ]

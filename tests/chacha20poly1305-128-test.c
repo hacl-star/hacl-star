@@ -67,7 +67,7 @@ main()
   EverCrypt_AutoConfig2_init();
 
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors) / sizeof(chacha20poly1305_test_vector);
+  for (size_t i = 0; i < sizeof(vectors) / sizeof(chacha20poly1305_test_vector);
        ++i) {
     ok &= print_test(vectors[i].input_len,
                      vectors[i].input,

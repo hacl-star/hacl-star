@@ -20,7 +20,7 @@ main()
   uint64_t r, r2, cout, cout2;
   bool passed = true;
 
-  for (int i = 0; i < num_vectors; ++i) {
+  for (size_t i = 0; i < num_vectors; ++i) {
     r = 0U;
     r2 = 0U;
     cout = Hacl_IntTypes_Intrinsics_128_add_carry_u64(

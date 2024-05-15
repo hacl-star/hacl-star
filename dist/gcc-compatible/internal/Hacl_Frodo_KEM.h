@@ -55,10 +55,10 @@ Hacl_Keccak_shake128_4x(
   uint8_t *output3
 )
 {
-  Hacl_Hash_SHA3_shake128_hacl(input_len, input0, output_len, output0);
-  Hacl_Hash_SHA3_shake128_hacl(input_len, input1, output_len, output1);
-  Hacl_Hash_SHA3_shake128_hacl(input_len, input2, output_len, output2);
-  Hacl_Hash_SHA3_shake128_hacl(input_len, input3, output_len, output3);
+  Hacl_Hash_SHA3_shake128(output0, output_len, input0, input_len);
+  Hacl_Hash_SHA3_shake128(output1, output_len, input1, input_len);
+  Hacl_Hash_SHA3_shake128(output2, output_len, input2, input_len);
+  Hacl_Hash_SHA3_shake128(output3, output_len, input3, input_len);
 }
 
 static inline void

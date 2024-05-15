@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_SHA2_Types.h"
 #include "Hacl_Krmllib.h"
 
 void

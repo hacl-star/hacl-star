@@ -36,12 +36,21 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
+#include "Hacl_Hash_Blake2b.h"
 #include "libintvector.h"
 
-typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
+typedef struct K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128__s
 {
   Lib_IntVector_Intrinsics_vec128 *fst;
   Lib_IntVector_Intrinsics_vec128 *snd;
+}
+K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_;
+
+typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
+{
+  uint8_t fst;
+  uint8_t snd;
+  K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_ thd;
 }
 Hacl_Hash_Blake2s_Simd128_block_state_t;
 
@@ -54,14 +63,55 @@ typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s
 Hacl_Hash_Blake2s_Simd128_state_t;
 
 /**
+ State allocation function when there are parameters and a key. The
+length of the key k MUST match the value of the field key_length in the
+parameters. Furthermore, there is a static (not dynamically checked) requirement
+that key_length does not exceed max_key (128 for S, 64 for B).)
+*/
+Hacl_Hash_Blake2s_Simd128_state_t
+*Hacl_Hash_Blake2s_Simd128_malloc_with_params_and_key(
+  Hacl_Hash_Blake2b_blake2_params *p,
+  uint8_t *k
+);
+
+/**
+ State allocation function when there is just a custom key. All
+other parameters are set to their respective default values, meaning the output
+length is the maximum allowed output (128 for S, 64 for B).
+*/
+Hacl_Hash_Blake2s_Simd128_state_t
+*Hacl_Hash_Blake2s_Simd128_malloc_with_key0(uint8_t *k, uint8_t kk);
+
+/**
   State allocation function when there is no key
 */
 Hacl_Hash_Blake2s_Simd128_state_t *Hacl_Hash_Blake2s_Simd128_malloc(void);
 
 /**
+ Re-initialization function. The reinitialization API is tricky --
+you MUST reuse the same original parameters for digest (output) length and key
+length.
+*/
+void
+Hacl_Hash_Blake2s_Simd128_reset_with_key_and_params(
+  Hacl_Hash_Blake2s_Simd128_state_t *s,
+  Hacl_Hash_Blake2b_blake2_params *p,
+  uint8_t *k
+);
+
+/**
+ Re-initialization function when there is a key. Note that the key
+size is not allowed to change, which is why this function does not take a key
+length -- the key has to be same key size that was originally passed to
+`malloc_with_key`
+*/
+void
+Hacl_Hash_Blake2s_Simd128_reset_with_key(Hacl_Hash_Blake2s_Simd128_state_t *s, uint8_t *k);
+
+/**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state);
+void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *s);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
@@ -85,10 +135,16 @@ Hacl_Hash_Blake2s_Simd128_digest(Hacl_Hash_Blake2s_Simd128_state_t *state, uint8
 void Hacl_Hash_Blake2s_Simd128_free(Hacl_Hash_Blake2s_Simd128_state_t *state);
 
 /**
+  Copying. The key length (or absence thereof) must match between source and destination.
+*/
+Hacl_Hash_Blake2s_Simd128_state_t
+*Hacl_Hash_Blake2s_Simd128_copy(Hacl_Hash_Blake2s_Simd128_state_t *state);
+
+/**
 Write the BLAKE2s digest of message `input` using key `key` into `output`.
 
 @param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 32.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
 @param input Pointer to `input_len` bytes of memory where the input message is read from.
 @param input_len Length of the input message.
 @param key Pointer to `key_len` bytes of memory where the key is read from.
@@ -102,6 +158,15 @@ Hacl_Hash_Blake2s_Simd128_hash_with_key(
   uint32_t input_len,
   uint8_t *key,
   uint32_t key_len
+);
+
+void
+Hacl_Hash_Blake2s_Simd128_hash_with_key_and_paramas(
+  uint8_t *output,
+  uint8_t *input,
+  uint32_t input_len,
+  Hacl_Hash_Blake2b_blake2_params params,
+  uint8_t *key
 );
 
 #if defined(__cplusplus)
