@@ -83,3 +83,8 @@ val lemma_mul (f:G.field) (a b:G.felem f) : Lemma
   (requires True)
   (ensures to_poly (G.fmul a b) == (to_poly a *. to_poly b) %. (irred_poly f))
   [SMTPat (to_poly (G.fmul a b))]
+
+val lemma_reverse (f:G.field) (e:G.felem f) : Lemma
+  (requires True)
+  (ensures to_poly (G.reverse e) == reverse (to_poly e) (I.bits f.t - 1))
+  [SMTPat (to_poly (G.reverse e))]
