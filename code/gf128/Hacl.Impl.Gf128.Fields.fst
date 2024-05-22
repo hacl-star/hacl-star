@@ -74,7 +74,7 @@ let feval4 #s h e =
   | NI -> Hacl.Impl.Gf128.FieldNI.feval4 h e
 
 noextract
-let zero = GF.zero #S.gf128
+let zero = GF.zero #S.gf128_le
 
 
 noextract
@@ -222,7 +222,7 @@ val fadd:
   Stack unit
   (requires fun h -> live h x /\ live h y /\ eq_or_disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
-    feval h1 x == GF.fadd #S.gf128 (feval h0 x) (feval h0 y))
+    feval h1 x == GF.fadd #S.gf128_le (feval h0 x) (feval h0 y))
 
 let fadd #s x y =
   match s with
@@ -252,7 +252,7 @@ val fmul:
   Stack unit
   (requires fun h -> live h x /\ live h y /\ eq_or_disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
-    feval h1 x == GF.fmul_be #S.gf128 (feval h0 x) (feval h0 y))
+    feval h1 x == GF.reverse (GF.fmul #S.gf128_le (GF.reverse (feval h0 x)) (GF.reverse (feval h0 y))))
 
 let fmul #s x y =
   match s with

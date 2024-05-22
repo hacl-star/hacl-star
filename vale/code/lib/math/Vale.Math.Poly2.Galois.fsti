@@ -3,6 +3,7 @@ open FStar.Mul
 module I = Lib.IntTypes
 module G = Spec.GaloisField
 module P = Vale.Math.Poly2_s
+module B = Vale.Math.Poly2.Bits_s
 open Vale.Math.Poly2_s
 open Vale.Math.Poly2
 open FStar.Seq
@@ -88,3 +89,13 @@ val lemma_reverse (f:G.field) (e:G.felem f) : Lemma
   (requires True)
   (ensures to_poly (G.reverse e) == reverse (to_poly e) (I.bits f.t - 1))
   [SMTPat (to_poly (G.reverse e))]
+
+val lemma_poly_of_uint (f:G.field) (e:G.felem f) : Lemma
+  (requires True)
+  (ensures to_poly e == B.of_uint (I.bits f.t) (I.uint_v e))
+  [SMTPat (to_poly e)]
+
+val lemma_poly_to_uint (f:G.field) (a:poly) : Lemma
+  (requires True)
+  (ensures to_felem f a == I.uint (B.to_uint (I.bits f.t) a))
+  [SMTPat (to_felem f a)]

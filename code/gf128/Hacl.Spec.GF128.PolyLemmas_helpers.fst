@@ -664,3 +664,71 @@ let lemma_add_helper_m a b c d p =
   lemma_add_associate p (a +. b) c;
   lemma_add_associate p (a +. b +. c) d;
   lemma_add_commute p (a +. b +. c +. d)
+
+let lemma_mul_reduce_helper1 x1 x2 x3 x4 y1 y2 y3 y4 =
+  let x1_r = reverse x1 127 in
+  let x2_r = reverse x2 127 in
+  let x3_r = reverse x3 127 in
+  let x4_r = reverse x4 127 in
+  let y1_r = reverse y1 127 in
+  let y2_r = reverse y2 127 in
+  let y3_r = reverse y3 127 in
+  let y4_r = reverse y4 127 in
+  calc (==) {
+    shift ((x1 *. y1) +. (x2 *. y2) +. (x3 *. y3) +. (x4 *. y4)) 1;
+    == {lemma_shift_is_mul ((x1 *. y1) +.
+          (x2 *. y2) +. (x3 *. y3) +. (x4 *. y4)) 1}
+    ((x1 *. y1) +. (x2 *. y2) +. (x3 *. y3) +. (x4 *. y4)) *. monomial 1;
+    == {lemma_mul_distribute_left ((x1 *. y1) +. (x2 *. y2) +. (x3 *. y3))
+          (x4 *. y4) (monomial 1)}
+    ((x1 *. y1) +. (x2 *. y2) +. (x3 *. y3)) *. monomial 1 +.
+      (x4 *. y4) *. monomial 1;
+    == {lemma_mul_distribute_left ((x1 *. y1) +. (x2 *. y2))
+          (x3 *. y3) (monomial 1)}
+    ((x1 *. y1) +. (x2 *. y2)) *. monomial 1 +. (x3 *. y3) *. monomial 1 +.
+      (x4 *. y4) *. monomial 1;
+    == {lemma_mul_distribute_left (x1 *. y1) (x2 *. y2) (monomial 1)}
+    (x1 *. y1) *. monomial 1 +. (x2 *. y2) *. monomial 1 +.
+      (x3 *. y3) *. monomial 1 +. (x4 *. y4) *. monomial 1;
+    == {lemma_shift_is_mul (x1 *. y1) 1;
+        lemma_shift_is_mul (x2 *. y2) 1;
+        lemma_shift_is_mul (x3 *. y3) 1;
+        lemma_shift_is_mul (x4 *. y4) 1}
+    shift (x1 *. y1) 1 +. shift (x2 *. y2) 1 +.
+      shift (x3 *. y3) 1 +. shift (x4 *. y4) 1;
+    == {lemma_mul_reverse_shift_1 x1_r y1_r 127;
+        lemma_mul_reverse_shift_1 x2_r y2_r 127;
+        lemma_mul_reverse_shift_1 x3_r y3_r 127;
+        lemma_mul_reverse_shift_1 x4_r y4_r 127}
+    reverse (x1_r *. y1_r) 255 +. reverse (x2_r *. y2_r) 255 +.
+      reverse (x3_r *. y3_r) 255 +. reverse (x4_r *. y4_r) 255;
+    == {lemma_add_reverse (x1_r *. y1_r) (x2_r *. y2_r) 255}
+    reverse ((x1_r *. y1_r) +. (x2_r *. y2_r)) 255 +.
+      reverse (x3_r *. y3_r) 255 +. reverse (x4_r *. y4_r) 255;
+    == {lemma_add_reverse ((x1_r *. y1_r) +. (x2_r *. y2_r)) (x3_r *. y3_r) 255}
+    reverse ((x1_r *. y1_r) +. (x2_r *. y2_r) +. (x3_r *. y3_r)) 255 +.
+      reverse (x4_r *. y4_r) 255;
+    == {lemma_add_reverse ((x1_r *. y1_r) +. (x2_r *. y2_r) +. (x3_r *. y3_r))
+          (x4_r *. y4_r) 255}
+    reverse ((x1_r *. y1_r) +. (x2_r *. y2_r) +. (x3_r *. y3_r) +. (x4_r *. y4_r)) 255;
+  }
+
+let lemma_mul_reduce_helper2 z1 z2 z3 z4 g =
+  calc (==) {
+    (z1 +. z2 +. z3 +. z4) %. g;
+    == {lemma_mod_distribute (z1 +. z2 +. z3) z4 g}
+    (z1 +. z2 +. z3) %. g +. z4 %. g;
+    == {lemma_mod_distribute (z1 +. z2) z3 g}
+    (z1 +. z2) %. g +. z3 %. g +. z4 %. g;
+    == {lemma_mod_distribute z1 z2 g}
+    z1 %. g +. z2 %. g +. z3 %. g +. z4 %. g;
+  };
+  calc (==) {
+    reverse (z1 %. g +. z2 %. g +. z3 %. g +. z4 %. g) 127;
+    == {lemma_add_reverse (z1 %. g +. z2 %. g +. z3 %. g) (z4 %. g) 127}
+    reverse (z1 %. g +. z2 %. g +. z3 %. g) 127 +. reverse (z4 %. g) 127;
+    == {lemma_add_reverse (z1 %. g +. z2 %. g) (z3 %. g) 127}
+    reverse (z1 %. g +. z2 %. g) 127 +. reverse (z3 %. g) 127 +. reverse (z4 %. g) 127;
+    == {lemma_add_reverse (z1 %. g) (z2 %. g) 127}
+    reverse (z1 %. g) 127 +. reverse (z2 %. g) 127 +. reverse (z3 %. g) 127 +. reverse (z4 %. g) 127;
+  }

@@ -17,14 +17,14 @@ type gf128_spec =
 
 let _: squash (inversion gf128_spec) = allow_inversion gf128_spec
 
-let elem = Scalar.elem
-let gf128 = Scalar.gf128
+let elem = Scalar.elem_le
+let gf128 = Scalar.gf128_le
 
 let elem2 = lseq elem 2
 
 let elem4 = lseq elem 4
 let fadd4 (a:elem4) (b:elem4) : elem4 = map2 fadd a b
-let fmul4 (a:elem4) (b:elem4) : elem4 = map2 fmul_be a b
+let fmul4 (a:elem4) (b:elem4) : elem4 = map2 (fun x y -> reverse (fmul (reverse x) (reverse y))) a b
 
 let load_elem4 (b:lbytes 64) : elem4 =
   let b1 = load_felem_be #gf128 (sub b 0 16) in
@@ -43,9 +43,9 @@ let normalize4 (pre:elem4) (acc:elem4) : elem =
   fadd (fadd (fadd a.[0] a.[1]) a.[2]) a.[3]
 
 let load_precompute_r (r:elem) : elem4 =
-  let r2 = r `fmul_be` r in
-  let r3 = r `fmul_be` r2 in
-  let r4 = r `fmul_be` r3 in
+  let r2 = reverse (reverse r `fmul` reverse r) in
+  let r3 = reverse (reverse r `fmul` reverse r2) in
+  let r4 =reverse (reverse r `fmul` reverse r3) in
   create4 r4 r3 r2 r
 
 let gf128_update4_add_mul (pre:elem4) (b:lbytes 64) (acc:elem) : Tot elem =

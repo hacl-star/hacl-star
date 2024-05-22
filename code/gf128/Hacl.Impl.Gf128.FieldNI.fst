@@ -26,7 +26,7 @@ include Hacl.Spec.Gf128.FieldNI
 inline_for_extraction noextract
 let vec128_zero = vec_zero U128 1
 noextract
-let zero = GF.zero #S.gf128
+let zero = GF.zero #S.gf128_le
 
 let felem = lbuffer vec128 1ul
 let felem4 = lbuffer vec128 4ul
@@ -164,7 +164,7 @@ val fadd:
   Stack unit
   (requires fun h -> live h x /\ live h y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
-    feval h1 x == GF.fadd #S.gf128 (feval h0 x) (feval h0 y))
+    feval h1 x == GF.fadd #S.gf128_le (feval h0 x) (feval h0 y))
 
 [@CInline]
 let fadd x y =
@@ -198,7 +198,7 @@ val fmul:
   Stack unit
   (requires fun h -> live h x /\ live h y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
-    feval h1 x == GF.fmul_be #S.gf128 (feval h0 x) (feval h0 y))
+    feval h1 x == GF.reverse (GF.fmul #S.gf128_le (GF.reverse (feval h0 x)) (GF.reverse (feval h0 y))))
 
 [@ CInline]
 let fmul x y =

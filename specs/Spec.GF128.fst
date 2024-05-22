@@ -8,16 +8,19 @@ open Lib.ByteSequence
 open Spec.GaloisField
 
 //GF128 Field: to load bits in little-endian order set the parameters as follows
-//let irred = u128 0x87
 //let load_elem (b:lbytes 16) : elem = load_felem_le #gf128 b
 //let store_elem (e:elem) : lbytes 16 = store_felem_le #gf128 e
-//and use `fmul` instead of `fmul_be`
+//and use `gf128_le/fmul` instead of `gf128/fmul_be`
 
 let irred = mk_int #U128 #SEC 0xE1000000000000000000000000000000
 let gf128 = gf U128 irred
 let elem = felem gf128
 let load_elem (b:lbytes 16) : elem = load_felem_be #gf128 b
 let store_elem (e:elem) : lbytes 16 = store_felem_be #gf128 e
+
+let irred_le = mk_int #U128 #SEC 0x87
+let gf128_le = gf U128 irred_le
+let elem_le = felem gf128_le
 
 (* GCM types and specs *)
 let size_block : size_nat = 16

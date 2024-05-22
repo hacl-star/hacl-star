@@ -11,6 +11,7 @@ open Vale.Math.Poly2
 open Vale.Math.Poly2.Lemmas
 open Vale.AES.GF128
 open Vale.AES.GHash_BE
+open Vale.Math.Poly2.Galois
 
 open Hacl.Spec.GF128.Poly_s
 open Hacl.Spec.GF128.PolyLemmas
@@ -19,6 +20,7 @@ open Hacl.Spec.GF128.PolyLemmas_helpers
 module S = Spec.GF128
 module GF = Spec.GaloisField
 module Vec = Hacl.Spec.GF128.Vec
+module B = Vale.Math.Poly2.Bits_s
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -56,7 +58,8 @@ let clmul_wide (x:vec128) (y:vec128) : Tot (vec128 & vec128) =
 val lemma_clmul_wide (x:vec128) (y:vec128) : Lemma
   (ensures (
     let (hi, lo) = clmul_wide x y in
-    mul (of_vec128 x) (of_vec128 y) == add (shift (of_vec128 hi) 128) (of_vec128 lo)
+    mul (of_vec128 x) (of_vec128 y) == add (shift (of_vec128 hi) 128) (of_vec128 lo) /\
+    degree (of_vec128 hi) <= 126
   ))
 
 let lemma_clmul_wide x y =
@@ -165,7 +168,8 @@ val lemma_clmul_wide4
       (mul (of_vec128 x2) (of_vec128 y2)))
       (mul (of_vec128 x3) (of_vec128 y3)))
       (mul (of_vec128 x4) (of_vec128 y4)) ==
-    add (shift (of_vec128 hi) 128) (of_vec128 lo)
+    add (shift (of_vec128 hi) 128) (of_vec128 lo) /\
+    degree (of_vec128 hi) <= 126
   ))
 
 let lemma_clmul_wide4 x1 x2 x3 x4 y1 y2 y3 y4 =
@@ -559,10 +563,74 @@ let lemma_gf128_reduce h l =
   assert (lo == reverse (mod x (add nn gf128_low)) 127); //OBSERVE
   ()
 
+let gf128_irred_elem_le = fun (i:nat) -> i = 127 || i = 126 || i = 125 || i = 120
+
+let gf128_irred_elem_le_lemma (i:nat{i < 128}) : Lemma
+  (UInt.nth #128 (v S.gf128_le.irred) i == gf128_irred_elem_le i) =
+  assert_norm (UInt.nth #8 (v S.gf128_le.irred) 0 == true);
+  assert_norm (UInt.nth #8 (v S.gf128_le.irred) 1 == false);
+  assert_norm (UInt.nth #8 (v S.gf128_le.irred) 2 == false);
+  assert_norm (UInt.nth #8 (v S.gf128_le.irred) 3 == false);
+  assert_norm (UInt.nth #8 (v S.gf128_le.irred) 4 == false);
+  assert_norm (UInt.nth #8 (v S.gf128_le.irred) 5 == true);
+  assert_norm (UInt.nth #8 (v S.gf128_le.irred) 6 == true);
+  assert_norm (UInt.nth #8 (v S.gf128_le.irred) 7 == true);
+
+  assert_norm ((v S.gf128_le.irred) % pow2 8 == (v S.gf128_le.irred));
+  UInt.slice_right_lemma #128 (UInt.to_vec (v S.gf128_le.irred)) 8;
+  assert (UInt.from_vec #8 (Seq.slice (UInt.to_vec #128 (v S.gf128_le.irred)) 120 128) = (v S.gf128_le.irred) % pow2 8);
+  assert (Seq.slice (UInt.to_vec #128 (v S.gf128_le.irred)) 120 128 = UInt.to_vec #8 (v S.gf128_le.irred));
+
+  assert_norm ((v S.gf128_le.irred) / pow2 8 == 0);
+  UInt.slice_left_lemma #128 (UInt.to_vec (v S.gf128_le.irred)) 120;
+  assert (UInt.from_vec #120 (Seq.slice (UInt.to_vec #128 (v S.gf128_le.irred)) 0 120) = (v S.gf128_le.irred) / pow2 8);
+  assert (Seq.slice (UInt.to_vec #128 (v S.gf128_le.irred)) 0 120 = UInt.to_vec #120 0);
+  let aux_zero (n:nat{n < 120}) : Lemma (UInt.nth #128 (v S.gf128_le.irred) n == false) =
+    UInt.zero_to_vec_lemma #120 n in
+
+  Classical.forall_intro aux_zero;
+  assert (UInt.nth #128 (v S.gf128_le.irred) i == gf128_irred_elem_le i)
+
+let lemma_gf128_irred_le (_:unit) : Lemma
+  (B.of_uint 128 (v S.gf128_le.irred) == gf128_low)
+  =
+  let aux (i:nat{i < 128}) : Lemma (UInt.nth #128 (v S.gf128_le.irred) i == gf128_irred_elem_le i) =
+    gf128_irred_elem_le_lemma i in
+
+  Classical.forall_intro aux;
+  lemma_index_all ();
+  lemma_reverse_define_all ();
+  lemma_equal (of_seq (UInt.to_vec #128 (v S.gf128_le.irred))) (of_fun 128 gf128_irred_elem_le);
+  lemma_equal (reverse (of_fun 128 gf128_irred_elem_le) 127) gf128_low
+
 val gf128_clmul_wide_reduce_lemma: x:vec128 -> y:vec128 -> Lemma
   (let (hi, lo) = clmul_wide x y in
-   to_elem (gf128_reduce hi lo) == GF.fmul_be #S.gf128 (to_elem x) (to_elem y))
-let gf128_clmul_wide_reduce_lemma x y = admit()
+   to_elem (gf128_reduce hi lo) ==
+    GF.reverse (GF.fmul #S.gf128_le (GF.reverse (to_elem x)) (GF.reverse (to_elem y))))
+let gf128_clmul_wide_reduce_lemma x y =
+  lemma_clmul_wide x y;
+  let (hi, lo) = clmul_wide x y in
+  assert (mul (of_vec128 x) (of_vec128 y) ==
+    add (shift (of_vec128 hi) 128) (of_vec128 lo));
+  lemma_gf128_reduce hi lo;
+  lemma_shift_is_mul (of_vec128 hi) 128;
+  let mm = monomial 128 in
+  let g = add mm gf128_low in
+  let a = shift (mul (of_vec128 x) (of_vec128 y)) 1 in
+  let z = reverse a 255 in
+  assert (gf128_reduce hi lo == to_vec128 (reverse (mod z g) 127));
+  let x_r = reverse (of_vec128 x) 127 in
+  let y_r = reverse (of_vec128 y) 127 in
+  lemma_mul_reverse_shift_1 x_r y_r 127;
+  assert (z == mul x_r y_r);
+  lemma_gf128_irred_le ();
+  assert (irred_poly S.gf128_le == g);
+  assert (to_poly (GF.fmul (to_felem S.gf128_le x_r) (to_felem S.gf128_le y_r)) == mod z g);
+  lemma_reverse S.gf128_le (GF.fmul (to_felem S.gf128_le x_r) (to_felem S.gf128_le y_r));
+  assert (GF.reverse (GF.fmul (to_felem S.gf128_le x_r) (to_felem S.gf128_le y_r)) ==
+    to_felem S.gf128_le (reverse (mod z g) 127));
+  lemma_reverse S.gf128_le (to_elem x);
+  lemma_reverse S.gf128_le (to_elem y)
 
 
 val gf128_clmul_wide4_reduce_lemma:
@@ -570,4 +638,55 @@ val gf128_clmul_wide4_reduce_lemma:
   -> y1:vec128 -> y2:vec128 -> y3:vec128 -> y4:vec128 -> Lemma
   (let (hi, lo) = clmul_wide4 x1 x2 x3 x4 y1 y2 y3 y4 in
    to_elem (gf128_reduce hi lo) == Vec.normalize4 (to_elem4 y1 y2 y3 y4) (to_elem4 x1 x2 x3 x4))
-let gf128_clmul_wide4_reduce_lemma x1 x2 x3 x4 y1 y2 y3 y4 = admit()
+let gf128_clmul_wide4_reduce_lemma x1 x2 x3 x4 y1 y2 y3 y4 =
+  lemma_clmul_wide4 x1 x2 x3 x4 y1 y2 y3 y4;
+  let (hi, lo) = clmul_wide4 x1 x2 x3 x4 y1 y2 y3 y4 in
+  assert (add (add (add
+      (mul (of_vec128 x1) (of_vec128 y1))
+      (mul (of_vec128 x2) (of_vec128 y2)))
+      (mul (of_vec128 x3) (of_vec128 y3)))
+      (mul (of_vec128 x4) (of_vec128 y4)) ==
+    add (shift (of_vec128 hi) 128) (of_vec128 lo));
+  lemma_gf128_reduce hi lo;
+  lemma_shift_is_mul (of_vec128 hi) 128;
+  let mm = monomial 128 in
+  let g = add mm gf128_low in
+  let a = shift (add (add (add
+    (mul (of_vec128 x1) (of_vec128 y1))
+    (mul (of_vec128 x2) (of_vec128 y2)))
+    (mul (of_vec128 x3) (of_vec128 y3)))
+    (mul (of_vec128 x4) (of_vec128 y4))) 1 in
+  let z = reverse a 255 in
+  assert (gf128_reduce hi lo == to_vec128 (reverse (mod z g) 127));
+  lemma_mul_reduce_helper1 (of_vec128 x1) (of_vec128 x2) (of_vec128 x3)
+    (of_vec128 x4) (of_vec128 y1) (of_vec128 y2) (of_vec128 y3) (of_vec128 y4);
+  let x1_r = reverse (of_vec128 x1) 127 in
+  let x2_r = reverse (of_vec128 x2) 127 in
+  let x3_r = reverse (of_vec128 x3) 127 in
+  let x4_r = reverse (of_vec128 x4) 127 in
+  let y1_r = reverse (of_vec128 y1) 127 in
+  let y2_r = reverse (of_vec128 y2) 127 in
+  let y3_r = reverse (of_vec128 y3) 127 in
+  let y4_r = reverse (of_vec128 y4) 127 in
+  assert (z == add (add (add (mul x1_r y1_r) (mul x2_r y2_r))
+    (mul x3_r y3_r)) (mul x4_r y4_r));
+  lemma_gf128_irred_le ();
+  assert (irred_poly S.gf128_le == g);
+  lemma_mul_reduce_helper2 (mul x1_r y1_r) (mul x2_r y2_r)
+    (mul x3_r y3_r) (mul x4_r y4_r) g;
+  assert (reverse (mod z g) 127 == add (add (add (reverse (mod (mul x1_r y1_r) g) 127)
+    (reverse (mod (mul x2_r y2_r) g) 127)) (reverse (mod (mul x3_r y3_r) g) 127))
+    (reverse (mod (mul x4_r y4_r) g) 127));
+  assert (reverse (mod z g) 127 == to_poly (GF.fadd (GF.fadd (GF.fadd
+    (GF.reverse (GF.fmul (to_felem S.gf128_le x1_r) (to_felem S.gf128_le y1_r)))
+    (GF.reverse (GF.fmul (to_felem S.gf128_le x2_r) (to_felem S.gf128_le y2_r))))
+    (GF.reverse (GF.fmul (to_felem S.gf128_le x3_r) (to_felem S.gf128_le y3_r))))
+    (GF.reverse (GF.fmul (to_felem S.gf128_le x4_r) (to_felem S.gf128_le y4_r)))));
+  lemma_reverse S.gf128_le (to_elem x1);
+  lemma_reverse S.gf128_le (to_elem x2);
+  lemma_reverse S.gf128_le (to_elem x3);
+  lemma_reverse S.gf128_le (to_elem x4);
+  lemma_reverse S.gf128_le (to_elem y1);
+  lemma_reverse S.gf128_le (to_elem y2);
+  lemma_reverse S.gf128_le (to_elem y3);
+  lemma_reverse S.gf128_le (to_elem y4)

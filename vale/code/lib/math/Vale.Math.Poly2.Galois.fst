@@ -812,3 +812,9 @@ let lemma_reverse f e =
   lemma_f_reverse f e;
   lemma_s_g_reverse f e;
   lemma_s_reverse (to_poly e) (I.bits f.t - 1)
+
+let lemma_poly_of_uint f e =
+  ()
+
+let lemma_poly_to_uint f a =
+  ()

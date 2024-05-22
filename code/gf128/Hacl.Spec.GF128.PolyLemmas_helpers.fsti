@@ -162,3 +162,20 @@ val lemma_gf128_mul_4 (a0 b0 c0 d0 a1 b1 c1 d1 a2 b2 c2 d2 a3 b3 c3 d3:poly) :
 
 val lemma_add_helper_m (a b c d p:poly) :
   Lemma (ensures (p +. a +. b +. c +. d  == (a +. b +. c +. d) +. p))
+
+val lemma_mul_reduce_helper1 (x1 x2 x3 x4 y1 y2 y3 y4:poly) : Lemma 
+    (requires degree x1 < 128 /\ degree x2 < 128 /\ degree x3 < 128 /\
+      degree x4 < 128 /\ degree y1 < 128 /\ degree y2 < 128 /\
+      degree y3 < 128 /\ degree y4 < 128)
+    (ensures reverse (shift ((x1 *. y1) +.
+      (x2 *. y2) +. (x3 *. y3) +. (x4 *. y4)) 1) 255 ==
+      ((reverse x1 127) *. (reverse y1 127)) +.
+      ((reverse x2 127) *. (reverse y2 127)) +.
+      ((reverse x3 127) *. (reverse y3 127)) +.
+      ((reverse x4 127) *. (reverse y4 127)))
+
+val lemma_mul_reduce_helper2 (z1 z2 z3 z4 g:poly) : Lemma
+    (requires degree g == 128)
+    (ensures reverse ((z1 +. z2 +. z3 +. z4) %. g) 127 ==
+      reverse (z1 %. g) 127 +. reverse (z2 %. g) 127 +.
+      reverse (z3 %. g) 127 +. reverse (z4 %. g) 127)
