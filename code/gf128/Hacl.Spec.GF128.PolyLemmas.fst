@@ -198,13 +198,91 @@ let logxor_disjoint #n a b m =
   assert (from_vec #m (slice #bool #n (to_vec b) (n - m) n) == b)
 #pop-options
 
+open Lib.ByteSequence
+
+val vec_cast_uint128: v1:vec_t U128 1 -> Lemma
+  (vec_v (cast U64 2 v1) == create2
+     (to_u64 ((index (vec_v v1) 0) >>. 64ul))
+     (to_u64 (index (vec_v v1) 0)))
+
+let vec_cast_uint128 v1 =
+  let v1_v = vec_v v1 in
+  assert (vec_v (cast U64 2 v1) == uints_from_bytes_be #U64 #SEC #2 (uints_to_bytes_be v1_v));
+  nat_from_intseq_be_lemma0 v1_v;
+  assert (nat_from_intseq_be v1_v == v (index v1_v 0));
+  lemma_nat_from_to_intseq_be_preserves_value 1 v1_v;
+  assert (nat_to_intseq_be 1 (nat_from_intseq_be v1_v) == v1_v);
+  uints_to_bytes_be_nat_lemma #U128 #SEC 1 (nat_from_intseq_be v1_v);
+  assert (uints_to_bytes_be v1_v == nat_to_intseq_be #U8 #SEC 16 (v (index v1_v 0)));
+  lemma_nat_from_to_intseq_be_preserves_value 2 (uints_from_bytes_be #U64 #SEC #2 (uints_to_bytes_be v1_v));
+  assert (nat_to_intseq_be 2 (nat_from_intseq_be #U64 #SEC (uints_from_bytes_be #U64 #SEC #2 (uints_to_bytes_be v1_v))) ==
+    uints_from_bytes_be #U64 #SEC #2 (uints_to_bytes_be v1_v));
+  uints_from_bytes_be_nat_lemma #U64 #SEC #2 (uints_to_bytes_be v1_v);
+  assert (nat_to_intseq_be 2 (nat_from_bytes_be (uints_to_bytes_be v1_v)) ==
+    uints_from_bytes_be #U64 #SEC #2 (uints_to_bytes_be v1_v));
+  assert (vec_v (cast U64 2 v1) == nat_to_intseq_be 2 (nat_from_bytes_be (nat_to_intseq_be #U8 #SEC 16 (v (index v1_v 0)))));
+  lemma_nat_to_from_bytes_be_preserves_value #SEC (nat_to_intseq_be #U8 #SEC 16 (v (index v1_v 0))) 16 (v (index v1_v 0));
+  assert (vec_v (cast U64 2 v1) == nat_to_intseq_be 2 (v (index v1_v 0)));
+  index_nat_to_intseq_be #U64 #SEC 2 (v (index v1_v 0)) 0;
+  assert (Seq.index (nat_to_intseq_be 2 (v (index v1_v 0))) 1 ==
+    uint #U64 #SEC ((v (index v1_v 0)) / pow2 0 % pow2 64));
+  assert ((v (index v1_v 0)) / pow2 0 % pow2 64 == v (index v1_v 0) % pow2 64);
+  index_nat_to_intseq_be #U64 #SEC 2 (v (index v1_v 0)) 1;
+  assert (Seq.index (nat_to_intseq_be 2 (v (index v1_v 0))) 0 ==
+    uint #U64 #SEC ((v (index v1_v 0)) / pow2 64 % pow2 64));
+  assert ((v (index v1_v 0)) / pow2 64 % pow2 64 == v (index v1_v 0) / pow2 64);
+  assert (v (index v1_v 0) / pow2 64 == v ((index v1_v 0) >>. 64ul));
+  eq_intro (nat_to_intseq_be #U64 #SEC 2 (v (index v1_v 0)))
+    (create2 (uint #U64 #SEC (v ((index v1_v 0) >>. 64ul))) (uint #U64 #SEC (v (index v1_v 0) % pow2 64)))
+
+val vec_cast_2_uint64: v1:vec_t U64 2 -> Lemma
+  (vec_v (cast U128 1 v1) == create 1
+    (to_u128 (index (vec_v v1) 1) +! ((to_u128 (index (vec_v v1) 0)) <<. 64ul)))
+
+#push-options "--z3rlimit 20"
+let vec_cast_2_uint64 v1 =
+  let v1_v = vec_v v1 in
+  assert (vec_v (cast U128 1 v1) == uints_from_bytes_be #U128 #SEC #1 (uints_to_bytes_be v1_v));
+  lemma_nat_from_to_intseq_be_preserves_value 2 v1_v;
+  assert (nat_to_intseq_be 2 (nat_from_intseq_be v1_v) == v1_v);
+  uints_to_bytes_be_nat_lemma #U64 #SEC 2 (nat_from_intseq_be v1_v);
+  assert (nat_to_bytes_be 16 (nat_from_intseq_be v1_v) == uints_to_bytes_be v1_v);
+  lemma_nat_from_to_intseq_be_preserves_value 1 (uints_from_bytes_be #U128 #SEC #1 (uints_to_bytes_be v1_v));
+  assert (nat_to_intseq_be 1 (nat_from_intseq_be (uints_from_bytes_be #U128 #SEC #1 (uints_to_bytes_be v1_v))) ==
+    uints_from_bytes_be #U128 #SEC #1 (uints_to_bytes_be v1_v));
+  uints_from_bytes_be_nat_lemma #U128 #SEC #1 (uints_to_bytes_be v1_v);
+  assert (nat_to_intseq_be 1 (nat_from_bytes_be (uints_to_bytes_be v1_v)) == uints_from_bytes_be #U128 #SEC #1 (uints_to_bytes_be v1_v));
+  assert (nat_to_intseq_be 1 (nat_from_bytes_be (nat_to_bytes_be #SEC 16 (nat_from_intseq_be v1_v))) ==
+    uints_from_bytes_be #U128 #SEC #1 (uints_to_bytes_be v1_v));
+  lemma_nat_to_from_bytes_be_preserves_value #SEC (nat_to_bytes_be #SEC 16 (nat_from_intseq_be v1_v)) 16 (nat_from_intseq_be v1_v);
+  assert (nat_to_intseq_be 1 (nat_from_intseq_be v1_v) == vec_v (cast U128 1 v1));
+
+  nat_from_intseq_be_slice_lemma #U64 #SEC #2 v1_v 1;
+  assert (nat_from_intseq_be v1_v == nat_from_intseq_be (slice v1_v 1 2) + pow2 64 * nat_from_intseq_be (slice v1_v 0 1));
+  nat_from_intseq_be_lemma0 #U64 #SEC (slice v1_v 1 2);
+  assert (nat_from_intseq_be (slice v1_v 1 2) == v (index v1_v 1));
+  nat_from_intseq_be_lemma0 #U64 #SEC (slice v1_v 0 1);
+  assert (nat_from_intseq_be (slice v1_v 0 1) == v (index v1_v 0));
+
+  assert (pow2 64 * v (index v1_v 0) == v ((to_u128 (index (vec_v v1) 0)) <<. 64ul));
+  assert (v (index v1_v 1) == v (to_u128 (index (vec_v v1) 1)));
+  assert (v (to_u128 (index (vec_v v1) 1)) + v ((to_u128 (index (vec_v v1) 0)) <<. 64ul) ==
+    v ((to_u128 (index (vec_v v1) 1)) +! ((to_u128 (index (vec_v v1) 0)) <<. 64ul)));
+
+  index_nat_to_intseq_be #U128 #SEC 1 (nat_from_intseq_be v1_v) 0;
+  assert (Seq.index (nat_to_intseq_be 1 (nat_from_intseq_be v1_v)) 0 ==
+    uint #U128 #SEC (nat_from_intseq_be v1_v));
+  eq_intro (nat_to_intseq_be 1 (nat_from_intseq_be v1_v))
+    (create 1 (uint #U128 #SEC (v ((to_u128 (index (vec_v v1) 1)) +! ((to_u128 (index (vec_v v1) 0)) <<. 64ul)))))
+#pop-options
+
 #push-options "--z3rlimit 150 --max_fuel 1"
 let lemma_vec128_shift_left_64 p s =
   vec_cast_uint128 p;
   vec_cast_2_uint64 (vec_shift_left (V.cast U64 2 p) s);
   eq_elim (map (shift_left_i s) (vec_v (V.cast U64 2 p))) (create2
-    (shift_left_i s (to_u64 (index (vec_v p) 0)))
     (shift_left_i s (to_u64 (T.shift_right (index (vec_v p) 0) 64ul)))
+    (shift_left_i s (to_u64 (index (vec_v p) 0)))
   );
   reveal_vec_v_1 p;
   reveal_vec_v_1 (V.cast U128 1 (vec_shift_left (V.cast U64 2 p) s));
@@ -216,8 +294,8 @@ let lemma_vec128_shift_left_64 p s =
   let p0 = (((to_uint 128 a) % pow2 64) * pow2 (v s)) % pow2 64 in
   let p1 = ((((to_uint 128 a) / pow2 64) % pow2 64) * pow2 (v s)) % pow2 64 in
   let t = T.add
-          (T.shift_left (to_u128 (shift_left_i s (to_u64 (T.shift_right #U128 #SEC p 64ul)))) 64ul)
-          (to_u128 (shift_left_i s (to_u64 #U128 #SEC p))) in
+          (to_u128 (shift_left_i s (to_u64 #U128 #SEC p)))
+          (T.shift_left (to_u128 (shift_left_i s (to_u64 (T.shift_right #U128 #SEC p 64ul)))) 64ul) in
   assert (t == V.cast U128 1 (vec_shift_left (V.cast U64 2 p) s));
   reveal_vec_v_1 #U128 t;
   assert (of_vec128 t == of_uint 128 (p1 * pow2 64 + p0));
@@ -260,8 +338,8 @@ let lemma_vec128_shift_right_64 p s =
   vec_cast_uint128 p;
   vec_cast_2_uint64 (vec_shift_right (V.cast U64 2 p) s);
   eq_elim (map (shift_right_i s) (vec_v (V.cast U64 2 p))) (create2
-    (shift_right_i s (to_u64 (index (vec_v p) 0)))
     (shift_right_i s (to_u64 (T.shift_right (index (vec_v p) 0) 64ul)))
+    (shift_right_i s (to_u64 (index (vec_v p) 0)))
   );
   reveal_vec_v_1 p;
   reveal_vec_v_1 (V.cast U128 1 (vec_shift_right (V.cast U64 2 p) s));
@@ -273,8 +351,8 @@ let lemma_vec128_shift_right_64 p s =
   let p0 = ((to_uint 128 a) % pow2 64) / pow2 (v s) in
   let p1 = (((to_uint 128 a) / pow2 64) % pow2 64) / pow2 (v s) in
   let t = T.add
-          (T.shift_left (to_u128 (shift_right_i s (to_u64 (T.shift_right #U128 #SEC p 64ul)))) 64ul)
-          (to_u128 (shift_right_i s (to_u64 #U128 #SEC p))) in
+          (to_u128 (shift_right_i s (to_u64 #U128 #SEC p)))
+          (T.shift_left (to_u128 (shift_right_i s (to_u64 (T.shift_right #U128 #SEC p 64ul)))) 64ul) in
   assert (t == V.cast U128 1 (vec_shift_right (V.cast U64 2 p) s));
   reveal_vec_v_1 #U128 t;
   assert (of_vec128 t == of_uint 128 (p1 * pow2 64 + p0));

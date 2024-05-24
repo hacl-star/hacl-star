@@ -332,9 +332,6 @@ let vec_interleave_high_n_lemma_uint64_4_2 v1 v2 = admit()
 
 let vec_shift_right_uint128_small2 v1 s = admit()
 
-let vec_cast_uint128 v1 = admit()
-let vec_cast_2_uint64 v1 = admit()
-
 let vec_permute2 #t v i1 i2 =
   match t with
   | U64 -> vec128_shuffle64 v i1 i2
@@ -453,3 +450,5 @@ let vec_store_be #t #w b v =
   | U32,8 -> vec256_store32_be b v
   | U64,4 -> vec256_store64_be b v
   | U128,2 -> admit() //vec256_store_be b v
+
+let cast_lemma #t #w t' w' v = admit()

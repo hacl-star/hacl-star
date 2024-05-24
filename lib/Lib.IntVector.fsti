@@ -16,7 +16,6 @@ inline_for_extraction
 val vec_t: t:v_inttype -> w:width -> Type0
 
 val reveal_vec_1: t:v_inttype -> Lemma
-  (requires t <> U128)
   (ensures vec_t t 1 == sec_int_t t)
 
 inline_for_extraction
@@ -43,7 +42,6 @@ val vecv_extensionality: #t:v_inttype -> #w:width -> f1:vec_t t w -> f2:vec_t t 
   (ensures f1 == f2)
 
 val reveal_vec_v_1: #t:v_inttype -> f:vec_t t 1 -> Lemma
-  (requires t <> U128)
   (ensures (
     reveal_vec_1 t;
     f == index (vec_v f) 0))
@@ -258,15 +256,6 @@ val vec_shift_right_uint128_small2: v1:vec_t U64 4 -> s:shiftval U128{uint_v s %
       ((vec_v v1).[1] >>. s)
      (((vec_v v1).[2] >>. s) |. ((vec_v v1).[3] <<. (64ul -! s)))
       ((vec_v v1).[3] >>. s))
-
-val vec_cast_uint128: v1:vec_t U128 1 -> Lemma
-  (vec_v (cast U64 2 v1) == create2
-     (to_u64 (vec_v v1).[0])
-     (to_u64 ((vec_v v1).[0] >>. 64ul)))
-
-val vec_cast_2_uint64: v1:vec_t U64 2 -> Lemma
-  (vec_v (cast U128 1 v1) == create 1
-     (((to_u128 (vec_v v1).[1]) <<. 64ul) +! (to_u128 (vec_v v1).[0])))
 
 inline_for_extraction
 val vec_permute2: #t:v_inttype -> v1:vec_t t 2
@@ -501,3 +490,7 @@ val vec_store_be:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 r h1 -> h1 == h0 /\ as_seq h1 b == vec_to_bytes_be v)
+
+val cast_lemma: #t:v_inttype -> #w:width -> t':v_inttype -> w':width{bits t * w == bits t' * w'} -> v:vec_t t w ->
+  Lemma (cast t' w' v == vec_from_bytes_be t' w' (vec_to_bytes_be v))
+  [SMTPat (cast t' w' v)]
