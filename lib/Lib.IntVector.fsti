@@ -32,11 +32,6 @@ val lemma_of_vec_v_t: #t:v_inttype -> #w:width -> f:vec_v_t t w -> Lemma
   (ensures vec_v (vec_t_v f) == f)
   [SMTPat (vec_v #t #w (vec_t_v #t #w f))]
 
-val lemma_create_index_vec_w1: #t:v_inttype -> f:vec_t t 1 -> Lemma
-  (ensures
-    (let x:uint_t t SEC = mk_int (v (index (vec_v f) 0)) in
-    create 1 x == vec_v f))
-
 val vecv_extensionality: #t:v_inttype -> #w:width -> f1:vec_t t w -> f2:vec_t t w -> Lemma
   (requires vec_v f1 == vec_v f2)
   (ensures f1 == f2)

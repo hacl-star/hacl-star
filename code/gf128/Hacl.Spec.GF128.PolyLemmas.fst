@@ -27,14 +27,13 @@ let lemma_of_to_uint_128 a =
   lemma_equal a (of_uint 128 (to_uint 128 a))
 
 let lemma_to_of_vec128 q =
-  lemma_create_index_vec_w1 q
+  eq_intro (create 1 (index (vec_v q) 0)) (vec_v q)
 
 let lemma_of_to_vec128 a =
   ()
 
 let lemma_vec128_zero () =
   lemma_bitwise_all ();
-  Vale.Arch.TypesNative.lemma_zero_nth 128;
   lemma_equal P.zero (of_uint 128 0);
   ()
 

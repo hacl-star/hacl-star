@@ -30,8 +30,6 @@ let lemma_of_vec_t #t #w f = admit()
 
 let lemma_of_vec_v_t #t #w f = admit()
 
-let lemma_create_index_vec_w1 #t f = admit()
-
 let vecv_extensionality #t #w f1 f2 = admit()
 
 let reveal_vec_v_1 #t f = admit()
