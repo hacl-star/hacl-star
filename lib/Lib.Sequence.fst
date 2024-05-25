@@ -82,7 +82,7 @@ let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i <
   assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
   Seq.snoc si (init i)
 
-#push-options "--max_fuel 1 --using_facts_from '+Lib.LoopCombinators +FStar.List'"
+#push-options "--max_fuel 1 --using_facts_from '+Lib.LoopCombinators +FStar.List' --z3rlimit_factor 2 --retry 2"
 
 let createi #a len init_f =
   repeat_gen_inductive len

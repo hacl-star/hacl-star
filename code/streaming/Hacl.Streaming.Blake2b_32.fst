@@ -20,6 +20,12 @@ open FStar.HyperStack.ST
 
 #set-options "--fuel 0 --ifuel 0"
 
+[@ CMacro ] let block_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.size_block Spec.Blake2B)
+[@ CMacro ] let out_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.max_output Spec.Blake2B)
+[@ CMacro ] let key_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.max_key Spec.Blake2B)
+[@ CMacro ] let salt_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.salt_length Spec.Blake2B)
+[@ CMacro ] let personal_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.personal_length Spec.Blake2B)
+
 inline_for_extraction noextract
 let blake2b_32 =
   Common.blake2 Spec.Blake2B Core.M32 Blake2b32.init_with_params Blake2b32.update_multi
@@ -61,6 +67,7 @@ The caller must satisfy the following requirements.
 val malloc_with_params_and_key:
   i:G.erased (P.index Spec.Blake2B) ->
   p:P.params Spec.Blake2B i ->
+  last_node:bool{last_node = i.P.last_node} ->
   k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v ((G.reveal i).key_length) } -> (
   let open F in
   let c = blake2b_32 in
@@ -82,9 +89,9 @@ val malloc_with_params_and_key:
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 )
 
-let malloc_with_params_and_key i p k r =
+let malloc_with_params_and_key i p last_node k r =
   let pv = P.get_params p in
-  let i = { P.key_length = pv.Core.key_length; digest_length = pv.Core.digest_length } in
+  let i = { P.key_length = pv.Core.key_length; digest_length = pv.Core.digest_length; last_node } in
   malloc_raw i (p, k) r
 
 [@ (Comment " Specialized allocation function that picks default values for all
@@ -101,7 +108,7 @@ val malloc_with_key:
   kk:Spec.key_length_t Spec.Blake2B { LowStar.Buffer.length k == UInt8.v kk } -> (
   let open F in
   let c = blake2b_32 in
-  let i: Common.index Spec.Blake2B = { P.key_length = kk; digest_length = UInt8.uint_to_t (Spec.max_output Spec.Blake2B) } in
+  let i: Common.index Spec.Blake2B = { P.key_length = kk; digest_length = UInt8.uint_to_t (Spec.max_output Spec.Blake2B); last_node = false } in
   let t: Type0 = c.state.s i in
   let t': Type0 = I.optional_key (G.reveal i) c.km c.key in
   r: HS.rid ->
@@ -130,14 +137,14 @@ let malloc_with_key k kk r =
   push_frame ();
   let _ = allow_inversion Spec.alg in
   let nn = UInt8.uint_to_t (Spec.max_output Spec.Blake2B) in
-  let i: Common.index Spec.Blake2B = { key_length = kk; digest_length = nn } in
+  let i: Common.index Spec.Blake2B = { key_length = kk; digest_length = nn; last_node = false } in
   let h00 = ST.get () in
 
   let p = P.alloca Spec.Blake2B i in
   let h0 = ST.get () in
   assert B.(as_seq h00 k == as_seq h0 k);
 
-  let s = malloc_with_params_and_key (G.hide i) p k r in
+  let s = malloc_with_params_and_key (G.hide i) p false k r in
   let h1 = ST.get () in
   assert F.(freeable blake2b_32 i h1 s);
   assert (nn == (Spec.blake2_default_params Spec.Blake2B).digest_length);
@@ -178,7 +185,7 @@ let reset_raw (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
   F.reset blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment " General-purpose re-initialization function with parameters and
-key. You cannot change digest_length or key_length, meaning those values in
+key. You cannot change digest_length, key_length, or last_node, meaning those values in
 the parameters object must be the same as originally decided via one of the
 malloc functions. All other values of the parameter can be changed. The behavior
 is unspecified if you violate this precondition.")]
@@ -338,10 +345,41 @@ at least `digest_length` bytes, where `digest_length` was determined by your
 choice of `malloc` function. Concretely, if you used `malloc` or
 `malloc_with_key`, then the expected length is 32 for S, or 64 for B (default
 digest length). If you used `malloc_with_params_and_key`, then the expected
-length is whatever you chose for the `digest_length` field of your
-parameters.")]
-let digest (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
-  F.digest_erased blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
+length is whatever you chose for the `digest_length` field of your parameters.
+For convenience, this function returns `digest_length`. When in doubt, callers
+can pass an array of size HACL_BLAKE2B_32_OUT_BYTES, then use the return value
+to see how many bytes were actually written. ")]
+val digest: (i: G.erased (Common.index Spec.Blake2B)) -> (
+  let open F in
+  let c = blake2b_32 in
+  let i = G.reveal i in
+  let t: Type0 = c.state.s i in
+  let t': Type0 = I.optional_key i c.km c.key in
+  s:state c i t t' ->
+  dst:B.buffer uint8 ->
+  l:c.output_length_t { B.length dst == c.output_length i l } ->
+  Stack UInt8.t
+    (requires fun h0 ->
+      invariant c i h0 s /\
+      B.live h0 dst /\
+      B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
+    (ensures fun h0 s' h1 ->
+      s' == i.digest_length /\
+      invariant c i h1 s /\
+      seen c i h0 s == seen c i h1 s /\
+      reveal_key c i h1 s == reveal_key c i h0 s /\
+      footprint c i h0 s == footprint c i h1 s /\
+      B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
+      seen_bounded c i h0 s;
+      S.equal (B.as_seq h1 dst) (c.spec_s i (reveal_key c i h0 s) (seen c i h0 s) l)) /\
+      preserves_freeable c i s h0 h1)
+)
+let digest (i: G.erased (Common.index Spec.Blake2B)) s dst l =
+  F.digest_erased blake2b_32 i (Common.s Spec.Blake2B i Core.M32) (Common.blake_key Spec.Blake2B i) s dst l;
+  (F.index_of_state blake2b_32 i (Common.s Spec.Blake2B i Core.M32) (Common.blake_key Spec.Blake2B i) s).digest_length
+
+let info (i: G.erased (Common.index Spec.Blake2B)): Tot _ =
+  F.index_of_state blake2b_32 i (Common.s Spec.Blake2B i Core.M32) (Common.blake_key Spec.Blake2B i)
 
 [@ (Comment "  Free state function when there is no key")]
 let free (kk: G.erased (Common.index Spec.Blake2B)): Tot _ =
@@ -367,5 +405,5 @@ let hash_with_key : Impl.blake2_st Spec.Blake2B Core.M32 =
 parameters `params` into `output`. The `key` array must be of length
 `params.key_length`. The `output` array must be of length
 `params.digest_length`. "]
-let hash_with_key_and_paramas : Impl.blake2_with_params_st Spec.Blake2B Core.M32 =
+let hash_with_key_and_params : Impl.blake2_with_params_st Spec.Blake2B Core.M32 =
   Impl.blake2_with_params #Spec.Blake2B #Core.M32 Blake2b32.init_with_params Blake2b32.update Blake2b32.finish

@@ -129,6 +129,12 @@ bool Hacl_Hash_SHA3_is_shake(Hacl_Hash_SHA3_state_t *s);
 
 /* SNIPPET_END: Hacl_Hash_SHA3_is_shake */
 
+/* SNIPPET_START: Hacl_Hash_SHA3_absorb_inner_32 */
+
+void Hacl_Hash_SHA3_absorb_inner_32(uint32_t rateInBytes, uint8_t *b, uint64_t *s);
+
+/* SNIPPET_END: Hacl_Hash_SHA3_absorb_inner_32 */
+
 /* SNIPPET_START: Hacl_Hash_SHA3_shake128 */
 
 void

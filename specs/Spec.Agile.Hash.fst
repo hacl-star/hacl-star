@@ -83,7 +83,7 @@ let finish (a:hash_alg) (hashw:words_state a) (l: output_length a): Tot (bytes_h
 // Same deal with the SHA3 family.
 let hash' a input l =
   if is_blake a then
-    Spec.Blake2.blake2 (to_blake_alg a) input (Spec.Blake2.blake2_default_params (to_blake_alg a)) Seq.empty
+    Spec.Blake2.blake2 (to_blake_alg a) false input (Spec.Blake2.blake2_default_params (to_blake_alg a)) Seq.empty
   else if is_md a then
     (* As defined in the NIST standard; pad, then update, then finish. *)
     let padding = pad a (S.length input) in

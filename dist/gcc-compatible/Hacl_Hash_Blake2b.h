@@ -53,6 +53,24 @@ typedef struct Hacl_Hash_Blake2b_blake2_params_s
 }
 Hacl_Hash_Blake2b_blake2_params;
 
+typedef struct Hacl_Hash_Blake2b_index_s
+{
+  uint8_t key_length;
+  uint8_t digest_length;
+  bool last_node;
+}
+Hacl_Hash_Blake2b_index;
+
+#define HACL_HASH_BLAKE2B_BLOCK_BYTES (128U)
+
+#define HACL_HASH_BLAKE2B_OUT_BYTES (64U)
+
+#define HACL_HASH_BLAKE2B_KEY_BYTES (64U)
+
+#define HACL_HASH_BLAKE2B_SALT_BYTES (16U)
+
+#define HACL_HASH_BLAKE2B_PERSONAL_BYTES (16U)
+
 typedef struct K____uint64_t___uint64_t__s
 {
   uint64_t *fst;
@@ -64,7 +82,8 @@ typedef struct Hacl_Hash_Blake2b_block_state_t_s
 {
   uint8_t fst;
   uint8_t snd;
-  K____uint64_t___uint64_t_ thd;
+  bool thd;
+  K____uint64_t___uint64_t_ f3;
 }
 Hacl_Hash_Blake2b_block_state_t;
 
@@ -92,7 +111,11 @@ The caller must satisfy the following requirements.
 
 */
 Hacl_Hash_Blake2b_state_t
-*Hacl_Hash_Blake2b_malloc_with_params_and_key(Hacl_Hash_Blake2b_blake2_params *p, uint8_t *k);
+*Hacl_Hash_Blake2b_malloc_with_params_and_key(
+  Hacl_Hash_Blake2b_blake2_params *p,
+  bool last_node,
+  uint8_t *k
+);
 
 /**
  Specialized allocation function that picks default values for all
@@ -116,7 +139,7 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void);
 
 /**
  General-purpose re-initialization function with parameters and
-key. You cannot change digest_length or key_length, meaning those values in
+key. You cannot change digest_length, key_length, or last_node, meaning those values in
 the parameters object must be the same as originally decided via one of the
 malloc functions. All other values of the parameter can be changed. The behavior
 is unspecified if you violate this precondition.
@@ -159,10 +182,14 @@ at least `digest_length` bytes, where `digest_length` was determined by your
 choice of `malloc` function. Concretely, if you used `malloc` or
 `malloc_with_key`, then the expected length is 32 for S, or 64 for B (default
 digest length). If you used `malloc_with_params_and_key`, then the expected
-length is whatever you chose for the `digest_length` field of your
-parameters.
+length is whatever you chose for the `digest_length` field of your parameters.
+For convenience, this function returns `digest_length`. When in doubt, callers
+can pass an array of size HACL_BLAKE2B_32_OUT_BYTES, then use the return value
+to see how many bytes were actually written. 
 */
-void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output);
+uint8_t Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *s, uint8_t *dst);
+
+Hacl_Hash_Blake2b_index Hacl_Hash_Blake2b_info(Hacl_Hash_Blake2b_state_t *s);
 
 /**
   Free state function when there is no key
@@ -201,7 +228,7 @@ parameters `params` into `output`. The `key` array must be of length
 `params.digest_length`. 
 */
 void
-Hacl_Hash_Blake2b_hash_with_key_and_paramas(
+Hacl_Hash_Blake2b_hash_with_key_and_params(
   uint8_t *output,
   uint8_t *input,
   uint32_t input_len,
