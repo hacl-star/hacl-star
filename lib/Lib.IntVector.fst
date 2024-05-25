@@ -22,7 +22,13 @@ let vec_t t w =
 
 let reveal_vec_1 _ = ()
 
+let vec_t_v #t #w x = admit()
+
 let vec_v #t #w x = admit()
+
+let lemma_of_vec_t #t #w f = admit()
+
+let lemma_of_vec_v_t #t #w f = admit()
 
 let vecv_extensionality #t #w f1 f2 = admit()
 
@@ -508,3 +514,5 @@ let vec_store_be #t #w b v =
   | U32,8 -> vec256_store32_be b v
   | U64,4 -> vec256_store64_be b v
   | U128,2 -> admit() //vec256_store_be b v
+
+let cast_lemma #t #w t' w' v = admit()

@@ -700,7 +700,9 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_Hash_Blake2b_Simd256:"libintvector.h"' \
   -add-include 'Hacl_MAC_Poly1305_Simd256:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"'
+  -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"' \
+  \
+  -add-include 'Hacl_Gf128_NI:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
@@ -763,7 +765,8 @@ BUNDLE_FLAGS	=\
   $(INTTYPES_128_BUNDLE) \
   $(RSAPSS_BUNDLE) \
   $(FFDHE_BUNDLE) \
-  $(LEGACY_BUNDLE)
+  $(LEGACY_BUNDLE) \
+  $(GF128_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -774,6 +777,8 @@ DEFAULT_FLAGS = \
   $(BUNDLE_FLAGS) \
   $(REQUIRED_FLAGS) \
   $(TARGET_H_INCLUDE)
+
+IGNORE_GF128_BUNDLE = -bundle Hacl.Impl.Gf128.*,Hacl.Gf128.*
 
 # WASM distribution
 # -----------------
@@ -832,6 +837,9 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Streaming.Poly1305_32=Hacl.Poly1305_32,Hacl.Impl.Poly1305.Field32xN_32'[rename=Hacl_MAC_Poly1305,rename-prefix] \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
+
+# Disabling GF128
+dist/wasm/Makefile.basic: GF128_BUNDLE = $(IGNORE_GF128_BUNDLE)
 
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS

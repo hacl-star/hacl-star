@@ -226,6 +226,7 @@ BIGNUM_BUNDLE= \
   -bundle Hacl.Bignum.Base,Hacl.Bignum.Addition,Hacl.Bignum.Convert,Hacl.Bignum.Lib,Hacl.Bignum.Multiplication[rename=Hacl_Bignum_Base] \
   -static-header Hacl.Bignum.Base,Hacl.Bignum.Addition,Hacl.Bignum.Convert,Hacl.Bignum.Lib,Hacl.Bignum.Multiplication \
   -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
+GF128_BUNDLE=-bundle Hacl.Gf128.NI=Hacl.Impl.Gf128.FieldNI
 
 # 3. OCaml
 
