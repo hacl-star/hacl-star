@@ -605,8 +605,7 @@ let lemma_gf128_irred_le (_:unit) : Lemma
 
 val gf128_clmul_wide_reduce_lemma: x:vec128 -> y:vec128 -> Lemma
   (let (hi, lo) = clmul_wide x y in
-   to_elem (gf128_reduce hi lo) ==
-    GF.reverse (GF.fmul #S.gf128_le (GF.reverse (to_elem x)) (GF.reverse (to_elem y))))
+   to_elem (gf128_reduce hi lo) == S.fmul_le (to_elem x) (to_elem y))
 let gf128_clmul_wide_reduce_lemma x y =
   lemma_clmul_wide x y;
   let (hi, lo) = clmul_wide x y in

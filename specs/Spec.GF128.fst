@@ -21,6 +21,7 @@ let store_elem (e:elem) : lbytes 16 = store_felem_be #gf128 e
 let irred_le = mk_int #U128 #SEC 0x87
 let gf128_le = gf U128 irred_le
 let elem_le = felem gf128_le
+let fmul_le (a b:elem_le) = reverse (fmul (reverse a) (reverse b))
 
 (* GCM types and specs *)
 let size_block : size_nat = 16
@@ -46,13 +47,13 @@ let gf128_init (h:lbytes size_block) : Tot (elem & elem) =
   zero, r
 
 let gf128_update1 (r:elem) (b:lbytes size_block) (acc:elem) : Tot elem =
-  (acc `fadd` encode b) `fmul_be` r
+  (acc `fadd` encode b) `fmul_le` r
 
 let gf128_finish (s:key) (acc:elem) : Tot tag =
   decode (acc `fadd` load_elem s)
 
 let gf128_update_last (r:elem) (l:size_nat{l < size_block}) (b:lbytes l) (acc:elem) =
-  if l = 0 then acc else (acc `fadd` encode_last l b) `fmul_be` r
+  if l = 0 then acc else (acc `fadd` encode_last l b) `fmul_le` r
 
 let gf128_update (text:bytes) (acc:elem) (r:elem) : Tot elem =
   repeat_blocks #uint8 #elem size_block text

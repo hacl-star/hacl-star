@@ -11,7 +11,7 @@ open FStar.Tactics.CanonCommSemiring
 friend Lib.IntTypes
 
 let add_identity a =
-  FStar.UInt.logxor_commutative #128 (v a) (v #U128 #SEC (zero #S.gf128));
+  FStar.UInt.logxor_commutative #128 (v a) (v #U128 #SEC (zero #S.gf128_le));
   FStar.UInt.logxor_lemma_1 #128 (v a);
   v_extensionality (zero ^. a) a
 
