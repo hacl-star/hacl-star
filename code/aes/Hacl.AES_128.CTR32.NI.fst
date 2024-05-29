@@ -19,8 +19,25 @@ module Spec = Spec.AES
 let aes_ctx = aes_ctx MAES Spec.AES128
 let skey = skey Spec.AES128
 
+[@@ CPrologue
+"/*******************************************************************************
+
+A verified AES-CTR32-128 library.
+
+This is a 128-bit optimized specific version of counter mode of operation for
+GCM, it uses AES-128 cipher for data confidentiality.
+
+AES-CTR32 always uses the forward version of AES cipher.
+
+*******************************************************************************/
+
+/************************/
+/* AES-CTR32-128 API */
+/************************/\n";
+Comment
+"Allocate a buffer on stack for AES-128 key expansion and nonce"]
 inline_for_extraction noextract
-val state_alloca: unit ->
+val context_alloca: unit ->
   StackInline aes_ctx
   (requires (fun h -> True))
   (ensures  (fun h0 f h1 -> live h1 f /\
@@ -28,10 +45,11 @@ val state_alloca: unit ->
     (elem_zero MAES))))
 
 inline_for_extraction noextract
-let state_alloca () = create_ctx MAES Spec.AES128
+let context_alloca () = create_ctx MAES Spec.AES128
 
+[@@ Comment "Allocate AES-128 context buffer using malloc for key expansion and nonce"]
 inline_for_extraction
-val state_malloc:
+val context_malloc:
     r:rid
   -> ST.ST (s:buffer (stelem MAES) { length s = v (ctxlen MAES Spec.AES128) })
   (requires (fun _ ->
@@ -43,12 +61,13 @@ val state_malloc:
     (M.loc_includes (M.loc_region_only true r) (loc_addr_of_buffer s)) /\
     freeable s))
 
-let state_malloc r =
+let context_malloc r =
   assert (v (ctxlen MAES Spec.AES128) == 12);
   B.malloc r (elem_zero MAES) (ctxlen MAES Spec.AES128)
 
+[@@ Comment "Free AES-128 context buffer"]
 inline_for_extraction
-val state_free:
+val context_free:
     s:buffer (stelem MAES) { length s = v (ctxlen MAES Spec.AES128) }
   -> ST.ST unit
   (requires fun h0 ->
@@ -56,11 +75,10 @@ val state_free:
   (ensures fun h0 _ h1 ->
     M.modifies (loc_addr_of_buffer s) h0 h1)
 
-let state_free s =
+let context_free s =
   B.free s
 
-
-[@ CInline ]
+[@@ Comment "Initiate AES-128 context buffer with key expansion and nonce"]
 val aes128_init:
     ctx: aes_ctx
   -> key: skey
@@ -74,11 +92,10 @@ val aes128_init:
     get_nonce_s MAES Spec.AES128 h1 ctx == state.block /\
     get_kex_s MAES Spec.AES128 h1 ctx == state.key_ex)))
 
-[@ CInline ]
 let aes128_init ctx key nonce = aes128_ni_init ctx key nonce
 
 
-[@ CInline ]
+[@@ Comment "Set nonce in AES-128 context buffer"]
 val aes128_set_nonce:
     ctx: aes_ctx
   -> nonce: lbuffer uint8 12ul ->
@@ -89,10 +106,14 @@ val aes128_set_nonce:
       u8_16_to_le (LSeq.update_sub
       (LSeq.create 16 (u8 0)) 0 12 (as_seq h0 nonce))))
 
-[@ CInline ]
 let aes128_set_nonce ctx nonce = aes_set_nonce ctx nonce
 
 
+[@@ Comment "Process 4-blocks (128-bit for each) in AES-CTR32 mode.
+
+  Given that `ctx` is initiated with AES-128 key and nonce, and
+  
+  `counter` is the current value of counter state."]
 inline_for_extraction noextract
 val aes128_update4:
     out: lbuffer uint8 64ul
@@ -109,6 +130,11 @@ val aes128_update4:
 
 let aes128_update4 out inp ctx ctr = aes_update4 out inp ctx ctr
 
+[@@ Comment "Process number of bytes in AES-CTR32 mode.
+
+  Given that `ctx` is initiated with AES-128 key and nonce, and
+  
+  `counter` is the initial value of counter state."]
 inline_for_extraction noextract
 val aes128_ctr:
   len: size_t
@@ -128,7 +154,11 @@ val aes128_ctr:
 let aes128_ctr len out inp ctx c = aes_ctr #MAES #Spec.AES128 len out inp ctx c
 
 
-[@ CInline ]
+[@@ Comment "Initiate AES-CTR32-128 context with key and nonce, and
+
+  encrypt number of bytes in AES-CTR32 mode.
+  
+  `counter` is the initial value of counter state."]
 val aes128_ctr_encrypt:
     len: size_t
   -> out: lbuffer uint8 len
@@ -146,7 +176,13 @@ val aes128_ctr_encrypt:
 let aes128_ctr_encrypt len out inp k n c = aes_ctr_encrypt #MAES #Spec.AES128 len out inp k n c
 
 
-[@ CInline ]
+[@@ Comment "Initiate AES-CTR32-128 context with key and nonce, and
+
+  decrypt number of bytes in AES-CTR32 mode.
+  
+  `counter` is the initial value of counter state.
+  
+  Decryption uses the forward version of AES cipher"]
 val aes128_ctr_decrypt:
     len: size_t
   -> out: lbuffer uint8 len

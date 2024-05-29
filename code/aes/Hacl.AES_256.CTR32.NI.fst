@@ -19,8 +19,25 @@ module Spec = Spec.AES
 let aes_ctx = aes_ctx MAES Spec.AES256
 let skey = skey Spec.AES256
 
+[@@ CPrologue
+"/*******************************************************************************
+
+A verified AES-CTR32-256 library.
+
+This is a 128-bit optimized specific version of counter mode of operation for
+GCM, it uses AES-256 cipher for data confidentiality.
+
+AES-CTR32 always uses the forward version of AES cipher.
+
+*******************************************************************************/
+
+/************************/
+/* AES-CTR32-256 API */
+/************************/\n";
+Comment
+"Allocate a buffer on stack for AES-256 key expansion and nonce"]
 inline_for_extraction noextract
-val state_alloca: unit ->
+val context_alloca: unit ->
   StackInline aes_ctx
   (requires (fun h -> True))
   (ensures  (fun h0 f h1 -> live h1 f /\
@@ -28,10 +45,11 @@ val state_alloca: unit ->
     (elem_zero MAES))))
 
 inline_for_extraction noextract
-let state_alloca () = create_ctx MAES Spec.AES256
+let context_alloca () = create_ctx MAES Spec.AES256
 
+[@@ Comment "Allocate AES-256 context buffer using malloc for key expansion and nonce"]
 inline_for_extraction
-val state_malloc:
+val context_malloc:
     r:rid
   -> ST.ST (s:buffer (stelem MAES) { length s = v (ctxlen MAES Spec.AES256) })
   (requires (fun _ ->
@@ -43,12 +61,13 @@ val state_malloc:
     (M.loc_includes (M.loc_region_only true r) (loc_addr_of_buffer s)) /\
     freeable s))
 
-let state_malloc r =
+let context_malloc r =
   assert (v (ctxlen MAES Spec.AES256) == 16);
   B.malloc r (elem_zero MAES) (ctxlen MAES Spec.AES256)
 
+[@@ Comment "Free AES-256 context buffer"]
 inline_for_extraction
-val state_free:
+val context_free:
     s:buffer (stelem MAES) { length s = v (ctxlen MAES Spec.AES256) }
   -> ST.ST unit
   (requires fun h0 ->
@@ -56,11 +75,11 @@ val state_free:
   (ensures fun h0 _ h1 ->
     M.modifies (loc_addr_of_buffer s) h0 h1)
 
-let state_free s =
+let context_free s =
   B.free s
 
 
-[@ CInline ]
+[@@ Comment "Initiate AES-256 context buffer with key expansion and nonce"]
 val aes256_init:
     ctx: aes_ctx
   -> key: skey 
@@ -74,10 +93,11 @@ val aes256_init:
     get_nonce_s MAES Spec.AES256 h1 ctx == state.block /\
     get_kex_s MAES Spec.AES256 h1 ctx == state.key_ex)))
 
-[@ CInline ]
 let aes256_init ctx key nonce = aes256_ni_init ctx key nonce
 
-[@ CInline ]
+[@@ Comment "Encrypt a block (128-bit) with AES-256 cipher.
+
+  Given that `ctx` is initiated with AES-256 key."]
 inline_for_extraction noextract
 val aes256_encrypt_block:
     ob: lbuffer uint8 16ul
@@ -93,7 +113,7 @@ let aes256_encrypt_block ob ctx ib =
     aes_encrypt_block #MAES #Spec.AES256 ob ctx ib
 
 
-[@ CInline ]
+[@@ Comment "Set nonce in AES-256 context buffer"]
 val aes256_set_nonce:
     ctx: aes_ctx
   -> nonce: lbuffer uint8 12ul ->
@@ -104,10 +124,14 @@ val aes256_set_nonce:
       u8_16_to_le (LSeq.update_sub
       (LSeq.create 16 (u8 0)) 0 12 (as_seq h0 nonce))))
 
-[@ CInline ]
 let aes256_set_nonce ctx nonce = aes_set_nonce ctx nonce
 
 
+[@@ Comment "Process 4-blocks (128-bit for each) in AES-CTR32 mode.
+
+  Given that `ctx` is initiated with AES-256 key and nonce, and
+  
+  `counter` is the current value of counter state."]
 inline_for_extraction noextract
 val aes256_update4:
     out: lbuffer uint8 64ul
@@ -125,7 +149,11 @@ val aes256_update4:
 let aes256_update4 out inp ctx ctr = aes_update4 out inp ctx ctr
 
 
-[@ CInline ]
+[@@ Comment "Process number of bytes in AES-CTR32 mode.
+
+  Given that `ctx` is initiated with AES-256 key and nonce, and
+  
+  `counter` is the initial value of counter state."]
 val aes256_ctr:
   len: size_t
   -> out: lbuffer uint8 len
@@ -144,8 +172,11 @@ val aes256_ctr:
 let aes256_ctr len out inp ctx c =  aes_ctr #MAES #Spec.AES256 len out inp ctx c
 
 
+[@@ Comment "Initiate AES-CTR32-256 context with key and nonce, and
 
-[@ CInline ]
+  encrypt number of bytes in AES-CTR32 mode.
+  
+  `counter` is the initial value of counter state."]
 val aes256_ctr_encrypt:
     len: size_t
   -> out: lbuffer uint8 len
@@ -163,7 +194,13 @@ val aes256_ctr_encrypt:
 let aes256_ctr_encrypt len out inp k n c = aes_ctr_encrypt #MAES #Spec.AES256 len out inp k n c
 
 
-[@ CInline ]
+[@@ Comment "Initiate AES-CTR32-256 context with key and nonce, and
+
+  decrypt number of bytes in AES-CTR32 mode.
+  
+  `counter` is the initial value of counter state.
+  
+  Decryption uses the forward version of AES cipher"]
 val aes256_ctr_decrypt:
     len: size_t
   -> out: lbuffer uint8 len
