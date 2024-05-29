@@ -80,7 +80,7 @@ let context_free s =
 
 
 [@@ Comment "Initiate AES-256 context buffer with key expansion and nonce"]
-val aes256_init:
+val init:
     ctx: aes_ctx
   -> key: skey 
   -> nonce: lbuffer uint8 12ul ->
@@ -93,13 +93,13 @@ val aes256_init:
     get_nonce_s MAES Spec.AES256 h1 ctx == state.block /\
     get_kex_s MAES Spec.AES256 h1 ctx == state.key_ex)))
 
-let aes256_init ctx key nonce = aes256_ni_init ctx key nonce
+let init ctx key nonce = aes256_ni_init ctx key nonce
 
 [@@ Comment "Encrypt a block (128-bit) with AES-256 cipher.
 
   Given that `ctx` is initiated with AES-256 key."]
 inline_for_extraction noextract
-val aes256_encrypt_block:
+val encrypt_block:
     ob: lbuffer uint8 16ul
   -> ctx: aes_ctx
   -> ib: lbuffer uint8 16ul ->
@@ -109,12 +109,12 @@ val aes256_encrypt_block:
     as_seq h1 ob == u8_16_to_le (Spec.aes_encrypt_block Spec.AES256
       (get_kex_s MAES Spec.AES256 h0 ctx) (u8_16_to_le (as_seq h0 ib)))))
 
-let aes256_encrypt_block ob ctx ib =
+let encrypt_block ob ctx ib =
     aes_encrypt_block #MAES #Spec.AES256 ob ctx ib
 
 
 [@@ Comment "Set nonce in AES-256 context buffer"]
-val aes256_set_nonce:
+val set_nonce:
     ctx: aes_ctx
   -> nonce: lbuffer uint8 12ul ->
   Stack unit
@@ -124,7 +124,7 @@ val aes256_set_nonce:
       u8_16_to_le (LSeq.update_sub
       (LSeq.create 16 (u8 0)) 0 12 (as_seq h0 nonce))))
 
-let aes256_set_nonce ctx nonce = aes_set_nonce ctx nonce
+let set_nonce ctx nonce = aes_set_nonce ctx nonce
 
 
 [@@ Comment "Process 4-blocks (128-bit for each) in AES-CTR32 mode.
@@ -133,7 +133,7 @@ let aes256_set_nonce ctx nonce = aes_set_nonce ctx nonce
   
   `counter` is the current value of counter state."]
 inline_for_extraction noextract
-val aes256_update4:
+val update4:
     out: lbuffer uint8 64ul
   -> inp: lbuffer uint8 64ul
   -> ctx: aes_ctx
@@ -146,7 +146,7 @@ val aes256_update4:
       (get_nonce_s MAES Spec.AES256 h0 ctx)
       counter (as_seq h0 inp)))
 
-let aes256_update4 out inp ctx ctr = aes_update4 out inp ctx ctr
+let update4 out inp ctx ctr = aes_update4 out inp ctx ctr
 
 
 [@@ Comment "Process number of bytes in AES-CTR32 mode.
@@ -154,7 +154,7 @@ let aes256_update4 out inp ctx ctr = aes_update4 out inp ctx ctr
   Given that `ctx` is initiated with AES-256 key and nonce, and
   
   `counter` is the initial value of counter state."]
-val aes256_ctr:
+val ctr:
   len: size_t
   -> out: lbuffer uint8 len
   -> inp: lbuffer uint8 len
@@ -169,7 +169,7 @@ val aes256_ctr:
       (get_nonce_s MAES Spec.AES256 h0 ctx)
       counter (as_seq h0 inp)))
 
-let aes256_ctr len out inp ctx c =  aes_ctr #MAES #Spec.AES256 len out inp ctx c
+let ctr len out inp ctx c =  aes_ctr #MAES #Spec.AES256 len out inp ctx c
 
 
 [@@ Comment "Initiate AES-CTR32-256 context with key and nonce, and
@@ -177,7 +177,7 @@ let aes256_ctr len out inp ctx c =  aes_ctr #MAES #Spec.AES256 len out inp ctx c
   encrypt number of bytes in AES-CTR32 mode.
   
   `counter` is the initial value of counter state."]
-val aes256_ctr_encrypt:
+val ctr_encrypt:
     len: size_t
   -> out: lbuffer uint8 len
   -> inp: lbuffer uint8 len
@@ -191,7 +191,7 @@ val aes256_ctr_encrypt:
     as_seq h1 out == Spec.aes_ctr32_encrypt_bytes_LE Spec.AES256
     (as_seq h0 k) (as_seq h0 n) counter (as_seq h0 inp)))
 
-let aes256_ctr_encrypt len out inp k n c = aes_ctr_encrypt #MAES #Spec.AES256 len out inp k n c
+let ctr_encrypt len out inp k n c = aes_ctr_encrypt #MAES #Spec.AES256 len out inp k n c
 
 
 [@@ Comment "Initiate AES-CTR32-256 context with key and nonce, and
@@ -201,7 +201,7 @@ let aes256_ctr_encrypt len out inp k n c = aes_ctr_encrypt #MAES #Spec.AES256 le
   `counter` is the initial value of counter state.
   
   Decryption uses the forward version of AES cipher"]
-val aes256_ctr_decrypt:
+val ctr_decrypt:
     len: size_t
   -> out: lbuffer uint8 len
   -> inp: lbuffer uint8 len
@@ -214,4 +214,4 @@ val aes256_ctr_decrypt:
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_seq h1 out == Spec.aes_ctr32_decrypt_bytes_LE Spec.AES256
     (as_seq h0 k) (as_seq h0 n) counter (as_seq h0 inp)))
-let aes256_ctr_decrypt len out inp k n c = aes_ctr_decrypt #MAES #Spec.AES256 len out inp k n c
+let ctr_decrypt len out inp k n c = aes_ctr_decrypt #MAES #Spec.AES256 len out inp k n c

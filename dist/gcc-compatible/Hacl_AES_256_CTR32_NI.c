@@ -50,11 +50,7 @@ void Hacl_AES_256_CTR32_NI_context_free(Lib_IntVector_Intrinsics_vec128 *s)
 Initiate AES-256 context buffer with key expansion and nonce
 */
 void
-Hacl_AES_256_CTR32_NI_aes256_init(
-  Lib_IntVector_Intrinsics_vec128 *ctx,
-  uint8_t *key,
-  uint8_t *nonce
-)
+Hacl_AES_256_CTR32_NI_init(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *key, uint8_t *nonce)
 {
   Lib_IntVector_Intrinsics_vec128 *kex = ctx + 1U;
   Lib_IntVector_Intrinsics_vec128 *n = ctx;
@@ -326,8 +322,7 @@ Hacl_AES_256_CTR32_NI_aes256_init(
 /**
 Set nonce in AES-256 context buffer
 */
-void
-Hacl_AES_256_CTR32_NI_aes256_set_nonce(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *nonce)
+void Hacl_AES_256_CTR32_NI_set_nonce(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *nonce)
 {
   Lib_IntVector_Intrinsics_vec128 *n = ctx;
   uint8_t nb[16U] = { 0U };
@@ -343,7 +338,7 @@ Process number of bytes in AES-CTR32 mode.
   `counter` is the initial value of counter state.
 */
 void
-Hacl_AES_256_CTR32_NI_aes256_ctr(
+Hacl_AES_256_CTR32_NI_ctr(
   uint32_t len,
   uint8_t *out,
   uint8_t *inp,
@@ -467,7 +462,7 @@ Initiate AES-CTR32-256 context with key and nonce, and
   `counter` is the initial value of counter state.
 */
 void
-Hacl_AES_256_CTR32_NI_aes256_ctr_encrypt(
+Hacl_AES_256_CTR32_NI_ctr_encrypt(
   uint32_t len,
   uint8_t *out,
   uint8_t *inp,
@@ -859,7 +854,7 @@ Initiate AES-CTR32-256 context with key and nonce, and
   Decryption uses the forward version of AES cipher
 */
 void
-Hacl_AES_256_CTR32_NI_aes256_ctr_decrypt(
+Hacl_AES_256_CTR32_NI_ctr_decrypt(
   uint32_t len,
   uint8_t *out,
   uint8_t *inp,

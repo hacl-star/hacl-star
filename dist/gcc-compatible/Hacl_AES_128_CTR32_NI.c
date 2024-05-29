@@ -50,11 +50,7 @@ void Hacl_AES_128_CTR32_NI_context_free(Lib_IntVector_Intrinsics_vec128 *s)
 Initiate AES-128 context buffer with key expansion and nonce
 */
 void
-Hacl_AES_128_CTR32_NI_aes128_init(
-  Lib_IntVector_Intrinsics_vec128 *ctx,
-  uint8_t *key,
-  uint8_t *nonce
-)
+Hacl_AES_128_CTR32_NI_init(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *key, uint8_t *nonce)
 {
   Lib_IntVector_Intrinsics_vec128 *kex = ctx + 1U;
   Lib_IntVector_Intrinsics_vec128 *n = ctx;
@@ -268,8 +264,7 @@ Hacl_AES_128_CTR32_NI_aes128_init(
 /**
 Set nonce in AES-128 context buffer
 */
-void
-Hacl_AES_128_CTR32_NI_aes128_set_nonce(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *nonce)
+void Hacl_AES_128_CTR32_NI_set_nonce(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *nonce)
 {
   Lib_IntVector_Intrinsics_vec128 *n = ctx;
   uint8_t nb[16U] = { 0U };
@@ -285,7 +280,7 @@ Initiate AES-CTR32-128 context with key and nonce, and
   `counter` is the initial value of counter state.
 */
 void
-Hacl_AES_128_CTR32_NI_aes128_ctr_encrypt(
+Hacl_AES_128_CTR32_NI_ctr_encrypt(
   uint32_t len,
   uint8_t *out,
   uint8_t *inp,
@@ -619,7 +614,7 @@ Initiate AES-CTR32-128 context with key and nonce, and
   Decryption uses the forward version of AES cipher
 */
 void
-Hacl_AES_128_CTR32_NI_aes128_ctr_decrypt(
+Hacl_AES_128_CTR32_NI_ctr_decrypt(
   uint32_t len,
   uint8_t *out,
   uint8_t *inp,

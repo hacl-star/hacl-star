@@ -79,7 +79,7 @@ let context_free s =
   B.free s
 
 [@@ Comment "Initiate AES-128 context buffer with key expansion and nonce"]
-val aes128_init:
+val init:
     ctx: aes_ctx
   -> key: skey
   -> nonce: lbuffer uint8 12ul ->
@@ -92,11 +92,11 @@ val aes128_init:
     get_nonce_s MAES Spec.AES128 h1 ctx == state.block /\
     get_kex_s MAES Spec.AES128 h1 ctx == state.key_ex)))
 
-let aes128_init ctx key nonce = aes128_ni_init ctx key nonce
+let init ctx key nonce = aes128_ni_init ctx key nonce
 
 
 [@@ Comment "Set nonce in AES-128 context buffer"]
-val aes128_set_nonce:
+val set_nonce:
     ctx: aes_ctx
   -> nonce: lbuffer uint8 12ul ->
   Stack unit
@@ -106,7 +106,7 @@ val aes128_set_nonce:
       u8_16_to_le (LSeq.update_sub
       (LSeq.create 16 (u8 0)) 0 12 (as_seq h0 nonce))))
 
-let aes128_set_nonce ctx nonce = aes_set_nonce ctx nonce
+let set_nonce ctx nonce = aes_set_nonce ctx nonce
 
 
 [@@ Comment "Process 4-blocks (128-bit for each) in AES-CTR32 mode.
@@ -115,7 +115,7 @@ let aes128_set_nonce ctx nonce = aes_set_nonce ctx nonce
   
   `counter` is the current value of counter state."]
 inline_for_extraction noextract
-val aes128_update4:
+val update4:
     out: lbuffer uint8 64ul
   -> inp: lbuffer uint8 64ul
   -> ctx: aes_ctx
@@ -128,7 +128,7 @@ val aes128_update4:
       (get_nonce_s MAES Spec.AES128 h0 ctx)
       counter (as_seq h0 inp)))
 
-let aes128_update4 out inp ctx ctr = aes_update4 out inp ctx ctr
+let update4 out inp ctx ctr = aes_update4 out inp ctx ctr
 
 [@@ Comment "Process number of bytes in AES-CTR32 mode.
 
@@ -136,7 +136,7 @@ let aes128_update4 out inp ctx ctr = aes_update4 out inp ctx ctr
   
   `counter` is the initial value of counter state."]
 inline_for_extraction noextract
-val aes128_ctr:
+val ctr:
   len: size_t
   -> out: lbuffer uint8 len
   -> inp: lbuffer uint8 len
@@ -151,7 +151,7 @@ val aes128_ctr:
       (get_nonce_s MAES Spec.AES128 h0 ctx)
       counter (as_seq h0 inp)))
 
-let aes128_ctr len out inp ctx c = aes_ctr #MAES #Spec.AES128 len out inp ctx c
+let ctr len out inp ctx c = aes_ctr #MAES #Spec.AES128 len out inp ctx c
 
 
 [@@ Comment "Initiate AES-CTR32-128 context with key and nonce, and
@@ -159,7 +159,7 @@ let aes128_ctr len out inp ctx c = aes_ctr #MAES #Spec.AES128 len out inp ctx c
   encrypt number of bytes in AES-CTR32 mode.
   
   `counter` is the initial value of counter state."]
-val aes128_ctr_encrypt:
+val ctr_encrypt:
     len: size_t
   -> out: lbuffer uint8 len
   -> inp: lbuffer uint8 len
@@ -173,7 +173,7 @@ val aes128_ctr_encrypt:
     as_seq h1 out == Spec.aes_ctr32_encrypt_bytes_LE Spec.AES128
     (as_seq h0 k) (as_seq h0 n) counter (as_seq h0 inp)))
 
-let aes128_ctr_encrypt len out inp k n c = aes_ctr_encrypt #MAES #Spec.AES128 len out inp k n c
+let ctr_encrypt len out inp k n c = aes_ctr_encrypt #MAES #Spec.AES128 len out inp k n c
 
 
 [@@ Comment "Initiate AES-CTR32-128 context with key and nonce, and
@@ -183,7 +183,7 @@ let aes128_ctr_encrypt len out inp k n c = aes_ctr_encrypt #MAES #Spec.AES128 le
   `counter` is the initial value of counter state.
   
   Decryption uses the forward version of AES cipher"]
-val aes128_ctr_decrypt:
+val ctr_decrypt:
     len: size_t
   -> out: lbuffer uint8 len
   -> inp: lbuffer uint8 len
@@ -196,5 +196,5 @@ val aes128_ctr_decrypt:
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_seq h1 out == Spec.aes_ctr32_decrypt_bytes_LE Spec.AES128
     (as_seq h0 k) (as_seq h0 n) counter (as_seq h0 inp)))
-let aes128_ctr_decrypt len out inp k n c = aes_ctr_decrypt #MAES #Spec.AES128 len out inp k n c
+let ctr_decrypt len out inp k n c = aes_ctr_decrypt #MAES #Spec.AES128 len out inp k n c
 
