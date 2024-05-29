@@ -393,6 +393,16 @@ let fmul_1b_lemma _ =
   logxor_spec p (b0 &. a);
   UInt.logxor_lemma_1 #8 (v p)
 
+let fmul_inner (#f:field) (x:(felem f & felem f & felem f)) =
+  let (p,a,b) = x in
+  let b0 = eq_mask #f.t (b &. one) one in
+  let p = p ^. (b0 &. a) in
+  let carry_mask = eq_mask #f.t (a >>. size (bits f.t - 1)) one  in
+  let a = a <<. size 1 in
+  let a = a ^. (carry_mask &. f.irred) in
+  let b = b >>. size 1 in
+  (p,a,b)
+
 let fmul_unroll #f (p:felem f) (a:felem f) (b:felem f) :
     Tot (felem f & felem f & felem f) =
   let (p,a,b) = fmul_inner (p,a,b) in
@@ -410,17 +420,31 @@ val fmul_loop:
   -> a:felem f
   -> b:felem f ->
   Lemma
-   (fmul_unroll p a b == repeati (bits f.t - 1) (fun i -> fmul_inner) (p,a,b))
+   (let f' = fun (p',a',b') -> (let b0 = eq_mask #f.t (b' &. one) one in
+              let p' = p' ^. (b0 &. a') in
+              let carry_mask = eq_mask #f.t (a' >>. size (bits f.t - 1)) one in
+              let a' = a' <<. size 1 in
+              let a' = a' ^. (carry_mask &. f.irred) in
+              let b' = b' >>. size 1 in
+              (p',a',b')) in
+    repeati (bits f.t - 1) (fun i -> f') (p,a,b) == fmul_unroll p a b)
 
 let fmul_loop #f p a b =
-  eq_repeati0 (bits f.t - 1) (fun i -> fmul_inner) (p,a,b);
-  unfold_repeati (bits f.t - 1) (fun i -> fmul_inner) (p,a,b) 0;
-  unfold_repeati (bits f.t - 1) (fun i -> fmul_inner) (p,a,b) 1;
-  unfold_repeati (bits f.t - 1) (fun i -> fmul_inner) (p,a,b) 2;
-  unfold_repeati (bits f.t - 1) (fun i -> fmul_inner) (p,a,b) 3;
-  unfold_repeati (bits f.t - 1) (fun i -> fmul_inner) (p,a,b) 4;
-  unfold_repeati (bits f.t - 1) (fun i -> fmul_inner) (p,a,b) 5;
-  unfold_repeati (bits f.t - 1) (fun i -> fmul_inner) (p,a,b) 6
+  let f' = fun (p',a',b') -> (let b0 = eq_mask #f.t (b' &. one) one in
+            let p' = p' ^. (b0 &. a') in
+            let carry_mask = eq_mask #f.t (a' >>. size (bits f.t - 1)) one in
+            let a' = a' <<. size 1 in
+            let a' = a' ^. (carry_mask &. f.irred) in
+            let b' = b' >>. size 1 in
+            (p',a',b')) in
+  eq_repeati0 (bits f.t - 1) (fun i -> f') (p,a,b);
+  unfold_repeati (bits f.t - 1) (fun i -> f') (p,a,b) 0;
+  unfold_repeati (bits f.t - 1) (fun i -> f') (p,a,b) 1;
+  unfold_repeati (bits f.t - 1) (fun i -> f') (p,a,b) 2;
+  unfold_repeati (bits f.t - 1) (fun i -> f') (p,a,b) 3;
+  unfold_repeati (bits f.t - 1) (fun i -> f') (p,a,b) 4;
+  unfold_repeati (bits f.t - 1) (fun i -> f') (p,a,b) 5;
+  unfold_repeati (bits f.t - 1) (fun i -> f') (p,a,b) 6
 
 val fmul_eq_lemma:
   #f:field{f == gf U8 (u8 0x1b)}
