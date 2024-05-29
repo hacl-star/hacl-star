@@ -59,6 +59,13 @@ TARGETS += uint128-intrinsics-test.exe
 endif
 endif
 
+# AESNI
+ifneq ($(COMPILE_AESNI),)
+CFLAGS += -DHACL_CAN_COMPILE_AESNI
+else
+TARGETS := $(filter-out aes128-ctr32-ni-test.exe, $(TARGETS))
+endif
+
 CFLAGS += -I$(KRML_HOME)/include -I../dist/gcc-compatible \
   -I$(KRML_HOME)/krmllib/dist/minimal \
   -I../secure_api/merkle_tree \
