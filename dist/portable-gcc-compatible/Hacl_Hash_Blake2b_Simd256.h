@@ -37,14 +37,58 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
+#include "Hacl_Hash_Blake2b.h"
 #include "libintvector.h"
+
+/* SNIPPET_START: HACL_HASH_BLAKE2B_SIMD256_BLOCK_BYTES */
+
+#define HACL_HASH_BLAKE2B_SIMD256_BLOCK_BYTES (128U)
+
+/* SNIPPET_END: HACL_HASH_BLAKE2B_SIMD256_BLOCK_BYTES */
+
+/* SNIPPET_START: HACL_HASH_BLAKE2B_SIMD256_OUT_BYTES */
+
+#define HACL_HASH_BLAKE2B_SIMD256_OUT_BYTES (64U)
+
+/* SNIPPET_END: HACL_HASH_BLAKE2B_SIMD256_OUT_BYTES */
+
+/* SNIPPET_START: HACL_HASH_BLAKE2B_SIMD256_KEY_BYTES */
+
+#define HACL_HASH_BLAKE2B_SIMD256_KEY_BYTES (64U)
+
+/* SNIPPET_END: HACL_HASH_BLAKE2B_SIMD256_KEY_BYTES */
+
+/* SNIPPET_START: HACL_HASH_BLAKE2B_SIMD256_SALT_BYTES */
+
+#define HACL_HASH_BLAKE2B_SIMD256_SALT_BYTES (16U)
+
+/* SNIPPET_END: HACL_HASH_BLAKE2B_SIMD256_SALT_BYTES */
+
+/* SNIPPET_START: HACL_HASH_BLAKE2B_SIMD256_PERSONAL_BYTES */
+
+#define HACL_HASH_BLAKE2B_SIMD256_PERSONAL_BYTES (16U)
+
+/* SNIPPET_END: HACL_HASH_BLAKE2B_SIMD256_PERSONAL_BYTES */
+
+/* SNIPPET_START: K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ */
+
+typedef struct K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256__s
+{
+  Lib_IntVector_Intrinsics_vec256 *fst;
+  Lib_IntVector_Intrinsics_vec256 *snd;
+}
+K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_;
+
+/* SNIPPET_END: K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ */
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_block_state_t */
 
 typedef struct Hacl_Hash_Blake2b_Simd256_block_state_t_s
 {
-  Lib_IntVector_Intrinsics_vec256 *fst;
-  Lib_IntVector_Intrinsics_vec256 *snd;
+  uint8_t fst;
+  uint8_t snd;
+  bool thd;
+  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ f3;
 }
 Hacl_Hash_Blake2b_Simd256_block_state_t;
 
@@ -62,28 +106,111 @@ Hacl_Hash_Blake2b_Simd256_state_t;
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_state_t */
 
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key */
+
+/**
+ General-purpose allocation function that gives control over all
+Blake2 parameters, including the key. Further resettings of the state SHALL be
+done with `reset_with_params_and_key`, and SHALL feature the exact same values
+for the `key_length` and `digest_length` fields as passed here. In other words,
+once you commit to a digest and key length, the only way to change these
+parameters is to allocate a new object.
+
+The caller must satisfy the following requirements.
+- The length of the key k MUST match the value of the field key_length in the
+  parameters.
+- The key_length must not exceed 256 for S, 64 for B.
+- The digest_length must not exceed 256 for S, 64 for B.
+
+*/
+Hacl_Hash_Blake2b_Simd256_state_t
+*Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key(
+  Hacl_Hash_Blake2b_blake2_params *p,
+  bool last_node,
+  uint8_t *k
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_malloc_with_key0 */
+
+/**
+ Specialized allocation function that picks default values for all
+parameters, except for the key_length. Further resettings of the state SHALL be
+done with `reset_with_key`, and SHALL feature the exact same key length `kk` as
+passed here. In other words, once you commit to a key length, the only way to
+change this parameter is to allocate a new object.
+
+The caller must satisfy the following requirements.
+- The key_length must not exceed 256 for S, 64 for B.
+
+*/
+Hacl_Hash_Blake2b_Simd256_state_t
+*Hacl_Hash_Blake2b_Simd256_malloc_with_key0(uint8_t *k, uint8_t kk);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_malloc_with_key0 */
+
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_malloc */
 
 /**
-  State allocation function when there is no key
+ Specialized allocation function that picks default values for all
+parameters, and has no key. Effectively, this is what you want if you intend to
+use Blake2 as a hash function. Further resettings of the state SHALL be done with `reset`.
 */
 Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(void);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_malloc */
 
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_reset_with_key_and_params */
+
+/**
+ General-purpose re-initialization function with parameters and
+key. You cannot change digest_length, key_length, or last_node, meaning those values in
+the parameters object must be the same as originally decided via one of the
+malloc functions. All other values of the parameter can be changed. The behavior
+is unspecified if you violate this precondition.
+*/
+void
+Hacl_Hash_Blake2b_Simd256_reset_with_key_and_params(
+  Hacl_Hash_Blake2b_Simd256_state_t *s,
+  Hacl_Hash_Blake2b_blake2_params *p,
+  uint8_t *k
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_reset_with_key_and_params */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_reset_with_key */
+
+/**
+ Specialized-purpose re-initialization function with no parameters,
+and a key. The key length must be the same as originally decided via your choice
+of malloc function. All other parameters are reset to their default values. The
+original call to malloc MUST have set digest_length to the default value. The
+behavior is unspecified if you violate this precondition.
+*/
+void
+Hacl_Hash_Blake2b_Simd256_reset_with_key(Hacl_Hash_Blake2b_Simd256_state_t *s, uint8_t *k);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_reset_with_key */
+
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_reset */
 
 /**
-  Re-initialization function when there is no key
+ Specialized-purpose re-initialization function with no parameters
+and no key. This is what you want if you intend to use Blake2 as a hash
+function. The key length and digest length must have been set to their
+respective default values via your choice of malloc function (always true if you
+used `malloc`). All other parameters are reset to their default values. The
+behavior is unspecified if you violate this precondition.
 */
-void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *state);
+void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *s);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_reset */
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_update */
 
 /**
-  Update function when there is no key; 0 = success, 1 = max length exceeded
+  Update function; 0 = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2b_Simd256_update(
@@ -97,12 +224,25 @@ Hacl_Hash_Blake2b_Simd256_update(
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_digest */
 
 /**
-  Finish function when there is no key
+ Digest function. This function expects the `output` array to hold
+at least `digest_length` bytes, where `digest_length` was determined by your
+choice of `malloc` function. Concretely, if you used `malloc` or
+`malloc_with_key`, then the expected length is 256 for S, or 64 for B (default
+digest length). If you used `malloc_with_params_and_key`, then the expected
+length is whatever you chose for the `digest_length` field of your parameters.
+For convenience, this function returns `digest_length`. When in doubt, callers
+can pass an array of size HACL_BLAKE2B_256_OUT_BYTES, then use the return value
+to see how many bytes were actually written. 
 */
-void
-Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8_t *output);
+uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_digest */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_info */
+
+Hacl_Hash_Blake2b_index Hacl_Hash_Blake2b_Simd256_info(Hacl_Hash_Blake2b_Simd256_state_t *s);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_info */
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_free */
 
@@ -112,6 +252,16 @@ Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8
 void Hacl_Hash_Blake2b_Simd256_free(Hacl_Hash_Blake2b_Simd256_state_t *state);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_free */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_copy */
+
+/**
+  Copying. This preserves all parameters.
+*/
+Hacl_Hash_Blake2b_Simd256_state_t
+*Hacl_Hash_Blake2b_Simd256_copy(Hacl_Hash_Blake2b_Simd256_state_t *state);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_copy */
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_hash_with_key */
 
@@ -136,6 +286,25 @@ Hacl_Hash_Blake2b_Simd256_hash_with_key(
 );
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_hash_with_key */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params */
+
+/**
+Write the BLAKE2b digest of message `input` using key `key` and
+parameters `params` into `output`. The `key` array must be of length
+`params.key_length`. The `output` array must be of length
+`params.digest_length`. 
+*/
+void
+Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params(
+  uint8_t *output,
+  uint8_t *input,
+  uint32_t input_len,
+  Hacl_Hash_Blake2b_blake2_params params,
+  uint8_t *key
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params */
 
 #if defined(__cplusplus)
 }

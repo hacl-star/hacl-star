@@ -34,7 +34,7 @@ let update_last (a:hash_alg)
   Tot (words_state a)
 =
   if is_blake a then
-    Spec.Blake2.blake2_update_last (to_blake_alg a) prevlen (S.length input) input hash
+    Spec.Blake2.blake2_update_last (to_blake_alg a) false prevlen (S.length input) input hash
   else if is_keccak a then
     // VERY UNPLEASANT! Because of the lazy split for Blake2 we need to unroll...
     let rateInBytes = rate a / 8 in
@@ -62,7 +62,8 @@ let split_blocks (a:hash_alg) (input:bytes)
       S.append bs l == input) =
   UpdateMulti.split_at_last_lazy (block_length a) input
 
-let hash_incremental (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a})
+let hash_incremental (a:hash_alg)
+  (input:bytes{S.length input `less_than_max_input_length` a})
   (out_length: output_length a):
   Tot (hash:bytes{S.length hash = (hash_length' a out_length)})
 =

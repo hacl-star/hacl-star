@@ -37,7 +37,7 @@ extern "C" {
 
 static const
 uint32_t
-Hacl_Hash_Blake2s_sigmaTable[160U] =
+Hacl_Hash_Blake2b_sigmaTable[160U] =
   {
     0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U, 14U, 10U, 4U, 8U, 9U, 15U,
     13U, 6U, 1U, 12U, 0U, 2U, 11U, 7U, 5U, 3U, 11U, 8U, 12U, 0U, 5U, 2U, 15U, 13U, 10U, 14U, 3U, 6U,
@@ -51,7 +51,7 @@ Hacl_Hash_Blake2s_sigmaTable[160U] =
 
 static const
 uint32_t
-Hacl_Hash_Blake2s_ivTable_S[8U] =
+Hacl_Hash_Blake2b_ivTable_S[8U] =
   {
     0x6A09E667U, 0xBB67AE85U, 0x3C6EF372U, 0xA54FF53AU, 0x510E527FU, 0x9B05688CU, 0x1F83D9ABU,
     0x5BE0CD19U
@@ -59,7 +59,7 @@ Hacl_Hash_Blake2s_ivTable_S[8U] =
 
 static const
 uint64_t
-Hacl_Hash_Blake2s_ivTable_B[8U] =
+Hacl_Hash_Blake2b_ivTable_B[8U] =
   {
     0x6A09E667F3BCC908ULL, 0xBB67AE8584CAA73BULL, 0x3C6EF372FE94F82BULL, 0xA54FF53A5F1D36F1ULL,
     0x510E527FADE682D1ULL, 0x9B05688C2B3E6C1FULL, 0x1F83D9ABFB41BD6BULL, 0x5BE0CD19137E2179ULL

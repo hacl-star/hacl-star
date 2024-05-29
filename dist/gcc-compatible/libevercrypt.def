@@ -13,10 +13,11 @@ EXPORTS
   Hacl_Hash_Blake2b_reset
   Hacl_Hash_Blake2b_update
   Hacl_Hash_Blake2b_digest
+  Hacl_Hash_Blake2b_info
   Hacl_Hash_Blake2b_free
   Hacl_Hash_Blake2b_copy
   Hacl_Hash_Blake2b_hash_with_key
-  Hacl_Hash_Blake2b_hash_with_key_and_paramas
+  Hacl_Hash_Blake2b_hash_with_key_and_params
   Hacl_Hash_Blake2s_init
   Hacl_Hash_Blake2s_update_multi
   Hacl_Hash_Blake2s_update_last
@@ -29,10 +30,11 @@ EXPORTS
   Hacl_Hash_Blake2s_reset
   Hacl_Hash_Blake2s_update
   Hacl_Hash_Blake2s_digest
+  Hacl_Hash_Blake2s_info
   Hacl_Hash_Blake2s_free
   Hacl_Hash_Blake2s_copy
   Hacl_Hash_Blake2s_hash_with_key
-  Hacl_Hash_Blake2s_hash_with_key_and_paramas
+  Hacl_Hash_Blake2s_hash_with_key_and_params
   Hacl_Hash_Blake2b_Simd256_init
   Hacl_Hash_Blake2b_Simd256_update_multi
   Hacl_Hash_Blake2b_Simd256_update_last
@@ -48,10 +50,11 @@ EXPORTS
   Hacl_Hash_Blake2b_Simd256_reset
   Hacl_Hash_Blake2b_Simd256_update
   Hacl_Hash_Blake2b_Simd256_digest
+  Hacl_Hash_Blake2b_Simd256_info
   Hacl_Hash_Blake2b_Simd256_free
   Hacl_Hash_Blake2b_Simd256_copy
   Hacl_Hash_Blake2b_Simd256_hash_with_key
-  Hacl_Hash_Blake2b_Simd256_hash_with_key_and_paramas
+  Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params
   Hacl_Hash_Blake2s_Simd128_init
   Hacl_Hash_Blake2s_Simd128_update_multi
   Hacl_Hash_Blake2s_Simd128_update_last
@@ -67,10 +70,11 @@ EXPORTS
   Hacl_Hash_Blake2s_Simd128_reset
   Hacl_Hash_Blake2s_Simd128_update
   Hacl_Hash_Blake2s_Simd128_digest
+  Hacl_Hash_Blake2s_Simd128_info
   Hacl_Hash_Blake2s_Simd128_free
   Hacl_Hash_Blake2s_Simd128_copy
   Hacl_Hash_Blake2s_Simd128_hash_with_key
-  Hacl_Hash_Blake2s_Simd128_hash_with_key_and_paramas
+  Hacl_Hash_Blake2s_Simd128_hash_with_key_and_params
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
@@ -712,11 +716,11 @@ EXPORTS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase
   Hacl_HPKE_Curve51_CP32_SHA256_openBase
-  EverCrypt_Poly1305_mac
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
+  EverCrypt_Poly1305_mac
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA512_sealBase

@@ -616,7 +616,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
     uint32_t wv[16U] = { 0U };
-    Hacl_Hash_Blake2s_update_last(last_len, wv, p1, prev_len, last_len, last);
+    Hacl_Hash_Blake2s_update_last(last_len, wv, p1, false, prev_len, last_len, last);
     return;
   }
   if (scrut.tag == Blake2S_128_s)
@@ -624,7 +624,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
-    Hacl_Hash_Blake2s_Simd128_update_last(last_len, wv, p1, prev_len, last_len, last);
+    Hacl_Hash_Blake2s_Simd128_update_last(last_len, wv, p1, false, prev_len, last_len, last);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);
@@ -638,6 +638,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
     Hacl_Hash_Blake2b_update_last(last_len,
       wv,
       p1,
+      false,
       FStar_UInt128_uint64_to_uint128(prev_len),
       last_len,
       last);
@@ -651,6 +652,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
     Hacl_Hash_Blake2b_Simd256_update_last(last_len,
       wv,
       p1,
+      false,
       FStar_UInt128_uint64_to_uint128(prev_len),
       last_len,
       last);
