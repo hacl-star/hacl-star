@@ -226,7 +226,7 @@ BIGNUM_BUNDLE= \
   -bundle Hacl.Bignum.Base,Hacl.Bignum.Addition,Hacl.Bignum.Convert,Hacl.Bignum.Lib,Hacl.Bignum.Multiplication[rename=Hacl_Bignum_Base] \
   -static-header Hacl.Bignum.Base,Hacl.Bignum.Addition,Hacl.Bignum.Convert,Hacl.Bignum.Lib,Hacl.Bignum.Multiplication \
   -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
-AES_CTR32_BUNDLE=-bundle Hacl.AES_128.CTR32.NI=Hacl.Impl.AES.* -bundle Hacl.AES_256.CTR32.NI
+AES_CTR32_BUNDLE=-bundle Hacl.AES_128.CTR32.NI=Hacl.Impl.AES.* -bundle Hacl.AES_256.CTR32.NI=Hacl.Impl.AES.*
 
 # 3. OCaml
 

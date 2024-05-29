@@ -25,7 +25,31 @@
 
 #include "Hacl_AES_128_CTR32_NI.h"
 
-inline void
+/**
+Allocate AES-128 context buffer using malloc for key expansion and nonce
+*/
+Lib_IntVector_Intrinsics_vec128 *Hacl_AES_128_CTR32_NI_context_malloc(void)
+{
+  Lib_IntVector_Intrinsics_vec128
+  *buf =
+    (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+      sizeof (Lib_IntVector_Intrinsics_vec128) * 12U);
+  memset(buf, 0U, 12U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  return buf;
+}
+
+/**
+Free AES-128 context buffer
+*/
+void Hacl_AES_128_CTR32_NI_context_free(Lib_IntVector_Intrinsics_vec128 *s)
+{
+  KRML_ALIGNED_FREE(s);
+}
+
+/**
+Initiate AES-128 context buffer with key expansion and nonce
+*/
+void
 Hacl_AES_128_CTR32_NI_aes128_init(
   Lib_IntVector_Intrinsics_vec128 *ctx,
   uint8_t *key,
@@ -241,7 +265,10 @@ Hacl_AES_128_CTR32_NI_aes128_init(
   next[0U] = Lib_IntVector_Intrinsics_vec128_xor(key48, next[0U]);
 }
 
-inline void
+/**
+Set nonce in AES-128 context buffer
+*/
+void
 Hacl_AES_128_CTR32_NI_aes128_set_nonce(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *nonce)
 {
   Lib_IntVector_Intrinsics_vec128 *n = ctx;
@@ -250,50 +277,14 @@ Hacl_AES_128_CTR32_NI_aes128_set_nonce(Lib_IntVector_Intrinsics_vec128 *ctx, uin
   n[0U] = Lib_IntVector_Intrinsics_vec128_load128_le(nb);
 }
 
-inline void
-Hacl_AES_128_CTR32_NI_aes128_key_block(
-  uint8_t *kb,
-  Lib_IntVector_Intrinsics_vec128 *ctx,
-  uint32_t counter
-)
-{
-  Lib_IntVector_Intrinsics_vec128 *kex = ctx + 1U;
-  Lib_IntVector_Intrinsics_vec128 *n = ctx;
-  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 st[4U] KRML_POST_ALIGN(16) = { 0U };
-  uint32_t counter0 = htobe32(counter);
-  uint32_t counter1 = htobe32(counter + 1U);
-  uint32_t counter2 = htobe32(counter + 2U);
-  uint32_t counter3 = htobe32(counter + 3U);
-  Lib_IntVector_Intrinsics_vec128 nonce0 = n[0U];
-  st[0U] = Lib_IntVector_Intrinsics_vec128_insert32(nonce0, counter0, 3U);
-  st[1U] = Lib_IntVector_Intrinsics_vec128_insert32(nonce0, counter1, 3U);
-  st[2U] = Lib_IntVector_Intrinsics_vec128_insert32(nonce0, counter2, 3U);
-  st[3U] = Lib_IntVector_Intrinsics_vec128_insert32(nonce0, counter3, 3U);
-  uint32_t klen = 1U;
-  Lib_IntVector_Intrinsics_vec128 *k0 = kex;
-  Lib_IntVector_Intrinsics_vec128 *kr = kex + klen;
-  Lib_IntVector_Intrinsics_vec128 *kn = kex + 10U * klen;
-  st[0U] = Lib_IntVector_Intrinsics_vec128_xor(st[0U], k0[0U]);
-  st[1U] = Lib_IntVector_Intrinsics_vec128_xor(st[1U], k0[0U]);
-  st[2U] = Lib_IntVector_Intrinsics_vec128_xor(st[2U], k0[0U]);
-  st[3U] = Lib_IntVector_Intrinsics_vec128_xor(st[3U], k0[0U]);
-  KRML_MAYBE_FOR9(i,
-    0U,
-    9U,
-    1U,
-    Lib_IntVector_Intrinsics_vec128 *k = kr + i * 1U;
-    st[0U] = Lib_IntVector_Intrinsics_ni_aes_enc(k[0U], st[0U]);
-    st[1U] = Lib_IntVector_Intrinsics_ni_aes_enc(k[0U], st[1U]);
-    st[2U] = Lib_IntVector_Intrinsics_ni_aes_enc(k[0U], st[2U]);
-    st[3U] = Lib_IntVector_Intrinsics_ni_aes_enc(k[0U], st[3U]););
-  st[0U] = Lib_IntVector_Intrinsics_ni_aes_enc_last(kn[0U], st[0U]);
-  st[1U] = Lib_IntVector_Intrinsics_ni_aes_enc_last(kn[0U], st[1U]);
-  st[2U] = Lib_IntVector_Intrinsics_ni_aes_enc_last(kn[0U], st[2U]);
-  st[3U] = Lib_IntVector_Intrinsics_ni_aes_enc_last(kn[0U], st[3U]);
-  Lib_IntVector_Intrinsics_vec128_store128_le(kb, st[0U]);
-}
+/**
+Initiate AES-CTR32-128 context with key and nonce, and
 
-inline void
+  encrypt number of bytes in AES-CTR32 mode.
+  
+  `counter` is the initial value of counter state.
+*/
+void
 Hacl_AES_128_CTR32_NI_aes128_ctr_encrypt(
   uint32_t len,
   uint8_t *out,
@@ -618,7 +609,16 @@ Hacl_AES_128_CTR32_NI_aes128_ctr_encrypt(
   }
 }
 
-inline void
+/**
+Initiate AES-CTR32-128 context with key and nonce, and
+
+  decrypt number of bytes in AES-CTR32 mode.
+  
+  `counter` is the initial value of counter state.
+  
+  Decryption uses the forward version of AES cipher
+*/
+void
 Hacl_AES_128_CTR32_NI_aes128_ctr_decrypt(
   uint32_t len,
   uint8_t *out,

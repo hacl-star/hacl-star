@@ -467,14 +467,16 @@ EXPORTS
   Hacl_FFDHE_ffdhe_secret_to_public
   Hacl_FFDHE_ffdhe_shared_secret_precomp
   Hacl_FFDHE_ffdhe_shared_secret
+  Hacl_AES_128_CTR32_NI_context_malloc
+  Hacl_AES_128_CTR32_NI_context_free
   Hacl_AES_128_CTR32_NI_aes128_init
   Hacl_AES_128_CTR32_NI_aes128_set_nonce
-  Hacl_AES_128_CTR32_NI_aes128_key_block
   Hacl_AES_128_CTR32_NI_aes128_ctr_encrypt
   Hacl_AES_128_CTR32_NI_aes128_ctr_decrypt
+  Hacl_AES_256_CTR32_NI_context_malloc
+  Hacl_AES_256_CTR32_NI_context_free
   Hacl_AES_256_CTR32_NI_aes256_init
   Hacl_AES_256_CTR32_NI_aes256_set_nonce
-  Hacl_AES_256_CTR32_NI_aes256_key_block
   Hacl_AES_256_CTR32_NI_aes256_ctr
   Hacl_AES_256_CTR32_NI_aes256_ctr_encrypt
   Hacl_AES_256_CTR32_NI_aes256_ctr_decrypt
