@@ -1653,54 +1653,174 @@ vector;
 static vector
 vectors[12U] =
   {
-    {
-      .output = output0, .output_len = 281U, .input = input0, .input_len = 265U, .aad = aad0,
-      .aad_len = 12U, .nonce = nonce0, .nonce_len = 12U, .key = key0, .key_len = 32U
-    },
-    {
-      .output = output1, .output_len = 16U, .input = input1, .input_len = 0U, .aad = aad1,
-      .aad_len = 0U, .nonce = nonce1, .nonce_len = 12U, .key = key1, .key_len = 32U
-    },
-    {
-      .output = output2, .output_len = 16U, .input = input2, .input_len = 0U, .aad = aad2,
-      .aad_len = 8U, .nonce = nonce2, .nonce_len = 12U, .key = key2, .key_len = 32U
-    },
-    {
-      .output = output3, .output_len = 17U, .input = input3, .input_len = 1U, .aad = aad3,
-      .aad_len = 8U, .nonce = nonce3, .nonce_len = 12U, .key = key3, .key_len = 32U
-    },
-    {
-      .output = output4, .output_len = 17U, .input = input4, .input_len = 1U, .aad = aad4,
-      .aad_len = 0U, .nonce = nonce4, .nonce_len = 12U, .key = key4, .key_len = 32U
-    },
-    {
-      .output = output5, .output_len = 145U, .input = input5, .input_len = 129U, .aad = aad5,
-      .aad_len = 7U, .nonce = nonce5, .nonce_len = 12U, .key = key5, .key_len = 32U
-    },
-    {
-      .output = output6, .output_len = 272U, .input = input6, .input_len = 256U, .aad = aad6,
-      .aad_len = 0U, .nonce = nonce6, .nonce_len = 12U, .key = key6, .key_len = 32U
-    },
-    {
-      .output = output7, .output_len = 528U, .input = input7, .input_len = 512U, .aad = aad7,
-      .aad_len = 0U, .nonce = nonce7, .nonce_len = 12U, .key = key7, .key_len = 32U
-    },
-    {
-      .output = output8, .output_len = 529U, .input = input8, .input_len = 513U, .aad = aad8,
-      .aad_len = 9U, .nonce = nonce8, .nonce_len = 12U, .key = key8, .key_len = 32U
-    },
-    {
-      .output = output9, .output_len = 1040U, .input = input9, .input_len = 1024U, .aad = aad9,
-      .aad_len = 16U, .nonce = nonce9, .nonce_len = 12U, .key = key9, .key_len = 32U
-    },
-    {
-      .output = output10, .output_len = 1949U, .input = input10, .input_len = 1933U, .aad = aad10,
-      .aad_len = 7U, .nonce = nonce10, .nonce_len = 12U, .key = key10, .key_len = 32U
-    },
-    {
-      .output = output11, .output_len = 2027U, .input = input11, .input_len = 2011U, .aad = aad11,
-      .aad_len = 63U, .nonce = nonce11, .nonce_len = 12U, .key = key11, .key_len = 32U
-    }
+    (
+      (vector){
+        .output = output0,
+        .output_len = 281U,
+        .input = input0,
+        .input_len = 265U,
+        .aad = aad0,
+        .aad_len = 12U,
+        .nonce = nonce0,
+        .nonce_len = 12U,
+        .key = key0,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output1,
+        .output_len = 16U,
+        .input = input1,
+        .input_len = 0U,
+        .aad = aad1,
+        .aad_len = 0U,
+        .nonce = nonce1,
+        .nonce_len = 12U,
+        .key = key1,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output2,
+        .output_len = 16U,
+        .input = input2,
+        .input_len = 0U,
+        .aad = aad2,
+        .aad_len = 8U,
+        .nonce = nonce2,
+        .nonce_len = 12U,
+        .key = key2,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output3,
+        .output_len = 17U,
+        .input = input3,
+        .input_len = 1U,
+        .aad = aad3,
+        .aad_len = 8U,
+        .nonce = nonce3,
+        .nonce_len = 12U,
+        .key = key3,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output4,
+        .output_len = 17U,
+        .input = input4,
+        .input_len = 1U,
+        .aad = aad4,
+        .aad_len = 0U,
+        .nonce = nonce4,
+        .nonce_len = 12U,
+        .key = key4,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output5,
+        .output_len = 145U,
+        .input = input5,
+        .input_len = 129U,
+        .aad = aad5,
+        .aad_len = 7U,
+        .nonce = nonce5,
+        .nonce_len = 12U,
+        .key = key5,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output6,
+        .output_len = 272U,
+        .input = input6,
+        .input_len = 256U,
+        .aad = aad6,
+        .aad_len = 0U,
+        .nonce = nonce6,
+        .nonce_len = 12U,
+        .key = key6,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output7,
+        .output_len = 528U,
+        .input = input7,
+        .input_len = 512U,
+        .aad = aad7,
+        .aad_len = 0U,
+        .nonce = nonce7,
+        .nonce_len = 12U,
+        .key = key7,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output8,
+        .output_len = 529U,
+        .input = input8,
+        .input_len = 513U,
+        .aad = aad8,
+        .aad_len = 9U,
+        .nonce = nonce8,
+        .nonce_len = 12U,
+        .key = key8,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output9,
+        .output_len = 1040U,
+        .input = input9,
+        .input_len = 1024U,
+        .aad = aad9,
+        .aad_len = 16U,
+        .nonce = nonce9,
+        .nonce_len = 12U,
+        .key = key9,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output10,
+        .output_len = 1949U,
+        .input = input10,
+        .input_len = 1933U,
+        .aad = aad10,
+        .aad_len = 7U,
+        .nonce = nonce10,
+        .nonce_len = 12U,
+        .key = key10,
+        .key_len = 32U
+      }
+    ),
+    (
+      (vector){
+        .output = output11,
+        .output_len = 2027U,
+        .input = input11,
+        .input_len = 2011U,
+        .aad = aad11,
+        .aad_len = 63U,
+        .nonce = nonce11,
+        .nonce_len = 12U,
+        .key = key11,
+        .key_len = 32U
+      }
+    )
   };
 
 static uint32_t vectors_len = 12U;
@@ -1915,34 +2035,83 @@ vector0;
 static vector0
 vectors0[7U] =
   {
-    {
-      .result = result0, .result_len = 32U, .public = public0, .public_len = 32U,
-      .private_ = private_0, .private__len = 32U, .valid = true
-    },
-    {
-      .result = result1, .result_len = 32U, .public = public1, .public_len = 32U,
-      .private_ = private_1, .private__len = 32U, .valid = true
-    },
-    {
-      .result = result2, .result_len = 32U, .public = public2, .public_len = 32U,
-      .private_ = private_2, .private__len = 32U, .valid = true
-    },
-    {
-      .result = result3, .result_len = 32U, .public = public3, .public_len = 32U,
-      .private_ = private_3, .private__len = 32U, .valid = true
-    },
-    {
-      .result = result4, .result_len = 32U, .public = public4, .public_len = 32U,
-      .private_ = private_4, .private__len = 32U, .valid = true
-    },
-    {
-      .result = result5, .result_len = 32U, .public = public5, .public_len = 32U,
-      .private_ = private_5, .private__len = 32U, .valid = false
-    },
-    {
-      .result = result6, .result_len = 32U, .public = public6, .public_len = 32U,
-      .private_ = private_6, .private__len = 32U, .valid = false
-    }
+    (
+      (vector0){
+        .result = result0,
+        .result_len = 32U,
+        .public = public0,
+        .public_len = 32U,
+        .private_ = private_0,
+        .private__len = 32U,
+        .valid = true
+      }
+    ),
+    (
+      (vector0){
+        .result = result1,
+        .result_len = 32U,
+        .public = public1,
+        .public_len = 32U,
+        .private_ = private_1,
+        .private__len = 32U,
+        .valid = true
+      }
+    ),
+    (
+      (vector0){
+        .result = result2,
+        .result_len = 32U,
+        .public = public2,
+        .public_len = 32U,
+        .private_ = private_2,
+        .private__len = 32U,
+        .valid = true
+      }
+    ),
+    (
+      (vector0){
+        .result = result3,
+        .result_len = 32U,
+        .public = public3,
+        .public_len = 32U,
+        .private_ = private_3,
+        .private__len = 32U,
+        .valid = true
+      }
+    ),
+    (
+      (vector0){
+        .result = result4,
+        .result_len = 32U,
+        .public = public4,
+        .public_len = 32U,
+        .private_ = private_4,
+        .private__len = 32U,
+        .valid = true
+      }
+    ),
+    (
+      (vector0){
+        .result = result5,
+        .result_len = 32U,
+        .public = public5,
+        .public_len = 32U,
+        .private_ = private_5,
+        .private__len = 32U,
+        .valid = false
+      }
+    ),
+    (
+      (vector0){
+        .result = result6,
+        .result_len = 32U,
+        .public = public6,
+        .public_len = 32U,
+        .private_ = private_6,
+        .private__len = 32U,
+        .valid = false
+      }
+    )
   };
 
 static uint32_t vectors_len0 = 7U;
@@ -2977,125 +3146,356 @@ vector1;
 static vector1
 vectors1[35U] =
   {
-    {
-      .tag = tag0, .tag_len = 16U, .key = key00, .key_len = 32U, .input = input00, .input_len = 34U
-    },
-    {
-      .tag = tag1, .tag_len = 16U, .key = key12, .key_len = 32U, .input = input12, .input_len = 2U
-    },
-    {
-      .tag = tag2, .tag_len = 16U, .key = key20, .key_len = 32U, .input = input20, .input_len = 0U
-    },
-    {
-      .tag = tag3, .tag_len = 16U, .key = key30, .key_len = 32U, .input = input30, .input_len = 32U
-    },
-    {
-      .tag = tag4, .tag_len = 16U, .key = key40, .key_len = 32U, .input = input40, .input_len = 63U
-    },
-    {
-      .tag = tag5, .tag_len = 16U, .key = key50, .key_len = 32U, .input = input50, .input_len = 64U
-    },
-    {
-      .tag = tag6, .tag_len = 16U, .key = key60, .key_len = 32U, .input = input60, .input_len = 48U
-    },
-    {
-      .tag = tag7, .tag_len = 16U, .key = key70, .key_len = 32U, .input = input70, .input_len = 96U
-    },
-    {
-      .tag = tag8, .tag_len = 16U, .key = key80, .key_len = 32U, .input = input80, .input_len = 112U
-    },
-    {
-      .tag = tag9, .tag_len = 16U, .key = key90, .key_len = 32U, .input = input90, .input_len = 128U
-    },
-    {
-      .tag = tag10, .tag_len = 16U, .key = key100, .key_len = 32U, .input = input100,
-      .input_len = 144U
-    },
-    {
-      .tag = tag11, .tag_len = 16U, .key = key110, .key_len = 32U, .input = input110,
-      .input_len = 160U
-    },
-    {
-      .tag = tag12, .tag_len = 16U, .key = key120, .key_len = 32U, .input = input120,
-      .input_len = 288U
-    },
-    {
-      .tag = tag13, .tag_len = 16U, .key = key13, .key_len = 32U, .input = input13,
-      .input_len = 320U
-    },
-    {
-      .tag = tag14, .tag_len = 16U, .key = key14, .key_len = 32U, .input = input14,
-      .input_len = 256U
-    },
-    {
-      .tag = tag15, .tag_len = 16U, .key = key15, .key_len = 32U, .input = input15,
-      .input_len = 252U
-    },
-    {
-      .tag = tag16, .tag_len = 16U, .key = key16, .key_len = 32U, .input = input16,
-      .input_len = 208U
-    },
-    {
-      .tag = tag17, .tag_len = 16U, .key = key17, .key_len = 32U, .input = input17, .input_len = 0U
-    },
-    {
-      .tag = tag18, .tag_len = 16U, .key = key18, .key_len = 32U, .input = input18, .input_len = 12U
-    },
-    {
-      .tag = tag19, .tag_len = 16U, .key = key19, .key_len = 32U, .input = input19, .input_len = 32U
-    },
-    {
-      .tag = tag20, .tag_len = 16U, .key = key200, .key_len = 32U, .input = input200,
-      .input_len = 128U
-    },
-    {
-      .tag = tag21, .tag_len = 16U, .key = key21, .key_len = 32U, .input = input21,
-      .input_len = 528U
-    },
-    {
-      .tag = tag22, .tag_len = 16U, .key = key22, .key_len = 32U, .input = input22,
-      .input_len = 257U
-    },
-    {
-      .tag = tag23, .tag_len = 16U, .key = key23, .key_len = 32U, .input = input23, .input_len = 39U
-    },
-    {
-      .tag = tag24, .tag_len = 16U, .key = key24, .key_len = 32U, .input = input24, .input_len = 2U
-    },
-    {
-      .tag = tag25, .tag_len = 16U, .key = key25, .key_len = 32U, .input = input25,
-      .input_len = 415U
-    },
-    {
-      .tag = tag26, .tag_len = 16U, .key = key26, .key_len = 32U, .input = input26,
-      .input_len = 118U
-    },
-    {
-      .tag = tag27, .tag_len = 16U, .key = key27, .key_len = 32U, .input = input27,
-      .input_len = 131U
-    },
-    {
-      .tag = tag28, .tag_len = 16U, .key = key28, .key_len = 32U, .input = input28, .input_len = 16U
-    },
-    {
-      .tag = tag29, .tag_len = 16U, .key = key29, .key_len = 32U, .input = input29, .input_len = 16U
-    },
-    {
-      .tag = tag30, .tag_len = 16U, .key = key300, .key_len = 32U, .input = input300,
-      .input_len = 48U
-    },
-    {
-      .tag = tag31, .tag_len = 16U, .key = key31, .key_len = 32U, .input = input31, .input_len = 48U
-    },
-    {
-      .tag = tag32, .tag_len = 16U, .key = key32, .key_len = 32U, .input = input32, .input_len = 16U
-    },
-    {
-      .tag = tag33, .tag_len = 16U, .key = key33, .key_len = 32U, .input = input33, .input_len = 64U
-    },
-    {
-      .tag = tag34, .tag_len = 16U, .key = key34, .key_len = 32U, .input = input34, .input_len = 48U
-    }
+    (
+      (vector1){
+        .tag = tag0,
+        .tag_len = 16U,
+        .key = key00,
+        .key_len = 32U,
+        .input = input00,
+        .input_len = 34U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag1,
+        .tag_len = 16U,
+        .key = key12,
+        .key_len = 32U,
+        .input = input12,
+        .input_len = 2U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag2,
+        .tag_len = 16U,
+        .key = key20,
+        .key_len = 32U,
+        .input = input20,
+        .input_len = 0U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag3,
+        .tag_len = 16U,
+        .key = key30,
+        .key_len = 32U,
+        .input = input30,
+        .input_len = 32U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag4,
+        .tag_len = 16U,
+        .key = key40,
+        .key_len = 32U,
+        .input = input40,
+        .input_len = 63U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag5,
+        .tag_len = 16U,
+        .key = key50,
+        .key_len = 32U,
+        .input = input50,
+        .input_len = 64U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag6,
+        .tag_len = 16U,
+        .key = key60,
+        .key_len = 32U,
+        .input = input60,
+        .input_len = 48U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag7,
+        .tag_len = 16U,
+        .key = key70,
+        .key_len = 32U,
+        .input = input70,
+        .input_len = 96U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag8,
+        .tag_len = 16U,
+        .key = key80,
+        .key_len = 32U,
+        .input = input80,
+        .input_len = 112U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag9,
+        .tag_len = 16U,
+        .key = key90,
+        .key_len = 32U,
+        .input = input90,
+        .input_len = 128U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag10,
+        .tag_len = 16U,
+        .key = key100,
+        .key_len = 32U,
+        .input = input100,
+        .input_len = 144U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag11,
+        .tag_len = 16U,
+        .key = key110,
+        .key_len = 32U,
+        .input = input110,
+        .input_len = 160U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag12,
+        .tag_len = 16U,
+        .key = key120,
+        .key_len = 32U,
+        .input = input120,
+        .input_len = 288U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag13,
+        .tag_len = 16U,
+        .key = key13,
+        .key_len = 32U,
+        .input = input13,
+        .input_len = 320U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag14,
+        .tag_len = 16U,
+        .key = key14,
+        .key_len = 32U,
+        .input = input14,
+        .input_len = 256U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag15,
+        .tag_len = 16U,
+        .key = key15,
+        .key_len = 32U,
+        .input = input15,
+        .input_len = 252U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag16,
+        .tag_len = 16U,
+        .key = key16,
+        .key_len = 32U,
+        .input = input16,
+        .input_len = 208U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag17,
+        .tag_len = 16U,
+        .key = key17,
+        .key_len = 32U,
+        .input = input17,
+        .input_len = 0U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag18,
+        .tag_len = 16U,
+        .key = key18,
+        .key_len = 32U,
+        .input = input18,
+        .input_len = 12U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag19,
+        .tag_len = 16U,
+        .key = key19,
+        .key_len = 32U,
+        .input = input19,
+        .input_len = 32U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag20,
+        .tag_len = 16U,
+        .key = key200,
+        .key_len = 32U,
+        .input = input200,
+        .input_len = 128U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag21,
+        .tag_len = 16U,
+        .key = key21,
+        .key_len = 32U,
+        .input = input21,
+        .input_len = 528U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag22,
+        .tag_len = 16U,
+        .key = key22,
+        .key_len = 32U,
+        .input = input22,
+        .input_len = 257U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag23,
+        .tag_len = 16U,
+        .key = key23,
+        .key_len = 32U,
+        .input = input23,
+        .input_len = 39U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag24,
+        .tag_len = 16U,
+        .key = key24,
+        .key_len = 32U,
+        .input = input24,
+        .input_len = 2U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag25,
+        .tag_len = 16U,
+        .key = key25,
+        .key_len = 32U,
+        .input = input25,
+        .input_len = 415U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag26,
+        .tag_len = 16U,
+        .key = key26,
+        .key_len = 32U,
+        .input = input26,
+        .input_len = 118U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag27,
+        .tag_len = 16U,
+        .key = key27,
+        .key_len = 32U,
+        .input = input27,
+        .input_len = 131U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag28,
+        .tag_len = 16U,
+        .key = key28,
+        .key_len = 32U,
+        .input = input28,
+        .input_len = 16U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag29,
+        .tag_len = 16U,
+        .key = key29,
+        .key_len = 32U,
+        .input = input29,
+        .input_len = 16U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag30,
+        .tag_len = 16U,
+        .key = key300,
+        .key_len = 32U,
+        .input = input300,
+        .input_len = 48U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag31,
+        .tag_len = 16U,
+        .key = key31,
+        .key_len = 32U,
+        .input = input31,
+        .input_len = 48U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag32,
+        .tag_len = 16U,
+        .key = key32,
+        .key_len = 32U,
+        .input = input32,
+        .input_len = 16U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag33,
+        .tag_len = 16U,
+        .key = key33,
+        .key_len = 32U,
+        .input = input33,
+        .input_len = 64U
+      }
+    ),
+    (
+      (vector1){
+        .tag = tag34,
+        .tag_len = 16U,
+        .key = key34,
+        .key_len = 32U,
+        .input = input34,
+        .input_len = 48U
+      }
+    )
   };
 
 static uint32_t vectors_len1 = 35U;
@@ -3275,150 +3675,198 @@ __Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_ui
 static __Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t
 hash_vectors_low24[24U] =
   {
-    {
-      .fst = Spec_Hash_Definitions_MD5,
-      .snd = "",
-      .thd = { .len = 16U, .b = hash_vectors_low0 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_MD5,
-      .snd = "a",
-      .thd = { .len = 16U, .b = hash_vectors_low1 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_MD5,
-      .snd = "abc",
-      .thd = { .len = 16U, .b = hash_vectors_low2 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_MD5,
-      .snd = "message digest",
-      .thd = { .len = 16U, .b = hash_vectors_low3 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_MD5,
-      .snd = "abcdefghijklmnopqrstuvwxyz",
-      .thd = { .len = 16U, .b = hash_vectors_low4 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_MD5,
-      .snd = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-      .thd = { .len = 16U, .b = hash_vectors_low5 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_MD5,
-      .snd = "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
-      .thd = { .len = 16U, .b = hash_vectors_low6 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA1,
-      .snd = "abc",
-      .thd = { .len = 20U, .b = hash_vectors_low7 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA1,
-      .snd = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-      .thd = { .len = 20U, .b = hash_vectors_low8 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA1,
-      .snd = "a",
-      .thd = { .len = 20U, .b = hash_vectors_low9 },
-      .f3 = 1000000U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA1,
-      .snd = "0123456701234567012345670123456701234567012345670123456701234567",
-      .thd = { .len = 20U, .b = hash_vectors_low10 },
-      .f3 = 10U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256,
-      .snd = "abc",
-      .thd = { .len = 32U, .b = hash_vectors_low11 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256,
-      .snd = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-      .thd = { .len = 32U, .b = hash_vectors_low12 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256,
-      .snd = "a",
-      .thd = { .len = 32U, .b = hash_vectors_low13 },
-      .f3 = 1000000U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256,
-      .snd = "0123456701234567012345670123456701234567012345670123456701234567",
-      .thd = { .len = 32U, .b = hash_vectors_low14 },
-      .f3 = 10U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256,
-      .snd = "\x19",
-      .thd = { .len = 32U, .b = hash_vectors_low15 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_384,
-      .snd = "abc",
-      .thd = { .len = 48U, .b = hash_vectors_low16 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_384,
-      .snd = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
-      .thd = { .len = 48U, .b = hash_vectors_low17 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_384,
-      .snd = "a",
-      .thd = { .len = 48U, .b = hash_vectors_low18 },
-      .f3 = 1000000U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_384,
-      .snd = "0123456701234567012345670123456701234567012345670123456701234567",
-      .thd = { .len = 48U, .b = hash_vectors_low19 },
-      .f3 = 10U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512,
-      .snd = "abc",
-      .thd = { .len = 64U, .b = hash_vectors_low20 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512,
-      .snd = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
-      .thd = { .len = 64U, .b = hash_vectors_low21 },
-      .f3 = 1U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512,
-      .snd = "a",
-      .thd = { .len = 64U, .b = hash_vectors_low22 },
-      .f3 = 1000000U
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512,
-      .snd = "0123456701234567012345670123456701234567012345670123456701234567",
-      .thd = { .len = 64U, .b = hash_vectors_low23 },
-      .f3 = 10U
-    }
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_MD5,
+        .snd = "",
+        .thd = { .len = 16U, .b = hash_vectors_low0 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_MD5,
+        .snd = "a",
+        .thd = { .len = 16U, .b = hash_vectors_low1 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_MD5,
+        .snd = "abc",
+        .thd = { .len = 16U, .b = hash_vectors_low2 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_MD5,
+        .snd = "message digest",
+        .thd = { .len = 16U, .b = hash_vectors_low3 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_MD5,
+        .snd = "abcdefghijklmnopqrstuvwxyz",
+        .thd = { .len = 16U, .b = hash_vectors_low4 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_MD5,
+        .snd = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+        .thd = { .len = 16U, .b = hash_vectors_low5 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_MD5,
+        .snd = "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+        .thd = { .len = 16U, .b = hash_vectors_low6 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = "abc",
+        .thd = { .len = 20U, .b = hash_vectors_low7 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+        .thd = { .len = 20U, .b = hash_vectors_low8 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = "a",
+        .thd = { .len = 20U, .b = hash_vectors_low9 },
+        .f3 = 1000000U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = "0123456701234567012345670123456701234567012345670123456701234567",
+        .thd = { .len = 20U, .b = hash_vectors_low10 },
+        .f3 = 10U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = "abc",
+        .thd = { .len = 32U, .b = hash_vectors_low11 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+        .thd = { .len = 32U, .b = hash_vectors_low12 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = "a",
+        .thd = { .len = 32U, .b = hash_vectors_low13 },
+        .f3 = 1000000U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = "0123456701234567012345670123456701234567012345670123456701234567",
+        .thd = { .len = 32U, .b = hash_vectors_low14 },
+        .f3 = 10U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = "\x19",
+        .thd = { .len = 32U, .b = hash_vectors_low15 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_384,
+        .snd = "abc",
+        .thd = { .len = 48U, .b = hash_vectors_low16 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_384,
+        .snd = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+        .thd = { .len = 48U, .b = hash_vectors_low17 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_384,
+        .snd = "a",
+        .thd = { .len = 48U, .b = hash_vectors_low18 },
+        .f3 = 1000000U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_384,
+        .snd = "0123456701234567012345670123456701234567012345670123456701234567",
+        .thd = { .len = 48U, .b = hash_vectors_low19 },
+        .f3 = 10U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = "abc",
+        .thd = { .len = 64U, .b = hash_vectors_low20 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+        .thd = { .len = 64U, .b = hash_vectors_low21 },
+        .f3 = 1U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = "a",
+        .thd = { .len = 64U, .b = hash_vectors_low22 },
+        .f3 = 1000000U
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = "0123456701234567012345670123456701234567012345670123456701234567",
+        .thd = { .len = 64U, .b = hash_vectors_low23 },
+        .f3 = 10U
+      }
+    )
   };
 
 typedef struct
@@ -3478,18 +3926,22 @@ __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstariz
 static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 hmac_vectors_low6[2U] =
   {
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256,
-      .snd = { .len = 20U, .b = hmac_vectors_low0 },
-      .thd = { .len = 8U, .b = hmac_vectors_low1 },
-      .f3 = { .len = 32U, .b = hmac_vectors_low2 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_384,
-      .snd = { .len = 20U, .b = hmac_vectors_low3 },
-      .thd = { .len = 8U, .b = hmac_vectors_low4 },
-      .f3 = { .len = 48U, .b = hmac_vectors_low5 }
-    }
+    (
+      (__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 20U, .b = hmac_vectors_low0 },
+        .thd = { .len = 8U, .b = hmac_vectors_low1 },
+        .f3 = { .len = 32U, .b = hmac_vectors_low2 }
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_384,
+        .snd = { .len = 20U, .b = hmac_vectors_low3 },
+        .thd = { .len = 8U, .b = hmac_vectors_low4 },
+        .f3 = { .len = 48U, .b = hmac_vectors_low5 }
+      }
+    )
   };
 
 typedef struct
@@ -4806,273 +5258,402 @@ hmac_drbg_vectors_low176[255U] =
     172U
   };
 
-static K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
 hmac_drbg_vectors_low177[28U] =
   {
-    {
-      .fst = Spec_Hash_Definitions_SHA1, .snd = { .len = 16U, .b = hmac_drbg_vectors_low0 },
-      .thd = { .len = 8U, .b = hmac_drbg_vectors_low1 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = hmac_drbg_vectors_low2 },
-      .f5 = { .len = 16U, .b = hmac_drbg_vectors_low3 },
-      .f6 = {
-        .fst = { .len = 16U, .b = hmac_drbg_vectors_low4 },
-        .snd = { .len = 16U, .b = hmac_drbg_vectors_low5 }
-      }, .f7 = { .len = 80U, .b = hmac_drbg_vectors_low6 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA1, .snd = { .len = 16U, .b = hmac_drbg_vectors_low7 },
-      .thd = { .len = 8U, .b = hmac_drbg_vectors_low8 },
-      .f3 = { .len = 16U, .b = hmac_drbg_vectors_low9 },
-      .f4 = { .len = 16U, .b = hmac_drbg_vectors_low10 },
-      .f5 = { .len = 16U, .b = hmac_drbg_vectors_low11 },
-      .f6 = {
-        .fst = { .len = 16U, .b = hmac_drbg_vectors_low12 },
-        .snd = { .len = 16U, .b = hmac_drbg_vectors_low13 }
-      }, .f7 = { .len = 80U, .b = hmac_drbg_vectors_low14 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA1, .snd = { .len = 16U, .b = hmac_drbg_vectors_low15 },
-      .thd = { .len = 8U, .b = hmac_drbg_vectors_low16 },
-      .f3 = { .len = 16U, .b = hmac_drbg_vectors_low17 },
-      .f4 = { .len = 16U, .b = hmac_drbg_vectors_low18 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 80U, .b = hmac_drbg_vectors_low19 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA1, .snd = { .len = 16U, .b = hmac_drbg_vectors_low20 },
-      .thd = { .len = 8U, .b = hmac_drbg_vectors_low21 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = hmac_drbg_vectors_low22 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 80U, .b = hmac_drbg_vectors_low23 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA1, .snd = { .len = 16U, .b = hmac_drbg_vectors_low24 },
-      .thd = { .len = 8U, .b = hmac_drbg_vectors_low25 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = hmac_drbg_vectors_low26 },
-      .f5 = { .len = 16U, .b = hmac_drbg_vectors_low27 },
-      .f6 = {
-        .fst = { .len = 16U, .b = hmac_drbg_vectors_low28 },
-        .snd = { .len = 16U, .b = hmac_drbg_vectors_low29 }
-      }, .f7 = { .len = 80U, .b = hmac_drbg_vectors_low30 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA1, .snd = { .len = 16U, .b = hmac_drbg_vectors_low31 },
-      .thd = { .len = 8U, .b = hmac_drbg_vectors_low32 },
-      .f3 = { .len = 16U, .b = hmac_drbg_vectors_low33 },
-      .f4 = { .len = 16U, .b = hmac_drbg_vectors_low34 },
-      .f5 = { .len = 16U, .b = hmac_drbg_vectors_low35 },
-      .f6 = {
-        .fst = { .len = 16U, .b = hmac_drbg_vectors_low36 },
-        .snd = { .len = 16U, .b = hmac_drbg_vectors_low37 }
-      }, .f7 = { .len = 80U, .b = hmac_drbg_vectors_low38 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 32U, .b = hmac_drbg_vectors_low39 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low40 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low41 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low42 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low43 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low44 }
-      }, .f7 = { .len = 128U, .b = hmac_drbg_vectors_low45 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 32U, .b = hmac_drbg_vectors_low46 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low47 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low48 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low49 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low50 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low51 }
-      }, .f7 = { .len = 128U, .b = hmac_drbg_vectors_low52 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 32U, .b = hmac_drbg_vectors_low53 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low54 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low55 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low56 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low57 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low58 }
-      }, .f7 = { .len = 128U, .b = hmac_drbg_vectors_low59 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 32U, .b = hmac_drbg_vectors_low60 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low61 },
-      .f3 = { .len = 32U, .b = hmac_drbg_vectors_low62 },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low63 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low64 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low65 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low66 }
-      }, .f7 = { .len = 128U, .b = hmac_drbg_vectors_low67 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 32U, .b = hmac_drbg_vectors_low68 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low69 },
-      .f3 = { .len = 32U, .b = hmac_drbg_vectors_low70 },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low71 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 128U, .b = hmac_drbg_vectors_low72 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 32U, .b = hmac_drbg_vectors_low73 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low74 },
-      .f3 = { .len = 32U, .b = hmac_drbg_vectors_low75 },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low76 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low77 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low78 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low79 }
-      }, .f7 = { .len = 128U, .b = hmac_drbg_vectors_low80 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 32U, .b = hmac_drbg_vectors_low81 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low82 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low83 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low84 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low85 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low86 }
-      }, .f7 = { .len = 128U, .b = hmac_drbg_vectors_low87 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 32U, .b = hmac_drbg_vectors_low88 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low89 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low90 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 128U, .b = hmac_drbg_vectors_low91 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 32U, .b = hmac_drbg_vectors_low92 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low93 },
-      .f3 = { .len = 32U, .b = hmac_drbg_vectors_low94 },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low95 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 128U, .b = hmac_drbg_vectors_low96 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_384, .snd = { .len = 32U, .b = hmac_drbg_vectors_low97 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low98 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low99 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low100 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low101 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low102 }
-      }, .f7 = { .len = 192U, .b = hmac_drbg_vectors_low103 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_384, .snd = { .len = 32U, .b = hmac_drbg_vectors_low104 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low105 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low106 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 192U, .b = hmac_drbg_vectors_low107 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_384, .snd = { .len = 32U, .b = hmac_drbg_vectors_low108 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low109 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low110 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low111 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low112 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low113 }
-      }, .f7 = { .len = 192U, .b = hmac_drbg_vectors_low114 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low115 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low116 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low117 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 256U, .b = hmac_drbg_vectors_low118 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low119 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low120 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low121 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 256U, .b = hmac_drbg_vectors_low122 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low123 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low124 },
-      .f3 = { .len = 32U, .b = hmac_drbg_vectors_low125 },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low126 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 256U, .b = hmac_drbg_vectors_low127 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low128 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low129 },
-      .f3 = { .len = 32U, .b = hmac_drbg_vectors_low130 },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low131 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low132 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low133 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low134 }
-      }, .f7 = { .len = 256U, .b = hmac_drbg_vectors_low135 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low136 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low137 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low138 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
-      .f7 = { .len = 256U, .b = hmac_drbg_vectors_low139 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low140 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low141 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low142 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low143 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low144 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low145 }
-      }, .f7 = { .len = 256U, .b = hmac_drbg_vectors_low146 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low147 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low148 },
-      .f3 = { .len = 32U, .b = hmac_drbg_vectors_low149 },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low150 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low151 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low152 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low153 }
-      }, .f7 = { .len = 256U, .b = hmac_drbg_vectors_low154 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low155 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low156 },
-      .f3 = { .len = 32U, .b = hmac_drbg_vectors_low157 },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low158 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low159 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low160 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low161 }
-      }, .f7 = { .len = 256U, .b = hmac_drbg_vectors_low162 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low163 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low164 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low165 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low166 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low167 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low168 }
-      }, .f7 = { .len = 256U, .b = hmac_drbg_vectors_low169 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_512, .snd = { .len = 32U, .b = hmac_drbg_vectors_low170 },
-      .thd = { .len = 16U, .b = hmac_drbg_vectors_low171 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hmac_drbg_vectors_low172 },
-      .f5 = { .len = 32U, .b = hmac_drbg_vectors_low173 },
-      .f6 = {
-        .fst = { .len = 32U, .b = hmac_drbg_vectors_low174 },
-        .snd = { .len = 32U, .b = hmac_drbg_vectors_low175 }
-      }, .f7 = { .len = 255U, .b = hmac_drbg_vectors_low176 }
-    }
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = { .len = 16U, .b = hmac_drbg_vectors_low0 },
+        .thd = { .len = 8U, .b = hmac_drbg_vectors_low1 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = hmac_drbg_vectors_low2 },
+        .f5 = { .len = 16U, .b = hmac_drbg_vectors_low3 },
+        .f6 = {
+          .fst = { .len = 16U, .b = hmac_drbg_vectors_low4 },
+          .snd = { .len = 16U, .b = hmac_drbg_vectors_low5 }
+        },
+        .f7 = { .len = 80U, .b = hmac_drbg_vectors_low6 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = { .len = 16U, .b = hmac_drbg_vectors_low7 },
+        .thd = { .len = 8U, .b = hmac_drbg_vectors_low8 },
+        .f3 = { .len = 16U, .b = hmac_drbg_vectors_low9 },
+        .f4 = { .len = 16U, .b = hmac_drbg_vectors_low10 },
+        .f5 = { .len = 16U, .b = hmac_drbg_vectors_low11 },
+        .f6 = {
+          .fst = { .len = 16U, .b = hmac_drbg_vectors_low12 },
+          .snd = { .len = 16U, .b = hmac_drbg_vectors_low13 }
+        },
+        .f7 = { .len = 80U, .b = hmac_drbg_vectors_low14 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = { .len = 16U, .b = hmac_drbg_vectors_low15 },
+        .thd = { .len = 8U, .b = hmac_drbg_vectors_low16 },
+        .f3 = { .len = 16U, .b = hmac_drbg_vectors_low17 },
+        .f4 = { .len = 16U, .b = hmac_drbg_vectors_low18 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 80U, .b = hmac_drbg_vectors_low19 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = { .len = 16U, .b = hmac_drbg_vectors_low20 },
+        .thd = { .len = 8U, .b = hmac_drbg_vectors_low21 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = hmac_drbg_vectors_low22 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 80U, .b = hmac_drbg_vectors_low23 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = { .len = 16U, .b = hmac_drbg_vectors_low24 },
+        .thd = { .len = 8U, .b = hmac_drbg_vectors_low25 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = hmac_drbg_vectors_low26 },
+        .f5 = { .len = 16U, .b = hmac_drbg_vectors_low27 },
+        .f6 = {
+          .fst = { .len = 16U, .b = hmac_drbg_vectors_low28 },
+          .snd = { .len = 16U, .b = hmac_drbg_vectors_low29 }
+        },
+        .f7 = { .len = 80U, .b = hmac_drbg_vectors_low30 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA1,
+        .snd = { .len = 16U, .b = hmac_drbg_vectors_low31 },
+        .thd = { .len = 8U, .b = hmac_drbg_vectors_low32 },
+        .f3 = { .len = 16U, .b = hmac_drbg_vectors_low33 },
+        .f4 = { .len = 16U, .b = hmac_drbg_vectors_low34 },
+        .f5 = { .len = 16U, .b = hmac_drbg_vectors_low35 },
+        .f6 = {
+          .fst = { .len = 16U, .b = hmac_drbg_vectors_low36 },
+          .snd = { .len = 16U, .b = hmac_drbg_vectors_low37 }
+        },
+        .f7 = { .len = 80U, .b = hmac_drbg_vectors_low38 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low39 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low40 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low41 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low42 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low43 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low44 }
+        },
+        .f7 = { .len = 128U, .b = hmac_drbg_vectors_low45 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low46 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low47 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low48 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low49 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low50 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low51 }
+        },
+        .f7 = { .len = 128U, .b = hmac_drbg_vectors_low52 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low53 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low54 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low55 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low56 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low57 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low58 }
+        },
+        .f7 = { .len = 128U, .b = hmac_drbg_vectors_low59 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low60 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low61 },
+        .f3 = { .len = 32U, .b = hmac_drbg_vectors_low62 },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low63 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low64 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low65 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low66 }
+        },
+        .f7 = { .len = 128U, .b = hmac_drbg_vectors_low67 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low68 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low69 },
+        .f3 = { .len = 32U, .b = hmac_drbg_vectors_low70 },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low71 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 128U, .b = hmac_drbg_vectors_low72 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low73 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low74 },
+        .f3 = { .len = 32U, .b = hmac_drbg_vectors_low75 },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low76 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low77 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low78 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low79 }
+        },
+        .f7 = { .len = 128U, .b = hmac_drbg_vectors_low80 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low81 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low82 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low83 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low84 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low85 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low86 }
+        },
+        .f7 = { .len = 128U, .b = hmac_drbg_vectors_low87 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low88 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low89 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low90 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 128U, .b = hmac_drbg_vectors_low91 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low92 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low93 },
+        .f3 = { .len = 32U, .b = hmac_drbg_vectors_low94 },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low95 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 128U, .b = hmac_drbg_vectors_low96 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_384,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low97 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low98 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low99 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low100 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low101 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low102 }
+        },
+        .f7 = { .len = 192U, .b = hmac_drbg_vectors_low103 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_384,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low104 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low105 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low106 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 192U, .b = hmac_drbg_vectors_low107 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_384,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low108 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low109 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low110 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low111 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low112 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low113 }
+        },
+        .f7 = { .len = 192U, .b = hmac_drbg_vectors_low114 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low115 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low116 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low117 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 256U, .b = hmac_drbg_vectors_low118 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low119 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low120 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low121 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 256U, .b = hmac_drbg_vectors_low122 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low123 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low124 },
+        .f3 = { .len = 32U, .b = hmac_drbg_vectors_low125 },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low126 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 256U, .b = hmac_drbg_vectors_low127 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low128 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low129 },
+        .f3 = { .len = 32U, .b = hmac_drbg_vectors_low130 },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low131 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low132 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low133 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low134 }
+        },
+        .f7 = { .len = 256U, .b = hmac_drbg_vectors_low135 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low136 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low137 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low138 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .fst = { .len = 0U, .b = NULL }, .snd = { .len = 0U, .b = NULL } },
+        .f7 = { .len = 256U, .b = hmac_drbg_vectors_low139 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low140 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low141 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low142 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low143 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low144 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low145 }
+        },
+        .f7 = { .len = 256U, .b = hmac_drbg_vectors_low146 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low147 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low148 },
+        .f3 = { .len = 32U, .b = hmac_drbg_vectors_low149 },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low150 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low151 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low152 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low153 }
+        },
+        .f7 = { .len = 256U, .b = hmac_drbg_vectors_low154 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low155 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low156 },
+        .f3 = { .len = 32U, .b = hmac_drbg_vectors_low157 },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low158 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low159 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low160 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low161 }
+        },
+        .f7 = { .len = 256U, .b = hmac_drbg_vectors_low162 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low163 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low164 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low165 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low166 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low167 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low168 }
+        },
+        .f7 = { .len = 256U, .b = hmac_drbg_vectors_low169 }
+      }
+    ),
+    (
+      (K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_512,
+        .snd = { .len = 32U, .b = hmac_drbg_vectors_low170 },
+        .thd = { .len = 16U, .b = hmac_drbg_vectors_low171 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hmac_drbg_vectors_low172 },
+        .f5 = { .len = 32U, .b = hmac_drbg_vectors_low173 },
+        .f6 = {
+          .fst = { .len = 32U, .b = hmac_drbg_vectors_low174 },
+          .snd = { .len = 32U, .b = hmac_drbg_vectors_low175 }
+        },
+        .f7 = { .len = 255U, .b = hmac_drbg_vectors_low176 }
+      }
+    )
   };
 
-static Test_Lowstarize_lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static Test_Lowstarize_lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
 hmac_drbg_vectors_low = { .len = 28U, .b = hmac_drbg_vectors_low177 };
 
 static uint8_t
@@ -5187,21 +5768,36 @@ __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstariz
 static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 hkdf_vectors_low13[3U] =
   {
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 22U, .b = hkdf_vectors_low0 },
-      .thd = { .len = 13U, .b = hkdf_vectors_low1 }, .f3 = { .len = 10U, .b = hkdf_vectors_low2 },
-      .f4 = { .len = 32U, .b = hkdf_vectors_low3 }, .f5 = { .len = 42U, .b = hkdf_vectors_low4 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 80U, .b = hkdf_vectors_low5 },
-      .thd = { .len = 80U, .b = hkdf_vectors_low6 }, .f3 = { .len = 80U, .b = hkdf_vectors_low7 },
-      .f4 = { .len = 32U, .b = hkdf_vectors_low8 }, .f5 = { .len = 82U, .b = hkdf_vectors_low9 }
-    },
-    {
-      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = 22U, .b = hkdf_vectors_low10 },
-      .thd = { .len = 0U, .b = NULL }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 32U, .b = hkdf_vectors_low11 }, .f5 = { .len = 42U, .b = hkdf_vectors_low12 }
-    }
+    (
+      (__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 22U, .b = hkdf_vectors_low0 },
+        .thd = { .len = 13U, .b = hkdf_vectors_low1 },
+        .f3 = { .len = 10U, .b = hkdf_vectors_low2 },
+        .f4 = { .len = 32U, .b = hkdf_vectors_low3 },
+        .f5 = { .len = 42U, .b = hkdf_vectors_low4 }
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 80U, .b = hkdf_vectors_low5 },
+        .thd = { .len = 80U, .b = hkdf_vectors_low6 },
+        .f3 = { .len = 80U, .b = hkdf_vectors_low7 },
+        .f4 = { .len = 32U, .b = hkdf_vectors_low8 },
+        .f5 = { .len = 82U, .b = hkdf_vectors_low9 }
+      }
+    ),
+    (
+      (__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Spec_Hash_Definitions_SHA2_256,
+        .snd = { .len = 22U, .b = hkdf_vectors_low10 },
+        .thd = { .len = 0U, .b = NULL },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 32U, .b = hkdf_vectors_low11 },
+        .f5 = { .len = 42U, .b = hkdf_vectors_low12 }
+      }
+    )
   };
 
 typedef struct
@@ -5263,12 +5859,15 @@ __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Tes
 static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 chacha20_vectors_low4[1U] =
   {
-    {
-      .fst = { .len = 32U, .b = chacha20_vectors_low0 },
-      .snd = { .len = 12U, .b = chacha20_vectors_low1 }, .thd = 1U,
-      .f3 = { .len = 114U, .b = chacha20_vectors_low2 },
-      .f4 = { .len = 114U, .b = chacha20_vectors_low3 }
-    }
+    (
+      (__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = { .len = 32U, .b = chacha20_vectors_low0 },
+        .snd = { .len = 12U, .b = chacha20_vectors_low1 },
+        .thd = 1U,
+        .f3 = { .len = 114U, .b = chacha20_vectors_low2 },
+        .f4 = { .len = 114U, .b = chacha20_vectors_low3 }
+      }
+    )
   };
 
 typedef struct
@@ -5929,133 +6528,237 @@ aead_vectors_low108[80U] =
 static K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 aead_vectors_low109[21U] =
   {
-    {
-      .fst = Test_Vectors_CHACHA20_POLY1305, .snd = { .len = 32U, .b = aead_vectors_low0 },
-      .thd = { .len = 12U, .b = aead_vectors_low1 }, .f3 = { .len = 12U, .b = aead_vectors_low2 },
-      .f4 = { .len = 16U, .b = aead_vectors_low3 }, .f5 = { .len = 114U, .b = aead_vectors_low4 },
-      .f6 = { .len = 114U, .b = aead_vectors_low5 }
-    },
-    {
-      .fst = Test_Vectors_CHACHA20_POLY1305, .snd = { .len = 32U, .b = aead_vectors_low6 },
-      .thd = { .len = 12U, .b = aead_vectors_low7 }, .f3 = { .len = 12U, .b = aead_vectors_low8 },
-      .f4 = { .len = 16U, .b = aead_vectors_low9 }, .f5 = { .len = 265U, .b = aead_vectors_low10 },
-      .f6 = { .len = 265U, .b = aead_vectors_low11 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low12 },
-      .thd = { .len = 12U, .b = aead_vectors_low13 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low14 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .len = 0U, .b = NULL }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low15 },
-      .thd = { .len = 12U, .b = aead_vectors_low16 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low17 }, .f5 = { .len = 16U, .b = aead_vectors_low18 },
-      .f6 = { .len = 16U, .b = aead_vectors_low19 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low20 },
-      .thd = { .len = 12U, .b = aead_vectors_low21 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low22 }, .f5 = { .len = 64U, .b = aead_vectors_low23 },
-      .f6 = { .len = 64U, .b = aead_vectors_low24 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low25 },
-      .thd = { .len = 12U, .b = aead_vectors_low26 }, .f3 = { .len = 20U, .b = aead_vectors_low27 },
-      .f4 = { .len = 16U, .b = aead_vectors_low28 }, .f5 = { .len = 60U, .b = aead_vectors_low29 },
-      .f6 = { .len = 60U, .b = aead_vectors_low30 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low31 },
-      .thd = { .len = 8U, .b = aead_vectors_low32 }, .f3 = { .len = 20U, .b = aead_vectors_low33 },
-      .f4 = { .len = 16U, .b = aead_vectors_low34 }, .f5 = { .len = 60U, .b = aead_vectors_low35 },
-      .f6 = { .len = 60U, .b = aead_vectors_low36 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low37 },
-      .thd = { .len = 60U, .b = aead_vectors_low38 }, .f3 = { .len = 20U, .b = aead_vectors_low39 },
-      .f4 = { .len = 16U, .b = aead_vectors_low40 }, .f5 = { .len = 60U, .b = aead_vectors_low41 },
-      .f6 = { .len = 60U, .b = aead_vectors_low42 }
-    },
-    {
-      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = 32U, .b = aead_vectors_low43 },
-      .thd = { .len = 12U, .b = aead_vectors_low44 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low45 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .len = 0U, .b = NULL }
-    },
-    {
-      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = 32U, .b = aead_vectors_low46 },
-      .thd = { .len = 12U, .b = aead_vectors_low47 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low48 }, .f5 = { .len = 64U, .b = aead_vectors_low49 },
-      .f6 = { .len = 64U, .b = aead_vectors_low50 }
-    },
-    {
-      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = 32U, .b = aead_vectors_low51 },
-      .thd = { .len = 12U, .b = aead_vectors_low52 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low53 }, .f5 = { .len = 64U, .b = aead_vectors_low54 },
-      .f6 = { .len = 64U, .b = aead_vectors_low55 }
-    },
-    {
-      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = 32U, .b = aead_vectors_low56 },
-      .thd = { .len = 12U, .b = aead_vectors_low57 }, .f3 = { .len = 20U, .b = aead_vectors_low58 },
-      .f4 = { .len = 16U, .b = aead_vectors_low59 }, .f5 = { .len = 60U, .b = aead_vectors_low60 },
-      .f6 = { .len = 60U, .b = aead_vectors_low61 }
-    },
-    {
-      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = 32U, .b = aead_vectors_low62 },
-      .thd = { .len = 8U, .b = aead_vectors_low63 }, .f3 = { .len = 20U, .b = aead_vectors_low64 },
-      .f4 = { .len = 16U, .b = aead_vectors_low65 }, .f5 = { .len = 60U, .b = aead_vectors_low66 },
-      .f6 = { .len = 60U, .b = aead_vectors_low67 }
-    },
-    {
-      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = 32U, .b = aead_vectors_low68 },
-      .thd = { .len = 60U, .b = aead_vectors_low69 }, .f3 = { .len = 20U, .b = aead_vectors_low70 },
-      .f4 = { .len = 16U, .b = aead_vectors_low71 }, .f5 = { .len = 60U, .b = aead_vectors_low72 },
-      .f6 = { .len = 60U, .b = aead_vectors_low73 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low74 },
-      .thd = { .len = 12U, .b = aead_vectors_low75 }, .f3 = { .len = 128U, .b = aead_vectors_low76 },
-      .f4 = { .len = 16U, .b = aead_vectors_low77 }, .f5 = { .len = 0U, .b = NULL },
-      .f6 = { .len = 0U, .b = NULL }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low78 },
-      .thd = { .len = 12U, .b = aead_vectors_low79 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low80 }, .f5 = { .len = 48U, .b = aead_vectors_low81 },
-      .f6 = { .len = 48U, .b = aead_vectors_low82 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low83 },
-      .thd = { .len = 12U, .b = aead_vectors_low84 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low85 }, .f5 = { .len = 80U, .b = aead_vectors_low86 },
-      .f6 = { .len = 80U, .b = aead_vectors_low87 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low88 },
-      .thd = { .len = 12U, .b = aead_vectors_low89 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low90 }, .f5 = { .len = 128U, .b = aead_vectors_low91 },
-      .f6 = { .len = 128U, .b = aead_vectors_low92 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low93 },
-      .thd = { .len = 64U, .b = aead_vectors_low94 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low95 }, .f5 = { .len = 192U, .b = aead_vectors_low96 },
-      .f6 = { .len = 192U, .b = aead_vectors_low97 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low98 },
-      .thd = { .len = 64U, .b = aead_vectors_low99 }, .f3 = { .len = 0U, .b = NULL },
-      .f4 = { .len = 16U, .b = aead_vectors_low100 },
-      .f5 = { .len = 288U, .b = aead_vectors_low101 },
-      .f6 = { .len = 288U, .b = aead_vectors_low102 }
-    },
-    {
-      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = 16U, .b = aead_vectors_low103 },
-      .thd = { .len = 12U, .b = aead_vectors_low104 },
-      .f3 = { .len = 32U, .b = aead_vectors_low105 }, .f4 = { .len = 16U, .b = aead_vectors_low106 },
-      .f5 = { .len = 80U, .b = aead_vectors_low107 }, .f6 = { .len = 80U, .b = aead_vectors_low108 }
-    }
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_CHACHA20_POLY1305,
+        .snd = { .len = 32U, .b = aead_vectors_low0 },
+        .thd = { .len = 12U, .b = aead_vectors_low1 },
+        .f3 = { .len = 12U, .b = aead_vectors_low2 },
+        .f4 = { .len = 16U, .b = aead_vectors_low3 },
+        .f5 = { .len = 114U, .b = aead_vectors_low4 },
+        .f6 = { .len = 114U, .b = aead_vectors_low5 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_CHACHA20_POLY1305,
+        .snd = { .len = 32U, .b = aead_vectors_low6 },
+        .thd = { .len = 12U, .b = aead_vectors_low7 },
+        .f3 = { .len = 12U, .b = aead_vectors_low8 },
+        .f4 = { .len = 16U, .b = aead_vectors_low9 },
+        .f5 = { .len = 265U, .b = aead_vectors_low10 },
+        .f6 = { .len = 265U, .b = aead_vectors_low11 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low12 },
+        .thd = { .len = 12U, .b = aead_vectors_low13 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low14 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .len = 0U, .b = NULL }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low15 },
+        .thd = { .len = 12U, .b = aead_vectors_low16 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low17 },
+        .f5 = { .len = 16U, .b = aead_vectors_low18 },
+        .f6 = { .len = 16U, .b = aead_vectors_low19 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low20 },
+        .thd = { .len = 12U, .b = aead_vectors_low21 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low22 },
+        .f5 = { .len = 64U, .b = aead_vectors_low23 },
+        .f6 = { .len = 64U, .b = aead_vectors_low24 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low25 },
+        .thd = { .len = 12U, .b = aead_vectors_low26 },
+        .f3 = { .len = 20U, .b = aead_vectors_low27 },
+        .f4 = { .len = 16U, .b = aead_vectors_low28 },
+        .f5 = { .len = 60U, .b = aead_vectors_low29 },
+        .f6 = { .len = 60U, .b = aead_vectors_low30 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low31 },
+        .thd = { .len = 8U, .b = aead_vectors_low32 },
+        .f3 = { .len = 20U, .b = aead_vectors_low33 },
+        .f4 = { .len = 16U, .b = aead_vectors_low34 },
+        .f5 = { .len = 60U, .b = aead_vectors_low35 },
+        .f6 = { .len = 60U, .b = aead_vectors_low36 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low37 },
+        .thd = { .len = 60U, .b = aead_vectors_low38 },
+        .f3 = { .len = 20U, .b = aead_vectors_low39 },
+        .f4 = { .len = 16U, .b = aead_vectors_low40 },
+        .f5 = { .len = 60U, .b = aead_vectors_low41 },
+        .f6 = { .len = 60U, .b = aead_vectors_low42 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_256_GCM,
+        .snd = { .len = 32U, .b = aead_vectors_low43 },
+        .thd = { .len = 12U, .b = aead_vectors_low44 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low45 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .len = 0U, .b = NULL }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_256_GCM,
+        .snd = { .len = 32U, .b = aead_vectors_low46 },
+        .thd = { .len = 12U, .b = aead_vectors_low47 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low48 },
+        .f5 = { .len = 64U, .b = aead_vectors_low49 },
+        .f6 = { .len = 64U, .b = aead_vectors_low50 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_256_GCM,
+        .snd = { .len = 32U, .b = aead_vectors_low51 },
+        .thd = { .len = 12U, .b = aead_vectors_low52 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low53 },
+        .f5 = { .len = 64U, .b = aead_vectors_low54 },
+        .f6 = { .len = 64U, .b = aead_vectors_low55 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_256_GCM,
+        .snd = { .len = 32U, .b = aead_vectors_low56 },
+        .thd = { .len = 12U, .b = aead_vectors_low57 },
+        .f3 = { .len = 20U, .b = aead_vectors_low58 },
+        .f4 = { .len = 16U, .b = aead_vectors_low59 },
+        .f5 = { .len = 60U, .b = aead_vectors_low60 },
+        .f6 = { .len = 60U, .b = aead_vectors_low61 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_256_GCM,
+        .snd = { .len = 32U, .b = aead_vectors_low62 },
+        .thd = { .len = 8U, .b = aead_vectors_low63 },
+        .f3 = { .len = 20U, .b = aead_vectors_low64 },
+        .f4 = { .len = 16U, .b = aead_vectors_low65 },
+        .f5 = { .len = 60U, .b = aead_vectors_low66 },
+        .f6 = { .len = 60U, .b = aead_vectors_low67 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_256_GCM,
+        .snd = { .len = 32U, .b = aead_vectors_low68 },
+        .thd = { .len = 60U, .b = aead_vectors_low69 },
+        .f3 = { .len = 20U, .b = aead_vectors_low70 },
+        .f4 = { .len = 16U, .b = aead_vectors_low71 },
+        .f5 = { .len = 60U, .b = aead_vectors_low72 },
+        .f6 = { .len = 60U, .b = aead_vectors_low73 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low74 },
+        .thd = { .len = 12U, .b = aead_vectors_low75 },
+        .f3 = { .len = 128U, .b = aead_vectors_low76 },
+        .f4 = { .len = 16U, .b = aead_vectors_low77 },
+        .f5 = { .len = 0U, .b = NULL },
+        .f6 = { .len = 0U, .b = NULL }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low78 },
+        .thd = { .len = 12U, .b = aead_vectors_low79 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low80 },
+        .f5 = { .len = 48U, .b = aead_vectors_low81 },
+        .f6 = { .len = 48U, .b = aead_vectors_low82 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low83 },
+        .thd = { .len = 12U, .b = aead_vectors_low84 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low85 },
+        .f5 = { .len = 80U, .b = aead_vectors_low86 },
+        .f6 = { .len = 80U, .b = aead_vectors_low87 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low88 },
+        .thd = { .len = 12U, .b = aead_vectors_low89 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low90 },
+        .f5 = { .len = 128U, .b = aead_vectors_low91 },
+        .f6 = { .len = 128U, .b = aead_vectors_low92 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low93 },
+        .thd = { .len = 64U, .b = aead_vectors_low94 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low95 },
+        .f5 = { .len = 192U, .b = aead_vectors_low96 },
+        .f6 = { .len = 192U, .b = aead_vectors_low97 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low98 },
+        .thd = { .len = 64U, .b = aead_vectors_low99 },
+        .f3 = { .len = 0U, .b = NULL },
+        .f4 = { .len = 16U, .b = aead_vectors_low100 },
+        .f5 = { .len = 288U, .b = aead_vectors_low101 },
+        .f6 = { .len = 288U, .b = aead_vectors_low102 }
+      }
+    ),
+    (
+      (K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        .fst = Test_Vectors_AES_128_GCM,
+        .snd = { .len = 16U, .b = aead_vectors_low103 },
+        .thd = { .len = 12U, .b = aead_vectors_low104 },
+        .f3 = { .len = 32U, .b = aead_vectors_low105 },
+        .f4 = { .len = 16U, .b = aead_vectors_low106 },
+        .f5 = { .len = 80U, .b = aead_vectors_low107 },
+        .f6 = { .len = 80U, .b = aead_vectors_low108 }
+      }
+    )
   };
 
 static Test_Lowstarize_lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
@@ -7908,26 +8611,70 @@ vector2;
 static vector2
 vectors2[4U] =
   {
-    {
-      .output = output00, .output_len = 0U, .tag = tag00, .tag_len = 16U, .input = input01,
-      .input_len = 0U, .aad = aad00, .aad_len = 0U, .nonce = nonce00, .nonce_len = 12U, .key = key01,
-      .key_len = 16U
-    },
-    {
-      .output = output12, .output_len = 16U, .tag = tag110, .tag_len = 16U, .input = input111,
-      .input_len = 16U, .aad = aad12, .aad_len = 0U, .nonce = nonce12, .nonce_len = 12U,
-      .key = key111, .key_len = 16U
-    },
-    {
-      .output = output20, .output_len = 64U, .tag = tag210, .tag_len = 16U, .input = input210,
-      .input_len = 64U, .aad = aad20, .aad_len = 0U, .nonce = nonce20, .nonce_len = 12U,
-      .key = key210, .key_len = 16U
-    },
-    {
-      .output = output30, .output_len = 60U, .tag = tag35, .tag_len = 16U, .input = input35,
-      .input_len = 60U, .aad = aad30, .aad_len = 20U, .nonce = nonce30, .nonce_len = 12U,
-      .key = key35, .key_len = 16U
-    }
+    (
+      (vector2){
+        .output = output00,
+        .output_len = 0U,
+        .tag = tag00,
+        .tag_len = 16U,
+        .input = input01,
+        .input_len = 0U,
+        .aad = aad00,
+        .aad_len = 0U,
+        .nonce = nonce00,
+        .nonce_len = 12U,
+        .key = key01,
+        .key_len = 16U
+      }
+    ),
+    (
+      (vector2){
+        .output = output12,
+        .output_len = 16U,
+        .tag = tag110,
+        .tag_len = 16U,
+        .input = input111,
+        .input_len = 16U,
+        .aad = aad12,
+        .aad_len = 0U,
+        .nonce = nonce12,
+        .nonce_len = 12U,
+        .key = key111,
+        .key_len = 16U
+      }
+    ),
+    (
+      (vector2){
+        .output = output20,
+        .output_len = 64U,
+        .tag = tag210,
+        .tag_len = 16U,
+        .input = input210,
+        .input_len = 64U,
+        .aad = aad20,
+        .aad_len = 0U,
+        .nonce = nonce20,
+        .nonce_len = 12U,
+        .key = key210,
+        .key_len = 16U
+      }
+    ),
+    (
+      (vector2){
+        .output = output30,
+        .output_len = 60U,
+        .tag = tag35,
+        .tag_len = 16U,
+        .input = input35,
+        .input_len = 60U,
+        .aad = aad30,
+        .aad_len = 20U,
+        .nonce = nonce30,
+        .nonce_len = 12U,
+        .key = key35,
+        .key_len = 16U
+      }
+    )
   };
 
 static uint32_t vectors_len2 = 4U;
@@ -8370,7 +9117,7 @@ static void test_aes128_gcm(void)
 
 static void
 test_one_hmac_drbg(
-  K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
@@ -8444,25 +9191,25 @@ test_one_hmac_drbg(
 }
 
 void
-test_many_st_loop__Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t(
+test_many_st_loop___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t_(
   uint32_t i,
   void
   (*f)(
-    K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+    K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
     x0
   ),
-  Test_Lowstarize_lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  Test_Lowstarize_lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
   uint32_t len = vec.len;
-  K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
   *vs = vec.b;
   if (!(i >= len))
   {
     f(vs[i]);
     uint32_t i1 = i + 1U;
-    test_many_st_loop__Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t(i1,
+    test_many_st_loop___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t_(i1,
       f,
       vec);
   }
@@ -8470,13 +9217,13 @@ test_many_st_loop__Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint
 
 static void
 test_hmac_drbg(
-  Test_Lowstarize_lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  Test_Lowstarize_lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
   C_String_print("HMAC-DRBG");
   C_String_print("\n");
-  test_many_st_loop__Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t(0U,
+  test_many_st_loop___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t_(0U,
     test_one_hmac_drbg,
     vec);
 }
