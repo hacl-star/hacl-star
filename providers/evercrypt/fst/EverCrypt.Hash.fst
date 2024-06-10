@@ -217,7 +217,6 @@ let frame_invariant #a l s h0 h1 =
   assert (repr_eq (repr s h0) (repr s h1))
 
 inline_for_extraction noextract
-[@@strict_on_arguments [0]]
 let alloca a =
   let s: state_s a =
     match a with
