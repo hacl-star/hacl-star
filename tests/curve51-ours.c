@@ -39,7 +39,7 @@ main()
 {
 
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors) / sizeof(curve25519_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors) / sizeof(curve25519_test_vector); ++i) {
     ok &= print_test(vectors[i].scalar, vectors[i].public, vectors[i].secret);
   }
 

@@ -15,7 +15,7 @@
 #include "blake2_vectors.h"
 #include "test_helpers.h"
 
-typedef struct Hacl_Hash_Blake2s_state_s blake2_state;
+typedef Hacl_Hash_Blake2s_state_t blake2_state;
 
 int
 main()

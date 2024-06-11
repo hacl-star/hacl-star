@@ -31,9 +31,12 @@ let row_v #a #m h r =
 
 let row_v_lemma #a #m h0 h1 r1 r2 = ()
 
-let create_default_params a salt personal = {
-      digest_length = u8 32;
-      key_length = u8 0;
+let alloca_default_params a =
+  let salt = create (salt_len a) (u8 0) in
+  let personal = create (personal_len a) (u8 0) in
+  {
+      digest_length = (match a with Spec.Blake2B -> 64uy | Spec.Blake2S -> 32uy);
+      key_length = 0uy;
       fanout = u8 1;
       depth = u8 1;
       leaf_length = u32 0;

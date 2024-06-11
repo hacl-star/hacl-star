@@ -646,7 +646,7 @@ EverCrypt_HMAC_compute_blake2s(
   if (data_len == 0U)
   {
     uint32_t wv[16U] = { 0U };
-    Hacl_Hash_Blake2s_update_last(64U, wv, s0, 0ULL, 64U, ipad);
+    Hacl_Hash_Blake2s_update_last(64U, wv, s0, false, 0ULL, 64U, ipad);
   }
   else
   {
@@ -681,6 +681,7 @@ EverCrypt_HMAC_compute_blake2s(
     Hacl_Hash_Blake2s_update_last(rem_len,
       wv1,
       s0,
+      false,
       (uint64_t)64U + (uint64_t)full_blocks_len,
       rem_len,
       rem);
@@ -719,6 +720,7 @@ EverCrypt_HMAC_compute_blake2s(
   Hacl_Hash_Blake2s_update_last(rem_len,
     wv1,
     s0,
+    false,
     (uint64_t)64U + (uint64_t)full_blocks_len,
     rem_len,
     rem);
@@ -787,7 +789,13 @@ EverCrypt_HMAC_compute_blake2b(
   if (data_len == 0U)
   {
     uint64_t wv[16U] = { 0U };
-    Hacl_Hash_Blake2b_update_last(128U, wv, s0, FStar_UInt128_uint64_to_uint128(0ULL), 128U, ipad);
+    Hacl_Hash_Blake2b_update_last(128U,
+      wv,
+      s0,
+      false,
+      FStar_UInt128_uint64_to_uint128(0ULL),
+      128U,
+      ipad);
   }
   else
   {
@@ -822,6 +830,7 @@ EverCrypt_HMAC_compute_blake2b(
     Hacl_Hash_Blake2b_update_last(rem_len,
       wv1,
       s0,
+      false,
       FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
         FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
       rem_len,
@@ -861,6 +870,7 @@ EverCrypt_HMAC_compute_blake2b(
   Hacl_Hash_Blake2b_update_last(rem_len,
     wv1,
     s0,
+    false,
     FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
       FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
     rem_len,

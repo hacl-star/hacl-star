@@ -8,18 +8,20 @@ open Lib.Sequence
 
 let blake2_update'
   (a:alg)
+  (last_node:bool)
   (kk:size_nat{kk <= max_key a})
   (k:lbytes kk)
   (d:bytes{if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a})
   (s:state a): Tot (state a)
 = let ll = length d in
   let key_block: bytes = if kk > 0 then blake2_key_block a kk k else Seq.empty in
-  blake2_update_blocks a 0 (key_block `Seq.append` d) s
+  blake2_update_blocks a last_node 0 (key_block `Seq.append` d) s
 
 val lemma_spec_equivalence_update:
     a:alg
+  -> last_node:bool
   -> kk:size_nat{kk <= max_key a}
   -> k:lbytes kk
   -> d:bytes{if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a}
   -> s:state a ->
-  Lemma (blake2_update a kk k d s `Seq.equal` blake2_update' a kk k d s)
+  Lemma (blake2_update a last_node kk k d s `Seq.equal` blake2_update' a last_node kk k d s)
