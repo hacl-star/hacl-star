@@ -66,4 +66,36 @@ module Bindings(F:Cstubs.FOREIGN) =
                        (ocaml_bytes @->
                           (ocaml_bytes @->
                              (ocaml_bytes @-> (uint32_t @-> (returning void))))))))))
+    type k____uint8_t___uint8_t_ = [ `k____uint8_t___uint8_t_ ] structure
+    let (k____uint8_t___uint8_t_ :
+      [ `k____uint8_t___uint8_t_ ] structure typ) =
+      structure "K____uint8_t___uint8_t__s"
+    let k____uint8_t___uint8_t__fst =
+      field k____uint8_t___uint8_t_ "fst" (ptr uint8_t)
+    let k____uint8_t___uint8_t__snd =
+      field k____uint8_t___uint8_t_ "snd" (ptr uint8_t)
+    let _ = seal k____uint8_t___uint8_t_
+    type k____uint8_t__K____uint8_t___uint8_t_ =
+      [ `k____uint8_t__K____uint8_t___uint8_t_ ] structure
+    let (k____uint8_t__K____uint8_t___uint8_t_ :
+      [ `k____uint8_t__K____uint8_t___uint8_t_ ] structure typ) =
+      structure "K____uint8_t__K____uint8_t___uint8_t__s"
+    let k____uint8_t__K____uint8_t___uint8_t__fst =
+      field k____uint8_t__K____uint8_t___uint8_t_ "fst" (ptr uint8_t)
+    let k____uint8_t__K____uint8_t___uint8_t__snd =
+      field k____uint8_t__K____uint8_t___uint8_t_ "snd"
+        k____uint8_t___uint8_t_
+    let _ = seal k____uint8_t__K____uint8_t___uint8_t_
+    type k____uint8_t____uint8_t____K____uint8_t___uint8_t__ =
+      [ `k____uint8_t____uint8_t____K____uint8_t___uint8_t__ ] structure
+    let (k____uint8_t____uint8_t____K____uint8_t___uint8_t__ :
+      [ `k____uint8_t____uint8_t____K____uint8_t___uint8_t__ ] structure typ)
+      = structure "K____uint8_t____uint8_t____K____uint8_t___uint8_t___s"
+    let k____uint8_t____uint8_t____K____uint8_t___uint8_t___fst =
+      field k____uint8_t____uint8_t____K____uint8_t___uint8_t__ "fst"
+        (ptr uint8_t)
+    let k____uint8_t____uint8_t____K____uint8_t___uint8_t___snd =
+      field k____uint8_t____uint8_t____K____uint8_t___uint8_t__ "snd"
+        k____uint8_t__K____uint8_t___uint8_t_
+    let _ = seal k____uint8_t____uint8_t____K____uint8_t___uint8_t__
   end

@@ -48,7 +48,10 @@ static inline void sha224_init4(Lib_IntVector_Intrinsics_vec128 *hash)
 /* SNIPPET_START: sha224_update4 */
 
 static inline void
-sha224_update4(Hacl_Hash_SHA2_uint8_4p b, Lib_IntVector_Intrinsics_vec128 *hash)
+sha224_update4(
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ b,
+  Lib_IntVector_Intrinsics_vec128 *hash
+)
 {
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 hash_old[8U] KRML_POST_ALIGN(16) = { 0U };
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 ws[16U] KRML_POST_ALIGN(16) = { 0U };
@@ -305,7 +308,7 @@ sha224_update4(Hacl_Hash_SHA2_uint8_4p b, Lib_IntVector_Intrinsics_vec128 *hash)
 static inline void
 sha224_update_nblocks4(
   uint32_t len,
-  Hacl_Hash_SHA2_uint8_4p b,
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ b,
   Lib_IntVector_Intrinsics_vec128 *st
 )
 {
@@ -320,7 +323,7 @@ sha224_update_nblocks4(
     uint8_t *bl1 = b1 + i * 64U;
     uint8_t *bl2 = b2 + i * 64U;
     uint8_t *bl3 = b3 + i * 64U;
-    Hacl_Hash_SHA2_uint8_4p
+    K____uint8_t____uint8_t____K____uint8_t___uint8_t__
     mb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
     sha224_update4(mb, st);
   }
@@ -334,7 +337,7 @@ static inline void
 sha224_update_last4(
   uint64_t totlen,
   uint32_t len,
-  Hacl_Hash_SHA2_uint8_4p b,
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ b,
   Lib_IntVector_Intrinsics_vec128 *hash
 )
 {
@@ -388,13 +391,13 @@ sha224_update_last4(
   uint8_t *last11 = last3 + 64U;
   uint8_t *l30 = last01;
   uint8_t *l31 = last11;
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   mb0 = { .fst = l00, .snd = { .fst = l10, .snd = { .fst = l20, .snd = l30 } } };
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   mb1 = { .fst = l01, .snd = { .fst = l11, .snd = { .fst = l21, .snd = l31 } } };
   Hacl_Hash_SHA2_uint8_2x4p scrut = { .fst = mb0, .snd = mb1 };
-  Hacl_Hash_SHA2_uint8_4p last0 = scrut.fst;
-  Hacl_Hash_SHA2_uint8_4p last1 = scrut.snd;
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ last0 = scrut.fst;
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ last1 = scrut.snd;
   sha224_update4(last0, hash);
   if (blocks > 1U)
   {
@@ -408,7 +411,10 @@ sha224_update_last4(
 /* SNIPPET_START: sha224_finish4 */
 
 static inline void
-sha224_finish4(Lib_IntVector_Intrinsics_vec128 *st, Hacl_Hash_SHA2_uint8_4p h)
+sha224_finish4(
+  Lib_IntVector_Intrinsics_vec128 *st,
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ h
+)
 {
   uint8_t hbuf[128U] = { 0U };
   Lib_IntVector_Intrinsics_vec128 v00 = st[0U];
@@ -507,9 +513,9 @@ Hacl_SHA2_Vec128_sha224_4(
   uint8_t *input3
 )
 {
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   rb = { .fst = dst0, .snd = { .fst = dst1, .snd = { .fst = dst2, .snd = dst3 } } };
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 st[8U] KRML_POST_ALIGN(16) = { 0U };
   sha224_init4(st);
@@ -525,7 +531,7 @@ Hacl_SHA2_Vec128_sha224_4(
   uint8_t *bl1 = b1 + input_len - rem1;
   uint8_t *bl2 = b2 + input_len - rem1;
   uint8_t *bl3 = b3 + input_len - rem1;
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   lb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
   sha224_update_last4(len_, rem, lb, st);
   sha224_finish4(st, rb);
@@ -552,7 +558,10 @@ static inline void sha256_init4(Lib_IntVector_Intrinsics_vec128 *hash)
 /* SNIPPET_START: sha256_update4 */
 
 static inline void
-sha256_update4(Hacl_Hash_SHA2_uint8_4p b, Lib_IntVector_Intrinsics_vec128 *hash)
+sha256_update4(
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ b,
+  Lib_IntVector_Intrinsics_vec128 *hash
+)
 {
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 hash_old[8U] KRML_POST_ALIGN(16) = { 0U };
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 ws[16U] KRML_POST_ALIGN(16) = { 0U };
@@ -809,7 +818,7 @@ sha256_update4(Hacl_Hash_SHA2_uint8_4p b, Lib_IntVector_Intrinsics_vec128 *hash)
 static inline void
 sha256_update_nblocks4(
   uint32_t len,
-  Hacl_Hash_SHA2_uint8_4p b,
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ b,
   Lib_IntVector_Intrinsics_vec128 *st
 )
 {
@@ -824,7 +833,7 @@ sha256_update_nblocks4(
     uint8_t *bl1 = b1 + i * 64U;
     uint8_t *bl2 = b2 + i * 64U;
     uint8_t *bl3 = b3 + i * 64U;
-    Hacl_Hash_SHA2_uint8_4p
+    K____uint8_t____uint8_t____K____uint8_t___uint8_t__
     mb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
     sha256_update4(mb, st);
   }
@@ -838,7 +847,7 @@ static inline void
 sha256_update_last4(
   uint64_t totlen,
   uint32_t len,
-  Hacl_Hash_SHA2_uint8_4p b,
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ b,
   Lib_IntVector_Intrinsics_vec128 *hash
 )
 {
@@ -892,13 +901,13 @@ sha256_update_last4(
   uint8_t *last11 = last3 + 64U;
   uint8_t *l30 = last01;
   uint8_t *l31 = last11;
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   mb0 = { .fst = l00, .snd = { .fst = l10, .snd = { .fst = l20, .snd = l30 } } };
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   mb1 = { .fst = l01, .snd = { .fst = l11, .snd = { .fst = l21, .snd = l31 } } };
   Hacl_Hash_SHA2_uint8_2x4p scrut = { .fst = mb0, .snd = mb1 };
-  Hacl_Hash_SHA2_uint8_4p last0 = scrut.fst;
-  Hacl_Hash_SHA2_uint8_4p last1 = scrut.snd;
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ last0 = scrut.fst;
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ last1 = scrut.snd;
   sha256_update4(last0, hash);
   if (blocks > 1U)
   {
@@ -912,7 +921,10 @@ sha256_update_last4(
 /* SNIPPET_START: sha256_finish4 */
 
 static inline void
-sha256_finish4(Lib_IntVector_Intrinsics_vec128 *st, Hacl_Hash_SHA2_uint8_4p h)
+sha256_finish4(
+  Lib_IntVector_Intrinsics_vec128 *st,
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__ h
+)
 {
   uint8_t hbuf[128U] = { 0U };
   Lib_IntVector_Intrinsics_vec128 v00 = st[0U];
@@ -1011,9 +1023,9 @@ Hacl_SHA2_Vec128_sha256_4(
   uint8_t *input3
 )
 {
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   rb = { .fst = dst0, .snd = { .fst = dst1, .snd = { .fst = dst2, .snd = dst3 } } };
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 st[8U] KRML_POST_ALIGN(16) = { 0U };
   sha256_init4(st);
@@ -1029,7 +1041,7 @@ Hacl_SHA2_Vec128_sha256_4(
   uint8_t *bl1 = b1 + input_len - rem1;
   uint8_t *bl2 = b2 + input_len - rem1;
   uint8_t *bl3 = b3 + input_len - rem1;
-  Hacl_Hash_SHA2_uint8_4p
+  K____uint8_t____uint8_t____K____uint8_t___uint8_t__
   lb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
   sha256_update_last4(len_, rem, lb, st);
   sha256_finish4(st, rb);

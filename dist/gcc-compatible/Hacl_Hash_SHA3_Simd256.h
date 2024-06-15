@@ -35,15 +35,28 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_SHA2_Types.h"
 #include "libintvector.h"
 
-void
-Hacl_Hash_SHA3_Simd256_absorb_inner_256(
-  uint32_t rateInBytes,
-  Hacl_Hash_SHA2_uint8_4p b,
-  Lib_IntVector_Intrinsics_vec256 *s
-);
+typedef struct K____uint8_t___uint8_t__s
+{
+  uint8_t *fst;
+  uint8_t *snd;
+}
+K____uint8_t___uint8_t_;
+
+typedef struct K____uint8_t__K____uint8_t___uint8_t__s
+{
+  uint8_t *fst;
+  K____uint8_t___uint8_t_ snd;
+}
+K____uint8_t__K____uint8_t___uint8_t_;
+
+typedef struct K____uint8_t____uint8_t____K____uint8_t___uint8_t___s
+{
+  uint8_t *fst;
+  K____uint8_t__K____uint8_t___uint8_t_ snd;
+}
+K____uint8_t____uint8_t____K____uint8_t___uint8_t__;
 
 void
 Hacl_Hash_SHA3_Simd256_shake128(

@@ -826,6 +826,7 @@ let alloc_multi m =
   | M32 -> alloc_multi1 m
   | M256 -> alloc_multi4 m
 
+inline_for_extraction noextract
 let absorb_inner #m rateInBytes b s =
   loadState #m rateInBytes b s;
   state_permute m s
