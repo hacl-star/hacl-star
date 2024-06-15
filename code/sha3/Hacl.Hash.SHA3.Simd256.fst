@@ -39,6 +39,7 @@ val absorb_inner_256:
   (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
     as_seq h1 s == V.absorb_inner #M256 (v rateInBytes) (as_seq_multi h0 b) (as_seq h0 s))
 
+inline_for_extraction noextract
 let absorb_inner_256 rateInBytes b s = absorb_inner #M256 rateInBytes b s
 
 inline_for_extraction noextract

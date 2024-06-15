@@ -28,6 +28,9 @@ module M = LowStar.Modifies
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
+val absorb_inner_32: absorb_inner_t M32
+
+inline_for_extraction noextract
 let absorb_inner_32 rateInBytes b s = absorb_inner #M32 rateInBytes b s
 
 val shake128:

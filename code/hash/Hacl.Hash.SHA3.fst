@@ -15,6 +15,10 @@ friend Spec.Agile.Hash
 
 #push-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 
+inline_for_extraction noextract
+val absorb_inner_32: Hacl.Impl.SHA3.Vec.absorb_inner_t Hacl.Spec.SHA3.Vec.Common.M32
+
+inline_for_extraction noextract
 let absorb_inner_32 rateInBytes b s = Hacl.Impl.SHA3.Vec.absorb_inner
   #Hacl.Spec.SHA3.Vec.Common.M32 rateInBytes b s
 
