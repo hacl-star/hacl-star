@@ -27,6 +27,7 @@ module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+inline_for_extraction noextract
 val absorb_inner_256:
     rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> b: Hacl.Impl.SHA2.Types.bufx4
