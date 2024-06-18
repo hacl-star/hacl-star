@@ -56,7 +56,15 @@ pub fn compute_blake2s_128(
     {
         let mut wv: [crate::lib::intvector_intrinsics::vec128; 4] =
             [crate::lib::intvector_intrinsics::vec128_zero; 4usize];
-        crate::hacl::hash_blake2s_simd128::update_last(64u32, &mut wv, s0, 0u64, 64u32, &mut ipad)
+        crate::hacl::hash_blake2s_simd128::update_last(
+            64u32,
+            &mut wv,
+            s0,
+            false,
+            0u64,
+            64u32,
+            &mut ipad
+        )
     }
     else
     {
@@ -96,6 +104,7 @@ pub fn compute_blake2s_128(
             rem_len,
             &mut wv1,
             s0,
+            false,
             (64u32 as u64).wrapping_add(full_blocks_len as u64),
             rem_len,
             rem0.1
@@ -141,6 +150,7 @@ pub fn compute_blake2s_128(
         rem_len,
         &mut wv1,
         s0,
+        false,
         (64u32 as u64).wrapping_add(full_blocks_len as u64),
         rem_len,
         rem0.1

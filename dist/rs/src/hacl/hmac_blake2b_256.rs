@@ -60,6 +60,7 @@ pub fn compute_blake2b_256(
             128u32,
             &mut wv,
             s0,
+            false,
             crate::fstar::uint128::uint64_to_uint128(0u64),
             128u32,
             &mut ipad
@@ -110,6 +111,7 @@ pub fn compute_blake2b_256(
             rem_len,
             &mut wv1,
             s0,
+            false,
             crate::fstar::uint128::add(
                 crate::fstar::uint128::uint64_to_uint128(128u32 as u64),
                 crate::fstar::uint128::uint64_to_uint128(full_blocks_len as u64)
@@ -165,6 +167,7 @@ pub fn compute_blake2b_256(
         rem_len,
         &mut wv1,
         s0,
+        false,
         crate::fstar::uint128::add(
             crate::fstar::uint128::uint64_to_uint128(128u32 as u64),
             crate::fstar::uint128::uint64_to_uint128(full_blocks_len as u64)

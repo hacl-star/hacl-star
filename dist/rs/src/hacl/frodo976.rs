@@ -22,7 +22,7 @@ pub fn crypto_kem_keypair(pk: &mut [u8], sk: &mut [u8]) -> u32
     let seed_se: (&mut [u8], &mut [u8]) = s.1.split_at_mut(24usize);
     let z: (&mut [u8], &mut [u8]) = seed_se.1.split_at_mut(24usize);
     let seed_a: (&mut [u8], &mut [u8]) = pk.split_at_mut(0usize);
-    crate::hacl::hash_sha3::shake256_hacl(16u32, z.1, 16u32, seed_a.1);
+    crate::hacl::hash_sha3::shake256(seed_a.1, 16u32, z.1, 16u32);
     let b_bytes: (&mut [u8], &mut [u8]) = seed_a.1.split_at_mut(16usize);
     let s_bytes: (&mut [u8], &mut [u8]) = sk.split_at_mut(15656usize);
     let mut s_matrix: [u16; 7808] = [0u16; 7808usize];
@@ -31,7 +31,7 @@ pub fn crypto_kem_keypair(pk: &mut [u8], sk: &mut [u8]) -> u32
     let mut shake_input_seed_se: [u8; 25] = [0u8; 25usize];
     (&mut shake_input_seed_se)[0usize] = 0x5fu8;
     ((&mut shake_input_seed_se)[1usize..1usize + 24usize]).copy_from_slice(&z.0[0usize..24usize]);
-    crate::hacl::hash_sha3::shake256_hacl(25u32, &mut shake_input_seed_se, 31232u32, &mut r);
+    crate::hacl::hash_sha3::shake256(&mut r, 31232u32, &mut shake_input_seed_se, 25u32);
     crate::lib::memzero0::memzero::<u8>(&mut shake_input_seed_se, 25u32);
     crate::hacl::frodo_kem::frodo_sample_matrix976(
         976u32,
@@ -70,7 +70,7 @@ pub fn crypto_kem_keypair(pk: &mut [u8], sk: &mut [u8]) -> u32
     let sk_p: (&mut [u8], &mut [u8]) = s_bytes.0.split_at_mut(0usize);
     (sk_p.1[0usize..24usize]).copy_from_slice(&seed_se.0[0usize..24usize]);
     (sk_p.1[24usize..24usize + 15632usize]).copy_from_slice(&pk[0usize..15632usize]);
-    crate::hacl::hash_sha3::shake256_hacl(15632u32, pk, 24u32, &mut sk[slen1 as usize..]);
+    crate::hacl::hash_sha3::shake256(&mut sk[slen1 as usize..], 24u32, pk, 15632u32);
     crate::lib::memzero0::memzero::<u8>(&mut coins, 64u32);
     0u32
 }
@@ -81,9 +81,9 @@ pub fn crypto_kem_enc(ct: &mut [u8], ss: &mut [u8], pk: &mut [u8]) -> u32
     crate::hacl::frodo_kem::randombytes_(24u32, &mut coins);
     let mut seed_se_k: [u8; 48] = [0u8; 48usize];
     let mut pkh_mu: [u8; 48] = [0u8; 48usize];
-    crate::hacl::hash_sha3::shake256_hacl(15632u32, pk, 24u32, &mut (&mut pkh_mu)[0usize..]);
+    crate::hacl::hash_sha3::shake256(&mut (&mut pkh_mu)[0usize..], 24u32, pk, 15632u32);
     ((&mut pkh_mu)[24usize..24usize + 24usize]).copy_from_slice(&(&mut coins)[0usize..24usize]);
-    crate::hacl::hash_sha3::shake256_hacl(48u32, &mut pkh_mu, 48u32, &mut seed_se_k);
+    crate::hacl::hash_sha3::shake256(&mut seed_se_k, 48u32, &mut pkh_mu, 48u32);
     let seed_se: (&mut [u8], &mut [u8]) = (&mut seed_se_k).split_at_mut(0usize);
     let k: (&mut [u8], &mut [u8]) = seed_se.1.split_at_mut(24usize);
     let seed_a: (&mut [u8], &mut [u8]) = pk.split_at_mut(0usize);
@@ -95,7 +95,7 @@ pub fn crypto_kem_enc(ct: &mut [u8], ss: &mut [u8], pk: &mut [u8]) -> u32
     let mut shake_input_seed_se: [u8; 25] = [0u8; 25usize];
     (&mut shake_input_seed_se)[0usize] = 0x96u8;
     ((&mut shake_input_seed_se)[1usize..1usize + 24usize]).copy_from_slice(&k.0[0usize..24usize]);
-    crate::hacl::hash_sha3::shake256_hacl(25u32, &mut shake_input_seed_se, 31360u32, &mut r);
+    crate::hacl::hash_sha3::shake256(&mut r, 31360u32, &mut shake_input_seed_se, 25u32);
     crate::lib::memzero0::memzero::<u8>(&mut shake_input_seed_se, 25u32);
     crate::hacl::frodo_kem::frodo_sample_matrix976(
         8u32,
@@ -162,7 +162,7 @@ pub fn crypto_kem_enc(ct: &mut [u8], ss: &mut [u8], pk: &mut [u8]) -> u32
     ((&mut shake_input_ss)[15744usize..15744usize + 24usize]).copy_from_slice(
         &k.1[0usize..24usize]
     );
-    crate::hacl::hash_sha3::shake256_hacl(ss_init_len, &mut shake_input_ss, 24u32, ss);
+    crate::hacl::hash_sha3::shake256(ss, 24u32, &mut shake_input_ss, ss_init_len);
     crate::lib::memzero0::memzero::<u8>(&mut shake_input_ss, ss_init_len);
     crate::lib::memzero0::memzero::<u8>(&mut seed_se_k, 48u32);
     crate::lib::memzero0::memzero::<u8>(&mut coins, 24u32);
@@ -202,12 +202,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &mut [u8], sk: &mut [u8]) -> u32
     ((&mut pkh_mu_decode)[24usize..24usize + 24usize]).copy_from_slice(
         &(&mut mu_decode)[0usize..24usize]
     );
-    crate::hacl::hash_sha3::shake256_hacl(
-        pkh_mu_decode_len,
-        &mut pkh_mu_decode,
-        48u32,
-        &mut seed_se_k
-    );
+    crate::hacl::hash_sha3::shake256(&mut seed_se_k, 48u32, &mut pkh_mu_decode, pkh_mu_decode_len);
     let seed_se: (&mut [u8], &mut [u8]) = (&mut seed_se_k).split_at_mut(0usize);
     let kp: (&mut [u8], &mut [u8]) = seed_se.1.split_at_mut(24usize);
     let s: (&mut [u8], &mut [u8]) = s_bytes.0.split_at_mut(0usize);
@@ -220,7 +215,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &mut [u8], sk: &mut [u8]) -> u32
     let mut shake_input_seed_se: [u8; 25] = [0u8; 25usize];
     (&mut shake_input_seed_se)[0usize] = 0x96u8;
     ((&mut shake_input_seed_se)[1usize..1usize + 24usize]).copy_from_slice(&kp.0[0usize..24usize]);
-    crate::hacl::hash_sha3::shake256_hacl(25u32, &mut shake_input_seed_se, 31360u32, &mut r);
+    crate::hacl::hash_sha3::shake256(&mut r, 31360u32, &mut shake_input_seed_se, 25u32);
     crate::lib::memzero0::memzero::<u8>(&mut shake_input_seed_se, 25u32);
     crate::hacl::frodo_kem::frodo_sample_matrix976(
         8u32,
@@ -302,7 +297,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &mut [u8], sk: &mut [u8]) -> u32
     ((&mut ss_init)[15744usize..15744usize + 24usize]).copy_from_slice(
         &(&mut kp_s)[0usize..24usize]
     );
-    crate::hacl::hash_sha3::shake256_hacl(ss_init_len, &mut ss_init, 24u32, ss);
+    crate::hacl::hash_sha3::shake256(ss, 24u32, &mut ss_init, ss_init_len);
     crate::lib::memzero0::memzero::<u8>(&mut ss_init, ss_init_len);
     crate::lib::memzero0::memzero::<u8>(&mut kp_s, 24u32);
     crate::lib::memzero0::memzero::<u8>(&mut seed_se_k, 48u32);

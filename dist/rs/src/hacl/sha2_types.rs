@@ -23,3 +23,7 @@ pub struct uint8_8p <'a> { pub fst: &'a mut [u8], pub snd: uint8_7p <'a> }
 pub struct uint8_2x4p <'a> { pub fst: uint8_4p <'a>, pub snd: uint8_4p <'a> }
 
 pub struct uint8_2x8p <'a> { pub fst: uint8_8p <'a>, pub snd: uint8_8p <'a> }
+
+pub type bufx1 <'a> = &'a mut [u8];
+
+pub type bufx4 = uint8_4p;

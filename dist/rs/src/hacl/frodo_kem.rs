@@ -20,10 +20,10 @@ pub fn shake128_4x(
 ) ->
     ()
 {
-    crate::hacl::hash_sha3::shake128_hacl(input_len, input0, output_len, output0);
-    crate::hacl::hash_sha3::shake128_hacl(input_len, input1, output_len, output1);
-    crate::hacl::hash_sha3::shake128_hacl(input_len, input2, output_len, output2);
-    crate::hacl::hash_sha3::shake128_hacl(input_len, input3, output_len, output3)
+    crate::hacl::hash_sha3::shake128(output0, output_len, input0, input_len);
+    crate::hacl::hash_sha3::shake128(output1, output_len, input1, input_len);
+    crate::hacl::hash_sha3::shake128(output2, output_len, input2, input_len);
+    crate::hacl::hash_sha3::shake128(output3, output_len, input3, input_len)
 }
 
 #[inline] pub fn mod_pow2(n1: u32, n2: u32, logq: u32, a: &mut [u16]) -> ()

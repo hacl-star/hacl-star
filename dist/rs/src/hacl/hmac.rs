@@ -519,7 +519,7 @@ pub fn compute_blake2s_32(
     if data_len == 0u32
     {
         let mut wv: [u32; 16] = [0u32; 16usize];
-        crate::hacl::hash_blake2s::update_last(64u32, &mut wv, s0, 0u64, 64u32, &mut ipad)
+        crate::hacl::hash_blake2s::update_last(64u32, &mut wv, s0, false, 0u64, 64u32, &mut ipad)
     }
     else
     {
@@ -556,6 +556,7 @@ pub fn compute_blake2s_32(
             rem_len,
             &mut wv1,
             s0,
+            false,
             (64u32 as u64).wrapping_add(full_blocks_len as u64),
             rem_len,
             rem0.1
@@ -598,6 +599,7 @@ pub fn compute_blake2s_32(
         rem_len,
         &mut wv1,
         s0,
+        false,
         (64u32 as u64).wrapping_add(full_blocks_len as u64),
         rem_len,
         rem0.1
@@ -648,6 +650,7 @@ pub fn compute_blake2b_32(
             128u32,
             &mut wv,
             s0,
+            false,
             crate::fstar::uint128::uint64_to_uint128(0u64),
             128u32,
             &mut ipad
@@ -695,6 +698,7 @@ pub fn compute_blake2b_32(
             rem_len,
             &mut wv1,
             s0,
+            false,
             crate::fstar::uint128::add(
                 crate::fstar::uint128::uint64_to_uint128(128u32 as u64),
                 crate::fstar::uint128::uint64_to_uint128(full_blocks_len as u64)
@@ -747,6 +751,7 @@ pub fn compute_blake2b_32(
         rem_len,
         &mut wv1,
         s0,
+        false,
         crate::fstar::uint128::add(
             crate::fstar::uint128::uint64_to_uint128(128u32 as u64),
             crate::fstar::uint128::uint64_to_uint128(full_blocks_len as u64)
