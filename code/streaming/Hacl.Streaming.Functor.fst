@@ -279,7 +279,7 @@ let seen_length #index c i t t' s =
 (* TODO: malloc and alloca have big portions of proofs in common, so it may
  * be possible to factorize them, but it is not clear how *)
 #restart-solver
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 600"
 let malloc #index c i t t' key r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -307,6 +307,8 @@ let malloc #index c i t t' key r =
   (**) B.loc_unused_in_not_unused_in_disjoint h20;
   (**) assert (B.fresh_loc (c.state.footprint #i h20 block_state) h0 h20);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h20);
+  (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.block_len c i));
+  (**) assert(0 % UInt32.v (Block?.block_len c i) = 0);
   (**) c.update_multi_zero i (c.state.v i h20 block_state) 0;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h20;
   (**) assert B.(modifies (c.state.footprint h2 block_state) h0 h20);
