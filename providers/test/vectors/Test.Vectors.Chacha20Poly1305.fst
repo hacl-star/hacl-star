@@ -2,7 +2,7 @@ module Test.Vectors.Chacha20Poly1305
 
 module B = LowStar.Buffer
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 40 --fuel 0 --ifuel 0"
 
 let key0: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   [@inline_let] let l = [ 0x1cuy; 0x92uy; 0x40uy; 0xa5uy; 0xebuy; 0x55uy; 0xd3uy; 0x8auy; 0xf3uy; 0x33uy; 0x88uy; 0x86uy; 0x04uy; 0xf6uy; 0xb5uy; 0xf0uy; 0x47uy; 0x39uy; 0x17uy; 0xc1uy; 0x40uy; 0x2buy; 0x80uy; 0x09uy; 0x9duy; 0xcauy; 0x5cuy; 0xbcuy; 0x20uy; 0x70uy; 0x75uy; 0xc0uy; ] in
@@ -499,7 +499,7 @@ type vector = | Vector:
   vector
 
 let vectors: (b: B.buffer vector { B.length b = 12 /\ B.recallable b }) =
-  [@inline_let] let l = [ 
+  [@inline_let] let l = [
     Vector output0 output0_len input0 input0_len aad0 aad0_len nonce0 nonce0_len key0 key0_len ;
     Vector output1 output1_len input1 input1_len aad1 aad1_len nonce1 nonce1_len key1 key1_len ;
     Vector output2 output2_len input2 input2_len aad2 aad2_len nonce2 nonce2_len key2 key2_len ;
