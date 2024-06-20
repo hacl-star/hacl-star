@@ -1133,11 +1133,7 @@ pub fn reset_with_key(s: &mut [state_t], k: &mut [u8]) -> ()
             personal: &mut personal
         };
     let mut p0: [crate::hacl::hash_blake2b::blake2_params; 1] = [p; 1usize];
-    reset_raw(
-        s,
-        crate::hacl::hash_blake2b::__ Hacl_Impl_Blake2_Core_blake2_params*_ uint8_t*
-        { fst: &mut p0, snd: k }
-    )
+    reset_raw(s, crate::hacl::hash_blake2b::params_and_key { fst: &mut p0, snd: k })
 }
 
 pub fn reset(s: &mut [state_t]) -> () { reset_with_key(s, &mut []) }

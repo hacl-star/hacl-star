@@ -22,6 +22,8 @@ pub struct blake2_params <'a>
 
 pub struct index { pub key_length: u8, pub digest_length: u8, pub last_node: bool }
 
+pub struct params_and_key <'a> { pub fst: &'a mut [blake2_params <'a>], pub snd: &'a mut [u8] }
+
 fn update_block(
     wv: &mut [u64],
     hash: &mut [u64],
@@ -992,9 +994,6 @@ pub struct block_state_t
 
 pub struct state_t { pub block_state: block_state_t, pub buf: Vec<u8>, pub total_len: u64 }
 
-pub struct __·Hacl_Impl_Blake2_Core_blake2_params·_·uint8_t· <'a>
-{ pub fst: &'a mut [blake2_params <'a>], pub snd: &'a mut [u8] }
-
 fn index_of_state(s: &mut [state_t]) -> index
 {
     let mut block_state: &mut block_state_t = &mut (s[0usize]).block_state;
@@ -1024,7 +1023,7 @@ pub fn reset_with_key(s: &mut [state_t], k: &mut [u8]) -> ()
             personal: &mut personal
         };
     let mut p0: [blake2_params; 1] = [p; 1usize];
-    reset_raw(s, __·Hacl_Impl_Blake2_Core_blake2_params·_·uint8_t· { fst: &mut p0, snd: k })
+    reset_raw(s, params_and_key { fst: &mut p0, snd: k })
 }
 
 pub fn reset(s: &mut [state_t]) -> () { reset_with_key(s, &mut []) }
