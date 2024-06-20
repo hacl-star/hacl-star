@@ -1571,7 +1571,7 @@ val update_round:
       S.length rest' = U32.v (c.blocks_state_len i)
       end))
 
-#push-options "--z3rlimit 200 --z3cliopt smt.arith.nl=false"
+#push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false"
 let update_round #index c i t t' p data len bs =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
