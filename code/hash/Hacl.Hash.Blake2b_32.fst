@@ -32,7 +32,7 @@ let update_multi s ev blocks n =
 let update_last s prev input input_len =
   ST.push_frame ();
   let wv = Hacl.Impl.Blake2.Core.alloc_state Spec.Blake2.Blake2B M32 in
-  BlB32.update_last #input_len wv s (secret prev) input_len input;
+  BlB32.update_last #input_len wv s false (secret prev) input_len input;
   ST.pop_frame()
 
 let finish s dst = BlB32.finish (hash_len Blake2B) dst s

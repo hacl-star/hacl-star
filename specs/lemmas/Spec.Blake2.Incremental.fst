@@ -46,7 +46,7 @@ val blake2b_update_incremental
   (s: words_state Blake2B)
   : Lemma
     (ensures
-      S.equal (Spec.Blake2.blake2_update (to_blake_alg Blake2B) 0 S.empty input s)
+      S.equal (Spec.Blake2.blake2_update (to_blake_alg Blake2B) false 0 S.empty input s)
               (let bs, l = split_blocks Blake2B input in
                 let s:words_state Blake2B = update_multi Blake2B s 0 bs in
                 update_last Blake2B s (S.length bs) l))
@@ -66,7 +66,7 @@ let blake2b_update_incremental input s =
   let s_m_def = Lib.LoopCombinators.repeati nb (Spec.Blake2.blake2_update1 a' 0 bs) s in
   assert (s_m == s_m_def);
 
-  Spec.Blake2.Alternative.lemma_spec_equivalence_update a' 0 S.empty input s;
+  Spec.Blake2.Alternative.lemma_spec_equivalence_update a' false 0 S.empty input s;
 
   assert ((S.empty `S.append` input) `S.equal` input);
   let nb', rem = Spec.Blake2.split a' (S.length input) in
@@ -90,7 +90,7 @@ val blake2s_update_incremental
   (s: words_state Blake2S)
   : Lemma
     (ensures
-      S.equal (Spec.Blake2.blake2_update (to_blake_alg Blake2S) 0 S.empty input s)
+      S.equal (Spec.Blake2.blake2_update (to_blake_alg Blake2S) false 0 S.empty input s)
               (let bs, l = split_blocks Blake2S input in
                 let s:words_state Blake2S = update_multi Blake2S s 0 bs in
                 update_last Blake2S s (S.length bs) l))
@@ -104,7 +104,7 @@ let blake2s_update_incremental input s =
 
   let nb = S.length bs / block_length a in
 
-  Spec.Blake2.Alternative.lemma_spec_equivalence_update a' 0 S.empty input s;
+  Spec.Blake2.Alternative.lemma_spec_equivalence_update a' false 0 S.empty input s;
   assert ((S.empty `S.append` input) `S.equal` input);
 
   let nb', rem = Spec.Blake2.split a' (S.length input) in
@@ -124,7 +124,7 @@ val blake2_update_incremental
   (s: words_state a)
   : Lemma
     (ensures
-      S.equal (Spec.Blake2.blake2_update (to_blake_alg a) 0 S.empty input s)
+      S.equal (Spec.Blake2.blake2_update (to_blake_alg a) false 0 S.empty input s)
               (let bs, l = split_blocks a input in
                 let s:words_state a = update_multi a s 0 bs in
                 update_last a s (S.length bs) l))

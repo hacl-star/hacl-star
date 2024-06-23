@@ -42,7 +42,7 @@ extern "C" {
 typedef struct Hacl_Hash_SHA2_uint8_5p_s
 {
   uint8_t *fst;
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_ snd;
+  Hacl_Hash_SHA2_uint8_4p snd;
 }
 Hacl_Hash_SHA2_uint8_5p;
 
@@ -85,8 +85,8 @@ Hacl_Hash_SHA2_uint8_8p;
 
 typedef struct Hacl_Hash_SHA2_uint8_2x4p_s
 {
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_ fst;
-  K____uint8_t___uint8_t____K____uint8_t___uint8_t_ snd;
+  Hacl_Hash_SHA2_uint8_4p fst;
+  Hacl_Hash_SHA2_uint8_4p snd;
 }
 Hacl_Hash_SHA2_uint8_2x4p;
 

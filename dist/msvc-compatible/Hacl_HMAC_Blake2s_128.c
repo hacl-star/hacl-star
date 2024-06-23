@@ -92,7 +92,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   if (data_len == 0U)
   {
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
-    Hacl_Hash_Blake2s_Simd128_update_last(64U, wv, s0, 0ULL, 64U, ipad);
+    Hacl_Hash_Blake2s_Simd128_update_last(64U, wv, s0, false, 0ULL, 64U, ipad);
   }
   else
   {
@@ -127,6 +127,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
     Hacl_Hash_Blake2s_Simd128_update_last(rem_len,
       wv1,
       s0,
+      false,
       (uint64_t)64U + (uint64_t)full_blocks_len,
       rem_len,
       rem);
@@ -165,6 +166,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   Hacl_Hash_Blake2s_Simd128_update_last(rem_len,
     wv1,
     s0,
+    false,
     (uint64_t)64U + (uint64_t)full_blocks_len,
     rem_len,
     rem);

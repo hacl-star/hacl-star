@@ -15,6 +15,7 @@ inline_for_extraction
 type index (a: Spec.alg) = {
   key_length: Spec.key_length_t a;
   digest_length: Spec.digest_length_t a;
+  last_node: bool;
 }
 
 inline_for_extraction noextract

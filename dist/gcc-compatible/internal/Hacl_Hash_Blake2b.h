@@ -38,13 +38,6 @@ extern "C" {
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "../Hacl_Hash_Blake2b.h"
 
-typedef struct Hacl_Hash_Blake2b_index_s
-{
-  uint8_t key_length;
-  uint8_t digest_length;
-}
-Hacl_Hash_Blake2b_index;
-
 void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);
 
 void
@@ -62,6 +55,7 @@ Hacl_Hash_Blake2b_update_last(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
+  bool last_node,
   FStar_UInt128_uint128 prev,
   uint32_t rem,
   uint8_t *d
