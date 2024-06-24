@@ -45,7 +45,7 @@ Comment
   h (carry-less mul) h^3 -> CONTEXT.[1] (16-byte)
   h (carry-less mul) h^2 -> CONTEXT.[2] (16-byte)
   h (carry-less mul) h   -> CONTEXT.[3] (16-byte)
-  h                      -> CONTEXT.[4] (16-byte)"]
+  h (hash key)           -> CONTEXT.[4] (16-byte)"]
 let gcm_init : gf128_init_st Vec.NI =
   gf128_init #Vec.NI
 
