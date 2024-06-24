@@ -105,21 +105,6 @@ val lemma_reduce_rev_helper (a0 a1 h:poly) (n:pos) : Lemma
     reverse (x %. g) (nn - 1) == swap y_10c 64 +. mask y_10c 64 *. c +. a1
   ))
 
-val lemma_gf128_mul_accum (z0 z1 a b c d:poly) (n:nat) : Lemma
-  (ensures (
-    let z = shift z1 (n + n) +. z0 in
-    let m = monomial n in
-    let ab = a *. m +. b in
-    let cd = c *. m +. d in
-    let ac = a *. c in
-    let ad = a *. d in
-    let bc = b *. c in
-    let bd = b *. d in
-    z +. ab *. cd ==
-      shift (z1 +. ac +. bc /. m +. ad /. m) (n + n) +.
-      (z0 +. (bc %. m) *. m +. (ad %. m) *. m +. bd)
-  ))
-
 val lemma_gf128_mul_4 (a0 b0 c0 d0 a1 b1 c1 d1 a2 b2 c2 d2 a3 b3 c3 d3:poly) :
   Lemma (ensures (
     let m = monomial 64 in

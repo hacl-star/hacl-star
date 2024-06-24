@@ -51,7 +51,6 @@ let gf128_update_st (s:field_spec) =
   (ensures  fun h0 _ h1 ->
     modifies1 ctx h0 h1 /\ state_inv_t h1 ctx /\
     as_get_acc h1 ctx == S.gf128_update (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
-//as_get_acc h1 ctx == Vec.gf128_update_vec s (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx)
 
 
 inline_for_extraction noextract

@@ -25,27 +25,44 @@ let gcm_ctx_elem_zero = vec_zero U128 1
 inline_for_extraction noextract
 let gcm_ctx = lbuffer gcm_ctx_elem gcm_ctx_len
 
+[@@ CPrologue
+"/*******************************************************************************
 
-[@CInline]
+A verified GHASH library.
+
+This is a 128-bit optimized version of GHASH algorithm over GF(2^128) for data
+authenticity that utilizes hardware-accelerated carry-less/polynomial multiplication.
+
+*******************************************************************************/
+
+/************************/
+/* GHASH API */
+/************************/\n";
+Comment
+"Initiate GHASH context with the following layout
+
+  Authentication Tag     -> CONTEXT.[0] (16-byte)
+  h (carry-less mul) h^3 -> CONTEXT.[1] (16-byte)
+  h (carry-less mul) h^2 -> CONTEXT.[2] (16-byte)
+  h (carry-less mul) h   -> CONTEXT.[3] (16-byte)
+  h                      -> CONTEXT.[4] (16-byte)"]
 let gcm_init : gf128_init_st Vec.NI =
   gf128_init #Vec.NI
 
 
-[@CInline]
+[@@ Comment "Expand the input message to have a length of multiple of 16 and pad 
+  the extra bytes with zeros. The authentication tag is computed by feeding the
+  previous state and applying GHASH algorithm on expanded message"]
 let gcm_update_blocks: gf128_update_st Vec.NI =
   gf128_update #Vec.NI
 
 
-[@CInline]
-let gcm_update_padded: gf128_update_st Vec.NI =
-  gcm_update_blocks
-
-
-[@CInline]
+[@@ Comment "Copy hash state from GHASH context to 16-byte output buffer"]
 let gcm_emit: gf128_emit_st Vec.NI =
   gf128_emit #Vec.NI
 
 
-[@CInline]
+[@@ Comment "Initiate GHASH context, apply GHASH algorithm on input message,
+  and copy authentication tag to output buffer"]
 let ghash: ghash_st Vec.NI =
   ghash #Vec.NI

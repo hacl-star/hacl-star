@@ -122,11 +122,11 @@ let lemma_mul_h_2_zero a h =
       lemma_mul_monomials 60 64;
       lemma_add_zero (monomial 124);
       lemma_div_mod_unique ((monomial 124) +. zero) (monomial 64) (monomial 60) zero;
-      // --> monomial 126 %. monomial 64 == zero
+      // --> monomial 124 %. monomial 64 == zero
       lemma_mul_monomials 50 64;
       lemma_add_zero (monomial 114);
       lemma_div_mod_unique ((monomial 114) +. zero) (monomial 64) (monomial 50) zero
-      // --> monomial 126 %. monomial 64 == zero
+      // --> monomial 114 %. monomial 64 == zero
     }
     (a *. (zero +. zero +. zero)) %. monomial 64;
     == {lemma_add_zero zero}
@@ -416,9 +416,6 @@ let lemma_reduce_rev_helper a0 a1 h n =
   lemma_add_commute a1 ((swap y_10c 64) +. (mask y_10c 64 *. c));
   lemma_reduce_rev a0 zero a1 h n;
   ()
-
-let lemma_gf128_mul_accum z0 z1 a b c d =
-  admit()
 
 val lemma_add_helper1 (ac bc_m ad_m z_ac z_bc_m z_ad_m:poly) :
   Lemma (ensures (

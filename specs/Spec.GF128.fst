@@ -18,9 +18,15 @@ let elem = felem gf128
 let load_elem (b:lbytes 16) : elem = load_felem_be #gf128 b
 let store_elem (e:elem) : lbytes 16 = store_felem_be #gf128 e
 
+/// Little-endian definitions for GF128 Field
+
+//Constant represents the irreducable polynomial for reduction over GF(2^128)
 let irred_le = mk_int #U128 #SEC 0x87
+
 let gf128_le = gf U128 irred_le
 let elem_le = felem gf128_le
+//Multiplication over GF(2^128), reverse the coefficients of operands to meet
+//little-endian requirement of GCM spec
 let fmul_le (a b:elem_le) = reverse (fmul (reverse a) (reverse b))
 
 (* GCM types and specs *)
