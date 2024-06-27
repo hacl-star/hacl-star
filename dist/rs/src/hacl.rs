@@ -3,7 +3,7 @@ pub mod inttypes_intrinsics_128;
 pub mod streaming_types;
 pub mod spec;
 pub mod impl_blake2_constants;
-// pub mod hash_blake2b;
+pub mod hash_blake2b;
 // pub mod hash_blake2s;
 // pub mod hash_blake2b_simd256;
 // pub mod hash_blake2s_simd128;

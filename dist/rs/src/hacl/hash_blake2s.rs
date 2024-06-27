@@ -958,6 +958,54 @@ pub struct block_state_t
 
 pub struct state_t { pub block_state: block_state_t, pub buf: Vec<u8>, pub total_len: u64 }
 
+fn malloc_raw(
+    kk: crate::hacl::hash_blake2b::index,
+    key: crate::hacl::hash_blake2b::params_and_key
+) ->
+    Vec<state_t>
+{
+    let mut buf: Vec<u8> = vec![0u8; 64usize];
+    let mut wv: Vec<u32> = vec![0u32; 16usize];
+    let mut b: Vec<u32> = vec![0u32; 16usize];
+    let mut block_state: block_state_t =
+        block_state_t
+        {
+            fst: kk.key_length,
+            snd: kk.digest_length,
+            thd: kk.last_node,
+            f3: __·uint32_t·_·uint32_t· { fst: wv, snd: b }
+        };
+    let p: &mut [crate::hacl::hash_blake2b::blake2_params] = key.fst;
+    let kk1: u8 = (p[0usize]).key_length;
+    let nn: u8 = (p[0usize]).digest_length;
+    let last_node: bool = block_state.thd;
+    let i: crate::hacl::hash_blake2b::index =
+        crate::hacl::hash_blake2b::index
+        { key_length: kk1, digest_length: nn, last_node: last_node };
+    let kk2: u32 = i.key_length as u32;
+    let k·: &mut [u8] = key.snd;
+    if ! (kk2 == 0u32)
+    {
+        let sub_b: (&mut [u8], &mut [u8]) = (&mut buf).split_at_mut(kk2 as usize);
+        (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
+            &vec![0u8; 64u32.wrapping_sub(kk2) as usize]
+        );
+        ((&mut buf)[0usize..kk2 as usize]).copy_from_slice(&k·[0usize..kk2 as usize])
+    };
+    let pv: crate::hacl::hash_blake2b::blake2_params = p[0usize];
+    init_with_params(&mut block_state.f3.snd, pv);
+    let kk10: u8 = kk.key_length;
+    let ite: u32 = if kk10 != 0u8 { 64u32 } else { 0u32 };
+    let mut s: state_t = state_t { block_state: block_state, buf: buf, total_len: ite as u64 };
+    let mut p0: Vec<state_t> =
+        {
+            let mut tmp: Vec<state_t> = Vec::new();
+            tmp.push(s);
+            tmp
+        };
+    p0
+}
+
 fn index_of_state(s: &mut [state_t]) -> crate::hacl::hash_blake2b::index
 {
     let mut block_state: &mut block_state_t = &mut (s[0usize]).block_state;
@@ -965,6 +1013,53 @@ fn index_of_state(s: &mut [state_t]) -> crate::hacl::hash_blake2b::index
     let nn: u8 = (*block_state).snd;
     let kk1: u8 = (*block_state).fst;
     crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node: last_node }
+}
+
+fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_key) -> ()
+{
+    let mut block_state: &mut block_state_t = &mut (state[0usize]).block_state;
+    let buf: &mut [u8] = &mut (state[0usize]).buf;
+    let last_node: bool = (*block_state).thd;
+    let nn: u8 = (*block_state).snd;
+    let kk1: u8 = (*block_state).fst;
+    let i: crate::hacl::hash_blake2b::index =
+        crate::hacl::hash_blake2b::index
+        { key_length: kk1, digest_length: nn, last_node: last_node };
+    let p: &mut [crate::hacl::hash_blake2b::blake2_params] = key.fst;
+    let kk10: u8 = (p[0usize]).key_length;
+    let nn0: u8 = (p[0usize]).digest_length;
+    let last_node0: bool = (*block_state).thd;
+    let i1: crate::hacl::hash_blake2b::index =
+        crate::hacl::hash_blake2b::index
+        { key_length: kk10, digest_length: nn0, last_node: last_node0 };
+    let kk2: u32 = i1.key_length as u32;
+    let k·1: &mut [u8] = key.snd;
+    if ! (kk2 == 0u32)
+    {
+        let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
+        (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
+            &vec![0u8; 64u32.wrapping_sub(kk2) as usize]
+        );
+        (buf[0usize..kk2 as usize]).copy_from_slice(&k·1[0usize..kk2 as usize])
+    };
+    let pv: crate::hacl::hash_blake2b::blake2_params = p[0usize];
+    init_with_params(&mut (*block_state).f3.snd, pv);
+    let mut uu____0: &mut block_state_t = &mut (state[0usize]).block_state;
+    let uu____1: &mut [u8] = &mut (state[0usize]).buf;
+    let kk11: u8 = i.key_length;
+    let ite: u32 = if kk11 != 0u8 { 64u32 } else { 0u32 };
+    state[0usize] = state_t { block_state: *uu____0, buf: uu____1.to_vec(), total_len: ite as u64 }
+}
+
+pub fn reset_with_key_and_params(
+    s: &mut [state_t],
+    p: &mut [crate::hacl::hash_blake2b::blake2_params],
+    k: &mut [u8]
+) ->
+    ()
+{
+    crate::lowstar::ignore::ignore::<crate::hacl::hash_blake2b::index>(index_of_state(s));
+    reset_raw(s, crate::hacl::hash_blake2b::params_and_key { fst: p, snd: k })
 }
 
 pub fn reset_with_key(s: &mut [state_t], k: &mut [u8]) -> ()

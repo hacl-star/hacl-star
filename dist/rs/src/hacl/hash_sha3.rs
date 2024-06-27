@@ -738,8 +738,6 @@ pub fn copy(state: &mut [state_t]) -> Vec<state_t>
 pub fn reset(state: &mut [state_t]) -> ()
 {
     let mut block_state: &mut hash_buf = &mut (state[0usize]).block_state;
-    let i: crate::hacl::streaming_types::hash_alg = (*block_state).fst;
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(i);
     let s: &mut [u64] = &mut (*block_state).snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
     (state[0usize]).total_len = 0u32 as u64

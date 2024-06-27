@@ -124,8 +124,9 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 pub fn reset(state: &mut [state_t]) -> ()
 {
     let block_state: &mut [state_s] = &mut (state[0usize]).block_state;
-    let i: crate::hacl::streaming_types::hash_alg = alg_of_state(block_state);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(i);
+    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(
+        alg_of_state(block_state)
+    );
     init(block_state);
     (state[0usize]).total_len = 0u32 as u64
 }
