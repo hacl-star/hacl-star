@@ -740,7 +740,8 @@ pub fn reset(state: &mut [state_t]) -> ()
     let mut block_state: &mut hash_buf = &mut (state[0usize]).block_state;
     let s: &mut [u64] = &mut (*block_state).snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    (state[0usize]).total_len = 0u32 as u64
+    let total_len: u64 = 0u32 as u64;
+    (state[0usize]).total_len = total_len
 }
 
 pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->

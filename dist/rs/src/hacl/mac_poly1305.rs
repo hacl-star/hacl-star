@@ -456,7 +456,8 @@ pub fn reset(state: &mut [state_t], key: &mut [u8]) -> ()
     poly1305_init(block_state, key);
     (k·[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
     let k·1: &mut [u8] = k·;
-    (state[0usize]).total_len = 0u32 as u64;
+    let total_len: u64 = 0u32 as u64;
+    (state[0usize]).total_len = total_len;
     (state[0usize]).p_key = k·1.to_vec()
 }
 

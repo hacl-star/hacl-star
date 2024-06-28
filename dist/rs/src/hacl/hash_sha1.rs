@@ -204,7 +204,8 @@ pub fn reset(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     init(block_state);
-    (state[0usize]).total_len = 0u32 as u64
+    let total_len: u64 = 0u32 as u64;
+    (state[0usize]).total_len = total_len
 }
 
 pub fn update0(

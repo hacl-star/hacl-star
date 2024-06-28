@@ -614,7 +614,8 @@ pub fn reset_256(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     sha256_init(block_state);
-    (state[0usize]).total_len = 0u32 as u64
+    let total_len: u64 = 0u32 as u64;
+    (state[0usize]).total_len = total_len
 }
 
 #[inline] fn update_224_256(
@@ -803,7 +804,8 @@ pub fn reset_224(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     sha224_init(block_state);
-    (state[0usize]).total_len = 0u32 as u64
+    let total_len: u64 = 0u32 as u64;
+    (state[0usize]).total_len = total_len
 }
 
 pub fn update_224(
@@ -897,7 +899,8 @@ pub fn reset_512(state: &mut [crate::hacl::streaming_types::state_64]) -> ()
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     sha512_init(block_state);
-    (state[0usize]).total_len = 0u32 as u64
+    let total_len: u64 = 0u32 as u64;
+    (state[0usize]).total_len = total_len
 }
 
 #[inline] fn update_384_512(
@@ -1095,7 +1098,8 @@ pub fn reset_384(state: &mut [crate::hacl::streaming_types::state_64]) -> ()
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     sha384_init(block_state);
-    (state[0usize]).total_len = 0u32 as u64
+    let total_len: u64 = 0u32 as u64;
+    (state[0usize]).total_len = total_len
 }
 
 pub fn update_384(

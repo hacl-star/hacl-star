@@ -128,7 +128,8 @@ pub fn reset(state: &mut [state_t]) -> ()
         alg_of_state(block_state)
     );
     init(block_state);
-    (state[0usize]).total_len = 0u32 as u64
+    let total_len: u64 = 0u32 as u64;
+    (state[0usize]).total_len = total_len
 }
 
 pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->

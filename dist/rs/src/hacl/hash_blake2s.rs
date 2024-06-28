@@ -1044,11 +1044,10 @@ fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_k
     };
     let pv: crate::hacl::hash_blake2b::blake2_params = p[0usize];
     init_with_params(&mut (*block_state).f3.snd, pv);
-    let mut uu____0: &mut block_state_t = &mut (state[0usize]).block_state;
-    let uu____1: &mut [u8] = &mut (state[0usize]).buf;
     let kk11: u8 = i.key_length;
     let ite: u32 = if kk11 != 0u8 { 64u32 } else { 0u32 };
-    state[0usize] = state_t { block_state: *uu____0, buf: uu____1.to_vec(), total_len: ite as u64 }
+    let total_len: u64 = ite as u64;
+    (state[0usize]).total_len = total_len
 }
 
 pub fn reset_with_key_and_params(

@@ -653,7 +653,7 @@ let reset #index c i t t' state key =
   (**) let h2 = ST.get () in
   (**) assert(preserves_freeable c i state h1 h2);
 
-  [@inline_let] let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
+  let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
   // HACL-RS: trigger the functional update pattern
   let uu__ = !*state in
   let State uu__block_state_ _ _ _ _ = uu__ in
