@@ -94,7 +94,7 @@ all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible \
   compile-portable-gcc-compatible dist/wasm/Makefile.basic \
-  obj/libhaclml.cmxa
+  obj/libhaclml.cmxa compile-rust
 
 # Mozilla does not want to run the configure script, so this means that the
 # build of Mozilla will break on platforms other than x86-64
@@ -117,11 +117,16 @@ endif
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml test-hpke
+test-unstaged: test-handwritten test-c test-ml test-rust test-hpke
 
 ifeq ($(shell uname -m),x86_64)
 test-unstaged: vale_testInline
 endif
+
+# potentially racing with compile-rust but cargo has a built-in lock, so we're
+# cool
+test-rust: dist/rs/src/Makefile.basic
+	cd dist/rs && cargo test
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -866,6 +871,28 @@ dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 # file that is *NOT* known to require sse2.
 dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 
+# Rust distribution
+# -----------------
+#
+# Experimental for now, only a very small subset of files & algorithms compile
+dist/rs/src/Makefile.basic: DEFAULT_FLAGS += -backend rust \
+  -drop Hacl.GenericField32.field_free,Hacl.Bignum4096.mont_ctx_free,Hacl.Bignum4096_32.mont_ctx_free,Hacl.GenericField64.field_free \
+  -drop Hacl.Bignum32.mont_ctx_free,Hacl.Bignum256_32.mont_ctx_free,Hacl.Bignum64.mont_ctx_free,Hacl.Bignum256.mont_ctx_free \
+  -drop Hacl.Streaming.SHA2.free_224,Hacl.Streaming.SHA2.free_256,Hacl.Streaming.SHA2.free_384,Hacl.Streaming.SHA2.free_512 \
+  -drop Hacl.Streaming.Blake2b_32.free,Hacl.Streaming.Blake2s_32.free,Hacl.Streaming.Blake2b_256.free,Hacl.Streaming.Blake2s_128.free \
+  -drop Hacl.Streaming.SHA1.free,Hacl.Streaming.Keccak.free,Hacl.Streaming.MD5.free,EverCrypt.Hash.free_,EverCrypt.Hash.Incremental.free \
+  -drop Hacl.Streaming.Poly1305_32.free,Hacl.Streaming.Poly1305_128.free,Hacl.Streaming.Poly1305_256.free,Hacl.HMAC_DRBG.free \
+  -drop EverCrypt.AEAD.free \
+  -funroll-loops 32
+
+dist/rs/src/Makefile.basic: VALE_ASMS =
+dist/rs/src/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/rs/src/Makefile.basic: HAND_WRITTEN_H_FILES =
+dist/rs/src/Makefile.basic: HAND_WRITTEN_FILES =
+dist/rs/src/Makefile.basic: TARGETCONFIG_FLAGS =
+dist/rs/src/Makefile.basic: INTRINSIC_FLAGS =
+
+
 # Actual KaRaMeL invocations
 # --------------------------
 
@@ -875,7 +902,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && mkdir -p $(dir $@)/lib_gen && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
-	$(KRML) $(DEFAULT_FLAGS) \
+	$(KRML) $(KRML_EXTRA) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  $(filter %.krml,$^) \
 	  -silent \
@@ -890,7 +917,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	echo "F* version: $(shell cd $(FSTAR_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "KaRaMeL version: $(shell cd $(KRML_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
-	if [ "$*" == "wasm" ]; then touch $@; fi
+	touch $@ # target not created for wasm and rust... but still creating it to avoid spurious rebuilds
 
 # Auto-generates a single C test file. Note that this rule will trigger multiple
 # times, for multiple KaRaMeL invocations in the test/ directory -- this may
@@ -940,6 +967,9 @@ compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-krmlli
 	cp $< dist/$*/Makefile
 	(if [ -f dist/$*/libintvector.h ]; then cp dist/configure dist/$*/configure; fi;)
 	$(MAKE) -C dist/$*
+
+compile-rust: dist/rs/src/Makefile.basic
+	cd dist/rs && cargo build
 
 ###########################
 # C tests (from F* files) #

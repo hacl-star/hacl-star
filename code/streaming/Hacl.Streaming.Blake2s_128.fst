@@ -73,7 +73,7 @@ val malloc_with_params_and_key:
   let c = blake2s_128 in
   let t: Type0 = c.state.s i in
   let t': Type0 = I.optional_key (G.reveal i) c.km c.key in
-  let k: Common.stateful_key_t Spec.Blake2S (G.reveal i) = p, k in
+  let k: Common.params_and_key Spec.Blake2S (G.reveal i) = p, k in
   r: HS.rid ->
   ST (state c i t t')
   (requires (fun h0 ->
@@ -197,7 +197,7 @@ val reset_with_key_and_params: (i: G.erased (Common.index Spec.Blake2S)) -> (
   state:state c (G.reveal i) t t' ->
   p:P.params Spec.Blake2S i ->
   k:LowStar.Buffer.buffer Lib.IntTypes.uint8 { LowStar.Buffer.length k == UInt8.v ((G.reveal i).key_length) } -> (
-  let key: Common.stateful_key_t Spec.Blake2S (G.reveal i) = (p, k) in
+  let key: Common.params_and_key Spec.Blake2S (G.reveal i) = (p, k) in
   unit ->
   Stack unit
   (requires (fun h0 ->

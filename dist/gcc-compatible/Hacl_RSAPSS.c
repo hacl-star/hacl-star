@@ -252,8 +252,8 @@ pss_encode(
   mgf_hash(a, hLen, m1Hash, dbLen, dbMask);
   for (uint32_t i = 0U; i < dbLen; i++)
   {
-    uint8_t *os = db;
     uint8_t x = (uint32_t)db[i] ^ (uint32_t)dbMask[i];
+    uint8_t *os = db;
     os[i] = x;
   }
   uint32_t msBits = emBits % 8U;
@@ -310,8 +310,8 @@ pss_verify(
   mgf_hash(a, hLen, m1Hash, dbLen, dbMask);
   for (uint32_t i = 0U; i < dbLen; i++)
   {
-    uint8_t *os = dbMask;
     uint8_t x = (uint32_t)dbMask[i] ^ (uint32_t)maskedDB[i];
+    uint8_t *os = dbMask;
     os[i] = x;
   }
   uint32_t msBits1 = emBits % 8U;
@@ -486,9 +486,9 @@ Hacl_RSAPSS_rsapss_sign(
     uint64_t eq_m = mask1;
     for (uint32_t i = 0U; i < nLen2; i++)
     {
-      uint64_t *os = s;
       uint64_t x = s[i];
       uint64_t x0 = eq_m & x;
+      uint64_t *os = s;
       os[i] = x0;
     }
     bool eq_b = eq_m == 0xFFFFFFFFFFFFFFFFULL;

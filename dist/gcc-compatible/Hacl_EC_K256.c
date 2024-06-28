@@ -267,9 +267,9 @@ void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out)
     0U,
     4U,
     1U,
-    uint64_t *os = scalar_q;
     uint64_t u = load64_be(scalar + (4U - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = scalar_q;
     os[i] = x;);
   Hacl_Impl_K256_PointMul_point_mul(out, scalar_q, p);
 }

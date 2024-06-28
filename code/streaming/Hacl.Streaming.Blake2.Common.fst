@@ -157,18 +157,17 @@ inline_for_extraction noextract
 let key_size (a : alg) = kk:nat{kk <= Spec.max_key a}
 
 /// Defining stateful keys
-inline_for_extraction noextract
-let stateful_key_t (a : alg) (i: index a): Type =
+let params_and_key (a : alg) (i: index a): Type =
   P.params a i & (b:B.buffer uint8 { B.length b == UInt8.v (i.key_length)})
 
 let key_footprint =
-  fun #a (#i: index a) h (s: stateful_key_t a i) ->
+  fun #a (#i: index a) h (s: params_and_key a i) ->
     let p, s = s in
     P.footprint #a h p `B.loc_union` (
     if i.key_length = 0uy then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8))
 
 let key_invariant =
-  fun #a (#i: index a) h (s: stateful_key_t a i) ->
+  fun #a (#i: index a) h (s: params_and_key a i) ->
     let kk = i.key_length in
     let nn = i.digest_length in
     let p = fst s in
@@ -179,7 +178,7 @@ let key_invariant =
       B.loc_disjoint (B.loc_addr_of_buffer (s <: B.buffer uint8)) (P.footprint #a h p))
 
 let key_freeable =
-  fun #a (#i: index a) h (s: stateful_key_t a i) ->
+  fun #a (#i: index a) h (s: params_and_key a i) ->
     let kk = i.key_length in
     let nn = i.digest_length in
     let p, s = s in
@@ -192,7 +191,7 @@ let params_t a (i: index a) =
 let key_t #a (i: index a) =
   params_t a i & s:S.seq uint8 { S.length s == UInt8.v (i.key_length) }
 
-let key_v #a (i: index a) h (s: stateful_key_t a i): GTot (key_t i) =
+let key_v #a (i: index a) h (s: params_and_key a i): GTot (key_t i) =
   let p, s = s in
   P.v #a h p, (if i.key_length = 0uy then S.empty #uint8 else B.as_seq h (s <: B.buffer uint8))
 
@@ -206,7 +205,7 @@ inline_for_extraction noextract
 let stateful_key (a : alg):
   I.stateful (index a) =
   I.Stateful
-    (fun i -> stateful_key_t a i)
+    (fun i -> params_and_key a i)
     (* footprint *)
     (key_footprint #a)
     (* freeable *)
@@ -220,7 +219,7 @@ let stateful_key (a : alg):
     (fun #i h s ->
       let p, s = s in
       P.invariant_loc_in_footprint #a h p) (* invariant_loc_in_footprint *)
-    (fun #i l (s: stateful_key_t a i) h0 h1 ->
+    (fun #i l (s: params_and_key a i) h0 h1 ->
       let p, _ = s in
       P.frame_invariant #a l p h0 h1) (* frame_invariant *)
     (fun #_ l s h0 h1 ->
@@ -285,7 +284,7 @@ let stateful_key (a : alg):
         s)
 
     (* free *)
-    (fun (i: G.erased (index a)) (s: stateful_key_t a i) ->
+    (fun (i: G.erased (index a)) (s: params_and_key a i) ->
       let p, s = s in
       let kk = (P.get_params p).key_length in
       assert (kk = (G.reveal i).key_length);
@@ -293,7 +292,7 @@ let stateful_key (a : alg):
       if kk = 0uy then () else B.free (s <: B.buffer uint8))
 
     (* copy *)
-    (fun i (s_src': stateful_key_t a i) (s_dst': stateful_key_t a i) ->
+    (fun i (s_src': params_and_key a i) (s_dst': params_and_key a i) ->
       let p_src, s_src = s_src' in
       let kk = (P.get_params p_src).key_length in
       assert (kk = (G.reveal i).key_length);
@@ -582,7 +581,7 @@ let spec_is_incremental a p last_node k input0 =
 #pop-options
 
 inline_for_extraction noextract
-val init_key_block (a : alg) (i : index a) (k : stateful_key_t a i)
+val init_key_block (a : alg) (i : index a) (k : params_and_key a i)
   (buf_: B.buffer uint8 { B.length buf_ = Spec.size_block a }) :
   ST.Stack unit
   (requires fun h0 ->
