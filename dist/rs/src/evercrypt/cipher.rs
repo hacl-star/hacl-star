@@ -13,8 +13,7 @@ pub fn chacha20(
     key: &mut [u8],
     iv: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     crate::hacl::chacha20::chacha20_init(&mut ctx, key, iv, ctr);

@@ -91,7 +91,7 @@ pub fn sub(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> u32
     (&mut c)[0usize]
 }
 
-pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> ()
+pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32])
 {
     let mut c: [u32; 1] = [0u32; 1usize];
     krml::unroll_for!(
@@ -186,7 +186,7 @@ pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
     )
 }
 
-pub fn sub_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> ()
+pub fn sub_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32])
 {
     let mut c: [u32; 1] = [0u32; 1usize];
     krml::unroll_for!(
@@ -297,7 +297,7 @@ pub fn sub_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
     )
 }
 
-pub fn mul(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> ()
+pub fn mul(a: &mut [u32], b: &mut [u32], res: &mut [u32])
 {
     (res[0usize..16usize]).copy_from_slice(&[0u32; 16usize]);
     krml::unroll_for!(
@@ -361,7 +361,7 @@ pub fn mul(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> ()
     )
 }
 
-pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
+pub fn sqr(a: &mut [u32], res: &mut [u32])
 {
     (res[0usize..16usize]).copy_from_slice(&[0u32; 16usize]);
     krml::unroll_for!(
@@ -451,7 +451,7 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
     crate::lowstar::ignore::ignore::<u32>(c1)
 }
 
-#[inline] fn precompr2(nBits: u32, n: &mut [u32], res: &mut [u32]) -> ()
+#[inline] fn precompr2(nBits: u32, n: &mut [u32], res: &mut [u32])
 {
     (res[0usize..8usize]).copy_from_slice(&[0u32; 8usize]);
     let i: u32 = nBits.wrapping_div(32u32);
@@ -467,7 +467,7 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
     }
 }
 
-#[inline] fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
+#[inline] fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32])
 {
     let mut c0: [u32; 1] = [0u32; 1usize];
     krml::unroll_for!(
@@ -602,21 +602,21 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
     )
 }
 
-#[inline] fn to(n: &mut [u32], nInv: u32, r2: &mut [u32], a: &mut [u32], aM: &mut [u32]) -> ()
+#[inline] fn to(n: &mut [u32], nInv: u32, r2: &mut [u32], a: &mut [u32], aM: &mut [u32])
 {
     let mut c: [u32; 16] = [0u32; 16usize];
     mul(a, r2, &mut c);
     reduction(n, nInv, &mut c, aM)
 }
 
-#[inline] fn from(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], a: &mut [u32]) -> ()
+#[inline] fn from(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], a: &mut [u32])
 {
     let mut tmp: [u32; 16] = [0u32; 16usize];
     ((&mut tmp)[0usize..8usize]).copy_from_slice(&aM[0usize..8usize]);
     reduction(n, nInv_u64, &mut tmp, a)
 }
 
-#[inline] fn areduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
+#[inline] fn areduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32])
 {
     let mut c0: [u32; 1] = [0u32; 1usize];
     krml::unroll_for!(
@@ -712,15 +712,14 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
     aM: &mut [u32],
     bM: &mut [u32],
     resM: &mut [u32]
-) ->
-    ()
+)
 {
     let mut c: [u32; 16] = [0u32; 16usize];
     mul(aM, bM, &mut c);
     areduction(n, nInv_u64, &mut c, resM)
 }
 
-#[inline] fn amont_sqr(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], resM: &mut [u32]) -> ()
+#[inline] fn amont_sqr(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], resM: &mut [u32])
 {
     let mut c: [u32; 16] = [0u32; 16usize];
     sqr(aM, &mut c);
@@ -733,8 +732,7 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
     r2: &mut [u32],
     a: &mut [u32],
     res: &mut [u32]
-) ->
-    ()
+)
 {
     let mut a_mod: [u32; 8] = [0u32; 8usize];
     let mut a1: [u32; 16] = [0u32; 16usize];
@@ -855,8 +853,7 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
     bBits: u32,
     b: &mut [u32],
     res: &mut [u32]
-) ->
-    ()
+)
 {
     if bBits < 200u32
     {
@@ -1013,8 +1010,7 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
     bBits: u32,
     b: &mut [u32],
     res: &mut [u32]
-) ->
-    ()
+)
 {
     if bBits < 200u32
     {
@@ -1237,8 +1233,7 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
     bBits: u32,
     b: &mut [u32],
     res: &mut [u32]
-) ->
-    ()
+)
 {
     let mut r2: [u32; 8] = [0u32; 8usize];
     precompr2(nBits, n, &mut r2);
@@ -1253,8 +1248,7 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
     bBits: u32,
     b: &mut [u32],
     res: &mut [u32]
-) ->
-    ()
+)
 {
     let mut r2: [u32; 8] = [0u32; 8usize];
     precompr2(nBits, n, &mut r2);
@@ -1452,8 +1446,7 @@ pub fn mod_precomp(
     k: &mut [crate::hacl::bignum::bn_mont_ctx_u32],
     a: &mut [u32],
     res: &mut [u32]
-) ->
-    ()
+)
 {
     let n: &mut [u32] = &mut (k[0usize]).n;
     let mu: u32 = (k[0usize]).mu;
@@ -1467,8 +1460,7 @@ pub fn mod_exp_vartime_precomp(
     bBits: u32,
     b: &mut [u32],
     res: &mut [u32]
-) ->
-    ()
+)
 {
     let n: &mut [u32] = &mut (k[0usize]).n;
     let mu: u32 = (k[0usize]).mu;
@@ -1482,8 +1474,7 @@ pub fn mod_exp_consttime_precomp(
     bBits: u32,
     b: &mut [u32],
     res: &mut [u32]
-) ->
-    ()
+)
 {
     let n: &mut [u32] = &mut (k[0usize]).n;
     let mu: u32 = (k[0usize]).mu;
@@ -1495,8 +1486,7 @@ pub fn mod_inv_prime_vartime_precomp(
     k: &mut [crate::hacl::bignum::bn_mont_ctx_u32],
     a: &mut [u32],
     res: &mut [u32]
-) ->
-    ()
+)
 {
     let n: &mut [u32] = &mut (k[0usize]).n;
     let mu: u32 = (k[0usize]).mu;
@@ -1625,7 +1615,7 @@ pub fn new_bn_from_bytes_le(len: u32, b: &mut [u8]) -> Vec<u32>
     }
 }
 
-pub fn bn_to_bytes_be(b: &mut [u32], res: &mut [u8]) -> ()
+pub fn bn_to_bytes_be(b: &mut [u32], res: &mut [u8])
 {
     let mut tmp: [u8; 32] = [0u8; 32usize];
     crate::lowstar::ignore::ignore::<&mut [u8]>(&mut tmp);
@@ -1641,7 +1631,7 @@ pub fn bn_to_bytes_be(b: &mut [u32], res: &mut [u8]) -> ()
     )
 }
 
-pub fn bn_to_bytes_le(b: &mut [u32], res: &mut [u8]) -> ()
+pub fn bn_to_bytes_le(b: &mut [u32], res: &mut [u8])
 {
     let mut tmp: [u8; 32] = [0u8; 32usize];
     crate::lowstar::ignore::ignore::<&mut [u8]>(&mut tmp);

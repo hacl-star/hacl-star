@@ -13,8 +13,7 @@ pub fn expand_sha2_256(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 32u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -89,8 +88,7 @@ pub fn extract_sha2_256(
     saltlen: u32,
     ikm: &mut [u8],
     ikmlen: u32
-) ->
-    ()
+)
 { crate::hacl::hmac::compute_sha2_256(prk, salt, saltlen, ikm, ikmlen) }
 
 pub fn expand_sha2_384(
@@ -100,8 +98,7 @@ pub fn expand_sha2_384(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 48u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -176,8 +173,7 @@ pub fn extract_sha2_384(
     saltlen: u32,
     ikm: &mut [u8],
     ikmlen: u32
-) ->
-    ()
+)
 { crate::hacl::hmac::compute_sha2_384(prk, salt, saltlen, ikm, ikmlen) }
 
 pub fn expand_sha2_512(
@@ -187,8 +183,7 @@ pub fn expand_sha2_512(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 64u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -263,8 +258,7 @@ pub fn extract_sha2_512(
     saltlen: u32,
     ikm: &mut [u8],
     ikmlen: u32
-) ->
-    ()
+)
 { crate::hacl::hmac::compute_sha2_512(prk, salt, saltlen, ikm, ikmlen) }
 
 pub fn expand_blake2s_32(
@@ -274,8 +268,7 @@ pub fn expand_blake2s_32(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 32u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -350,8 +343,7 @@ pub fn extract_blake2s_32(
     saltlen: u32,
     ikm: &mut [u8],
     ikmlen: u32
-) ->
-    ()
+)
 { crate::hacl::hmac::compute_blake2s_32(prk, salt, saltlen, ikm, ikmlen) }
 
 pub fn expand_blake2b_32(
@@ -361,8 +353,7 @@ pub fn expand_blake2b_32(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 64u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -437,6 +428,5 @@ pub fn extract_blake2b_32(
     saltlen: u32,
     ikm: &mut [u8],
     ikmlen: u32
-) ->
-    ()
+)
 { crate::hacl::hmac::compute_blake2b_32(prk, salt, saltlen, ikm, ikmlen) }

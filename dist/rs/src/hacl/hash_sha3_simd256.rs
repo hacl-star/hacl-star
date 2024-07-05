@@ -10,8 +10,7 @@ pub fn absorb_inner_256(
     rateInBytes: u32,
     b: crate::hacl::sha2_types::uint8_4p,
     s: &mut [crate::lib::intvector_intrinsics::vec256]
-) ->
-    ()
+)
 {
     crate::lowstar::ignore::ignore::<u32>(rateInBytes);
     let mut ws: [crate::lib::intvector_intrinsics::vec256; 32] =
@@ -482,8 +481,7 @@ pub fn shake128(
     input2: &mut [u8],
     input3: &mut [u8],
     inputByteLen: u32
-) ->
-    ()
+)
 {
     let ib: crate::hacl::sha2_types::uint8_4p =
         crate::hacl::sha2_types::uint8_4p
@@ -1603,8 +1601,7 @@ pub fn shake256(
     input2: &mut [u8],
     input3: &mut [u8],
     inputByteLen: u32
-) ->
-    ()
+)
 {
     let ib: crate::hacl::sha2_types::uint8_4p =
         crate::hacl::sha2_types::uint8_4p
@@ -2723,8 +2720,7 @@ pub fn sha3_224(
     input2: &mut [u8],
     input3: &mut [u8],
     inputByteLen: u32
-) ->
-    ()
+)
 {
     let ib: crate::hacl::sha2_types::uint8_4p =
         crate::hacl::sha2_types::uint8_4p
@@ -3843,8 +3839,7 @@ pub fn sha3_256(
     input2: &mut [u8],
     input3: &mut [u8],
     inputByteLen: u32
-) ->
-    ()
+)
 {
     let ib: crate::hacl::sha2_types::uint8_4p =
         crate::hacl::sha2_types::uint8_4p
@@ -4963,8 +4958,7 @@ pub fn sha3_384(
     input2: &mut [u8],
     input3: &mut [u8],
     inputByteLen: u32
-) ->
-    ()
+)
 {
     let ib: crate::hacl::sha2_types::uint8_4p =
         crate::hacl::sha2_types::uint8_4p
@@ -6083,8 +6077,7 @@ pub fn sha3_512(
     input2: &mut [u8],
     input3: &mut [u8],
     inputByteLen: u32
-) ->
-    ()
+)
 {
     let ib: crate::hacl::sha2_types::uint8_4p =
         crate::hacl::sha2_types::uint8_4p
@@ -7200,7 +7193,7 @@ pub fn state_malloc() -> Vec<crate::lib::intvector_intrinsics::vec256>
     buf
 }
 
-pub fn state_free(s: &mut [crate::lib::intvector_intrinsics::vec256]) -> () { () }
+pub fn state_free(s: &mut [crate::lib::intvector_intrinsics::vec256]) { () }
 
 pub fn shake128_absorb_nblocks(
     state: &mut [crate::lib::intvector_intrinsics::vec256],
@@ -7209,8 +7202,7 @@ pub fn shake128_absorb_nblocks(
     input2: &mut [u8],
     input3: &mut [u8],
     inputByteLen: u32
-) ->
-    ()
+)
 {
     for i in 0u32..inputByteLen.wrapping_div(168u32)
     {
@@ -7260,8 +7252,7 @@ pub fn shake128_absorb_final(
     input2: &mut [u8],
     input3: &mut [u8],
     inputByteLen: u32
-) ->
-    ()
+)
 {
     let mut b0: [u8; 256] = [0u8; 256usize];
     let mut b1: [u8; 256] = [0u8; 256usize];
@@ -7607,8 +7598,7 @@ pub fn shake128_squeeze_nblocks(
     output2: &mut [u8],
     output3: &mut [u8],
     outputByteLen: u32
-) ->
-    ()
+)
 {
     for i in 0u32..outputByteLen.wrapping_div(168u32)
     {

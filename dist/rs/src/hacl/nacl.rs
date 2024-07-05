@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-fn secretbox_init(xkeys: &mut [u8], k: &mut [u8], n: &mut [u8]) -> ()
+fn secretbox_init(xkeys: &mut [u8], k: &mut [u8], n: &mut [u8])
 {
     let subkey: (&mut [u8], &mut [u8]) = xkeys.split_at_mut(0usize);
     let aekey: (&mut [u8], &mut [u8]) = subkey.1.split_at_mut(32usize);
@@ -23,8 +23,7 @@ fn secretbox_detached(
     k: &mut [u8],
     n: &mut [u8],
     m: &mut [u8]
-) ->
-    ()
+)
 {
     let mut xkeys: [u8; 96] = [0u8; 96usize];
     secretbox_init(&mut xkeys, k, n);
@@ -120,7 +119,7 @@ fn secretbox_open_detached(
     { 0xffffffffu32 }
 }
 
-fn secretbox_easy(mlen: u32, c: &mut [u8], k: &mut [u8], n: &mut [u8], m: &mut [u8]) -> ()
+fn secretbox_easy(mlen: u32, c: &mut [u8], k: &mut [u8], n: &mut [u8], m: &mut [u8])
 {
     let tag: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
     let cip: (&mut [u8], &mut [u8]) = tag.1.split_at_mut(16usize);

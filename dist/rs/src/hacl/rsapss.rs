@@ -31,8 +31,7 @@
     mHash: &mut [u8],
     msgLen: u32,
     msg: &mut [u8]
-) ->
-    ()
+)
 {
     match a
     {
@@ -52,8 +51,7 @@
     mgfseed: &mut [u8],
     maskLen: u32,
     res: &mut [u8]
-) ->
-    ()
+)
 {
     let mut mgfseed_counter: Vec<u8> = vec![0u8; len.wrapping_add(4u32) as usize];
     ((&mut mgfseed_counter)[0usize..len as usize]).copy_from_slice(&mgfseed[0usize..len as usize]);
@@ -148,8 +146,7 @@
     msg: &mut [u8],
     emBits: u32,
     em: &mut [u8]
-) ->
-    ()
+)
 {
     let hLen: u32 = hash_len(a);
     let mut m1Hash: Vec<u8> = vec![0u8; hLen as usize];
@@ -708,6 +705,5 @@ pub fn mgf_hash0(
     mgfseed: &mut [u8],
     maskLen: u32,
     res: &mut [u8]
-) ->
-    ()
+)
 { mgf_hash(a, len, mgfseed, maskLen, res) }

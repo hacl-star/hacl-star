@@ -15,8 +15,7 @@ pub fn aead_encrypt(
     m: &mut [u8],
     cipher: &mut [u8],
     tag: &mut [u8]
-) ->
-    ()
+)
 {
     let vec256: bool = crate::evercrypt::autoconfig2::has_vec256();
     let vec128: bool = crate::evercrypt::autoconfig2::has_vec128();

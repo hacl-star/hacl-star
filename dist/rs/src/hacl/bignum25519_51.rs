@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     let f10: u64 = f1[0usize];
     let f20: u64 = f2[0usize];
@@ -25,7 +25,7 @@
     out[4usize] = f14.wrapping_add(f24)
 }
 
-#[inline] pub fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] pub fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     let f10: u64 = f1[0usize];
     let f20: u64 = f2[0usize];
@@ -49,8 +49,7 @@
     f1: &mut [u64],
     f2: &mut [u64],
     uu___: &mut [crate::fstar::uint128::uint128]
-) ->
-    ()
+)
 {
     crate::lowstar::ignore::ignore::<&mut [crate::fstar::uint128::uint128]>(uu___);
     let f10: u64 = f1[0usize];
@@ -162,8 +161,7 @@
     f1: &mut [u64],
     f2: &mut [u64],
     uu___: &mut [crate::fstar::uint128::uint128]
-) ->
-    ()
+)
 {
     crate::lowstar::ignore::ignore::<&mut [crate::fstar::uint128::uint128]>(uu___);
     let f10: u64 = f1[0usize];
@@ -382,7 +380,7 @@
     out[9usize] = o242
 }
 
-#[inline] pub fn fmul1(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
+#[inline] pub fn fmul1(out: &mut [u64], f1: &mut [u64], f2: u64)
 {
     let f10: u64 = f1[0usize];
     let f11: u64 = f1[1usize];
@@ -438,8 +436,7 @@
     out: &mut [u64],
     f: &mut [u64],
     uu___: &mut [crate::fstar::uint128::uint128]
-) ->
-    ()
+)
 {
     crate::lowstar::ignore::ignore::<&mut [crate::fstar::uint128::uint128]>(uu___);
     let f0: u64 = f[0usize];
@@ -542,8 +539,7 @@
     out: &mut [u64],
     f: &mut [u64],
     uu___: &mut [crate::fstar::uint128::uint128]
-) ->
-    ()
+)
 {
     crate::lowstar::ignore::ignore::<&mut [crate::fstar::uint128::uint128]>(uu___);
     let f10: u64 = f[0usize];
@@ -746,7 +742,7 @@
     out[9usize] = o240
 }
 
-pub fn store_felem(u64s: &mut [u64], f: &mut [u64]) -> ()
+pub fn store_felem(u64s: &mut [u64], f: &mut [u64])
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -806,7 +802,7 @@ pub fn store_felem(u64s: &mut [u64], f: &mut [u64]) -> ()
     u64s[3usize] = o30
 }
 
-#[inline] pub fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64]) -> ()
+#[inline] pub fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64])
 {
     let mask: u64 = 0u64.wrapping_sub(bit);
     krml::unroll_for!(

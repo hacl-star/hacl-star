@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub fn poly1305_init(ctx: &mut [u64], key: &mut [u8]) -> ()
+pub fn poly1305_init(ctx: &mut [u64], key: &mut [u8])
 {
     let acc: (&mut [u64], &mut [u64]) = ctx.split_at_mut(0usize);
     let pre: (&mut [u64], &mut [u64]) = acc.1.split_at_mut(5usize);
@@ -67,7 +67,7 @@ pub fn poly1305_init(ctx: &mut [u64], key: &mut [u8]) -> ()
     rn_5.1[4usize] = rn.0[4usize]
 }
 
-fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
+fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8])
 {
     let pre: (&mut [u64], &mut [u64]) = ctx.split_at_mut(5usize);
     let acc: (&mut [u64], &mut [u64]) = pre.0.split_at_mut(0usize);
@@ -317,7 +317,7 @@ fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
     }
 }
 
-pub fn poly1305_finish(tag: &mut [u8], key: &mut [u8], ctx: &mut [u64]) -> ()
+pub fn poly1305_finish(tag: &mut [u8], key: &mut [u8], ctx: &mut [u64])
 {
     let acc: (&mut [u64], &mut [u64]) = ctx.split_at_mut(0usize);
     let ks: (&mut [u8], &mut [u8]) = key.split_at_mut(16usize);
@@ -449,7 +449,7 @@ pub fn malloc(key: &mut [u8]) -> Vec<state_t>
     p
 }
 
-pub fn reset(state: &mut [state_t], key: &mut [u8]) -> ()
+pub fn reset(state: &mut [state_t], key: &mut [u8])
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     let k·: &mut [u8] = &mut (state[0usize]).p_key;
@@ -576,7 +576,7 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     }
 }
 
-pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
+pub fn digest(state: &mut [state_t], output: &mut [u8])
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     let buf_: &mut [u8] = &mut (state[0usize]).buf;
@@ -602,7 +602,7 @@ pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
     poly1305_finish(output, k·, &mut tmp)
 }
 
-pub fn mac(output: &mut [u8], input: &mut [u8], input_len: u32, key: &mut [u8]) -> ()
+pub fn mac(output: &mut [u8], input: &mut [u8], input_len: u32, key: &mut [u8])
 {
     let mut ctx: [u64; 25] = [0u64; 25usize];
     poly1305_init(&mut ctx, key);

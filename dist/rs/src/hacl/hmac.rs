@@ -14,8 +14,7 @@ pub fn compute_sha1(
     key_len: u32,
     data: &mut [u8],
     data_len: u32
-) ->
-    ()
+)
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -111,8 +110,7 @@ pub fn compute_sha2_256(
     key_len: u32,
     data: &mut [u8],
     data_len: u32
-) ->
-    ()
+)
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -226,8 +224,7 @@ pub fn compute_sha2_384(
     key_len: u32,
     data: &mut [u8],
     data_len: u32
-) ->
-    ()
+)
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -356,8 +353,7 @@ pub fn compute_sha2_512(
     key_len: u32,
     data: &mut [u8],
     data_len: u32
-) ->
-    ()
+)
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -486,8 +482,7 @@ pub fn compute_blake2s_32(
     key_len: u32,
     data: &mut [u8],
     data_len: u32
-) ->
-    ()
+)
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -613,8 +608,7 @@ pub fn compute_blake2b_32(
     key_len: u32,
     data: &mut [u8],
     data_len: u32
-) ->
-    ()
+)
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];

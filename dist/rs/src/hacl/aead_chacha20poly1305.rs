@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] fn poly1305_padded_32(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
+#[inline] fn poly1305_padded_32(ctx: &mut [u64], len: u32, text: &mut [u8])
 {
     let n: u32 = len.wrapping_div(16u32);
     let r: u32 = len.wrapping_rem(16u32);
@@ -390,8 +390,7 @@
     mlen: u32,
     m: &mut [u8],
     out: &mut [u8]
-) ->
-    ()
+)
 {
     let mut ctx: [u64; 25] = [0u64; 25usize];
     let mut block: [u8; 16] = [0u8; 16usize];
@@ -530,8 +529,7 @@ pub fn encrypt(
     data_len: u32,
     key: &mut [u8],
     nonce: &mut [u8]
-) ->
-    ()
+)
 {
     crate::hacl::chacha20::chacha20_encrypt(input_len, output, input, key, nonce, 1u32);
     let mut tmp: [u8; 64] = [0u8; 64usize];

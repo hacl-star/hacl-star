@@ -109,8 +109,7 @@ pub fn instantiate(
     nonce: &mut [u8],
     personalization_string_len: u32,
     personalization_string: &mut [u8]
-) ->
-    ()
+)
 {
     match a
     {
@@ -497,8 +496,7 @@ pub fn reseed(
     entropy_input: &mut [u8],
     additional_input_input_len: u32,
     additional_input_input: &mut [u8]
-) ->
-    ()
+)
 {
     match a
     {

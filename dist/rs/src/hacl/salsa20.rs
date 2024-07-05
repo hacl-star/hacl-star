@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] fn quarter_round(st: &mut [u32], a: u32, b: u32, c: u32, d: u32) -> ()
+#[inline] fn quarter_round(st: &mut [u32], a: u32, b: u32, c: u32, d: u32)
 {
     let sta: u32 = st[b as usize];
     let stb: u32 = st[a as usize];
@@ -40,7 +40,7 @@
     st[a as usize] = sta12
 }
 
-#[inline] fn double_round(st: &mut [u32]) -> ()
+#[inline] fn double_round(st: &mut [u32])
 {
     quarter_round(st, 0u32, 4u32, 8u32, 12u32);
     quarter_round(st, 5u32, 9u32, 13u32, 1u32);
@@ -52,7 +52,7 @@
     quarter_round(st, 15u32, 12u32, 13u32, 14u32)
 }
 
-#[inline] fn rounds(st: &mut [u32]) -> ()
+#[inline] fn rounds(st: &mut [u32])
 {
     double_round(st);
     double_round(st);
@@ -66,7 +66,7 @@
     double_round(st)
 }
 
-#[inline] fn salsa20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
+#[inline] fn salsa20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32)
 {
     (k[0usize..16usize]).copy_from_slice(&ctx[0usize..16usize]);
     let ctr_u32: u32 = ctr;
@@ -86,7 +86,7 @@
     k[8usize] = (k[8usize]).wrapping_add(ctr_u32)
 }
 
-#[inline] fn salsa20_key_block0(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
+#[inline] fn salsa20_key_block0(out: &mut [u8], key: &mut [u8], n: &mut [u8])
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k: [u32; 16] = [0u32; 16usize];
@@ -151,8 +151,7 @@
     key: &mut [u8],
     n: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k32: [u32; 8] = [0u32; 8usize];
@@ -304,8 +303,7 @@
     key: &mut [u8],
     n: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k32: [u32; 8] = [0u32; 8usize];
@@ -450,7 +448,7 @@
     }
 }
 
-#[inline] fn hsalsa20(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
+#[inline] fn hsalsa20(out: &mut [u8], key: &mut [u8], n: &mut [u8])
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k32: [u32; 8] = [0u32; 8usize];
@@ -521,8 +519,7 @@ pub fn salsa20_encrypt0(
     key: &mut [u8],
     n: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 { salsa20_encrypt(len, out, text, key, n, ctr) }
 
 pub fn salsa20_decrypt0(
@@ -532,11 +529,10 @@ pub fn salsa20_decrypt0(
     key: &mut [u8],
     n: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 { salsa20_decrypt(len, out, cipher, key, n, ctr) }
 
-pub fn salsa20_key_block00(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
+pub fn salsa20_key_block00(out: &mut [u8], key: &mut [u8], n: &mut [u8])
 { salsa20_key_block0(out, key, n) }
 
-pub fn hsalsa200(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> () { hsalsa20(out, key, n) }
+pub fn hsalsa200(out: &mut [u8], key: &mut [u8], n: &mut [u8]) { hsalsa20(out, key, n) }

@@ -13,8 +13,7 @@ fn expand_sha1(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 20u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -83,8 +82,7 @@ fn expand_sha1(
     }
 }
 
-fn extract_sha1(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32) ->
-    ()
+fn extract_sha1(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::evercrypt::hmac::compute_sha1(prk, salt, saltlen, ikm, ikmlen) }
 
 fn expand_sha2_256(
@@ -94,8 +92,7 @@ fn expand_sha2_256(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 32u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -164,8 +161,7 @@ fn expand_sha2_256(
     }
 }
 
-fn extract_sha2_256(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32) ->
-    ()
+fn extract_sha2_256(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::evercrypt::hmac::compute_sha2_256(prk, salt, saltlen, ikm, ikmlen) }
 
 fn expand_sha2_384(
@@ -175,8 +171,7 @@ fn expand_sha2_384(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 48u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -245,8 +240,7 @@ fn expand_sha2_384(
     }
 }
 
-fn extract_sha2_384(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32) ->
-    ()
+fn extract_sha2_384(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::evercrypt::hmac::compute_sha2_384(prk, salt, saltlen, ikm, ikmlen) }
 
 fn expand_sha2_512(
@@ -256,8 +250,7 @@ fn expand_sha2_512(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 64u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -326,8 +319,7 @@ fn expand_sha2_512(
     }
 }
 
-fn extract_sha2_512(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32) ->
-    ()
+fn extract_sha2_512(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::evercrypt::hmac::compute_sha2_512(prk, salt, saltlen, ikm, ikmlen) }
 
 fn expand_blake2s(
@@ -337,8 +329,7 @@ fn expand_blake2s(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 32u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -407,8 +398,7 @@ fn expand_blake2s(
     }
 }
 
-fn extract_blake2s(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32) ->
-    ()
+fn extract_blake2s(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::evercrypt::hmac::compute_blake2s(prk, salt, saltlen, ikm, ikmlen) }
 
 fn expand_blake2b(
@@ -418,8 +408,7 @@ fn expand_blake2b(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 64u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -488,8 +477,7 @@ fn expand_blake2b(
     }
 }
 
-fn extract_blake2b(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32) ->
-    ()
+fn extract_blake2b(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::evercrypt::hmac::compute_blake2b(prk, salt, saltlen, ikm, ikmlen) }
 
 pub fn expand(
@@ -500,8 +488,7 @@ pub fn expand(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     match a
     {
@@ -528,8 +515,7 @@ pub fn extract(
     saltlen: u32,
     ikm: &mut [u8],
     ikmlen: u32
-) ->
-    ()
+)
 {
     match a
     {

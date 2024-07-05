@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] fn add_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
+#[inline] fn add_scalar(out: &mut [u64], f1: &mut [u64], f2: u64)
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fadd_inline::add_scalar(out, f1, f2) }
@@ -18,7 +18,7 @@
     }
 }
 
-#[inline] fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fadd_inline::fadd(out, f1, f2) }
@@ -26,7 +26,7 @@
     { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fadd::fadd_e(out, f1, f2)) }
 }
 
-#[inline] fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fadd_inline::fsub(out, f1, f2) }
@@ -34,7 +34,7 @@
     { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsub::fsub_e(out, f1, f2)) }
 }
 
-#[inline] fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64]) -> ()
+#[inline] fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64])
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fmul_inline::fmul(out, f1, f2, &mut tmp[0usize..]) }
@@ -46,7 +46,7 @@
     }
 }
 
-#[inline] fn fmul2(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64]) -> ()
+#[inline] fn fmul2(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64])
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fmul_inline::fmul2(out, f1, f2, tmp) }
@@ -58,7 +58,7 @@
     }
 }
 
-#[inline] fn fmul_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
+#[inline] fn fmul_scalar(out: &mut [u64], f1: &mut [u64], f2: u64)
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fmul_inline::fmul_scalar(out, f1, f2) }
@@ -70,7 +70,7 @@
     }
 }
 
-#[inline] fn fsqr(out: &mut [u64], f1: &mut [u64], tmp: &mut [u64]) -> ()
+#[inline] fn fsqr(out: &mut [u64], f1: &mut [u64], tmp: &mut [u64])
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fsqr_inline::fsqr(out, f1, tmp) }
@@ -78,7 +78,7 @@
     { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsqr::fsqr_e(tmp, f1, out)) }
 }
 
-#[inline] fn fsqr2(out: &mut [u64], f: &mut [u64], tmp: &mut [u64]) -> ()
+#[inline] fn fsqr2(out: &mut [u64], f: &mut [u64], tmp: &mut [u64])
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fsqr_inline::fsqr2(out, f, tmp) }
@@ -86,7 +86,7 @@
     { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsqr::fsqr2_e(tmp, f, out)) }
 }
 
-#[inline] fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64]) -> ()
+#[inline] fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64])
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fswap_inline::cswap2(bit, p1, p2) }
@@ -102,7 +102,7 @@ const g25519: [u8; 32] =
     [9u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
         0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8];
 
-fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64]) -> ()
+fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64])
 {
     let nq: (&mut [u64], &mut [u64]) = p01_tmp1.split_at_mut(0usize);
     let nq_p1: (&mut [u64], &mut [u64]) = nq.1.split_at_mut(8usize);
@@ -160,7 +160,7 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64]) -
     fmul(z310.1, &mut f1_copy2, x1.1, tmp2)
 }
 
-fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64]) -> ()
+fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64])
 {
     let x2: (&mut [u64], &mut [u64]) = nq.split_at_mut(0usize);
     let z2: (&mut [u64], &mut [u64]) = x2.1.split_at_mut(4usize);
@@ -191,7 +191,7 @@ fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64]) -> ()
     fmul2(nq, dc1.1, ab1.1, tmp2)
 }
 
-fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64]) -> ()
+fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64])
 {
     let mut tmp2: [u64; 16] = [0u64; 16usize];
     let mut p01_tmp1_swap: [u64; 33] = [0u64; 33usize];
@@ -251,7 +251,7 @@ fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64]) -> ()
     (out[0usize..8usize]).copy_from_slice(&p010.1[0usize..8usize])
 }
 
-fn fsquare_times(o: &mut [u64], inp: &mut [u64], tmp: &mut [u64], n: u32) -> ()
+fn fsquare_times(o: &mut [u64], inp: &mut [u64], tmp: &mut [u64], n: u32)
 {
     fsqr(o, inp, tmp);
     for _i in 0u32..n.wrapping_sub(1u32)
@@ -262,7 +262,7 @@ fn fsquare_times(o: &mut [u64], inp: &mut [u64], tmp: &mut [u64], n: u32) -> ()
     }
 }
 
-fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64]) -> ()
+fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64])
 {
     let mut t1: [u64; 16] = [0u64; 16usize];
     let a1: (&mut [u64], &mut [u64]) = (&mut t1).split_at_mut(0usize);
@@ -330,7 +330,7 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64]) -> ()
     fmul(o, t0.1, a.1, tmp)
 }
 
-fn store_felem(b: &mut [u64], f: &mut [u64]) -> ()
+fn store_felem(b: &mut [u64], f: &mut [u64])
 {
     let f3: u64 = f[3usize];
     let top_bit: u64 = f3.wrapping_shr(63u32);
@@ -363,7 +363,7 @@ fn store_felem(b: &mut [u64], f: &mut [u64]) -> ()
     b[3usize] = o3
 }
 
-fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
+fn encode_point(o: &mut [u8], i: &mut [u64])
 {
     let x: (&mut [u64], &mut [u64]) = i.split_at_mut(0usize);
     let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(4usize);
@@ -387,7 +387,7 @@ fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
     )
 }
 
-pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
+pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8])
 {
     let mut init: [u64; 8] = [0u64; 8usize];
     let mut init_copy: [u64; 8] = [0u64; 8usize];
@@ -423,7 +423,7 @@ pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
     encode_point(out, &mut init)
 }
 
-pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8]) -> ()
+pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8])
 {
     let mut basepoint: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(

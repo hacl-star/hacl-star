@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub fn load_acc2(acc: &mut [crate::lib::intvector_intrinsics::vec128], b: &mut [u8]) -> ()
+pub fn load_acc2(acc: &mut [crate::lib::intvector_intrinsics::vec128], b: &mut [u8])
 {
     let mut e: [crate::lib::intvector_intrinsics::vec128; 5] =
         [crate::lib::intvector_intrinsics::vec128_zero; 5usize];
@@ -106,8 +106,7 @@ pub fn load_acc2(acc: &mut [crate::lib::intvector_intrinsics::vec128], b: &mut [
 pub fn fmul_r2_normalize(
     out: &mut [crate::lib::intvector_intrinsics::vec128],
     p: &mut [crate::lib::intvector_intrinsics::vec128]
-) ->
-    ()
+)
 {
     let
     r:
@@ -411,8 +410,7 @@ pub fn fmul_r2_normalize(
     out[4usize] = o40
 }
 
-pub fn poly1305_init(ctx: &mut [crate::lib::intvector_intrinsics::vec128], key: &mut [u8]) ->
-    ()
+pub fn poly1305_init(ctx: &mut [crate::lib::intvector_intrinsics::vec128], key: &mut [u8])
 {
     let
     acc:
@@ -719,8 +717,7 @@ fn poly1305_update(
     ctx: &mut [crate::lib::intvector_intrinsics::vec128],
     len: u32,
     text: &mut [u8]
-) ->
-    ()
+)
 {
     let
     pre:
@@ -1584,8 +1581,7 @@ pub fn poly1305_finish(
     tag: &mut [u8],
     key: &mut [u8],
     ctx: &mut [crate::lib::intvector_intrinsics::vec128]
-) ->
-    ()
+)
 {
     let
     acc:
@@ -1830,7 +1826,7 @@ pub fn malloc(key: &mut [u8]) -> Vec<state_t>
     p
 }
 
-pub fn reset(state: &mut [state_t], key: &mut [u8]) -> ()
+pub fn reset(state: &mut [state_t], key: &mut [u8])
 {
     let block_state: &mut [crate::lib::intvector_intrinsics::vec128] =
         &mut (state[0usize]).block_state;
@@ -1959,7 +1955,7 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     }
 }
 
-pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
+pub fn digest(state: &mut [state_t], output: &mut [u8])
 {
     let block_state: &mut [crate::lib::intvector_intrinsics::vec128] =
         &mut (state[0usize]).block_state;
@@ -1992,7 +1988,7 @@ pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
     poly1305_finish(output, k·, &mut tmp)
 }
 
-pub fn mac(output: &mut [u8], input: &mut [u8], input_len: u32, key: &mut [u8]) -> ()
+pub fn mac(output: &mut [u8], input: &mut [u8], input_len: u32, key: &mut [u8])
 {
     let mut ctx: [crate::lib::intvector_intrinsics::vec128; 25] =
         [crate::lib::intvector_intrinsics::vec128_zero; 25usize];

@@ -13,8 +13,7 @@ pub fn expand_blake2s_128(
     info: &mut [u8],
     infolen: u32,
     len: u32
-) ->
-    ()
+)
 {
     let tlen: u32 = 32u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -89,6 +88,5 @@ pub fn extract_blake2s_128(
     saltlen: u32,
     ikm: &mut [u8],
     ikmlen: u32
-) ->
-    ()
+)
 { crate::hacl::hmac_blake2s_128::compute_blake2s_128(prk, salt, saltlen, ikm, ikmlen) }

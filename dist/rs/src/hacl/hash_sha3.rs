@@ -22,7 +22,7 @@ pub const keccak_rndc: [u64; 24] =
         0x8000000000008002u64, 0x8000000000000080u64, 0x000000000000800au64, 0x800000008000000au64,
         0x8000000080008081u64, 0x8000000000008080u64, 0x0000000080000001u64, 0x8000000080008008u64];
 
-fn absorb_inner_32(b: &mut [u8], s: &mut [u64]) -> ()
+fn absorb_inner_32(b: &mut [u8], s: &mut [u64])
 {
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &mut [u8] = b;
@@ -230,8 +230,7 @@ pub fn update_multi_sha3(
     s: &mut [u64],
     blocks: &mut [u8],
     n_blocks: u32
-) ->
-    ()
+)
 {
     let l: u32 = (block_len(a)).wrapping_mul(n_blocks);
     for i in 0u32..l.wrapping_div(block_len(a))
@@ -255,8 +254,7 @@ pub fn update_last_sha3(
     s: &mut [u64],
     input: &mut [u8],
     input_len: u32
-) ->
-    ()
+)
 {
     let suffix: u8 =
         if
@@ -735,7 +733,7 @@ pub fn copy(state: &mut [state_t]) -> Vec<state_t>
     p
 }
 
-pub fn reset(state: &mut [state_t]) -> ()
+pub fn reset(state: &mut [state_t])
 {
     let mut block_state: &mut hash_buf = &mut (state[0usize]).block_state;
     let s: &mut [u64] = &mut (*block_state).snd;
@@ -873,8 +871,7 @@ fn digest_(
     state: &mut [state_t],
     output: &mut [u8],
     l: u32
-) ->
-    ()
+)
 {
     let mut block_state: &mut hash_buf = &mut (state[0usize]).block_state;
     let buf_: &mut [u8] = &mut (state[0usize]).buf;
@@ -1273,7 +1270,7 @@ pub fn is_shake(s: &mut [state_t]) -> bool
     uu____0 == crate::hacl::streaming_types::hash_alg::Shake256
 }
 
-pub fn absorb_inner_320(rateInBytes: u32, b: &mut [u8], s: &mut [u64]) -> ()
+pub fn absorb_inner_320(rateInBytes: u32, b: &mut [u8], s: &mut [u64])
 {
     crate::lowstar::ignore::ignore::<u32>(rateInBytes);
     let mut ws: [u64; 32] = [0u64; 32usize];
@@ -1451,8 +1448,7 @@ pub fn absorb_inner_320(rateInBytes: u32, b: &mut [u8], s: &mut [u64]) -> ()
     )
 }
 
-pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &mut [u8], inputByteLen: u32) ->
-    ()
+pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &mut [u8], inputByteLen: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;
@@ -1707,8 +1703,7 @@ pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &mut [u8], inputBy
     remOut as usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..remOut as usize])
 }
 
-pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &mut [u8], inputByteLen: u32) ->
-    ()
+pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &mut [u8], inputByteLen: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;
@@ -1963,7 +1958,7 @@ pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &mut [u8], inputBy
     remOut as usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..remOut as usize])
 }
 
-pub fn sha3_224(output: &mut [u8], input: &mut [u8], inputByteLen: u32) -> ()
+pub fn sha3_224(output: &mut [u8], input: &mut [u8], inputByteLen: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;
@@ -2218,7 +2213,7 @@ pub fn sha3_224(output: &mut [u8], input: &mut [u8], inputByteLen: u32) -> ()
     )
 }
 
-pub fn sha3_256(output: &mut [u8], input: &mut [u8], inputByteLen: u32) -> ()
+pub fn sha3_256(output: &mut [u8], input: &mut [u8], inputByteLen: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;
@@ -2473,7 +2468,7 @@ pub fn sha3_256(output: &mut [u8], input: &mut [u8], inputByteLen: u32) -> ()
     )
 }
 
-pub fn sha3_384(output: &mut [u8], input: &mut [u8], inputByteLen: u32) -> ()
+pub fn sha3_384(output: &mut [u8], input: &mut [u8], inputByteLen: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;
@@ -2728,7 +2723,7 @@ pub fn sha3_384(output: &mut [u8], input: &mut [u8], inputByteLen: u32) -> ()
     )
 }
 
-pub fn sha3_512(output: &mut [u8], input: &mut [u8], inputByteLen: u32) -> ()
+pub fn sha3_512(output: &mut [u8], input: &mut [u8], inputByteLen: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;
@@ -2989,9 +2984,9 @@ pub fn state_malloc() -> Vec<u64>
     buf
 }
 
-pub fn state_free(s: &mut [u64]) -> () { () }
+pub fn state_free(s: &mut [u64]) { () }
 
-pub fn shake128_absorb_nblocks(state: &mut [u64], input: &mut [u8], inputByteLen: u32) -> ()
+pub fn shake128_absorb_nblocks(state: &mut [u64], input: &mut [u8], inputByteLen: u32)
 {
     for i in 0u32..inputByteLen.wrapping_div(168u32)
     {
@@ -3006,7 +3001,7 @@ pub fn shake128_absorb_nblocks(state: &mut [u64], input: &mut [u8], inputByteLen
     }
 }
 
-pub fn shake128_absorb_final(state: &mut [u64], input: &mut [u8], inputByteLen: u32) -> ()
+pub fn shake128_absorb_final(state: &mut [u64], input: &mut [u8], inputByteLen: u32)
 {
     let mut b: [u8; 256] = [0u8; 256usize];
     let b·: &mut [u8] = &mut b;
@@ -3098,7 +3093,7 @@ pub fn shake128_absorb_final(state: &mut [u64], input: &mut [u8], inputByteLen: 
     absorb_inner_320(168u32, b3, state)
 }
 
-pub fn shake128_squeeze_nblocks(state: &mut [u64], output: &mut [u8], outputByteLen: u32) -> ()
+pub fn shake128_squeeze_nblocks(state: &mut [u64], output: &mut [u8], outputByteLen: u32)
 {
     for i in 0u32..outputByteLen.wrapping_div(168u32)
     {

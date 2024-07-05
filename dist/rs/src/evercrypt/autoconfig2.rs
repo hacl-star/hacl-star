@@ -50,9 +50,9 @@ pub fn has_rdrand() -> bool { (&mut cpu_has_rdrand)[0usize] }
 
 pub fn has_avx512() -> bool { (&mut cpu_has_avx512)[0usize] }
 
-pub fn recall() -> () { () }
+pub fn recall() { () }
 
-pub fn init() -> ()
+pub fn init()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_vale
     {
@@ -106,27 +106,27 @@ pub fn init() -> ()
 
 pub type disabler = () ();
 
-pub fn disable_avx2() -> () { (&mut cpu_has_avx2)[0usize] = false }
+pub fn disable_avx2() { (&mut cpu_has_avx2)[0usize] = false }
 
-pub fn disable_avx() -> () { (&mut cpu_has_avx)[0usize] = false }
+pub fn disable_avx() { (&mut cpu_has_avx)[0usize] = false }
 
-pub fn disable_bmi2() -> () { (&mut cpu_has_bmi2)[0usize] = false }
+pub fn disable_bmi2() { (&mut cpu_has_bmi2)[0usize] = false }
 
-pub fn disable_adx() -> () { (&mut cpu_has_adx)[0usize] = false }
+pub fn disable_adx() { (&mut cpu_has_adx)[0usize] = false }
 
-pub fn disable_shaext() -> () { (&mut cpu_has_shaext)[0usize] = false }
+pub fn disable_shaext() { (&mut cpu_has_shaext)[0usize] = false }
 
-pub fn disable_aesni() -> () { (&mut cpu_has_aesni)[0usize] = false }
+pub fn disable_aesni() { (&mut cpu_has_aesni)[0usize] = false }
 
-pub fn disable_pclmulqdq() -> () { (&mut cpu_has_pclmulqdq)[0usize] = false }
+pub fn disable_pclmulqdq() { (&mut cpu_has_pclmulqdq)[0usize] = false }
 
-pub fn disable_sse() -> () { (&mut cpu_has_sse)[0usize] = false }
+pub fn disable_sse() { (&mut cpu_has_sse)[0usize] = false }
 
-pub fn disable_movbe() -> () { (&mut cpu_has_movbe)[0usize] = false }
+pub fn disable_movbe() { (&mut cpu_has_movbe)[0usize] = false }
 
-pub fn disable_rdrand() -> () { (&mut cpu_has_rdrand)[0usize] = false }
+pub fn disable_rdrand() { (&mut cpu_has_rdrand)[0usize] = false }
 
-pub fn disable_avx512() -> () { (&mut cpu_has_avx512)[0usize] = false }
+pub fn disable_avx512() { (&mut cpu_has_avx512)[0usize] = false }
 
 pub fn has_vec128() -> bool
 {

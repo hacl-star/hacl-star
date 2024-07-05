@@ -21,10 +21,10 @@ const _t: [u32; 64] =
         0xffeff47du32, 0x85845dd1u32, 0x6fa87e4fu32, 0xfe2ce6e0u32, 0xa3014314u32, 0x4e0811a1u32,
         0xf7537e82u32, 0xbd3af235u32, 0x2ad7d2bbu32, 0xeb86d391u32];
 
-pub fn init(s: &mut [u32]) -> ()
+pub fn init(s: &mut [u32])
 { krml::unroll_for!(4, "i", 0u32, 1u32, s[i as usize] = (&mut _h0)[i as usize]) }
 
-fn update(abcd: &mut [u32], x: &mut [u8]) -> ()
+fn update(abcd: &mut [u32], x: &mut [u8])
 {
     let aa: u32 = abcd[0usize];
     let bb: u32 = abcd[1usize];
@@ -1256,7 +1256,7 @@ fn update(abcd: &mut [u32], x: &mut [u8]) -> ()
     abcd[3usize] = d.wrapping_add(dd)
 }
 
-fn pad(len: u64, dst: &mut [u8]) -> ()
+fn pad(len: u64, dst: &mut [u8])
 {
     let dst1: (&mut [u8], &mut [u8]) = dst.split_at_mut(0usize);
     dst1.1[0usize] = 0x80u8;
@@ -1279,7 +1279,7 @@ fn pad(len: u64, dst: &mut [u8]) -> ()
     crate::lowstar::endianness::store64_le(dst3.1, len.wrapping_shl(3u32))
 }
 
-pub fn finish(s: &mut [u32], dst: &mut [u8]) -> ()
+pub fn finish(s: &mut [u32], dst: &mut [u8])
 {
     krml::unroll_for!(
         4,
@@ -1293,7 +1293,7 @@ pub fn finish(s: &mut [u32], dst: &mut [u8]) -> ()
     )
 }
 
-pub fn update_multi(s: &mut [u32], blocks: &mut [u8], n_blocks: u32) -> ()
+pub fn update_multi(s: &mut [u32], blocks: &mut [u8], n_blocks: u32)
 {
     for i in 0u32..n_blocks
     {
@@ -1303,7 +1303,7 @@ pub fn update_multi(s: &mut [u32], blocks: &mut [u8], n_blocks: u32) -> ()
     }
 }
 
-pub fn update_last(s: &mut [u32], prev_len: u64, input: &mut [u8], input_len: u32) -> ()
+pub fn update_last(s: &mut [u32], prev_len: u64, input: &mut [u8], input_len: u32)
 {
     let blocks_n: u32 = input_len.wrapping_div(64u32);
     let blocks_len: u32 = blocks_n.wrapping_mul(64u32);
@@ -1328,7 +1328,7 @@ pub fn update_last(s: &mut [u32], prev_len: u64, input: &mut [u8], input_len: u3
     update_multi(s, tmp.1, tmp_len.wrapping_div(64u32))
 }
 
-pub fn hash_oneshot(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+pub fn hash_oneshot(output: &mut [u8], input: &mut [u8], input_len: u32)
 {
     let mut s: [u32; 4] = [0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32];
     let blocks_n: u32 = input_len.wrapping_div(64u32);
@@ -1370,7 +1370,7 @@ pub fn malloc() -> Vec<crate::hacl::streaming_types::state_32>
     p
 }
 
-pub fn reset(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
+pub fn reset(state: &mut [crate::hacl::streaming_types::state_32])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     init(block_state);
@@ -1487,7 +1487,7 @@ pub fn update0(
     }
 }
 
-pub fn digest(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8]) -> ()
+pub fn digest(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     let buf_: &mut [u8] = &mut (state[0usize]).buf;
@@ -1532,5 +1532,5 @@ pub fn copy(state: &mut [crate::hacl::streaming_types::state_32]) ->
     p
 }
 
-pub fn hash(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+pub fn hash(output: &mut [u8], input: &mut [u8], input_len: u32)
 { hash_oneshot(output, input, input_len) }

@@ -6,49 +6,46 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub fn mk_felem_zero(f: &mut [u64]) -> ()
-{ (f[0usize..5usize]).copy_from_slice(&[0u64; 5usize]) }
+pub fn mk_felem_zero(f: &mut [u64]) { (f[0usize..5usize]).copy_from_slice(&[0u64; 5usize]) }
 
-pub fn mk_felem_one(f: &mut [u64]) -> ()
+pub fn mk_felem_one(f: &mut [u64])
 {
     (f[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
     f[0usize] = 1u64
 }
 
-pub fn felem_add(a: &mut [u64], b: &mut [u64], out: &mut [u64]) -> ()
+pub fn felem_add(a: &mut [u64], b: &mut [u64], out: &mut [u64])
 {
     crate::hacl::bignum_k256::fadd(out, a, b);
     crate::hacl::bignum_k256::fnormalize_weak(out, out)
 }
 
-pub fn felem_sub(a: &mut [u64], b: &mut [u64], out: &mut [u64]) -> ()
+pub fn felem_sub(a: &mut [u64], b: &mut [u64], out: &mut [u64])
 {
     crate::hacl::bignum_k256::fsub(out, a, b, 2u64);
     crate::hacl::bignum_k256::fnormalize_weak(out, out)
 }
 
-pub fn felem_mul(a: &mut [u64], b: &mut [u64], out: &mut [u64]) -> ()
+pub fn felem_mul(a: &mut [u64], b: &mut [u64], out: &mut [u64])
 { crate::hacl::bignum_k256::fmul(out, a, b) }
 
-pub fn felem_sqr(a: &mut [u64], out: &mut [u64]) -> ()
-{ crate::hacl::bignum_k256::fsqr(out, a) }
+pub fn felem_sqr(a: &mut [u64], out: &mut [u64]) { crate::hacl::bignum_k256::fsqr(out, a) }
 
-pub fn felem_inv(a: &mut [u64], out: &mut [u64]) -> ()
-{ crate::hacl::bignum_k256::finv(out, a) }
+pub fn felem_inv(a: &mut [u64], out: &mut [u64]) { crate::hacl::bignum_k256::finv(out, a) }
 
-pub fn felem_load(b: &mut [u8], out: &mut [u64]) -> ()
+pub fn felem_load(b: &mut [u8], out: &mut [u64])
 { crate::hacl::bignum_k256::load_felem(out, b) }
 
-pub fn felem_store(a: &mut [u64], out: &mut [u8]) -> ()
+pub fn felem_store(a: &mut [u64], out: &mut [u8])
 {
     let mut tmp: [u64; 5] = [0u64; 5usize];
     crate::hacl::bignum_k256::fnormalize(&mut tmp, a);
     crate::hacl::bignum_k256::store_felem(out, &mut tmp)
 }
 
-pub fn mk_point_at_inf(p: &mut [u64]) -> () { crate::hacl::k256_ecdsa::make_point_at_inf(p) }
+pub fn mk_point_at_inf(p: &mut [u64]) { crate::hacl::k256_ecdsa::make_point_at_inf(p) }
 
-pub fn mk_base_point(p: &mut [u64]) -> ()
+pub fn mk_base_point(p: &mut [u64])
 {
     let gx: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let gy: (&mut [u64], &mut [u64]) = gx.1.split_at_mut(5usize);
@@ -67,16 +64,16 @@ pub fn mk_base_point(p: &mut [u64]) -> ()
     gz.1[0usize] = 1u64
 }
 
-pub fn point_negate(p: &mut [u64], out: &mut [u64]) -> ()
+pub fn point_negate(p: &mut [u64], out: &mut [u64])
 { crate::hacl::k256_ecdsa::point_negate(out, p) }
 
-pub fn point_add(p: &mut [u64], q: &mut [u64], out: &mut [u64]) -> ()
+pub fn point_add(p: &mut [u64], q: &mut [u64], out: &mut [u64])
 { crate::hacl::k256_ecdsa::point_add(out, p, q) }
 
-pub fn point_double(p: &mut [u64], out: &mut [u64]) -> ()
+pub fn point_double(p: &mut [u64], out: &mut [u64])
 { crate::hacl::k256_ecdsa::point_double(out, p) }
 
-pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64]) -> ()
+pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64])
 {
     let mut scalar_q: [u64; 4] = [0u64; 4usize];
     krml::unroll_for!(
@@ -98,10 +95,10 @@ pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64]) -> ()
     crate::hacl::k256_ecdsa::point_mul(out, &mut scalar_q, p)
 }
 
-pub fn point_store(p: &mut [u64], out: &mut [u8]) -> ()
+pub fn point_store(p: &mut [u64], out: &mut [u8])
 { crate::hacl::k256_ecdsa::point_store(out, p) }
 
-pub fn point_load(b: &mut [u8], out: &mut [u64]) -> ()
+pub fn point_load(b: &mut [u8], out: &mut [u64])
 {
     let mut p_aff: [u64; 10] = [0u64; 10usize];
     let px: (&mut [u64], &mut [u64]) = (&mut p_aff).split_at_mut(0usize);

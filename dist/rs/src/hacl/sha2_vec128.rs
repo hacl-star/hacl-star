@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] fn sha224_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
+#[inline] fn sha224_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128])
 {
     krml::unroll_for!(
         8,
@@ -31,8 +31,7 @@
 #[inline] fn sha224_update4(
     b: crate::hacl::sha2_types::uint8_4p,
     hash: &mut [crate::lib::intvector_intrinsics::vec128]
-) ->
-    ()
+)
 {
     let mut hash_old: [crate::lib::intvector_intrinsics::vec128; 8] =
         [crate::lib::intvector_intrinsics::vec128_zero; 8usize];
@@ -374,8 +373,7 @@
     len: u32,
     b: crate::hacl::sha2_types::uint8_4p,
     st: &mut [crate::lib::intvector_intrinsics::vec128]
-) ->
-    ()
+)
 {
     let blocks: u32 = len.wrapping_div(64u32);
     for i in 0u32..blocks
@@ -405,8 +403,7 @@
     len: u32,
     b: crate::hacl::sha2_types::uint8_4p,
     hash: &mut [crate::lib::intvector_intrinsics::vec128]
-) ->
-    ()
+)
 {
     let blocks: u32 = if len.wrapping_add(8u32).wrapping_add(1u32) <= 64u32 { 1u32 } else { 2u32 };
     let fin: u32 = blocks.wrapping_mul(64u32);
@@ -485,8 +482,7 @@
 #[inline] fn sha224_finish4(
     st: &mut [crate::lib::intvector_intrinsics::vec128],
     h: crate::hacl::sha2_types::uint8_4p
-) ->
-    ()
+)
 {
     let mut hbuf: [u8; 128] = [0u8; 128usize];
     let v0: crate::lib::intvector_intrinsics::vec128 = st[0usize];
@@ -583,8 +579,7 @@ pub fn sha224_4(
     input1: &mut [u8],
     input2: &mut [u8],
     input3: &mut [u8]
-) ->
-    ()
+)
 {
     let ib: crate::hacl::sha2_types::uint8_4p =
         crate::hacl::sha2_types::uint8_4p
@@ -629,7 +624,7 @@ pub fn sha224_4(
     sha224_finish4(&mut st, rb)
 }
 
-#[inline] fn sha256_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
+#[inline] fn sha256_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128])
 {
     krml::unroll_for!(
         8,
@@ -654,8 +649,7 @@ pub fn sha224_4(
 #[inline] fn sha256_update4(
     b: crate::hacl::sha2_types::uint8_4p,
     hash: &mut [crate::lib::intvector_intrinsics::vec128]
-) ->
-    ()
+)
 {
     let mut hash_old: [crate::lib::intvector_intrinsics::vec128; 8] =
         [crate::lib::intvector_intrinsics::vec128_zero; 8usize];
@@ -997,8 +991,7 @@ pub fn sha224_4(
     len: u32,
     b: crate::hacl::sha2_types::uint8_4p,
     st: &mut [crate::lib::intvector_intrinsics::vec128]
-) ->
-    ()
+)
 {
     let blocks: u32 = len.wrapping_div(64u32);
     for i in 0u32..blocks
@@ -1028,8 +1021,7 @@ pub fn sha224_4(
     len: u32,
     b: crate::hacl::sha2_types::uint8_4p,
     hash: &mut [crate::lib::intvector_intrinsics::vec128]
-) ->
-    ()
+)
 {
     let blocks: u32 = if len.wrapping_add(8u32).wrapping_add(1u32) <= 64u32 { 1u32 } else { 2u32 };
     let fin: u32 = blocks.wrapping_mul(64u32);
@@ -1108,8 +1100,7 @@ pub fn sha224_4(
 #[inline] fn sha256_finish4(
     st: &mut [crate::lib::intvector_intrinsics::vec128],
     h: crate::hacl::sha2_types::uint8_4p
-) ->
-    ()
+)
 {
     let mut hbuf: [u8; 128] = [0u8; 128usize];
     let v0: crate::lib::intvector_intrinsics::vec128 = st[0usize];
@@ -1206,8 +1197,7 @@ pub fn sha256_4(
     input1: &mut [u8],
     input2: &mut [u8],
     input3: &mut [u8]
-) ->
-    ()
+)
 {
     let ib: crate::hacl::sha2_types::uint8_4p =
         crate::hacl::sha2_types::uint8_4p

@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-fn poly1305_vale(dst: &mut [u8], src: &mut [u8], len: u32, key: &mut [u8]) -> ()
+fn poly1305_vale(dst: &mut [u8], src: &mut [u8], len: u32, key: &mut [u8])
 {
     crate::lowstar::ignore::ignore::<&mut [u8]>(dst);
     crate::lowstar::ignore::ignore::<&mut [u8]>(src);
@@ -49,7 +49,7 @@ fn poly1305_vale(dst: &mut [u8], src: &mut [u8], len: u32, key: &mut [u8]) -> ()
     }
 }
 
-pub fn mac(output: &mut [u8], input: &mut [u8], input_len: u32, key: &mut [u8]) -> ()
+pub fn mac(output: &mut [u8], input: &mut [u8], input_len: u32, key: &mut [u8])
 {
     let vec256: bool = crate::evercrypt::autoconfig2::has_vec256();
     let vec128: bool = crate::evercrypt::autoconfig2::has_vec128();

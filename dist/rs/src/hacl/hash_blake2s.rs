@@ -13,8 +13,7 @@
     last_node: bool,
     totlen: u64,
     d: &mut [u8]
-) ->
-    ()
+)
 {
     let mut m_w: [u32; 16] = [0u32; 16usize];
     krml::unroll_for!(
@@ -629,7 +628,7 @@
     )
 }
 
-pub fn init(hash: &mut [u32], kk: u32, nn: u32) -> ()
+pub fn init(hash: &mut [u32], kk: u32, nn: u32)
 {
     let mut salt: [u8; 8] = [0u8; 8usize];
     let mut personal: [u8; 8] = [0u8; 8usize];
@@ -736,7 +735,7 @@ pub fn init(hash: &mut [u32], kk: u32, nn: u32) -> ()
     r2.0[3usize] = iv7·
 }
 
-fn init_with_params(hash: &mut [u32], p: crate::hacl::hash_blake2b::blake2_params) -> ()
+fn init_with_params(hash: &mut [u32], p: crate::hacl::hash_blake2b::blake2_params)
 {
     let mut tmp: [u32; 8] = [0u32; 8usize];
     let r0: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
@@ -827,7 +826,7 @@ fn init_with_params(hash: &mut [u32], p: crate::hacl::hash_blake2b::blake2_param
     r2.0[3usize] = iv7·
 }
 
-fn update_key(wv: &mut [u32], hash: &mut [u32], kk: u32, k: &mut [u8], ll: u32) -> ()
+fn update_key(wv: &mut [u32], hash: &mut [u32], kk: u32, k: &mut [u8], ll: u32)
 {
     let lb: u64 = 64u32 as u64;
     let mut b: [u8; 64] = [0u8; 64usize];
@@ -846,8 +845,7 @@ pub fn update_multi(
     prev: u64,
     blocks: &mut [u8],
     nb: u32
-) ->
-    ()
+)
 {
     crate::lowstar::ignore::ignore::<u32>(len);
     for i in 0u32..nb
@@ -866,8 +864,7 @@ pub fn update_last(
     prev: u64,
     rem: u32,
     d: &mut [u8]
-) ->
-    ()
+)
 {
     let mut b: [u8; 64] = [0u8; 64usize];
     let last: (&mut [u8], &mut [u8]) = d.split_at_mut(len.wrapping_sub(rem) as usize);
@@ -877,8 +874,7 @@ pub fn update_last(
     crate::lib::memzero0::memzero::<u8>(&mut b, 64u32)
 }
 
-fn update_blocks(len: u32, wv: &mut [u32], hash: &mut [u32], prev: u64, blocks: &mut [u8]) ->
-    ()
+fn update_blocks(len: u32, wv: &mut [u32], hash: &mut [u32], prev: u64, blocks: &mut [u8])
 {
     let nb: u32 = len.wrapping_div(64u32);
     let rem: u32 = len.wrapping_rem(64u32);
@@ -895,8 +891,7 @@ fn update_blocks(len: u32, wv: &mut [u32], hash: &mut [u32], prev: u64, blocks: 
     k: &mut [u8],
     ll: u32,
     d: &mut [u8]
-) ->
-    ()
+)
 {
     let lb: u64 = 64u32 as u64;
     if kk > 0u32
@@ -908,7 +903,7 @@ fn update_blocks(len: u32, wv: &mut [u32], hash: &mut [u32], prev: u64, blocks: 
     { update_blocks(ll, wv, hash, 0u32 as u64, d) }
 }
 
-pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u32]) -> ()
+pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u32])
 {
     let mut b: [u8; 32] = [0u8; 32usize];
     let first: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
@@ -1015,7 +1010,7 @@ fn index_of_state(s: &mut [state_t]) -> crate::hacl::hash_blake2b::index
     crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node: last_node }
 }
 
-fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_key) -> ()
+fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_key)
 {
     let mut block_state: &mut block_state_t = &mut (state[0usize]).block_state;
     let buf: &mut [u8] = &mut (state[0usize]).buf;
@@ -1054,14 +1049,13 @@ pub fn reset_with_key_and_params(
     s: &mut [state_t],
     p: &mut [crate::hacl::hash_blake2b::blake2_params],
     k: &mut [u8]
-) ->
-    ()
+)
 {
     crate::lowstar::ignore::ignore::<crate::hacl::hash_blake2b::index>(index_of_state(s));
     reset_raw(s, crate::hacl::hash_blake2b::params_and_key { fst: p, snd: k })
 }
 
-pub fn reset_with_key(s: &mut [state_t], k: &mut [u8]) -> ()
+pub fn reset_with_key(s: &mut [state_t], k: &mut [u8])
 {
     let idx: crate::hacl::hash_blake2b::index = index_of_state(s);
     let mut salt: [u8; 8] = [0u8; 8usize];
@@ -1084,7 +1078,7 @@ pub fn reset_with_key(s: &mut [state_t], k: &mut [u8]) -> ()
     reset_raw(s, crate::hacl::hash_blake2b::params_and_key { fst: &mut p0, snd: k })
 }
 
-pub fn reset(s: &mut [state_t]) -> () { reset_with_key(s, &mut []) }
+pub fn reset(s: &mut [state_t]) { reset_with_key(s, &mut []) }
 
 pub fn update0(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
@@ -1322,8 +1316,7 @@ pub fn hash_with_key(
     input_len: u32,
     key: &mut [u8],
     key_len: u32
-) ->
-    ()
+)
 {
     let mut b: [u32; 16] = [0u32; 16usize];
     let mut b1: [u32; 16] = [0u32; 16usize];
@@ -1340,8 +1333,7 @@ pub fn hash_with_key_and_params(
     input_len: u32,
     params: crate::hacl::hash_blake2b::blake2_params,
     key: &mut [u8]
-) ->
-    ()
+)
 {
     let mut b: [u32; 16] = [0u32; 16usize];
     let mut b1: [u32; 16] = [0u32; 16usize];

@@ -12,8 +12,7 @@ pub fn compute_blake2b_256(
     key_len: u32,
     data: &mut [u8],
     data_len: u32
-) ->
-    ()
+)
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];

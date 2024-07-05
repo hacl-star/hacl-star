@@ -14,7 +14,7 @@ pub fn add(len: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> u64
 pub fn sub(len: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> u64
 { crate::hacl::bignum_base::bn_sub_eq_len_u64(len, a, b, res) }
 
-pub fn add_mod(len: u32, n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
+pub fn add_mod(len: u32, n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64])
 {
     let mut a_copy: Vec<u64> = vec![0u64; len as usize];
     let mut b_copy: Vec<u64> = vec![0u64; len as usize];
@@ -23,16 +23,16 @@ pub fn add_mod(len: u32, n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut 
     crate::hacl::bignum::bn_add_mod_n_u64(len, n, &mut a_copy, &mut b_copy, res)
 }
 
-pub fn sub_mod(len: u32, n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
+pub fn sub_mod(len: u32, n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64])
 { crate::hacl::bignum::bn_sub_mod_n_u64(len, n, a, b, res) }
 
-pub fn mul(len: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
+pub fn mul(len: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64])
 {
     let mut tmp: Vec<u64> = vec![0u64; 4u32.wrapping_mul(len) as usize];
     crate::hacl::bignum::bn_karatsuba_mul_uint64(len, a, b, &mut tmp, res)
 }
 
-pub fn sqr(len: u32, a: &mut [u64], res: &mut [u64]) -> ()
+pub fn sqr(len: u32, a: &mut [u64], res: &mut [u64])
 {
     let mut tmp: Vec<u64> = vec![0u64; 4u32.wrapping_mul(len) as usize];
     crate::hacl::bignum::bn_karatsuba_sqr_uint64(len, a, &mut tmp, res)
@@ -45,8 +45,7 @@ pub fn sqr(len: u32, a: &mut [u64], res: &mut [u64]) -> ()
     r2: &mut [u64],
     a: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let mut a_mod: Vec<u64> = vec![0u64; len as usize];
     let mut a1: Vec<u64> = vec![0u64; len.wrapping_add(len) as usize];
@@ -294,8 +293,7 @@ pub fn mod_precomp(
     k: &mut [crate::hacl::bignum::bn_mont_ctx_u64],
     a: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = (k[0usize]).len;
     let n: &mut [u64] = &mut (k[0usize]).n;
@@ -310,8 +308,7 @@ pub fn mod_exp_vartime_precomp(
     bBits: u32,
     b: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = (k[0usize]).len;
     let n: &mut [u64] = &mut (k[0usize]).n;
@@ -326,8 +323,7 @@ pub fn mod_exp_consttime_precomp(
     bBits: u32,
     b: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = (k[0usize]).len;
     let n: &mut [u64] = &mut (k[0usize]).n;
@@ -340,8 +336,7 @@ pub fn mod_inv_prime_vartime_precomp(
     k: &mut [crate::hacl::bignum::bn_mont_ctx_u64],
     a: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = (k[0usize]).len;
     let n: &mut [u64] = &mut (k[0usize]).n;
@@ -516,7 +511,7 @@ pub fn new_bn_from_bytes_le(len: u32, b: &mut [u8]) -> Vec<u64>
     }
 }
 
-pub fn bn_to_bytes_be(len: u32, b: &mut [u64], res: &mut [u8]) -> ()
+pub fn bn_to_bytes_be(len: u32, b: &mut [u64], res: &mut [u8])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
@@ -533,7 +528,7 @@ pub fn bn_to_bytes_be(len: u32, b: &mut [u64], res: &mut [u8]) -> ()
     )
 }
 
-pub fn bn_to_bytes_le(len: u32, b: &mut [u64], res: &mut [u8]) -> ()
+pub fn bn_to_bytes_le(len: u32, b: &mut [u64], res: &mut [u8])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let tmpLen: u32 = 8u32.wrapping_mul(bnLen);

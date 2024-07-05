@@ -14,8 +14,7 @@ fn point_add_and_double(
     q: &mut [u64],
     p01_tmp1: &mut [u64],
     tmp2: &mut [crate::fstar::uint128::uint128]
-) ->
-    ()
+)
 {
     let nq: (&mut [u64], &mut [u64]) = p01_tmp1.split_at_mut(0usize);
     let nq_p1: (&mut [u64], &mut [u64]) = nq.1.split_at_mut(10usize);
@@ -74,8 +73,7 @@ fn point_add_and_double(
     crate::hacl::bignum25519_51::fmul(z310.1, &mut f1_copy2, x1.1, tmp2)
 }
 
-fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [crate::fstar::uint128::uint128]) ->
-    ()
+fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [crate::fstar::uint128::uint128])
 {
     let x2: (&mut [u64], &mut [u64]) = nq.split_at_mut(0usize);
     let z2: (&mut [u64], &mut [u64]) = x2.1.split_at_mut(5usize);
@@ -107,7 +105,7 @@ fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [crate::fstar::uint
     crate::hacl::bignum25519_51::fmul2(nq, dc1.1, ab1.1, tmp2)
 }
 
-fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64]) -> ()
+fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64])
 {
     let mut tmp2: [crate::fstar::uint128::uint128; 10] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
@@ -175,8 +173,7 @@ pub fn fsquare_times(
     inp: &mut [u64],
     tmp: &mut [crate::fstar::uint128::uint128],
     n: u32
-) ->
-    ()
+)
 {
     crate::hacl::bignum25519_51::fsqr(o, inp, tmp);
     for _i in 0u32..n.wrapping_sub(1u32)
@@ -187,7 +184,7 @@ pub fn fsquare_times(
     }
 }
 
-pub fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [crate::fstar::uint128::uint128]) -> ()
+pub fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [crate::fstar::uint128::uint128])
 {
     let mut t1: [u64; 20] = [0u64; 20usize];
     let a1: (&mut [u64], &mut [u64]) = (&mut t1).split_at_mut(0usize);
@@ -265,7 +262,7 @@ pub fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [crate::fstar::uint128::uint
     crate::hacl::bignum25519_51::fmul(o, t0.1, a.1, tmp)
 }
 
-fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
+fn encode_point(o: &mut [u8], i: &mut [u64])
 {
     let x: (&mut [u64], &mut [u64]) = i.split_at_mut(0usize);
     let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(5usize);
@@ -290,7 +287,7 @@ fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
     )
 }
 
-pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
+pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8])
 {
     let mut init: [u64; 10] = [0u64; 10usize];
     let mut init_copy: [u64; 10] = [0u64; 10usize];
@@ -336,7 +333,7 @@ pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
     encode_point(out, &mut init)
 }
 
-pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8]) -> ()
+pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8])
 {
     let mut basepoint: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(

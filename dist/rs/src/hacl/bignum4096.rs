@@ -91,7 +91,7 @@ pub fn sub(a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> u64
     (&mut c)[0usize]
 }
 
-pub fn add_mod(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
+pub fn add_mod(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64])
 {
     let mut c: [u64; 1] = [0u64; 1usize];
     krml::unroll_for!(
@@ -181,7 +181,7 @@ pub fn add_mod(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> 
     }
 }
 
-pub fn sub_mod(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
+pub fn sub_mod(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64])
 {
     let mut c: [u64; 1] = [0u64; 1usize];
     krml::unroll_for!(
@@ -287,19 +287,19 @@ pub fn sub_mod(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> 
     }
 }
 
-pub fn mul(a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
+pub fn mul(a: &mut [u64], b: &mut [u64], res: &mut [u64])
 {
     let mut tmp: [u64; 256] = [0u64; 256usize];
     crate::hacl::bignum::bn_karatsuba_mul_uint64(64u32, a, b, &mut tmp, res)
 }
 
-pub fn sqr(a: &mut [u64], res: &mut [u64]) -> ()
+pub fn sqr(a: &mut [u64], res: &mut [u64])
 {
     let mut tmp: [u64; 256] = [0u64; 256usize];
     crate::hacl::bignum::bn_karatsuba_sqr_uint64(64u32, a, &mut tmp, res)
 }
 
-#[inline] fn precompr2(nBits: u32, n: &mut [u64], res: &mut [u64]) -> ()
+#[inline] fn precompr2(nBits: u32, n: &mut [u64], res: &mut [u64])
 {
     (res[0usize..64usize]).copy_from_slice(&[0u64; 64usize]);
     let i: u32 = nBits.wrapping_div(64u32);
@@ -315,7 +315,7 @@ pub fn sqr(a: &mut [u64], res: &mut [u64]) -> ()
     }
 }
 
-#[inline] fn reduction(n: &mut [u64], nInv: u64, c: &mut [u64], res: &mut [u64]) -> ()
+#[inline] fn reduction(n: &mut [u64], nInv: u64, c: &mut [u64], res: &mut [u64])
 {
     let mut c0: [u64; 1] = [0u64; 1usize];
     for i in 0u32..64u32
@@ -430,21 +430,21 @@ pub fn sqr(a: &mut [u64], res: &mut [u64]) -> ()
     }
 }
 
-#[inline] fn to(n: &mut [u64], nInv: u64, r2: &mut [u64], a: &mut [u64], aM: &mut [u64]) -> ()
+#[inline] fn to(n: &mut [u64], nInv: u64, r2: &mut [u64], a: &mut [u64], aM: &mut [u64])
 {
     let mut c: [u64; 128] = [0u64; 128usize];
     mul(a, r2, &mut c);
     reduction(n, nInv, &mut c, aM)
 }
 
-#[inline] fn from(n: &mut [u64], nInv_u64: u64, aM: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn from(n: &mut [u64], nInv_u64: u64, aM: &mut [u64], a: &mut [u64])
 {
     let mut tmp: [u64; 128] = [0u64; 128usize];
     ((&mut tmp)[0usize..64usize]).copy_from_slice(&aM[0usize..64usize]);
     reduction(n, nInv_u64, &mut tmp, a)
 }
 
-#[inline] fn areduction(n: &mut [u64], nInv: u64, c: &mut [u64], res: &mut [u64]) -> ()
+#[inline] fn areduction(n: &mut [u64], nInv: u64, c: &mut [u64], res: &mut [u64])
 {
     let mut c0: [u64; 1] = [0u64; 1usize];
     for i in 0u32..64u32
@@ -520,15 +520,14 @@ pub fn sqr(a: &mut [u64], res: &mut [u64]) -> ()
     aM: &mut [u64],
     bM: &mut [u64],
     resM: &mut [u64]
-) ->
-    ()
+)
 {
     let mut c: [u64; 128] = [0u64; 128usize];
     mul(aM, bM, &mut c);
     areduction(n, nInv_u64, &mut c, resM)
 }
 
-#[inline] fn amont_sqr(n: &mut [u64], nInv_u64: u64, aM: &mut [u64], resM: &mut [u64]) -> ()
+#[inline] fn amont_sqr(n: &mut [u64], nInv_u64: u64, aM: &mut [u64], resM: &mut [u64])
 {
     let mut c: [u64; 128] = [0u64; 128usize];
     sqr(aM, &mut c);
@@ -541,8 +540,7 @@ pub fn sqr(a: &mut [u64], res: &mut [u64]) -> ()
     r2: &mut [u64],
     a: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let mut a_mod: [u64; 64] = [0u64; 64usize];
     let mut a1: [u64; 128] = [0u64; 128usize];
@@ -649,8 +647,7 @@ fn exp_check(n: &mut [u64], a: &mut [u64], bBits: u32, b: &mut [u64]) -> u64
     bBits: u32,
     b: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     if bBits < 200u32
     {
@@ -807,8 +804,7 @@ fn exp_check(n: &mut [u64], a: &mut [u64], bBits: u32, b: &mut [u64]) -> u64
     bBits: u32,
     b: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     if bBits < 200u32
     {
@@ -1013,8 +1009,7 @@ fn exp_check(n: &mut [u64], a: &mut [u64], bBits: u32, b: &mut [u64]) -> u64
     bBits: u32,
     b: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let mut r2: [u64; 64] = [0u64; 64usize];
     precompr2(nBits, n, &mut r2);
@@ -1029,8 +1024,7 @@ fn exp_check(n: &mut [u64], a: &mut [u64], bBits: u32, b: &mut [u64]) -> u64
     bBits: u32,
     b: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let mut r2: [u64; 64] = [0u64; 64usize];
     precompr2(nBits, n, &mut r2);
@@ -1227,8 +1221,7 @@ pub fn mod_precomp(
     k: &mut [crate::hacl::bignum::bn_mont_ctx_u64],
     a: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let n: &mut [u64] = &mut (k[0usize]).n;
     let mu: u64 = (k[0usize]).mu;
@@ -1242,8 +1235,7 @@ pub fn mod_exp_vartime_precomp(
     bBits: u32,
     b: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let n: &mut [u64] = &mut (k[0usize]).n;
     let mu: u64 = (k[0usize]).mu;
@@ -1257,8 +1249,7 @@ pub fn mod_exp_consttime_precomp(
     bBits: u32,
     b: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let n: &mut [u64] = &mut (k[0usize]).n;
     let mu: u64 = (k[0usize]).mu;
@@ -1270,8 +1261,7 @@ pub fn mod_inv_prime_vartime_precomp(
     k: &mut [crate::hacl::bignum::bn_mont_ctx_u64],
     a: &mut [u64],
     res: &mut [u64]
-) ->
-    ()
+)
 {
     let n: &mut [u64] = &mut (k[0usize]).n;
     let mu: u64 = (k[0usize]).mu;
@@ -1418,7 +1408,7 @@ pub fn new_bn_from_bytes_le(len: u32, b: &mut [u8]) -> Vec<u64>
     }
 }
 
-pub fn bn_to_bytes_be(b: &mut [u64], res: &mut [u8]) -> ()
+pub fn bn_to_bytes_be(b: &mut [u64], res: &mut [u8])
 {
     let mut tmp: [u8; 512] = [0u8; 512usize];
     crate::lowstar::ignore::ignore::<&mut [u8]>(&mut tmp);
@@ -1431,7 +1421,7 @@ pub fn bn_to_bytes_be(b: &mut [u64], res: &mut [u8]) -> ()
     }
 }
 
-pub fn bn_to_bytes_le(b: &mut [u64], res: &mut [u8]) -> ()
+pub fn bn_to_bytes_le(b: &mut [u64], res: &mut [u8])
 {
     let mut tmp: [u8; 512] = [0u8; 512usize];
     crate::lowstar::ignore::ignore::<&mut [u8]>(&mut tmp);

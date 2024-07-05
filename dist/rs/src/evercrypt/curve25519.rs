@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8]) -> ()
+pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8])
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_vale
     {
@@ -21,7 +21,7 @@ pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8]) -> ()
     { crate::hacl::curve25519_51::secret_to_public(r#pub, r#priv) }
 }
 
-pub fn scalarmult(shared: &mut [u8], my_priv: &mut [u8], their_pub: &mut [u8]) -> ()
+pub fn scalarmult(shared: &mut [u8], my_priv: &mut [u8], their_pub: &mut [u8])
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_vale
     {

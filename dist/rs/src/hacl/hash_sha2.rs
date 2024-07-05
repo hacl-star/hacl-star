@@ -57,7 +57,7 @@ pub const k384_512: [u64; 80] =
         0x28db77f523047d84u64, 0x32caab7b40c72493u64, 0x3c9ebe0a15c9bebcu64, 0x431d67c49c100d4cu64,
         0x4cc5d4becb3e42b6u64, 0x597f299cfc657e2au64, 0x5fcb6fab3ad6faecu64, 0x6c44198c4a475817u64];
 
-pub fn sha256_init(hash: &mut [u32]) -> ()
+pub fn sha256_init(hash: &mut [u32])
 {
     krml::unroll_for!(
         8,
@@ -72,7 +72,7 @@ pub fn sha256_init(hash: &mut [u32]) -> ()
     )
 }
 
-#[inline] fn sha256_update(b: &mut [u8], hash: &mut [u32]) -> ()
+#[inline] fn sha256_update(b: &mut [u8], hash: &mut [u32])
 {
     let mut hash_old: [u32; 8] = [0u32; 8usize];
     let mut ws: [u32; 16] = [0u32; 16usize];
@@ -213,7 +213,7 @@ pub fn sha256_init(hash: &mut [u32]) -> ()
     )
 }
 
-pub fn sha256_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32]) -> ()
+pub fn sha256_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32])
 {
     let blocks: u32 = len.wrapping_div(64u32);
     for i in 0u32..blocks
@@ -224,7 +224,7 @@ pub fn sha256_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32]) -> ()
     }
 }
 
-pub fn sha256_update_last(totlen: u64, len: u32, b: &mut [u8], hash: &mut [u32]) -> ()
+pub fn sha256_update_last(totlen: u64, len: u32, b: &mut [u8], hash: &mut [u32])
 {
     let blocks: u32 = if len.wrapping_add(8u32).wrapping_add(1u32) <= 64u32 { 1u32 } else { 2u32 };
     let fin: u32 = blocks.wrapping_mul(64u32);
@@ -250,7 +250,7 @@ pub fn sha256_update_last(totlen: u64, len: u32, b: &mut [u8], hash: &mut [u32])
     if blocks > 1u32 { sha256_update(last10, hash) }
 }
 
-pub fn sha256_finish(st: &mut [u32], h: &mut [u8]) -> ()
+pub fn sha256_finish(st: &mut [u32], h: &mut [u8])
 {
     let mut hbuf: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(
@@ -266,7 +266,7 @@ pub fn sha256_finish(st: &mut [u32], h: &mut [u8]) -> ()
     (h[0usize..32usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..32usize])
 }
 
-pub fn sha224_init(hash: &mut [u32]) -> ()
+pub fn sha224_init(hash: &mut [u32])
 {
     krml::unroll_for!(
         8,
@@ -281,13 +281,13 @@ pub fn sha224_init(hash: &mut [u32]) -> ()
     )
 }
 
-#[inline] fn sha224_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32]) -> ()
+#[inline] fn sha224_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32])
 { sha256_update_nblocks(len, b, st) }
 
-pub fn sha224_update_last(totlen: u64, len: u32, b: &mut [u8], st: &mut [u32]) -> ()
+pub fn sha224_update_last(totlen: u64, len: u32, b: &mut [u8], st: &mut [u32])
 { sha256_update_last(totlen, len, b, st) }
 
-pub fn sha224_finish(st: &mut [u32], h: &mut [u8]) -> ()
+pub fn sha224_finish(st: &mut [u32], h: &mut [u8])
 {
     let mut hbuf: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(
@@ -303,7 +303,7 @@ pub fn sha224_finish(st: &mut [u32], h: &mut [u8]) -> ()
     (h[0usize..28usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..28usize])
 }
 
-pub fn sha512_init(hash: &mut [u64]) -> ()
+pub fn sha512_init(hash: &mut [u64])
 {
     krml::unroll_for!(
         8,
@@ -318,7 +318,7 @@ pub fn sha512_init(hash: &mut [u64]) -> ()
     )
 }
 
-#[inline] fn sha512_update(b: &mut [u8], hash: &mut [u64]) -> ()
+#[inline] fn sha512_update(b: &mut [u8], hash: &mut [u64])
 {
     let mut hash_old: [u64; 8] = [0u64; 8usize];
     let mut ws: [u64; 16] = [0u64; 16usize];
@@ -459,7 +459,7 @@ pub fn sha512_init(hash: &mut [u64]) -> ()
     )
 }
 
-pub fn sha512_update_nblocks(len: u32, b: &mut [u8], st: &mut [u64]) -> ()
+pub fn sha512_update_nblocks(len: u32, b: &mut [u8], st: &mut [u64])
 {
     let blocks: u32 = len.wrapping_div(128u32);
     for i in 0u32..blocks
@@ -475,8 +475,7 @@ pub fn sha512_update_last(
     len: u32,
     b: &mut [u8],
     hash: &mut [u64]
-) ->
-    ()
+)
 {
     let blocks: u32 =
         if len.wrapping_add(16u32).wrapping_add(1u32) <= 128u32 { 1u32 } else { 2u32 };
@@ -504,7 +503,7 @@ pub fn sha512_update_last(
     if blocks > 1u32 { sha512_update(last10, hash) }
 }
 
-pub fn sha512_finish(st: &mut [u64], h: &mut [u8]) -> ()
+pub fn sha512_finish(st: &mut [u64], h: &mut [u8])
 {
     let mut hbuf: [u8; 64] = [0u8; 64usize];
     krml::unroll_for!(
@@ -520,7 +519,7 @@ pub fn sha512_finish(st: &mut [u64], h: &mut [u8]) -> ()
     (h[0usize..64usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..64usize])
 }
 
-pub fn sha384_init(hash: &mut [u64]) -> ()
+pub fn sha384_init(hash: &mut [u64])
 {
     krml::unroll_for!(
         8,
@@ -535,7 +534,7 @@ pub fn sha384_init(hash: &mut [u64]) -> ()
     )
 }
 
-pub fn sha384_update_nblocks(len: u32, b: &mut [u8], st: &mut [u64]) -> ()
+pub fn sha384_update_nblocks(len: u32, b: &mut [u8], st: &mut [u64])
 { sha512_update_nblocks(len, b, st) }
 
 pub fn sha384_update_last(
@@ -543,11 +542,10 @@ pub fn sha384_update_last(
     len: u32,
     b: &mut [u8],
     st: &mut [u64]
-) ->
-    ()
+)
 { sha512_update_last(totlen, len, b, st) }
 
-pub fn sha384_finish(st: &mut [u64], h: &mut [u8]) -> ()
+pub fn sha384_finish(st: &mut [u64], h: &mut [u8])
 {
     let mut hbuf: [u8; 64] = [0u8; 64usize];
     krml::unroll_for!(
@@ -610,7 +608,7 @@ pub fn copy_256(state: &mut [crate::hacl::streaming_types::state_32]) ->
     p
 }
 
-pub fn reset_256(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
+pub fn reset_256(state: &mut [crate::hacl::streaming_types::state_32])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     sha256_init(block_state);
@@ -743,8 +741,7 @@ pub fn update_256(
     crate::hacl::streaming_types::error_code
 { update_224_256(state, input, input_len) }
 
-pub fn digest_256(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8]) ->
-    ()
+pub fn digest_256(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     let buf_: &mut [u8] = &mut (state[0usize]).buf;
@@ -767,7 +764,7 @@ pub fn digest_256(state: &mut [crate::hacl::streaming_types::state_32], output: 
     sha256_finish(&mut tmp_block_state, output)
 }
 
-pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;
@@ -800,7 +797,7 @@ pub fn malloc_224() -> Vec<crate::hacl::streaming_types::state_32>
     p
 }
 
-pub fn reset_224(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
+pub fn reset_224(state: &mut [crate::hacl::streaming_types::state_32])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     sha224_init(block_state);
@@ -816,8 +813,7 @@ pub fn update_224(
     crate::hacl::streaming_types::error_code
 { update_224_256(state, input, input_len) }
 
-pub fn digest_224(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8]) ->
-    ()
+pub fn digest_224(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     let buf_: &mut [u8] = &mut (state[0usize]).buf;
@@ -840,7 +836,7 @@ pub fn digest_224(state: &mut [crate::hacl::streaming_types::state_32], output: 
     sha224_finish(&mut tmp_block_state, output)
 }
 
-pub fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+pub fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;
@@ -895,7 +891,7 @@ pub fn copy_512(state: &mut [crate::hacl::streaming_types::state_64]) ->
     p
 }
 
-pub fn reset_512(state: &mut [crate::hacl::streaming_types::state_64]) -> ()
+pub fn reset_512(state: &mut [crate::hacl::streaming_types::state_64])
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     sha512_init(block_state);
@@ -1028,8 +1024,7 @@ pub fn update_512(
     crate::hacl::streaming_types::error_code
 { update_384_512(state, input, input_len) }
 
-pub fn digest_512(state: &mut [crate::hacl::streaming_types::state_64], output: &mut [u8]) ->
-    ()
+pub fn digest_512(state: &mut [crate::hacl::streaming_types::state_64], output: &mut [u8])
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     let buf_: &mut [u8] = &mut (state[0usize]).buf;
@@ -1060,7 +1055,7 @@ pub fn digest_512(state: &mut [crate::hacl::streaming_types::state_64], output: 
     sha512_finish(&mut tmp_block_state, output)
 }
 
-pub fn hash_512(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+pub fn hash_512(output: &mut [u8], input: &mut [u8], input_len: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;
@@ -1094,7 +1089,7 @@ pub fn malloc_384() -> Vec<crate::hacl::streaming_types::state_64>
     p
 }
 
-pub fn reset_384(state: &mut [crate::hacl::streaming_types::state_64]) -> ()
+pub fn reset_384(state: &mut [crate::hacl::streaming_types::state_64])
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     sha384_init(block_state);
@@ -1110,8 +1105,7 @@ pub fn update_384(
     crate::hacl::streaming_types::error_code
 { update_384_512(state, input, input_len) }
 
-pub fn digest_384(state: &mut [crate::hacl::streaming_types::state_64], output: &mut [u8]) ->
-    ()
+pub fn digest_384(state: &mut [crate::hacl::streaming_types::state_64], output: &mut [u8])
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     let buf_: &mut [u8] = &mut (state[0usize]).buf;
@@ -1142,7 +1136,7 @@ pub fn digest_384(state: &mut [crate::hacl::streaming_types::state_64], output: 
     sha384_finish(&mut tmp_block_state, output)
 }
 
-pub fn hash_384(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+pub fn hash_384(output: &mut [u8], input: &mut [u8], input_len: u32)
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = output;

@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] fn double_round_32(st: &mut [u32]) -> ()
+#[inline] fn double_round_32(st: &mut [u32])
 {
     st[0usize] = (st[0usize]).wrapping_add(st[4usize]);
     let std: u32 = st[12usize] ^ st[0usize];
@@ -106,7 +106,7 @@
     st[4usize] = std30.wrapping_shl(7u32) | std30.wrapping_shr(25u32)
 }
 
-#[inline] fn chacha20_core_32(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
+#[inline] fn chacha20_core_32(k: &mut [u32], ctx: &mut [u32], ctr: u32)
 {
     (k[0usize..16usize]).copy_from_slice(&ctx[0usize..16usize]);
     let ctr_u32: u32 = 1u32.wrapping_mul(ctr);
@@ -136,7 +136,7 @@
     k[12usize] = (k[12usize]).wrapping_add(cv)
 }
 
-#[inline] fn chacha20_init_32(ctx: &mut [u32], k: &mut [u8], n: &mut [u8], ctr: u32) -> ()
+#[inline] fn chacha20_init_32(ctx: &mut [u32], k: &mut [u8], n: &mut [u8], ctr: u32)
 {
     let mut ctx1: [u32; 16] = [0u32; 16usize];
     krml::unroll_for!(
@@ -204,8 +204,7 @@ pub fn chacha20_encrypt_32(
     key: &mut [u8],
     n: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     chacha20_init_32(&mut ctx, key, n, ctr);
@@ -277,8 +276,7 @@ pub fn chacha20_decrypt_32(
     key: &mut [u8],
     n: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     chacha20_init_32(&mut ctx, key, n, ctr);

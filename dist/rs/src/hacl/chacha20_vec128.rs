@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] fn double_round_128(st: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
+#[inline] fn double_round_128(st: &mut [crate::lib::intvector_intrinsics::vec128])
 {
     st[0usize] = crate::lib::intvector_intrinsics::vec128_add32(st[0usize], st[4usize]);
     let std: crate::lib::intvector_intrinsics::vec128 =
@@ -142,8 +142,7 @@
     k: &mut [crate::lib::intvector_intrinsics::vec128],
     ctx: &mut [crate::lib::intvector_intrinsics::vec128],
     ctr: u32
-) ->
-    ()
+)
 {
     (k[0usize..16usize]).copy_from_slice(&ctx[0usize..16usize]);
     let ctr_u32: u32 = 4u32.wrapping_mul(ctr);
@@ -185,8 +184,7 @@
     k: &mut [u8],
     n: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 {
     let mut ctx1: [u32; 16] = [0u32; 16usize];
     krml::unroll_for!(
@@ -262,8 +260,7 @@ pub fn chacha20_encrypt_128(
     key: &mut [u8],
     n: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 {
     let mut ctx: [crate::lib::intvector_intrinsics::vec128; 16] =
         [crate::lib::intvector_intrinsics::vec128_zero; 16usize];
@@ -594,8 +591,7 @@ pub fn chacha20_decrypt_128(
     key: &mut [u8],
     n: &mut [u8],
     ctr: u32
-) ->
-    ()
+)
 {
     let mut ctx: [crate::lib::intvector_intrinsics::vec128; 16] =
         [crate::lib::intvector_intrinsics::vec128_zero; 16usize];

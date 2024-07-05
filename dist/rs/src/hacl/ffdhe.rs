@@ -19,7 +19,7 @@
     }
 }
 
-#[inline] fn ffdhe_precomp_p(a: crate::hacl::spec::ffdhe_alg, p_r2_n: &mut [u64]) -> ()
+#[inline] fn ffdhe_precomp_p(a: crate::hacl::spec::ffdhe_alg, p_r2_n: &mut [u64])
 {
     let nLen: u32 = (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let p_n: (&mut [u64], &mut [u64]) = p_r2_n.split_at_mut(0usize);
@@ -166,8 +166,7 @@
     sk_n: &mut [u64],
     b_n: &mut [u64],
     res: &mut [u8]
-) ->
-    ()
+)
 {
     let nLen: u32 = (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let p_n: (&mut [u64], &mut [u64]) = p_r2_n.split_at_mut(0usize);
@@ -209,8 +208,7 @@ pub fn ffdhe_secret_to_public_precomp(
     p_r2_n: &mut [u64],
     sk: &mut [u8],
     pk: &mut [u8]
-) ->
-    ()
+)
 {
     let len: u32 = ffdhe_len(a);
     let nLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
@@ -227,8 +225,7 @@ pub fn ffdhe_secret_to_public_precomp(
     ffdhe_compute_exp(a, p_r2_n, &mut sk_n, &mut g_n, pk)
 }
 
-pub fn ffdhe_secret_to_public(a: crate::hacl::spec::ffdhe_alg, sk: &mut [u8], pk: &mut [u8]) ->
-    ()
+pub fn ffdhe_secret_to_public(a: crate::hacl::spec::ffdhe_alg, sk: &mut [u8], pk: &mut [u8])
 {
     let len: u32 = ffdhe_len(a);
     let nLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);

@@ -10,8 +10,7 @@
     ctx: &mut [crate::lib::intvector_intrinsics::vec256],
     len: u32,
     text: &mut [u8]
-) ->
-    ()
+)
 {
     let n: u32 = len.wrapping_div(16u32);
     let r: u32 = len.wrapping_rem(16u32);
@@ -1166,8 +1165,7 @@
     mlen: u32,
     m: &mut [u8],
     out: &mut [u8]
-) ->
-    ()
+)
 {
     let mut ctx: [crate::lib::intvector_intrinsics::vec256; 25] =
         [crate::lib::intvector_intrinsics::vec256_zero; 25usize];
@@ -1468,8 +1466,7 @@ pub fn encrypt(
     data_len: u32,
     key: &mut [u8],
     nonce: &mut [u8]
-) ->
-    ()
+)
 {
     crate::hacl::chacha20_vec256::chacha20_encrypt_256(input_len, output, input, key, nonce, 1u32);
     let mut tmp: [u8; 64] = [0u8; 64usize];

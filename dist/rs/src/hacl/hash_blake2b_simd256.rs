@@ -13,8 +13,7 @@
     last_node: bool,
     totlen: crate::fstar::uint128::uint128,
     d: &mut [u8]
-) ->
-    ()
+)
 {
     let mut m_w: [u64; 16] = [0u64; 16usize];
     krml::unroll_for!(
@@ -554,7 +553,7 @@
     s1.1[0usize] = crate::lib::intvector_intrinsics::vec256_xor(s1.1[0usize], r3.1[0usize])
 }
 
-pub fn init(hash: &mut [crate::lib::intvector_intrinsics::vec256], kk: u32, nn: u32) -> ()
+pub fn init(hash: &mut [crate::lib::intvector_intrinsics::vec256], kk: u32, nn: u32)
 {
     let mut salt: [u8; 16] = [0u8; 16usize];
     let mut personal: [u8; 16] = [0u8; 16usize];
@@ -673,8 +672,7 @@ pub fn init(hash: &mut [crate::lib::intvector_intrinsics::vec256], kk: u32, nn: 
 fn init_with_params(
     hash: &mut [crate::lib::intvector_intrinsics::vec256],
     p: crate::hacl::hash_blake2b::blake2_params
-) ->
-    ()
+)
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     let
@@ -780,8 +778,7 @@ fn update_key(
     kk: u32,
     k: &mut [u8],
     ll: u32
-) ->
-    ()
+)
 {
     let lb: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::uint64_to_uint128(128u32 as u64);
@@ -801,8 +798,7 @@ pub fn update_multi(
     prev: crate::fstar::uint128::uint128,
     blocks: &mut [u8],
     nb: u32
-) ->
-    ()
+)
 {
     crate::lowstar::ignore::ignore::<u32>(len);
     for i in 0u32..nb
@@ -827,8 +823,7 @@ pub fn update_last(
     prev: crate::fstar::uint128::uint128,
     rem: u32,
     d: &mut [u8]
-) ->
-    ()
+)
 {
     let mut b: [u8; 128] = [0u8; 128usize];
     let last: (&mut [u8], &mut [u8]) = d.split_at_mut(len.wrapping_sub(rem) as usize);
@@ -845,8 +840,7 @@ pub fn update_last(
     hash: &mut [crate::lib::intvector_intrinsics::vec256],
     prev: crate::fstar::uint128::uint128,
     blocks: &mut [u8]
-) ->
-    ()
+)
 {
     let nb: u32 = len.wrapping_div(128u32);
     let rem: u32 = len.wrapping_rem(128u32);
@@ -863,8 +857,7 @@ pub fn update_last(
     k: &mut [u8],
     ll: u32,
     d: &mut [u8]
-) ->
-    ()
+)
 {
     let lb: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::uint64_to_uint128(128u32 as u64);
@@ -881,8 +874,7 @@ pub fn finish(
     nn: u32,
     output: &mut [u8],
     hash: &mut [crate::lib::intvector_intrinsics::vec256]
-) ->
-    ()
+)
 {
     let mut b: [u8; 64] = [0u8; 64usize];
     let first: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
@@ -910,8 +902,7 @@ pub fn finish(
 pub fn load_state256b_from_state32(
     st: &mut [crate::lib::intvector_intrinsics::vec256],
     st32: &mut [u64]
-) ->
-    ()
+)
 {
     let
     r0:
@@ -974,8 +965,7 @@ pub fn load_state256b_from_state32(
 pub fn store_state256b_to_state32(
     st32: &mut [u64],
     st: &mut [crate::lib::intvector_intrinsics::vec256]
-) ->
-    ()
+)
 {
     let
     r0:
@@ -1165,7 +1155,7 @@ fn index_of_state(s: &mut [state_t]) -> crate::hacl::hash_blake2b::index
     crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node: last_node }
 }
 
-fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_key) -> ()
+fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_key)
 {
     let mut block_state: &mut block_state_t = &mut (state[0usize]).block_state;
     let buf: &mut [u8] = &mut (state[0usize]).buf;
@@ -1204,14 +1194,13 @@ pub fn reset_with_key_and_params(
     s: &mut [state_t],
     p: &mut [crate::hacl::hash_blake2b::blake2_params],
     k: &mut [u8]
-) ->
-    ()
+)
 {
     crate::lowstar::ignore::ignore::<crate::hacl::hash_blake2b::index>(index_of_state(s));
     reset_raw(s, crate::hacl::hash_blake2b::params_and_key { fst: p, snd: k })
 }
 
-pub fn reset_with_key(s: &mut [state_t], k: &mut [u8]) -> ()
+pub fn reset_with_key(s: &mut [state_t], k: &mut [u8])
 {
     let idx: crate::hacl::hash_blake2b::index = index_of_state(s);
     let mut salt: [u8; 16] = [0u8; 16usize];
@@ -1234,7 +1223,7 @@ pub fn reset_with_key(s: &mut [state_t], k: &mut [u8]) -> ()
     reset_raw(s, crate::hacl::hash_blake2b::params_and_key { fst: &mut p0, snd: k })
 }
 
-pub fn reset(s: &mut [state_t]) -> () { reset_with_key(s, &mut []) }
+pub fn reset(s: &mut [state_t]) { reset_with_key(s, &mut []) }
 
 pub fn update0(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
@@ -1541,8 +1530,7 @@ pub fn hash_with_key(
     input_len: u32,
     key: &mut [u8],
     key_len: u32
-) ->
-    ()
+)
 {
     let mut b: [crate::lib::intvector_intrinsics::vec256; 4] =
         [crate::lib::intvector_intrinsics::vec256_zero; 4usize];
@@ -1561,8 +1549,7 @@ pub fn hash_with_key_and_params(
     input_len: u32,
     params: crate::hacl::hash_blake2b::blake2_params,
     key: &mut [u8]
-) ->
-    ()
+)
 {
     let mut b: [crate::lib::intvector_intrinsics::vec256; 4] =
         [crate::lib::intvector_intrinsics::vec256_zero; 4usize];

@@ -38,8 +38,7 @@ pub fn field_init(len: u32, n: &mut [u64]) -> Vec<crate::hacl::bignum::bn_mont_c
 
 pub fn field_get_len(k: &mut [crate::hacl::bignum::bn_mont_ctx_u64]) -> u32 { (k[0usize]).len }
 
-pub fn to_field(k: &mut [crate::hacl::bignum::bn_mont_ctx_u64], a: &mut [u64], aM: &mut [u64]) ->
-    ()
+pub fn to_field(k: &mut [crate::hacl::bignum::bn_mont_ctx_u64], a: &mut [u64], aM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u64 = &mut k[0usize];
@@ -57,8 +56,7 @@ pub fn from_field(
     k: &mut [crate::hacl::bignum::bn_mont_ctx_u64],
     aM: &mut [u64],
     a: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = field_get_len(k);
     let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u64 = &mut k[0usize];
@@ -70,8 +68,7 @@ pub fn add(
     aM: &mut [u64],
     bM: &mut [u64],
     cM: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = field_get_len(k);
     let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u64 = &mut k[0usize];
@@ -87,8 +84,7 @@ pub fn sub(
     aM: &mut [u64],
     bM: &mut [u64],
     cM: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = field_get_len(k);
     crate::hacl::bignum::bn_sub_mod_n_u64(len1, &mut (k[0usize]).n, aM, bM, cM)
@@ -99,23 +95,21 @@ pub fn mul(
     aM: &mut [u64],
     bM: &mut [u64],
     cM: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = field_get_len(k);
     let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u64 = &mut k[0usize];
     crate::hacl::bignum::bn_mont_mul_u64(len1, &mut (*uu____0).n, (*uu____0).mu, aM, bM, cM)
 }
 
-pub fn sqr(k: &mut [crate::hacl::bignum::bn_mont_ctx_u64], aM: &mut [u64], cM: &mut [u64]) ->
-    ()
+pub fn sqr(k: &mut [crate::hacl::bignum::bn_mont_ctx_u64], aM: &mut [u64], cM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u64 = &mut k[0usize];
     crate::hacl::bignum::bn_mont_sqr_u64(len1, &mut (*uu____0).n, (*uu____0).mu, aM, cM)
 }
 
-pub fn one(k: &mut [crate::hacl::bignum::bn_mont_ctx_u64], oneM: &mut [u64]) -> ()
+pub fn one(k: &mut [crate::hacl::bignum::bn_mont_ctx_u64], oneM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u64 = &mut k[0usize];
@@ -134,8 +128,7 @@ pub fn exp_consttime(
     bBits: u32,
     b: &mut [u64],
     resM: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = field_get_len(k);
     let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u64 = &mut k[0usize];
@@ -350,8 +343,7 @@ pub fn exp_vartime(
     bBits: u32,
     b: &mut [u64],
     resM: &mut [u64]
-) ->
-    ()
+)
 {
     let len1: u32 = field_get_len(k);
     let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u64 = &mut k[0usize];
@@ -513,8 +505,7 @@ pub fn inverse(
     k: &mut [crate::hacl::bignum::bn_mont_ctx_u64],
     aM: &mut [u64],
     aInvM: &mut [u64]
-) ->
-    ()
+)
 {
     let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u64 = &mut k[0usize];
     let len1: u32 = (*uu____0).len;

@@ -38,7 +38,7 @@ const k224_256: [u32; 64] =
         0x5b9cca4fu32, 0x682e6ff3u32, 0x748f82eeu32, 0x78a5636fu32, 0x84c87814u32, 0x8cc70208u32,
         0x90befffau32, 0xa4506cebu32, 0xbef9a3f7u32, 0xc67178f2u32];
 
-pub fn update_multi_256(s: &mut [u32], blocks: &mut [u8], n: u32) -> ()
+pub fn update_multi_256(s: &mut [u32], blocks: &mut [u8], n: u32)
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_vale
     {
@@ -121,7 +121,7 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
     p
 }
 
-pub fn reset(state: &mut [state_t]) -> ()
+pub fn reset(state: &mut [state_t])
 {
     let block_state: &mut [state_s] = &mut (state[0usize]).block_state;
     crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(
@@ -290,7 +290,7 @@ pub fn alg_of_state0(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_al
     alg_of_state(block_state)
 }
 
-pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
+pub fn digest(state: &mut [state_t], output: &mut [u8])
 {
     let a1: crate::hacl::streaming_types::hash_alg = alg_of_state0(state);
     match a1
@@ -311,7 +311,7 @@ pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
     }
 }
 
-pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32)
 {
     let mut st: [u32; 8] = [0u32; 8usize];
     krml::unroll_for!(
@@ -351,7 +351,7 @@ pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
     crate::hacl::hash_sha2::sha256_finish(s, output)
 }
 
-fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32)
 {
     let mut st: [u32; 8] = [0u32; 8usize];
     krml::unroll_for!(
@@ -396,8 +396,7 @@ pub fn hash(
     output: &mut [u8],
     input: &mut [u8],
     input_len: u32
-) ->
-    ()
+)
 {
     match a
     {
