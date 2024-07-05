@@ -42,6 +42,17 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_index_last_node =
       field hacl_Hash_Blake2b_index "last_node" bool
     let _ = seal hacl_Hash_Blake2b_index
+    type hacl_Hash_Blake2b_params_and_key =
+      [ `hacl_Hash_Blake2b_params_and_key ] structure
+    let (hacl_Hash_Blake2b_params_and_key :
+      [ `hacl_Hash_Blake2b_params_and_key ] structure typ) =
+      structure "Hacl_Hash_Blake2b_params_and_key_s"
+    let hacl_Hash_Blake2b_params_and_key_fst =
+      field hacl_Hash_Blake2b_params_and_key "fst"
+        (ptr hacl_Hash_Blake2b_blake2_params)
+    let hacl_Hash_Blake2b_params_and_key_snd =
+      field hacl_Hash_Blake2b_params_and_key "snd" (ptr uint8_t)
+    let _ = seal hacl_Hash_Blake2b_params_and_key
     let hacl_Hash_Blake2b_init =
       foreign "Hacl_Hash_Blake2b_init"
         ((ptr uint64_t) @-> (uint32_t @-> (uint32_t @-> (returning void))))
