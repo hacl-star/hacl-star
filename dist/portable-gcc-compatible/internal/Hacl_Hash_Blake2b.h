@@ -38,6 +38,17 @@ extern "C" {
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "../Hacl_Hash_Blake2b.h"
 
+/* SNIPPET_START: Hacl_Hash_Blake2b_params_and_key */
+
+typedef struct Hacl_Hash_Blake2b_params_and_key_s
+{
+  Hacl_Hash_Blake2b_blake2_params *fst;
+  uint8_t *snd;
+}
+Hacl_Hash_Blake2b_params_and_key;
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_params_and_key */
+
 /* SNIPPET_START: Hacl_Hash_Blake2b_init */
 
 void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);
@@ -78,17 +89,6 @@ Hacl_Hash_Blake2b_update_last(
 void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_finish */
-
-/* SNIPPET_START: K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t_ */
-
-typedef struct K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t__s
-{
-  Hacl_Hash_Blake2b_blake2_params *fst;
-  uint8_t *snd;
-}
-K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t_;
-
-/* SNIPPET_END: K____Hacl_Impl_Blake2_Core_blake2_params___uint8_t_ */
 
 #if defined(__cplusplus)
 }
