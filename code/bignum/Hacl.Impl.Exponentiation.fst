@@ -303,6 +303,7 @@ val lmul_acc_pow_a_bits_l:
   -> pow_a_to_small_b:pow_a_to_small_b_st a_t len ctx_len k l table_len table_inv ->
   lmul_acc_pow_a_bits_l_st a_t len ctx_len k l table_len table_inv
 
+#push-options "--z3rlimit 200"
 let lmul_acc_pow_a_bits_l #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc tmp =
   let h0 = ST.get () in
   push_frame ();
@@ -313,7 +314,7 @@ let lmul_acc_pow_a_bits_l #a_t len ctx_len k l table_len table_inv pow_a_to_smal
   pow_a_to_small_b ctx (as_seq h0 a) table bits_l tmp;
   k.lmul ctx acc tmp acc;
   pop_frame ()
-
+#pop-options
 
 inline_for_extraction noextract
 let lexp_fw_f_st
