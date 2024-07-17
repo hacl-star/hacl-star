@@ -66,7 +66,7 @@ let singleton_b x' = x:bool { x == x' }
 /// dummy type arguments are added in order to make sure it monomorphizes à la
 /// ML).
 inline_for_extraction noextract
-let s (a : alg) (i: index a) (m : m_spec) = singleton (i.key_length) & singleton (i.digest_length) & singleton_b (i.last_node) & Core.(state_p a m & state_p a m)
+let s (a : alg) (i: index a) (m : m_spec) = singleton (i.key_length) & singleton (i.digest_length) & singleton_b (i.last_node) & Core.state_p a m & Core.state_p a m
 
 inline_for_extraction noextract
 let t (a : alg) = Spec.key_length_t a & Spec.digest_length_t a & bool & Spec.state a
@@ -76,11 +76,11 @@ temporary scratch space that the Blake2 implementation expects to receive. (Why
 is the implementation not performing its own stack allocations? Don't know!) *)
 inline_for_extraction noextract
 let get_wv (#a : alg) #i (#m : m_spec) (s : s a i m) : Tot (Core.state_p a m) =
-  match s with _, _, _, (wv, _) -> wv
+  match s with _, _, _, wv, _ -> wv
 
 inline_for_extraction noextract
 let get_state_p (#a : alg) (#i: index a) (#m : m_spec) (s : s a i m) : Tot (Core.state_p a m) =
-  match s with _, _, _, (_, p) -> p
+  match s with _, _, _, _, p -> p
 
 (* But the working vector is not reflected in the state at all -- it doesn't
 have meaningful specification contents. *)
@@ -90,7 +90,7 @@ let state_v (#a : alg) (#i: index a) (#m : m_spec) (h : HS.mem) (s : s a i m) : 
 
 inline_for_extraction noextract
 let s_v (#a : alg) (#i: index a) (#m : m_spec) (h : HS.mem) (s : s a i m) : GTot (t a) =
-  let kk, nn, last_node, _ = s in
+  let kk, nn, last_node, _, _ = s in
   kk, nn, last_node, state_v h s
 
 /// Small helper which facilitates inferencing implicit arguments for buffer
@@ -108,45 +108,45 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful (index a) =
     (fun i -> s a i m) (* s *)
     (* footprint *)
     (fun #_ _ acc ->
-      let _, _, _, (wv, b) = acc in
+      let _, _, _, wv, b = acc in
       B.loc_union
        (B.loc_addr_of_buffer (state_to_lbuffer wv))
        (B.loc_addr_of_buffer (state_to_lbuffer b)))
     (* freeable *)
     (fun #_ _ acc ->
-      let _, _, _, (wv, b) = acc in
+      let _, _, _, wv, b = acc in
       B.freeable (state_to_lbuffer wv) /\
       B.freeable (state_to_lbuffer b))
     (* invariant *)
     (fun #_ h acc ->
-      let _, _, _, (wv, b) = acc in
+      let _, _, _, wv, b = acc in
       B.live h (state_to_lbuffer wv) /\
       B.live h (state_to_lbuffer b) /\
       B.disjoint (state_to_lbuffer wv) (state_to_lbuffer b))
     (fun _ -> t a) (* t *)
     (fun _ h acc -> s_v h acc) (* v *)
-    (fun #_ h acc -> let _, _, _, (wv, b) = acc in ()) (* invariant_loc_in_footprint *)
-    (fun #_ l acc h0 h1 -> let _, _, _, (wv, b) = acc in ()) (* frame_invariant *)
+    (fun #_ h acc -> let _, _, _, wv, b = acc in ()) (* invariant_loc_in_footprint *)
+    (fun #_ l acc h0 h1 -> let _, _, _, wv, b = acc in ()) (* frame_invariant *)
     (fun #_ _ _ _ _ -> ()) (* frame_freeable *)
     (* alloca *)
     (fun i ->
       let wv = Core.alloc_state a m in
       let b = Core.alloc_state a m in
-      i.key_length, i.digest_length, i.last_node, (wv, b))
+      i.key_length, i.digest_length, i.last_node, wv, b)
     (* create_in *)
     (fun i r ->
       let wv = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
       let b = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
-      i.key_length, i.digest_length, i.last_node, (wv, b))
+      i.key_length, i.digest_length, i.last_node, wv, b)
     (* free *)
     (fun _ acc ->
-      match acc with _, _, _, (wv, b) ->
+      match acc with _, _, _, wv, b ->
       B.free (state_to_lbuffer wv);
       B.free (state_to_lbuffer b))
     (* copy *)
     (fun _ src dst ->
-      match src with _, _, _, (src_wv, src_b) ->
-      match dst with _, _, _, (src_wv, dst_b) ->
+      match src with _, _, _, src_wv, src_b ->
+      match dst with _, _, _, src_wv, dst_b ->
       B.blit (state_to_lbuffer src_b) 0ul (state_to_lbuffer dst_b) 0ul
              U32.(4ul *^ Core.row_len a m))
 
@@ -693,7 +693,7 @@ let blake2 (a : alg)
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
     (fun i (p, k) input _ ->
       spec_is_incremental a p i.last_node k input) (* spec_is_incremental *)
-    (fun _ (kk, nn, last_node, _) -> { key_length = kk; digest_length = nn; last_node }) (* index_of_state *)
+    (fun _ (kk, nn, last_node, _, _) -> { key_length = kk; digest_length = nn; last_node }) (* index_of_state *)
 
     (* init *)
     (fun i k' buf_ acc ->
@@ -702,7 +702,7 @@ let blake2 (a : alg)
       let nn = (P.get_params p).digest_length in
       assert (kk == (G.reveal i).key_length);
       assert (nn == (G.reveal i).digest_length);
-      let kk', nn', last_node, s = acc in
+      let kk', nn', last_node, _, _ = acc in
       assert (kk == kk');
       assert (nn == nn');
       let i: index a = { key_length = kk; digest_length = nn; last_node } in
@@ -722,20 +722,18 @@ let blake2 (a : alg)
       )
 
     (* update_multi *)
-    (fun _ (kk, _, _, acc) prevlen blocks len ->
-      let wv, hash = acc in
+    (fun _ (kk, _, _, wv, hash) prevlen blocks len ->
       let nb = len `U32.div` Core.size_block a in
       update_multi #len wv hash (blake2_prevlen a prevlen) blocks nb)
 
     (* update_last *)
-    (fun _ (kk, _, last_node, acc) prevlen last last_len ->
-      let wv, hash = acc in
+    (fun _ (kk, _, last_node, wv, hash) prevlen last last_len ->
       update_last #last_len wv hash last_node (blake2_prevlen a prevlen) last_len last)
 
     (* finish *)
     (fun _ k s dst _ ->
       // Requires fuel and ifuel. Ideally, flesh out the proof instead.
-      let kk, nn, last_node, acc = s in
+      let kk, nn, last_node, _, _ = s in
       let i: index a = { key_length = kk; digest_length = nn; last_node } in
       [@inline_let] let wv = get_wv #a #i #m s in
       [@inline_let] let h = get_state_p #a #i s in
