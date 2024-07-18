@@ -883,7 +883,8 @@ dist/rs/src/Makefile.basic: DEFAULT_FLAGS += -backend rust \
   -drop Hacl.Streaming.SHA1.free,Hacl.Streaming.Keccak.free,Hacl.Streaming.MD5.free,EverCrypt.Hash.free_,EverCrypt.Hash.Incremental.free \
   -drop Hacl.Streaming.Poly1305_32.free,Hacl.Streaming.Poly1305_128.free,Hacl.Streaming.Poly1305_256.free,Hacl.HMAC_DRBG.free \
   -drop EverCrypt.AEAD.free \
-  -funroll-loops 32
+  -funroll-loops 32 \
+  -drop EverCrypt.*
 
 dist/rs/src/Makefile.basic: VALE_ASMS =
 dist/rs/src/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
