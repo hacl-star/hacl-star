@@ -16,13 +16,13 @@ pub struct blake2_params <'a>
     pub node_offset: u64,
     pub node_depth: u8,
     pub inner_length: u8,
-    pub salt: &'a mut [u8],
-    pub personal: &'a mut [u8]
+    pub salt: &'a [u8],
+    pub personal: &'a [u8]
 }
 
 pub struct index { pub key_length: u8, pub digest_length: u8, pub last_node: bool }
 
-pub struct params_and_key <'a> { pub fst: &'a mut [blake2_params <'a>], pub snd: &'a mut [u8] }
+pub struct params_and_key <'a> { pub fst: &'a [blake2_params <'a>], pub snd: &'a [u8] }
 
 fn update_block(
     wv: &mut [u64],
@@ -30,7 +30,7 @@ fn update_block(
     flag: bool,
     last_node: bool,
     totlen: crate::fstar::uint128::uint128,
-    d: &mut [u8]
+    d: &[u8]
 )
 {
     let mut m_w: [u64; 16] = [0u64; 16usize];
@@ -40,7 +40,7 @@ fn update_block(
         0u32,
         1u32,
         {
-            let bj: (&mut [u8], &mut [u8]) = d.split_at_mut(i.wrapping_mul(8u32) as usize);
+            let bj: (&[u8], &[u8]) = d.split_at(i.wrapping_mul(8u32) as usize);
             let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
@@ -64,7 +64,7 @@ fn update_block(
         0u32,
         1u32,
         {
-            let x: u64 = wv3.1[i as usize] ^ (&mut mask)[i as usize];
+            let x: u64 = wv3.1[i as usize] ^ (&mask)[i as usize];
             let os: (&mut [u64], &mut [u64]) = wv3.1.split_at_mut(0usize);
             os.1[i as usize] = x
         }
@@ -145,38 +145,38 @@ fn update_block(
                 (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(15u32)
                 as
                 usize];
-            let uu____0: u64 = (&mut m_w)[s2 as usize];
-            let uu____1: u64 = (&mut m_w)[s4 as usize];
-            let uu____2: u64 = (&mut m_w)[s6 as usize];
-            r1.0[0usize] = (&mut m_w)[s0 as usize];
+            let uu____0: u64 = (&m_w)[s2 as usize];
+            let uu____1: u64 = (&m_w)[s4 as usize];
+            let uu____2: u64 = (&m_w)[s6 as usize];
+            r1.0[0usize] = (&m_w)[s0 as usize];
             r1.0[1usize] = uu____0;
             r1.0[2usize] = uu____1;
             r1.0[3usize] = uu____2;
-            let uu____3: u64 = (&mut m_w)[s3 as usize];
-            let uu____4: u64 = (&mut m_w)[s5 as usize];
-            let uu____5: u64 = (&mut m_w)[s7 as usize];
-            r2.0[0usize] = (&mut m_w)[s1 as usize];
+            let uu____3: u64 = (&m_w)[s3 as usize];
+            let uu____4: u64 = (&m_w)[s5 as usize];
+            let uu____5: u64 = (&m_w)[s7 as usize];
+            r2.0[0usize] = (&m_w)[s1 as usize];
             r2.0[1usize] = uu____3;
             r2.0[2usize] = uu____4;
             r2.0[3usize] = uu____5;
-            let uu____6: u64 = (&mut m_w)[s10 as usize];
-            let uu____7: u64 = (&mut m_w)[s12 as usize];
-            let uu____8: u64 = (&mut m_w)[s14 as usize];
-            r3.0[0usize] = (&mut m_w)[s8 as usize];
+            let uu____6: u64 = (&m_w)[s10 as usize];
+            let uu____7: u64 = (&m_w)[s12 as usize];
+            let uu____8: u64 = (&m_w)[s14 as usize];
+            r3.0[0usize] = (&m_w)[s8 as usize];
             r3.0[1usize] = uu____6;
             r3.0[2usize] = uu____7;
             r3.0[3usize] = uu____8;
-            let uu____9: u64 = (&mut m_w)[s11 as usize];
-            let uu____10: u64 = (&mut m_w)[s13 as usize];
-            let uu____11: u64 = (&mut m_w)[s15 as usize];
-            r3.1[0usize] = (&mut m_w)[s9 as usize];
+            let uu____9: u64 = (&m_w)[s11 as usize];
+            let uu____10: u64 = (&m_w)[s13 as usize];
+            let uu____11: u64 = (&m_w)[s15 as usize];
+            r3.1[0usize] = (&m_w)[s9 as usize];
             r3.1[1usize] = uu____9;
             r3.1[2usize] = uu____10;
             r3.1[3usize] = uu____11;
-            let x: (&mut [u64], &mut [u64]) = r1.0.split_at_mut(0usize);
-            let y: (&mut [u64], &mut [u64]) = r2.0.split_at_mut(0usize);
-            let z: (&mut [u64], &mut [u64]) = r3.0.split_at_mut(0usize);
-            let w: (&mut [u64], &mut [u64]) = r3.1.split_at_mut(0usize);
+            let x: (&[u64], &[u64]) = r1.0.split_at(0usize);
+            let y: (&[u64], &[u64]) = r2.0.split_at(0usize);
+            let z: (&[u64], &[u64]) = r3.0.split_at(0usize);
+            let w: (&[u64], &[u64]) = r3.1.split_at(0usize);
             let wv_a: (&mut [u64], &mut [u64]) = wv3.0.split_at_mut(0usize);
             let wv_b: (&mut [u64], &mut [u64]) = wv_a.1.split_at_mut(4usize);
             krml::unroll_for!(
@@ -499,7 +499,7 @@ fn update_block(
                 }
             );
             let wv_a12: (&mut [u64], &mut [u64]) = wv_b9.1.split_at_mut(0usize);
-            let wv_b12: (&mut [u64], &mut [u64]) = wv_a11.1.split_at_mut(0usize);
+            let wv_b12: (&[u64], &[u64]) = wv_a11.1.split_at(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -597,10 +597,10 @@ fn update_block(
     );
     let s0: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
     let s1: (&mut [u64], &mut [u64]) = s0.1.split_at_mut(4usize);
-    let r0: (&mut [u64], &mut [u64]) = wv3.0.split_at_mut(0usize);
-    let r1: (&mut [u64], &mut [u64]) = r0.1.split_at_mut(4usize);
-    let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(4usize);
-    let r3: (&mut [u64], &mut [u64]) = wv3.1.split_at_mut(0usize);
+    let r0: (&[u64], &[u64]) = wv3.0.split_at(0usize);
+    let r1: (&[u64], &[u64]) = r0.1.split_at(4usize);
+    let r2: (&[u64], &[u64]) = r1.1.split_at(4usize);
+    let r3: (&[u64], &[u64]) = wv3.1.split_at(0usize);
     krml::unroll_for!(
         4,
         "i",
@@ -649,8 +649,8 @@ fn update_block(
 
 pub fn init(hash: &mut [u64], kk: u32, nn: u32)
 {
-    let mut salt: [u8; 16] = [0u8; 16usize];
-    let mut personal: [u8; 16] = [0u8; 16usize];
+    let salt: [u8; 16] = [0u8; 16usize];
+    let personal: [u8; 16] = [0u8; 16usize];
     let p: blake2_params =
         blake2_params
         {
@@ -662,8 +662,8 @@ pub fn init(hash: &mut [u64], kk: u32, nn: u32)
             node_offset: 0u64,
             node_depth: 0u8,
             inner_length: 0u8,
-            salt: &mut salt,
-            personal: &mut personal
+            salt: &salt,
+            personal: &personal
         };
     let mut tmp: [u64; 8] = [0u64; 8usize];
     let r0: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
@@ -695,7 +695,7 @@ pub fn init(hash: &mut [u64], kk: u32, nn: u32)
         0u32,
         1u32,
         {
-            let bj: &mut [u8] = &mut p.salt[i.wrapping_mul(8u32) as usize..];
+            let bj: &[u8] = &p.salt[i.wrapping_mul(8u32) as usize..];
             let u: u64 = crate::lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
@@ -710,7 +710,7 @@ pub fn init(hash: &mut [u64], kk: u32, nn: u32)
         0u32,
         1u32,
         {
-            let bj: &mut [u8] = &mut p.personal[i.wrapping_mul(8u32) as usize..];
+            let bj: &[u8] = &p.personal[i.wrapping_mul(8u32) as usize..];
             let u: u64 = crate::lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
@@ -729,14 +729,14 @@ pub fn init(hash: &mut [u64], kk: u32, nn: u32)
     (&mut tmp)[1usize] = p.node_offset;
     (&mut tmp)[2usize] = p.node_depth as u64 ^ (p.inner_length as u64).wrapping_shl(8u32);
     (&mut tmp)[3usize] = 0u64;
-    let tmp0: u64 = (&mut tmp)[0usize];
-    let tmp1: u64 = (&mut tmp)[1usize];
-    let tmp2: u64 = (&mut tmp)[2usize];
-    let tmp3: u64 = (&mut tmp)[3usize];
-    let tmp4: u64 = (&mut tmp)[4usize];
-    let tmp5: u64 = (&mut tmp)[5usize];
-    let tmp6: u64 = (&mut tmp)[6usize];
-    let tmp7: u64 = (&mut tmp)[7usize];
+    let tmp0: u64 = (&tmp)[0usize];
+    let tmp1: u64 = (&tmp)[1usize];
+    let tmp2: u64 = (&tmp)[2usize];
+    let tmp3: u64 = (&tmp)[3usize];
+    let tmp4: u64 = (&tmp)[4usize];
+    let tmp5: u64 = (&tmp)[5usize];
+    let tmp6: u64 = (&tmp)[6usize];
+    let tmp7: u64 = (&tmp)[7usize];
     let iv0·: u64 = iv0 ^ tmp0;
     let iv1·: u64 = iv1 ^ tmp1;
     let iv2·: u64 = iv2 ^ tmp2;
@@ -787,7 +787,7 @@ fn init_with_params(hash: &mut [u64], p: blake2_params)
         0u32,
         1u32,
         {
-            let bj: &mut [u8] = &mut p.salt[i.wrapping_mul(8u32) as usize..];
+            let bj: &[u8] = &p.salt[i.wrapping_mul(8u32) as usize..];
             let u: u64 = crate::lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
@@ -802,7 +802,7 @@ fn init_with_params(hash: &mut [u64], p: blake2_params)
         0u32,
         1u32,
         {
-            let bj: &mut [u8] = &mut p.personal[i.wrapping_mul(8u32) as usize..];
+            let bj: &[u8] = &p.personal[i.wrapping_mul(8u32) as usize..];
             let u: u64 = crate::lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
@@ -821,14 +821,14 @@ fn init_with_params(hash: &mut [u64], p: blake2_params)
     (&mut tmp)[1usize] = p.node_offset;
     (&mut tmp)[2usize] = p.node_depth as u64 ^ (p.inner_length as u64).wrapping_shl(8u32);
     (&mut tmp)[3usize] = 0u64;
-    let tmp0: u64 = (&mut tmp)[0usize];
-    let tmp1: u64 = (&mut tmp)[1usize];
-    let tmp2: u64 = (&mut tmp)[2usize];
-    let tmp3: u64 = (&mut tmp)[3usize];
-    let tmp4: u64 = (&mut tmp)[4usize];
-    let tmp5: u64 = (&mut tmp)[5usize];
-    let tmp6: u64 = (&mut tmp)[6usize];
-    let tmp7: u64 = (&mut tmp)[7usize];
+    let tmp0: u64 = (&tmp)[0usize];
+    let tmp1: u64 = (&tmp)[1usize];
+    let tmp2: u64 = (&tmp)[2usize];
+    let tmp3: u64 = (&tmp)[3usize];
+    let tmp4: u64 = (&tmp)[4usize];
+    let tmp5: u64 = (&tmp)[5usize];
+    let tmp6: u64 = (&tmp)[6usize];
+    let tmp7: u64 = (&tmp)[7usize];
     let iv0·: u64 = iv0 ^ tmp0;
     let iv1·: u64 = iv1 ^ tmp1;
     let iv2·: u64 = iv2 ^ tmp2;
@@ -847,16 +847,16 @@ fn init_with_params(hash: &mut [u64], p: blake2_params)
     r2.0[3usize] = iv7·
 }
 
-fn update_key(wv: &mut [u64], hash: &mut [u64], kk: u32, k: &mut [u8], ll: u32)
+fn update_key(wv: &mut [u64], hash: &mut [u64], kk: u32, k: &[u8], ll: u32)
 {
     let lb: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::uint64_to_uint128(128u32 as u64);
     let mut b: [u8; 128] = [0u8; 128usize];
     ((&mut b)[0usize..kk as usize]).copy_from_slice(&k[0usize..kk as usize]);
     if ll == 0u32
-    { update_block(wv, hash, true, false, lb, &mut b) }
+    { update_block(wv, hash, true, false, lb, &b) }
     else
-    { update_block(wv, hash, false, false, lb, &mut b) };
+    { update_block(wv, hash, false, false, lb, &b) };
     crate::lib::memzero0::memzero::<u8>(&mut b, 128u32)
 }
 
@@ -865,7 +865,7 @@ pub fn update_multi(
     wv: &mut [u64],
     hash: &mut [u64],
     prev: crate::fstar::uint128::uint128,
-    blocks: &mut [u8],
+    blocks: &[u8],
     nb: u32
 )
 {
@@ -879,7 +879,7 @@ pub fn update_multi(
                     i.wrapping_add(1u32).wrapping_mul(128u32) as u64
                 )
             );
-        let b: (&mut [u8], &mut [u8]) = blocks.split_at_mut(i.wrapping_mul(128u32) as usize);
+        let b: (&[u8], &[u8]) = blocks.split_at(i.wrapping_mul(128u32) as usize);
         update_block(wv, hash, false, false, totlen, b.1)
     }
 }
@@ -891,15 +891,15 @@ pub fn update_last(
     last_node: bool,
     prev: crate::fstar::uint128::uint128,
     rem: u32,
-    d: &mut [u8]
+    d: &[u8]
 )
 {
     let mut b: [u8; 128] = [0u8; 128usize];
-    let last: (&mut [u8], &mut [u8]) = d.split_at_mut(len.wrapping_sub(rem) as usize);
+    let last: (&[u8], &[u8]) = d.split_at(len.wrapping_sub(rem) as usize);
     ((&mut b)[0usize..rem as usize]).copy_from_slice(&last.1[0usize..rem as usize]);
     let totlen: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::add_mod(prev, crate::fstar::uint128::uint64_to_uint128(len as u64));
-    update_block(wv, hash, true, last_node, totlen, &mut b);
+    update_block(wv, hash, true, last_node, totlen, &b);
     crate::lib::memzero0::memzero::<u8>(&mut b, 128u32)
 }
 
@@ -908,7 +908,7 @@ fn update_blocks(
     wv: &mut [u64],
     hash: &mut [u64],
     prev: crate::fstar::uint128::uint128,
-    blocks: &mut [u8]
+    blocks: &[u8]
 )
 {
     let nb: u32 = len.wrapping_div(128u32);
@@ -919,14 +919,7 @@ fn update_blocks(
     update_last(len, wv, hash, false, prev, rem0, blocks)
 }
 
-#[inline] fn update(
-    wv: &mut [u64],
-    hash: &mut [u64],
-    kk: u32,
-    k: &mut [u8],
-    ll: u32,
-    d: &mut [u8]
-)
+#[inline] fn update(wv: &mut [u64], hash: &mut [u64], kk: u32, k: &[u8], ll: u32, d: &[u8])
 {
     let lb: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::uint64_to_uint128(128u32 as u64);
@@ -939,13 +932,13 @@ fn update_blocks(
     { update_blocks(ll, wv, hash, crate::fstar::uint128::uint64_to_uint128(0u32 as u64), d) }
 }
 
-pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u64])
+pub fn finish(nn: u32, output: &mut [u8], hash: &[u64])
 {
     let mut b: [u8; 64] = [0u8; 64usize];
     let first: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
     let second: (&mut [u8], &mut [u8]) = first.1.split_at_mut(32usize);
-    let row0: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
-    let row1: (&mut [u64], &mut [u64]) = row0.1.split_at_mut(4usize);
+    let row0: (&[u64], &[u64]) = hash.split_at(0usize);
+    let row1: (&[u64], &[u64]) = row0.1.split_at(4usize);
     krml::unroll_for!(
         4,
         "i",
@@ -966,8 +959,8 @@ pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u64])
             row1.1[i as usize]
         )
     );
-    crate::lowstar::ignore::ignore::<&mut [u8]>(&mut b);
-    let r#final: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
+    crate::lowstar::ignore::ignore::<&[u8]>(&b);
+    let r#final: (&[u8], &[u8]) = (&b).split_at(0usize);
     (output[0usize..nn as usize]).copy_from_slice(&r#final.1[0usize..nn as usize]);
     crate::lib::memzero0::memzero::<u8>(&mut b, 64u32)
 }
@@ -982,33 +975,26 @@ pub const salt_bytes: u32 = 16u32;
 
 pub const personal_bytes: u32 = 16u32;
 
-pub struct __·uint64_t·_·uint64_t· { pub fst: Vec<u64>, pub snd: Vec<u64> }
-
 pub struct block_state_t
-{ pub fst: u8, pub snd: u8, pub thd: bool, pub f3: __·uint64_t·_·uint64_t· }
+{ pub fst: u8, pub snd: u8, pub thd: bool, pub f3: Vec<u64>, pub f4: Vec<u64> }
 
 pub struct state_t { pub block_state: block_state_t, pub buf: Vec<u8>, pub total_len: u64 }
 
 fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
 {
     let mut buf: Vec<u8> = vec![0u8; 128usize];
-    let mut wv: Vec<u64> = vec![0u64; 16usize];
-    let mut b: Vec<u64> = vec![0u64; 16usize];
-    let mut block_state: block_state_t =
+    let wv: Vec<u64> = vec![0u64; 16usize];
+    let b: Vec<u64> = vec![0u64; 16usize];
+    let block_state: block_state_t =
         block_state_t
-        {
-            fst: kk.key_length,
-            snd: kk.digest_length,
-            thd: kk.last_node,
-            f3: __·uint64_t·_·uint64_t· { fst: wv, snd: b }
-        };
-    let p: &mut [blake2_params] = key.fst;
+        { fst: kk.key_length, snd: kk.digest_length, thd: kk.last_node, f3: wv, f4: b };
+    let p: &[blake2_params] = key.fst;
     let kk1: u8 = (p[0usize]).key_length;
     let nn: u8 = (p[0usize]).digest_length;
     let last_node: bool = block_state.thd;
     let i: index = index { key_length: kk1, digest_length: nn, last_node: last_node };
     let kk2: u32 = i.key_length as u32;
-    let k·: &mut [u8] = key.snd;
+    let k·: &[u8] = key.snd;
     if ! (kk2 == 0u32)
     {
         let sub_b: (&mut [u8], &mut [u8]) = (&mut buf).split_at_mut(kk2 as usize);
@@ -1018,11 +1004,11 @@ fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
         ((&mut buf)[0usize..kk2 as usize]).copy_from_slice(&k·[0usize..kk2 as usize])
     };
     let pv: blake2_params = p[0usize];
-    init_with_params(&mut block_state.f3.snd, pv);
+    init_with_params(&mut block_state.f4, pv);
     let kk10: u8 = kk.key_length;
     let ite: u32 = if kk10 != 0u8 { 128u32 } else { 0u32 };
-    let mut s: state_t = state_t { block_state: block_state, buf: buf, total_len: ite as u64 };
-    let mut p0: Vec<state_t> =
+    let s: state_t = state_t { block_state: block_state, buf: buf, total_len: ite as u64 };
+    let p0: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
             tmp.push(s);
@@ -1031,9 +1017,9 @@ fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
     p0
 }
 
-fn index_of_state(s: &mut [state_t]) -> index
+fn index_of_state(s: &[state_t]) -> index
 {
-    let mut block_state: &mut block_state_t = &mut (s[0usize]).block_state;
+    let block_state: &block_state_t = &(s[0usize]).block_state;
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
     let kk1: u8 = (*block_state).fst;
@@ -1042,19 +1028,19 @@ fn index_of_state(s: &mut [state_t]) -> index
 
 fn reset_raw(state: &mut [state_t], key: params_and_key)
 {
-    let mut block_state: &mut block_state_t = &mut (state[0usize]).block_state;
+    let block_state: &block_state_t = &(state[0usize]).block_state;
     let buf: &mut [u8] = &mut (state[0usize]).buf;
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
     let kk1: u8 = (*block_state).fst;
     let i: index = index { key_length: kk1, digest_length: nn, last_node: last_node };
-    let p: &mut [blake2_params] = key.fst;
+    let p: &[blake2_params] = key.fst;
     let kk10: u8 = (p[0usize]).key_length;
     let nn0: u8 = (p[0usize]).digest_length;
     let last_node0: bool = (*block_state).thd;
     let i1: index = index { key_length: kk10, digest_length: nn0, last_node: last_node0 };
     let kk2: u32 = i1.key_length as u32;
-    let k·1: &mut [u8] = key.snd;
+    let k·1: &[u8] = key.snd;
     if ! (kk2 == 0u32)
     {
         let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
@@ -1064,24 +1050,24 @@ fn reset_raw(state: &mut [state_t], key: params_and_key)
         (buf[0usize..kk2 as usize]).copy_from_slice(&k·1[0usize..kk2 as usize])
     };
     let pv: blake2_params = p[0usize];
-    init_with_params(&mut (*block_state).f3.snd, pv);
+    init_with_params(&mut (*block_state).f4, pv);
     let kk11: u8 = i.key_length;
     let ite: u32 = if kk11 != 0u8 { 128u32 } else { 0u32 };
     let total_len: u64 = ite as u64;
     (state[0usize]).total_len = total_len
 }
 
-pub fn reset_with_key_and_params(s: &mut [state_t], p: &mut [blake2_params], k: &mut [u8])
+pub fn reset_with_key_and_params(s: &mut [state_t], p: &[blake2_params], k: &[u8])
 {
     crate::lowstar::ignore::ignore::<index>(index_of_state(s));
     reset_raw(s, params_and_key { fst: p, snd: k })
 }
 
-pub fn reset_with_key(s: &mut [state_t], k: &mut [u8])
+pub fn reset_with_key(s: &mut [state_t], k: &[u8])
 {
     let idx: index = index_of_state(s);
-    let mut salt: [u8; 16] = [0u8; 16usize];
-    let mut personal: [u8; 16] = [0u8; 16usize];
+    let salt: [u8; 16] = [0u8; 16usize];
+    let personal: [u8; 16] = [0u8; 16usize];
     let p: blake2_params =
         blake2_params
         {
@@ -1093,19 +1079,19 @@ pub fn reset_with_key(s: &mut [state_t], k: &mut [u8])
             node_offset: 0u64,
             node_depth: 0u8,
             inner_length: 0u8,
-            salt: &mut salt,
-            personal: &mut personal
+            salt: &salt,
+            personal: &personal
         };
-    let mut p0: [blake2_params; 1] = [p; 1usize];
-    reset_raw(s, params_and_key { fst: &mut p0, snd: k })
+    let p0: [blake2_params; 1] = [p; 1usize];
+    reset_raw(s, params_and_key { fst: &p0, snd: k })
 }
 
-pub fn reset(s: &mut [state_t]) { reset_with_key(s, &mut []) }
+pub fn reset(s: &mut [state_t]) { reset_with_key(s, &[]) }
 
-pub fn update0(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
+pub fn update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
-    let mut block_state: &mut block_state_t = &mut (state[0usize]).block_state;
+    let block_state: &block_state_t = &(state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     if chunk_len as u64 > 0xffffffffffffffffu64.wrapping_sub(total_len)
     { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
@@ -1143,9 +1129,8 @@ pub fn update0(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             if ! (sz1 == 0u32)
             {
                 let prevlen: u64 = total_len1.wrapping_sub(sz1 as u64);
-                let mut acc: &mut __·uint64_t·_·uint64_t· = &mut (*block_state).f3;
-                let wv: &mut [u64] = &mut (*acc).fst;
-                let hash: &mut [u64] = &mut (*acc).snd;
+                let hash: &mut [u64] = &mut (*block_state).f4;
+                let wv: &mut [u64] = &mut (*block_state).f3;
                 let nb: u32 = 1u32;
                 update_multi(
                     128u32,
@@ -1164,11 +1149,10 @@ pub fn update0(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             let n_blocks: u32 = chunk_len.wrapping_sub(ite).wrapping_div(128u32);
             let data1_len: u32 = n_blocks.wrapping_mul(128u32);
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
-            let data1: (&mut [u8], &mut [u8]) = chunk.split_at_mut(0usize);
-            let data2: (&mut [u8], &mut [u8]) = data1.1.split_at_mut(data1_len as usize);
-            let mut acc: &mut __·uint64_t·_·uint64_t· = &mut (*block_state).f3;
-            let wv: &mut [u64] = &mut (*acc).fst;
-            let hash: &mut [u64] = &mut (*acc).snd;
+            let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
+            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let hash: &mut [u64] = &mut (*block_state).f4;
+            let wv: &mut [u64] = &mut (*block_state).f3;
             let nb: u32 = data1_len.wrapping_div(128u32);
             update_multi(
                 data1_len,
@@ -1187,8 +1171,8 @@ pub fn update0(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
         else
         {
             let diff: u32 = 128u32.wrapping_sub(sz);
-            let chunk1: (&mut [u8], &mut [u8]) = chunk.split_at_mut(0usize);
-            let chunk2: (&mut [u8], &mut [u8]) = chunk1.1.split_at_mut(diff as usize);
+            let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
+            let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
@@ -1210,9 +1194,8 @@ pub fn update0(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             if ! (sz10 == 0u32)
             {
                 let prevlen: u64 = total_len10.wrapping_sub(sz10 as u64);
-                let mut acc: &mut __·uint64_t·_·uint64_t· = &mut (*block_state).f3;
-                let wv: &mut [u64] = &mut (*acc).fst;
-                let hash: &mut [u64] = &mut (*acc).snd;
+                let hash: &mut [u64] = &mut (*block_state).f4;
+                let wv: &mut [u64] = &mut (*block_state).f3;
                 let nb: u32 = 1u32;
                 update_multi(
                     128u32,
@@ -1234,11 +1217,10 @@ pub fn update0(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             let n_blocks: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(128u32);
             let data1_len: u32 = n_blocks.wrapping_mul(128u32);
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
-            let data1: (&mut [u8], &mut [u8]) = chunk2.1.split_at_mut(0usize);
-            let data2: (&mut [u8], &mut [u8]) = data1.1.split_at_mut(data1_len as usize);
-            let mut acc: &mut __·uint64_t·_·uint64_t· = &mut (*block_state).f3;
-            let wv: &mut [u64] = &mut (*acc).fst;
-            let hash: &mut [u64] = &mut (*acc).snd;
+            let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
+            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let hash: &mut [u64] = &mut (*block_state).f4;
+            let wv: &mut [u64] = &mut (*block_state).f3;
             let nb: u32 = data1_len.wrapping_div(128u32);
             update_multi(
                 data1_len,
@@ -1259,43 +1241,43 @@ pub fn update0(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     }
 }
 
-pub fn digest(s: &mut [state_t], dst: &mut [u8]) -> u8
+pub fn digest(s: &[state_t], dst: &mut [u8]) -> u8
 {
-    let mut block_state: &mut block_state_t = &mut (s[0usize]).block_state;
+    let block_state: &block_state_t = &(s[0usize]).block_state;
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
     let kk: u8 = (*block_state).fst;
     let i1: index = index { key_length: kk, digest_length: nn, last_node: last_node };
-    let mut block_state0: &mut block_state_t = &mut (s[0usize]).block_state;
-    let buf_: &mut [u8] = &mut (s[0usize]).buf;
+    let block_state0: &block_state_t = &(s[0usize]).block_state;
+    let buf_: &[u8] = &(s[0usize]).buf;
     let total_len: u64 = (s[0usize]).total_len;
     let r: u32 =
         if total_len.wrapping_rem(128u32 as u64) == 0u64 && total_len > 0u64
         { 128u32 }
         else
         { total_len.wrapping_rem(128u32 as u64) as u32 };
-    let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
-    let mut wv: [u64; 16] = [0u64; 16usize];
-    let mut b: [u64; 16] = [0u64; 16usize];
-    let mut tmp_block_state: block_state_t =
+    let buf_1: (&[u8], &[u8]) = buf_.split_at(0usize);
+    let wv: [u64; 16] = [0u64; 16usize];
+    let b: [u64; 16] = [0u64; 16usize];
+    let tmp_block_state: block_state_t =
         block_state_t
         {
             fst: i1.key_length,
             snd: i1.digest_length,
             thd: i1.last_node,
-            f3: __·uint64_t·_·uint64_t· { fst: Vec::from(wv), snd: Vec::from(b) }
+            f3: Vec::from(wv),
+            f4: Vec::from(b)
         };
-    let src_b: &mut [u64] = &mut (*block_state0).f3.snd;
-    let dst_b: &mut [u64] = &mut tmp_block_state.f3.snd;
+    let src_b: &[u64] = &(*block_state0).f4;
+    let dst_b: &mut [u64] = &mut tmp_block_state.f4;
     (dst_b[0usize..16usize]).copy_from_slice(&src_b[0usize..16usize]);
     let prev_len: u64 = total_len.wrapping_sub(r as u64);
-    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
+    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(128u32) == 0u32 && r > 0u32 { 128u32 } else { r.wrapping_rem(128u32) };
-    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
-    let mut acc: &mut __·uint64_t·_·uint64_t· = &mut tmp_block_state.f3;
-    let wv0: &mut [u64] = &mut (*acc).fst;
-    let hash: &mut [u64] = &mut (*acc).snd;
+    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let hash: &mut [u64] = &mut tmp_block_state.f4;
+    let wv0: &mut [u64] = &mut tmp_block_state.f3;
     let nb: u32 = 0u32;
     update_multi(
         0u32,
@@ -1306,10 +1288,9 @@ pub fn digest(s: &mut [state_t], dst: &mut [u8]) -> u8
         nb
     );
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
-    let mut acc0: &mut __·uint64_t·_·uint64_t· = &mut tmp_block_state.f3;
+    let hash0: &mut [u64] = &mut tmp_block_state.f4;
+    let wv1: &mut [u64] = &mut tmp_block_state.f3;
     let last_node0: bool = tmp_block_state.thd;
-    let wv1: &mut [u64] = &mut (*acc0).fst;
-    let hash0: &mut [u64] = &mut (*acc0).snd;
     update_last(
         r,
         wv1,
@@ -1320,27 +1301,27 @@ pub fn digest(s: &mut [state_t], dst: &mut [u8]) -> u8
         buf_last.1
     );
     let nn0: u8 = tmp_block_state.snd;
-    finish(nn0 as u32, dst, &mut tmp_block_state.f3.snd);
-    let mut block_state1: &mut block_state_t = &mut (s[0usize]).block_state;
+    finish(nn0 as u32, dst, &tmp_block_state.f4);
+    let block_state1: &block_state_t = &(s[0usize]).block_state;
     let last_node1: bool = (*block_state1).thd;
     let nn1: u8 = (*block_state1).snd;
     let kk0: u8 = (*block_state1).fst;
     index { key_length: kk0, digest_length: nn1, last_node: last_node1 }.digest_length
 }
 
-pub fn info(s: &mut [state_t]) -> index
+pub fn info(s: &[state_t]) -> index
 {
-    let mut block_state: &mut block_state_t = &mut (s[0usize]).block_state;
+    let block_state: &block_state_t = &(s[0usize]).block_state;
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
     let kk: u8 = (*block_state).fst;
     index { key_length: kk, digest_length: nn, last_node: last_node }
 }
 
-pub fn copy(state: &mut [state_t]) -> Vec<state_t>
+pub fn copy(state: &[state_t]) -> Vec<state_t>
 {
-    let mut block_state0: &mut block_state_t = &mut (state[0usize]).block_state;
-    let buf0: &mut [u8] = &mut (state[0usize]).buf;
+    let block_state0: &block_state_t = &(state[0usize]).block_state;
+    let buf0: &[u8] = &(state[0usize]).buf;
     let total_len0: u64 = (state[0usize]).total_len;
     let last_node: bool = (*block_state0).thd;
     let nn: u8 = (*block_state0).snd;
@@ -1348,21 +1329,15 @@ pub fn copy(state: &mut [state_t]) -> Vec<state_t>
     let i: index = index { key_length: kk1, digest_length: nn, last_node: last_node };
     let mut buf: Vec<u8> = vec![0u8; 128usize];
     ((&mut buf)[0usize..128usize]).copy_from_slice(&buf0[0usize..128usize]);
-    let mut wv: Vec<u64> = vec![0u64; 16usize];
-    let mut b: Vec<u64> = vec![0u64; 16usize];
-    let mut block_state: block_state_t =
-        block_state_t
-        {
-            fst: i.key_length,
-            snd: i.digest_length,
-            thd: i.last_node,
-            f3: __·uint64_t·_·uint64_t· { fst: wv, snd: b }
-        };
-    let src_b: &mut [u64] = &mut (*block_state0).f3.snd;
-    let dst_b: &mut [u64] = &mut block_state.f3.snd;
+    let wv: Vec<u64> = vec![0u64; 16usize];
+    let b: Vec<u64> = vec![0u64; 16usize];
+    let block_state: block_state_t =
+        block_state_t { fst: i.key_length, snd: i.digest_length, thd: i.last_node, f3: wv, f4: b };
+    let src_b: &[u64] = &(*block_state0).f4;
+    let dst_b: &mut [u64] = &mut block_state.f4;
     (dst_b[0usize..16usize]).copy_from_slice(&src_b[0usize..16usize]);
-    let mut s: state_t = state_t { block_state: block_state, buf: buf, total_len: total_len0 };
-    let mut p: Vec<state_t> =
+    let s: state_t = state_t { block_state: block_state, buf: buf, total_len: total_len0 };
+    let p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
             tmp.push(s);
@@ -1374,9 +1349,9 @@ pub fn copy(state: &mut [state_t]) -> Vec<state_t>
 pub fn hash_with_key(
     output: &mut [u8],
     output_len: u32,
-    input: &mut [u8],
+    input: &[u8],
     input_len: u32,
-    key: &mut [u8],
+    key: &[u8],
     key_len: u32
 )
 {
@@ -1384,17 +1359,17 @@ pub fn hash_with_key(
     let mut b1: [u64; 16] = [0u64; 16usize];
     init(&mut b, key_len, output_len);
     update(&mut b1, &mut b, key_len, key, input_len, input);
-    finish(output_len, output, &mut b);
+    finish(output_len, output, &b);
     crate::lib::memzero0::memzero::<u64>(&mut b1, 16u32);
     crate::lib::memzero0::memzero::<u64>(&mut b, 16u32)
 }
 
 pub fn hash_with_key_and_params(
     output: &mut [u8],
-    input: &mut [u8],
+    input: &[u8],
     input_len: u32,
     params: blake2_params,
-    key: &mut [u8]
+    key: &[u8]
 )
 {
     let mut b: [u64; 16] = [0u64; 16usize];
@@ -1429,7 +1404,7 @@ pub fn hash_with_key_and_params(
         0u32,
         1u32,
         {
-            let bj: &mut [u8] = &mut params.salt[i.wrapping_mul(8u32) as usize..];
+            let bj: &[u8] = &params.salt[i.wrapping_mul(8u32) as usize..];
             let u: u64 = crate::lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
@@ -1444,7 +1419,7 @@ pub fn hash_with_key_and_params(
         0u32,
         1u32,
         {
-            let bj: &mut [u8] = &mut params.personal[i.wrapping_mul(8u32) as usize..];
+            let bj: &[u8] = &params.personal[i.wrapping_mul(8u32) as usize..];
             let u: u64 = crate::lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
@@ -1463,14 +1438,14 @@ pub fn hash_with_key_and_params(
     (&mut tmp)[1usize] = params.node_offset;
     (&mut tmp)[2usize] = params.node_depth as u64 ^ (params.inner_length as u64).wrapping_shl(8u32);
     (&mut tmp)[3usize] = 0u64;
-    let tmp0: u64 = (&mut tmp)[0usize];
-    let tmp1: u64 = (&mut tmp)[1usize];
-    let tmp2: u64 = (&mut tmp)[2usize];
-    let tmp3: u64 = (&mut tmp)[3usize];
-    let tmp4: u64 = (&mut tmp)[4usize];
-    let tmp5: u64 = (&mut tmp)[5usize];
-    let tmp6: u64 = (&mut tmp)[6usize];
-    let tmp7: u64 = (&mut tmp)[7usize];
+    let tmp0: u64 = (&tmp)[0usize];
+    let tmp1: u64 = (&tmp)[1usize];
+    let tmp2: u64 = (&tmp)[2usize];
+    let tmp3: u64 = (&tmp)[3usize];
+    let tmp4: u64 = (&tmp)[4usize];
+    let tmp5: u64 = (&tmp)[5usize];
+    let tmp6: u64 = (&tmp)[6usize];
+    let tmp7: u64 = (&tmp)[7usize];
     let iv0·: u64 = iv0 ^ tmp0;
     let iv1·: u64 = iv1 ^ tmp1;
     let iv2·: u64 = iv2 ^ tmp2;
@@ -1488,7 +1463,7 @@ pub fn hash_with_key_and_params(
     r2.0[2usize] = iv6·;
     r2.0[3usize] = iv7·;
     update(&mut b1, &mut b, params.key_length as u32, key, input_len, input);
-    finish(params.digest_length as u32, output, &mut b);
+    finish(params.digest_length as u32, output, &b);
     crate::lib::memzero0::memzero::<u64>(&mut b1, 16u32);
     crate::lib::memzero0::memzero::<u64>(&mut b, 16u32)
 }

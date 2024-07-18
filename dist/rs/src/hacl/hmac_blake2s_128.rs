@@ -8,9 +8,9 @@
 
 pub fn compute_blake2s_128(
     dst: &mut [u8],
-    key: &mut [u8],
+    key: &[u8],
     key_len: u32,
-    data: &mut [u8],
+    data: &[u8],
     data_len: u32
 )
 {
@@ -19,32 +19,23 @@ pub fn compute_blake2s_128(
     let nkey: (&mut [u8], &mut [u8]) = (&mut key_block).split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 32u32 };
     let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
-    crate::lowstar::ignore::ignore::<&mut [u8]>(zeroes.1);
+    crate::lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 64u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
     else
-    {
-        crate::hacl::hash_blake2s_simd128::hash_with_key(
-            zeroes.0,
-            32u32,
-            key,
-            key_len,
-            &mut [],
-            0u32
-        )
-    };
+    { crate::hacl::hash_blake2s_simd128::hash_with_key(zeroes.0, 32u32, key, key_len, &[], 0u32) };
     let mut ipad: Vec<u8> = vec![0x36u8; l as usize];
     for i in 0u32..l
     {
-        let xi: u8 = (&mut ipad)[i as usize];
-        let yi: u8 = (&mut key_block)[i as usize];
+        let xi: u8 = (&ipad)[i as usize];
+        let yi: u8 = (&key_block)[i as usize];
         (&mut ipad)[i as usize] = xi ^ yi
     };
     let mut opad: Vec<u8> = vec![0x5cu8; l as usize];
     for i in 0u32..l
     {
-        let xi: u8 = (&mut opad)[i as usize];
-        let yi: u8 = (&mut key_block)[i as usize];
+        let xi: u8 = (&opad)[i as usize];
+        let yi: u8 = (&key_block)[i as usize];
         (&mut opad)[i as usize] = xi ^ yi
     };
     let mut s: [crate::lib::intvector_intrinsics::vec128; 4] =
@@ -62,7 +53,7 @@ pub fn compute_blake2s_128(
             false,
             0u64,
             64u32,
-            &mut ipad
+            &ipad
         )
     }
     else
@@ -82,11 +73,11 @@ pub fn compute_blake2s_128(
         let n_blocks0: u32 = scrut.fst;
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-        let full_blocks: (&mut [u8], &mut [u8]) = data.split_at_mut(0usize);
-        let rem0: (&mut [u8], &mut [u8]) = full_blocks.1.split_at_mut(full_blocks_len as usize);
+        let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
+        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
         let mut wv: [crate::lib::intvector_intrinsics::vec128; 4] =
             [crate::lib::intvector_intrinsics::vec128_zero; 4usize];
-        crate::hacl::hash_blake2s_simd128::update_multi(64u32, &mut wv, s0, 0u64, &mut ipad, 1u32);
+        crate::hacl::hash_blake2s_simd128::update_multi(64u32, &mut wv, s0, 0u64, &ipad, 1u32);
         let mut wv0: [crate::lib::intvector_intrinsics::vec128; 4] =
             [crate::lib::intvector_intrinsics::vec128_zero; 4usize];
         crate::hacl::hash_blake2s_simd128::update_multi(
@@ -111,7 +102,7 @@ pub fn compute_blake2s_128(
     };
     let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     crate::hacl::hash_blake2s_simd128::finish(32u32, dst1.1, s0);
-    let hash1: (&mut [u8], &mut [u8]) = dst1.1.split_at_mut(0usize);
+    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
     crate::hacl::hash_blake2s_simd128::init(s0, 0u32, 32u32);
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 32u32.wrapping_div(block_len);
@@ -128,11 +119,11 @@ pub fn compute_blake2s_128(
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&mut [u8], &mut [u8]) = hash1.1.split_at_mut(0usize);
-    let rem0: (&mut [u8], &mut [u8]) = full_blocks.1.split_at_mut(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
+    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
     let mut wv: [crate::lib::intvector_intrinsics::vec128; 4] =
         [crate::lib::intvector_intrinsics::vec128_zero; 4usize];
-    crate::hacl::hash_blake2s_simd128::update_multi(64u32, &mut wv, s0, 0u64, &mut opad, 1u32);
+    crate::hacl::hash_blake2s_simd128::update_multi(64u32, &mut wv, s0, 0u64, &opad, 1u32);
     let mut wv0: [crate::lib::intvector_intrinsics::vec128; 4] =
         [crate::lib::intvector_intrinsics::vec128_zero; 4usize];
     crate::hacl::hash_blake2s_simd128::update_multi(

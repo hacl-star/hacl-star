@@ -8,9 +8,9 @@
 
 pub fn expand_blake2s_128(
     okm: &mut [u8],
-    prk: &mut [u8],
+    prk: &[u8],
     prklen: u32,
-    info: &mut [u8],
+    info: &[u8],
     infolen: u32,
     len: u32
 )
@@ -44,7 +44,7 @@ pub fn expand_blake2s_128(
                 ctr.0,
                 prk,
                 prklen,
-                &mut text,
+                &text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
@@ -71,22 +71,16 @@ pub fn expand_blake2s_128(
                 ctr.0,
                 prk,
                 prklen,
-                &mut text,
+                &text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
-            &(&mut ctr.0[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
+            &(&ctr.0[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
     }
 }
 
-pub fn extract_blake2s_128(
-    prk: &mut [u8],
-    salt: &mut [u8],
-    saltlen: u32,
-    ikm: &mut [u8],
-    ikmlen: u32
-)
+pub fn extract_blake2s_128(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
 { crate::hacl::hmac_blake2s_128::compute_blake2s_128(prk, salt, saltlen, ikm, ikmlen) }

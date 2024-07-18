@@ -140,7 +140,7 @@
 
 #[inline] fn chacha20_core_256(
     k: &mut [crate::lib::intvector_intrinsics::vec256],
-    ctx: &mut [crate::lib::intvector_intrinsics::vec256],
+    ctx: &[crate::lib::intvector_intrinsics::vec256],
     ctr: u32
 )
 {
@@ -181,8 +181,8 @@
 
 #[inline] fn chacha20_init_256(
     ctx: &mut [crate::lib::intvector_intrinsics::vec256],
-    k: &mut [u8],
-    n: &mut [u8],
+    k: &[u8],
+    n: &[u8],
     ctr: u32
 )
 {
@@ -205,7 +205,7 @@
         0u32,
         1u32,
         {
-            let bj: (&mut [u8], &mut [u8]) = k.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let bj: (&[u8], &[u8]) = k.split_at(i.wrapping_mul(4u32) as usize);
             let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -221,7 +221,7 @@
         0u32,
         1u32,
         {
-            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
+            let bj: (&[u8], &[u8]) = n.split_at(i.wrapping_mul(4u32) as usize);
             let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -235,7 +235,7 @@
         0u32,
         1u32,
         {
-            let x: u32 = (&mut ctx1)[i as usize];
+            let x: u32 = (&ctx1)[i as usize];
             let x0: crate::lib::intvector_intrinsics::vec256 =
                 crate::lib::intvector_intrinsics::vec256_load32(x);
             let
@@ -265,9 +265,9 @@
 pub fn chacha20_encrypt_256(
     len: u32,
     out: &mut [u8],
-    text: &mut [u8],
-    key: &mut [u8],
-    n: &mut [u8],
+    text: &[u8],
+    key: &[u8],
+    n: &[u8],
     ctr: u32
 )
 {
@@ -280,26 +280,26 @@ pub fn chacha20_encrypt_256(
     for i in 0u32..nb
     {
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(512u32) as usize);
-        let uu____1: (&mut [u8], &mut [u8]) = text.split_at_mut(i.wrapping_mul(512u32) as usize);
+        let uu____1: (&[u8], &[u8]) = text.split_at(i.wrapping_mul(512u32) as usize);
         let mut k: [crate::lib::intvector_intrinsics::vec256; 16] =
             [crate::lib::intvector_intrinsics::vec256_zero; 16usize];
-        chacha20_core_256(&mut k, &mut ctx, i);
-        let st0: crate::lib::intvector_intrinsics::vec256 = (&mut k)[0usize];
-        let st1: crate::lib::intvector_intrinsics::vec256 = (&mut k)[1usize];
-        let st2: crate::lib::intvector_intrinsics::vec256 = (&mut k)[2usize];
-        let st3: crate::lib::intvector_intrinsics::vec256 = (&mut k)[3usize];
-        let st4: crate::lib::intvector_intrinsics::vec256 = (&mut k)[4usize];
-        let st5: crate::lib::intvector_intrinsics::vec256 = (&mut k)[5usize];
-        let st6: crate::lib::intvector_intrinsics::vec256 = (&mut k)[6usize];
-        let st7: crate::lib::intvector_intrinsics::vec256 = (&mut k)[7usize];
-        let st8: crate::lib::intvector_intrinsics::vec256 = (&mut k)[8usize];
-        let st9: crate::lib::intvector_intrinsics::vec256 = (&mut k)[9usize];
-        let st10: crate::lib::intvector_intrinsics::vec256 = (&mut k)[10usize];
-        let st11: crate::lib::intvector_intrinsics::vec256 = (&mut k)[11usize];
-        let st12: crate::lib::intvector_intrinsics::vec256 = (&mut k)[12usize];
-        let st13: crate::lib::intvector_intrinsics::vec256 = (&mut k)[13usize];
-        let st14: crate::lib::intvector_intrinsics::vec256 = (&mut k)[14usize];
-        let st15: crate::lib::intvector_intrinsics::vec256 = (&mut k)[15usize];
+        chacha20_core_256(&mut k, &ctx, i);
+        let st0: crate::lib::intvector_intrinsics::vec256 = (&k)[0usize];
+        let st1: crate::lib::intvector_intrinsics::vec256 = (&k)[1usize];
+        let st2: crate::lib::intvector_intrinsics::vec256 = (&k)[2usize];
+        let st3: crate::lib::intvector_intrinsics::vec256 = (&k)[3usize];
+        let st4: crate::lib::intvector_intrinsics::vec256 = (&k)[4usize];
+        let st5: crate::lib::intvector_intrinsics::vec256 = (&k)[5usize];
+        let st6: crate::lib::intvector_intrinsics::vec256 = (&k)[6usize];
+        let st7: crate::lib::intvector_intrinsics::vec256 = (&k)[7usize];
+        let st8: crate::lib::intvector_intrinsics::vec256 = (&k)[8usize];
+        let st9: crate::lib::intvector_intrinsics::vec256 = (&k)[9usize];
+        let st10: crate::lib::intvector_intrinsics::vec256 = (&k)[10usize];
+        let st11: crate::lib::intvector_intrinsics::vec256 = (&k)[11usize];
+        let st12: crate::lib::intvector_intrinsics::vec256 = (&k)[12usize];
+        let st13: crate::lib::intvector_intrinsics::vec256 = (&k)[13usize];
+        let st14: crate::lib::intvector_intrinsics::vec256 = (&k)[14usize];
+        let st15: crate::lib::intvector_intrinsics::vec256 = (&k)[15usize];
         let v0: crate::lib::intvector_intrinsics::vec256 = st0;
         let v1: crate::lib::intvector_intrinsics::vec256 = st1;
         let v2: crate::lib::intvector_intrinsics::vec256 = st2;
@@ -516,10 +516,10 @@ pub fn chacha20_encrypt_256(
             {
                 let x: crate::lib::intvector_intrinsics::vec256 =
                     crate::lib::intvector_intrinsics::vec256_load32_le(
-                        &mut uu____1.1[i0.wrapping_mul(32u32) as usize..]
+                        &uu____1.1[i0.wrapping_mul(32u32) as usize..]
                     );
                 let y: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(x, (&mut k)[i0 as usize]);
+                    crate::lib::intvector_intrinsics::vec256_xor(x, (&k)[i0 as usize]);
                 crate::lib::intvector_intrinsics::vec256_store32_le(
                     &mut uu____0.1[i0.wrapping_mul(32u32) as usize..],
                     y
@@ -532,27 +532,27 @@ pub fn chacha20_encrypt_256(
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(512u32) as usize);
         let mut plain: [u8; 512] = [0u8; 512usize];
         ((&mut plain)[0usize..rem as usize]).copy_from_slice(
-            &(&mut text[nb.wrapping_mul(512u32) as usize..])[0usize..rem as usize]
+            &(&text[nb.wrapping_mul(512u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [crate::lib::intvector_intrinsics::vec256; 16] =
             [crate::lib::intvector_intrinsics::vec256_zero; 16usize];
-        chacha20_core_256(&mut k, &mut ctx, nb);
-        let st0: crate::lib::intvector_intrinsics::vec256 = (&mut k)[0usize];
-        let st1: crate::lib::intvector_intrinsics::vec256 = (&mut k)[1usize];
-        let st2: crate::lib::intvector_intrinsics::vec256 = (&mut k)[2usize];
-        let st3: crate::lib::intvector_intrinsics::vec256 = (&mut k)[3usize];
-        let st4: crate::lib::intvector_intrinsics::vec256 = (&mut k)[4usize];
-        let st5: crate::lib::intvector_intrinsics::vec256 = (&mut k)[5usize];
-        let st6: crate::lib::intvector_intrinsics::vec256 = (&mut k)[6usize];
-        let st7: crate::lib::intvector_intrinsics::vec256 = (&mut k)[7usize];
-        let st8: crate::lib::intvector_intrinsics::vec256 = (&mut k)[8usize];
-        let st9: crate::lib::intvector_intrinsics::vec256 = (&mut k)[9usize];
-        let st10: crate::lib::intvector_intrinsics::vec256 = (&mut k)[10usize];
-        let st11: crate::lib::intvector_intrinsics::vec256 = (&mut k)[11usize];
-        let st12: crate::lib::intvector_intrinsics::vec256 = (&mut k)[12usize];
-        let st13: crate::lib::intvector_intrinsics::vec256 = (&mut k)[13usize];
-        let st14: crate::lib::intvector_intrinsics::vec256 = (&mut k)[14usize];
-        let st15: crate::lib::intvector_intrinsics::vec256 = (&mut k)[15usize];
+        chacha20_core_256(&mut k, &ctx, nb);
+        let st0: crate::lib::intvector_intrinsics::vec256 = (&k)[0usize];
+        let st1: crate::lib::intvector_intrinsics::vec256 = (&k)[1usize];
+        let st2: crate::lib::intvector_intrinsics::vec256 = (&k)[2usize];
+        let st3: crate::lib::intvector_intrinsics::vec256 = (&k)[3usize];
+        let st4: crate::lib::intvector_intrinsics::vec256 = (&k)[4usize];
+        let st5: crate::lib::intvector_intrinsics::vec256 = (&k)[5usize];
+        let st6: crate::lib::intvector_intrinsics::vec256 = (&k)[6usize];
+        let st7: crate::lib::intvector_intrinsics::vec256 = (&k)[7usize];
+        let st8: crate::lib::intvector_intrinsics::vec256 = (&k)[8usize];
+        let st9: crate::lib::intvector_intrinsics::vec256 = (&k)[9usize];
+        let st10: crate::lib::intvector_intrinsics::vec256 = (&k)[10usize];
+        let st11: crate::lib::intvector_intrinsics::vec256 = (&k)[11usize];
+        let st12: crate::lib::intvector_intrinsics::vec256 = (&k)[12usize];
+        let st13: crate::lib::intvector_intrinsics::vec256 = (&k)[13usize];
+        let st14: crate::lib::intvector_intrinsics::vec256 = (&k)[14usize];
+        let st15: crate::lib::intvector_intrinsics::vec256 = (&k)[15usize];
         let v0: crate::lib::intvector_intrinsics::vec256 = st0;
         let v1: crate::lib::intvector_intrinsics::vec256 = st1;
         let v2: crate::lib::intvector_intrinsics::vec256 = st2;
@@ -769,10 +769,10 @@ pub fn chacha20_encrypt_256(
             {
                 let x: crate::lib::intvector_intrinsics::vec256 =
                     crate::lib::intvector_intrinsics::vec256_load32_le(
-                        &mut (&mut plain)[i.wrapping_mul(32u32) as usize..]
+                        &(&plain)[i.wrapping_mul(32u32) as usize..]
                     );
                 let y: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(x, (&mut k)[i as usize]);
+                    crate::lib::intvector_intrinsics::vec256_xor(x, (&k)[i as usize]);
                 crate::lib::intvector_intrinsics::vec256_store32_le(
                     &mut (&mut plain)[i.wrapping_mul(32u32) as usize..],
                     y
@@ -780,7 +780,7 @@ pub fn chacha20_encrypt_256(
             }
         );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
-            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
+            &(&(&plain)[0usize..])[0usize..rem as usize]
         )
     }
 }
@@ -788,9 +788,9 @@ pub fn chacha20_encrypt_256(
 pub fn chacha20_decrypt_256(
     len: u32,
     out: &mut [u8],
-    cipher: &mut [u8],
-    key: &mut [u8],
-    n: &mut [u8],
+    cipher: &[u8],
+    key: &[u8],
+    n: &[u8],
     ctr: u32
 )
 {
@@ -803,26 +803,26 @@ pub fn chacha20_decrypt_256(
     for i in 0u32..nb
     {
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(512u32) as usize);
-        let uu____1: (&mut [u8], &mut [u8]) = cipher.split_at_mut(i.wrapping_mul(512u32) as usize);
+        let uu____1: (&[u8], &[u8]) = cipher.split_at(i.wrapping_mul(512u32) as usize);
         let mut k: [crate::lib::intvector_intrinsics::vec256; 16] =
             [crate::lib::intvector_intrinsics::vec256_zero; 16usize];
-        chacha20_core_256(&mut k, &mut ctx, i);
-        let st0: crate::lib::intvector_intrinsics::vec256 = (&mut k)[0usize];
-        let st1: crate::lib::intvector_intrinsics::vec256 = (&mut k)[1usize];
-        let st2: crate::lib::intvector_intrinsics::vec256 = (&mut k)[2usize];
-        let st3: crate::lib::intvector_intrinsics::vec256 = (&mut k)[3usize];
-        let st4: crate::lib::intvector_intrinsics::vec256 = (&mut k)[4usize];
-        let st5: crate::lib::intvector_intrinsics::vec256 = (&mut k)[5usize];
-        let st6: crate::lib::intvector_intrinsics::vec256 = (&mut k)[6usize];
-        let st7: crate::lib::intvector_intrinsics::vec256 = (&mut k)[7usize];
-        let st8: crate::lib::intvector_intrinsics::vec256 = (&mut k)[8usize];
-        let st9: crate::lib::intvector_intrinsics::vec256 = (&mut k)[9usize];
-        let st10: crate::lib::intvector_intrinsics::vec256 = (&mut k)[10usize];
-        let st11: crate::lib::intvector_intrinsics::vec256 = (&mut k)[11usize];
-        let st12: crate::lib::intvector_intrinsics::vec256 = (&mut k)[12usize];
-        let st13: crate::lib::intvector_intrinsics::vec256 = (&mut k)[13usize];
-        let st14: crate::lib::intvector_intrinsics::vec256 = (&mut k)[14usize];
-        let st15: crate::lib::intvector_intrinsics::vec256 = (&mut k)[15usize];
+        chacha20_core_256(&mut k, &ctx, i);
+        let st0: crate::lib::intvector_intrinsics::vec256 = (&k)[0usize];
+        let st1: crate::lib::intvector_intrinsics::vec256 = (&k)[1usize];
+        let st2: crate::lib::intvector_intrinsics::vec256 = (&k)[2usize];
+        let st3: crate::lib::intvector_intrinsics::vec256 = (&k)[3usize];
+        let st4: crate::lib::intvector_intrinsics::vec256 = (&k)[4usize];
+        let st5: crate::lib::intvector_intrinsics::vec256 = (&k)[5usize];
+        let st6: crate::lib::intvector_intrinsics::vec256 = (&k)[6usize];
+        let st7: crate::lib::intvector_intrinsics::vec256 = (&k)[7usize];
+        let st8: crate::lib::intvector_intrinsics::vec256 = (&k)[8usize];
+        let st9: crate::lib::intvector_intrinsics::vec256 = (&k)[9usize];
+        let st10: crate::lib::intvector_intrinsics::vec256 = (&k)[10usize];
+        let st11: crate::lib::intvector_intrinsics::vec256 = (&k)[11usize];
+        let st12: crate::lib::intvector_intrinsics::vec256 = (&k)[12usize];
+        let st13: crate::lib::intvector_intrinsics::vec256 = (&k)[13usize];
+        let st14: crate::lib::intvector_intrinsics::vec256 = (&k)[14usize];
+        let st15: crate::lib::intvector_intrinsics::vec256 = (&k)[15usize];
         let v0: crate::lib::intvector_intrinsics::vec256 = st0;
         let v1: crate::lib::intvector_intrinsics::vec256 = st1;
         let v2: crate::lib::intvector_intrinsics::vec256 = st2;
@@ -1039,10 +1039,10 @@ pub fn chacha20_decrypt_256(
             {
                 let x: crate::lib::intvector_intrinsics::vec256 =
                     crate::lib::intvector_intrinsics::vec256_load32_le(
-                        &mut uu____1.1[i0.wrapping_mul(32u32) as usize..]
+                        &uu____1.1[i0.wrapping_mul(32u32) as usize..]
                     );
                 let y: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(x, (&mut k)[i0 as usize]);
+                    crate::lib::intvector_intrinsics::vec256_xor(x, (&k)[i0 as usize]);
                 crate::lib::intvector_intrinsics::vec256_store32_le(
                     &mut uu____0.1[i0.wrapping_mul(32u32) as usize..],
                     y
@@ -1055,27 +1055,27 @@ pub fn chacha20_decrypt_256(
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(512u32) as usize);
         let mut plain: [u8; 512] = [0u8; 512usize];
         ((&mut plain)[0usize..rem as usize]).copy_from_slice(
-            &(&mut cipher[nb.wrapping_mul(512u32) as usize..])[0usize..rem as usize]
+            &(&cipher[nb.wrapping_mul(512u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [crate::lib::intvector_intrinsics::vec256; 16] =
             [crate::lib::intvector_intrinsics::vec256_zero; 16usize];
-        chacha20_core_256(&mut k, &mut ctx, nb);
-        let st0: crate::lib::intvector_intrinsics::vec256 = (&mut k)[0usize];
-        let st1: crate::lib::intvector_intrinsics::vec256 = (&mut k)[1usize];
-        let st2: crate::lib::intvector_intrinsics::vec256 = (&mut k)[2usize];
-        let st3: crate::lib::intvector_intrinsics::vec256 = (&mut k)[3usize];
-        let st4: crate::lib::intvector_intrinsics::vec256 = (&mut k)[4usize];
-        let st5: crate::lib::intvector_intrinsics::vec256 = (&mut k)[5usize];
-        let st6: crate::lib::intvector_intrinsics::vec256 = (&mut k)[6usize];
-        let st7: crate::lib::intvector_intrinsics::vec256 = (&mut k)[7usize];
-        let st8: crate::lib::intvector_intrinsics::vec256 = (&mut k)[8usize];
-        let st9: crate::lib::intvector_intrinsics::vec256 = (&mut k)[9usize];
-        let st10: crate::lib::intvector_intrinsics::vec256 = (&mut k)[10usize];
-        let st11: crate::lib::intvector_intrinsics::vec256 = (&mut k)[11usize];
-        let st12: crate::lib::intvector_intrinsics::vec256 = (&mut k)[12usize];
-        let st13: crate::lib::intvector_intrinsics::vec256 = (&mut k)[13usize];
-        let st14: crate::lib::intvector_intrinsics::vec256 = (&mut k)[14usize];
-        let st15: crate::lib::intvector_intrinsics::vec256 = (&mut k)[15usize];
+        chacha20_core_256(&mut k, &ctx, nb);
+        let st0: crate::lib::intvector_intrinsics::vec256 = (&k)[0usize];
+        let st1: crate::lib::intvector_intrinsics::vec256 = (&k)[1usize];
+        let st2: crate::lib::intvector_intrinsics::vec256 = (&k)[2usize];
+        let st3: crate::lib::intvector_intrinsics::vec256 = (&k)[3usize];
+        let st4: crate::lib::intvector_intrinsics::vec256 = (&k)[4usize];
+        let st5: crate::lib::intvector_intrinsics::vec256 = (&k)[5usize];
+        let st6: crate::lib::intvector_intrinsics::vec256 = (&k)[6usize];
+        let st7: crate::lib::intvector_intrinsics::vec256 = (&k)[7usize];
+        let st8: crate::lib::intvector_intrinsics::vec256 = (&k)[8usize];
+        let st9: crate::lib::intvector_intrinsics::vec256 = (&k)[9usize];
+        let st10: crate::lib::intvector_intrinsics::vec256 = (&k)[10usize];
+        let st11: crate::lib::intvector_intrinsics::vec256 = (&k)[11usize];
+        let st12: crate::lib::intvector_intrinsics::vec256 = (&k)[12usize];
+        let st13: crate::lib::intvector_intrinsics::vec256 = (&k)[13usize];
+        let st14: crate::lib::intvector_intrinsics::vec256 = (&k)[14usize];
+        let st15: crate::lib::intvector_intrinsics::vec256 = (&k)[15usize];
         let v0: crate::lib::intvector_intrinsics::vec256 = st0;
         let v1: crate::lib::intvector_intrinsics::vec256 = st1;
         let v2: crate::lib::intvector_intrinsics::vec256 = st2;
@@ -1292,10 +1292,10 @@ pub fn chacha20_decrypt_256(
             {
                 let x: crate::lib::intvector_intrinsics::vec256 =
                     crate::lib::intvector_intrinsics::vec256_load32_le(
-                        &mut (&mut plain)[i.wrapping_mul(32u32) as usize..]
+                        &(&plain)[i.wrapping_mul(32u32) as usize..]
                     );
                 let y: crate::lib::intvector_intrinsics::vec256 =
-                    crate::lib::intvector_intrinsics::vec256_xor(x, (&mut k)[i as usize]);
+                    crate::lib::intvector_intrinsics::vec256_xor(x, (&k)[i as usize]);
                 crate::lib::intvector_intrinsics::vec256_store32_le(
                     &mut (&mut plain)[i.wrapping_mul(32u32) as usize..],
                     y
@@ -1303,7 +1303,7 @@ pub fn chacha20_decrypt_256(
             }
         );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
-            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
+            &(&(&plain)[0usize..])[0usize..rem as usize]
         )
     }
 }

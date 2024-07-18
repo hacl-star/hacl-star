@@ -6,23 +6,23 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] fn poly1305_padded_32(ctx: &mut [u64], len: u32, text: &mut [u8])
+#[inline] fn poly1305_padded_32(ctx: &mut [u64], len: u32, text: &[u8])
 {
     let n: u32 = len.wrapping_div(16u32);
     let r: u32 = len.wrapping_rem(16u32);
-    let blocks: (&mut [u8], &mut [u8]) = text.split_at_mut(0usize);
-    let rem: (&mut [u8], &mut [u8]) = blocks.1.split_at_mut(n.wrapping_mul(16u32) as usize);
+    let blocks: (&[u8], &[u8]) = text.split_at(0usize);
+    let rem: (&[u8], &[u8]) = blocks.1.split_at(n.wrapping_mul(16u32) as usize);
     let pre: (&mut [u64], &mut [u64]) = ctx.split_at_mut(5usize);
     let acc: (&mut [u64], &mut [u64]) = pre.0.split_at_mut(0usize);
     let nb: u32 = n.wrapping_mul(16u32).wrapping_div(16u32);
     let rem1: u32 = n.wrapping_mul(16u32).wrapping_rem(16u32);
     for i in 0u32..nb
     {
-        let block: (&mut [u8], &mut [u8]) = rem.0.split_at_mut(i.wrapping_mul(16u32) as usize);
+        let block: (&[u8], &[u8]) = rem.0.split_at(i.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
-        let u: u64 = crate::lowstar::endianness::load64_le(&mut block.1[0usize..]);
+        let u: u64 = crate::lowstar::endianness::load64_le(&block.1[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&mut block.1[8usize..]);
+        let u0: u64 = crate::lowstar::endianness::load64_le(&block.1[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -43,10 +43,10 @@
         (&mut e)[4usize] = f40;
         let b: u64 = 0x1000000u64;
         let mask: u64 = b;
-        let f41: u64 = (&mut e)[4usize];
+        let f41: u64 = (&e)[4usize];
         (&mut e)[4usize] = f41 | mask;
-        let r1: (&mut [u64], &mut [u64]) = pre.1.split_at_mut(0usize);
-        let r5: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(5usize);
+        let r1: (&[u64], &[u64]) = pre.1.split_at(0usize);
+        let r5: (&[u64], &[u64]) = r1.1.split_at(5usize);
         let r0: u64 = r5.0[0usize];
         let r11: u64 = r5.0[1usize];
         let r2: u64 = r5.0[2usize];
@@ -56,11 +56,11 @@
         let r52: u64 = r5.1[2usize];
         let r53: u64 = r5.1[3usize];
         let r54: u64 = r5.1[4usize];
-        let f10: u64 = (&mut e)[0usize];
-        let f111: u64 = (&mut e)[1usize];
-        let f12: u64 = (&mut e)[2usize];
-        let f13: u64 = (&mut e)[3usize];
-        let f14: u64 = (&mut e)[4usize];
+        let f10: u64 = (&e)[0usize];
+        let f111: u64 = (&e)[1usize];
+        let f12: u64 = (&e)[2usize];
+        let f13: u64 = (&e)[3usize];
+        let f14: u64 = (&e)[4usize];
         let a0: u64 = acc.1[0usize];
         let a1: u64 = acc.1[1usize];
         let a2: u64 = acc.1[2usize];
@@ -138,13 +138,13 @@
     };
     if rem1 > 0u32
     {
-        let last: (&mut [u8], &mut [u8]) = rem.0.split_at_mut(nb.wrapping_mul(16u32) as usize);
+        let last: (&[u8], &[u8]) = rem.0.split_at(nb.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
         let mut tmp: [u8; 16] = [0u8; 16usize];
         ((&mut tmp)[0usize..rem1 as usize]).copy_from_slice(&last.1[0usize..rem1 as usize]);
-        let u: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[0usize..]);
+        let u: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[8usize..]);
+        let u0: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -165,10 +165,10 @@
         (&mut e)[4usize] = f40;
         let b: u64 = 1u64.wrapping_shl(rem1.wrapping_mul(8u32).wrapping_rem(26u32));
         let mask: u64 = b;
-        let fi: u64 = (&mut e)[rem1.wrapping_mul(8u32).wrapping_div(26u32) as usize];
+        let fi: u64 = (&e)[rem1.wrapping_mul(8u32).wrapping_div(26u32) as usize];
         (&mut e)[rem1.wrapping_mul(8u32).wrapping_div(26u32) as usize] = fi | mask;
-        let r1: (&mut [u64], &mut [u64]) = pre.1.split_at_mut(0usize);
-        let r5: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(5usize);
+        let r1: (&[u64], &[u64]) = pre.1.split_at(0usize);
+        let r5: (&[u64], &[u64]) = r1.1.split_at(5usize);
         let r0: u64 = r5.0[0usize];
         let r11: u64 = r5.0[1usize];
         let r2: u64 = r5.0[2usize];
@@ -178,11 +178,11 @@
         let r52: u64 = r5.1[2usize];
         let r53: u64 = r5.1[3usize];
         let r54: u64 = r5.1[4usize];
-        let f10: u64 = (&mut e)[0usize];
-        let f111: u64 = (&mut e)[1usize];
-        let f12: u64 = (&mut e)[2usize];
-        let f13: u64 = (&mut e)[3usize];
-        let f14: u64 = (&mut e)[4usize];
+        let f10: u64 = (&e)[0usize];
+        let f111: u64 = (&e)[1usize];
+        let f12: u64 = (&e)[2usize];
+        let f13: u64 = (&e)[3usize];
+        let f14: u64 = (&e)[4usize];
         let a0: u64 = acc.1[0usize];
         let a1: u64 = acc.1[1usize];
         let a2: u64 = acc.1[2usize];
@@ -262,12 +262,12 @@
     ((&mut tmp)[0usize..r as usize]).copy_from_slice(&rem.1[0usize..r as usize]);
     if r > 0u32
     {
-        let pre0: (&mut [u64], &mut [u64]) = pre.1.split_at_mut(0usize);
+        let pre0: (&[u64], &[u64]) = pre.1.split_at(0usize);
         let acc0: (&mut [u64], &mut [u64]) = acc.1.split_at_mut(0usize);
         let mut e: [u64; 5] = [0u64; 5usize];
-        let u: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[0usize..]);
+        let u: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[8usize..]);
+        let u0: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -288,10 +288,10 @@
         (&mut e)[4usize] = f40;
         let b: u64 = 0x1000000u64;
         let mask: u64 = b;
-        let f41: u64 = (&mut e)[4usize];
+        let f41: u64 = (&e)[4usize];
         (&mut e)[4usize] = f41 | mask;
-        let r1: (&mut [u64], &mut [u64]) = pre0.1.split_at_mut(0usize);
-        let r5: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(5usize);
+        let r1: (&[u64], &[u64]) = pre0.1.split_at(0usize);
+        let r5: (&[u64], &[u64]) = r1.1.split_at(5usize);
         let r0: u64 = r5.0[0usize];
         let r11: u64 = r5.0[1usize];
         let r2: u64 = r5.0[2usize];
@@ -301,11 +301,11 @@
         let r52: u64 = r5.1[2usize];
         let r53: u64 = r5.1[3usize];
         let r54: u64 = r5.1[4usize];
-        let f10: u64 = (&mut e)[0usize];
-        let f111: u64 = (&mut e)[1usize];
-        let f12: u64 = (&mut e)[2usize];
-        let f13: u64 = (&mut e)[3usize];
-        let f14: u64 = (&mut e)[4usize];
+        let f10: u64 = (&e)[0usize];
+        let f111: u64 = (&e)[1usize];
+        let f12: u64 = (&e)[2usize];
+        let f13: u64 = (&e)[3usize];
+        let f14: u64 = (&e)[4usize];
         let a0: u64 = acc0.1[0usize];
         let a1: u64 = acc0.1[1usize];
         let a2: u64 = acc0.1[2usize];
@@ -384,11 +384,11 @@
 }
 
 #[inline] fn poly1305_do_32(
-    k: &mut [u8],
+    k: &[u8],
     aadlen: u32,
-    aad: &mut [u8],
+    aad: &[u8],
     mlen: u32,
-    m: &mut [u8],
+    m: &[u8],
     out: &mut [u8]
 )
 {
@@ -402,9 +402,9 @@
     let pre: (&mut [u64], &mut [u64]) = (&mut ctx).split_at_mut(5usize);
     let acc: (&mut [u64], &mut [u64]) = pre.0.split_at_mut(0usize);
     let mut e: [u64; 5] = [0u64; 5usize];
-    let u: u64 = crate::lowstar::endianness::load64_le(&mut (&mut block)[0usize..]);
+    let u: u64 = crate::lowstar::endianness::load64_le(&(&block)[0usize..]);
     let lo: u64 = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&mut (&mut block)[8usize..]);
+    let u0: u64 = crate::lowstar::endianness::load64_le(&(&block)[8usize..]);
     let hi: u64 = u0;
     let f0: u64 = lo;
     let f1: u64 = hi;
@@ -425,10 +425,10 @@
     (&mut e)[4usize] = f40;
     let b: u64 = 0x1000000u64;
     let mask: u64 = b;
-    let f41: u64 = (&mut e)[4usize];
+    let f41: u64 = (&e)[4usize];
     (&mut e)[4usize] = f41 | mask;
-    let r: (&mut [u64], &mut [u64]) = pre.1.split_at_mut(0usize);
-    let r5: (&mut [u64], &mut [u64]) = r.1.split_at_mut(5usize);
+    let r: (&[u64], &[u64]) = pre.1.split_at(0usize);
+    let r5: (&[u64], &[u64]) = r.1.split_at(5usize);
     let r0: u64 = r5.0[0usize];
     let r1: u64 = r5.0[1usize];
     let r2: u64 = r5.0[2usize];
@@ -438,11 +438,11 @@
     let r52: u64 = r5.1[2usize];
     let r53: u64 = r5.1[3usize];
     let r54: u64 = r5.1[4usize];
-    let f10: u64 = (&mut e)[0usize];
-    let f111: u64 = (&mut e)[1usize];
-    let f12: u64 = (&mut e)[2usize];
-    let f13: u64 = (&mut e)[3usize];
-    let f14: u64 = (&mut e)[4usize];
+    let f10: u64 = (&e)[0usize];
+    let f111: u64 = (&e)[1usize];
+    let f12: u64 = (&e)[2usize];
+    let f13: u64 = (&e)[3usize];
+    let f14: u64 = (&e)[4usize];
     let a0: u64 = acc.1[0usize];
     let a1: u64 = acc.1[1usize];
     let a2: u64 = acc.1[2usize];
@@ -523,39 +523,39 @@
 pub fn encrypt(
     output: &mut [u8],
     tag: &mut [u8],
-    input: &mut [u8],
+    input: &[u8],
     input_len: u32,
-    data: &mut [u8],
+    data: &[u8],
     data_len: u32,
-    key: &mut [u8],
-    nonce: &mut [u8]
+    key: &[u8],
+    nonce: &[u8]
 )
 {
     crate::hacl::chacha20::chacha20_encrypt(input_len, output, input, key, nonce, 1u32);
     let mut tmp: [u8; 64] = [0u8; 64usize];
-    let mut tmp_copy: [u8; 64] = [0u8; 64usize];
-    crate::hacl::chacha20::chacha20_encrypt(64u32, &mut tmp, &mut tmp_copy, key, nonce, 0u32);
-    let key1: (&mut [u8], &mut [u8]) = (&mut tmp).split_at_mut(0usize);
+    let tmp_copy: [u8; 64] = [0u8; 64usize];
+    crate::hacl::chacha20::chacha20_encrypt(64u32, &mut tmp, &tmp_copy, key, nonce, 0u32);
+    let key1: (&[u8], &[u8]) = (&tmp).split_at(0usize);
     poly1305_do_32(key1.1, data_len, data, input_len, output, tag)
 }
 
 pub fn decrypt(
     output: &mut [u8],
-    input: &mut [u8],
+    input: &[u8],
     input_len: u32,
-    data: &mut [u8],
+    data: &[u8],
     data_len: u32,
-    key: &mut [u8],
-    nonce: &mut [u8],
-    tag: &mut [u8]
+    key: &[u8],
+    nonce: &[u8],
+    tag: &[u8]
 ) ->
     u32
 {
     let mut computed_tag: [u8; 16] = [0u8; 16usize];
     let mut tmp: [u8; 64] = [0u8; 64usize];
-    let mut tmp_copy: [u8; 64] = [0u8; 64usize];
-    crate::hacl::chacha20::chacha20_encrypt(64u32, &mut tmp, &mut tmp_copy, key, nonce, 0u32);
-    let key1: (&mut [u8], &mut [u8]) = (&mut tmp).split_at_mut(0usize);
+    let tmp_copy: [u8; 64] = [0u8; 64usize];
+    crate::hacl::chacha20::chacha20_encrypt(64u32, &mut tmp, &tmp_copy, key, nonce, 0u32);
+    let key1: (&[u8], &[u8]) = (&tmp).split_at(0usize);
     poly1305_do_32(key1.1, data_len, data, input_len, input, &mut computed_tag);
     let mut res: [u8; 1] = [255u8; 1usize];
     krml::unroll_for!(
@@ -565,11 +565,11 @@ pub fn decrypt(
         1u32,
         {
             let uu____0: u8 =
-                crate::fstar::uint8::eq_mask((&mut computed_tag)[i as usize], tag[i as usize]);
-            (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
+                crate::fstar::uint8::eq_mask((&computed_tag)[i as usize], tag[i as usize]);
+            (&mut res)[0usize] = uu____0 & (&res)[0usize]
         }
     );
-    let z: u8 = (&mut res)[0usize];
+    let z: u8 = (&res)[0usize];
     if z == 255u8
     {
         crate::hacl::chacha20::chacha20_encrypt(input_len, output, input, key, nonce, 1u32);
