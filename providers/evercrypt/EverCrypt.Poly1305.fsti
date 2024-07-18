@@ -12,17 +12,17 @@ open FStar.HyperStack.ST
 
 (** @type: true
 *)
-val poly1305: dst:B.buffer UInt8.t { B.length dst = 16 } ->
-  src:B.buffer UInt8.t ->
-  len:U32.t { U32.v len = B.length src /\ U32.v len + 16 <= UInt.max_int 32 } ->
+val mac: output:B.buffer UInt8.t { B.length output = 16 } ->
+  input:B.buffer UInt8.t ->
+  input_len:U32.t { U32.v input_len = B.length input /\ U32.v input_len + 16 <= UInt.max_int 32 } ->
   key:B.buffer UInt8.t { B.length key = 32 } ->
   Stack unit
     (requires fun h ->
-      B.live h src /\ B.live h dst /\ B.live h key /\
-      B.disjoint dst src /\ B.disjoint dst key)
+      B.live h input /\ B.live h output /\ B.live h key /\
+      B.disjoint output input /\ B.disjoint output key)
     (ensures fun h0 _ h1 ->
-      B.(modifies (loc_buffer dst) h0 h1 /\ (
-      B.as_seq h1 dst ==
+      B.(modifies (loc_buffer output) h0 h1 /\ (
+      B.as_seq h1 output ==
         BF.of_bytes (Spec.Poly1305.poly1305_mac
-          (BF.to_bytes (B.as_seq h0 src))
+          (BF.to_bytes (B.as_seq h0 input))
           (BF.to_bytes (B.as_seq h0 key))))))

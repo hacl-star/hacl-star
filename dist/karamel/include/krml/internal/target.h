@@ -57,11 +57,23 @@
 #  define KRML_HOST_IGNORE(x) (void)(x)
 #endif
 
+#ifndef KRML_MAYBE_UNUSED_VAR
+#  define KRML_MAYBE_UNUSED_VAR(x) KRML_HOST_IGNORE(x)
+#endif
+
 #ifndef KRML_MAYBE_UNUSED
 #  if defined(__GNUC__)
 #    define KRML_MAYBE_UNUSED __attribute__((unused))
 #  else
 #    define KRML_MAYBE_UNUSED
+#  endif
+#endif
+
+#ifndef KRML_ATTRIBUTE_TARGET
+#  if defined(__GNUC__)
+#    define KRML_ATTRIBUTE_TARGET(x) __attribute__((target(x)))
+#  else
+#    define KRML_ATTRIBUTE_TARGET(x) 
 #  endif
 #endif
 
@@ -74,6 +86,18 @@
 #    define KRML_NOINLINE
 #    warning "The KRML_NOINLINE macro is not defined for this toolchain!"
 #    warning "The compiler may defeat side-channel resistance with optimizations."
+#    warning "Please locate target.h and try to fill it out with a suitable definition for this compiler."
+#  endif
+#endif
+
+#ifndef KRML_MUSTINLINE
+#  if defined(_MSC_VER)
+#    define KRML_MUSTINLINE inline __forceinline
+#  elif defined (__GNUC__)
+#    define KRML_MUSTINLINE inline __attribute__((always_inline))
+#  else
+#    define KRML_MUSTINLINE inline
+#    warning "The KRML_MUSTINLINE macro defaults to plain inline for this toolchain!"
 #    warning "Please locate target.h and try to fill it out with a suitable definition for this compiler."
 #  endif
 #endif

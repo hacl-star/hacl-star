@@ -41,11 +41,11 @@ print_test1(uint8_t* in, int in_len, uint8_t* exp256, uint8_t* exp512)
   uint8_t comp256[32] = { 0 };
   uint8_t comp512[64] = { 0 };
 
-  Hacl_Streaming_SHA2_hash_256(in, in_len, comp256);
+  Hacl_Hash_SHA2_hash_256(comp256, in, in_len);
   printf("NEW SHA2-256 (32-bit) Result:\n");
   bool ok = print_result(comp256, exp256, 32);
 
-  Hacl_Streaming_SHA2_hash_512(in, in_len, comp512);
+  Hacl_Hash_SHA2_hash_512(comp512, in, in_len);
   printf("NEW SHA2-512 (32-bit) Result:\n");
   ok = print_result(comp512, exp512, 64) && ok;
 
@@ -178,7 +178,7 @@ main()
   EverCrypt_AutoConfig2_init();
 
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors) / sizeof(sha2_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors) / sizeof(sha2_test_vector); ++i) {
     ok &= print_test1(vectors[i].input,
                       vectors[i].input_len,
                       vectors[i].tag_256,
@@ -225,20 +225,19 @@ main()
                           vectors_mb[3].tag_512);
   }
 
-  uint64_t len = SIZE;
   uint8_t plain[SIZE];
   cycles a, b;
   clock_t t1, t2;
   memset(plain, 'P', SIZE);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Streaming_SHA2_hash_256(plain, SIZE, plain);
+    Hacl_Hash_SHA2_hash_256(plain, plain, SIZE);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Streaming_SHA2_hash_256(plain, SIZE, plain);
+    Hacl_Hash_SHA2_hash_256(plain, plain, SIZE);
   }
   b = cpucycles_end();
   t2 = clock();
@@ -328,13 +327,13 @@ main()
 #endif
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Streaming_SHA2_hash_512(plain, SIZE, plain);
+    Hacl_Hash_SHA2_hash_512(plain, plain, SIZE);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Streaming_SHA2_hash_512(plain, SIZE, plain);
+    Hacl_Hash_SHA2_hash_512(plain, plain, SIZE);
   }
   b = cpucycles_end();
   t2 = clock();

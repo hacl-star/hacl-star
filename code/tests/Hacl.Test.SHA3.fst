@@ -6,7 +6,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.PrintBuffer
-open Hacl.SHA3
+open Hacl.Hash.SHA3.Scalar
 
 #reset-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
@@ -30,10 +30,10 @@ let test_sha3 msg_len msg expected224 expected256 expected384 expected512 =
   let test384 = create 48ul (u8 0) in
   let test512 = create 64ul (u8 0) in
 
-  sha3_224 msg_len msg test224;
-  sha3_256 msg_len msg test256;
-  sha3_384 msg_len msg test384;
-  sha3_512 msg_len msg test512;
+  sha3_224 test224 msg msg_len;
+  sha3_256 test256 msg msg_len;
+  sha3_384 test384 msg msg_len;
+  sha3_512 test512 msg msg_len;
 
   if not (result_compare_display 28ul (to_const test224) (to_const expected224)) then C.exit 255l;
   if not (result_compare_display 32ul (to_const test256) (to_const expected256)) then C.exit 255l;
@@ -54,7 +54,7 @@ val test_shake128:
 let test_shake128 msg_len msg out_len expected =
   push_frame ();
   let test = create out_len (u8 0) in
-  shake128_hacl msg_len msg out_len test;
+  shake128 test out_len msg msg_len;
   if not (result_compare_display out_len (to_const test) (to_const expected)) then C.exit 255l;
   pop_frame ()
 
@@ -71,7 +71,7 @@ val test_shake256:
 let test_shake256 msg_len msg out_len expected =
   push_frame ();
   let test = create out_len (u8 0) in
-  shake256_hacl msg_len msg out_len test;
+  shake256 test out_len msg msg_len;
   if not (result_compare_display out_len (to_const test) (to_const expected)) then C.exit 255l;
   pop_frame ()
 

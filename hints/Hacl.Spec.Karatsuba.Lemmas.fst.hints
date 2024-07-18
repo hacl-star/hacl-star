@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "03259ffc01c0e8131b0eedcb6b83b5cc"
+      "71695b52e34a9e83127554dc8904d406"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.sign_abs",
@@ -38,7 +38,7 @@
         "typing_tok_Hacl.Spec.Karatsuba.Lemmas.Positive@tok"
       ],
       0,
-      "e5fb84d186235a168d34a6c1c52f7c7e"
+      "89b2c7e9fe8629ef21c375a53943cd01"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.lemma_double_p",
@@ -55,7 +55,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "219cb826fd1f1ef1d3e5d9f4c86bed7f"
+      "00d3d92b30b0160e96de0ff422624809"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.lemma_double_p",
@@ -73,7 +73,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "286d50fcfb633eb4f1b1c0a76d274a28"
+      "ff74d301eace66b3ddf30f06a521c8ea"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.lemma_bn_halves",
@@ -90,7 +90,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "648f11e6b2126d520769206daa41f116"
+      "5efbff5c2815de8d3a2c76a9206979cf"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.lemma_bn_halves",
@@ -98,15 +98,20 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Prims.pos", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_148be657e3a342509cd0bb35055d7a4f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_99f5449c4823d8d777941bfed2e627ef",
+        "typing_Prims.pow2"
       ],
       0,
-      "c88fdec7116bf788264c642d41b93384"
+      "09020bd5d4dde79dd8a832345ab9aee0"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.lemma_bn_halves",
@@ -127,7 +132,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "6ad0c8ae18456de5e6f66c3c84e48515"
+      "b0372681d5f6fe97d2050f20ecca4cf3"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.lemma_middle_karatsuba",
@@ -136,7 +141,7 @@
       0,
       [ "@query", "assumption_Hacl.Spec.Karatsuba.Lemmas.sign__uu___haseq" ],
       0,
-      "6a57408949c956587363aaa27186016e"
+      "93d5f236c26735f31de9d6fde77ea05d"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.lemma_middle_karatsuba",
@@ -165,7 +170,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "9347ba0a941bf4d04a40137a7a3a229c"
+      "f72ab0eb67554943866476c94b640f09"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.lemma_karatsuba",
@@ -182,7 +187,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "6fb75394856303601fac4d2552d2face"
+      "fa3a1149cef4defb84813214cffd660f"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.lemma_karatsuba",
@@ -200,7 +205,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "91e6dd31a7e0c285e5cc5f05495f84b9"
+      "9295d12e3f3078869b99af395a35b299"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.karatsuba",
@@ -215,7 +220,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "bbfdc3104fe5b0a3288895c2ef6a18e0"
+      "7b841d87c410ba5b87bd9ae7315b9860"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.karatsuba",
@@ -223,14 +228,41 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Hacl.Spec.Karatsuba.Lemmas_pretyping_97f057d561fc02ace097a68551f70db3",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Hacl.Spec.Karatsuba.Lemmas.sign__uu___haseq",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
+        "binder_x_be632dcc8038156b668caaebe5161ff1_2",
+        "binder_x_be632dcc8038156b668caaebe5161ff1_3",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
+        "constructor_distinct_Hacl.Spec.Karatsuba.Lemmas.Negative",
+        "constructor_distinct_Hacl.Spec.Karatsuba.Lemmas.Positive",
+        "equality_tok_Hacl.Spec.Karatsuba.Lemmas.Negative@tok",
+        "equality_tok_Hacl.Spec.Karatsuba.Lemmas.Positive@tok",
+        "equation_Hacl.Spec.Karatsuba.Lemmas.abs", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_Tm_refine_4eaf001a34bc51ce30dba519d403e8f8",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7c8eef06be33cc20ad1cfa950554835a",
+        "refinement_interpretation_Tm_refine_87f61a1c9454204cabed82a4561b9462",
+        "refinement_interpretation_Tm_refine_e02132138d2fba71c560ea9586868258",
+        "typing_tok_Hacl.Spec.Karatsuba.Lemmas.Positive@tok",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "b64d0dd72f77f7b332116d64a2d8a4a0"
+      "3dfd185f65e25936dadaef0e865761f8"
     ],
     [
       "Hacl.Spec.Karatsuba.Lemmas.karatsuba",
@@ -273,7 +305,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "cfb52ba0e768d7e30928263aaee848e3"
+      "3ad3b383ff849865b176aec32d6322ab"
     ]
   ]
 ]

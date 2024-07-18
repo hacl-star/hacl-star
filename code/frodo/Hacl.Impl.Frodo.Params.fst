@@ -102,9 +102,10 @@ let frodo_shake_st (a:S.frodo_alg) =
 
 inline_for_extraction noextract
 let frodo_shake (a:S.frodo_alg) : frodo_shake_st a =
+  fun inputByteLen input outputByteLen output ->
   match a with
-  | S.Frodo64 | S.Frodo640 -> Hacl.SHA3.shake128_hacl
-  | S.Frodo976 | S.Frodo1344 -> Hacl.SHA3.shake256_hacl
+  | S.Frodo64 | S.Frodo640 -> Hacl.Hash.SHA3.Scalar.shake128 output outputByteLen input inputByteLen
+  | S.Frodo976 | S.Frodo1344 -> Hacl.Hash.SHA3.Scalar.shake256 output outputByteLen input inputByteLen
 
 
 inline_for_extraction noextract

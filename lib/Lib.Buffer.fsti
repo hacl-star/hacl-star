@@ -334,10 +334,23 @@ val bget_as_seq:
     (ensures  bget #t #a #len h b i == Seq.index #a #(v len) (as_seq h b) i)
     [SMTPat (bget #t #a #len h b i)]
 
+// An improved version of the predicate found in LowStar.Buffer, that uses
+// loc_in (which has an equational reasoning theory via SMTPats rather than the
+// cumbersome unused_in). Any questions should be addressed to Tahina.
+unfold
+let alloc_post_mem_common (#a:Type0) (#rrel #rel:LMB.srel a)
+  (b:LMB.mbuffer a rrel rel) (h0 h1:HS.mem) (s:Seq.seq a)
+  = LMB.live h1 b /\
+    B.loc_not_in (B.loc_addr_of_buffer b) h0 /\
+    Map.domain (HS.get_hmap h1) `Set.equal` Map.domain (HS.get_hmap h0) /\
+    (HS.get_tip h1) == (HS.get_tip h0) /\
+    modifies LMB.loc_none h0 h1 /\
+    LMB.as_seq h1 b == s
+
 let stack_allocated (#a:Type0) (#len:size_t) (b:lbuffer a len)
                     (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
   let b: B.buffer a = b in
-  B.alloc_post_mem_common b h0 h1 s /\
+  alloc_post_mem_common b h0 h1 s /\
   B.frameOf b = HS.get_tip h0 /\
   B.frameOf b <> HyperStack.root
 
@@ -345,7 +358,7 @@ let global_allocated (#a:Type0) (#len:size_t) (b:glbuffer a len)
                     (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
   let b: ibuffer a = CB.as_mbuf b in
   B.frameOf b == HyperStack.root /\
-  B.alloc_post_mem_common b h0 h1 s
+  alloc_post_mem_common b h0 h1 s
 
 let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
   match t with
@@ -408,7 +421,7 @@ val createL_mglobal: #a:Type0 -> init:list a ->
     (requires fun h0 -> normalize (FStar.List.Tot.length init <= max_size_t))
     (ensures  fun h0 b h1 ->
       B.frameOf b == HyperStack.root /\ B.recallable b /\
-      B.alloc_post_mem_common (b <: buffer a) h0 h1 (FStar.Seq.seq_of_list init) /\
+      alloc_post_mem_common (b <: buffer a) h0 h1 (FStar.Seq.seq_of_list init) /\
       length b == normalize_term (FStar.List.Tot.length init))
 
 #set-options "--max_fuel 0"
@@ -1269,3 +1282,19 @@ val create16: #a:Type0 -> st:lbuffer a 16ul
   (requires fun h -> live h st)
   (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
     as_seq h1 st == Seq.create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)
+
+
+inline_for_extraction
+val create32: #a:Type0 -> st:lbuffer a 32ul
+  -> v0:a -> v1:a -> v2:a -> v3:a
+  -> v4:a -> v5:a -> v6:a -> v7:a
+  -> v8:a -> v9:a -> v10:a -> v11:a
+  -> v12:a -> v13:a -> v14:a -> v15:a
+  -> v16:a -> v17:a -> v18:a -> v19:a
+  -> v20:a -> v21:a -> v22:a -> v23:a
+  -> v24:a -> v25:a -> v26:a -> v27:a
+  -> v28:a -> v29:a -> v30:a -> v31:a ->
+  Stack unit
+  (requires fun h -> live h st)
+  (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+    as_seq h1 st == Seq.create32 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31)

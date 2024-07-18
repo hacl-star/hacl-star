@@ -1,9 +1,24 @@
-{ dotnet-runtime, fetchFromGitHub, fstar, fstar-scripts, git, karamel, lib
-, ocamlPackages, openssl, python3, stdenv, time, vale, which, writeTextFile, z3
-}:
-
-let
-
+{
+  bash,
+  dotnet-runtime,
+  fetchFromGitHub,
+  fstar,
+  fstar-scripts,
+  git,
+  karamel,
+  lib,
+  ocamlPackages,
+  openssl,
+  python3,
+  rustc,
+  sd,
+  stdenv,
+  time,
+  vale,
+  which,
+  writeTextFile,
+  z3,
+}: let
   runlim = stdenv.mkDerivation rec {
     name = "runlim";
     src = fetchFromGitHub {
@@ -26,9 +41,12 @@ let
 
     src = lib.cleanSourceWith {
       src = ./..;
-      filter = path: type:
-        let relPath = lib.removePrefix (toString ./.. + "/") (toString path);
-        in type == "directory" || lib.elem relPath [
+      filter = path: type: let
+        relPath = lib.removePrefix (toString ./.. + "/") (toString path);
+      in
+        type
+        == "directory"
+        || lib.elem relPath [
           ".gitignore"
           "Makefile"
           "Makefile.common"
@@ -40,7 +58,8 @@ let
           "dist/Makefile.tmpl"
           "dist/configure"
           "dist/package-mozilla.sh"
-        ] || lib.any (lib.flip lib.hasPrefix relPath) [
+        ]
+        || lib.any (lib.flip lib.hasPrefix relPath) [
           "code"
           "hints"
           "lib"
@@ -61,7 +80,17 @@ let
       echo "0.3.19" > vale/.vale_version
     '';
 
-    nativeBuildInputs = [ z3 fstar python3 which dotnet-runtime time runlim ]
+    nativeBuildInputs =
+      [
+        z3
+        fstar
+        python3
+        which
+        dotnet-runtime
+        time
+        runlim
+        rustc
+      ]
       ++ (with ocamlPackages; [
         ocaml
         findlib
@@ -83,7 +112,7 @@ let
         sedlex
       ]);
 
-    buildInputs = [ openssl.dev ];
+    buildInputs = [openssl.dev];
 
     VALE_HOME = vale;
     FSTAR_HOME = fstar;
@@ -95,6 +124,7 @@ let
 
     buildPhase = ''
       RESOURCEMONITOR=1 make -j$NIX_BUILD_CORES ci 2>&1 | tee log.txt
+      bash ${fstar-scripts}/remove_stale_hints.sh
     '';
 
     installPhase = ''
@@ -116,7 +146,7 @@ let
       dist-compare = stdenv.mkDerivation {
         name = "hacl-diff-compare";
         src = "${hacl.build-products}/dist.tar.gz";
-        phases = [ "unpackPhase" "buildPhase" "installPhase" ];
+        phases = ["unpackPhase" "buildPhase" "installPhase"];
         buildPhase = ''
           for file in ./*/*.c ./*/*.h
           do
@@ -134,7 +164,7 @@ let
       dist-list = stdenv.mkDerivation {
         name = "hacl-diff-list";
         src = "${hacl.build-products}/dist.tar.gz";
-        phases = [ "unpackPhase" "buildPhase" "installPhase" ];
+        phases = ["unpackPhase" "buildPhase" "installPhase"];
         buildPhase = ''
           diff -rq . ${../dist} 2>&1 \
             | sed 's/\/nix\/store\/[a-z0-9]\{32\}-//g' \
@@ -151,13 +181,13 @@ let
       build-products = stdenv.mkDerivation {
         name = "hacl-build-products";
         src = hacl;
-        buildInputs = [ git ];
+        buildInputs = [git sd];
         buildPhase = ''
-          sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/configure
-          sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/package-mozilla.sh
-          for target in gcc-compatible msvc-compatible portable-gcc-compatible
+          sd '${bash}/bin/bash' '/usr/bin/env bash' dist/configure
+          sd '${bash}/bin/bash' '/usr/bin/env bash' dist/package-mozilla.sh
+          for target in gcc-compatible msvc-compatible portable-gcc-compatible mozilla
           do
-            sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/$target/configure
+            sd '${bash}/bin/bash' '/usr/bin/env bash' dist/$target/configure
           done
 
           for target in gcc-compatible mozilla msvc-compatible portable-gcc-compatible wasm
@@ -181,7 +211,7 @@ let
       };
       stats = stdenv.mkDerivation {
         name = "hacl-stats";
-        phases = [ "installPhase" ];
+        phases = ["installPhase"];
         installPhase = ''
           mkdir -p $out
           cat ${hacl}/log.txt \
@@ -200,7 +230,6 @@ let
         '';
       };
     };
-
   };
-
-in hacl
+in
+  hacl

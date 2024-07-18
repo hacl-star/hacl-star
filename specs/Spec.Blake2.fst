@@ -8,113 +8,70 @@ open Lib.ByteSequence
 open Lib.LoopCombinators
 module UpdateMulti = Lib.UpdateMulti
 
+include Spec.Blake2.Definitions
+
 #set-options "--z3rlimit 50"
 
-type alg =
-  | Blake2S
-  | Blake2B
+/// Serialize blake2s parameters to be xor'ed with the state during initialization
+/// As the state is represented using uint32, we need to serialize to uint32 instead
+/// of the more standard bytes representation
+let serialize_blake2s_params (p: blake2_params Blake2S) : lseq uint32 8 =
+  let s0 = (u32 (v #U8 #PUB p.digest_length)) ^.
+           (u32 (v #U8 #PUB p.key_length) <<. (size 8)) ^.
+           (u32 (v p.fanout) <<. (size 16)) ^.
+           (u32 (v p.depth) <<. (size 24)) in
+  let s1 = p.leaf_length in
+  (* Take the first four bytes *)
+  let s2 = (to_u32 p.node_offset) in
+  (* Take the last four bytes of node_offset *)
+  let s3 = (to_u32 (p.node_offset >>. (size 32))) ^.
+           (u32 (v p.node_depth) <<. (size 16)) ^.
+           (u32 (v p.inner_length) <<. (size 24)) in
+  let salt_u32: lseq uint32 2 = uints_from_bytes_le p.salt in
+  let s4 = salt_u32.[0] in
+  let s5 = salt_u32.[1] in
+  let personal_u32: lseq uint32 2 = uints_from_bytes_le p.personal in
+  let s6 = personal_u32.[0] in
+  let s7 = personal_u32.[1] in
+  [@inline_let]
+  let l = [s0; s1; s2; s3; s4; s5; s6; s7] in
+  assert_norm (List.Tot.length l == 8);
+  createL l
 
-let alg_inversion_lemma (a:alg) : Lemma (a == Blake2S \/ a == Blake2B) = ()
+/// Serialize blake2b parameters to be xor'ed with the state during initialization
+/// As the state is represented using uint64, we need to serialize to uint64 instead
+/// of the more standard bytes representation
+let serialize_blake2b_params (p: blake2_params Blake2B) : lseq uint64 8 =
+  let s0 = (u64 (v #U8 #PUB p.digest_length)) ^.
+           (u64 (v #U8 #PUB p.key_length) <<. (size 8)) ^.
+           (u64 (v p.fanout) <<. (size 16)) ^.
+           (u64 (v p.depth) <<. (size 24)) ^.
+           (u64 (v p.leaf_length) <<. (size 32)) in
+  let s1 = p.node_offset in
+  // The serialization corresponding to s2 contains node_depth and inner_length,
+  // followed by the 14 reserved bytes which always seem to be zeros, and can hence
+  // be ignored when building the corresponding uint64 using xor's
+  let s2 = (u64 (v p.node_depth)) ^.
+           (u64 (v p.inner_length) <<. (size 8)) in
+  // s3 corresponds to the remaining of the reserved bytes
+  let s3 = u64 0 in
+  let salt_u64: lseq uint64 2 = uints_from_bytes_le p.salt in
+  let s4 = salt_u64.[0] in
+  let s5 = salt_u64.[1] in
+  let personal_u64: lseq uint64 2 = uints_from_bytes_le p.personal in
+  let s6 = personal_u64.[0] in
+  let s7 = personal_u64.[1] in
+  [@inline_let]
+  let l = [s0; s1; s2; s3; s4; s5; s6; s7] in
+  assert_norm (List.Tot.length l == 8);
+  createL l
 
 inline_for_extraction
-let wt (a:alg) : t:inttype{unsigned t} =
+let serialize_blake2_params (#a: alg) (p: blake2_params a): lseq (word_t a) 8 =
   match a with
-  | Blake2S -> U32
-  | Blake2B -> U64
+  | Blake2S -> serialize_blake2s_params p
+  | Blake2B -> serialize_blake2b_params p
 
-inline_for_extraction
-let rounds (a:alg) =
-  match a with
-  | Blake2S -> 10
-  | Blake2B -> 12
-
-(* Algorithm parameters *)
-inline_for_extraction let size_hash_w : size_nat = 8
-inline_for_extraction let size_block_w : size_nat = 16
-inline_for_extraction let size_word (a:alg) : size_nat = numbytes (wt a)
-inline_for_extraction let size_block (a:alg) : size_nat = size_block_w * (size_word a)
-inline_for_extraction let size_ivTable : size_nat = 8
-inline_for_extraction let size_sigmaTable : size_nat = 160
-
-inline_for_extraction let max_key (a:alg) =
-  match a with
-  | Blake2S -> 32
-  | Blake2B -> 64
-inline_for_extraction let max_output (a:alg) =
-  match a with
-  | Blake2S -> 32
-  | Blake2B -> 64
-
-
-(* Definition of base types *)
-inline_for_extraction
-unfold let limb_inttype (a:alg) =
-  match (wt a) with
-  | U32 -> U64
-  | U64 -> U128
-
-inline_for_extraction
-unfold type word_t (a:alg) = uint_t (wt a) SEC
-
-inline_for_extraction
-let zero (a:alg) : word_t a=
-  match a with
-  | Blake2S -> u32 0
-  | Blake2B -> u64 0
-
-inline_for_extraction
-unfold let row (a:alg) = lseq (word_t a) 4
-
-inline_for_extraction
-let zero_row (a:alg) : row a = create 4 (zero a)
-
-inline_for_extraction
-let load_row (#a:alg) (s:lseq (word_t a) 4) : row a =
-  createL [s.[0]; s.[1]; s.[2]; s.[3]]
-
-inline_for_extraction
-let create_row (#a:alg) x0 x1 x2 x3 : row a =
-  createL [x0;x1;x2;x3]
-
-inline_for_extraction
-unfold let state (a:alg) = lseq (row a) 4
-
-inline_for_extraction
-type pub_word_t (a:alg) = uint_t (wt a) PUB
-
-inline_for_extraction
-type limb_t (a:alg) : Type0 = uint_t (limb_inttype a) SEC
-
-inline_for_extraction
-let max_limb (a:alg) = maxint (limb_inttype a)
-
-inline_for_extraction
-let nat_to_word (a:alg) (x:size_nat) : word_t a =
-  match (wt a) with
-  | U32 -> u32 x
-  | U64 -> u64 x
-
-inline_for_extraction
-let nat_to_limb (a:alg) (x:nat{x <= max_limb a}) : xl:limb_t a{uint_v xl == x} =
-  match (wt a) with
-  | U32 -> u64 x
-  | U64 -> let h = u64 (x / pow2 64) in
-	  let l = u64 (x % pow2 64) in
-	  (to_u128 h <<. 64ul) +! to_u128 l
-
-inline_for_extraction
-let word_to_limb (a:alg) (x:word_t a{uint_v x <= max_limb a}) : xl:limb_t a{uint_v xl == uint_v x} =
-  match (wt a) with
-  | U32 -> to_u64 x
-  | U64 -> to_u128 x
-
-inline_for_extraction
-let limb_to_word (a:alg) (x:limb_t a) : word_t a =
-  match (wt a) with
-  | U32 -> to_u32 x
-  | U64 -> to_u64 x
-
-unfold let rtable_t (a:alg) = lseq (rotval (wt a)) 4
 
 [@"opaque_to_smt"]
 inline_for_extraction
@@ -171,9 +128,6 @@ let ivTable (a:alg) : lseq (pub_word_t a) 8 =
   | Blake2S -> of_list list_iv_S
   | Blake2B -> of_list list_iv_B
 
-type sigma_elt_t = n:size_t{size_v n < 16}
-type list_sigma_t = l:list sigma_elt_t{List.Tot.length l == 160}
-
 [@"opaque_to_smt"]
 let list_sigma: list_sigma_t =
   [@inline_let]
@@ -207,31 +161,6 @@ inline_for_extraction
 let sigmaTable:lseq sigma_elt_t size_sigmaTable =
   assert_norm (List.Tot.length list_sigma == size_sigmaTable);
   of_list list_sigma
-
-
-(* Algorithms types *)
-type block_s (a:alg) = lseq uint8 (size_block a)
-type block_w (a:alg) = lseq (word_t a) 16
-type idx_t = n:size_nat{n < 16}
-
-let row_idx = n:nat {n < 4}
-
-inline_for_extraction
-let ( ^| ) (#a:alg) (r1:row a) (r2:row a) : row a =
-  map2 ( ^. ) r1 r2
-
-inline_for_extraction
-let ( +| ) (#a:alg) (r1:row a) (r2:row a) : row a =
-  map2 ( +. ) r1 r2
-
-inline_for_extraction
-let ( >>>| ) (#a:alg) (r1:row a) (r:rotval (wt a)) : row a =
-  map #(word_t a) (rotate_right_i r) r1
-
-inline_for_extraction
-let rotr (#a:alg) (r1:row a) (r:row_idx) : row a =
-  createi 4 (fun i -> r1.[(i+r)%4])
-
 
 (* Functions *)
 let g1 (a:alg) (wv:state a) (i:row_idx) (j:row_idx) (r:rotval (wt a)) : Tot (state a) =
@@ -319,21 +248,21 @@ val blake2_compress1:
     a:alg
   -> s_iv:state a
   -> offset:limb_t a
-  -> flag:bool ->
+  -> flag:bool
+  -> last_node_flag:bool ->
   Tot (state a)
 
-let blake2_compress1 a s_iv offset flag =
+let blake2_compress1 a s_iv offset flag last_node_flag =
   let wv : state a = s_iv in
   let low_offset = limb_to_word a offset in
   let high_offset = limb_to_word a (shift_right #(limb_inttype a) offset (size (bits (wt a)))) in
   let m_12 = low_offset in
   let m_13 = high_offset in
   let m_14 = if flag then (ones (wt a) SEC) else zero a in
-  let m_15 = zero a in
+  let m_15 = if last_node_flag then (ones (wt a) SEC) else zero a in
   let mask = create_row m_12 m_13 m_14 m_15 in
   let wv = wv.[3] <- wv.[3] ^| mask in
   wv
-
 
 val blake2_compress2:
     a:alg
@@ -359,12 +288,13 @@ val blake2_compress:
   -> s_iv:state a
   -> m:block_s a
   -> offset:limb_t a
-  -> flag:bool ->
+  -> flag:bool
+  -> last_node_flag:bool ->
   Tot (state a)
 
-let blake2_compress a s_iv m offset flag =
+let blake2_compress a s_iv m offset flag last_node_flag =
   let m_w = blake2_compress0 a m in
-  let wv = blake2_compress1 a s_iv offset flag in
+  let wv = blake2_compress1 a s_iv offset flag last_node_flag in
   let wv = blake2_compress2 a wv m_w in
   let s_iv = blake2_compress3 a wv s_iv in
   s_iv
@@ -373,14 +303,15 @@ let blake2_compress a s_iv m offset flag =
 val blake2_update_block:
     a:alg
   -> flag:bool
+  -> last_node_flag:bool
   -> totlen:nat{totlen <= max_limb a}
   -> d:block_s a
   -> s_iv:state a ->
   Tot (state a)
 
-let blake2_update_block a flag totlen d s =
+let blake2_update_block a flag last_node_flag totlen d s =
   let offset = nat_to_limb a totlen in
-  blake2_compress a s d offset flag
+  blake2_compress a s d offset flag last_node_flag
 
 val blake2_update1:
     a:alg
@@ -396,10 +327,11 @@ let get_blocki (a:alg) (m:bytes) (i:nat{i < length m / size_block a}) : block_s 
 let blake2_update1 a prev m i s =
   let totlen = prev + (i+1) * size_block a in
   let d = get_blocki a m i in
-  blake2_update_block a false totlen d s
+  blake2_update_block a false false totlen d s
 
 val blake2_update_last:
     a:alg
+  -> last_node_flag: bool
   -> prev:nat
   -> rem:nat
   -> m:bytes{prev + length m <= max_limb a /\ rem <= length m /\ rem <= size_block a}
@@ -413,14 +345,15 @@ let get_last_padded_block (a:alg) (m:bytes)
   let last_block = update_sub last_block 0 rem last in
   last_block
 
-let blake2_update_last a prev rem m s =
+let blake2_update_last a last_node_flag prev rem m s =
   let inlen = length m in
   let totlen = prev + inlen in
   let last_block = get_last_padded_block a m rem in
-  blake2_update_block a true totlen last_block s
+  blake2_update_block a true last_node_flag totlen last_block s
 
 val blake2_update_blocks:
     a:alg
+  -> last_node_flag:bool
   -> prev:nat
   -> m:bytes{prev + length m <= max_limb a}
   -> s:state a ->
@@ -431,19 +364,18 @@ let split (a:alg) (len:nat)
 		   nb * size_block a + rem == len} =
   UpdateMulti.split_at_last_lazy_nb_rem (size_block a) len
 
-let blake2_update_blocks a prev m s =
+let blake2_update_blocks a last_node_flag prev m s =
   let (nb,rem) = split a (length m) in
   let s = repeati nb (blake2_update1 a prev m) s in
-  blake2_update_last a prev rem m s
+  blake2_update_last a last_node_flag prev rem m s
 
 
 val blake2_init_hash:
     a:alg
-  -> kk:size_nat{kk <= max_key a}
-  -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
+  -> blake2_params a ->
   Tot (state a)
 
-let blake2_init_hash a kk nn =
+let blake2_init_hash a p =
   let iv0 = secret (ivTable a).[0] in
   let iv1 = secret (ivTable a).[1] in
   let iv2 = secret (ivTable a).[2] in
@@ -454,10 +386,18 @@ let blake2_init_hash a kk nn =
   let iv7 = secret (ivTable a).[7] in
   let r0 = create_row #a iv0 iv1 iv2 iv3 in
   let r1 = create_row #a iv4 iv5 iv6 iv7 in
-  let s0' = (nat_to_word a 0x01010000) ^. ((nat_to_word a kk) <<. (size 8)) ^. (nat_to_word a nn) in
-  let iv0' = iv0 ^. s0' in
-  let r0' = create_row #a iv0' iv1 iv2 iv3 in
-  let s_iv = createL [r0';r1;r0;r1] in
+  let s = serialize_blake2_params p in
+  let iv0' = iv0 ^. s.[0] in
+  let iv1' = iv1 ^. s.[1] in
+  let iv2' = iv2 ^. s.[2] in
+  let iv3' = iv3 ^. s.[3] in
+  let iv4' = iv4 ^. s.[4] in
+  let iv5' = iv5 ^. s.[5] in
+  let iv6' = iv6 ^. s.[6] in
+  let iv7' = iv7 ^. s.[7] in
+  let r0' = create_row #a iv0' iv1' iv2' iv3' in
+  let r1' = create_row #a iv4' iv5' iv6' iv7' in
+  let s_iv = createL [r0';r1';r0;r1] in
   s_iv
 
 val blake2_key_block:
@@ -473,32 +413,34 @@ let blake2_key_block a kk k =
 /// This function must be called only if the key is non empty (see the precondition)
 val blake2_update_key:
     a:alg
+  -> last_node_flag: bool
   -> kk:size_nat{0 < kk /\ kk <= max_key a}
   -> k:lbytes kk
   -> ll:nat
   -> s:state a ->
   Tot (state a)
-let blake2_update_key a kk k ll s =
+let blake2_update_key a last_node_flag kk k ll s =
   let key_block = blake2_key_block a kk k in
   if ll = 0 then
-      blake2_update_block a true (size_block a) key_block s
+      blake2_update_block a true last_node_flag (size_block a) key_block s
   else
-      blake2_update_block a false (size_block a) key_block s
+      blake2_update_block a false false (size_block a) key_block s
 
 val blake2_update:
     a:alg
+  -> last_node: bool
   -> kk:size_nat{kk <= max_key a}
   -> k:lbytes kk
   -> d:bytes{if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a}
   -> s:state a ->
   Tot (state a)
-let blake2_update a kk k d s =
+let blake2_update a last_node kk k d s =
   let ll = length d in
   if kk > 0 then
-     let s = blake2_update_key a kk k ll s in
+     let s = blake2_update_key a last_node kk k ll s in
      if ll = 0 then s // Skip update_last if ll = 0 (but kk > 0)
-     else blake2_update_blocks a (size_block a) d s
-  else blake2_update_blocks a 0 d s
+     else blake2_update_blocks a last_node (size_block a) d s
+  else blake2_update_blocks a last_node 0 d s
 
 val blake2_finish:
     a:alg
@@ -510,19 +452,26 @@ let blake2_finish a s nn =
   let full = (uints_to_bytes_le s.[0] @| uints_to_bytes_le s.[1]) in
   sub full 0 nn
 
+// Full generality, with parameters
 val blake2:
     a:alg
+  -> last_node: bool
   -> d:bytes
-  -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)}
-  -> k:lbytes kk
-  -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
-  Tot (lbytes nn)
+  -> p:blake2_params a {
+      let kk = p.key_length in
+      if kk = 0uy then length d <= max_limb a else length d + (size_block a) <= max_limb a
+  }
+  -> k:lbytes (UInt8.v p.key_length) ->
+  Tot (lbytes (UInt8.v p.digest_length))
 
-let blake2 a d kk k nn =
-  let s = blake2_init_hash a kk nn in
-  let s = blake2_update a kk k d s in
+let blake2 a last_node d p k =
+  let kk = UInt8.v p.key_length in
+  let nn = UInt8.v p.digest_length in
+  let s = blake2_init_hash a p in
+  let s = blake2_update a last_node kk k d s in
   blake2_finish a s nn
 
+// Simplified API, no parameters, last_node set to false
 val blake2s:
     d:bytes
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d < pow2 64 else length d + 64 < pow2 64)}
@@ -530,14 +479,13 @@ val blake2s:
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
   Tot (lbytes nn)
 
-let blake2s d kk k n = blake2 Blake2S d kk k n
-
+let blake2s d kk k n = blake2 Blake2S false d { blake2_default_params Blake2S with key_length = UInt8.uint_to_t kk; digest_length = UInt8.uint_to_t n } k
 
 val blake2b:
     d:bytes
-  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 64)}
+  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 128)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)
 
-let blake2b d kk k n = blake2 Blake2B d kk k n
+let blake2b d kk k n = blake2 Blake2B false d { blake2_default_params Blake2B with key_length = UInt8.uint_to_t kk; digest_length = UInt8.uint_to_t n } k

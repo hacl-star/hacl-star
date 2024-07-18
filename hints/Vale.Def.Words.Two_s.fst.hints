@@ -4,16 +4,22 @@
     [
       "Vale.Def.Words.Two_s.nat_to_two_unfold",
       1,
-      2,
       1,
+      0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "int_inversion", "primitive_Prims.op_Multiply",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
       ],
       0,
-      "6074cfa63ce2afd447ae684cdfd335fd"
+      "f71c7b93c8b8f2877949048834ce25b1"
     ],
     [
       "Vale.Def.Words.Two_s.nat_to_two_unfold",
@@ -33,7 +39,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "f094b4721a15af189956de7e474398b4"
+      "4ccb4864711ff2296cefac0f4ad0a95d"
     ],
     [
       "Vale.Def.Words.Two_s.nat_to_two",
@@ -47,25 +53,40 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "b5d382562be758c4b4af929b1c667ded"
+      "803074724aff1aa54b8016714f5ed866"
     ],
     [
       "Vale.Def.Words.Two_s.nat_to_two",
       2,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
       0,
-      "ea638daadbb374b5f7daae4da708a663"
+      "3f81166e1e7d529fdb80913913dac10c"
     ],
     [
       "Vale.Def.Words.Two_s.two_to_nat_unfold",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
+      ],
       0,
-      "4b350d0f07fe546d9fc1b6063b97092d"
+      "a43a767a5111eef53388243d5d428fa7"
     ],
     [
       "Vale.Def.Words.Two_s.two_to_nat_unfold",
@@ -85,16 +106,20 @@
         "typing_Prims.pow2"
       ],
       0,
-      "b7c470908f83b8e9244498ef4cd63e17"
+      "eebeb1c0c96d9eea97dd69378404130a"
     ],
     [
       "Vale.Def.Words.Two_s.two_to_nat",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
       0,
-      "9180aef2d0a741ce8b62e7ca3c946b5f"
+      "8eaaba3fc698dc1be00e91f2d14e74c2"
     ],
     [
       "Vale.Def.Words.Two_s.two_to_nat",
@@ -108,7 +133,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "eec1bb1dacf91fcc40049415b1fbe32d"
+      "f9983ab3d83cd4875a86c4979a378aba"
     ],
     [
       "Vale.Def.Words.Two_s.two_select",
@@ -123,7 +148,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "aa0e9162929e64c382ee9d8a2cb7e0d2"
+      "4bcbd33f6c7a922ac92693af6f886459"
     ],
     [
       "Vale.Def.Words.Two_s.two_insert",
@@ -138,7 +163,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "2679a067434a9b78e4883e86044cf1db"
+      "dc2e59ec2a9c2e8131ffafd8e3f1181d"
     ]
   ]
 ]

@@ -20,7 +20,7 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "d382deaf0e6c2bcc100142668dd6d5a4"
+      "2bd9fdbd8469f9798b00955f05322eb9"
     ],
     [
       "Hacl.GenericField64.field_init",
@@ -35,7 +35,7 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "d524fd9a948ce5a8b1e48d4295a50aff"
+      "70ece70ed97724308ae536392db37aae"
     ],
     [
       "Hacl.GenericField64.to_field",
@@ -57,7 +57,7 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "f9ad52fcb8510483ab325c45a99ba7cd"
+      "d4935b1b7a3a6afeea80659795d10f18"
     ],
     [
       "Hacl.GenericField64.from_field",
@@ -79,7 +79,7 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "d3613f610b7810a15d5459a7419dc618"
+      "b59b7ecc8e965b36377f6da3564387e1"
     ],
     [
       "Hacl.GenericField64.add",
@@ -101,7 +101,7 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "dd4eab2d621e913a2ef54c514dfed74c"
+      "6b5f74a695f2e9e646cfab3b853b2a40"
     ],
     [
       "Hacl.GenericField64.sub",
@@ -123,7 +123,7 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "e998456a5d1cb9fd4a0998596edc58ff"
+      "d7275faa44a21f69a22cf2eadfcc715b"
     ],
     [
       "Hacl.GenericField64.mul",
@@ -145,7 +145,7 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "d74d99b7272327305f7f26250ace9c42"
+      "1131c12e8d7446775ad63473633ae609"
     ],
     [
       "Hacl.GenericField64.sqr",
@@ -167,7 +167,7 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "0f87f7d75c8dfb5d7e78fb71de73fe50"
+      "93611f9ec10d55fc34c0bb2616463d73"
     ],
     [
       "Hacl.GenericField64.one",
@@ -189,11 +189,33 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "ff973b6f178f9c5c9c551b8c38fe4b97"
+      "802fd3de14d541ae8135af740434fba4"
     ],
     [
       "Hacl.GenericField64.exp_consttime",
       1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equation_Hacl.Bignum.Definitions.lbignum",
+        "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.GenericField64.km",
+        "equation_Hacl.GenericField64.t_limbs",
+        "equation_Lib.Buffer.lbuffer_t",
+        "lemma_Hacl.Bignum.Montgomery.mk_runtime_mont_len_lemma",
+        "refinement_interpretation_Tm_refine_00f2c1a6fadb82aaeb5336724514acf7",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_f07869ce5120a316bd74e738242f36b9",
+        "typing_Hacl.GenericField64.t_limbs"
+      ],
+      0,
+      "6dc640f72434b12b7629318ff2420522"
+    ],
+    [
+      "Hacl.GenericField64.exp_consttime",
+      2,
       0,
       0,
       [
@@ -217,11 +239,11 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "976787c873009d50c2706551c578eca0"
+      "6e649edd46375af7c39c689fb7c747ba"
     ],
     [
-      "Hacl.GenericField64.exp_consttime",
-      2,
+      "Hacl.GenericField64.exp_vartime",
+      1,
       0,
       0,
       [
@@ -239,11 +261,11 @@
         "typing_Hacl.GenericField64.t_limbs"
       ],
       0,
-      "717e32366a8f19f1d68693176867f40a"
+      "c27c31732f9b025d612c64ac5911cd7f"
     ],
     [
       "Hacl.GenericField64.exp_vartime",
-      1,
+      2,
       0,
       0,
       [
@@ -267,29 +289,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c9d790e241ff9191c1d90c58d0951c02"
-    ],
-    [
-      "Hacl.GenericField64.exp_vartime",
-      2,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
-        "equality_tok_Lib.IntTypes.U64@tok",
-        "equation_Hacl.Bignum.Definitions.lbignum",
-        "equation_Hacl.Bignum.Definitions.limb",
-        "equation_Hacl.GenericField64.km",
-        "equation_Hacl.GenericField64.t_limbs",
-        "equation_Lib.Buffer.lbuffer_t",
-        "lemma_Hacl.Bignum.Montgomery.mk_runtime_mont_len_lemma",
-        "refinement_interpretation_Tm_refine_00f2c1a6fadb82aaeb5336724514acf7",
-        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_f07869ce5120a316bd74e738242f36b9",
-        "typing_Hacl.GenericField64.t_limbs"
-      ],
-      0,
-      "a6d994855b473eeff011fcc72fcad834"
+      "82ee9bc9ef50367f6ff79c15355f6cb5"
     ]
   ]
 ]

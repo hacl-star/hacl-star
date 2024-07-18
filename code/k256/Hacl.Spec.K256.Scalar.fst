@@ -78,13 +78,10 @@ let is_qelem_le_q_halved_vartime4 ((a0,a1,a2,a3): qelem4) : bool =
     else begin
       if u64_to_UInt64 a2 <. 0xffffffffffffffffuL then true
       else begin
-        if u64_to_UInt64 a2 >. 0xffffffffffffffffuL then false
+        if u64_to_UInt64 a1 <. 0x5d576e7357a4501duL then true
         else begin
-          if u64_to_UInt64 a1 <. 0x5d576e7357a4501duL then true
-          else begin
-            if u64_to_UInt64 a1 >. 0x5d576e7357a4501duL then false
-            else u64_to_UInt64 a0 <=. 0xdfe92f46681b20a0uL
-          end
+          if u64_to_UInt64 a1 >. 0x5d576e7357a4501duL then false
+          else u64_to_UInt64 a0 <=. 0xdfe92f46681b20a0uL
         end
       end
     end

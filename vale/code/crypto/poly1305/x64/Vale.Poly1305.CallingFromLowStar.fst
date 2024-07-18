@@ -143,6 +143,7 @@ let lemma_hash_init h0 h1 ctx_b is_zero =
       0;
     }
 
+#restart-solver
 let lemma_block (h1:HS.mem) (inp_b:B.buffer UInt8.t) (len:nat) (i:nat) : Lemma
   (requires B.length inp_b = 8 * PU.readable_words len /\ i < B.length inp_b / 16)
   (ensures (

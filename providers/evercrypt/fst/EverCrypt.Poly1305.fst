@@ -47,7 +47,7 @@ let poly1305_vale
       // Call Vale
       let h1 = ST.get () in
       // Initial hash (0) is located at bytes [ 0; 24 )
-      assert (forall (i:int).{:pattern (Seq.index (B.as_seq h1 ctx) i)} 0 <= i /\ i < 24 ==>
+      assert_spinoff (forall (i:int).{:pattern (Seq.index (B.as_seq h1 ctx) i)} 0 <= i /\ i < 24 ==>
         Seq.index (Seq.slice (B.as_seq h1 ctx) 0 24) i == 0uy);
       Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
       let res = Vale.Wrapper.X64.Poly.x64_poly1305 ctx src (FStar.Int.Cast.Full.uint32_to_uint64 len) 1UL in
@@ -127,25 +127,26 @@ let poly1305_vale
     let h3 = ST.get () in
     assert (B.as_seq h3 dst `S.equal` Spec.Poly1305.poly1305_mac (B.as_seq h0 src) (B.as_seq h0 key))
 
-let poly1305 dst src len key =
+let mac output input input_len key =
   let h0 = ST.get () in
   let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
   let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
 
   if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then begin
     LowStar.Ignore.ignore vec128;
-    Hacl.Poly1305_256.poly1305_mac dst len src key
+    Hacl.Streaming.Poly1305_256.mac output input input_len key
 
   end else if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then begin
     LowStar.Ignore.ignore vec256;
-    Hacl.Poly1305_128.poly1305_mac dst len src key
+    Hacl.Streaming.Poly1305_128.mac output input input_len key
 
   end else begin
     LowStar.Ignore.ignore vec256;
     LowStar.Ignore.ignore vec128;
     if EverCrypt.TargetConfig.hacl_can_compile_vale then
-      poly1305_vale dst src len key
+      poly1305_vale output input input_len key
     else (
       LowStar.Ignore.ignore poly1305_vale;
-      Hacl.Poly1305_32.poly1305_mac dst len src key)
+      Hacl.Streaming.Poly1305_32.mac output input input_len key
+    )
   end

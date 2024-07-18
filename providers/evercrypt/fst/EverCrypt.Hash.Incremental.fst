@@ -149,7 +149,7 @@ let evercrypt_hash : block Hash.alg =
 
 #pop-options
 
-let hash_state =
+let state_t =
   F.state_s evercrypt_hash SHA2_256 ((agile_state).s SHA2_256) (G.erased unit)
 
 // Public API (streaming)
@@ -160,11 +160,11 @@ let hash_state =
 choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
 efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
 before. The state is to be freed by calling `free`."]
-let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
+let malloc a = F.malloc evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
 [@@ Comment
 "Reset an existing state to the initial hash state with empty data."]
-let init (a: G.erased Hash.alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
+let reset (a: G.erased Hash.alg) = F.reset evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 [@@ Comment
 "Feed an arbitrary amount of data into the hash. This function returns
@@ -173,82 +173,82 @@ the combined length of all of the data passed to `update` (since the last call
 to `init`) exceeds 2^61-1 bytes or 2^64-1 bytes, depending on the choice of
 algorithm. Both limits are unlikely to be attained in practice."]
 let update (i: G.erased Hash.alg)
-  (s:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
-  (data: B.buffer uint8)
-  (len: UInt32.t):
+  (state:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
+  (chunk: B.buffer uint8)
+  (chunk_len: UInt32.t):
   Stack EverCrypt.Error.error_code
-    (requires fun h0 -> F.update_pre evercrypt_hash i s data len h0)
+    (requires fun h0 -> F.update_pre evercrypt_hash i state chunk chunk_len h0)
     (ensures fun h0 e h1 ->
       match e with
       | EverCrypt.Error.Success ->
-          S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= U64.v (evercrypt_hash.max_input_len i) /\
-          F.update_post evercrypt_hash i s data len h0 h1
+          S.length (F.seen evercrypt_hash i h0 state) + U32.v chunk_len <= U64.v (evercrypt_hash.max_input_len i) /\
+          F.update_post evercrypt_hash i state chunk chunk_len h0 h1
       | EverCrypt.Error.MaximumLengthExceeded ->
           h0 == h1 /\
-          not (S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= U64.v (evercrypt_hash.max_input_len i))
+          not (S.length (F.seen evercrypt_hash i h0 state) + U32.v chunk_len <= U64.v (evercrypt_hash.max_input_len i))
       | _ -> False)
 =
-  match F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s data len with
+  match F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) state chunk chunk_len with
   | Hacl.Streaming.Types.Success -> EverCrypt.Error.Success
   | Hacl.Streaming.Types.MaximumLengthExceeded -> EverCrypt.Error.MaximumLengthExceeded
 
 inline_for_extraction noextract
-let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
+let digest_st a = F.digest_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 /// The wrapper pattern, to ensure that the stack-allocated state is properly
 /// monomorphized.
 private
-let finish_md5: finish_st MD5 = F.mk_finish evercrypt_hash MD5 (EverCrypt.Hash.state MD5) (G.erased unit)
+let digest_md5: digest_st MD5 = F.digest evercrypt_hash MD5 (EverCrypt.Hash.state MD5) (G.erased unit)
 private
-let finish_sha1: finish_st SHA1 = F.mk_finish evercrypt_hash SHA1 (EverCrypt.Hash.state SHA1) (G.erased unit)
+let digest_sha1: digest_st SHA1 = F.digest evercrypt_hash SHA1 (EverCrypt.Hash.state SHA1) (G.erased unit)
 private
-let finish_sha224: finish_st SHA2_224 = F.mk_finish evercrypt_hash SHA2_224 (EverCrypt.Hash.state SHA2_224) (G.erased unit)
+let digest_sha224: digest_st SHA2_224 = F.digest evercrypt_hash SHA2_224 (EverCrypt.Hash.state SHA2_224) (G.erased unit)
 private
-let finish_sha256: finish_st SHA2_256 = F.mk_finish evercrypt_hash SHA2_256 (EverCrypt.Hash.state SHA2_256) (G.erased unit)
+let digest_sha256: digest_st SHA2_256 = F.digest evercrypt_hash SHA2_256 (EverCrypt.Hash.state SHA2_256) (G.erased unit)
 private
-let finish_sha3_224: finish_st SHA3_224 = F.mk_finish evercrypt_hash SHA3_224 (EverCrypt.Hash.state SHA3_224) (G.erased unit)
+let digest_sha3_224: digest_st SHA3_224 = F.digest evercrypt_hash SHA3_224 (EverCrypt.Hash.state SHA3_224) (G.erased unit)
 private
-let finish_sha3_256: finish_st SHA3_256 = F.mk_finish evercrypt_hash SHA3_256 (EverCrypt.Hash.state SHA3_256) (G.erased unit)
+let digest_sha3_256: digest_st SHA3_256 = F.digest evercrypt_hash SHA3_256 (EverCrypt.Hash.state SHA3_256) (G.erased unit)
 private
-let finish_sha3_384: finish_st SHA3_384 = F.mk_finish evercrypt_hash SHA3_384 (EverCrypt.Hash.state SHA3_384) (G.erased unit)
+let digest_sha3_384: digest_st SHA3_384 = F.digest evercrypt_hash SHA3_384 (EverCrypt.Hash.state SHA3_384) (G.erased unit)
 private
-let finish_sha3_512: finish_st SHA3_512 = F.mk_finish evercrypt_hash SHA3_512 (EverCrypt.Hash.state SHA3_512) (G.erased unit)
+let digest_sha3_512: digest_st SHA3_512 = F.digest evercrypt_hash SHA3_512 (EverCrypt.Hash.state SHA3_512) (G.erased unit)
 private
-let finish_sha384: finish_st SHA2_384 = F.mk_finish evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384) (G.erased unit)
+let digest_sha384: digest_st SHA2_384 = F.digest evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384) (G.erased unit)
 private
-let finish_sha512: finish_st SHA2_512 = F.mk_finish evercrypt_hash SHA2_512 (EverCrypt.Hash.state SHA2_512) (G.erased unit)
+let digest_sha512: digest_st SHA2_512 = F.digest evercrypt_hash SHA2_512 (EverCrypt.Hash.state SHA2_512) (G.erased unit)
 private
-let finish_blake2s: finish_st Blake2S = F.mk_finish evercrypt_hash Blake2S (EverCrypt.Hash.state Blake2S) (G.erased unit)
+let digest_blake2s: digest_st Blake2S = F.digest evercrypt_hash Blake2S (EverCrypt.Hash.state Blake2S) (G.erased unit)
 private
-let finish_blake2b: finish_st Blake2B = F.mk_finish evercrypt_hash Blake2B (EverCrypt.Hash.state Blake2B) (G.erased unit)
+let digest_blake2b: digest_st Blake2B = F.digest evercrypt_hash Blake2B (EverCrypt.Hash.state Blake2B) (G.erased unit)
 
 [@@ Comment
 "Perform a run-time test to determine which algorithm was chosen for the given piece of state."]
 let alg_of_state (a: G.erased Hash.alg) = F.index_of_state evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 [@@ Comment
-"Write the resulting hash into `dst`, an array whose length is
+"Write the resulting hash into `output`, an array whose length is
 algorithm-specific. You can use the macros defined earlier in this file to
 allocate a destination buffer of the right length. The state remains valid after
-a call to `finish`, meaning the user may feed more data into the hash via
+a call to `digest`, meaning the user may feed more data into the hash via
 `update`. (The finish function operates on an internal copy of the state and
 therefore does not invalidate the client-held state.)"]
-val finish: a:G.erased Hash.alg -> finish_st a
-let finish a s dst l =
-  let a = alg_of_state a s in
+val digest: a:G.erased Hash.alg -> digest_st a
+let digest a state output l =
+  let a = alg_of_state a state in
   match a with
-  | MD5 -> finish_md5 s dst l
-  | SHA1 -> finish_sha1 s dst l
-  | SHA2_224 -> finish_sha224 s dst l
-  | SHA2_256 -> finish_sha256 s dst l
-  | SHA2_384 -> finish_sha384 s dst l
-  | SHA2_512 -> finish_sha512 s dst l
-  | SHA3_224 -> finish_sha3_224 s dst l
-  | SHA3_256 -> finish_sha3_256 s dst l
-  | SHA3_384 -> finish_sha3_384 s dst l
-  | SHA3_512 -> finish_sha3_512 s dst l
-  | Blake2S -> finish_blake2s s dst l
-  | Blake2B -> finish_blake2b s dst l
+  | MD5 -> digest_md5 state output l
+  | SHA1 -> digest_sha1 state output l
+  | SHA2_224 -> digest_sha224 state output l
+  | SHA2_256 -> digest_sha256 state output l
+  | SHA2_384 -> digest_sha384 state output l
+  | SHA2_512 -> digest_sha512 state output l
+  | SHA3_224 -> digest_sha3_224 state output l
+  | SHA3_256 -> digest_sha3_256 state output l
+  | SHA3_384 -> digest_sha3_384 state output l
+  | SHA3_512 -> digest_sha3_512 state output l
+  | Blake2S -> digest_blake2s state output l
+  | Blake2B -> digest_blake2b state output l
 
 [@@ Comment
 "Free a state previously allocated with `create_in`."]
@@ -261,19 +261,19 @@ private
 val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
 
 // A full one-shot hash that relies on vale at each multiplexing point
-let hash_256 input input_len dst =
+let hash_256 output input input_len =
   let open EverCrypt.Hash in
   // TODO: This function now only exists for SHA1 and MD5
   Hacl.Hash.MD.mk_hash SHA2_256 Hacl.Hash.SHA2.alloca_256 update_multi_256
-    Hacl.Hash.SHA2.update_last_256 Hacl.Hash.SHA2.finish_256 input input_len dst
+    Hacl.Hash.SHA2.update_last_256 Hacl.Hash.SHA2.finish_256 output input input_len
 
 private
 val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
 
-let hash_224 input input_len dst =
+let hash_224 output input input_len =
   let open EverCrypt.Hash in
   Hacl.Hash.MD.mk_hash SHA2_224 Hacl.Hash.SHA2.alloca_224 update_multi_224
-    Hacl.Hash.SHA2.update_last_224 Hacl.Hash.SHA2.finish_224 input input_len dst
+    Hacl.Hash.SHA2.update_last_224 Hacl.Hash.SHA2.finish_224 output input input_len
 
 // Public API (one-shot, agile and multiplexing)
 // ---------------------------------------------
@@ -287,54 +287,54 @@ let hash_224 input input_len dst =
 // fixing at some point.
 
 [@@ Comment
-"Hash `input`, of len `len`, into `dst`, an array whose length is determined by
+"Hash `input`, of len `input_len`, into `output`, an array whose length is determined by
 your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined
 earlier in this file to allocate a destination buffer of the right length. This
 API will automatically pick the most efficient implementation, provided you have
 called EverCrypt_AutoConfig2_init() before. "]
 val hash:
   a:Hash.alg ->
-  dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
+  output:B.buffer Lib.IntTypes.uint8 {B.length output = hash_length a} ->
   input:B.buffer Lib.IntTypes.uint8 ->
-  len:FStar.UInt32.t {B.length input = FStar.UInt32.v len /\ FStar.UInt32.v len `less_than_max_input_length` a} ->
+  input_len:FStar.UInt32.t {B.length input = FStar.UInt32.v input_len /\ FStar.UInt32.v input_len `less_than_max_input_length` a} ->
   Stack unit
   (requires fun h0 ->
-    B.live h0 dst /\
+    B.live h0 output /\
     B.live h0 input /\
-    B.(loc_disjoint (loc_buffer input) (loc_buffer dst)))
+    B.(loc_disjoint (loc_buffer input) (loc_buffer output)))
   (ensures fun h0 _ h1 ->
-    B.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst == Spec.Agile.Hash.hash a (B.as_seq h0 input))
-let hash a dst input len =
+    B.(modifies (loc_buffer output) h0 h1) /\
+    B.as_seq h1 output == Spec.Agile.Hash.hash a (B.as_seq h0 input))
+let hash a output input input_len =
   match a with
-  | MD5 -> Hacl.Hash.MD5.legacy_hash input len dst
-  | SHA1 -> Hacl.Hash.SHA1.legacy_hash input len dst
-  | SHA2_224 -> hash_224 input len dst
-  | SHA2_256 -> hash_256 input len dst
-  | SHA2_384 -> Hacl.Streaming.SHA2.hash_384 input len dst
-  | SHA2_512 -> Hacl.Streaming.SHA2.hash_512 input len dst
-  | SHA3_224 -> Hacl.Hash.SHA3.hash SHA3_224 input len dst
-  | SHA3_256 -> Hacl.Hash.SHA3.hash SHA3_256 input len dst
-  | SHA3_384 -> Hacl.Hash.SHA3.hash SHA3_384 input len dst
-  | SHA3_512 -> Hacl.Hash.SHA3.hash SHA3_512 input len dst
+  | MD5 -> Hacl.Hash.MD5.hash_oneshot output input input_len
+  | SHA1 -> Hacl.Hash.SHA1.hash_oneshot output input input_len
+  | SHA2_224 -> hash_224 output input input_len
+  | SHA2_256 -> hash_256 output input input_len
+  | SHA2_384 -> Hacl.Streaming.SHA2.hash_384 output input input_len
+  | SHA2_512 -> Hacl.Streaming.SHA2.hash_512 output input input_len
+  | SHA3_224 -> Hacl.Hash.SHA3.hash SHA3_224 output input input_len
+  | SHA3_256 -> Hacl.Hash.SHA3.hash SHA3_256 output input input_len
+  | SHA3_384 -> Hacl.Hash.SHA3.hash SHA3_384 output input input_len
+  | SHA3_512 -> Hacl.Hash.SHA3.hash SHA3_512 output input input_len
   | Blake2S ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
         let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
         if vec128 then
-          Hacl.Hash.Blake2.hash_blake2s_128 input len dst
+          Hacl.Hash.Blake2s_128.hash output input input_len
         else
-          Hacl.Hash.Blake2.hash_blake2s_32 input len dst
+          Hacl.Hash.Blake2s_32.hash output input input_len
       else
-        Hacl.Hash.Blake2.hash_blake2s_32 input len dst
+        Hacl.Hash.Blake2s_32.hash output input input_len
   | Blake2B ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
         let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
         if vec256 then
-          Hacl.Hash.Blake2.hash_blake2b_256 input len dst
+          Hacl.Hash.Blake2b_256.hash output input input_len
         else
-          Hacl.Hash.Blake2.hash_blake2b_32 input len dst
+          Hacl.Hash.Blake2b_32.hash output input input_len
       else
-        Hacl.Hash.Blake2.hash_blake2b_32 input len dst
+        Hacl.Hash.Blake2b_32.hash output input input_len
 
 // Public API (verified clients)
 // -----------------------------

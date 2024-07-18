@@ -1,0 +1,83 @@
+[
+  "ñÓímå\u001dûmá‚ó€\u001fœ¥\u0007",
+  [
+    [
+      "Hacl.Streaming.Blake2.Params.index",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Prims.eqtype",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.Blake2.Definitions.digest_length_t",
+        "equation_Spec.Blake2.Definitions.key_length_t",
+        "equation_Spec.GaloisField.gf",
+        "haseqTm_refine_0f51164b0bab51a6c85702dbb28050d4",
+        "haseqTm_refine_9574995d7759e91573a864a824f17975",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_FStar.UInt8.t", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t"
+      ],
+      0,
+      "2093fb6f851798b0b4461e53ec65a1a1"
+    ],
+    [
+      "Hacl.Streaming.Blake2.Params.frame_invariant",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "112ce4ef8ef0a0c1cd7fd701e77ca670"
+    ],
+    [
+      "Hacl.Streaming.Blake2.Params.get_params",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "data_elim_Hacl.Impl.Blake2.Core.Mkblake2_params",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Blake2.Definitions.digest_length_t",
+        "equation_Spec.Blake2.Definitions.key_length_t",
+        "equation_Spec.GaloisField.gf",
+        "fuel_guarded_inversion_Hacl.Impl.Blake2.Core.blake2_params",
+        "fuel_guarded_inversion_Hacl.Streaming.Blake2.Params.index",
+        "kinding_Hacl.Streaming.Blake2.Params.index@tok",
+        "proj_equation_Hacl.Impl.Blake2.Core.Mkblake2_params_digest_length",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_0f51164b0bab51a6c85702dbb28050d4",
+        "refinement_interpretation_Tm_refine_9574995d7759e91573a864a824f17975",
+        "refinement_interpretation_Tm_refine_a8f00cbbeac24b1f2452bb4f30c85817",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_FStar.Ghost.reveal",
+        "typing_Hacl.Impl.Blake2.Core.__proj__Mkblake2_params__item__digest_length",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+      ],
+      0,
+      "a79d4a3bbc66f470514383926eee2a83"
+    ],
+    [
+      "Hacl.Streaming.Blake2.Params.copy",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "9c85694e2edaed5a3ab9436d3cefbc90"
+    ]
+  ]
+]

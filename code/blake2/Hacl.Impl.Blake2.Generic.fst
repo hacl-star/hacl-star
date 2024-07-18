@@ -323,13 +323,14 @@ val blake2_compress1:
   -> wv: state_p al m
   -> s_iv: state_p al m
   -> offset: Spec.limb_t al
-  -> flag: bool ->
+  -> flag: bool
+  -> last_node: bool ->
   Stack unit
     (requires (fun h -> live h wv /\ live h s_iv /\ disjoint wv s_iv))
     (ensures  (fun h0 _ h1 -> modifies (loc wv) h0 h1
-                         /\ state_v h1 wv == Spec.blake2_compress1 al (state_v h0 s_iv) offset flag))
+                         /\ state_v h1 wv == Spec.blake2_compress1 al (state_v h0 s_iv) offset flag last_node))
 
-let blake2_compress1 #al #m wv s_iv offset flag =
+let blake2_compress1 #al #m wv s_iv offset flag last_node =
   let h0 = ST.get() in
   push_frame();
   let mask = alloc_row al m in
@@ -348,8 +349,8 @@ let blake2_compress1 #al #m wv s_iv offset flag =
   (**) normalize_term_spec (Spec.wt al);
   [@inline_let] let wt_al = normalize_term (Spec.wt al) in
   let wv_14 = if flag then ones wt_al SEC else (Spec.zero al) in
+  let wv_15 = if last_node then ones wt_al SEC else (Spec.zero al) in
   // end of the TODO
-  let wv_15 = Spec.zero al in
   create_row mask wv_12 wv_13 wv_14 wv_15;
   copy_state wv s_iv;
   let wv3 = rowi wv 3ul in
@@ -357,7 +358,7 @@ let blake2_compress1 #al #m wv s_iv offset flag =
   pop_frame();
   let h1 = ST.get() in
   assert(modifies (loc wv) h0 h1);
-  Lib.Sequence.eq_intro (state_v h1 wv) (Spec.blake2_compress1 al (state_v h0 s_iv) offset flag)
+  Lib.Sequence.eq_intro (state_v h1 wv) (Spec.blake2_compress1 al (state_v h0 s_iv) offset flag last_node)
 
 inline_for_extraction noextract
 val blake2_compress2 :
@@ -433,28 +434,28 @@ let blake2_compress3 #al #ms s_iv wv =
   eq_intro (state_v h4 s_iv) (Spec.blake2_compress3 al (state_v h0 wv) (state_v h0 s_iv))
 
 
-
 inline_for_extraction noextract
 let compress_t (al:Spec.alg) (ms:m_spec) =
     wv:state_p al ms
   -> s: state_p al ms
   -> m: block_p al
   -> offset: Spec.limb_t al
-  -> flag: bool ->
+  -> flag: bool
+  -> last_node: bool ->
   Stack unit
     (requires (fun h -> live h wv /\ live h s /\ live h m /\ disjoint s m /\ disjoint wv s /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies (loc s |+| loc wv) h0 h1
-                         /\ state_v h1 s == Spec.blake2_compress al (state_v h0 s) h0.[|m|] offset flag))
+                         /\ state_v h1 s == Spec.blake2_compress al (state_v h0 s) h0.[|m|] offset flag last_node))
 
 
 inline_for_extraction noextract
 val blake2_compress: #al:Spec.alg -> #ms:m_spec -> compress_t al ms
 
-let blake2_compress #al #ms wv s m offset flag =
+let blake2_compress #al #ms wv s m offset flag last_node =
   push_frame();
   let m_w = create 16ul (Spec.zero al) in
   blake2_compress0 #al m m_w;
-  blake2_compress1 wv s offset flag;
+  blake2_compress1 wv s offset flag last_node;
   blake2_compress2 wv m_w;
   blake2_compress3 s wv;
   pop_frame()
@@ -464,18 +465,19 @@ let blake2_update_block_st (al:Spec.alg) (ms:m_spec) =
     wv:state_p al ms
   -> hash: state_p al ms
   -> flag: bool
+  -> last_node: bool
   -> totlen: Spec.limb_t al{v totlen <= Spec.max_limb al}
   -> d: block_p al ->
   Stack unit
     (requires (fun h -> live h wv /\ live h hash /\ live h d /\ disjoint hash d /\ disjoint wv hash /\ disjoint wv d))
     (ensures  (fun h0 _ h1 -> modifies (loc hash |+| loc wv) h0 h1
-                         /\ state_v h1 hash == Spec.blake2_update_block al flag (v totlen) h0.[|d|] (state_v h0 hash)))
+                         /\ state_v h1 hash == Spec.blake2_update_block al flag last_node (v totlen) h0.[|d|] (state_v h0 hash)))
 
 inline_for_extraction noextract
 val blake2_update_block: #al:Spec.alg -> #ms:m_spec -> blake2_update_block_st al ms
 
-let blake2_update_block #al #ms wv hash flag totlen d =
-    blake2_compress wv hash d totlen flag
+let blake2_update_block #al #ms wv hash flag last_node totlen d =
+    blake2_compress wv hash d totlen flag last_node
 
 inline_for_extraction noextract
 let blake2_update1_st (al:Spec.alg) (ms:m_spec) =
@@ -499,20 +501,21 @@ let blake2_update1 #al #ms blake2_update_block #len wv hash prev d i =
   let b = sub d (i *. size_block al) (size_block al) in
   let h = ST.get() in
   assert (as_seq h b == Spec.get_blocki al (as_seq h d) (v i));
-  blake2_update_block wv hash false totlen b
+  blake2_update_block wv hash false false totlen b
 
 inline_for_extraction noextract
 let blake2_update_last_st (al:Spec.alg) (ms:m_spec) =
    #len:size_t
   -> wv: state_p al ms
   -> hash: state_p al ms
+  -> last_node: bool
   -> prev: Spec.limb_t al{v prev + v len <= Spec.max_limb al}
   -> rem: size_t {v rem <= v len /\ v rem <= Spec.size_block al}
   -> d: lbuffer uint8 len ->
   Stack unit
     (requires (fun h -> live h wv /\ live h hash /\ live h d /\ disjoint hash d /\ disjoint wv hash /\ disjoint wv d))
     (ensures  (fun h0 _ h1 -> modifies (loc hash |+| loc wv) h0 h1
-                         /\ state_v h1 hash == Spec.blake2_update_last al (v prev) (v rem) h0.[|d|] (state_v h0 hash)))
+                         /\ state_v h1 hash == Spec.blake2_update_last al last_node (v prev) (v rem) h0.[|d|] (state_v h0 hash)))
 
 inline_for_extraction noextract
 val blake2_update_last:
@@ -521,10 +524,10 @@ val blake2_update_last:
   -> blake2_update_block: blake2_update_block_st al ms
   -> blake2_update_last_st al ms
 
-let blake2_update_last #al #ms blake2_update_block #len wv hash prev rem d =
+let blake2_update_last #al #ms blake2_update_block #len wv hash last_node prev rem d =
   let h0 = ST.get () in
   [@inline_let]
-  let spec _ h1 = state_v h1 hash == Spec.blake2_update_last al (v prev) (v rem) h0.[|d|] (state_v h0 hash) in
+  let spec _ h1 = state_v h1 hash == Spec.blake2_update_last al last_node (v prev) (v rem) h0.[|d|] (state_v h0 hash) in
   salloc1 h0 (size_block al) (u8 0) (Ghost.hide (loc hash |+| loc wv)) spec
   (fun last_block ->
     let last = sub d (len -! rem) rem in
@@ -536,10 +539,10 @@ let blake2_update_last #al #ms blake2_update_block #len wv hash prev rem d =
     assert (as_seq h1 last == Seq.slice (as_seq h0 d) (v len - v rem) (v len));
     assert (as_seq h2 last_block == Spec.get_last_padded_block al (as_seq h0 d) (v rem));
     let totlen = prev +. (size_to_limb al len) in
-    blake2_update_block wv hash true totlen last_block;
+    blake2_update_block wv hash true last_node totlen last_block;
     let h3 = ST.get() in
     assert (v totlen == v prev + v len);
-    assert (state_v h3 hash == Spec.blake2_update_block al true (v totlen) (as_seq h2 last_block) (state_v h0 hash)))
+    assert (state_v h3 hash == Spec.blake2_update_block al true last_node (v totlen) (as_seq h2 last_block) (state_v h0 hash)))
 
 inline_for_extraction noextract
 let blake2_init_st  (al:Spec.alg) (ms:m_spec) =
@@ -549,16 +552,244 @@ let blake2_init_st  (al:Spec.alg) (ms:m_spec) =
   Stack unit
     (requires (fun h -> live h hash))
     (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-			   state_v h1 hash == Spec.blake2_init_hash al (v kk) (v nn)))
+      state_v h1 hash ==
+        Spec.blake2_init_hash al ({ Spec.blake2_default_params al with
+          key_length = UInt8.uint_to_t (v kk);
+          digest_length = UInt8.uint_to_t (v nn)})))
 
 inline_for_extraction noextract
-val blake2_init:
+let blake2_init_with_params_st  (al:Spec.alg) (ms:m_spec) =
+    hash: state_p al ms
+  -> p: blake2_params al ->
+  Stack unit
+    (requires (fun h -> live h hash /\ blake2_params_inv h p /\ LowStar.Buffer.loc_disjoint (loc hash) (blake2_params_loc p)))
+    (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
+			   state_v h1 hash == Spec.blake2_init_hash al (blake2_params_v h0 p)))
+
+inline_for_extraction noextract
+val serialize_params (al:Spec.alg)
+  (p: blake2_params al)
+  (b: lbuffer (word_t al) 8ul)
+  : Stack unit
+    (requires fun h ->
+      live h b /\
+      blake2_params_inv h p /\
+      LowStar.Buffer.loc_disjoint (loc b) (blake2_params_loc p) /\
+      as_seq h b == Seq.create 8 (Spec.nat_to_word al 0)
+    )
+    (ensures fun h0 _ h1 ->
+      let _ = allow_inversion Spec.alg in
+      modifies (loc b) h0 h1 /\
+      as_seq h1 b == Spec.serialize_blake2_params (blake2_params_v h0 p))
+
+#push-options "--z3rlimit 100 --fuel 0"
+inline_for_extraction noextract
+let serialize_params_blake2s
+  (p: blake2_params Spec.Blake2S)
+  (b: lbuffer (word_t Spec.Blake2S) 8ul)
+  : Stack unit
+    (requires fun h -> live h b /\
+      blake2_params_inv h p /\
+      LowStar.Buffer.loc_disjoint (loc b) (blake2_params_loc p) /\
+      as_seq h b == Seq.create 8 (u32 0)
+    )
+    (ensures fun h0 _ h1 ->
+      modifies (loc b) h0 h1 /\ as_seq h1 b == Spec.serialize_blake2_params (blake2_params_v h0 p))
+  = let h0 = ST.get () in
+    [@inline_let]
+    let kk: int_t U8 PUB = p.key_length in
+    [@inline_let]
+    let nn: int_t U8 PUB = p.digest_length in
+    [@inline_let]
+    let kk_shift_8 = shift_left (to_u32 kk) (size 8) in
+    [@inline_let]
+    let fanout_shift_16 = shift_left (to_u32 p.fanout) (size 16) in
+    [@inline_let]
+    let depth_shift_24 = shift_left (to_u32 p.depth) (size 24) in
+    [@inline_let]
+    let v0 = (to_u32 nn) ^. kk_shift_8 ^. fanout_shift_16 ^. depth_shift_24 in
+    [@inline_let]
+    let v1 = p.leaf_length in
+    [@inline_let]
+    let v2 = to_u32 p.node_offset in
+    [@inline_let]
+    let node_offset_high = to_u32 (shift_right p.node_offset (size 32)) in
+    [@inline_let]
+    let node_depth_shift_16 = shift_left (to_u32 p.node_depth) (size 16) in
+    [@inline_let]
+    let inner_length_shift_16 = shift_left (to_u32 p.inner_length) (size 24) in
+    [@inline_let]
+    let v3 = node_offset_high ^. node_depth_shift_16 ^. inner_length_shift_16 in
+
+    uints_from_bytes_le (sub b 4ul 2ul) p.salt;
+    uints_from_bytes_le (sub b 6ul 2ul) p.personal;
+
+    // AF: Putting these writes *after* modifications on a subbuffer of b helps with modifies-reasoning:
+    // By putting them before, F* struggles with proving that b[0..3] is not modified by uints_from_bytes_le
+    b.(0ul) <- v0;
+    b.(1ul) <- v1;
+    b.(2ul) <- v2;
+    b.(3ul) <- v3;
+
+    let h1 = ST.get () in
+    let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2s_params
+         {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}) =
+      let open Lib.Sequence in
+      let open Lib.ByteSequence in
+      let s0 = (u32 (v nn)) ^.
+               (u32 (v kk) <<. (size 8)) ^.
+               (u32 (v p.fanout) <<. (size 16)) ^.
+               (u32 (v p.depth) <<. (size 24)) in
+      let s1 = p.leaf_length in
+      (* Take the first four bytes *)
+      let s2 = (to_u32 p.node_offset) in
+      (* Take the last four bytes of node_offset *)
+      let s3 = (to_u32 (p.node_offset >>. (size 32))) ^.
+               (u32 (v p.node_depth) <<. (size 16)) ^.
+               (u32 (v p.inner_length) <<. (size 24)) in
+      let salt_u32: lseq uint32 2 = uints_from_bytes_le (as_seq h0 p.salt) in
+      let s4 = salt_u32.[0] in
+      let s5 = salt_u32.[1] in
+      let personal_u32: lseq uint32 2 = uints_from_bytes_le (as_seq h0 p.personal) in
+      let s6 = personal_u32.[0] in
+      let s7 = personal_u32.[1] in
+      [@inline_let]
+      let l = [s0; s1; s2; s3; s4; s5; s6; s7] in
+      assert_norm (List.Tot.length l == 8);
+
+      // There seems to be something not triggering with createL, requiring the
+      // following lemma calls, and assert_norms to relate List.index to the
+      // actual elements
+
+      assert_norm (List.Tot.index l 0 == s0);
+      assert_norm (List.Tot.index l 1 == s1);
+      assert_norm (List.Tot.index l 2 == s2);
+      assert_norm (List.Tot.index l 3 == s3);
+      assert_norm (List.Tot.index l 4 == s4);
+      assert_norm (List.Tot.index l 5 == s5);
+      assert_norm (List.Tot.index l 6 == s6);
+      assert_norm (List.Tot.index l 7 == s7);
+      of_list_index l 0;
+      of_list_index l 1;
+      of_list_index l 2;
+      of_list_index l 3;
+      of_list_index l 4;
+      of_list_index l 5;
+      of_list_index l 6;
+      of_list_index l 7
+    in
+    aux()
+
+inline_for_extraction noextract
+let serialize_params_blake2b
+  (p: blake2_params Spec.Blake2B)
+  (b: lbuffer (word_t Spec.Blake2B) 8ul)
+  : Stack unit
+    (requires fun h -> live h b /\
+      blake2_params_inv #Spec.Blake2B h p /\
+      LowStar.Buffer.loc_disjoint (loc b) (blake2_params_loc p) /\
+      as_seq h b == Seq.create 8 (u64 0)
+    )
+    (ensures fun h0 _ h1 ->
+      modifies (loc b) h0 h1 /\
+      as_seq h1 b == Spec.serialize_blake2_params (blake2_params_v h0 p))
+  = let h0 = ST.get () in
+    let kk: int_t U8 PUB = p.key_length in
+    let nn: int_t U8 PUB = p.digest_length in
+    [@inline_let]
+    let kk_shift_8 = shift_left (to_u64 kk) (size 8) in
+    [@inline_let]
+    let fanout_shift_16 = shift_left (to_u64 p.fanout) (size 16) in
+    [@inline_let]
+    let depth_shift_24 = shift_left (to_u64 p.depth) (size 24) in
+    [@inline_let]
+    let leaf_length_shift_32 = shift_left (to_u64 p.leaf_length) (size 32) in
+    [@inline_let]
+    let v0 = (to_u64 nn) ^. kk_shift_8 ^. fanout_shift_16 ^. depth_shift_24 ^. leaf_length_shift_32 in
+    [@inline_let]
+    let v1 = p.node_offset in
+    [@inline_let]
+    let inner_length_shift_8 = shift_left (to_u64 p.inner_length) (size 8) in
+    [@inline_let]
+    let v2 = (to_u64 p.node_depth) ^. inner_length_shift_8 in
+
+    uints_from_bytes_le (sub b 4ul 2ul) p.salt;
+    uints_from_bytes_le (sub b 6ul 2ul) p.personal;
+
+    b.(0ul) <- v0;
+    b.(1ul) <- v1;
+    b.(2ul) <- v2;
+    b.(3ul) <- (u64 0);
+
+    let h1 = ST.get () in
+    let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2b_params
+        {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}) =
+      let open Lib.Sequence in
+      let open Lib.ByteSequence in
+      let s0 = (u64 (v nn)) ^.
+               (u64 (v kk) <<. (size 8)) ^.
+               (u64 (v p.fanout) <<. (size 16)) ^.
+               (u64 (v p.depth) <<. (size 24)) ^.
+               (u64 (v p.leaf_length) <<. (size 32)) in
+      let s1 = p.node_offset in
+      // The serialization corresponding to s2 contains node_depth and inner_length,
+      // followed by the 14 reserved bytes which always seem to be zeros, and can hence
+      // be ignored when building the corresponding uint64 using xor's
+      let s2 = (u64 (v p.node_depth)) ^.
+               (u64 (v p.inner_length) <<. (size 8)) in
+      // s3 corresponds to the remaining of the reserved bytes
+      let s3 = u64 0 in
+      let salt_u64: lseq uint64 2 = uints_from_bytes_le (as_seq h0 p.salt) in
+      let s4 = salt_u64.[0] in
+      let s5 = salt_u64.[1] in
+      let personal_u64: lseq uint64 2 = uints_from_bytes_le (as_seq h0 p.personal) in
+      let s6 = personal_u64.[0] in
+      let s7 = personal_u64.[1] in
+      [@inline_let]
+      let l = [s0; s1; s2; s3; s4; s5; s6; s7] in
+      assert_norm (List.Tot.length l == 8);
+
+      // There seems to be something not triggering with createL, requiring the
+      // following lemma calls, and assert_norms to relate List.index to the
+      // actual elements
+
+      assert_norm (List.Tot.index l 0 == s0);
+      assert_norm (List.Tot.index l 1 == s1);
+      assert_norm (List.Tot.index l 2 == s2);
+      assert_norm (List.Tot.index l 3 == s3);
+      assert_norm (List.Tot.index l 4 == s4);
+      assert_norm (List.Tot.index l 5 == s5);
+      assert_norm (List.Tot.index l 6 == s6);
+      assert_norm (List.Tot.index l 7 == s7);
+      of_list_index l 0;
+      of_list_index l 1;
+      of_list_index l 2;
+      of_list_index l 3;
+      of_list_index l 4;
+      of_list_index l 5;
+      of_list_index l 6;
+      of_list_index l 7
+    in
+    aux()
+#pop-options
+
+let serialize_params al p b =
+  match al with
+  | Spec.Blake2S -> serialize_params_blake2s p b
+  | Spec.Blake2B -> serialize_params_blake2b p b
+
+// General initialization API that takes a complete set of parameters. See below
+// for blake2_init, a simplified version of it.
+inline_for_extraction noextract
+val blake2_init_with_params:
     #al:Spec.alg
   -> #ms:m_spec
-  -> blake2_init_st al ms
+  -> blake2_init_with_params_st al ms
 
-let blake2_init #al #ms hash kk nn =
+let blake2_init_with_params #al #ms hash p =
+  push_frame ();
   let h0 = ST.get() in
+  let tmp = create 8ul (Spec.nat_to_word al 0) in
   let r0 = rowi hash 0ul in
   let r1 = rowi hash 1ul in
   let r2 = rowi hash 2ul in
@@ -573,13 +804,45 @@ let blake2_init #al #ms hash kk nn =
   let iv7 = get_iv al 7ul in
   create_row #al #ms r2 iv0 iv1 iv2 iv3;
   create_row #al #ms r3 iv4 iv5 iv6 iv7;
-  let kk_shift_8 = shift_left (size_to_word al kk) (size 8) in
-  let iv0' = iv0 ^. (Spec.nat_to_word al 0x01010000) ^. kk_shift_8 ^. (size_to_word al nn) in
-  create_row #al #ms r0 iv0' iv1 iv2 iv3;
-  create_row #al #ms r1 iv4 iv5 iv6 iv7;
+  serialize_params al p tmp;
+  let tmp0 = tmp.(0ul) in
+  let tmp1 = tmp.(1ul) in
+  let tmp2 = tmp.(2ul) in
+  let tmp3 = tmp.(3ul) in
+  let tmp4 = tmp.(4ul) in
+  let tmp5 = tmp.(5ul) in
+  let tmp6 = tmp.(6ul) in
+  let tmp7 = tmp.(7ul) in
+  let iv0' = iv0 ^. tmp0 in
+  let iv1' = iv1 ^. tmp1 in
+  let iv2' = iv2 ^. tmp2 in
+  let iv3' = iv3 ^. tmp3 in
+  let iv4' = iv4 ^. tmp4 in
+  let iv5' = iv5 ^. tmp5 in
+  let iv6' = iv6 ^. tmp6 in
+  let iv7' = iv7 ^. tmp7 in
+  create_row #al #ms r0 iv0' iv1' iv2' iv3';
+  create_row #al #ms r1 iv4' iv5' iv6' iv7';
   let h1 = ST.get() in
-  assert(modifies (loc hash) h0 h1);
-  Lib.Sequence.eq_intro (state_v h1 hash) (Spec.blake2_init_hash al (v kk) (v nn))
+  assert (disjoint hash tmp);
+  assert (modifies (loc hash `union` loc tmp) h0 h1);
+  Lib.Sequence.eq_intro (state_v h1 hash) (Spec.blake2_init_hash al (blake2_params_v h0 p));
+  pop_frame ()
+
+// Simplified initialization API that only takes key length and output length --
+// see blake2_init_with_params for an API that gives complete control over the
+// parameters.
+inline_for_extraction noextract
+val blake2_init:
+    #al:Spec.alg
+  -> #ms:m_spec
+  -> blake2_init_st al ms
+
+let blake2_init #al #ms hash kk nn =
+  push_frame ();
+  let p = alloca_default_params al in
+  blake2_init_with_params hash { p with key_length = FStar.Int.Cast.uint32_to_uint8 kk; digest_length = FStar.Int.Cast.uint32_to_uint8 nn };
+  pop_frame ()
 
 #push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let _ : squash (inversion Spec.alg) = allow_inversion Spec.alg
@@ -594,11 +857,8 @@ val split_blocks: al:Spec.alg -> len:size_t -> r:(size_t & size_t){
 let split_blocks al len =
   let nb = len /. size_block al in
   let rem = len %. size_block al in
-  if rem =. 0ul && nb >. 0ul then
-      let nb' = nb -! 1ul in
-      let rem' = size_block al in
-      (nb',rem')
-  else (nb,rem)
+  (if rem =. 0ul && nb >. 0ul then nb -! 1ul else nb),
+  (if rem =. 0ul && nb >. 0ul then size_block al else rem)
 
 inline_for_extraction noextract
 let blake2_update_multi_st (al : Spec.alg) (ms : m_spec) =
@@ -647,7 +907,7 @@ let blake2_update_blocks_st (al : Spec.alg) (ms : m_spec) =
     (requires (fun h -> live h wv /\ live h hash /\ live h blocks /\ disjoint hash blocks /\ disjoint wv hash /\ disjoint wv blocks))
     (ensures  (fun h0 _ h1 -> modifies (loc hash |+| loc wv) h0 h1 /\
 			   state_v h1 hash ==
-			   Spec.blake2_update_blocks al (v prev) h0.[|blocks|] (state_v h0 hash)))
+			   Spec.blake2_update_blocks al false (v prev) h0.[|blocks|] (state_v h0 hash)))
 
 inline_for_extraction noextract
 val blake2_update_blocks (#al : Spec.alg) (#ms : m_spec) :
@@ -658,7 +918,7 @@ val blake2_update_blocks (#al : Spec.alg) (#ms : m_spec) :
 let blake2_update_blocks #al #ms blake2_update_multi blake2_update_last #len wv hash prev blocks =
   let (nb,rem) = split_blocks al len in
   blake2_update_multi wv hash prev blocks nb;
-  blake2_update_last #len wv hash prev rem blocks
+  blake2_update_last #len wv hash false prev rem blocks
 
 inline_for_extraction noextract
 let blake2_finish_st (al:Spec.alg) (ms:m_spec) =
@@ -706,7 +966,7 @@ let blake2_update_key_st (al:Spec.alg) (ms:m_spec) =
     (requires (fun h -> live h wv /\ live h hash /\ live h k /\
                      disjoint hash k /\ disjoint wv hash /\ disjoint wv k))
     (ensures  (fun h0 _ h1 -> modifies (loc hash |+| loc wv) h0 h1
-                         /\ state_v h1 hash == Spec.blake2_update_key al (v kk) h0.[|k|] (v ll) (state_v h0 hash)))
+                         /\ state_v h1 hash == Spec.blake2_update_key al false (v kk) h0.[|k|] (v ll) (state_v h0 hash)))
 
 inline_for_extraction noextract
 val blake2_update_key:
@@ -721,14 +981,14 @@ let blake2_update_key #al #ms blake2_update_block wv hash kk k ll =
   assert (v lb = Spec.size_block al);
   let h0 = ST.get () in
   salloc1 h0 (size_block al) (u8 0) (Ghost.hide (loc hash |+| loc wv))
-    (fun _ h1 -> live h1 hash /\ state_v h1 hash == Spec.blake2_update_key al (v kk) h0.[|k|] (v ll) (state_v h0 hash))
+    (fun _ h1 -> live h1 hash /\ state_v h1 hash == Spec.blake2_update_key al false (v kk) h0.[|k|] (v ll) (state_v h0 hash))
     (fun key_block ->
       update_sub key_block 0ul kk k;
       let h1 = ST.get() in
       if ll =. 0ul then
-         blake2_update_block wv hash true lb key_block
+         blake2_update_block wv hash true false lb key_block
       else
-         blake2_update_block wv hash false lb key_block)
+         blake2_update_block wv hash false false lb key_block)
 
 inline_for_extraction noextract
 let blake2_update_st (al:Spec.alg) (ms:m_spec) =
@@ -743,7 +1003,7 @@ let blake2_update_st (al:Spec.alg) (ms:m_spec) =
                      disjoint hash k /\ disjoint wv hash /\ disjoint wv k /\
                      disjoint hash d /\ disjoint wv d /\ disjoint d k))
     (ensures  (fun h0 _ h1 -> modifies (loc hash |+| loc wv) h0 h1
-                         /\ state_v h1 hash == Spec.blake2_update al (v kk) h0.[|k|] h0.[|d|] (state_v h0 hash)))
+                         /\ state_v h1 hash == Spec.blake2_update al false (v kk) h0.[|k|] h0.[|d|] (state_v h0 hash)))
 
 
 inline_for_extraction noextract
@@ -765,24 +1025,77 @@ let blake2_update #al #ms blake2_update_key blake2_update_blocks
       else blake2_update_blocks wv hash lb d)
     else blake2_update_blocks wv hash (size_to_limb al 0ul) d
 
+// TODO: this is technically redundant because output_len and key_len are ALREADY present in params. But this is good for regularity... or not?
+inline_for_extraction noextract
+let blake2_with_params_st (al:Spec.alg) (ms:m_spec) =
+    output: buffer_t MUT uint8
+  -> input: buffer_t MUT uint8
+  -> input_len: size_t{v input_len == length input}
+  -> params: blake2_params al
+  -> key: buffer_t MUT uint8 ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h input /\ live h key /\ blake2_params_inv h params
+                   /\ disjoint output input /\ disjoint output key /\ disjoint input key /\
+                   UInt8.v params.key_length == length key /\
+                   UInt8.v params.digest_length == length output /\
+                   True))
+    (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
+                         /\ h1.[|(output <: lbuffer uint8 (FStar.Int.Cast.uint8_to_uint32 params.digest_length))|] == Spec.blake2 al false h0.[|(input <: lbuffer uint8 input_len)|] (blake2_params_v h0 params) h0.[|(key <: lbuffer uint8 (FStar.Int.Cast.uint8_to_uint32 params.key_length))|]))
+
+inline_for_extraction noextract
+val blake2_with_params:
+    #al:Spec.alg
+  -> #ms:m_spec
+  -> blake2_init_with_params_st al ms
+  -> blake2_update_st al ms
+  -> blake2_finish_st al ms
+  -> blake2_with_params_st al ms
+
+#push-options "--z3rlimit 100"
+let blake2_with_params #al #ms blake2_init blake2_update blake2_finish output input input_len params key =
+  [@inline_let]
+  let output_len = FStar.Int.Cast.uint8_to_uint32 params.digest_length in
+  [@inline_let]
+  let key_len = FStar.Int.Cast.uint8_to_uint32 params.key_length in
+  [@inline_let]
+  let stlen = le_sigh al ms in
+  [@inline_let]
+  let stzero = zero_element al ms in
+  let h0 = ST.get() in
+  [@inline_let]
+  let spec _ h1 = h1.[|output <: lbuffer uint8 output_len|] == Spec.blake2 al false h0.[|(input <: lbuffer uint8 input_len)|] (blake2_params_v h0 params) h0.[|key <: lbuffer uint8 key_len|] in
+  salloc1 h0 stlen stzero (Ghost.hide (loc output)) spec
+  (fun h ->
+    assert (max_size_t <= Spec.max_limb al);
+    let h1 = ST.get() in
+    salloc1 h1 stlen stzero (Ghost.hide (loc output |+| loc h)) spec
+    (fun wv ->
+      blake2_init_with_params h params;
+      blake2_update wv h key_len key input_len input;
+      blake2_finish output_len output h))
+#pop-options
 
 inline_for_extraction noextract
 let blake2_st (al:Spec.alg) (ms:m_spec) =
-    nn:size_t{1 <= v nn /\ v nn <= Spec.max_output al}
-  -> output: lbuffer uint8 nn
-  -> ll: size_t
-  -> d: lbuffer uint8 ll
-  -> kk: size_t{v kk <= Spec.max_key al}
-  -> k: lbuffer uint8 kk ->
+    output: buffer_t MUT uint8
+  -> output_len: size_t{v output_len == length output /\ 1 <= v output_len /\ v output_len <= Spec.max_output al}
+  -> input: buffer_t MUT uint8
+  -> input_len: size_t{v input_len == length input}
+  -> key: buffer_t MUT uint8
+  -> key_len: size_t{v key_len == length key /\ v key_len <= Spec.max_key al} ->
   Stack unit
-    (requires (fun h -> live h output /\ live h d /\ live h k
-                   /\ disjoint output d /\ disjoint output k /\ disjoint d k))
+    (requires (fun h -> live h output /\ live h input /\ live h key /\
+                     disjoint output input /\ disjoint output key /\ disjoint input key))
     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
-                         /\ h1.[|output|] == Spec.blake2 al h0.[|d|] (v kk) h0.[|k|] (v nn)))
+      /\ h1.[|(output <: lbuffer uint8 output_len)|] == Spec.blake2 al false h0.[|(input <: lbuffer uint8 input_len)|]
+        ({ Spec.blake2_default_params al with
+          key_length = UInt8.uint_to_t (v key_len);
+          digest_length = UInt8.uint_to_t (v output_len)})
+        h0.[|(key <: lbuffer uint8 key_len)|]))
 
 inline_for_extraction noextract
 val blake2:
-     #al:Spec.alg
+    #al:Spec.alg
   -> #ms:m_spec
   -> blake2_init_st al ms
   -> blake2_update_st al ms
@@ -790,23 +1103,25 @@ val blake2:
   -> blake2_st al ms
 
 #push-options "--z3rlimit 100"
-let blake2 #al #ms blake2_init blake2_update blake2_finish nn output ll d kk k =
+let blake2 #al #ms blake2_init blake2_update blake2_finish output output_len input input_len key key_len =
   [@inline_let]
   let stlen = le_sigh al ms in
   [@inline_let]
   let stzero = zero_element al ms in
   let h0 = ST.get() in
   [@inline_let]
-  let spec _ h1 = h1.[|output|] == Spec.blake2 al h0.[|d|] (v kk) h0.[|k|] (v nn) in
+  let spec _ h1 = h1.[|output <: lbuffer uint8 output_len|] == Spec.blake2 al false h0.[|(input <: lbuffer uint8 input_len)|] ({ Spec.blake2_default_params al with
+          key_length = UInt8.uint_to_t (v key_len);
+          digest_length = UInt8.uint_to_t (v output_len)}) h0.[|key <: lbuffer uint8 key_len|] in
   salloc1 h0 stlen stzero (Ghost.hide (loc output)) spec
   (fun h ->
     assert (max_size_t <= Spec.max_limb al);
     let h1 = ST.get() in
     salloc1 h1 stlen stzero (Ghost.hide (loc output |+| loc h)) spec
     (fun wv ->
-      blake2_init h kk nn;
-      blake2_update wv h kk k ll d;
-      blake2_finish nn output h))
+      blake2_init h key_len output_len;
+      blake2_update wv h key_len key input_len input;
+      blake2_finish output_len output h))
 #pop-options
 
 module B = LowStar.Buffer

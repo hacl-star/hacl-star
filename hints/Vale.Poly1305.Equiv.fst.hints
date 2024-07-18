@@ -43,7 +43,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8fcf582b9595c091a654154c8c9f8b7d"
+      "af4f05dfb324864bf42e6290e0169c5d"
     ],
     [
       "Vale.Poly1305.Equiv.lemma_poly1305_equiv_rec",
@@ -51,32 +51,66 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_correspondence_Vale.Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
+        "@fuel_irrelevance_Vale.Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Vale.Poly1305.Equiv_interpretation_Tm_arrow_750b542a74c0f6cef7bc9c9174882097",
+        "Vale.Poly1305.Spec_s_interpretation_Tm_arrow_6c528cb178c0356159679935f3a11594",
+        "b2t_def", "binder_x_11f88ae15b1e5de7ff355bd1d7c52426_0",
+        "binder_x_2d0bd80df28aa2f2169bec182f0e740d_1",
+        "binder_x_2d0bd80df28aa2f2169bec182f0e740d_2",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_3",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
-        "equation_Prims.nat", "equation_Prims.squash",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
-        "equation_Spec.Poly1305.size_block",
-        "equation_Spec.Poly1305.size_key", "int_inversion",
-        "primitive_Prims.op_LessThanOrEqual",
+        "equation_Lib.Sequence.repeat_blocks_f", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "equation_Prims.pos", "equation_Prims.squash",
+        "equation_Spec.AES.elem", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.felem",
+        "equation_Spec.GaloisField.gf", "equation_Spec.Poly1305.encode",
+        "equation_Spec.Poly1305.fadd", "equation_Spec.Poly1305.felem",
+        "equation_Spec.Poly1305.poly1305_update1",
+        "equation_Spec.Poly1305.prime", "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key",
+        "equation_Vale.Def.Words_s.nat128", "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.Poly1305.Equiv.block_fun",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "equation_with_fuel_Vale.Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Spec.AES.elem",
+        "function_token_typing_Vale.Poly1305.Equiv.block_fun",
+        "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_Lib.IntTypes.pow2_127", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_2df60152c11f8fa3e12a9a666c0e23b7",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_85e2201486b6cecb7974fcc2060e6096",
+        "refinement_interpretation_Tm_refine_7469e637a8c96cb70cd78854c6904f1b",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_Spec.Poly1305.size_key"
+        "token_correspondence_Spec.Poly1305.poly1305_update1",
+        "typing_FStar.Seq.Base.length", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.Poly1305.size_key",
+        "typing_Vale.Poly1305.Equiv.block_fun",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "01ae78afa43958e002f928ffb2f221c7"
+      "08ed5635aff1928590715354e3e55d60"
     ],
     [
       "Vale.Poly1305.Equiv.lemma_poly1305_equiv_rec",
@@ -142,7 +176,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "82c5ddf05b34aaaf8dfc92070e9a7bd3"
+      "7d5be2a3be88e266559c05d2dbc2cfcb"
     ],
     [
       "Vale.Poly1305.Equiv.lemma_poly1305_equiv_last",
@@ -194,7 +228,7 @@
         "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "dfeec30b70ba725b94469fc6ef4f3ff4"
+      "639b167218a1074478eb722d9fe5c072"
     ],
     [
       "Vale.Poly1305.Equiv.lemma_poly1305_equiv_r",
@@ -268,7 +302,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5fc479d87f53fbf004816d481d875550"
+      "0a60a0b018d2764b4cb7fd313fc96bcf"
     ],
     [
       "Vale.Poly1305.Equiv.lemma_poly1305_equiv",
@@ -314,7 +348,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "af759ca4bc5949225227147019cb5a2f"
+      "9cdcc4abe8ccd352b0c34f7cd0ed90ed"
     ],
     [
       "Vale.Poly1305.Equiv.lemma_poly1305_equiv",
@@ -391,7 +425,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a2993ac7182204d5a5a143d78118648c"
+      "270300fa01f62f5386f96f3bc02949d6"
     ]
   ]
 ]

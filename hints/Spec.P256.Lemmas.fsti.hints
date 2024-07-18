@@ -1,38 +1,6 @@
 [
-  "\u001a2.¼Š\u001f‘õÍà?'Îyc`",
+  "®_m'6ºo¸4¸ÔxVÎ÷o",
   [
-    [
-      "Spec.P256.Lemmas.lemma_exp_prime",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_FStar.Math.Euclid.is_prime", "equation_Prims.nat",
-        "int_inversion", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
-      ],
-      0,
-      "913f211a8b7527b5195f20767c8d9249"
-    ],
-    [
-      "Spec.P256.Lemmas.lemma_exp_inv_prime",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_FStar.Math.Euclid.is_prime", "equation_Prims.nat",
-        "int_inversion", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
-      ],
-      0,
-      "26c71b8fd395ceaf59535039c4bfb78e"
-    ],
     [
       "Spec.P256.Lemmas.aff_point_at_inf_lemma",
       1,
@@ -43,16 +11,14 @@
         "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
         "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Spec.P256.PointOps.aff_point",
-        "equation_Spec.P256.PointOps.felem",
-        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
         "function_token_typing_Prims.int",
+        "haseqTm_refine_4fc245c235ca9463e44799dcc9bb0f7d",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "haseqTm_refine_569f2949dec184ab1b313e670f9509e3",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "typing_Spec.P256.PointOps.felem"
+        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "a6b2f1de93358e1cd290e19e30366688"
+      "f9b4404af40d678e09837b1ce7071112"
     ],
     [
       "Spec.P256.Lemmas.aff_point_add_comm_lemma",
@@ -64,16 +30,14 @@
         "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
         "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Spec.P256.PointOps.aff_point",
-        "equation_Spec.P256.PointOps.felem",
-        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
         "function_token_typing_Prims.int",
+        "haseqTm_refine_4fc245c235ca9463e44799dcc9bb0f7d",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "haseqTm_refine_569f2949dec184ab1b313e670f9509e3",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "typing_Spec.P256.PointOps.felem"
+        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "0ef916e753d842a6ce634896657c7cdc"
+      "414e6ed8349f2becf429a272af5df54d"
     ]
   ]
 ]

@@ -35,12 +35,12 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Poly1305_32.h"
-#include "Hacl_Poly1305_256.h"
-#include "Hacl_Poly1305_128.h"
+#include "Hacl_MAC_Poly1305_Simd256.h"
+#include "Hacl_MAC_Poly1305_Simd128.h"
+#include "Hacl_MAC_Poly1305.h"
 #include "EverCrypt_AutoConfig2.h"
 
-void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
+void EverCrypt_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len, uint8_t *key);
 
 #if defined(__cplusplus)
 }
