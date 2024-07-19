@@ -101,7 +101,7 @@ val precomp_inv_zeros: #s:field_spec -> precomp_b:lbuffer (limb s) (precomplen s
   (requires as_seq h precomp_b == Lib.Sequence.create (v (precomplen s)) (limb_zero s))
   (ensures  F32xN.load_precompute_r_post #(width s) h precomp_b)
 
-#push-options "--z3rlimit 150"
+#push-options "--z3rlimit 250"
 let precomp_inv_zeros #s precomp_b h =
   let r_b = gsub precomp_b 0ul (nlimb s) in
   let rn_b = gsub precomp_b (2ul *! nlimb s) (nlimb s) in
