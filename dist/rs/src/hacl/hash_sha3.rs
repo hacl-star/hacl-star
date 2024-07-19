@@ -682,7 +682,7 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 {
     let buf: Vec<u8> = vec![0u8; block_len(a) as usize];
     let buf0: Vec<u64> = vec![0u64; 25usize];
-    let block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
+    let mut block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
     let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
     let s0: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
@@ -706,7 +706,7 @@ pub fn copy(state: &[state_t]) -> Vec<state_t>
         &buf0[0usize..block_len(i) as usize]
     );
     let buf1: Vec<u64> = vec![0u64; 25usize];
-    let block_state: hash_buf = hash_buf { fst: i, snd: buf1 };
+    let mut block_state: hash_buf = hash_buf { fst: i, snd: buf1 };
     let s_src: &[u64] = &(*block_state0).snd;
     let s_dst: &mut [u64] = &mut block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
@@ -722,7 +722,7 @@ pub fn copy(state: &[state_t]) -> Vec<state_t>
 
 pub fn reset(state: &mut [state_t])
 {
-    let block_state: &hash_buf = &(state[0usize]).block_state;
+    let block_state: &mut hash_buf = &mut (state[0usize]).block_state;
     let s: &mut [u64] = &mut (*block_state).snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
     let total_len: u64 = 0u32 as u64;
@@ -732,7 +732,7 @@ pub fn reset(state: &mut [state_t])
 pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
-    let block_state: &hash_buf = &(state[0usize]).block_state;
+    let block_state: &mut hash_buf = &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     let i: crate::hacl::streaming_types::hash_alg = (*block_state).fst;
     if chunk_len as u64 > 0xFFFFFFFFFFFFFFFFu64.wrapping_sub(total_len)
@@ -870,7 +870,7 @@ fn digest_(
         { total_len.wrapping_rem(block_len(a) as u64) as u32 };
     let buf_1: (&[u8], &[u8]) = buf_.split_at(0usize);
     let buf: [u64; 25] = [0u64; 25usize];
-    let tmp_block_state: hash_buf = hash_buf { fst: a, snd: Vec::from(buf) };
+    let mut tmp_block_state: hash_buf = hash_buf { fst: a, snd: Vec::from(buf) };
     let s_src: &[u64] = &(*block_state).snd;
     let s_dst: &mut [u64] = &mut tmp_block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);

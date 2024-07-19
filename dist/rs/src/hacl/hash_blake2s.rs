@@ -953,7 +953,7 @@ fn malloc_raw(
     let mut buf: Vec<u8> = vec![0u8; 64usize];
     let wv: Vec<u32> = vec![0u32; 16usize];
     let b: Vec<u32> = vec![0u32; 16usize];
-    let block_state: block_state_t =
+    let mut block_state: block_state_t =
         block_state_t
         { fst: kk.key_length, snd: kk.digest_length, thd: kk.last_node, f3: wv, f4: b };
     let p: &[crate::hacl::hash_blake2b::blake2_params] = key.fst;
@@ -998,7 +998,7 @@ fn index_of_state(s: &[state_t]) -> crate::hacl::hash_blake2b::index
 
 fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_key)
 {
-    let block_state: &block_state_t = &(state[0usize]).block_state;
+    let block_state: &mut block_state_t = &mut (state[0usize]).block_state;
     let buf: &mut [u8] = &mut (state[0usize]).buf;
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
@@ -1069,7 +1069,7 @@ pub fn reset(s: &mut [state_t]) { reset_with_key(s, &[]) }
 pub fn update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
-    let block_state: &block_state_t = &(state[0usize]).block_state;
+    let block_state: &mut block_state_t = &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     if chunk_len as u64 > 0xffffffffffffffffu64.wrapping_sub(total_len)
     { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
@@ -1210,7 +1210,7 @@ pub fn digest(s: &[state_t], dst: &mut [u8]) -> u8
     let buf_1: (&[u8], &[u8]) = buf_.split_at(0usize);
     let wv: [u32; 16] = [0u32; 16usize];
     let b: [u32; 16] = [0u32; 16usize];
-    let tmp_block_state: block_state_t =
+    let mut tmp_block_state: block_state_t =
         block_state_t
         {
             fst: i1.key_length,
@@ -1269,7 +1269,7 @@ pub fn copy(state: &[state_t]) -> Vec<state_t>
     ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
     let wv: Vec<u32> = vec![0u32; 16usize];
     let b: Vec<u32> = vec![0u32; 16usize];
-    let block_state: block_state_t =
+    let mut block_state: block_state_t =
         block_state_t { fst: i.key_length, snd: i.digest_length, thd: i.last_node, f3: wv, f4: b };
     let src_b: &[u32] = &(*block_state0).f4;
     let dst_b: &mut [u32] = &mut block_state.f4;

@@ -22,5 +22,5 @@ pub mod test {
    pub mod salsa20;
    pub mod sha1;
    pub mod sha2;
-//   pub mod sha3;
+   pub mod sha3;
 }

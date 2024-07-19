@@ -916,7 +916,7 @@ fn malloc_raw(
         vec![crate::lib::intvector_intrinsics::vec256_zero; 4usize];
     let b: Vec<crate::lib::intvector_intrinsics::vec256> =
         vec![crate::lib::intvector_intrinsics::vec256_zero; 4usize];
-    let block_state: block_state_t =
+    let mut block_state: block_state_t =
         block_state_t
         { fst: kk.key_length, snd: kk.digest_length, thd: kk.last_node, f3: wv, f4: b };
     let p: &[crate::hacl::hash_blake2b::blake2_params] = key.fst;
@@ -961,7 +961,7 @@ fn index_of_state(s: &[state_t]) -> crate::hacl::hash_blake2b::index
 
 fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_key)
 {
-    let block_state: &block_state_t = &(state[0usize]).block_state;
+    let block_state: &mut block_state_t = &mut (state[0usize]).block_state;
     let buf: &mut [u8] = &mut (state[0usize]).buf;
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
@@ -1032,7 +1032,7 @@ pub fn reset(s: &mut [state_t]) { reset_with_key(s, &[]) }
 pub fn update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
-    let block_state: &block_state_t = &(state[0usize]).block_state;
+    let block_state: &mut block_state_t = &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     if chunk_len as u64 > 0xffffffffffffffffu64.wrapping_sub(total_len)
     { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
@@ -1203,7 +1203,7 @@ pub fn digest(s: &[state_t], dst: &mut [u8]) -> u8
         [crate::lib::intvector_intrinsics::vec256_zero; 4usize];
     let b: [crate::lib::intvector_intrinsics::vec256; 4] =
         [crate::lib::intvector_intrinsics::vec256_zero; 4usize];
-    let tmp_block_state: block_state_t =
+    let mut tmp_block_state: block_state_t =
         block_state_t
         {
             fst: i1.key_length,
@@ -1279,7 +1279,7 @@ pub fn copy(state: &[state_t]) -> Vec<state_t>
         vec![crate::lib::intvector_intrinsics::vec256_zero; 4usize];
     let b: Vec<crate::lib::intvector_intrinsics::vec256> =
         vec![crate::lib::intvector_intrinsics::vec256_zero; 4usize];
-    let block_state: block_state_t =
+    let mut block_state: block_state_t =
         block_state_t { fst: i.key_length, snd: i.digest_length, thd: i.last_node, f3: wv, f4: b };
     let src_b: &[crate::lib::intvector_intrinsics::vec256] = &(*block_state0).f4;
     let dst_b: &mut [crate::lib::intvector_intrinsics::vec256] = &mut block_state.f4;

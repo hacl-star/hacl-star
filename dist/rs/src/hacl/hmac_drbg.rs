@@ -102,7 +102,7 @@ pub fn create_in(a: crate::hacl::streaming_types::hash_alg) -> state
 
 pub fn instantiate(
     a: crate::hacl::streaming_types::hash_alg,
-    st: state,
+    mut st: state,
     entropy_input_len: u32,
     entropy_input: &[u8],
     nonce_len: u32,
@@ -491,7 +491,7 @@ pub fn instantiate(
 
 pub fn reseed(
     a: crate::hacl::streaming_types::hash_alg,
-    st: state,
+    mut st: state,
     entropy_input_len: u32,
     entropy_input: &[u8],
     additional_input_input_len: u32,
@@ -771,7 +771,7 @@ pub fn reseed(
 pub fn generate(
     a: crate::hacl::streaming_types::hash_alg,
     output: &mut [u8],
-    st: state,
+    mut st: state,
     n: u32,
     additional_input_len: u32,
     additional_input: &[u8]

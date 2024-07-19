@@ -13,7 +13,7 @@ pub mod hash_sha2;
 // pub mod hmac;
 // pub mod hmac_blake2s_128;
 // pub mod hmac_blake2b_256;
-// pub mod hash_sha3;
+pub mod hash_sha3;
 pub mod hash_md5;
 pub mod sha2_types;
 pub mod chacha20;
