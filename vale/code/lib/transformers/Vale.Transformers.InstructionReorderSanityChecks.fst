@@ -19,7 +19,7 @@ friend Vale.Transformers.BoundedInstructionEffects
 
 open Vale.Transformers.InstructionReorder
 
-#push-options "--lax" (* XXX: This part of the file causes an F* SMTEncoding bug. I've reported it, and once it is fixed, we should remove this --lax *)
+#push-options "--admit_smt_queries true" (* XXX: This part of the file causes an F* SMTEncoding bug. I've reported it, and once it is fixed, we should remove this --lax *)
 let ins_exchange_sanity_check1_1 : pbool =
   normalize_term (
     ins_exchange_allowed
