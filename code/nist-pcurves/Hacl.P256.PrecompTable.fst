@@ -26,7 +26,7 @@ module PP = Hacl.Impl.PCurves.PrecompPoints.P256
 open Hacl.Impl.PCurves.PrecompTable
 open Spec.P256
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0 --admit_smt_queries true"
 
 //----------------
 
@@ -80,6 +80,7 @@ let p256_g_pow2_64_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
 
 inline_for_extraction noextract
 let p256_g_pow2_64_table_lseq_w4 : LSeq.lseq uint64 192 =
+  admit();
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table PP.proj_g_pow2_64 15);
   Seq.seq_of_list p256_g_pow2_64_table_list_w4
 
