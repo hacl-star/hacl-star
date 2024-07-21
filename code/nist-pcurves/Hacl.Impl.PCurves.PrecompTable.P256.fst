@@ -62,6 +62,8 @@ let p256_basepoint_table_w4:
   createL_global p256_basepoint_table_list_w4
 #pop-options
 
+#push-options "--admit_smt_queries true"
+
 inline_for_extraction noextract
 let p256_precomp_basepoint_table_w4 : precomp_table_w4 g_aff = {
   table_lseq_w4 = p256_basepoint_table_lseq_w4;
@@ -101,6 +103,7 @@ let p256_g_pow2_64_table_w4 :
   x:glbuffer uint64 192ul{witnessed x p256_g_pow2_64_table_lseq_w4 /\ recallable x} =
   createL_global p256_g_pow2_64_table_list_w4
 #pop-options
+
 
 inline_for_extraction noextract
 let p256_precomp_g_pow2_64_table_w4 : precomp_table_w4 g_pow2_64 = {

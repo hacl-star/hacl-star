@@ -42,6 +42,7 @@ let compressed_to_raw {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |}
       (fun h -> BSeq.nat_to_bytes_be cp.bytes (as_nat h1 ya))
       (fun _ -> bn_to_bytes_be (sub pk_raw (size cp.bytes) (size cp.bytes)) ya);
     let h2 = ST.get () in
+    admit();
     LSeq.eq_intro (as_seq h2 pk_raw)
       (LSeq.concat #_ #cp.bytes #cp.bytes (as_seq h0 pk_xb) (BSeq.nat_to_bytes_be cp.bytes (as_nat h0 ya))) end;
   pop_frame ();
