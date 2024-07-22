@@ -556,7 +556,7 @@ val loadState_lemma_l:
   Lemma
   (requires
     forall l. l < lanes m ==> (forall j. (j >= r /\ j < 256) ==> Seq.index b.(|l|) j == u8 0))
-  (ensures 
+  (ensures
     (state_spec_v (loadState #m r b s)).[l] ==
       Spec.loadState r (Seq.slice b.(|l|) 0 r) (state_spec_v s).[l])
 
@@ -1043,7 +1043,7 @@ let storeState_update_b_last_lemma_l #m r outputByteLen outRem b s l =
 val absorb_inner_lemma_l:
   #m:m_spec
   -> r:size_nat{r > 0 /\ r <= 200}
-  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==>
      (forall i. (i >= r /\ i < 256) ==> Seq.index input.(|l|) i == u8 0)}
   -> s:state_spec m
   -> l:nat{l < lanes m} ->
@@ -1163,12 +1163,12 @@ val load_last_block_lemma_helper:
         Seq.index b rem == byte_to_uint8 delimitedSuffix /\
         (forall i. (i >= (rem + 1) /\ i < r) ==> Seq.index b i == u8 0))
 
-let load_last_block_lemma_helper #m delimitedSuffix r rem input = 
+let load_last_block_lemma_helper #m delimitedSuffix r rem input =
   let b_0 = update_sub (create r (u8 0)) 0 rem input in
   let b = b_0.[rem] <- byte_to_uint8 delimitedSuffix in
   eq_intro (slice #uint8 #r b_0 (rem + 1) r)
         (create (r - (rem + 1)) (u8 0));
-  assert (forall j. (j >= 0 /\ j < (r - (rem + 1))) ==> 
+  assert (forall j. (j >= 0 /\ j < (r - (rem + 1))) ==>
         Seq.index (slice #uint8 #r b (rem + 1) r) j ==
           Seq.index b ((rem + 1) + j));
   assert (forall j. (j >= (rem + 1) /\ j < r) ==> (j - (rem + 1) >= 0))
@@ -1178,7 +1178,7 @@ let load_last_block_lemma_helper #m delimitedSuffix r rem input =
   -> delimitedSuffix:byte_t
   -> r:size_nat{r > 0 /\ r <= 200}
   -> rem:size_nat{rem < r}
-  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==>
        (forall i. (i >= rem /\ i < 256) ==> Seq.index input.(|l|) i == u8 0)}
   -> l:nat{l < lanes m} ->
   Lemma
@@ -1197,7 +1197,7 @@ val absorb_last_lemma_l:
   -> delimitedSuffix:byte_t
   -> r:size_nat{r > 0 /\ r <= 200}
   -> rem:size_nat{rem < r}
-  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==>
        (forall i. (i >= rem /\ i < 256) ==> Seq.index input.(|l|) i == u8 0)}
   -> s:state_spec m
   -> l:nat{l < lanes m} ->
@@ -1457,7 +1457,7 @@ let absorb_inner_repeat_blocks_multi_lemma r inputByteLen input s =
   reveal_vec_1 U64;
   let aux_s (i:nat{i < 25}) : Lemma (s.[i] == (vec_v #U64 #1 s.[i]).[0]) =
     reveal_vec_v_1 #U64 s.[i] in
-  let aux_n (i:nat{i < 25}) : Lemma ((absorb_inner_nblocks #M32 r inputByteLen input s).[i] == 
+  let aux_n (i:nat{i < 25}) : Lemma ((absorb_inner_nblocks #M32 r inputByteLen input s).[i] ==
     ((vec_v (absorb_inner_nblocks #M32 r inputByteLen input s).[i]).[0] <: vec_t U64 1)) =
     reveal_vec_v_1 (absorb_inner_nblocks #M32 r inputByteLen input s).[i] in
 
@@ -1473,7 +1473,7 @@ let absorb_inner_block_r_lemma r input s =
   reveal_vec_1 U64;
   let aux_s (i:nat{i < 25}) : Lemma (s.[i] == (vec_v #U64 #1 s.[i]).[0]) =
     reveal_vec_v_1 #U64 s.[i] in
-  let aux_n (i:nat{i < 25}) : Lemma ((absorb_inner_block #M32 r r input 0 s).[i] == 
+  let aux_n (i:nat{i < 25}) : Lemma ((absorb_inner_block #M32 r r input 0 s).[i] ==
     ((vec_v (absorb_inner_block #M32 r r input 0 s).[i]).[0] <: vec_t U64 1)) =
     reveal_vec_v_1 (absorb_inner_block #M32 r r input 0 s).[i] in
 
@@ -1491,7 +1491,7 @@ let absorb_last_r_lemma delimitedSuffix r inputByteLen input s =
   let aux_s (i:nat{i < 25}) : Lemma (s.[i] == (vec_v #U64 #1 s.[i]).[0]) =
     reveal_vec_v_1 #U64 s.[i] in
   let aux_n (i:nat{i < 25}) : Lemma
-    ((absorb_final #M32 s r inputByteLen input delimitedSuffix).[i] == 
+    ((absorb_final #M32 s r inputByteLen input delimitedSuffix).[i] ==
       ((vec_v (absorb_final #M32 s r inputByteLen input
       delimitedSuffix).[i]).[0] <: vec_t U64 1)) =
     reveal_vec_v_1 (absorb_final #M32 s r inputByteLen input delimitedSuffix).[i] in
