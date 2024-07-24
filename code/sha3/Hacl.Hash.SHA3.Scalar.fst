@@ -171,7 +171,7 @@ let state_free s =
 [@@ Comment "Absorb number of input blocks and write the output state
 
   This function is intended to receive a hash state and input buffer.
-  It prcoesses an input of multiple of 168-bytes (SHAKE128 block size),
+  It processes an input of multiple of 168-bytes (SHAKE128 block size),
   any additional bytes of final partial block are ignored.
 
   The argument `state` (IN/OUT) points to hash state, i.e., uint64_t[25]
@@ -194,14 +194,14 @@ let shake128_absorb_nblocks state input inputByteLen =
 [@@ Comment "Absorb a final partial block of input and write the output state
 
   This function is intended to receive a hash state and input buffer.
-  It prcoesses a sequence of bytes at end of input buffer that is less 
+  It processes a sequence of bytes at end of input buffer that is less
   than 168-bytes (SHAKE128 block size),
   any bytes of full blocks at start of input buffer are ignored.
 
   The argument `state` (IN/OUT) points to hash state, i.e., uint64_t[25]
   The argument `input` (IN) points to `inputByteLen` bytes of valid memory,
   i.e., uint8_t[inputByteLen]
-  
+
   Note: Full size of input buffer must be passed to `inputByteLen` including
   the number of full-block bytes at start of input buffer that are ignored"]
 val shake128_absorb_final:
@@ -236,7 +236,7 @@ val shake128_squeeze_nblocks:
        live h output /\ live h state /\ disjoint output state)
      (ensures  fun h0 _ h1 ->
        modifies (loc state |+| loc output) h0 h1 /\
-       (let s', b' = 
+       (let s', b' =
           V.squeeze_nblocks #M32 168 (v outputByteLen) (as_seq h0 state, as_seq_multi h0 (ntup1 output)) in
           as_seq h1 state == s' /\
           as_seq_multi h1 (ntup1 output) == b'))
