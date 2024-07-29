@@ -55,7 +55,7 @@ let mul_mod ctx x y xy = qmul xy x y
 
 inline_for_extraction noextract
 val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_p256_order_comm_monoid
-let sqr_mod ctx x xx = qsqr xx x
+let sqr_mod ctx x xx = qsqr_sa xx x
 
 
 inline_for_extraction noextract
@@ -111,31 +111,31 @@ val qinv_x8_x128 (x128 x6 x_11:felem) : Stack unit
 let qinv_x8_x128 x128 x6 x_11 =
   let h0 = ST.get () in
   qsquare_times_in_place x6 2ul;
-  qmul x6 x6 x_11;
+  qmul_sa1 x6 x6 x_11;
   let h1 = ST.get () in
   assert (qmont_as_nat h1 x6 == // x8
     S.qmul (SI.qsquare_times (qmont_as_nat h0 x6) 2) (qmont_as_nat h0 x_11));
 
   qsquare_times x128 x6 8ul;
-  qmul x128 x128 x6;
+  qmul_sa1 x128 x128 x6;
   let h2 = ST.get () in
   assert (qmont_as_nat h2 x128 == // x16
     S.qmul (SI.qsquare_times (qmont_as_nat h1 x6) 8) (qmont_as_nat h1 x6));
 
   qsquare_times x6 x128 16ul;
-  qmul x6 x6 x128;
+  qmul_sa1 x6 x6 x128;
   let h3 = ST.get () in
   assert (qmont_as_nat h3 x6 == // x32
     S.qmul (SI.qsquare_times (qmont_as_nat h2 x128) 16) (qmont_as_nat h2 x128));
 
   qsquare_times x128 x6 64ul;
-  qmul x128 x128 x6;
+  qmul_sa1 x128 x128 x6;
   let h4 = ST.get () in
   assert (qmont_as_nat h4 x128 == // x96
     S.qmul (SI.qsquare_times (qmont_as_nat h3 x6) 64) (qmont_as_nat h3 x6));
 
   qsquare_times_in_place x128 32ul;
-  qmul x128 x128 x6;
+  qmul_sa1 x128 x128 x6;
   let h5 = ST.get () in
   assert (qmont_as_nat h5 x128 == // x128
     S.qmul (SI.qsquare_times (qmont_as_nat h4 x128) 32) (qmont_as_nat h3 x6))
@@ -161,31 +161,31 @@ val qinv_x134_x153 (x128 x_11 x_111 x_1111 x_10101 x_101111:felem) : Stack unit
 let qinv_x134_x153 x128 x_11 x_111 x_1111 x_10101 x_101111 =
   let h0 = ST.get () in
   qsquare_times_in_place x128 6ul;
-  qmul x128 x128 x_101111;
+  qmul_sa1 x128 x128 x_101111;
   let h1 = ST.get () in
   assert (qmont_as_nat h1 x128 == // x134
     S.qmul (SI.qsquare_times (qmont_as_nat h0 x128) 6) (qmont_as_nat h0 x_101111));
 
   qsquare_times_in_place x128 5ul;
-  qmul x128 x128 x_111;
+  qmul_sa1 x128 x128 x_111;
   let h2 = ST.get () in
   assert (qmont_as_nat h2 x128 == // x139
     S.qmul (SI.qsquare_times (qmont_as_nat h1 x128) 5) (qmont_as_nat h0 x_111));
 
   qsquare_times_in_place x128 4ul;
-  qmul x128 x128 x_11;
+  qmul_sa1 x128 x128 x_11;
   let h3 = ST.get () in
   assert (qmont_as_nat h3 x128 == // x143
     S.qmul (SI.qsquare_times (qmont_as_nat h2 x128) 4) (qmont_as_nat h0 x_11));
 
   qsquare_times_in_place x128 5ul;
-  qmul x128 x128 x_1111;
+  qmul_sa1 x128 x128 x_1111;
   let h4 = ST.get () in
   assert (qmont_as_nat h4 x128 == // x148
     S.qmul (SI.qsquare_times (qmont_as_nat h3 x128) 5) (qmont_as_nat h0 x_1111));
 
   qsquare_times_in_place x128 5ul;
-  qmul x128 x128 x_10101;
+  qmul_sa1 x128 x128 x_10101;
   let h5 = ST.get () in
   assert (qmont_as_nat h5 x128 == // x153
     S.qmul (SI.qsquare_times (qmont_as_nat h4 x128) 5) (qmont_as_nat h0 x_10101))
@@ -207,31 +207,31 @@ val qinv_x153_x177 (x153 x_101 x_111 x_101111:felem) : Stack unit
 let qinv_x153_x177 x153 x_101 x_111 x_101111 =
   let h0 = ST.get () in
   qsquare_times_in_place x153 4ul;
-  qmul x153 x153 x_101;
+  qmul_sa1 x153 x153 x_101;
   let h1 = ST.get () in
   assert (qmont_as_nat h1 x153 == // x157
     S.qmul (SI.qsquare_times (qmont_as_nat h0 x153) 4) (qmont_as_nat h0 x_101));
 
   qsquare_times_in_place x153 3ul;
-  qmul x153 x153 x_101;
+  qmul_sa1 x153 x153 x_101;
   let h2 = ST.get () in
   assert (qmont_as_nat h2 x153 == // x160
     S.qmul (SI.qsquare_times (qmont_as_nat h1 x153) 3) (qmont_as_nat h0 x_101));
 
   qsquare_times_in_place x153 3ul;
-  qmul x153 x153 x_101;
+  qmul_sa1 x153 x153 x_101;
   let h3 = ST.get () in
   assert (qmont_as_nat h3 x153 == // x163
     S.qmul (SI.qsquare_times (qmont_as_nat h2 x153) 3) (qmont_as_nat h0 x_101));
 
   qsquare_times_in_place x153 5ul;
-  qmul x153 x153 x_111;
+  qmul_sa1 x153 x153 x_111;
   let h4 = ST.get () in
   assert (qmont_as_nat h4 x153 == // x168
     S.qmul (SI.qsquare_times (qmont_as_nat h3 x153) 5) (qmont_as_nat h0 x_111));
 
   qsquare_times_in_place x153 9ul;
-  qmul x153 x153 x_101111;
+  qmul_sa1 x153 x153 x_101111;
   let h5 = ST.get () in
   assert (qmont_as_nat h5 x153 == // x177
     S.qmul (SI.qsquare_times (qmont_as_nat h4 x153) 9) (qmont_as_nat h0 x_101111))
@@ -253,43 +253,43 @@ val qinv_x177_x210 (x177 x_111 x_1111 a:felem) : Stack unit
 let qinv_x177_x210 x177 x_111 x_1111 a =
   let h0 = ST.get () in
   qsquare_times_in_place x177 6ul;
-  qmul x177 x177 x_1111;
+  qmul_sa1 x177 x177 x_1111;
   let h1 = ST.get () in
   assert (qmont_as_nat h1 x177 == // x183
     S.qmul (SI.qsquare_times (qmont_as_nat h0 x177) 6) (qmont_as_nat h0 x_1111));
 
   qsquare_times_in_place x177 2ul;
-  qmul x177 x177 a;
+  qmul_sa1 x177 x177 a;
   let h2 = ST.get () in
   assert (qmont_as_nat h2 x177 == // x185
     S.qmul (SI.qsquare_times (qmont_as_nat h1 x177) 2) (qmont_as_nat h0 a));
 
   qsquare_times_in_place x177 5ul;
-  qmul x177 x177 a;
+  qmul_sa1 x177 x177 a;
   let h3 = ST.get () in
   assert (qmont_as_nat h3 x177 == // x190
     S.qmul (SI.qsquare_times (qmont_as_nat h2 x177) 5) (qmont_as_nat h0 a));
 
   qsquare_times_in_place x177 6ul;
-  qmul x177 x177 x_1111;
+  qmul_sa1 x177 x177 x_1111;
   let h4 = ST.get () in
   assert (qmont_as_nat h4 x177 == // x196
     S.qmul (SI.qsquare_times (qmont_as_nat h3 x177) 6) (qmont_as_nat h0 x_1111));
 
   qsquare_times_in_place x177 5ul;
-  qmul x177 x177 x_111;
+  qmul_sa1 x177 x177 x_111;
   let h5 = ST.get () in
   assert (qmont_as_nat h5 x177 == // x201
     S.qmul (SI.qsquare_times (qmont_as_nat h4 x177) 5) (qmont_as_nat h0 x_111));
 
   qsquare_times_in_place x177 4ul;
-  qmul x177 x177 x_111;
+  qmul_sa1 x177 x177 x_111;
   let h6 = ST.get () in
   assert (qmont_as_nat h6 x177 == // x205
     S.qmul (SI.qsquare_times (qmont_as_nat h5 x177) 4) (qmont_as_nat h0 x_111));
 
   qsquare_times_in_place x177 5ul;
-  qmul x177 x177 x_111;
+  qmul_sa1 x177 x177 x_111;
   let h7 = ST.get () in
   assert (qmont_as_nat h7 x177 == // x210
     S.qmul (SI.qsquare_times (qmont_as_nat h6 x177) 5) (qmont_as_nat h0 x_111))
@@ -310,37 +310,37 @@ val qinv_x210_x240 (x210 x_11 x_101 x_101111:felem) : Stack unit
 let qinv_x210_x240 x210 x_11 x_101 x_101111 =
   let h0 = ST.get () in
   qsquare_times_in_place x210 5ul;
-  qmul x210 x210 x_101;
+  qmul_sa1 x210 x210 x_101;
   let h1 = ST.get () in
   assert (qmont_as_nat h1 x210 == // x215
     S.qmul (SI.qsquare_times (qmont_as_nat h0 x210) 5) (qmont_as_nat h0 x_101));
 
   qsquare_times_in_place x210 3ul;
-  qmul x210 x210 x_11;
+  qmul_sa1 x210 x210 x_11;
   let h2 = ST.get () in
   assert (qmont_as_nat h2 x210 == // x218
     S.qmul (SI.qsquare_times (qmont_as_nat h1 x210) 3) (qmont_as_nat h0 x_11));
 
   qsquare_times_in_place x210 10ul;
-  qmul x210 x210 x_101111;
+  qmul_sa1 x210 x210 x_101111;
   let h3 = ST.get () in
   assert (qmont_as_nat h3 x210 == // x228
     S.qmul (SI.qsquare_times (qmont_as_nat h2 x210) 10) (qmont_as_nat h0 x_101111));
 
   qsquare_times_in_place x210 2ul;
-  qmul x210 x210 x_11;
+  qmul_sa1 x210 x210 x_11;
   let h4 = ST.get () in
   assert (qmont_as_nat h4 x210 == // x230
     S.qmul (SI.qsquare_times (qmont_as_nat h3 x210) 2) (qmont_as_nat h0 x_11));
 
   qsquare_times_in_place x210 5ul;
-  qmul x210 x210 x_11;
+  qmul_sa1 x210 x210 x_11;
   let h5 = ST.get () in
   assert (qmont_as_nat h5 x210 == // x235
     S.qmul (SI.qsquare_times (qmont_as_nat h4 x210) 5) (qmont_as_nat h0 x_11));
 
   qsquare_times_in_place x210 5ul;
-  qmul x210 x210 x_11;
+  qmul_sa1 x210 x210 x_11;
   let h6 = ST.get () in
   assert (qmont_as_nat h6 x210 == // x240
     S.qmul (SI.qsquare_times (qmont_as_nat h5 x210) 5) (qmont_as_nat h0 x_11))
@@ -361,19 +361,19 @@ val qinv_x240_x256 (x240 x_1111 x_10101 a:felem) : Stack unit
 let qinv_x240_x256 x240 x_1111 x_10101 a =
   let h0 = ST.get () in
   qsquare_times_in_place x240 3ul;
-  qmul x240 x240 a;
+  qmul_sa1 x240 x240 a;
   let h1 = ST.get () in
   assert (qmont_as_nat h1 x240 == // x243
     S.qmul (SI.qsquare_times (qmont_as_nat h0 x240) 3) (qmont_as_nat h0 a));
 
   qsquare_times_in_place x240 7ul;
-  qmul x240 x240 x_10101;
+  qmul_sa1 x240 x240 x_10101;
   let h2 = ST.get () in
   assert (qmont_as_nat h2 x240 == // x250
     S.qmul (SI.qsquare_times (qmont_as_nat h1 x240) 7) (qmont_as_nat h0 x_10101));
 
   qsquare_times_in_place x240 6ul;
-  qmul x240 x240 x_1111;
+  qmul_sa1 x240 x240 x_1111;
   let h3 = ST.get () in
   assert (qmont_as_nat h3 x240 == // x256
     S.qmul (SI.qsquare_times (qmont_as_nat h2 x240) 6) (qmont_as_nat h0 x_1111))
@@ -458,7 +458,7 @@ let qinv_make_x x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a =
 
   qsquare_times x6 x_10101 1ul; // x_101010
   qmul x_101111 x_101 x6;
-  qmul x6 x_10101 x6
+  qmul_sa2 x6 x_10101 x6
 
 
 [@CInline]

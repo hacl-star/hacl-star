@@ -182,9 +182,9 @@ Hacl_Impl_Matrix_matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint16
 {
   for (uint32_t i = 0U; i < n1 * n2; i++)
   {
-    uint16_t *os = res;
     uint16_t u = load16_le(b + 2U * i);
     uint16_t x = u;
+    uint16_t *os = res;
     os[i] = x;
   }
 }

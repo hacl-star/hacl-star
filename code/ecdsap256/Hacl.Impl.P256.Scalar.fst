@@ -43,7 +43,7 @@ let bn_is_lt_order_mask4 f =
   push_frame ();
   let tmp = create_felem () in
   make_order tmp;
-  let c = bn_sub4 tmp f tmp in
+  let c = bn_sub4_sa2 tmp f tmp in
   assert (if v c = 0 then as_nat h0 f >= S.order else as_nat h0 f < S.order);
   pop_frame ();
   u64 0 -. c
@@ -101,11 +101,19 @@ let qmod_short res x =
   let tmp = create_felem () in
   make_order tmp;
   let h0 = ST.get () in
-  let c = bn_sub4 tmp x tmp in
+  let c = bn_sub4_sa2 tmp x tmp in
   bn_cmovznz4 res c tmp x;
   BD.bn_eval_bound (as_seq h0 x) 4;
   qmod_short_lemma (as_nat h0 x);
   pop_frame ()
+
+
+let qmod_short_sa res x =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  qmod_short res x_copy;
+  pop_frame()
 
 
 [@CInline]
@@ -119,6 +127,22 @@ let qadd res x y =
   assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.order);
   SM.qmont_add_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
+
+
+let qadd_sa1 res x y =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  qadd res x_copy y;
+  pop_frame()
+
+
+let qadd_sa2 res x y =
+  push_frame();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  qadd res x y_copy;
+  pop_frame()
 
 
 val qmont_reduction: res:felem -> x:widefelem -> Stack unit
@@ -153,6 +177,13 @@ let from_qmont res x =
   qmont_reduction res tmp;
   pop_frame ()
 
+let from_qmont_sa res x =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  from_qmont res x_copy;
+  pop_frame()
+
 
 [@CInline]
 let qmul res x y =
@@ -166,6 +197,20 @@ let qmul res x y =
   SM.qmont_mul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
+let qmul_sa1 res x y =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  qmul res x_copy y;
+  pop_frame()
+
+let qmul_sa2 res x y =
+  push_frame();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  qmul res x y_copy;
+  pop_frame()
+
 
 [@CInline]
 let qsqr res x =
@@ -178,3 +223,10 @@ let qsqr res x =
   qmont_reduction res tmp;
   SM.qmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
   pop_frame ()
+
+let qsqr_sa res x =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  qsqr res x_copy;
+  pop_frame()

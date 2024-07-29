@@ -62,7 +62,7 @@ let fmul_eq_vartime r z x =
   let tmp = create_felem () in
   fmul tmp r z;
   let h1 = ST.get () in
-  fnormalize tmp tmp;
+  fnormalize_a tmp tmp;
   let h2 = ST.get () in
   BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h1 tmp);
   assert (inv_fully_reduced h2 tmp);
@@ -117,7 +117,7 @@ let ecdsa_verify_avoid_finv p r =
        make_u52_5 tmp_q (make_order_k256 ());
        let h4 = ST.get () in
        BL.add5_lemma (1,1,1,1,1) (1,1,1,1,1) (as_felem5 h4 r_fe) (as_felem5 h4 tmp_q);
-       fadd tmp_q r_fe tmp_q;
+       fadd_sa2 tmp_q r_fe tmp_q;
        fmul_eq_vartime tmp_q z tmp_x end
        //assert (is_rqz_x == (S.fmul (feval h5 tmp) (feval h5 z) = as_nat h5 tmp_x));
      else false end

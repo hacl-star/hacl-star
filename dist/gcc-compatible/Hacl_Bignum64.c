@@ -78,7 +78,15 @@ Write `(a + b) mod n` in `res`.
 */
 void Hacl_Bignum64_add_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
-  Hacl_Bignum_bn_add_mod_n_u64(len, n, a, b, res);
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t a_copy[len];
+  memset(a_copy, 0U, len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t b_copy[len];
+  memset(b_copy, 0U, len * sizeof (uint64_t));
+  memcpy(a_copy, a, len * sizeof (uint64_t));
+  memcpy(b_copy, b, len * sizeof (uint64_t));
+  Hacl_Bignum_bn_add_mod_n_u64(len, n, a_copy, b_copy, res);
 }
 
 /**
@@ -432,9 +440,9 @@ Deallocate the memory previously allocated by Hacl_Bignum64_mont_ctx_init.
 */
 void Hacl_Bignum64_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k)
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
-  uint64_t *n = k1.n;
-  uint64_t *r2 = k1.r2;
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 uu____0 = *k;
+  uint64_t *n = uu____0.n;
+  uint64_t *r2 = uu____0.r2;
   KRML_HOST_FREE(n);
   KRML_HOST_FREE(r2);
   KRML_HOST_FREE(k);
@@ -454,10 +462,11 @@ Hacl_Bignum64_mod_precomp(
   uint64_t *res
 )
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k10 = *k;
-  uint32_t len1 = k10.len;
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
-  bn_slow_precomp(len1, k1.n, k1.mu, k1.r2, a, res);
+  uint32_t len1 = (*k).len;
+  uint64_t *n = (*k).n;
+  uint64_t mu = (*k).mu;
+  uint64_t *r2 = (*k).r2;
+  bn_slow_precomp(len1, n, mu, r2, a, res);
 }
 
 /**
@@ -488,17 +497,11 @@ Hacl_Bignum64_mod_exp_vartime_precomp(
   uint64_t *res
 )
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k10 = *k;
-  uint32_t len1 = k10.len;
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
-  Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(len1,
-    k1.n,
-    k1.mu,
-    k1.r2,
-    a,
-    bBits,
-    b,
-    res);
+  uint32_t len1 = (*k).len;
+  uint64_t *n = (*k).n;
+  uint64_t mu = (*k).mu;
+  uint64_t *r2 = (*k).r2;
+  Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(len1, n, mu, r2, a, bBits, b, res);
 }
 
 /**
@@ -529,17 +532,11 @@ Hacl_Bignum64_mod_exp_consttime_precomp(
   uint64_t *res
 )
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k10 = *k;
-  uint32_t len1 = k10.len;
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
-  Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(len1,
-    k1.n,
-    k1.mu,
-    k1.r2,
-    a,
-    bBits,
-    b,
-    res);
+  uint32_t len1 = (*k).len;
+  uint64_t *n = (*k).n;
+  uint64_t mu = (*k).mu;
+  uint64_t *r2 = (*k).r2;
+  Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(len1, n, mu, r2, a, bBits, b, res);
 }
 
 /**
@@ -561,17 +558,18 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
   uint64_t *res
 )
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k10 = *k;
-  uint32_t len1 = k10.len;
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  uint32_t len1 = (*k).len;
+  uint64_t *n = (*k).n;
+  uint64_t mu = (*k).mu;
+  uint64_t *r2 = (*k).r2;
   KRML_CHECK_SIZE(sizeof (uint64_t), len1);
   uint64_t n2[len1];
   memset(n2, 0U, len1 * sizeof (uint64_t));
-  uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(0ULL, k1.n[0U], 2ULL, n2);
+  uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(0ULL, n[0U], 2ULL, n2);
   uint64_t c1;
   if (1U < len1)
   {
-    uint64_t *a1 = k1.n + 1U;
+    uint64_t *a1 = n + 1U;
     uint64_t *res1 = n2 + 1U;
     uint64_t c = c0;
     for (uint32_t i = 0U; i < (len1 - 1U) / 4U; i++)
@@ -604,9 +602,9 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
   }
   KRML_MAYBE_UNUSED_VAR(c1);
   Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(len1,
-    k1.n,
-    k1.mu,
-    k1.r2,
+    n,
+    mu,
+    r2,
     a,
     64U * len1,
     n2,
@@ -652,9 +650,9 @@ uint64_t *Hacl_Bignum64_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   memcpy(tmp + tmpLen - len, b, len * sizeof (uint8_t));
   for (uint32_t i = 0U; i < bnLen; i++)
   {
-    uint64_t *os = res2;
     uint64_t u = load64_be(tmp + (bnLen - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = res2;
     os[i] = x;
   }
   return res2;
@@ -693,11 +691,11 @@ uint64_t *Hacl_Bignum64_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   memcpy(tmp, b, len * sizeof (uint8_t));
   for (uint32_t i = 0U; i < (len - 1U) / 8U + 1U; i++)
   {
-    uint64_t *os = res2;
     uint8_t *bj = tmp + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r1 = u;
     uint64_t x = r1;
+    uint64_t *os = res2;
     os[i] = x;
   }
   return res2;

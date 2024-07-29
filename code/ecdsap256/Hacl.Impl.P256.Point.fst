@@ -97,8 +97,8 @@ let to_aff_point res p =
   FI.finv zinv pz;
   fmul x px zinv;
   fmul y py zinv;
-  from_mont x x;
-  from_mont y y;
+  from_mont_sa x x;
+  from_mont_sa y y;
   pop_frame ()
 
 
@@ -111,7 +111,7 @@ let to_aff_point_x res p =
 
   FI.finv zinv pz;
   fmul res px zinv;
-  from_mont res res;
+  from_mont_sa res res;
   pop_frame ()
 
 
@@ -148,10 +148,10 @@ let compute_rp_ec_equation x res =
   let tmp = create_felem () in
   fcube res x;
   make_a_coeff tmp;
-  fmul tmp tmp x;
-  fadd res tmp res;
+  fmul_sa1 tmp tmp x;
+  fadd_sa2 res tmp res;
   make_b_coeff tmp;
-  fadd res tmp res;
+  fadd_sa2 res tmp res;
   pop_frame ()
 
 
@@ -164,7 +164,7 @@ val is_y_sqr_is_y2_vartime (y2 y:felem) : Stack bool
     b == (fmont_as_nat h0 y2 = S.fmul (fmont_as_nat h0 y) (fmont_as_nat h0 y)))
 
 let is_y_sqr_is_y2_vartime y2 y =
-  fsqr y y; // y = y * y
+  fsqr_sa y y; // y = y * y
   let r = feq_mask y y2 in
   Hacl.Bignum.Base.unsafe_bool_of_limb r
 
