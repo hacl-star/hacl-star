@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub fn load_acc4(acc: &mut [crate::lib::intvector_intrinsics::vec256], b: &[u8])
+pub(crate) fn load_acc4(acc: &mut [crate::lib::intvector_intrinsics::vec256], b: &[u8])
 {
     let mut e: [crate::lib::intvector_intrinsics::vec256; 5] =
         [crate::lib::intvector_intrinsics::vec256_zero; 5usize];
@@ -133,7 +133,7 @@ pub fn load_acc4(acc: &mut [crate::lib::intvector_intrinsics::vec256], b: &[u8])
     acc[4usize] = acc41
 }
 
-pub fn fmul_r4_normalize(
+pub(crate) fn fmul_r4_normalize(
     out: &mut [crate::lib::intvector_intrinsics::vec256],
     p: &[crate::lib::intvector_intrinsics::vec256]
 )
@@ -815,7 +815,7 @@ pub fn fmul_r4_normalize(
     out[4usize] = o40
 }
 
-pub fn poly1305_init(ctx: &mut [crate::lib::intvector_intrinsics::vec256], key: &[u8])
+pub(crate) fn poly1305_init(ctx: &mut [crate::lib::intvector_intrinsics::vec256], key: &[u8])
 {
     let
     acc:
@@ -2171,7 +2171,7 @@ fn poly1305_update(ctx: &mut [crate::lib::intvector_intrinsics::vec256], len: u3
     }
 }
 
-pub fn poly1305_finish(
+pub(crate) fn poly1305_finish(
     tag: &mut [u8],
     key: &[u8],
     ctx: &mut [crate::lib::intvector_intrinsics::vec256]
@@ -2433,7 +2433,11 @@ pub fn reset(state: &mut [state_t], key: &[u8])
     (state[0usize]).p_key = k·1.to_vec()
 }
 
-pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
+/**
+0 = success, 1 = max length exceeded
+*/
+pub fn
+update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
     let block_state: &mut [crate::lib::intvector_intrinsics::vec256] =

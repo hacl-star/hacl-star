@@ -8,13 +8,71 @@
 
 pub type pbn_mont_ctx_u32 <'a> = &'a [crate::hacl::bignum::bn_mont_ctx_u32];
 
-pub fn add(len: u32, a: &[u32], b: &[u32], res: &mut [u32]) -> u32
+/**
+Write `a + b mod 2 ^ (32 * len)` in `res`.
+
+  This function returns the carry.
+  
+  @param[in] len Number of limbs.
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must not
+    partially overlap the memory locations of `b` or `res`. May have exactly equal memory
+    location to `b` or `res`.
+  @param[in] b Points to `len` number of limbs, i.e. `uint32_t[len]`. Must not
+    partially overlap the memory locations of `a` or `res`. May have exactly
+    equal memory location to `a` or `res`.
+  @param[out] res Points to `len` number of limbs where the carry is written, i.e. `uint32_t[len]`.
+    Must not partially overlap the memory locations of `a` or `b`. May have
+    exactly equal memory location to `a` or `b`.
+*/
+pub fn
+add(len: u32, a: &[u32], b: &[u32], res: &mut [u32]) ->
+    u32
 { crate::hacl::bignum_base::bn_add_eq_len_u32(len, a, b, res) }
 
-pub fn sub(len: u32, a: &[u32], b: &[u32], res: &mut [u32]) -> u32
+/**
+Write `a - b mod 2 ^ (32 * len)` in `res`.
+
+  This functions returns the carry.
+
+  @param[in] len Number of limbs.
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must not
+    partially overlap the memory locations of `b` or `res`. May have exactly
+    equal memory location to `b` or `res`.
+  @param[in] b Points to `len` number of limbs, i.e. `uint32_t[len]`. Must not
+    partially overlap the memory locations of `a` or `res`. May have exactly
+    equal memory location to `a` or `res`.
+  @param[out] res Points to `len` number of limbs where the carry is written, i.e. `uint32_t[len]`.
+    Must not partially overlap the memory locations of `a` or `b`. May have
+    exactly equal memory location to `a` or `b`.
+*/
+pub fn
+sub(len: u32, a: &[u32], b: &[u32], res: &mut [u32]) ->
+    u32
 { crate::hacl::bignum_base::bn_sub_eq_len_u32(len, a, b, res) }
 
-pub fn add_mod(len: u32, n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
+/**
+Write `(a + b) mod n` in `res`.
+
+  @param[in] len Number of limbs.
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must not
+    partially overlap the memory locations of `b` or `res`. May have exactly
+    equal memory location to `b` or `res`.
+  @param[in] b Points to `len` number of limbs, i.e. `uint32_t[len]`. Must not
+    partially overlap the memory locations of `a` or `res`. May have exactly
+    equal memory location to `a` or `res`.
+  @param[in] n Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a`, `b`, and `res`.
+  @param[out] res Points to `len` number of limbs where the result is written, i.e. `uint32_t[len]`.
+    Must not partially overlap the memory locations of `a` or `b`. May have
+    exactly equal memory location to `a` or `b`.
+    
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `a < n`
+    - `b < n`
+*/
+pub fn
+add_mod(len: u32, n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
 {
     let mut a_copy: Vec<u32> = vec![0u32; len as usize];
     let mut b_copy: Vec<u32> = vec![0u32; len as usize];
@@ -23,16 +81,59 @@ pub fn add_mod(len: u32, n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
     crate::hacl::bignum::bn_add_mod_n_u32(len, n, &a_copy, &b_copy, res)
 }
 
-pub fn sub_mod(len: u32, n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
+/**
+Write `(a - b) mod n` in `res`.
+
+  @param[in] len Number of limbs.
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must not
+    partially overlap the memory locations of `b` or `res`. May have exactly
+    equal memory location to `b` or `res`.
+  @param[in] b Points to `len` number of limbs, i.e. `uint32_t[len]`. Must not
+    partially overlap the memory locations of `a` or `res`. May have exactly
+    equal memory location to `a` or `res`.
+  @param[in] n Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a`, `b`, and `res`.
+  @param[out] res Points to `len` number of limbs where the result is written, i.e. `uint32_t[len]`.
+    Must not partially overlap the memory locations of `a` or `b`. May have
+    exactly equal memory location to `a` or `b`.
+    
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `a < n`
+    - `b < n`
+*/
+pub fn
+sub_mod(len: u32, n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
 { crate::hacl::bignum::bn_sub_mod_n_u32(len, n, a, b, res) }
 
-pub fn mul(len: u32, a: &[u32], b: &[u32], res: &mut [u32])
+/**
+Write `a * b` in `res`.
+
+  @param[in] len Number of limbs.
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `b` and `res`.
+  @param[in] b Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `a` and `res`.
+  @param[out] res Points to `2*len` number of limbs where the result is written, i.e. `uint32_t[2*len]`.
+    Must be disjoint from the memory locations of `a` and `b`.
+*/
+pub fn
+mul(len: u32, a: &[u32], b: &[u32], res: &mut [u32])
 {
     let mut tmp: Vec<u32> = vec![0u32; 4u32.wrapping_mul(len) as usize];
     crate::hacl::bignum::bn_karatsuba_mul_uint32(len, a, b, &mut tmp, res)
 }
 
-pub fn sqr(len: u32, a: &[u32], res: &mut [u32])
+/**
+Write `a * a` in `res`.
+
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `res`.
+  @param[out] res Points to `2*len` number of limbs where the result is written, i.e. `uint32_t[2*len]`.
+    Must be disjoint from the memory location of `a`.
+*/
+pub fn
+sqr(len: u32, a: &[u32], res: &mut [u32])
 {
     let mut tmp: Vec<u32> = vec![0u32; 4u32.wrapping_mul(len) as usize];
     crate::hacl::bignum::bn_karatsuba_sqr_uint32(len, a, &mut tmp, res)
@@ -56,7 +157,26 @@ pub fn sqr(len: u32, a: &[u32], res: &mut [u32])
     crate::hacl::bignum::bn_to_mont_u32(len, n, mu, r2, &a_mod, res)
 }
 
-pub fn r#mod(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) -> bool
+/**
+Write `a mod n` in `res`.
+
+  @param[in] a Points to `2*len` number of limbs, i.e. `uint32_t[2*len]`. Must be
+    disjoint from the memory location of `res`.
+  @param[in] n Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `res`.
+  @param[out] res Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a` and `n`.
+  
+  @return `false` if any precondition is violated, `true` otherwise.
+  
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `1 < n`
+    - `n % 2 = 1`
+*/
+pub fn
+r#mod(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
+    bool
 {
     let mut one: Vec<u32> = vec![0u32; len as usize];
     ((&mut one)[0usize..len as usize]).copy_from_slice(&vec![0u32; len as usize]);
@@ -85,7 +205,36 @@ pub fn r#mod(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) -> bool
     is_valid_m == 0xFFFFFFFFu32
 }
 
-pub fn mod_exp_vartime(len: u32, n: &[u32], a: &[u32], bBits: u32, b: &[u32], res: &mut [u32]) ->
+/**
+Write `a ^ b mod n` in `res`.
+
+  This function is *NOT* constant-time on the argument `b`. See the
+  `mod_exp_consttime_*` functions for constant-time variants.
+
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `n` and `res`.
+  @param[in] n Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a` and `res`.
+  @param[in] b Points to a bignum of any size, with an upper bound of `bBits` number of
+    significant bits. Must be disjoint from the memory location of `res`.
+  @param[in] bBits An upper bound on the number of significant bits of `b`.
+    A tighter bound results in faster execution time. When in doubt, the number
+    of bits for the bignum size is always a safe default, e.g. if `b` is a 4096-bit
+    bignum, `bBits` should be `4096`.
+  @param[out] res Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a`, `b`, and `n`.
+    
+  @return `false` if any preconditions are violated, `true` otherwise.
+  
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `n % 2 = 1`
+    - `1 < n`
+    - `b < pow2 bBits`
+    - `a < n`
+*/
+pub fn
+mod_exp_vartime(len: u32, n: &[u32], a: &[u32], bBits: u32, b: &[u32], res: &mut [u32]) ->
     bool
 {
     let is_valid_m: u32 = crate::hacl::bignum::bn_check_mod_exp_u32(len, n, a, bBits, b);
@@ -97,14 +246,36 @@ pub fn mod_exp_vartime(len: u32, n: &[u32], a: &[u32], bBits: u32, b: &[u32], re
     is_valid_m == 0xFFFFFFFFu32
 }
 
-pub fn mod_exp_consttime(
-    len: u32,
-    n: &[u32],
-    a: &[u32],
-    bBits: u32,
-    b: &[u32],
-    res: &mut [u32]
-) ->
+/**
+Write `a ^ b mod n` in `res`.
+
+  This function is constant-time over its argument `b`, at the cost of a slower
+  execution time than `mod_exp_vartime_*`.
+  
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `n` and `res`.
+  @param[in] n Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a` and `res`.
+  @param[in] b Points to a bignum of any size, with an upper bound of `bBits` number of
+    significant bits. Must be disjoint from the memory location of `res`.
+  @param[in] bBits An upper bound on the number of significant bits of `b`.
+    A tighter bound results in faster execution time. When in doubt, the number
+    of bits for the bignum size is always a safe default, e.g. if `b` is a 4096-bit
+    bignum, `bBits` should be `4096`.
+  @param[out] res Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a`, `b`, and `n`.
+    
+  @return `false` if any preconditions are violated, `true` otherwise.
+
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `n % 2 = 1`
+    - `1 < n`
+    - `b < pow2 bBits`
+    - `a < n`
+*/
+pub fn
+mod_exp_consttime(len: u32, n: &[u32], a: &[u32], bBits: u32, b: &[u32], res: &mut [u32]) ->
     bool
 {
     let is_valid_m: u32 = crate::hacl::bignum::bn_check_mod_exp_u32(len, n, a, bBits, b);
@@ -116,7 +287,30 @@ pub fn mod_exp_consttime(
     is_valid_m == 0xFFFFFFFFu32
 }
 
-pub fn mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) -> bool
+/**
+Write `a ^ (-1) mod n` in `res`.
+
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `n` and `res`.
+  @param[in] n Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a` and `res`.
+  @param[out] res Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `a` and `n`.
+    
+  @return `false` if any preconditions (except the precondition: `n` is a prime)
+    are violated, `true` otherwise.
+    
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `n` is a prime
+    - `n % 2 = 1`
+    - `1 < n`
+    - `0 < a`
+    - `a < n`
+*/
+pub fn
+mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
+    bool
 {
     let mut one: Vec<u32> = vec![0u32; len as usize];
     ((&mut one)[0usize..len as usize]).copy_from_slice(&vec![0u32; len as usize]);
@@ -253,7 +447,23 @@ pub fn mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
     is_valid_m == 0xFFFFFFFFu32
 }
 
-pub fn mont_ctx_init(len: u32, n: &[u32]) -> Vec<crate::hacl::bignum::bn_mont_ctx_u32>
+/**
+Heap-allocate and initialize a montgomery context.
+
+  @param n Points to `len` number of limbs, i.e. `uint32_t[len]`.
+
+  @return A pointer to an allocated and initialized Montgomery context is returned.
+    Clients will need to call `Hacl_Bignum32_mont_ctx_free` on the return value to
+    avoid memory leaks.
+    
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `n % 2 = 1`
+    - `1 < n`
+*/
+pub fn
+mont_ctx_init(len: u32, n: &[u32]) ->
+    Vec<crate::hacl::bignum::bn_mont_ctx_u32>
 {
     let mut r2: Vec<u32> = vec![0u32; len as usize];
     let mut n1: Vec<u32> = vec![0u32; len as usize];
@@ -274,7 +484,17 @@ pub fn mont_ctx_init(len: u32, n: &[u32]) -> Vec<crate::hacl::bignum::bn_mont_ct
     buf
 }
 
-pub fn mod_precomp(k: &[crate::hacl::bignum::bn_mont_ctx_u32], a: &[u32], res: &mut [u32])
+/**
+Write `a mod n` in `res`.
+
+  @param[in] k Points to a Montgomery context obtained from `Hacl_Bignum32_mont_ctx_init`.
+  @param[in] a Points to `2*len` number of limbs, i.e. `uint32_t[2*len]`. Must be
+    disjoint from the memory location of `res`.
+  @param[out] res Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `a`.
+*/
+pub fn
+mod_precomp(k: &[crate::hacl::bignum::bn_mont_ctx_u32], a: &[u32], res: &mut [u32])
 {
     let len1: u32 = (k[0usize]).len;
     let n: &[u32] = &(k[0usize]).n;
@@ -283,7 +503,31 @@ pub fn mod_precomp(k: &[crate::hacl::bignum::bn_mont_ctx_u32], a: &[u32], res: &
     bn_slow_precomp(len1, n, mu, r2, a, res)
 }
 
-pub fn mod_exp_vartime_precomp(
+/**
+Write `a ^ b mod n` in `res`.
+
+  This function is *NOT* constant-time on the argument `b`. See the
+  `mod_exp_consttime_*` functions for constant-time variants.
+
+  @param[in] k Points to a Montgomery context obtained from `Hacl_Bignum32_mont_ctx_init`.
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `res`.
+  @param[in] b Points to a bignum of any size, with an upper bound of `bBits` number of
+    significant bits. Must be disjoint from the memory location of `res`.
+  @param[in] bBits An upper bound on the number of significant bits of `b`.
+    A tighter bound results in faster execution time. When in doubt, the number
+    of bits for the bignum size is always a safe default, e.g. if `b` is a 4096-bit
+    bignum, `bBits` should be `4096`.
+  @param[out] res Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a` and `b`.
+    
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `b < pow2 bBits`
+    - `a < n`
+*/
+pub fn
+mod_exp_vartime_precomp(
     k: &[crate::hacl::bignum::bn_mont_ctx_u32],
     a: &[u32],
     bBits: u32,
@@ -298,7 +542,31 @@ pub fn mod_exp_vartime_precomp(
     crate::hacl::bignum::bn_mod_exp_vartime_precomp_u32(len1, n, mu, r2, a, bBits, b, res)
 }
 
-pub fn mod_exp_consttime_precomp(
+/**
+Write `a ^ b mod n` in `res`.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than `mod_exp_vartime_*`.
+
+  @param[in] k Points to a Montgomery context obtained from `Hacl_Bignum32_mont_ctx_init`.
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `res`.
+  @param[in] b Points to a bignum of any size, with an upper bound of `bBits` number of
+    significant bits. Must be disjoint from the memory location of `res`.
+  @param[in] bBits An upper bound on the number of significant bits of `b`.
+    A tighter bound results in faster execution time. When in doubt, the number
+    of bits for the bignum size is always a safe default, e.g. if `b` is a 4096-bit
+    bignum, `bBits` should be `4096`.
+  @param[out] res Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory locations of `a` and `b`.
+    
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `b < pow2 bBits`
+    - `a < n`
+*/
+pub fn
+mod_exp_consttime_precomp(
     k: &[crate::hacl::bignum::bn_mont_ctx_u32],
     a: &[u32],
     bBits: u32,
@@ -313,7 +581,23 @@ pub fn mod_exp_consttime_precomp(
     crate::hacl::bignum::bn_mod_exp_consttime_precomp_u32(len1, n, mu, r2, a, bBits, b, res)
 }
 
-pub fn mod_inv_prime_vartime_precomp(
+/**
+Write `a ^ (-1) mod n` in `res`.
+
+  @param[in] k Points to a Montgomery context obtained through `Hacl_Bignum32_mont_ctx_init`.
+  @param[in] a Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `res`.
+  @param[out] res Points to `len` number of limbs, i.e. `uint32_t[len]`. Must be
+    disjoint from the memory location of `a`.
+    
+  @pre Before calling this function, the caller will need to ensure that the following
+    preconditions are observed:
+    - `n` is a prime
+    - `0 < a`
+    - `a < n`
+*/
+pub fn
+mod_inv_prime_vartime_precomp(
     k: &[crate::hacl::bignum::bn_mont_ctx_u32],
     a: &[u32],
     res: &mut [u32]
@@ -409,7 +693,20 @@ pub fn mod_inv_prime_vartime_precomp(
     )
 }
 
-pub fn new_bn_from_bytes_be(len: u32, b: &[u8]) -> Vec<u32>
+/**
+Load a bid-endian bignum from memory.
+
+  @param len Size of `b` as number of bytes.
+  @param b Points to `len` number of bytes, i.e. `uint8_t[len]`.
+  
+  @return A heap-allocated bignum of size sufficient to hold the result of
+    loading `b`. Otherwise, `NULL`, if either the allocation failed, or the amount
+    of required memory would exceed 4GB. Clients must `free(3)` any non-null return
+    value to avoid memory leaks.
+*/
+pub fn
+new_bn_from_bytes_be(len: u32, b: &[u8]) ->
+    Vec<u32>
 {
     if
     len == 0u32
@@ -447,7 +744,20 @@ pub fn new_bn_from_bytes_be(len: u32, b: &[u8]) -> Vec<u32>
     }
 }
 
-pub fn new_bn_from_bytes_le(len: u32, b: &[u8]) -> Vec<u32>
+/**
+Load a little-endian bignum from memory.
+
+  @param len Size of `b` as number of bytes.
+  @param b Points to `len` number of bytes, i.e. `uint8_t[len]`.
+  
+  @return A heap-allocated bignum of size sufficient to hold the result of
+    loading `b`. Otherwise, `NULL`, if either the allocation failed, or the amount
+    of required memory would exceed 4GB. Clients must `free(3)` any non-null return
+    value to avoid memory leaks.
+*/
+pub fn
+new_bn_from_bytes_le(len: u32, b: &[u8]) ->
+    Vec<u32>
 {
     if
     len == 0u32
@@ -482,7 +792,17 @@ pub fn new_bn_from_bytes_le(len: u32, b: &[u8]) -> Vec<u32>
     }
 }
 
-pub fn bn_to_bytes_be(len: u32, b: &[u32], res: &mut [u8])
+/**
+Serialize a bignum into big-endian memory.
+
+  @param[in] len Size of `b` as number of bytes.
+  @param[in] b Points to a bignum of `ceil(len/4)` size. Must be disjoint from
+    the memory location of `res`.
+  @param[out] res Points to `len` number of bytes, i.e. `uint8_t[len]`. Must be
+    disjoint from the memory location of `b`.
+*/
+pub fn
+bn_to_bytes_be(len: u32, b: &[u32], res: &mut [u8])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32);
     let tmpLen: u32 = 4u32.wrapping_mul(bnLen);
@@ -499,7 +819,17 @@ pub fn bn_to_bytes_be(len: u32, b: &[u32], res: &mut [u8])
     )
 }
 
-pub fn bn_to_bytes_le(len: u32, b: &[u32], res: &mut [u8])
+/**
+Serialize a bignum into little-endian memory.
+
+  @param[in] len Size of `b` as number of bytes.
+  @param[in] b Points to a bignum of `ceil(len/4)` size. Must be disjoint from
+    the memory location of `res`.
+  @param[out] res Points to `len` number of bytes, i.e. `uint8_t[len]`. Must be
+    disjoint from the memory location of `b`.
+*/
+pub fn
+bn_to_bytes_le(len: u32, b: &[u32], res: &mut [u8])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32);
     let tmpLen: u32 = 4u32.wrapping_mul(bnLen);
@@ -514,7 +844,18 @@ pub fn bn_to_bytes_le(len: u32, b: &[u32], res: &mut [u8])
     (res[0usize..len as usize]).copy_from_slice(&(&(&tmp)[0usize..])[0usize..len as usize])
 }
 
-pub fn lt_mask(len: u32, a: &[u32], b: &[u32]) -> u32
+/**
+Returns 2^32 - 1 if a < b, otherwise returns 0.
+
+  @param len Number of limbs.
+  @param a Points to `len` number of limbs, i.e. `uint32_t[len]`.
+  @param b Points to `len` number of limbs, i.e. `uint32_t[len]`.
+  
+  @return `2^32 - 1` if `a < b`, otherwise, `0`.
+*/
+pub fn
+lt_mask(len: u32, a: &[u32], b: &[u32]) ->
+    u32
 {
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
@@ -526,7 +867,18 @@ pub fn lt_mask(len: u32, a: &[u32], b: &[u32]) -> u32
     (&acc)[0usize]
 }
 
-pub fn eq_mask(len: u32, a: &[u32], b: &[u32]) -> u32
+/**
+Returns 2^32 - 1 if a = b, otherwise returns 0.
+
+  @param len Number of limbs.
+  @param a Points to `len` number of limbs, i.e. `uint32_t[len]`.
+  @param b Points to `len` number of limbs, i.e. `uint32_t[len]`.
+  
+  @return `2^32 - 1` if a = b, otherwise, `0`.
+*/
+pub fn
+eq_mask(len: u32, a: &[u32], b: &[u32]) ->
+    u32
 {
     let mut mask: [u32; 1] = [0xFFFFFFFFu32; 1usize];
     for i in 0u32..len

@@ -544,7 +544,7 @@
     s1.1[0usize] = crate::lib::intvector_intrinsics::vec256_xor(s1.1[0usize], r3.1[0usize])
 }
 
-pub fn init(hash: &mut [crate::lib::intvector_intrinsics::vec256], kk: u32, nn: u32)
+pub(crate) fn init(hash: &mut [crate::lib::intvector_intrinsics::vec256], kk: u32, nn: u32)
 {
     let salt: [u8; 16] = [0u8; 16usize];
     let personal: [u8; 16] = [0u8; 16usize];
@@ -782,7 +782,7 @@ fn update_key(
     crate::lib::memzero0::memzero::<u8>(&mut b, 128u32)
 }
 
-pub fn update_multi(
+pub(crate) fn update_multi(
     len: u32,
     wv: &mut [crate::lib::intvector_intrinsics::vec256],
     hash: &mut [crate::lib::intvector_intrinsics::vec256],
@@ -806,7 +806,7 @@ pub fn update_multi(
     }
 }
 
-pub fn update_last(
+pub(crate) fn update_last(
     len: u32,
     wv: &mut [crate::lib::intvector_intrinsics::vec256],
     hash: &mut [crate::lib::intvector_intrinsics::vec256],
@@ -861,7 +861,11 @@ pub fn update_last(
     { update_blocks(ll, wv, hash, crate::fstar::uint128::uint64_to_uint128(0u32 as u64), d) }
 }
 
-pub fn finish(nn: u32, output: &mut [u8], hash: &[crate::lib::intvector_intrinsics::vec256])
+pub(crate) fn finish(
+    nn: u32,
+    output: &mut [u8],
+    hash: &[crate::lib::intvector_intrinsics::vec256]
+)
 {
     let mut b: [u8; 64] = [0u8; 64usize];
     let first: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
@@ -994,7 +998,15 @@ fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_k
     (state[0usize]).total_len = total_len
 }
 
-pub fn reset_with_key_and_params(
+/**
+General-purpose re-initialization function with parameters and
+key. You cannot change digest_length, key_length, or last_node, meaning those values in
+the parameters object must be the same as originally decided via one of the
+malloc functions. All other values of the parameter can be changed. The behavior
+is unspecified if you violate this precondition.
+*/
+pub fn
+reset_with_key_and_params(
     s: &mut [state_t],
     p: &[crate::hacl::hash_blake2b::blake2_params],
     k: &[u8]
@@ -1004,7 +1016,15 @@ pub fn reset_with_key_and_params(
     reset_raw(s, crate::hacl::hash_blake2b::params_and_key { fst: p, snd: k })
 }
 
-pub fn reset_with_key(s: &mut [state_t], k: &[u8])
+/**
+Specialized-purpose re-initialization function with no parameters,
+and a key. The key length must be the same as originally decided via your choice
+of malloc function. All other parameters are reset to their default values. The
+original call to malloc MUST have set digest_length to the default value. The
+behavior is unspecified if you violate this precondition.
+*/
+pub fn
+reset_with_key(s: &mut [state_t], k: &[u8])
 {
     let idx: crate::hacl::hash_blake2b::index = index_of_state(s);
     let salt: [u8; 16] = [0u8; 16usize];
@@ -1027,9 +1047,23 @@ pub fn reset_with_key(s: &mut [state_t], k: &[u8])
     reset_raw(s, crate::hacl::hash_blake2b::params_and_key { fst: &p0, snd: k })
 }
 
-pub fn reset(s: &mut [state_t]) { reset_with_key(s, &[]) }
+/**
+Specialized-purpose re-initialization function with no parameters
+and no key. This is what you want if you intend to use Blake2 as a hash
+function. The key length and digest length must have been set to their
+respective default values via your choice of malloc function (always true if you
+used `malloc`). All other parameters are reset to their default values. The
+behavior is unspecified if you violate this precondition.
+*/
+pub fn
+reset(s: &mut [state_t])
+{ reset_with_key(s, &[]) }
 
-pub fn update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
+/**
+Update function; 0 = success, 1 = max length exceeded
+*/
+pub fn
+update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
     let block_state: &mut block_state_t = &mut (state[0usize]).block_state;
@@ -1182,7 +1216,20 @@ pub fn update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     }
 }
 
-pub fn digest(s: &[state_t], dst: &mut [u8]) -> u8
+/**
+Digest function. This function expects the `output` array to hold
+at least `digest_length` bytes, where `digest_length` was determined by your
+choice of `malloc` function. Concretely, if you used `malloc` or
+`malloc_with_key`, then the expected length is 256 for S, or 64 for B (default
+digest length). If you used `malloc_with_params_and_key`, then the expected
+length is whatever you chose for the `digest_length` field of your parameters.
+For convenience, this function returns `digest_length`. When in doubt, callers
+can pass an array of size HACL_BLAKE2B_256_OUT_BYTES, then use the return value
+to see how many bytes were actually written.
+*/
+pub fn
+digest(s: &[state_t], dst: &mut [u8]) ->
+    u8
 {
     let block_state: &block_state_t = &(s[0usize]).block_state;
     let last_node: bool = (*block_state).thd;
@@ -1262,7 +1309,12 @@ pub fn info(s: &[state_t]) -> crate::hacl::hash_blake2b::index
     crate::hacl::hash_blake2b::index { key_length: kk, digest_length: nn, last_node: last_node }
 }
 
-pub fn copy(state: &[state_t]) -> Vec<state_t>
+/**
+Copying. This preserves all parameters.
+*/
+pub fn
+copy(state: &[state_t]) ->
+    Vec<state_t>
 {
     let block_state0: &block_state_t = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
@@ -1294,7 +1346,18 @@ pub fn copy(state: &[state_t]) -> Vec<state_t>
     p
 }
 
-pub fn hash_with_key(
+/**
+Write the BLAKE2b digest of message `input` using key `key` into `output`.
+
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0.
+*/
+pub fn
+hash_with_key(
     output: &mut [u8],
     output_len: u32,
     input: &[u8],
@@ -1314,7 +1377,14 @@ pub fn hash_with_key(
     crate::lib::memzero0::memzero::<crate::lib::intvector_intrinsics::vec256>(&mut b, 4u32)
 }
 
-pub fn hash_with_key_and_params(
+/**
+Write the BLAKE2b digest of message `input` using key `key` and
+parameters `params` into `output`. The `key` array must be of length
+`params.key_length`. The `output` array must be of length
+`params.digest_length`.
+*/
+pub fn
+hash_with_key_and_params(
     output: &mut [u8],
     input: &[u8],
     input_len: u32,

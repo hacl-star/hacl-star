@@ -7126,16 +7126,39 @@ pub fn sha3_512(
     )
 }
 
-pub fn state_malloc() -> Vec<crate::lib::intvector_intrinsics::vec256>
+/**
+Allocate quadruple state buffer (200-bytes for each)
+*/
+pub fn
+state_malloc() ->
+    Vec<crate::lib::intvector_intrinsics::vec256>
 {
     let buf: Vec<crate::lib::intvector_intrinsics::vec256> =
         vec![crate::lib::intvector_intrinsics::vec256_zero; 25usize];
     buf
 }
 
-pub fn state_free(s: &[crate::lib::intvector_intrinsics::vec256]) { () }
+/**
+Free quadruple state buffer
+*/
+pub fn
+state_free(s: &[crate::lib::intvector_intrinsics::vec256])
+{ () }
 
-pub fn shake128_absorb_nblocks(
+/**
+Absorb number of blocks of 4 input buffers and write the output states
+
+  This function is intended to receive a quadruple hash state and 4 input buffers.
+  It prcoesses an inputs of multiple of 168-bytes (SHAKE128 block size),
+  any additional bytes of final partial block for each buffer are ignored.
+
+  The argument `state` (IN/OUT) points to quadruple hash state,
+  i.e., Lib_IntVector_Intrinsics_vec256[25]
+  The arguments `input0/input1/input2/input3` (IN) point to `inputByteLen` bytes 
+  of valid memory for each buffer, i.e., uint8_t[inputByteLen]
+*/
+pub fn
+shake128_absorb_nblocks(
     state: &mut [crate::lib::intvector_intrinsics::vec256],
     input0: &[u8],
     input1: &[u8],
@@ -7182,7 +7205,24 @@ pub fn shake128_absorb_nblocks(
     }
 }
 
-pub fn shake128_absorb_final(
+/**
+Absorb a final partial blocks of 4 input buffers and write the output states
+
+  This function is intended to receive a quadruple hash state and 4 input buffers.
+  It prcoesses a sequence of bytes at end of each input buffer that is less 
+  than 168-bytes (SHAKE128 block size),
+  any bytes of full blocks at start of input buffers are ignored.
+
+  The argument `state` (IN/OUT) points to quadruple hash state,
+  i.e., Lib_IntVector_Intrinsics_vec256[25]
+  The arguments `input0/input1/input2/input3` (IN) point to `inputByteLen` bytes 
+  of valid memory for each buffer, i.e., uint8_t[inputByteLen]
+  
+  Note: Full size of input buffers must be passed to `inputByteLen` including
+  the number of full-block bytes at start of each input buffer that are ignored
+*/
+pub fn
+shake128_absorb_final(
     state: &mut [crate::lib::intvector_intrinsics::vec256],
     input0: &[u8],
     input1: &[u8],
@@ -7525,7 +7565,20 @@ pub fn shake128_absorb_final(
     absorb_inner_256(168u32, b, state)
 }
 
-pub fn shake128_squeeze_nblocks(
+/**
+Squeeze a quadruple hash state to 4 output buffers
+
+  This function is intended to receive a quadruple hash state and 4 output buffers.
+  It produces 4 outputs, each is multiple of 168-bytes (SHAKE128 block size),
+  any additional bytes of final partial block for each buffer are ignored.
+
+  The argument `state` (IN) points to quadruple hash state,
+  i.e., Lib_IntVector_Intrinsics_vec256[25]
+  The arguments `output0/output1/output2/output3` (OUT) point to `outputByteLen` bytes 
+  of valid memory for each buffer, i.e., uint8_t[inputByteLen]
+*/
+pub fn
+shake128_squeeze_nblocks(
     state: &mut [crate::lib::intvector_intrinsics::vec256],
     output0: &mut [u8],
     output1: &mut [u8],

@@ -9,7 +9,7 @@
 const _h0: [u32; 5] =
     [0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32, 0xc3d2e1f0u32];
 
-pub fn init(s: &mut [u32])
+pub(crate) fn init(s: &mut [u32])
 { krml::unroll_for!(5, "i", 0u32, 1u32, s[i as usize] = (&_h0)[i as usize]) }
 
 fn update(h: &mut [u32], l: &[u8])
@@ -108,7 +108,7 @@ fn pad(len: u64, dst: &mut [u8])
     crate::lowstar::endianness::store64_be(dst3.1, len.wrapping_shl(3u32))
 }
 
-pub fn finish(s: &[u32], dst: &mut [u8])
+pub(crate) fn finish(s: &[u32], dst: &mut [u8])
 {
     krml::unroll_for!(
         5,
@@ -122,7 +122,7 @@ pub fn finish(s: &[u32], dst: &mut [u8])
     )
 }
 
-pub fn update_multi(s: &mut [u32], blocks: &[u8], n_blocks: u32)
+pub(crate) fn update_multi(s: &mut [u32], blocks: &[u8], n_blocks: u32)
 {
     for i in 0u32..n_blocks
     {
@@ -132,7 +132,7 @@ pub fn update_multi(s: &mut [u32], blocks: &[u8], n_blocks: u32)
     }
 }
 
-pub fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len: u32)
+pub(crate) fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len: u32)
 {
     let blocks_n: u32 = input_len.wrapping_div(64u32);
     let blocks_len: u32 = blocks_n.wrapping_mul(64u32);
@@ -157,7 +157,7 @@ pub fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len: u32)
     update_multi(s, tmp.1, tmp_len.wrapping_div(64u32))
 }
 
-pub fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
+pub(crate) fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
 {
     let mut s: [u32; 5] =
         [0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32, 0xc3d2e1f0u32];
@@ -208,11 +208,11 @@ pub fn reset(state: &mut [crate::hacl::streaming_types::state_32])
     (state[0usize]).total_len = total_len
 }
 
-pub fn update0(
-    state: &mut [crate::hacl::streaming_types::state_32],
-    chunk: &[u8],
-    chunk_len: u32
-) ->
+/**
+0 = success, 1 = max length exceeded
+*/
+pub fn
+update0(state: &mut [crate::hacl::streaming_types::state_32], chunk: &[u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;

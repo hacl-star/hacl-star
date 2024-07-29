@@ -8,13 +8,42 @@
 
 pub type pbn_mont_ctx_u64 <'a> = &'a [crate::hacl::bignum::bn_mont_ctx_u64];
 
-pub fn add(len: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u64
+/**
+Write `a + b mod 2 ^ (64 * len)` in `res`.
+
+  This functions returns the carry.
+
+  The arguments a, b and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len]
+*/
+pub fn
+add(len: u32, a: &[u64], b: &[u64], res: &mut [u64]) ->
+    u64
 { crate::hacl::bignum_base::bn_add_eq_len_u64(len, a, b, res) }
 
-pub fn sub(len: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u64
+/**
+Write `a - b mod 2 ^ (64 * len)` in `res`.
+
+  This functions returns the carry.
+
+  The arguments a, b and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len]
+*/
+pub fn
+sub(len: u32, a: &[u64], b: &[u64], res: &mut [u64]) ->
+    u64
 { crate::hacl::bignum_base::bn_sub_eq_len_u64(len, a, b, res) }
 
-pub fn add_mod(len: u32, n: &[u64], a: &[u64], b: &[u64], res: &mut [u64])
+/**
+Write `(a + b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+pub fn
+add_mod(len: u32, n: &[u64], a: &[u64], b: &[u64], res: &mut [u64])
 {
     let mut a_copy: Vec<u64> = vec![0u64; len as usize];
     let mut b_copy: Vec<u64> = vec![0u64; len as usize];
@@ -23,16 +52,41 @@ pub fn add_mod(len: u32, n: &[u64], a: &[u64], b: &[u64], res: &mut [u64])
     crate::hacl::bignum::bn_add_mod_n_u64(len, n, &a_copy, &b_copy, res)
 }
 
-pub fn sub_mod(len: u32, n: &[u64], a: &[u64], b: &[u64], res: &mut [u64])
+/**
+Write `(a - b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+pub fn
+sub_mod(len: u32, n: &[u64], a: &[u64], b: &[u64], res: &mut [u64])
 { crate::hacl::bignum::bn_sub_mod_n_u64(len, n, a, b, res) }
 
-pub fn mul(len: u32, a: &[u64], b: &[u64], res: &mut [u64])
+/**
+Write `a * b` in `res`.
+
+  The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The outparam res is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
+*/
+pub fn
+mul(len: u32, a: &[u64], b: &[u64], res: &mut [u64])
 {
     let mut tmp: Vec<u64> = vec![0u64; 4u32.wrapping_mul(len) as usize];
     crate::hacl::bignum::bn_karatsuba_mul_uint64(len, a, b, &mut tmp, res)
 }
 
-pub fn sqr(len: u32, a: &[u64], res: &mut [u64])
+/**
+Write `a * a` in `res`.
+
+  The argument a is meant to be `len` limbs in size, i.e. uint64_t[len].
+  The outparam res is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
+*/
+pub fn
+sqr(len: u32, a: &[u64], res: &mut [u64])
 {
     let mut tmp: Vec<u64> = vec![0u64; 4u32.wrapping_mul(len) as usize];
     crate::hacl::bignum::bn_karatsuba_sqr_uint64(len, a, &mut tmp, res)
@@ -56,7 +110,20 @@ pub fn sqr(len: u32, a: &[u64], res: &mut [u64])
     crate::hacl::bignum::bn_to_mont_u64(len, n, mu, r2, &a_mod, res)
 }
 
-pub fn r#mod(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) -> bool
+/**
+Write `a mod n` in `res`.
+
+  The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
+  The argument n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • 1 < n
+   • n % 2 = 1
+*/
+pub fn
+r#mod(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) ->
+    bool
 {
     let mut one: Vec<u64> = vec![0u64; len as usize];
     ((&mut one)[0usize..len as usize]).copy_from_slice(&vec![0u64; len as usize]);
@@ -87,7 +154,28 @@ pub fn r#mod(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) -> bool
     is_valid_m == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn mod_exp_vartime(len: u32, n: &[u64], a: &[u64], bBits: u32, b: &[u64], res: &mut [u64]) ->
+/**
+Write `a ^ b mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_consttime_* functions for constant-time variants.
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • b < pow2 bBits
+   • a < n
+*/
+pub fn
+mod_exp_vartime(len: u32, n: &[u64], a: &[u64], bBits: u32, b: &[u64], res: &mut [u64]) ->
     bool
 {
     let is_valid_m: u64 = crate::hacl::bignum::bn_check_mod_exp_u64(len, n, a, bBits, b);
@@ -100,14 +188,28 @@ pub fn mod_exp_vartime(len: u32, n: &[u64], a: &[u64], bBits: u32, b: &[u64], re
     is_valid_m == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn mod_exp_consttime(
-    len: u32,
-    n: &[u64],
-    a: &[u64],
-    bBits: u32,
-    b: &[u64],
-    res: &mut [u64]
-) ->
+/**
+Write `a ^ b mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than mod_exp_vartime.
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • b < pow2 bBits
+   • a < n
+*/
+pub fn
+mod_exp_consttime(len: u32, n: &[u64], a: &[u64], bBits: u32, b: &[u64], res: &mut [u64]) ->
     bool
 {
     let is_valid_m: u64 = crate::hacl::bignum::bn_check_mod_exp_u64(len, n, a, bBits, b);
@@ -120,7 +222,25 @@ pub fn mod_exp_consttime(
     is_valid_m == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn mod_inv_prime_vartime(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) -> bool
+/**
+Write `a ^ (-1) mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+  • n % 2 = 1
+  • 1 < n
+  • 0 < a
+  • a < n
+*/
+pub fn
+mod_inv_prime_vartime(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) ->
+    bool
 {
     let mut one: Vec<u64> = vec![0u64; len as usize];
     ((&mut one)[0usize..len as usize]).copy_from_slice(&vec![0u64; len as usize]);
@@ -260,7 +380,22 @@ pub fn mod_inv_prime_vartime(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) ->
     is_valid_m == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn mont_ctx_init(len: u32, n: &[u64]) -> Vec<crate::hacl::bignum::bn_mont_ctx_u64>
+/**
+Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_Bignum64_mont_ctx_free on the return value
+  to avoid memory leaks.
+*/
+pub fn
+mont_ctx_init(len: u32, n: &[u64]) ->
+    Vec<crate::hacl::bignum::bn_mont_ctx_u64>
 {
     let mut r2: Vec<u64> = vec![0u64; len as usize];
     let mut n1: Vec<u64> = vec![0u64; len as usize];
@@ -282,7 +417,15 @@ pub fn mont_ctx_init(len: u32, n: &[u64]) -> Vec<crate::hacl::bignum::bn_mont_ct
     buf
 }
 
-pub fn mod_precomp(k: &[crate::hacl::bignum::bn_mont_ctx_u64], a: &[u64], res: &mut [u64])
+/**
+Write `a mod n` in `res`.
+
+  The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
+  The outparam res is meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
+*/
+pub fn
+mod_precomp(k: &[crate::hacl::bignum::bn_mont_ctx_u64], a: &[u64], res: &mut [u64])
 {
     let len1: u32 = (k[0usize]).len;
     let n: &[u64] = &(k[0usize]).n;
@@ -291,7 +434,27 @@ pub fn mod_precomp(k: &[crate::hacl::bignum::bn_mont_ctx_u64], a: &[u64], res: &
     bn_slow_precomp(len1, n, mu, r2, a, res)
 }
 
-pub fn mod_exp_vartime_precomp(
+/**
+Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_consttime_* functions for constant-time variants.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • b < pow2 bBits
+  • a < n
+*/
+pub fn
+mod_exp_vartime_precomp(
     k: &[crate::hacl::bignum::bn_mont_ctx_u64],
     a: &[u64],
     bBits: u32,
@@ -306,7 +469,27 @@ pub fn mod_exp_vartime_precomp(
     crate::hacl::bignum::bn_mod_exp_vartime_precomp_u64(len1, n, mu, r2, a, bBits, b, res)
 }
 
-pub fn mod_exp_consttime_precomp(
+/**
+Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than mod_exp_vartime_*.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • b < pow2 bBits
+  • a < n
+*/
+pub fn
+mod_exp_consttime_precomp(
     k: &[crate::hacl::bignum::bn_mont_ctx_u64],
     a: &[u64],
     bBits: u32,
@@ -321,7 +504,20 @@ pub fn mod_exp_consttime_precomp(
     crate::hacl::bignum::bn_mod_exp_consttime_precomp_u64(len1, n, mu, r2, a, bBits, b, res)
 }
 
-pub fn mod_inv_prime_vartime_precomp(
+/**
+Write `a ^ (-1) mod n` in `res`.
+
+  The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
+  • 0 < a
+  • a < n
+*/
+pub fn
+mod_inv_prime_vartime_precomp(
     k: &[crate::hacl::bignum::bn_mont_ctx_u64],
     a: &[u64],
     res: &mut [u64]
@@ -417,7 +613,20 @@ pub fn mod_inv_prime_vartime_precomp(
     )
 }
 
-pub fn new_bn_from_bytes_be(len: u32, b: &[u8]) -> Vec<u64>
+/**
+Load a bid-endian bignum from memory.
+
+  The argument b points to `len` bytes of valid memory.
+  The function returns a heap-allocated bignum of size sufficient to hold the
+   result of loading b, or NULL if either the allocation failed, or the amount of
+    required memory would exceed 4GB.
+
+  If the return value is non-null, clients must eventually call free(3) on it to
+  avoid memory leaks.
+*/
+pub fn
+new_bn_from_bytes_be(len: u32, b: &[u8]) ->
+    Vec<u64>
 {
     if
     len == 0u32 || ! (len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32) <= 536870911u32)
@@ -453,7 +662,20 @@ pub fn new_bn_from_bytes_be(len: u32, b: &[u8]) -> Vec<u64>
     }
 }
 
-pub fn new_bn_from_bytes_le(len: u32, b: &[u8]) -> Vec<u64>
+/**
+Load a little-endian bignum from memory.
+
+  The argument b points to `len` bytes of valid memory.
+  The function returns a heap-allocated bignum of size sufficient to hold the
+   result of loading b, or NULL if either the allocation failed, or the amount of
+    required memory would exceed 4GB.
+
+  If the return value is non-null, clients must eventually call free(3) on it to
+  avoid memory leaks.
+*/
+pub fn
+new_bn_from_bytes_le(len: u32, b: &[u8]) ->
+    Vec<u64>
 {
     if
     len == 0u32 || ! (len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32) <= 536870911u32)
@@ -486,7 +708,14 @@ pub fn new_bn_from_bytes_le(len: u32, b: &[u8]) -> Vec<u64>
     }
 }
 
-pub fn bn_to_bytes_be(len: u32, b: &[u64], res: &mut [u8])
+/**
+Serialize a bignum into big-endian memory.
+
+  The argument b points to a bignum of ⌈len / 8⌉ size.
+  The outparam res points to `len` bytes of valid memory.
+*/
+pub fn
+bn_to_bytes_be(len: u32, b: &[u64], res: &mut [u8])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
@@ -503,7 +732,14 @@ pub fn bn_to_bytes_be(len: u32, b: &[u64], res: &mut [u8])
     )
 }
 
-pub fn bn_to_bytes_le(len: u32, b: &[u64], res: &mut [u8])
+/**
+Serialize a bignum into little-endian memory.
+
+  The argument b points to a bignum of ⌈len / 8⌉ size.
+  The outparam res points to `len` bytes of valid memory.
+*/
+pub fn
+bn_to_bytes_le(len: u32, b: &[u64], res: &mut [u8])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
@@ -518,7 +754,14 @@ pub fn bn_to_bytes_le(len: u32, b: &[u64], res: &mut [u8])
     (res[0usize..len as usize]).copy_from_slice(&(&(&tmp)[0usize..])[0usize..len as usize])
 }
 
-pub fn lt_mask(len: u32, a: &[u64], b: &[u64]) -> u64
+/**
+Returns 2^64 - 1 if a < b, otherwise returns 0.
+
+ The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].
+*/
+pub fn
+lt_mask(len: u32, a: &[u64], b: &[u64]) ->
+    u64
 {
     let mut acc: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
@@ -531,7 +774,14 @@ pub fn lt_mask(len: u32, a: &[u64], b: &[u64]) -> u64
     (&acc)[0usize]
 }
 
-pub fn eq_mask(len: u32, a: &[u64], b: &[u64]) -> u64
+/**
+Returns 2^64 - 1 if a = b, otherwise returns 0.
+
+ The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].
+*/
+pub fn
+eq_mask(len: u32, a: &[u64], b: &[u64]) ->
+    u64
 {
     let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
     for i in 0u32..len

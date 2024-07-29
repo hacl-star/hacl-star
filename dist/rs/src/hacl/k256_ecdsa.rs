@@ -914,7 +914,7 @@ fn sqr4(a: &[u64], res: &mut [u64])
     qmul(out, &f1_copy29, &x6)
 }
 
-pub fn make_point_at_inf(p: &mut [u64])
+pub(crate) fn make_point_at_inf(p: &mut [u64])
 {
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
@@ -987,7 +987,7 @@ pub fn make_point_at_inf(p: &mut [u64])
     res0
 }
 
-pub fn point_negate(out: &mut [u64], p: &[u64])
+pub(crate) fn point_negate(out: &mut [u64], p: &[u64])
 {
     let px: (&[u64], &[u64]) = p.split_at(0usize);
     let py: (&[u64], &[u64]) = px.1.split_at(5usize);
@@ -1048,14 +1048,14 @@ pub fn point_negate(out: &mut [u64], p: &[u64])
     crate::hacl::bignum_k256::store_felem(&mut out[32usize..], py.1)
 }
 
-pub fn point_store(out: &mut [u8], p: &[u64])
+pub(crate) fn point_store(out: &mut [u8], p: &[u64])
 {
     let mut p_aff: [u64; 10] = [0u64; 10usize];
     to_aff_point(&mut p_aff, p);
     aff_point_store(out, &p_aff)
 }
 
-pub fn aff_point_load_vartime(p: &mut [u64], b: &[u8]) -> bool
+pub(crate) fn aff_point_load_vartime(p: &mut [u64], b: &[u8]) -> bool
 {
     let px: (&[u8], &[u8]) = b.split_at(0usize);
     let py: (&[u8], &[u8]) = px.1.split_at(32usize);
@@ -1142,7 +1142,7 @@ pub fn aff_point_load_vartime(p: &mut [u64], b: &[u8]) -> bool
     }
 }
 
-pub fn point_double(out: &mut [u64], p: &[u64])
+pub(crate) fn point_double(out: &mut [u64], p: &[u64])
 {
     let mut tmp: [u64; 25] = [0u64; 25usize];
     let x1: (&[u64], &[u64]) = p.split_at(0usize);
@@ -1197,7 +1197,7 @@ pub fn point_double(out: &mut [u64], p: &[u64])
     crate::hacl::bignum_k256::fnormalize_weak(z3.0, &f_copy3)
 }
 
-pub fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
+pub(crate) fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
 {
     let mut tmp: [u64; 45] = [0u64; 45usize];
     let x1: (&[u64], &[u64]) = p.split_at(0usize);
@@ -1401,7 +1401,7 @@ struct __bool_bool { pub fst: bool, pub snd: bool }
     __bool_bool { fst: is_high1, snd: is_high2 }
 }
 
-pub fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
+pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
 {
     let mut table: [u64; 240] = [0u64; 240usize];
     let mut tmp: [u64; 15] = [0u64; 15usize];
@@ -2035,12 +2035,22 @@ struct __bool_bool_bool_bool { pub fst: bool, pub snd: bool, pub thd: bool, pub 
     b
 }
 
-pub fn ecdsa_sign_hashed_msg(
-    signature: &mut [u8],
-    msgHash: &[u8],
-    private_key: &[u8],
-    nonce: &[u8]
-) ->
+/**
+Create an ECDSA signature.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `msgHash`, `private_key`, and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_hashed_msg` if needed.
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
+*/
+pub fn
+ecdsa_sign_hashed_msg(signature: &mut [u8], msgHash: &[u8], private_key: &[u8], nonce: &[u8]) ->
     bool
 {
     let oneq: [u64; 4] = [0x1u64, 0x0u64, 0x0u64, 0x0u64];
@@ -2108,7 +2118,21 @@ pub fn ecdsa_sign_hashed_msg(
     res
 }
 
-pub fn ecdsa_sign_sha256(
+/**
+Create an ECDSA signature using SHA2-256.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function first hashes a message `msg` with SHA2-256 and then calls `ecdsa_sign_hashed_msg`.
+
+  The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_sha256` if needed.
+*/
+pub fn
+ecdsa_sign_sha256(
     signature: &mut [u8],
     msg_len: u32,
     msg: &[u8],
@@ -2123,7 +2147,21 @@ pub fn ecdsa_sign_sha256(
     b
 }
 
-pub fn ecdsa_verify_hashed_msg(m: &[u8], public_key: &[u8], signature: &[u8]) -> bool
+/**
+Verify an ECDSA signature.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msgHash` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
+
+  The function also checks whether `public key` is valid.
+*/
+pub fn
+ecdsa_verify_hashed_msg(m: &[u8], public_key: &[u8], signature: &[u8]) ->
+    bool
 {
     let mut tmp: [u64; 35] = [0u64; 35usize];
     let pk: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -2190,7 +2228,20 @@ pub fn ecdsa_verify_hashed_msg(m: &[u8], public_key: &[u8], signature: &[u8]) ->
     }
 }
 
-pub fn ecdsa_verify_sha256(msg_len: u32, msg: &[u8], public_key: &[u8], signature: &[u8]) ->
+/**
+Verify an ECDSA signature using SHA2-256.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function first hashes a message `msg` with SHA2-256 and then calls `ecdsa_verify_hashed_msg`.
+
+  The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_sha256` if needed.
+*/
+pub fn
+ecdsa_verify_sha256(msg_len: u32, msg: &[u8], public_key: &[u8], signature: &[u8]) ->
     bool
 {
     let mut mHash: [u8; 32] = [0u8; 32usize];
@@ -2199,7 +2250,16 @@ pub fn ecdsa_verify_sha256(msg_len: u32, msg: &[u8], public_key: &[u8], signatur
     b
 }
 
-pub fn secp256k1_ecdsa_signature_normalize(signature: &mut [u8]) -> bool
+/**
+Compute canonical lowest S value for `signature` (R || S).
+
+  The function returns `true` for successful normalization of S and `false` otherwise.
+
+  The argument `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+*/
+pub fn
+secp256k1_ecdsa_signature_normalize(signature: &mut [u8]) ->
+    bool
 {
     let mut s_q: [u64; 4] = [0u64; 4usize];
     let s: (&[u8], &[u8]) = signature.split_at(32usize);
@@ -2215,7 +2275,16 @@ pub fn secp256k1_ecdsa_signature_normalize(signature: &mut [u8]) -> bool
     }
 }
 
-pub fn secp256k1_ecdsa_is_signature_normalized(signature: &[u8]) -> bool
+/**
+Check whether `signature` (R || S) is in canonical form.
+
+  The function returns `true` if S is low-S normalized and `false` otherwise.
+
+  The argument `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+*/
+pub fn
+secp256k1_ecdsa_is_signature_normalized(signature: &[u8]) ->
+    bool
 {
     let mut s_q: [u64; 4] = [0u64; 4usize];
     let s: (&[u8], &[u8]) = signature.split_at(32usize);
@@ -2224,7 +2293,22 @@ pub fn secp256k1_ecdsa_is_signature_normalized(signature: &[u8]) -> bool
     is_s_valid && is_s_lt_q_halved
 }
 
-pub fn secp256k1_ecdsa_sign_hashed_msg(
+/**
+Create an ECDSA signature.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `msgHash`, `private_key`, and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed.
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
+*/
+pub fn
+secp256k1_ecdsa_sign_hashed_msg(
     signature: &mut [u8],
     msgHash: &[u8],
     private_key: &[u8],
@@ -2236,7 +2320,21 @@ pub fn secp256k1_ecdsa_sign_hashed_msg(
     if b { secp256k1_ecdsa_signature_normalize(signature) } else { false }
 }
 
-pub fn secp256k1_ecdsa_sign_sha256(
+/**
+Create an ECDSA signature using SHA2-256.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function first hashes a message `msg` with SHA2-256 and then calls `secp256k1_ecdsa_sign_hashed_msg`.
+
+  The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed.
+*/
+pub fn
+secp256k1_ecdsa_sign_sha256(
     signature: &mut [u8],
     msg_len: u32,
     msg: &[u8],
@@ -2251,19 +2349,40 @@ pub fn secp256k1_ecdsa_sign_sha256(
     b
 }
 
-pub fn secp256k1_ecdsa_verify_hashed_msg(msgHash: &[u8], public_key: &[u8], signature: &[u8]) ->
+/**
+Verify an ECDSA signature.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msgHash` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed.
+
+  The function also checks whether `public_key` is valid
+*/
+pub fn
+secp256k1_ecdsa_verify_hashed_msg(msgHash: &[u8], public_key: &[u8], signature: &[u8]) ->
     bool
 {
     let is_s_normalized: bool = secp256k1_ecdsa_is_signature_normalized(signature);
     if ! is_s_normalized { false } else { ecdsa_verify_hashed_msg(msgHash, public_key, signature) }
 }
 
-pub fn secp256k1_ecdsa_verify_sha256(
-    msg_len: u32,
-    msg: &[u8],
-    public_key: &[u8],
-    signature: &[u8]
-) ->
+/**
+Verify an ECDSA signature using SHA2-256.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function first hashes a message `msg` with SHA2-256 and then calls `secp256k1_ecdsa_verify_hashed_msg`.
+
+  The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_sha256` if needed.
+*/
+pub fn
+secp256k1_ecdsa_verify_sha256(msg_len: u32, msg: &[u8], public_key: &[u8], signature: &[u8]) ->
     bool
 {
     let mut mHash: [u8; 32] = [0u8; 32usize];
@@ -2272,7 +2391,19 @@ pub fn secp256k1_ecdsa_verify_sha256(
     b
 }
 
-pub fn public_key_uncompressed_to_raw(pk_raw: &mut [u8], pk: &[u8]) -> bool
+/**
+Convert a public key from uncompressed to its raw form.
+
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
+
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+
+  The function DOESN'T check whether (x, y) is valid point.
+*/
+pub fn
+public_key_uncompressed_to_raw(pk_raw: &mut [u8], pk: &[u8]) ->
+    bool
 {
     let pk0: u8 = pk[0usize];
     if pk0 != 0x04u8
@@ -2284,13 +2415,34 @@ pub fn public_key_uncompressed_to_raw(pk_raw: &mut [u8], pk: &[u8]) -> bool
     }
 }
 
-pub fn public_key_uncompressed_from_raw(pk: &mut [u8], pk_raw: &[u8])
+/**
+Convert a public key from raw to its uncompressed form.
+
+  The outparam `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T check whether (x, y) is valid point.
+*/
+pub fn
+public_key_uncompressed_from_raw(pk: &mut [u8], pk_raw: &[u8])
 {
     pk[0usize] = 0x04u8;
     (pk[1usize..1usize + 64usize]).copy_from_slice(&pk_raw[0usize..64usize])
 }
 
-pub fn public_key_compressed_to_raw(pk_raw: &mut [u8], pk: &[u8]) -> bool
+/**
+Convert a public key from compressed to its raw form.
+
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
+
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+
+  The function also checks whether (x, y) is valid point.
+*/
+pub fn
+public_key_compressed_to_raw(pk_raw: &mut [u8], pk: &[u8]) ->
+    bool
 {
     let mut xa: [u64; 5] = [0u64; 5usize];
     let mut ya: [u64; 5] = [0u64; 5usize];
@@ -2304,7 +2456,16 @@ pub fn public_key_compressed_to_raw(pk_raw: &mut [u8], pk: &[u8]) -> bool
     b
 }
 
-pub fn public_key_compressed_from_raw(pk: &mut [u8], pk_raw: &[u8])
+/**
+Convert a public key from raw to its compressed form.
+
+  The outparam `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T check whether (x, y) is valid point.
+*/
+pub fn
+public_key_compressed_from_raw(pk: &mut [u8], pk_raw: &[u8])
 {
     let pk_x: (&[u8], &[u8]) = pk_raw.split_at(0usize);
     let pk_y: (&[u8], &[u8]) = pk_x.1.split_at(32usize);
@@ -2315,21 +2476,62 @@ pub fn public_key_compressed_from_raw(pk: &mut [u8], pk_raw: &[u8])
     (pk[1usize..1usize + 32usize]).copy_from_slice(&pk_y.0[0usize..32usize])
 }
 
-pub fn is_public_key_valid(public_key: &[u8]) -> bool
+/**
+Public key validation.
+
+  The function returns `true` if a public key is valid and `false` otherwise.
+
+  The argument `public_key` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The public key (x || y) is valid (with respect to SP 800-56A):
+    • the public key is not the “point at infinity”, represented as O.
+    • the affine x and y coordinates of the point represented by the public key are
+      in the range [0, p – 1] where p is the prime defining the finite field.
+    • y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
+  The last extract is taken from: https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+*/
+pub fn
+is_public_key_valid(public_key: &[u8]) ->
+    bool
 {
     let mut p: [u64; 15] = [0u64; 15usize];
     let is_pk_valid: bool = load_point_vartime(&mut p, public_key);
     is_pk_valid
 }
 
-pub fn is_private_key_valid(private_key: &[u8]) -> bool
+/**
+Private key validation.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve
+*/
+pub fn
+is_private_key_valid(private_key: &[u8]) ->
+    bool
 {
     let mut s_q: [u64; 4] = [0u64; 4usize];
     let res: u64 = load_qelem_check(&mut s_q, private_key);
     res == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn secret_to_public(public_key: &mut [u8], private_key: &[u8]) -> bool
+/**
+Compute the public key from the private key.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The outparam `public_key`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve.
+*/
+pub fn
+secret_to_public(public_key: &mut [u8], private_key: &[u8]) ->
+    bool
 {
     let mut tmp: [u64; 19] = [0u64; 19usize];
     let pk: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -2354,7 +2556,21 @@ pub fn secret_to_public(public_key: &mut [u8], private_key: &[u8]) -> bool
     is_sk_valid == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn ecdh(shared_secret: &mut [u8], their_pubkey: &[u8], private_key: &[u8]) -> bool
+/**
+Execute the diffie-hellmann key exchange.
+
+  The function returns `true` for successful creation of an ECDH shared secret and
+  `false` otherwise.
+
+  The outparam `shared_secret` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `their_pubkey` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `their_pubkey` are valid.
+*/
+pub fn
+ecdh(shared_secret: &mut [u8], their_pubkey: &[u8], private_key: &[u8]) ->
+    bool
 {
     let mut tmp: [u64; 34] = [0u64; 34usize];
     let pk: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);

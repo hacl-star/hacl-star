@@ -6,13 +6,14 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub fn compute_blake2b_256(
-    dst: &mut [u8],
-    key: &[u8],
-    key_len: u32,
-    data: &[u8],
-    data_len: u32
-)
+/**
+Write the HMAC-BLAKE2b MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 64 bytes of memory.
+*/
+pub fn
+compute_blake2b_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];

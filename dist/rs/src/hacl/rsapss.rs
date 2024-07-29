@@ -307,7 +307,27 @@
     b && m1 == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn rsapss_sign(
+/**
+Sign a message `msg` and write the signature to `sgnt`.
+
+@param a Hash algorithm to use. Allowed values for `a` are ...
+  - Spec_Hash_Definitions_SHA2_256,
+  - Spec_Hash_Definitions_SHA2_384, and
+  - Spec_Hash_Definitions_SHA2_512.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param skey Pointer to secret key created by `Hacl_RSAPSS_new_rsapss_load_skey`.
+@param saltLen Length of salt.
+@param salt Pointer to `saltLen` bytes where the salt is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+@param sgnt Pointer to `ceil(modBits / 8)` bytes where the signature is written to.
+
+@return Returns true if and only if signing was successful.
+*/
+pub fn
+rsapss_sign(
     a: crate::hacl::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
@@ -399,7 +419,26 @@ pub fn rsapss_sign(
     { false }
 }
 
-pub fn rsapss_verify(
+/**
+Verify the signature `sgnt` of a message `msg`.
+
+@param a Hash algorithm to use. Allowed values for `a` are ...
+  - Spec_Hash_Definitions_SHA2_256,
+  - Spec_Hash_Definitions_SHA2_384, and
+  - Spec_Hash_Definitions_SHA2_512.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param pkey Pointer to public key created by `Hacl_RSAPSS_new_rsapss_load_pkey`.
+@param saltLen Length of salt.
+@param sgntLen Length of signature.
+@param sgnt Pointer to `sgntLen` bytes where the signature is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+
+@return Returns true if and only if the signature is valid.
+*/
+pub fn
+rsapss_verify(
     a: crate::hacl::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
@@ -487,7 +526,19 @@ pub fn rsapss_verify(
     { false }
 }
 
-pub fn new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) -> Vec<u64>
+/**
+Load a public key from key parts.
+
+@param modBits Count of bits in modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+
+@return Returns an allocated public key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
+*/
+pub fn
+new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
+    Vec<u64>
 {
     let ite: bool =
         if 1u32 < modBits && 0u32 < eBits
@@ -544,14 +595,20 @@ pub fn new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) -> V
     }
 }
 
-pub fn new_rsapss_load_skey(
-    modBits: u32,
-    eBits: u32,
-    dBits: u32,
-    nb: &[u8],
-    eb: &[u8],
-    db: &[u8]
-) ->
+/**
+Load a secret key from key parts.
+
+@param modBits Count of bits in modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
+
+@return Returns an allocated secret key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
+*/
+pub fn
+new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8], db: &[u8]) ->
     Vec<u64>
 {
     let ite: bool =
@@ -631,7 +688,29 @@ pub fn new_rsapss_load_skey(
     }
 }
 
-pub fn rsapss_skey_sign(
+/**
+Sign a message `msg` and write the signature to `sgnt`.
+
+@param a Hash algorithm to use. Allowed values for `a` are ...
+  - Spec_Hash_Definitions_SHA2_256,
+  - Spec_Hash_Definitions_SHA2_384, and
+  - Spec_Hash_Definitions_SHA2_512.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
+@param saltLen Length of salt.
+@param salt Pointer to `saltLen` bytes where the salt is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+@param sgnt Pointer to `ceil(modBits / 8)` bytes where the signature is written to.
+
+@return Returns true if and only if signing was successful.
+*/
+pub fn
+rsapss_skey_sign(
     a: crate::hacl::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
@@ -661,7 +740,27 @@ pub fn rsapss_skey_sign(
     { false }
 }
 
-pub fn rsapss_pkey_verify(
+/**
+Verify the signature `sgnt` of a message `msg`.
+
+@param a Hash algorithm to use. Allowed values for `a` are ...
+  - Spec_Hash_Definitions_SHA2_256,
+  - Spec_Hash_Definitions_SHA2_384, and
+  - Spec_Hash_Definitions_SHA2_512.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param saltLen Length of salt.
+@param sgntLen Length of signature.
+@param sgnt Pointer to `sgntLen` bytes where the signature is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+
+@return Returns true if and only if the signature is valid.
+*/
+pub fn
+rsapss_pkey_verify(
     a: crate::hacl::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
@@ -689,7 +788,12 @@ pub fn rsapss_pkey_verify(
     { false }
 }
 
-pub fn mgf_hash0(
+/**
+The mask generation function defined in the Public Key Cryptography Standard #1
+  (https://www.ietf.org/rfc/rfc2437.txt Section 10.2.1)
+*/
+pub fn
+mgf_hash0(
     a: crate::hacl::streaming_types::hash_alg,
     len: u32,
     mgfseed: &[u8],

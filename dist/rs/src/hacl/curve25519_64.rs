@@ -387,7 +387,15 @@ fn encode_point(o: &mut [u8], i: &mut [u64])
     )
 }
 
-pub fn scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
+/**
+Compute the scalar multiple of a point.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where the public point is read from.
+*/
+pub fn
+scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
 {
     let mut init: [u64; 8] = [0u64; 8usize];
     let mut init_copy: [u64; 8] = [0u64; 8usize];
@@ -423,7 +431,16 @@ pub fn scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
     encode_point(out, &mut init)
 }
 
-pub fn secret_to_public(r#pub: &mut [u8], r#priv: &[u8])
+/**
+Calculate a public point from a secret/private key.
+
+This computes a scalar multiplication of the secret/private key with the curve's basepoint.
+
+@param pub Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+*/
+pub fn
+secret_to_public(r#pub: &mut [u8], r#priv: &[u8])
 {
     let mut basepoint: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(
@@ -440,7 +457,16 @@ pub fn secret_to_public(r#pub: &mut [u8], r#priv: &[u8])
     scalarmult(r#pub, r#priv, &basepoint)
 }
 
-pub fn ecdh(out: &mut [u8], r#priv: &[u8], r#pub: &[u8]) -> bool
+/**
+Execute the diffie-hellmann key exchange.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where **our** secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where **their** public point is read from.
+*/
+pub fn
+ecdh(out: &mut [u8], r#priv: &[u8], r#pub: &[u8]) ->
+    bool
 {
     let zeros: [u8; 32] = [0u8; 32usize];
     scalarmult(out, r#priv, r#pub);

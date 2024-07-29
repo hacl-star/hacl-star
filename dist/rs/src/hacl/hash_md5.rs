@@ -1378,11 +1378,11 @@ pub fn reset(state: &mut [crate::hacl::streaming_types::state_32])
     (state[0usize]).total_len = total_len
 }
 
-pub fn update0(
-    state: &mut [crate::hacl::streaming_types::state_32],
-    chunk: &[u8],
-    chunk_len: u32
-) ->
+/**
+0 = success, 1 = max length exceeded
+*/
+pub fn
+update0(state: &mut [crate::hacl::streaming_types::state_32], chunk: &[u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;

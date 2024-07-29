@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] pub fn mul_wide_add2_u32(a: u32, b: u32, c_in: u32, out: &mut [u32]) -> u32
+#[inline] pub(crate) fn mul_wide_add2_u32(a: u32, b: u32, c_in: u32, out: &mut [u32]) -> u32
 {
     let out0: u32 = out[0usize];
     let res: u64 =
@@ -15,7 +15,7 @@
     res.wrapping_shr(32u32) as u32
 }
 
-#[inline] pub fn mul_wide_add2_u64(a: u64, b: u64, c_in: u64, out: &mut [u64]) -> u64
+#[inline] pub(crate) fn mul_wide_add2_u64(a: u64, b: u64, c_in: u64, out: &mut [u64]) -> u64
 {
     let out0: u64 = out[0usize];
     let res: crate::fstar::uint128::uint128 =
@@ -30,7 +30,7 @@
     crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(res, 64u32))
 }
 
-pub fn bn_from_bytes_be_uint64(len: u32, b: &[u8], res: &mut [u64])
+pub(crate) fn bn_from_bytes_be_uint64(len: u32, b: &[u8], res: &mut [u64])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
@@ -50,7 +50,7 @@ pub fn bn_from_bytes_be_uint64(len: u32, b: &[u8], res: &mut [u64])
     }
 }
 
-pub fn bn_to_bytes_be_uint64(len: u32, b: &[u64], res: &mut [u8])
+pub(crate) fn bn_to_bytes_be_uint64(len: u32, b: &[u64], res: &mut [u8])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
@@ -67,7 +67,7 @@ pub fn bn_to_bytes_be_uint64(len: u32, b: &[u64], res: &mut [u8])
     )
 }
 
-pub fn bn_get_top_index_u32(len: u32, b: &[u32]) -> u32
+pub(crate) fn bn_get_top_index_u32(len: u32, b: &[u32]) -> u32
 {
     let mut r#priv: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
@@ -78,7 +78,7 @@ pub fn bn_get_top_index_u32(len: u32, b: &[u32]) -> u32
     (&r#priv)[0usize]
 }
 
-pub fn bn_get_top_index_u64(len: u32, b: &[u64]) -> u64
+pub(crate) fn bn_get_top_index_u64(len: u32, b: &[u64]) -> u64
 {
     let mut r#priv: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
@@ -89,7 +89,7 @@ pub fn bn_get_top_index_u64(len: u32, b: &[u64]) -> u64
     (&r#priv)[0usize]
 }
 
-#[inline] pub fn bn_get_bits_u32(len: u32, b: &[u32], i: u32, l: u32) -> u32
+#[inline] pub(crate) fn bn_get_bits_u32(len: u32, b: &[u32], i: u32, l: u32) -> u32
 {
     let i1: u32 = i.wrapping_div(32u32);
     let j: u32 = i.wrapping_rem(32u32);
@@ -102,7 +102,7 @@ pub fn bn_get_top_index_u64(len: u32, b: &[u64]) -> u64
     ite & 1u32.wrapping_shl(l).wrapping_sub(1u32)
 }
 
-#[inline] pub fn bn_get_bits_u64(len: u32, b: &[u64], i: u32, l: u32) -> u64
+#[inline] pub(crate) fn bn_get_bits_u64(len: u32, b: &[u64], i: u32, l: u32) -> u64
 {
     let i1: u32 = i.wrapping_div(64u32);
     let j: u32 = i.wrapping_rem(64u32);
@@ -115,7 +115,7 @@ pub fn bn_get_top_index_u64(len: u32, b: &[u64]) -> u64
     ite & 1u64.wrapping_shl(l).wrapping_sub(1u64)
 }
 
-pub fn bn_sub_eq_len_u32(aLen: u32, a: &[u32], b: &[u32], res: &mut [u32]) -> u32
+pub(crate) fn bn_sub_eq_len_u32(aLen: u32, a: &[u32], b: &[u32], res: &mut [u32]) -> u32
 {
     let mut c: [u32; 1] = [0u32; 1usize];
     for i in 0u32..aLen.wrapping_div(4u32)
@@ -152,7 +152,7 @@ pub fn bn_sub_eq_len_u32(aLen: u32, a: &[u32], b: &[u32], res: &mut [u32]) -> u3
     (&c)[0usize]
 }
 
-pub fn bn_sub_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u64
+pub(crate) fn bn_sub_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u64
 {
     let mut c: [u64; 1] = [0u64; 1usize];
     for i in 0u32..aLen.wrapping_div(4u32)
@@ -189,7 +189,7 @@ pub fn bn_sub_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u6
     (&c)[0usize]
 }
 
-pub fn bn_add_eq_len_u32(aLen: u32, a: &[u32], b: &[u32], res: &mut [u32]) -> u32
+pub(crate) fn bn_add_eq_len_u32(aLen: u32, a: &[u32], b: &[u32], res: &mut [u32]) -> u32
 {
     let mut c: [u32; 1] = [0u32; 1usize];
     for i in 0u32..aLen.wrapping_div(4u32)
@@ -226,7 +226,7 @@ pub fn bn_add_eq_len_u32(aLen: u32, a: &[u32], b: &[u32], res: &mut [u32]) -> u3
     (&c)[0usize]
 }
 
-pub fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u64
+pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u64
 {
     let mut c: [u64; 1] = [0u64; 1usize];
     for i in 0u32..aLen.wrapping_div(4u32)
@@ -263,7 +263,7 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u6
     (&c)[0usize]
 }
 
-#[inline] pub fn bn_mul_u32(aLen: u32, a: &[u32], bLen: u32, b: &[u32], res: &mut [u32])
+#[inline] pub(crate) fn bn_mul_u32(aLen: u32, a: &[u32], bLen: u32, b: &[u32], res: &mut [u32])
 {
     (res[0usize..aLen.wrapping_add(bLen) as usize]).copy_from_slice(
         &vec![0u32; aLen.wrapping_add(bLen) as usize]
@@ -300,7 +300,7 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u6
     }
 }
 
-#[inline] pub fn bn_mul_u64(aLen: u32, a: &[u64], bLen: u32, b: &[u64], res: &mut [u64])
+#[inline] pub(crate) fn bn_mul_u64(aLen: u32, a: &[u64], bLen: u32, b: &[u64], res: &mut [u64])
 {
     (res[0usize..aLen.wrapping_add(bLen) as usize]).copy_from_slice(
         &vec![0u64; aLen.wrapping_add(bLen) as usize]
@@ -337,7 +337,7 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u6
     }
 }
 
-#[inline] pub fn bn_sqr_u32(aLen: u32, a: &[u32], res: &mut [u32])
+#[inline] pub(crate) fn bn_sqr_u32(aLen: u32, a: &[u32], res: &mut [u32])
 {
     (res[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
         &vec![0u32; aLen.wrapping_add(aLen) as usize]
@@ -406,7 +406,7 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]) -> u6
     crate::lowstar::ignore::ignore::<u32>(c1)
 }
 
-#[inline] pub fn bn_sqr_u64(aLen: u32, a: &[u64], res: &mut [u64])
+#[inline] pub(crate) fn bn_sqr_u64(aLen: u32, a: &[u64], res: &mut [u64])
 {
     (res[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
         &vec![0u64; aLen.wrapping_add(aLen) as usize]

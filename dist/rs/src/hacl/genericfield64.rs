@@ -8,13 +8,38 @@
 
 pub type pbn_mont_ctx_u64 <'a> = &'a [crate::hacl::bignum::bn_mont_ctx_u64];
 
-pub fn field_modulus_check(len: u32, n: &[u64]) -> bool
+/**
+Check whether this library will work for a modulus `n`.
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+  • n % 2 = 1
+  • 1 < n
+*/
+pub fn
+field_modulus_check(len: u32, n: &[u64]) ->
+    bool
 {
     let m: u64 = crate::hacl::bignum::bn_check_modulus_u64(len, n);
     m == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn field_init(len: u32, n: &[u64]) -> Vec<crate::hacl::bignum::bn_mont_ctx_u64>
+/**
+Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_GenericField64_field_free on the return value
+  to avoid memory leaks.
+*/
+pub fn
+field_init(len: u32, n: &[u64]) ->
+    Vec<crate::hacl::bignum::bn_mont_ctx_u64>
 {
     let mut r2: Vec<u64> = vec![0u64; len as usize];
     let mut n1: Vec<u64> = vec![0u64; len as usize];
@@ -36,23 +61,57 @@ pub fn field_init(len: u32, n: &[u64]) -> Vec<crate::hacl::bignum::bn_mont_ctx_u
     buf
 }
 
-pub fn field_get_len(k: &[crate::hacl::bignum::bn_mont_ctx_u64]) -> u32 { (k[0usize]).len }
+/**
+Return the size of a modulus `n` in limbs.
 
-pub fn to_field(k: &[crate::hacl::bignum::bn_mont_ctx_u64], a: &[u64], aM: &mut [u64])
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+pub fn
+field_get_len(k: &[crate::hacl::bignum::bn_mont_ctx_u64]) ->
+    u32
+{ (k[0usize]).len }
+
+/**
+Convert a bignum from the regular representation to the Montgomery representation.
+
+  Write `a * R mod n` in `aM`.
+
+  The argument a and the outparam aM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+pub fn
+to_field(k: &[crate::hacl::bignum::bn_mont_ctx_u64], a: &[u64], aM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
     crate::hacl::bignum::bn_to_mont_u64(len1, &(*uu____0).n, (*uu____0).mu, &(*uu____0).r2, a, aM)
 }
 
-pub fn from_field(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], a: &mut [u64])
+/**
+Convert a result back from the Montgomery representation to the regular representation.
+
+  Write `aM / R mod n` in `a`, i.e.
+  Hacl_GenericField64_from_field(k, Hacl_GenericField64_to_field(k, a)) == a % n
+
+  The argument aM and the outparam a are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+pub fn
+from_field(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], a: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
     crate::hacl::bignum::bn_from_mont_u64(len1, &(*uu____0).n, (*uu____0).mu, aM, a)
 }
 
-pub fn add(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
+/**
+Write `aM + bM mod n` in `cM`.
+
+  The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+pub fn
+add(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
@@ -63,34 +122,81 @@ pub fn add(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], c
     crate::hacl::bignum::bn_add_mod_n_u64(len1, &(*uu____0).n, &a_copy, &b_copy, cM)
 }
 
-pub fn sub(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
+/**
+Write `aM - bM mod n` to `cM`.
+
+  The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+pub fn
+sub(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     crate::hacl::bignum::bn_sub_mod_n_u64(len1, &(k[0usize]).n, aM, bM, cM)
 }
 
-pub fn mul(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
+/**
+Write `aM * bM mod n` in `cM`.
+
+  The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+pub fn
+mul(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
     crate::hacl::bignum::bn_mont_mul_u64(len1, &(*uu____0).n, (*uu____0).mu, aM, bM, cM)
 }
 
-pub fn sqr(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], cM: &mut [u64])
+/**
+Write `aM * aM mod n` in `cM`.
+
+  The argument aM and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+pub fn
+sqr(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], cM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
     crate::hacl::bignum::bn_mont_sqr_u64(len1, &(*uu____0).n, (*uu____0).mu, aM, cM)
 }
 
-pub fn one(k: &[crate::hacl::bignum::bn_mont_ctx_u64], oneM: &mut [u64])
+/**
+Convert a bignum `one` to its Montgomery representation.
+
+  The outparam oneM is meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+pub fn
+one(k: &[crate::hacl::bignum::bn_mont_ctx_u64], oneM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
     crate::hacl::bignum::bn_from_mont_u64(len1, &(*uu____0).n, (*uu____0).mu, &(*uu____0).r2, oneM)
 }
 
-pub fn exp_consttime(
+/**
+Write `aM ^ b mod n` in `resM`.
+
+  The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than exp_vartime.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • b < pow2 bBits
+*/
+pub fn
+exp_consttime(
     k: &[crate::hacl::bignum::bn_mont_ctx_u64],
     aM: &[u64],
     bBits: u32,
@@ -287,7 +393,26 @@ pub fn exp_consttime(
     }
 }
 
-pub fn exp_vartime(
+/**
+Write `aM ^ b mod n` in `resM`.
+
+  The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  The function is *NOT* constant-time on the argument b. See the
+  exp_consttime function for constant-time variant.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • b < pow2 bBits
+*/
+pub fn
+exp_vartime(
     k: &[crate::hacl::bignum::bn_mont_ctx_u64],
     aM: &[u64],
     bBits: u32,
@@ -437,7 +562,19 @@ pub fn exp_vartime(
     }
 }
 
-pub fn inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64])
+/**
+Write `aM ^ (-1) mod n` in `aInvM`.
+
+  The argument aM and the outparam aInvM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
+  • 0 < aM
+*/
+pub fn
+inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64])
 {
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
     let len1: u32 = (*uu____0).len;

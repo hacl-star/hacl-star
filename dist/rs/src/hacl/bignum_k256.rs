@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] pub fn is_felem_zero_vartime(f: &[u64]) -> bool
+#[inline] pub(crate) fn is_felem_zero_vartime(f: &[u64]) -> bool
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -16,7 +16,7 @@
     f0 == 0u64 && f1 == 0u64 && f2 == 0u64 && f3 == 0u64 && f4 == 0u64
 }
 
-#[inline] pub fn is_felem_eq_vartime(f1: &[u64], f2: &[u64]) -> bool
+#[inline] pub(crate) fn is_felem_eq_vartime(f1: &[u64], f2: &[u64]) -> bool
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -31,7 +31,7 @@
     a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4
 }
 
-#[inline] pub fn is_felem_lt_prime_minus_order_vartime(f: &[u64]) -> bool
+#[inline] pub(crate) fn is_felem_lt_prime_minus_order_vartime(f: &[u64]) -> bool
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -56,7 +56,7 @@
     if f1 > 0x1950b75fc4402u64 { false } else { f0 < 0xda1722fc9baeeu64 }
 }
 
-#[inline] pub fn load_felem(f: &mut [u64], b: &[u8])
+#[inline] pub(crate) fn load_felem(f: &mut [u64], b: &[u8])
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     krml::unroll_for!(
@@ -94,7 +94,7 @@
     f[4usize] = f40
 }
 
-#[inline] pub fn load_felem_lt_prime_vartime(f: &mut [u64], b: &[u8]) -> bool
+#[inline] pub(crate) fn load_felem_lt_prime_vartime(f: &mut [u64], b: &[u8]) -> bool
 {
     load_felem(f, b);
     let f0: u64 = f[0usize];
@@ -111,7 +111,7 @@
     ! is_ge_p
 }
 
-#[inline] pub fn store_felem(b: &mut [u8], f: &[u64])
+#[inline] pub(crate) fn store_felem(b: &mut [u8], f: &[u64])
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     let f0: u64 = f[0usize];
@@ -143,7 +143,7 @@
     )
 }
 
-#[inline] pub fn fmul_small_num(out: &mut [u64], f: &[u64], num: u64)
+#[inline] pub(crate) fn fmul_small_num(out: &mut [u64], f: &[u64], num: u64)
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -167,7 +167,7 @@
     out[4usize] = f40
 }
 
-#[inline] pub fn fadd(out: &mut [u64], f1: &[u64], f2: &[u64])
+#[inline] pub(crate) fn fadd(out: &mut [u64], f1: &[u64], f2: &[u64])
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -196,7 +196,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub fn fsub(out: &mut [u64], f1: &[u64], f2: &[u64], x: u64)
+#[inline] pub(crate) fn fsub(out: &mut [u64], f1: &[u64], f2: &[u64], x: u64)
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -235,7 +235,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub fn fmul(out: &mut [u64], f1: &[u64], f2: &[u64])
+#[inline] pub(crate) fn fmul(out: &mut [u64], f1: &[u64], f2: &[u64])
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -384,7 +384,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub fn fsqr(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fsqr(out: &mut [u64], f: &[u64])
 {
     let a0: u64 = f[0usize];
     let a1: u64 = f[1usize];
@@ -500,7 +500,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub fn fnormalize_weak(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fnormalize_weak(out: &mut [u64], f: &[u64])
 {
     let t0: u64 = f[0usize];
     let t1: u64 = f[1usize];
@@ -536,7 +536,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub fn fnormalize(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fnormalize(out: &mut [u64], f: &[u64])
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -613,7 +613,7 @@
     out[4usize] = f40
 }
 
-#[inline] pub fn fnegate_conditional_vartime(f: &mut [u64], is_negate: bool)
+#[inline] pub(crate) fn fnegate_conditional_vartime(f: &mut [u64], is_negate: bool)
 {
     if is_negate
     {
@@ -643,7 +643,7 @@
     }
 }
 
-#[inline] pub fn fsquare_times_in_place(out: &mut [u64], b: u32)
+#[inline] pub(crate) fn fsquare_times_in_place(out: &mut [u64], b: u32)
 {
     for _i in 0u32..b
     {
@@ -653,7 +653,7 @@
     }
 }
 
-#[inline] pub fn fsquare_times(out: &mut [u64], a: &[u64], b: u32)
+#[inline] pub(crate) fn fsquare_times(out: &mut [u64], a: &[u64], b: u32)
 {
     (out[0usize..5usize]).copy_from_slice(&a[0usize..5usize]);
     for _i in 0u32..b
@@ -664,7 +664,7 @@
     }
 }
 
-#[inline] pub fn fexp_223_23(out: &mut [u64], x2: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fexp_223_23(out: &mut [u64], x2: &mut [u64], f: &[u64])
 {
     let mut x3: [u64; 5] = [0u64; 5usize];
     let mut x22: [u64; 5] = [0u64; 5usize];
@@ -720,7 +720,7 @@
     fmul(out, &f1_copy10, &x22)
 }
 
-#[inline] pub fn finv(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn finv(out: &mut [u64], f: &[u64])
 {
     let mut x2: [u64; 5] = [0u64; 5usize];
     fexp_223_23(out, &mut x2, f);
@@ -738,7 +738,7 @@
     fmul(out, &f1_copy1, f)
 }
 
-#[inline] pub fn fsqrt(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fsqrt(out: &mut [u64], f: &[u64])
 {
     let mut x2: [u64; 5] = [0u64; 5usize];
     fexp_223_23(out, &mut x2, f);

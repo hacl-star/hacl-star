@@ -6,45 +6,148 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub fn mk_felem_zero(f: &mut [u64]) { (f[0usize..5usize]).copy_from_slice(&[0u64; 5usize]) }
+/**
+Write the additive identity in `f`.
 
-pub fn mk_felem_one(f: &mut [u64])
+  The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
+*/
+pub fn
+mk_felem_zero(f: &mut [u64])
+{ (f[0usize..5usize]).copy_from_slice(&[0u64; 5usize]) }
+
+/**
+Write the multiplicative identity in `f`.
+
+  The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
+*/
+pub fn
+mk_felem_one(f: &mut [u64])
 {
     (f[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
     f[0usize] = 1u64
 }
 
-pub fn felem_add(a: &[u64], b: &[u64], out: &mut [u64])
+/**
+Write `a + b mod p` in `out`.
+
+  The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a`, `b`, and `out` are either pairwise disjoint or equal
+*/
+pub fn
+felem_add(a: &[u64], b: &[u64], out: &mut [u64])
 {
     crate::hacl::bignum_k256::fadd(out, a, b);
     crate::hacl::bignum_k256::fnormalize_weak(out, out)
 }
 
-pub fn felem_sub(a: &[u64], b: &[u64], out: &mut [u64])
+/**
+Write `a - b mod p` in `out`.
+
+  The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a`, `b`, and `out` are either pairwise disjoint or equal
+*/
+pub fn
+felem_sub(a: &[u64], b: &[u64], out: &mut [u64])
 {
     crate::hacl::bignum_k256::fsub(out, a, b, 2u64);
     crate::hacl::bignum_k256::fnormalize_weak(out, out)
 }
 
-pub fn felem_mul(a: &[u64], b: &[u64], out: &mut [u64])
+/**
+Write `a * b mod p` in `out`.
+
+  The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a`, `b`, and `out` are either pairwise disjoint or equal
+*/
+pub fn
+felem_mul(a: &[u64], b: &[u64], out: &mut [u64])
 { crate::hacl::bignum_k256::fmul(out, a, b) }
 
-pub fn felem_sqr(a: &[u64], out: &mut [u64]) { crate::hacl::bignum_k256::fsqr(out, a) }
+/**
+Write `a * a mod p` in `out`.
 
-pub fn felem_inv(a: &[u64], out: &mut [u64]) { crate::hacl::bignum_k256::finv(out, a) }
+  The argument `a`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
 
-pub fn felem_load(b: &[u8], out: &mut [u64]) { crate::hacl::bignum_k256::load_felem(out, b) }
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a` and `out` are either disjoint or equal
+*/
+pub fn
+felem_sqr(a: &[u64], out: &mut [u64])
+{ crate::hacl::bignum_k256::fsqr(out, a) }
 
-pub fn felem_store(a: &[u64], out: &mut [u8])
+/**
+Write `a ^ (p - 2) mod p` in `out`.
+
+  The function computes modular multiplicative inverse if `a` <> zero.
+
+  The argument `a`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a` and `out` are disjoint
+*/
+pub fn
+felem_inv(a: &[u64], out: &mut [u64])
+{ crate::hacl::bignum_k256::finv(out, a) }
+
+/**
+Load a bid-endian field element from memory.
+
+  The argument `b` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The outparam `out` points to a field element of 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `b` and `out` are disjoint
+*/
+pub fn
+felem_load(b: &[u8], out: &mut [u64])
+{ crate::hacl::bignum_k256::load_felem(out, b) }
+
+/**
+Serialize a field element into big-endian memory.
+
+  The argument `a` points to a field element of 5 limbs in size, i.e., uint64_t[5].
+  The outparam `out` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a` and `out` are disjoint
+*/
+pub fn
+felem_store(a: &[u64], out: &mut [u8])
 {
     let mut tmp: [u64; 5] = [0u64; 5usize];
     crate::hacl::bignum_k256::fnormalize(&mut tmp, a);
     crate::hacl::bignum_k256::store_felem(out, &tmp)
 }
 
-pub fn mk_point_at_inf(p: &mut [u64]) { crate::hacl::k256_ecdsa::make_point_at_inf(p) }
+/**
+Write the point at infinity (additive identity) in `p`.
 
-pub fn mk_base_point(p: &mut [u64])
+  The outparam `p` is meant to be 15 limbs in size, i.e., uint64_t[15].
+*/
+pub fn
+mk_point_at_inf(p: &mut [u64])
+{ crate::hacl::k256_ecdsa::make_point_at_inf(p) }
+
+/**
+Write the base point (generator) in `p`.
+
+  The outparam `p` is meant to be 15 limbs in size, i.e., uint64_t[15].
+*/
+pub fn
+mk_base_point(p: &mut [u64])
 {
     let gx: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let gy: (&mut [u64], &mut [u64]) = gx.1.split_at_mut(5usize);
@@ -63,16 +166,60 @@ pub fn mk_base_point(p: &mut [u64])
     gz.1[0usize] = 1u64
 }
 
-pub fn point_negate(p: &[u64], out: &mut [u64])
+/**
+Write `-p` in `out` (point negation).
+
+  The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are either disjoint or equal
+*/
+pub fn
+point_negate(p: &[u64], out: &mut [u64])
 { crate::hacl::k256_ecdsa::point_negate(out, p) }
 
-pub fn point_add(p: &[u64], q: &[u64], out: &mut [u64])
+/**
+Write `p + q` in `out` (point addition).
+
+  The arguments `p`, `q` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p`, `q`, and `out` are either pairwise disjoint or equal
+*/
+pub fn
+point_add(p: &[u64], q: &[u64], out: &mut [u64])
 { crate::hacl::k256_ecdsa::point_add(out, p, q) }
 
-pub fn point_double(p: &[u64], out: &mut [u64])
+/**
+Write `p + p` in `out` (point doubling).
+
+  The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are either disjoint or equal
+*/
+pub fn
+point_double(p: &[u64], out: &mut [u64])
 { crate::hacl::k256_ecdsa::point_double(out, p) }
 
-pub fn point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
+/**
+Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
+
+  The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
+  The argument `scalar` is meant to be 32 bytes in size, i.e., uint8_t[32].
+
+  The function first loads a bid-endian scalar element from `scalar` and
+  then computes a point multiplication.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `scalar`, `p`, and `out` are pairwise disjoint
+*/
+pub fn
+point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
 {
     let mut scalar_q: [u64; 4] = [0u64; 4usize];
     krml::unroll_for!(
@@ -93,9 +240,36 @@ pub fn point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
     crate::hacl::k256_ecdsa::point_mul(out, &scalar_q, p)
 }
 
-pub fn point_store(p: &[u64], out: &mut [u8]) { crate::hacl::k256_ecdsa::point_store(out, p) }
+/**
+Convert a point from projective coordinates to its raw form.
 
-pub fn point_load(b: &[u8], out: &mut [u64])
+  The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
+  The outparam `out` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function first converts a given point `p` from projective to affine coordinates
+  and then writes [ `x`; `y` ] in `out`.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are disjoint.
+*/
+pub fn
+point_store(p: &[u64], out: &mut [u8])
+{ crate::hacl::k256_ecdsa::point_store(out, p) }
+
+/**
+Convert a point to projective coordinates from its raw form.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The outparam `out` points to a point of 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `b` is valid point, i.e., x < prime and y < prime and (x, y) is on the curve
+  • `b` and `out` are disjoint.
+*/
+pub fn
+point_load(b: &[u8], out: &mut [u64])
 {
     let mut p_aff: [u64; 10] = [0u64; 10usize];
     let px: (&mut [u64], &mut [u64]) = (&mut p_aff).split_at_mut(0usize);
@@ -115,7 +289,22 @@ pub fn point_load(b: &[u8], out: &mut [u64])
     z1.1[0usize] = 1u64
 }
 
-pub fn is_point_valid(b: &[u8]) -> bool
+/**
+Check whether a point is valid.
+
+  The function returns `true` if a point is valid and `false` otherwise.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The point (x || y) is valid:
+    • x < prime and y < prime
+    • (x, y) is on the curve.
+
+  This function is NOT constant-time.
+*/
+pub fn
+is_point_valid(b: &[u8]) ->
+    bool
 {
     let mut p: [u64; 10] = [0u64; 10usize];
     let res: bool = crate::hacl::k256_ecdsa::aff_point_load_vartime(&mut p, b);

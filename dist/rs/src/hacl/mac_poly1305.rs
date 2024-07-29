@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub fn poly1305_init(ctx: &mut [u64], key: &[u8])
+pub(crate) fn poly1305_init(ctx: &mut [u64], key: &[u8])
 {
     let acc: (&mut [u64], &mut [u64]) = ctx.split_at_mut(0usize);
     let pre: (&mut [u64], &mut [u64]) = acc.1.split_at_mut(5usize);
@@ -317,7 +317,7 @@ fn poly1305_update(ctx: &mut [u64], len: u32, text: &[u8])
     }
 }
 
-pub fn poly1305_finish(tag: &mut [u8], key: &[u8], ctx: &mut [u64])
+pub(crate) fn poly1305_finish(tag: &mut [u8], key: &[u8], ctx: &mut [u64])
 {
     let acc: (&mut [u64], &mut [u64]) = ctx.split_at_mut(0usize);
     let ks: (&[u8], &[u8]) = key.split_at(16usize);
@@ -461,7 +461,11 @@ pub fn reset(state: &mut [state_t], key: &[u8])
     (state[0usize]).p_key = k·1.to_vec()
 }
 
-pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
+/**
+0 = success, 1 = max length exceeded
+*/
+pub fn
+update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;

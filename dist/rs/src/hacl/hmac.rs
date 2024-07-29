@@ -6,9 +6,16 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub struct __uint32_t_uint32_t { pub fst: u32, pub snd: u32 }
+pub(crate) struct __uint32_t_uint32_t { pub fst: u32, pub snd: u32 }
 
-pub fn compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
+/**
+Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
+`dst` must point to 20 bytes of memory.
+*/
+pub fn
+compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -98,7 +105,14 @@ pub fn compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_
     crate::hacl::hash_sha1::finish(&s, dst)
 }
 
-pub fn compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
+/**
+Write the HMAC-SHA-2-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+`dst` must point to 32 bytes of memory.
+*/
+pub fn
+compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -201,7 +215,14 @@ pub fn compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], d
     crate::hacl::hash_sha2::sha256_finish(s, dst)
 }
 
-pub fn compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
+/**
+Write the HMAC-SHA-2-384 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 48 bytes of memory.
+*/
+pub fn
+compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -324,7 +345,14 @@ pub fn compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], d
     crate::hacl::hash_sha2::sha384_finish(s, dst)
 }
 
-pub fn compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
+/**
+Write the HMAC-SHA-2-512 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 64 bytes of memory.
+*/
+pub fn
+compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -447,7 +475,14 @@ pub fn compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], d
     crate::hacl::hash_sha2::sha512_finish(s, dst)
 }
 
-pub fn compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
+/**
+Write the HMAC-BLAKE2s MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+`dst` must point to 32 bytes of memory.
+*/
+pub fn
+compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
@@ -567,7 +602,14 @@ pub fn compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8],
     crate::hacl::hash_blake2s::finish(32u32, dst, s0)
 }
 
-pub fn compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
+/**
+Write the HMAC-BLAKE2b MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 64 bytes of memory.
+*/
+pub fn
+compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];

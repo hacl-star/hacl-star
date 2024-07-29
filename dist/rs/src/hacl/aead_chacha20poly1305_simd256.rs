@@ -1446,7 +1446,23 @@
     crate::hacl::mac_poly1305_simd256::poly1305_finish(out, k, &mut ctx)
 }
 
-pub fn encrypt(
+/**
+Encrypt a message `input` with key `key`.
+
+The arguments `key`, `nonce`, `data`, and `data_len` are same in encryption/decryption.
+Note: Encryption and decryption can be executed in-place, i.e., `input` and `output` can point to the same memory.
+
+@param output Pointer to `input_len` bytes of memory where the ciphertext is written to.
+@param tag Pointer to 16 bytes of memory where the mac is written to.
+@param input Pointer to `input_len` bytes of memory where the message is read from.
+@param input_len Length of the message.
+@param data Pointer to `data_len` bytes of memory where the associated data is read from.
+@param data_len Length of the associated data.
+@param key Pointer to 32 bytes of memory where the AEAD key is read from.
+@param nonce Pointer to 12 bytes of memory where the AEAD nonce is read from.
+*/
+pub fn
+encrypt(
     output: &mut [u8],
     tag: &mut [u8],
     input: &[u8],
@@ -1472,7 +1488,28 @@ pub fn encrypt(
     poly1305_do_256(key1.1, data_len, data, input_len, output, tag)
 }
 
-pub fn decrypt(
+/**
+Decrypt a ciphertext `input` with key `key`.
+
+The arguments `key`, `nonce`, `data`, and `data_len` are same in encryption/decryption.
+Note: Encryption and decryption can be executed in-place, i.e., `input` and `output` can point to the same memory.
+
+If decryption succeeds, the resulting plaintext is stored in `output` and the function returns the success code 0.
+If decryption fails, the array `output` remains unchanged and the function returns the error code 1.
+
+@param output Pointer to `input_len` bytes of memory where the message is written to.
+@param input Pointer to `input_len` bytes of memory where the ciphertext is read from.
+@param input_len Length of the ciphertext.
+@param data Pointer to `data_len` bytes of memory where the associated data is read from.
+@param data_len Length of the associated data.
+@param key Pointer to 32 bytes of memory where the AEAD key is read from.
+@param nonce Pointer to 12 bytes of memory where the AEAD nonce is read from.
+@param tag Pointer to 16 bytes of memory where the mac is read from.
+
+@returns 0 on succeess; 1 on failure.
+*/
+pub fn
+decrypt(
     output: &mut [u8],
     input: &[u8],
     input_len: u32,

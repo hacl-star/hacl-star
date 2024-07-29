@@ -6,23 +6,23 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub const h224: [u32; 8] =
+pub(crate) const h224: [u32; 8] =
     [0xc1059ed8u32, 0x367cd507u32, 0x3070dd17u32, 0xf70e5939u32, 0xffc00b31u32, 0x68581511u32,
         0x64f98fa7u32, 0xbefa4fa4u32];
 
-pub const h256: [u32; 8] =
+pub(crate) const h256: [u32; 8] =
     [0x6a09e667u32, 0xbb67ae85u32, 0x3c6ef372u32, 0xa54ff53au32, 0x510e527fu32, 0x9b05688cu32,
         0x1f83d9abu32, 0x5be0cd19u32];
 
-pub const h384: [u64; 8] =
+pub(crate) const h384: [u64; 8] =
     [0xcbbb9d5dc1059ed8u64, 0x629a292a367cd507u64, 0x9159015a3070dd17u64, 0x152fecd8f70e5939u64,
         0x67332667ffc00b31u64, 0x8eb44a8768581511u64, 0xdb0c2e0d64f98fa7u64, 0x47b5481dbefa4fa4u64];
 
-pub const h512: [u64; 8] =
+pub(crate) const h512: [u64; 8] =
     [0x6a09e667f3bcc908u64, 0xbb67ae8584caa73bu64, 0x3c6ef372fe94f82bu64, 0xa54ff53a5f1d36f1u64,
         0x510e527fade682d1u64, 0x9b05688c2b3e6c1fu64, 0x1f83d9abfb41bd6bu64, 0x5be0cd19137e2179u64];
 
-pub const k224_256: [u32; 64] =
+pub(crate) const k224_256: [u32; 64] =
     [0x428a2f98u32, 0x71374491u32, 0xb5c0fbcfu32, 0xe9b5dba5u32, 0x3956c25bu32, 0x59f111f1u32,
         0x923f82a4u32, 0xab1c5ed5u32, 0xd807aa98u32, 0x12835b01u32, 0x243185beu32, 0x550c7dc3u32,
         0x72be5d74u32, 0x80deb1feu32, 0x9bdc06a7u32, 0xc19bf174u32, 0xe49b69c1u32, 0xefbe4786u32,
@@ -35,7 +35,7 @@ pub const k224_256: [u32; 64] =
         0x5b9cca4fu32, 0x682e6ff3u32, 0x748f82eeu32, 0x78a5636fu32, 0x84c87814u32, 0x8cc70208u32,
         0x90befffau32, 0xa4506cebu32, 0xbef9a3f7u32, 0xc67178f2u32];
 
-pub const k384_512: [u64; 80] =
+pub(crate) const k384_512: [u64; 80] =
     [0x428a2f98d728ae22u64, 0x7137449123ef65cdu64, 0xb5c0fbcfec4d3b2fu64, 0xe9b5dba58189dbbcu64,
         0x3956c25bf348b538u64, 0x59f111f1b605d019u64, 0x923f82a4af194f9bu64, 0xab1c5ed5da6d8118u64,
         0xd807aa98a3030242u64, 0x12835b0145706fbeu64, 0x243185be4ee4b28cu64, 0x550c7dc3d5ffb4e2u64,
@@ -57,7 +57,7 @@ pub const k384_512: [u64; 80] =
         0x28db77f523047d84u64, 0x32caab7b40c72493u64, 0x3c9ebe0a15c9bebcu64, 0x431d67c49c100d4cu64,
         0x4cc5d4becb3e42b6u64, 0x597f299cfc657e2au64, 0x5fcb6fab3ad6faecu64, 0x6c44198c4a475817u64];
 
-pub fn sha256_init(hash: &mut [u32])
+pub(crate) fn sha256_init(hash: &mut [u32])
 {
     krml::unroll_for!(
         8,
@@ -211,7 +211,7 @@ pub fn sha256_init(hash: &mut [u32])
     )
 }
 
-pub fn sha256_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
+pub(crate) fn sha256_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
 {
     let blocks: u32 = len.wrapping_div(64u32);
     for i in 0u32..blocks
@@ -222,7 +222,7 @@ pub fn sha256_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
     }
 }
 
-pub fn sha256_update_last(totlen: u64, len: u32, b: &[u8], hash: &mut [u32])
+pub(crate) fn sha256_update_last(totlen: u64, len: u32, b: &[u8], hash: &mut [u32])
 {
     let blocks: u32 = if len.wrapping_add(8u32).wrapping_add(1u32) <= 64u32 { 1u32 } else { 2u32 };
     let fin: u32 = blocks.wrapping_mul(64u32);
@@ -248,7 +248,7 @@ pub fn sha256_update_last(totlen: u64, len: u32, b: &[u8], hash: &mut [u32])
     if blocks > 1u32 { sha256_update(last10, hash) }
 }
 
-pub fn sha256_finish(st: &[u32], h: &mut [u8])
+pub(crate) fn sha256_finish(st: &[u32], h: &mut [u8])
 {
     let mut hbuf: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(
@@ -301,7 +301,7 @@ fn sha224_update_last(totlen: u64, len: u32, b: &[u8], st: &mut [u32])
     (h[0usize..28usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..28usize])
 }
 
-pub fn sha512_init(hash: &mut [u64])
+pub(crate) fn sha512_init(hash: &mut [u64])
 {
     krml::unroll_for!(
         8,
@@ -455,7 +455,7 @@ pub fn sha512_init(hash: &mut [u64])
     )
 }
 
-pub fn sha512_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
+pub(crate) fn sha512_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
 {
     let blocks: u32 = len.wrapping_div(128u32);
     for i in 0u32..blocks
@@ -466,7 +466,7 @@ pub fn sha512_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
     }
 }
 
-pub fn sha512_update_last(
+pub(crate) fn sha512_update_last(
     totlen: crate::fstar::uint128::uint128,
     len: u32,
     b: &[u8],
@@ -499,7 +499,7 @@ pub fn sha512_update_last(
     if blocks > 1u32 { sha512_update(last10, hash) }
 }
 
-pub fn sha512_finish(st: &[u64], h: &mut [u8])
+pub(crate) fn sha512_finish(st: &[u64], h: &mut [u8])
 {
     let mut hbuf: [u8; 64] = [0u8; 64usize];
     krml::unroll_for!(
@@ -515,7 +515,7 @@ pub fn sha512_finish(st: &[u64], h: &mut [u8])
     (h[0usize..64usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..64usize])
 }
 
-pub fn sha384_init(hash: &mut [u64])
+pub(crate) fn sha384_init(hash: &mut [u64])
 {
     krml::unroll_for!(
         8,
@@ -530,10 +530,10 @@ pub fn sha384_init(hash: &mut [u64])
     )
 }
 
-pub fn sha384_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
+pub(crate) fn sha384_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
 { sha512_update_nblocks(len, b, st) }
 
-pub fn sha384_update_last(
+pub(crate) fn sha384_update_last(
     totlen: crate::fstar::uint128::uint128,
     len: u32,
     b: &[u8],
@@ -541,7 +541,7 @@ pub fn sha384_update_last(
 )
 { sha512_update_last(totlen, len, b, st) }
 
-pub fn sha384_finish(st: &[u64], h: &mut [u8])
+pub(crate) fn sha384_finish(st: &[u64], h: &mut [u8])
 {
     let mut hbuf: [u8; 64] = [0u8; 64usize];
     krml::unroll_for!(
@@ -565,7 +565,13 @@ pub type state_t_384 = crate::hacl::streaming_types::state_64;
 
 pub type state_t_512 = crate::hacl::streaming_types::state_64;
 
-pub fn malloc_256() -> Vec<crate::hacl::streaming_types::state_32>
+/**
+Allocate initial state for the SHA2_256 hash. The state is to be freed by
+calling `free_256`.
+*/
+pub fn
+malloc_256() ->
+    Vec<crate::hacl::streaming_types::state_32>
 {
     let buf: Vec<u8> = vec![0u8; 64usize];
     let mut block_state: Vec<u32> = vec![0u32; 8usize];
@@ -582,7 +588,14 @@ pub fn malloc_256() -> Vec<crate::hacl::streaming_types::state_32>
     p
 }
 
-pub fn copy_256(state: &[crate::hacl::streaming_types::state_32]) ->
+/**
+Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_256`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch.
+*/
+pub fn
+copy_256(state: &[crate::hacl::streaming_types::state_32]) ->
     Vec<crate::hacl::streaming_types::state_32>
 {
     let block_state0: &[u32] = &(state[0usize]).block_state;
@@ -604,7 +617,11 @@ pub fn copy_256(state: &[crate::hacl::streaming_types::state_32]) ->
     p
 }
 
-pub fn reset_256(state: &mut [crate::hacl::streaming_types::state_32])
+/**
+Reset an existing state to the initial hash state with empty data.
+*/
+pub fn
+reset_256(state: &mut [crate::hacl::streaming_types::state_32])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     sha256_init(block_state);
@@ -729,15 +746,26 @@ pub fn reset_256(state: &mut [crate::hacl::streaming_types::state_32])
     }
 }
 
-pub fn update_256(
-    state: &mut [crate::hacl::streaming_types::state_32],
-    input: &[u8],
-    input_len: u32
-) ->
+/**
+Feed an arbitrary amount of data into the hash. This function returns 0 for
+success, or 1 if the combined length of all of the data passed to `update_256`
+(since the last call to `reset_256`) exceeds 2^61-1 bytes.
+
+This function is identical to the update function for SHA2_224.
+*/
+pub fn
+update_256(state: &mut [crate::hacl::streaming_types::state_32], input: &[u8], input_len: u32) ->
     crate::hacl::streaming_types::error_code
 { update_224_256(state, input, input_len) }
 
-pub fn digest_256(state: &[crate::hacl::streaming_types::state_32], output: &mut [u8])
+/**
+Write the resulting hash into `output`, an array of 32 bytes. The state remains
+valid after a call to `digest_256`, meaning the user may feed more data into
+the hash via `update_256`. (The digest_256 function operates on an internal copy of
+the state and therefore does not invalidate the client-held state `p`.)
+*/
+pub fn
+digest_256(state: &[crate::hacl::streaming_types::state_32], output: &mut [u8])
 {
     let block_state: &[u32] = &(state[0usize]).block_state;
     let buf_: &[u8] = &(state[0usize]).buf;
@@ -760,7 +788,11 @@ pub fn digest_256(state: &[crate::hacl::streaming_types::state_32], output: &mut
     sha256_finish(&tmp_block_state, output)
 }
 
-pub fn hash_256(output: &mut [u8], input: &[u8], input_len: u32)
+/**
+Hash `input`, of len `input_len`, into `output`, an array of 32 bytes.
+*/
+pub fn
+hash_256(output: &mut [u8], input: &[u8], input_len: u32)
 {
     let ib: &[u8] = input;
     let rb: &mut [u8] = output;
@@ -809,7 +841,13 @@ pub fn update_224(
     crate::hacl::streaming_types::error_code
 { update_224_256(state, input, input_len) }
 
-pub fn digest_224(state: &[crate::hacl::streaming_types::state_32], output: &mut [u8])
+/**
+Write the resulting hash into `output`, an array of 28 bytes. The state remains
+valid after a call to `digest_224`, meaning the user may feed more data into
+the hash via `update_224`.
+*/
+pub fn
+digest_224(state: &[crate::hacl::streaming_types::state_32], output: &mut [u8])
 {
     let block_state: &[u32] = &(state[0usize]).block_state;
     let buf_: &[u8] = &(state[0usize]).buf;
@@ -832,7 +870,11 @@ pub fn digest_224(state: &[crate::hacl::streaming_types::state_32], output: &mut
     sha224_finish(&tmp_block_state, output)
 }
 
-pub fn hash_224(output: &mut [u8], input: &[u8], input_len: u32)
+/**
+Hash `input`, of len `input_len`, into `output`, an array of 28 bytes.
+*/
+pub fn
+hash_224(output: &mut [u8], input: &[u8], input_len: u32)
 {
     let ib: &[u8] = input;
     let rb: &mut [u8] = output;
@@ -865,7 +907,14 @@ pub fn malloc_512() -> Vec<crate::hacl::streaming_types::state_64>
     p
 }
 
-pub fn copy_512(state: &[crate::hacl::streaming_types::state_64]) ->
+/**
+Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_512`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch.
+*/
+pub fn
+copy_512(state: &[crate::hacl::streaming_types::state_64]) ->
     Vec<crate::hacl::streaming_types::state_64>
 {
     let block_state0: &[u64] = &(state[0usize]).block_state;
@@ -1012,15 +1061,26 @@ pub fn reset_512(state: &mut [crate::hacl::streaming_types::state_64])
     }
 }
 
-pub fn update_512(
-    state: &mut [crate::hacl::streaming_types::state_64],
-    input: &[u8],
-    input_len: u32
-) ->
+/**
+Feed an arbitrary amount of data into the hash. This function returns 0 for
+success, or 1 if the combined length of all of the data passed to `update_512`
+(since the last call to `reset_512`) exceeds 2^125-1 bytes.
+
+This function is identical to the update function for SHA2_384.
+*/
+pub fn
+update_512(state: &mut [crate::hacl::streaming_types::state_64], input: &[u8], input_len: u32) ->
     crate::hacl::streaming_types::error_code
 { update_384_512(state, input, input_len) }
 
-pub fn digest_512(state: &[crate::hacl::streaming_types::state_64], output: &mut [u8])
+/**
+Write the resulting hash into `output`, an array of 64 bytes. The state remains
+valid after a call to `digest_512`, meaning the user may feed more data into
+the hash via `update_512`. (The digest_512 function operates on an internal copy of
+the state and therefore does not invalidate the client-held state `p`.)
+*/
+pub fn
+digest_512(state: &[crate::hacl::streaming_types::state_64], output: &mut [u8])
 {
     let block_state: &[u64] = &(state[0usize]).block_state;
     let buf_: &[u8] = &(state[0usize]).buf;
@@ -1051,7 +1111,11 @@ pub fn digest_512(state: &[crate::hacl::streaming_types::state_64], output: &mut
     sha512_finish(&tmp_block_state, output)
 }
 
-pub fn hash_512(output: &mut [u8], input: &[u8], input_len: u32)
+/**
+Hash `input`, of len `input_len`, into `output`, an array of 64 bytes.
+*/
+pub fn
+hash_512(output: &mut [u8], input: &[u8], input_len: u32)
 {
     let ib: &[u8] = input;
     let rb: &mut [u8] = output;
@@ -1101,7 +1165,13 @@ pub fn update_384(
     crate::hacl::streaming_types::error_code
 { update_384_512(state, input, input_len) }
 
-pub fn digest_384(state: &[crate::hacl::streaming_types::state_64], output: &mut [u8])
+/**
+Write the resulting hash into `output`, an array of 48 bytes. The state remains
+valid after a call to `digest_384`, meaning the user may feed more data into
+the hash via `update_384`.
+*/
+pub fn
+digest_384(state: &[crate::hacl::streaming_types::state_64], output: &mut [u8])
 {
     let block_state: &[u64] = &(state[0usize]).block_state;
     let buf_: &[u8] = &(state[0usize]).buf;
@@ -1132,7 +1202,11 @@ pub fn digest_384(state: &[crate::hacl::streaming_types::state_64], output: &mut
     sha384_finish(&tmp_block_state, output)
 }
 
-pub fn hash_384(output: &mut [u8], input: &[u8], input_len: u32)
+/**
+Hash `input`, of len `input_len`, into `output`, an array of 48 bytes.
+*/
+pub fn
+hash_384(output: &mut [u8], input: &[u8], input_len: u32)
 {
     let ib: &[u8] = input;
     let rb: &mut [u8] = output;

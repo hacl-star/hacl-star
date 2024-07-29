@@ -1804,7 +1804,7 @@
     qmont_reduction(res, &mut tmp)
 }
 
-pub fn ecp256dh_i(public_key: &mut [u8], private_key: &[u8]) -> bool
+pub(crate) fn ecp256dh_i(public_key: &mut [u8], private_key: &[u8]) -> bool
 {
     let mut tmp: [u64; 16] = [0u64; 16usize];
     let sk: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -1834,7 +1834,8 @@ pub fn ecp256dh_i(public_key: &mut [u8], private_key: &[u8]) -> bool
     is_sk_valid == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &[u8], private_key: &[u8]) -> bool
+pub(crate) fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &[u8], private_key: &[u8]) ->
+    bool
 {
     let mut tmp: [u64; 16] = [0u64; 16usize];
     let sk: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -2481,7 +2482,21 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &[u8], private_key: &[
     res
 }
 
-pub fn ecdsa_sign_p256_sha2(
+/**
+Create an ECDSA signature using SHA2-256.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
+*/
+pub fn
+ecdsa_sign_p256_sha2(
     signature: &mut [u8],
     msg_len: u32,
     msg: &[u8],
@@ -2503,7 +2518,21 @@ pub fn ecdsa_sign_p256_sha2(
     res
 }
 
-pub fn ecdsa_sign_p256_sha384(
+/**
+Create an ECDSA signature using SHA2-384.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
+*/
+pub fn
+ecdsa_sign_p256_sha384(
     signature: &mut [u8],
     msg_len: u32,
     msg: &[u8],
@@ -2525,7 +2554,21 @@ pub fn ecdsa_sign_p256_sha384(
     res
 }
 
-pub fn ecdsa_sign_p256_sha512(
+/**
+Create an ECDSA signature using SHA2-512.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
+*/
+pub fn
+ecdsa_sign_p256_sha512(
     signature: &mut [u8],
     msg_len: u32,
     msg: &[u8],
@@ -2547,7 +2590,31 @@ pub fn ecdsa_sign_p256_sha512(
     res
 }
 
-pub fn ecdsa_sign_p256_without_hash(
+/**
+Create an ECDSA signature WITHOUT hashing first.
+
+  This function is intended to receive a hash of the input.
+  For convenience, we recommend using one of the hash-and-sign combined functions above.
+
+  The argument `msg` MUST be at least 32 bytes (i.e. `msg_len >= 32`).
+
+  NOTE: The equivalent functions in OpenSSL and Fiat-Crypto both accept inputs
+  smaller than 32 bytes. These libraries left-pad the input with enough zeroes to
+  reach the minimum 32 byte size. Clients who need behavior identical to OpenSSL
+  need to perform the left-padding themselves.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid values:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
+*/
+pub fn
+ecdsa_sign_p256_without_hash(
     signature: &mut [u8],
     msg_len: u32,
     msg: &[u8],
@@ -2569,7 +2636,19 @@ pub fn ecdsa_sign_p256_without_hash(
     res
 }
 
-pub fn ecdsa_verif_p256_sha2(
+/**
+Verify an ECDSA signature using SHA2-256.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid
+*/
+pub fn
+ecdsa_verif_p256_sha2(
     msg_len: u32,
     msg: &[u8],
     public_key: &[u8],
@@ -2591,7 +2670,19 @@ pub fn ecdsa_verif_p256_sha2(
     res
 }
 
-pub fn ecdsa_verif_p256_sha384(
+/**
+Verify an ECDSA signature using SHA2-384.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid
+*/
+pub fn
+ecdsa_verif_p256_sha384(
     msg_len: u32,
     msg: &[u8],
     public_key: &[u8],
@@ -2613,7 +2704,19 @@ pub fn ecdsa_verif_p256_sha384(
     res
 }
 
-pub fn ecdsa_verif_p256_sha512(
+/**
+Verify an ECDSA signature using SHA2-512.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid
+*/
+pub fn
+ecdsa_verif_p256_sha512(
     msg_len: u32,
     msg: &[u8],
     public_key: &[u8],
@@ -2635,7 +2738,24 @@ pub fn ecdsa_verif_p256_sha512(
     res
 }
 
-pub fn ecdsa_verif_without_hash(
+/**
+Verify an ECDSA signature WITHOUT hashing first.
+
+  This function is intended to receive a hash of the input.
+  For convenience, we recommend using one of the hash-and-verify combined functions above.
+
+  The argument `msg` MUST be at least 32 bytes (i.e. `msg_len >= 32`).
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid
+*/
+pub fn
+ecdsa_verif_without_hash(
     msg_len: u32,
     msg: &[u8],
     public_key: &[u8],
@@ -2657,14 +2777,42 @@ pub fn ecdsa_verif_without_hash(
     res
 }
 
-pub fn validate_public_key(public_key: &[u8]) -> bool
+/**
+Public key validation.
+
+  The function returns `true` if a public key is valid and `false` otherwise.
+
+  The argument `public_key` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The public key (x || y) is valid (with respect to SP 800-56A):
+    • the public key is not the “point at infinity”, represented as O.
+    • the affine x and y coordinates of the point represented by the public key are
+      in the range [0, p – 1] where p is the prime defining the finite field.
+    • y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
+  The last extract is taken from: https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+*/
+pub fn
+validate_public_key(public_key: &[u8]) ->
+    bool
 {
     let mut point_jac: [u64; 12] = [0u64; 12usize];
     let res: bool = load_point_vartime(&mut point_jac, public_key);
     res
 }
 
-pub fn validate_private_key(private_key: &[u8]) -> bool
+/**
+Private key validation.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve
+*/
+pub fn
+validate_private_key(private_key: &[u8]) ->
+    bool
 {
     let mut bn_sk: [u64; 4] = [0u64; 4usize];
     bn_from_bytes_be4(&mut bn_sk, private_key);
@@ -2672,7 +2820,19 @@ pub fn validate_private_key(private_key: &[u8]) -> bool
     res == 0xFFFFFFFFFFFFFFFFu64
 }
 
-pub fn uncompressed_to_raw(pk: &[u8], pk_raw: &mut [u8]) -> bool
+/**
+Convert a public key from uncompressed to its raw form.
+
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
+
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+
+  The function DOESN'T check whether (x, y) is a valid point.
+*/
+pub fn
+uncompressed_to_raw(pk: &[u8], pk_raw: &mut [u8]) ->
+    bool
 {
     let pk0: u8 = pk[0usize];
     if pk0 != 0x04u8
@@ -2684,7 +2844,19 @@ pub fn uncompressed_to_raw(pk: &[u8], pk_raw: &mut [u8]) -> bool
     }
 }
 
-pub fn compressed_to_raw(pk: &[u8], pk_raw: &mut [u8]) -> bool
+/**
+Convert a public key from compressed to its raw form.
+
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
+
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+
+  The function also checks whether (x, y) is a valid point.
+*/
+pub fn
+compressed_to_raw(pk: &[u8], pk_raw: &mut [u8]) ->
+    bool
 {
     let mut xa: [u64; 4] = [0u64; 4usize];
     let mut ya: [u64; 4] = [0u64; 4usize];
@@ -2698,13 +2870,31 @@ pub fn compressed_to_raw(pk: &[u8], pk_raw: &mut [u8]) -> bool
     b
 }
 
-pub fn raw_to_uncompressed(pk_raw: &[u8], pk: &mut [u8])
+/**
+Convert a public key from raw to its uncompressed form.
+
+  The outparam `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T check whether (x, y) is a valid point.
+*/
+pub fn
+raw_to_uncompressed(pk_raw: &[u8], pk: &mut [u8])
 {
     pk[0usize] = 0x04u8;
     (pk[1usize..1usize + 64usize]).copy_from_slice(&pk_raw[0usize..64usize])
 }
 
-pub fn raw_to_compressed(pk_raw: &[u8], pk: &mut [u8])
+/**
+Convert a public key from raw to its compressed form.
+
+  The outparam `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T check whether (x, y) is a valid point.
+*/
+pub fn
+raw_to_compressed(pk_raw: &[u8], pk: &mut [u8])
 {
     let pk_x: (&[u8], &[u8]) = pk_raw.split_at(0usize);
     let pk_y: (&[u8], &[u8]) = pk_x.1.split_at(32usize);
@@ -2715,8 +2905,35 @@ pub fn raw_to_compressed(pk_raw: &[u8], pk: &mut [u8])
     (pk[1usize..1usize + 32usize]).copy_from_slice(&pk_y.0[0usize..32usize])
 }
 
-pub fn dh_initiator(public_key: &mut [u8], private_key: &[u8]) -> bool
+/**
+Compute the public key from the private key.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The outparam `public_key`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve.
+*/
+pub fn
+dh_initiator(public_key: &mut [u8], private_key: &[u8]) ->
+    bool
 { ecp256dh_i(public_key, private_key) }
 
-pub fn dh_responder(shared_secret: &mut [u8], their_pubkey: &[u8], private_key: &[u8]) -> bool
+/**
+Execute the diffie-hellmann key exchange.
+
+  The function returns `true` for successful creation of an ECDH shared secret and
+  `false` otherwise.
+
+  The outparam `shared_secret` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `their_pubkey` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `their_pubkey` are valid.
+*/
+pub fn
+dh_responder(shared_secret: &mut [u8], their_pubkey: &[u8], private_key: &[u8]) ->
+    bool
 { ecp256dh_r(shared_secret, their_pubkey, private_key) }

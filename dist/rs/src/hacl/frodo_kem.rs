@@ -6,7 +6,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub fn shake128_4x(
+pub(crate) fn shake128_4x(
     input_len: u32,
     input0: &[u8],
     input1: &[u8],
@@ -25,7 +25,7 @@ pub fn shake128_4x(
     crate::hacl::hash_sha3::shake128(output3, output_len, input3, input_len)
 }
 
-#[inline] pub fn mod_pow2(n1: u32, n2: u32, logq: u32, a: &mut [u16])
+#[inline] pub(crate) fn mod_pow2(n1: u32, n2: u32, logq: u32, a: &mut [u16])
 {
     if logq < 16u32
     {
@@ -42,7 +42,7 @@ pub fn shake128_4x(
     }
 }
 
-#[inline] pub fn matrix_add(n1: u32, n2: u32, a: &mut [u16], b: &[u16])
+#[inline] pub(crate) fn matrix_add(n1: u32, n2: u32, a: &mut [u16], b: &[u16])
 {
     for i in 0u32..n1
     {
@@ -56,7 +56,7 @@ pub fn shake128_4x(
     }
 }
 
-#[inline] pub fn matrix_sub(n1: u32, n2: u32, a: &[u16], b: &mut [u16])
+#[inline] pub(crate) fn matrix_sub(n1: u32, n2: u32, a: &[u16], b: &mut [u16])
 {
     for i in 0u32..n1
     {
@@ -70,7 +70,14 @@ pub fn shake128_4x(
     }
 }
 
-#[inline] pub fn matrix_mul(n1: u32, n2: u32, n3: u32, a: &[u16], b: &[u16], c: &mut [u16])
+#[inline] pub(crate) fn matrix_mul(
+    n1: u32,
+    n2: u32,
+    n3: u32,
+    a: &[u16],
+    b: &[u16],
+    c: &mut [u16]
+)
 {
     for i in 0u32..n1
     {
@@ -89,7 +96,14 @@ pub fn shake128_4x(
     }
 }
 
-#[inline] pub fn matrix_mul_s(n1: u32, n2: u32, n3: u32, a: &[u16], b: &[u16], c: &mut [u16])
+#[inline] pub(crate) fn matrix_mul_s(
+    n1: u32,
+    n2: u32,
+    n3: u32,
+    a: &[u16],
+    b: &[u16],
+    c: &mut [u16]
+)
 {
     for i in 0u32..n1
     {
@@ -108,7 +122,7 @@ pub fn shake128_4x(
     }
 }
 
-#[inline] pub fn matrix_eq(n1: u32, n2: u32, a: &[u16], b: &[u16]) -> u16
+#[inline] pub(crate) fn matrix_eq(n1: u32, n2: u32, a: &[u16], b: &[u16]) -> u16
 {
     let mut res: [u16; 1] = [0xFFFFu16; 1usize];
     for i in 0u32..n1.wrapping_mul(n2)
@@ -120,7 +134,7 @@ pub fn shake128_4x(
     r
 }
 
-#[inline] pub fn matrix_to_lbytes(n1: u32, n2: u32, m: &[u16], res: &mut [u8])
+#[inline] pub(crate) fn matrix_to_lbytes(n1: u32, n2: u32, m: &[u16], res: &mut [u8])
 {
     for i in 0u32..n1.wrapping_mul(n2)
     {
@@ -131,7 +145,7 @@ pub fn shake128_4x(
     }
 }
 
-#[inline] pub fn matrix_from_lbytes(n1: u32, n2: u32, b: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn matrix_from_lbytes(n1: u32, n2: u32, b: &[u8], res: &mut [u16])
 {
     for i in 0u32..n1.wrapping_mul(n2)
     {
@@ -142,7 +156,7 @@ pub fn shake128_4x(
     }
 }
 
-#[inline] pub fn frodo_gen_matrix_shake_4x(n: u32, seed: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_gen_matrix_shake_4x(n: u32, seed: &[u8], res: &mut [u16])
 {
     let mut r: Vec<u8> = vec![0u8; 8u32.wrapping_mul(n) as usize];
     let mut tmp_seed: [u8; 72] = [0u8; 72usize];
@@ -216,7 +230,7 @@ pub fn shake128_4x(
     }
 }
 
-#[inline] pub fn frodo_gen_matrix(
+#[inline] pub(crate) fn frodo_gen_matrix(
     a: crate::hacl::spec::frodo_gen_a,
     n: u32,
     seed: &[u8],
@@ -230,18 +244,18 @@ pub fn shake128_4x(
     }
 }
 
-pub const cdf_table640: [u16; 13] =
+pub(crate) const cdf_table640: [u16; 13] =
     [4643u16, 13363u16, 20579u16, 25843u16, 29227u16, 31145u16, 32103u16, 32525u16, 32689u16,
         32745u16, 32762u16, 32766u16, 32767u16];
 
-pub const cdf_table976: [u16; 11] =
+pub(crate) const cdf_table976: [u16; 11] =
     [5638u16, 15915u16, 23689u16, 28571u16, 31116u16, 32217u16, 32613u16, 32731u16, 32760u16,
         32766u16, 32767u16];
 
-pub const cdf_table1344: [u16; 7] =
+pub(crate) const cdf_table1344: [u16; 7] =
     [9142u16, 23462u16, 30338u16, 32361u16, 32725u16, 32765u16, 32767u16];
 
-#[inline] pub fn frodo_sample_matrix64(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_sample_matrix64(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
         &vec![0u16; n1.wrapping_mul(n2) as usize]
@@ -272,7 +286,7 @@ pub const cdf_table1344: [u16; 7] =
     }
 }
 
-#[inline] pub fn frodo_sample_matrix640(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_sample_matrix640(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
         &vec![0u16; n1.wrapping_mul(n2) as usize]
@@ -303,7 +317,7 @@ pub const cdf_table1344: [u16; 7] =
     }
 }
 
-#[inline] pub fn frodo_sample_matrix976(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_sample_matrix976(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
         &vec![0u16; n1.wrapping_mul(n2) as usize]
@@ -334,7 +348,7 @@ pub const cdf_table1344: [u16; 7] =
     }
 }
 
-#[inline] pub fn frodo_sample_matrix1344(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_sample_matrix1344(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
         &vec![0u16; n1.wrapping_mul(n2) as usize]
@@ -365,12 +379,12 @@ pub const cdf_table1344: [u16; 7] =
     }
 }
 
-pub fn randombytes_(len: u32, res: &mut [u8])
+pub(crate) fn randombytes_(len: u32, res: &mut [u8])
 {
     crate::lowstar::ignore::ignore::<bool>(crate::lib::randombuffer_system::randombytes(res, len))
 }
 
-#[inline] pub fn frodo_pack(n1: u32, n2: u32, d: u32, a: &[u16], res: &mut [u8])
+#[inline] pub(crate) fn frodo_pack(n1: u32, n2: u32, d: u32, a: &[u16], res: &mut [u8])
 {
     let n: u32 = n1.wrapping_mul(n2).wrapping_div(8u32);
     for i in 0u32..n
@@ -440,7 +454,7 @@ pub fn randombytes_(len: u32, res: &mut [u8])
     }
 }
 
-#[inline] pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &[u8], res: &mut [u16])
 {
     let n: u32 = n1.wrapping_mul(n2).wrapping_div(8u32);
     for i in 0u32..n
@@ -521,7 +535,7 @@ pub fn randombytes_(len: u32, res: &mut [u8])
     }
 }
 
-#[inline] pub fn frodo_key_encode(logq: u32, b: u32, n: u32, a: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_key_encode(logq: u32, b: u32, n: u32, a: &[u8], res: &mut [u16])
 {
     for i in 0u32..n
     {
@@ -546,7 +560,7 @@ pub fn randombytes_(len: u32, res: &mut [u8])
     }
 }
 
-#[inline] pub fn frodo_key_decode(logq: u32, b: u32, n: u32, a: &[u16], res: &mut [u8])
+#[inline] pub(crate) fn frodo_key_decode(logq: u32, b: u32, n: u32, a: &[u16], res: &mut [u8])
 {
     for i in 0u32..n
     {

@@ -6,15 +6,15 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub const keccak_rotc: [u32; 24] =
+pub(crate) const keccak_rotc: [u32; 24] =
     [1u32, 3u32, 6u32, 10u32, 15u32, 21u32, 28u32, 36u32, 45u32, 55u32, 2u32, 14u32, 27u32, 41u32,
         56u32, 8u32, 25u32, 43u32, 62u32, 18u32, 39u32, 61u32, 20u32, 44u32];
 
-pub const keccak_piln: [u32; 24] =
+pub(crate) const keccak_piln: [u32; 24] =
     [10u32, 7u32, 11u32, 17u32, 18u32, 3u32, 5u32, 16u32, 8u32, 21u32, 24u32, 4u32, 15u32, 23u32,
         19u32, 13u32, 12u32, 2u32, 20u32, 14u32, 22u32, 9u32, 6u32, 1u32];
 
-pub const keccak_rndc: [u64; 24] =
+pub(crate) const keccak_rndc: [u64; 24] =
     [0x0000000000000001u64, 0x0000000000008082u64, 0x800000000000808au64, 0x8000000080008000u64,
         0x000000000000808bu64, 0x0000000080000001u64, 0x8000000080008081u64, 0x8000000000008009u64,
         0x000000000000008au64, 0x0000000000000088u64, 0x0000000080008009u64, 0x000000008000000au64,
@@ -2958,15 +2958,37 @@ pub fn sha3_512(output: &mut [u8], input: &[u8], inputByteLen: u32)
     )
 }
 
-pub fn state_malloc() -> Vec<u64>
+/**
+Allocate state buffer of 200-bytes
+*/
+pub fn
+state_malloc() ->
+    Vec<u64>
 {
     let buf: Vec<u64> = vec![0u64; 25usize];
     buf
 }
 
-pub fn state_free(s: &[u64]) { () }
+/**
+Free state buffer
+*/
+pub fn
+state_free(s: &[u64])
+{ () }
 
-pub fn shake128_absorb_nblocks(state: &mut [u64], input: &[u8], inputByteLen: u32)
+/**
+Absorb number of input blocks and write the output state
+
+  This function is intended to receive a hash state and input buffer.
+  It prcoesses an input of multiple of 168-bytes (SHAKE128 block size),
+  any additional bytes of final partial block are ignored.
+
+  The argument `state` (IN/OUT) points to hash state, i.e., uint64_t[25]
+  The argument `input` (IN) points to `inputByteLen` bytes of valid memory,
+  i.e., uint8_t[inputByteLen]
+*/
+pub fn
+shake128_absorb_nblocks(state: &mut [u64], input: &[u8], inputByteLen: u32)
 {
     for i in 0u32..inputByteLen.wrapping_div(168u32)
     {
@@ -2981,7 +3003,23 @@ pub fn shake128_absorb_nblocks(state: &mut [u64], input: &[u8], inputByteLen: u3
     }
 }
 
-pub fn shake128_absorb_final(state: &mut [u64], input: &[u8], inputByteLen: u32)
+/**
+Absorb a final partial block of input and write the output state
+
+  This function is intended to receive a hash state and input buffer.
+  It prcoesses a sequence of bytes at end of input buffer that is less 
+  than 168-bytes (SHAKE128 block size),
+  any bytes of full blocks at start of input buffer are ignored.
+
+  The argument `state` (IN/OUT) points to hash state, i.e., uint64_t[25]
+  The argument `input` (IN) points to `inputByteLen` bytes of valid memory,
+  i.e., uint8_t[inputByteLen]
+  
+  Note: Full size of input buffer must be passed to `inputByteLen` including
+  the number of full-block bytes at start of input buffer that are ignored
+*/
+pub fn
+shake128_absorb_final(state: &mut [u64], input: &[u8], inputByteLen: u32)
 {
     let mut b: [u8; 256] = [0u8; 256usize];
     let b·: &mut [u8] = &mut b;
@@ -3073,7 +3111,19 @@ pub fn shake128_absorb_final(state: &mut [u64], input: &[u8], inputByteLen: u32)
     absorb_inner_320(168u32, b3, state)
 }
 
-pub fn shake128_squeeze_nblocks(state: &mut [u64], output: &mut [u8], outputByteLen: u32)
+/**
+Squeeze a hash state to output buffer
+
+  This function is intended to receive a hash state and output buffer.
+  It produces an output of multiple of 168-bytes (SHAKE128 block size),
+  any additional bytes of final partial block are ignored.
+
+  The argument `state` (IN) points to hash state, i.e., uint64_t[25]
+  The argument `output` (OUT) points to `outputByteLen` bytes of valid memory,
+  i.e., uint8_t[outputByteLen]
+*/
+pub fn
+shake128_squeeze_nblocks(state: &mut [u64], output: &mut [u8], outputByteLen: u32)
 {
     for i in 0u32..outputByteLen.wrapping_div(168u32)
     {

@@ -12,7 +12,7 @@
 #[inline] fn fdifference(out: &mut [u64], a: &[u64], b: &[u64])
 { crate::hacl::bignum25519_51::fsub(out, a, b) }
 
-pub fn reduce_513(a: &mut [u64])
+pub(crate) fn reduce_513(a: &mut [u64])
 {
     let f0: u64 = a[0usize];
     let f1: u64 = a[1usize];
@@ -115,7 +115,7 @@ pub fn reduce_513(a: &mut [u64])
     crate::hacl::curve25519_51::fsquare_times(output, &input, &tmp, count)
 }
 
-pub fn inverse(out: &mut [u64], a: &[u64])
+pub(crate) fn inverse(out: &mut [u64], a: &[u64])
 {
     let tmp: [crate::fstar::uint128::uint128; 10] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
@@ -175,7 +175,7 @@ pub fn inverse(out: &mut [u64], a: &[u64])
     out[4usize] = f41
 }
 
-pub fn load_51(output: &mut [u64], input: &[u8])
+pub(crate) fn load_51(output: &mut [u64], input: &[u8])
 {
     let mut u64s: [u64; 4] = [0u64; 4usize];
     krml::unroll_for!(
@@ -206,7 +206,7 @@ pub fn load_51(output: &mut [u64], input: &[u8])
     output[4usize] = ((&u64s)[3usize]).wrapping_shr(12u32)
 }
 
-pub fn store_51(output: &mut [u8], input: &[u64])
+pub(crate) fn store_51(output: &mut [u8], input: &[u64])
 {
     let mut u64s: [u64; 4] = [0u64; 4usize];
     crate::hacl::bignum25519_51::store_felem(&mut u64s, input);
@@ -222,7 +222,7 @@ pub fn store_51(output: &mut [u8], input: &[u64])
     )
 }
 
-pub fn point_double(out: &mut [u64], p: &[u64])
+pub(crate) fn point_double(out: &mut [u64], p: &[u64])
 {
     let mut tmp: [u64; 20] = [0u64; 20usize];
     let tmp1: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -273,7 +273,7 @@ pub fn point_double(out: &mut [u64], p: &[u64])
     fmul(t3.0, tmp_f.1, tmp_g.1)
 }
 
-pub fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
+pub(crate) fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
 {
     let mut tmp: [u64; 30] = [0u64; 30usize];
     let tmp1: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -328,7 +328,7 @@ pub fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
     fmul(t3.0, tmp_f.1, tmp_g.1)
 }
 
-pub fn make_point_inf(b: &mut [u64])
+pub(crate) fn make_point_inf(b: &mut [u64])
 {
     let x: (&mut [u64], &mut [u64]) = b.split_at_mut(0usize);
     let y: (&mut [u64], &mut [u64]) = x.1.split_at_mut(5usize);
@@ -576,7 +576,7 @@ pub fn make_point_inf(b: &mut [u64])
     res0
 }
 
-pub fn point_decompress(out: &mut [u64], s: &[u8]) -> bool
+pub(crate) fn point_decompress(out: &mut [u64], s: &[u8]) -> bool
 {
     let mut tmp: [u64; 10] = [0u64; 10usize];
     let y: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -616,7 +616,7 @@ pub fn point_decompress(out: &mut [u64], s: &[u8]) -> bool
     res0
 }
 
-pub fn point_compress(z: &mut [u8], p: &[u64])
+pub(crate) fn point_compress(z: &mut [u8], p: &[u64])
 {
     let mut tmp: [u64; 15] = [0u64; 15usize];
     let zinv: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -1299,7 +1299,7 @@ pub fn point_compress(z: &mut [u8], p: &[u64])
     a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4
 }
 
-pub fn point_equal(p: &[u64], q: &[u64]) -> bool
+pub(crate) fn point_equal(p: &[u64], q: &[u64]) -> bool
 {
     let mut tmp: [u64; 20] = [0u64; 20usize];
     let pxqz: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -1323,7 +1323,7 @@ pub fn point_equal(p: &[u64], q: &[u64]) -> bool
     { false }
 }
 
-pub fn point_negate(p: &[u64], out: &mut [u64])
+pub(crate) fn point_negate(p: &[u64], out: &mut [u64])
 {
     let mut zero: [u64; 5] = [0u64; 5usize];
     (&mut zero)[0usize] = 0u64;
@@ -1347,7 +1347,7 @@ pub fn point_negate(p: &[u64], out: &mut [u64])
     reduce_513(t1.1)
 }
 
-pub fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
+pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
 {
     let mut bscalar: [u64; 4] = [0u64; 4usize];
     krml::unroll_for!(
@@ -1988,7 +1988,14 @@ pub fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
     h_low.1[31usize] = h_low31 & 127u8 | 64u8
 }
 
-pub fn secret_to_public(public_key: &mut [u8], private_key: &[u8])
+/**
+Compute the public key from the private key.
+
+  @param[out] public_key Points to 32 bytes of valid memory, i.e., `uint8_t[32]`. Must not overlap the memory location of `private_key`.
+  @param[in] private_key Points to 32 bytes of valid memory containing the private key, i.e., `uint8_t[32]`.
+*/
+pub fn
+secret_to_public(public_key: &mut [u8], private_key: &[u8])
 {
     let mut expanded_secret: [u8; 64] = [0u8; 64usize];
     secret_expand(&mut expanded_secret, private_key);
@@ -1996,7 +2003,17 @@ pub fn secret_to_public(public_key: &mut [u8], private_key: &[u8])
     point_mul_g_compress(public_key, a.1)
 }
 
-pub fn expand_keys(expanded_keys: &mut [u8], private_key: &[u8])
+/**
+Compute the expanded keys for an Ed25519 signature.
+
+  @param[out] expanded_keys Points to 96 bytes of valid memory, i.e., `uint8_t[96]`. Must not overlap the memory location of `private_key`.
+  @param[in] private_key Points to 32 bytes of valid memory containing the private key, i.e., `uint8_t[32]`.
+
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message.
+*/
+pub fn
+expand_keys(expanded_keys: &mut [u8], private_key: &[u8])
 {
     let s_prefix: (&mut [u8], &mut [u8]) = expanded_keys.split_at_mut(32usize);
     secret_expand(s_prefix.1, private_key);
@@ -2005,7 +2022,19 @@ pub fn expand_keys(expanded_keys: &mut [u8], private_key: &[u8])
     point_mul_g_compress(public_key.1, s.1)
 }
 
-pub fn sign_expanded(signature: &mut [u8], expanded_keys: &[u8], msg_len: u32, msg: &[u8])
+/**
+Create an Ed25519 signature with the (precomputed) expanded keys.
+
+  @param[out] signature Points to 64 bytes of valid memory, i.e., `uint8_t[64]`. Must not overlap the memory locations of `expanded_keys` nor `msg`.
+  @param[in] expanded_keys Points to 96 bytes of valid memory, i.e., `uint8_t[96]`, containing the expanded keys obtained by invoking `expand_keys`.
+  @param[in] msg_len Length of `msg`.
+  @param[in] msg Points to `msg_len` bytes of valid memory containing the message, i.e., `uint8_t[msg_len]`.
+
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message.
+*/
+pub fn
+sign_expanded(signature: &mut [u8], expanded_keys: &[u8], msg_len: u32, msg: &[u8])
 {
     let rs: (&mut [u8], &mut [u8]) = signature.split_at_mut(0usize);
     let ss: (&mut [u8], &mut [u8]) = rs.1.split_at_mut(32usize);
@@ -2030,14 +2059,40 @@ pub fn sign_expanded(signature: &mut [u8], expanded_keys: &[u8], msg_len: u32, m
     store_56(ss.1, &aq)
 }
 
-pub fn sign(signature: &mut [u8], private_key: &[u8], msg_len: u32, msg: &[u8])
+/**
+Create an Ed25519 signature.
+
+  @param[out] signature Points to 64 bytes of valid memory, i.e., `uint8_t[64]`. Must not overlap the memory locations of `private_key` nor `msg`.
+  @param[in] private_key Points to 32 bytes of valid memory containing the private key, i.e., `uint8_t[32]`.
+  @param[in] msg_len Length of `msg`.
+  @param[in] msg Points to `msg_len` bytes of valid memory containing the message, i.e., `uint8_t[msg_len]`.
+
+  The function first calls `expand_keys` and then invokes `sign_expanded`.
+
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message.
+*/
+pub fn
+sign(signature: &mut [u8], private_key: &[u8], msg_len: u32, msg: &[u8])
 {
     let mut expanded_keys: [u8; 96] = [0u8; 96usize];
     expand_keys(&mut expanded_keys, private_key);
     sign_expanded(signature, &expanded_keys, msg_len, msg)
 }
 
-pub fn verify(public_key: &[u8], msg_len: u32, msg: &[u8], signature: &[u8]) -> bool
+/**
+Verify an Ed25519 signature.
+
+  @param public_key Points to 32 bytes of valid memory containing the public key, i.e., `uint8_t[32]`.
+  @param msg_len Length of `msg`.
+  @param msg Points to `msg_len` bytes of valid memory containing the message, i.e., `uint8_t[msg_len]`.
+  @param signature Points to 64 bytes of valid memory containing the signature, i.e., `uint8_t[64]`.
+
+  @return Returns `true` if the signature is valid and `false` otherwise.
+*/
+pub fn
+verify(public_key: &[u8], msg_len: u32, msg: &[u8], signature: &[u8]) ->
+    bool
 {
     let mut a·: [u64; 20] = [0u64; 20usize];
     let b: bool = point_decompress(&mut a·, public_key);

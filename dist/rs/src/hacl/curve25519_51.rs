@@ -168,7 +168,7 @@ fn montgomery_ladder(out: &mut [u64], key: &[u8], init: &[u64])
     (out[0usize..10usize]).copy_from_slice(&p010.1[0usize..10usize])
 }
 
-pub fn fsquare_times(
+pub(crate) fn fsquare_times(
     o: &mut [u64],
     inp: &[u64],
     tmp: &[crate::fstar::uint128::uint128],
@@ -184,7 +184,7 @@ pub fn fsquare_times(
     }
 }
 
-pub fn finv(o: &mut [u64], i: &[u64], tmp: &[crate::fstar::uint128::uint128])
+pub(crate) fn finv(o: &mut [u64], i: &[u64], tmp: &[crate::fstar::uint128::uint128])
 {
     let mut t1: [u64; 20] = [0u64; 20usize];
     let a1: (&mut [u64], &mut [u64]) = (&mut t1).split_at_mut(0usize);
@@ -287,7 +287,15 @@ fn encode_point(o: &mut [u8], i: &[u64])
     )
 }
 
-pub fn scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
+/**
+Compute the scalar multiple of a point.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where the public point is read from.
+*/
+pub fn
+scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
 {
     let mut init: [u64; 10] = [0u64; 10usize];
     let mut init_copy: [u64; 10] = [0u64; 10usize];
@@ -333,7 +341,16 @@ pub fn scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
     encode_point(out, &init)
 }
 
-pub fn secret_to_public(r#pub: &mut [u8], r#priv: &[u8])
+/**
+Calculate a public point from a secret/private key.
+
+This computes a scalar multiplication of the secret/private key with the curve's basepoint.
+
+@param pub Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+*/
+pub fn
+secret_to_public(r#pub: &mut [u8], r#priv: &[u8])
 {
     let mut basepoint: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(
@@ -350,7 +367,16 @@ pub fn secret_to_public(r#pub: &mut [u8], r#priv: &[u8])
     scalarmult(r#pub, r#priv, &basepoint)
 }
 
-pub fn ecdh(out: &mut [u8], r#priv: &[u8], r#pub: &[u8]) -> bool
+/**
+Execute the diffie-hellmann key exchange.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where **our** secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where **their** public point is read from.
+*/
+pub fn
+ecdh(out: &mut [u8], r#priv: &[u8], r#pub: &[u8]) ->
+    bool
 {
     let zeros: [u8; 32] = [0u8; 32usize];
     scalarmult(out, r#priv, r#pub);

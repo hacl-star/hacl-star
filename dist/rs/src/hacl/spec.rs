@@ -17,7 +17,7 @@ pub enum ffdhe_alg
 }
 
 #[derive(PartialEq, Clone, Copy)]
-pub enum frodo_gen_a
+pub(crate) enum frodo_gen_a
 {
     SHAKE128,
     AES128

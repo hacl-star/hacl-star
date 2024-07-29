@@ -18,7 +18,14 @@ pub const max_personalization_string_length: u32 = 65536u32;
 
 pub const max_additional_input_length: u32 = 65536u32;
 
-pub fn min_length(a: crate::hacl::streaming_types::hash_alg) -> u32
+/**
+Return the minimal entropy input length of the desired hash function.
+
+@param a Hash algorithm to use.
+*/
+pub fn
+min_length(a: crate::hacl::streaming_types::hash_alg) ->
+    u32
 {
     match a
     {
@@ -39,7 +46,18 @@ pub fn uu___is_State(a: crate::hacl::streaming_types::hash_alg, projectee: state
     true
 }
 
-pub fn create_in(a: crate::hacl::streaming_types::hash_alg) -> state
+/**
+Create a DRBG state.
+
+@param a Hash algorithm to use. The possible instantiations are ...
+  * `Spec_Hash_Definitions_SHA2_256`,
+  * `Spec_Hash_Definitions_SHA2_384`,
+  * `Spec_Hash_Definitions_SHA2_512`, and
+  * `Spec_Hash_Definitions_SHA1`.
+*/
+pub fn
+create_in(a: crate::hacl::streaming_types::hash_alg) ->
+    state
 {
     let k: &[u8] =
         match a
@@ -100,7 +118,20 @@ pub fn create_in(a: crate::hacl::streaming_types::hash_alg) -> state
     state { k: k.to_vec(), v: v.to_vec(), reseed_counter: ctr }
 }
 
-pub fn instantiate(
+/**
+Instantiate the DRBG.
+
+@param a Hash algorithm to use. (Value must match the value used in `Hacl_HMAC_DRBG_create_in`.)
+@param st Pointer to DRBG state.
+@param entropy_input_len Length of entropy input.
+@param entropy_input Pointer to `entropy_input_len` bytes of memory where entropy input is read from.
+@param nonce_len Length of nonce.
+@param nonce Pointer to `nonce_len` bytes of memory where nonce is read from.
+@param personalization_string_len length of personalization string.
+@param personalization_string Pointer to `personalization_string_len` bytes of memory where personalization string is read from.
+*/
+pub fn
+instantiate(
     a: crate::hacl::streaming_types::hash_alg,
     mut st: state,
     entropy_input_len: u32,
@@ -489,7 +520,18 @@ pub fn instantiate(
     }
 }
 
-pub fn reseed(
+/**
+Reseed the DRBG.
+
+@param a Hash algorithm to use. (Value must match the value used in `Hacl_HMAC_DRBG_create_in`.)
+@param st Pointer to DRBG state.
+@param entropy_input_len Length of entropy input.
+@param entropy_input Pointer to `entropy_input_len` bytes of memory where entropy input is read from.
+@param additional_input_input_len Length of additional input.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+*/
+pub fn
+reseed(
     a: crate::hacl::streaming_types::hash_alg,
     mut st: state,
     entropy_input_len: u32,
@@ -768,7 +810,18 @@ pub fn reseed(
     }
 }
 
-pub fn generate(
+/**
+Generate output.
+
+@param a Hash algorithm to use. (Value must match the value used in `create_in`.)
+@param output Pointer to `n` bytes of memory where random output is written to.
+@param st Pointer to DRBG state.
+@param n Length of desired output.
+@param additional_input_input_len Length of additional input.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+*/
+pub fn
+generate(
     a: crate::hacl::streaming_types::hash_alg,
     output: &mut [u8],
     mut st: state,
