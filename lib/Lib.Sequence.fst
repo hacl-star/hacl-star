@@ -268,6 +268,12 @@ let mod_prop n a b =
 
 #push-options "--z3rlimit 200"
 
+// This proof is somehow very brittle on Z3 4.8.5.
+// For a small percentage of seeds, it fails after taking a rather long
+// time. For most others, it succeeds very quickly. Use a retry until we
+// can upgrade.
+#push-options "--retry 5"
+#restart-solver
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in
   let map_blocks_f = map_blocks_f #a bs max inp f in
@@ -285,6 +291,7 @@ let rec index_map_blocks_multi #a bs max n inp f i =
     Seq.lemma_index_app2 s s' i;
     mod_prop bs (n-1) i
   end
+#pop-options
 
 let map_blocks #a blocksize inp f g =
   let len = length inp in
