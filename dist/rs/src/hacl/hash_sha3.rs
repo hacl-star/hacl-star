@@ -2980,7 +2980,7 @@ state_free(s: &[u64])
 Absorb number of input blocks and write the output state
 
   This function is intended to receive a hash state and input buffer.
-  It prcoesses an input of multiple of 168-bytes (SHAKE128 block size),
+  It processes an input of multiple of 168-bytes (SHAKE128 block size),
   any additional bytes of final partial block are ignored.
 
   The argument `state` (IN/OUT) points to hash state, i.e., uint64_t[25]
@@ -3007,14 +3007,14 @@ shake128_absorb_nblocks(state: &mut [u64], input: &[u8], inputByteLen: u32)
 Absorb a final partial block of input and write the output state
 
   This function is intended to receive a hash state and input buffer.
-  It prcoesses a sequence of bytes at end of input buffer that is less 
+  It processes a sequence of bytes at end of input buffer that is less
   than 168-bytes (SHAKE128 block size),
   any bytes of full blocks at start of input buffer are ignored.
 
   The argument `state` (IN/OUT) points to hash state, i.e., uint64_t[25]
   The argument `input` (IN) points to `inputByteLen` bytes of valid memory,
   i.e., uint8_t[inputByteLen]
-  
+
   Note: Full size of input buffer must be passed to `inputByteLen` including
   the number of full-block bytes at start of input buffer that are ignored
 */
