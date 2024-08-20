@@ -645,8 +645,7 @@ fn exp_check(n: &[u64], a: &[u64], bBits: u32, b: &[u64]) -> u64
                 let beq: u64 = crate::fstar::uint64::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 let blt: u64 = ! crate::fstar::uint64::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 (&mut acc0)[0usize] =
-                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64);
-                ()
+                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
             };
             let res: u64 = (&acc0)[0usize];
             res

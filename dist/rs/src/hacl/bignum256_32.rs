@@ -743,8 +743,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                 let beq: u32 = crate::fstar::uint32::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 let blt: u32 = ! crate::fstar::uint32::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 (&mut acc0)[0usize] =
-                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32);
-                ()
+                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32)
             };
             let res: u32 = (&acc0)[0usize];
             res

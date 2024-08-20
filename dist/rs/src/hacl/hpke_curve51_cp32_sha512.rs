@@ -35,8 +35,7 @@ pub fn setupBaseS(
                 {
                     let uu____0: u8 =
                         crate::fstar::uint8::eq_mask((&o_dh)[i as usize], (&zeros)[i as usize]);
-                    (&mut res)[0usize] = uu____0 & (&res)[0usize];
-                    ()
+                    (&mut res)[0usize] = uu____0 & (&res)[0usize]
                 }
             );
             let z: u8 = (&res)[0usize];

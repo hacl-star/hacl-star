@@ -622,8 +622,7 @@ inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u32], aM: &[u32], aInvM: &mut [u32
                         t12,
                         0u32,
                         res_i2.1
-                    );
-                ()
+                    )
             };
             for
             i
@@ -633,8 +632,7 @@ inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u32], aM: &[u32], aInvM: &mut [u32
                 let t1: u32 = a1[i as usize];
                 let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(i as usize);
                 (&mut c)[0usize] =
-                    crate::lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1);
-                ()
+                    crate::lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1)
             };
             let c1: u32 = (&c)[0usize];
             c1

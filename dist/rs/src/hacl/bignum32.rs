@@ -400,8 +400,7 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
                             t12,
                             0u32,
                             res_i2.1
-                        );
-                    ()
+                        )
                 };
                 for
                 i
@@ -416,8 +415,7 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
                             t1,
                             0u32,
                             res_i.1
-                        );
-                    ()
+                        )
                 };
                 let c1: u32 = (&c)[0usize];
                 c1
@@ -647,8 +645,7 @@ mod_inv_prime_vartime_precomp(
                         t12,
                         0u32,
                         res_i2.1
-                    );
-                ()
+                    )
             };
             for
             i
@@ -658,8 +655,7 @@ mod_inv_prime_vartime_precomp(
                 let t1: u32 = a1.1[i as usize];
                 let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(i as usize);
                 (&mut c)[0usize] =
-                    crate::lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1);
-                ()
+                    crate::lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1)
             };
             let c1: u32 = (&c)[0usize];
             c1

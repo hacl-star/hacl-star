@@ -156,8 +156,7 @@ pub(crate) fn bn_karatsuba_mul_uint32(
                             t112,
                             0u32,
                             res_i2.1
-                        );
-                    ()
+                        )
                 };
                 for
                 i
@@ -176,8 +175,7 @@ pub(crate) fn bn_karatsuba_mul_uint32(
                             t11,
                             0u32,
                             res_i.1
-                        );
-                    ()
+                        )
                 };
                 let c110: u32 = (&c8)[0usize];
                 c110
@@ -341,8 +339,7 @@ pub(crate) fn bn_karatsuba_mul_uint64(
                             t112,
                             0u64,
                             res_i2.1
-                        );
-                    ()
+                        )
                 };
                 for
                 i
@@ -361,8 +358,7 @@ pub(crate) fn bn_karatsuba_mul_uint64(
                             t11,
                             0u64,
                             res_i.1
-                        );
-                    ()
+                        )
                 };
                 let c110: u64 = (&c8)[0usize];
                 c110
@@ -492,8 +488,7 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
                             t12,
                             0u32,
                             res_i2.1
-                        );
-                    ()
+                        )
                 };
                 for
                 i
@@ -512,8 +507,7 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
                             t1,
                             0u32,
                             res_i.1
-                        );
-                    ()
+                        )
                 };
                 let c10: u32 = (&c4)[0usize];
                 c10
@@ -643,8 +637,7 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
                             t12,
                             0u64,
                             res_i2.1
-                        );
-                    ()
+                        )
                 };
                 for
                 i
@@ -663,8 +656,7 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
                             t1,
                             0u64,
                             res_i.1
-                        );
-                    ()
+                        )
                 };
                 let c10: u64 = (&c4)[0usize];
                 c10
@@ -1593,8 +1585,7 @@ pub(crate) fn bn_check_mod_exp_u32(len: u32, n: &[u32], a: &[u32], bBits: u32, b
                 let beq: u32 = crate::fstar::uint32::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 let blt: u32 = ! crate::fstar::uint32::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 (&mut acc0)[0usize] =
-                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32);
-                ()
+                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32)
             };
             let res: u32 = (&acc0)[0usize];
             res
@@ -2059,8 +2050,7 @@ pub(crate) fn bn_check_mod_exp_u64(len: u32, n: &[u64], a: &[u64], bBits: u32, b
                 let beq: u64 = crate::fstar::uint64::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 let blt: u64 = ! crate::fstar::uint64::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 (&mut acc0)[0usize] =
-                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64);
-                ()
+                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
             };
             let res: u64 = (&acc0)[0usize];
             res

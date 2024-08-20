@@ -625,8 +625,7 @@ inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64
                         t12,
                         0u64,
                         res_i2.1
-                    );
-                ()
+                    )
             };
             for
             i
@@ -636,8 +635,7 @@ inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64
                 let t1: u64 = a1[i as usize];
                 let res_i: (&mut [u64], &mut [u64]) = res1.1.split_at_mut(i as usize);
                 (&mut c)[0usize] =
-                    crate::lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1);
-                ()
+                    crate::lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1)
             };
             let c1: u64 = (&c)[0usize];
             c1
