@@ -46,7 +46,6 @@ add(a: &[u32], b: &[u32], res: &mut [u32]) ->
                 crate::lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t12, t22, res_i2.1)
         }
     );
-    ();
     (&c)[0usize]
 }
 
@@ -90,7 +89,6 @@ sub(a: &[u32], b: &[u32], res: &mut [u32]) ->
                 crate::lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t12, t22, res_i2.1)
         }
     );
-    ();
     (&c)[0usize]
 }
 
@@ -136,7 +134,6 @@ add_mod(n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
                 crate::lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t12, t22, res_i2.1)
         }
     );
-    ();
     let c0: u32 = (&c)[0usize];
     let mut tmp: [u32; 8] = [0u32; 8usize];
     let mut c1: [u32; 1] = [0u32; 1usize];
@@ -169,7 +166,6 @@ add_mod(n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
                 crate::lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t12, t22, res_i2.1)
         }
     );
-    ();
     let c10: u32 = (&c1)[0usize];
     let c2: u32 = c0.wrapping_sub(c10);
     krml::unroll_for!(
@@ -227,7 +223,6 @@ sub_mod(n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
                 crate::lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t12, t22, res_i2.1)
         }
     );
-    ();
     let c0: u32 = (&c)[0usize];
     let mut tmp: [u32; 8] = [0u32; 8usize];
     let mut c1: [u32; 1] = [0u32; 1usize];
@@ -260,7 +255,6 @@ sub_mod(n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
                 crate::lib::inttypes_intrinsics::add_carry_u32((&c1)[0usize], t12, t22, res_i2.1)
         }
     );
-    ();
     let c10: u32 = (&c1)[0usize];
     crate::lowstar::ignore::ignore::<u32>(c10);
     let c2: u32 = 0u32.wrapping_sub(c0);
@@ -336,7 +330,6 @@ mul(a: &[u32], b: &[u32], res: &mut [u32])
                         )
                 }
             );
-            ();
             let r: u32 = (&c)[0usize];
             res[8u32.wrapping_add(i) as usize] = r
         }
@@ -492,7 +485,6 @@ sqr(a: &[u32], res: &mut [u32])
                         )
                 }
             );
-            ();
             let r: u32 = (&c1)[0usize];
             let c10: u32 = r;
             let res_j0: u32 = c[8u32.wrapping_add(i) as usize];
@@ -534,7 +526,6 @@ sqr(a: &[u32], res: &mut [u32])
                 crate::lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t12, t22, res_i2.1)
         }
     );
-    ();
     let c10: u32 = (&c1)[0usize];
     let c2: u32 = c00.wrapping_sub(c10);
     krml::unroll_for!(
@@ -616,7 +607,6 @@ sqr(a: &[u32], res: &mut [u32])
                         )
                 }
             );
-            ();
             let r: u32 = (&c1)[0usize];
             let c10: u32 = r;
             let res_j0: u32 = c[8u32.wrapping_add(i) as usize];
@@ -747,7 +737,6 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
             let i: u32 = bBits.wrapping_div(32u32);
             let j: u32 = bBits.wrapping_rem(32u32);
             (&mut b2)[i as usize] = (&b2)[i as usize] | 1u32.wrapping_shl(j);
-            ();
             let mut acc0: [u32; 1] = [0u32; 1usize];
             for i0 in 0u32..bLen
             {

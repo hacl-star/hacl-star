@@ -374,7 +374,6 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
                             0u32,
                             res_i.1
                         );
-                    ();
                     let t10: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
                     (&mut c)[0usize] =
@@ -384,7 +383,6 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
                             0u32,
                             res_i0.1
                         );
-                    ();
                     let t11: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
                     (&mut c)[0usize] =
@@ -394,7 +392,6 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
                             0u32,
                             res_i1.1
                         );
-                    ();
                     let t12: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
                     (&mut c)[0usize] =
@@ -404,11 +401,8 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
                             0u32,
                             res_i2.1
                         );
-                    ();
-                    ();
                     ()
                 };
-                ();
                 for
                 i
                 in
@@ -423,7 +417,6 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
                             0u32,
                             res_i.1
                         );
-                    ();
                     ()
                 };
                 let c1: u32 = (&c)[0usize];
@@ -628,7 +621,6 @@ mod_inv_prime_vartime_precomp(
                     res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
                 (&mut c)[0usize] =
                     crate::lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1);
-                ();
                 let t10: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                 let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
@@ -638,7 +630,6 @@ mod_inv_prime_vartime_precomp(
                         0u32,
                         res_i0.1
                     );
-                ();
                 let t11: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                 let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
@@ -648,7 +639,6 @@ mod_inv_prime_vartime_precomp(
                         0u32,
                         res_i1.1
                     );
-                ();
                 let t12: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                 let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
@@ -658,11 +648,8 @@ mod_inv_prime_vartime_precomp(
                         0u32,
                         res_i2.1
                     );
-                ();
-                ();
                 ()
             };
-            ();
             for
             i
             in
@@ -672,7 +659,6 @@ mod_inv_prime_vartime_precomp(
                 let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(i as usize);
                 (&mut c)[0usize] =
                     crate::lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1);
-                ();
                 ()
             };
             let c1: u32 = (&c)[0usize];

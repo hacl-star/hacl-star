@@ -36,7 +36,6 @@ pub fn setupBaseS(
                     let uu____0: u8 =
                         crate::fstar::uint8::eq_mask((&o_dh)[i as usize], (&zeros)[i as usize]);
                     (&mut res)[0usize] = uu____0 & (&res)[0usize];
-                    ();
                     ()
                 }
             );
@@ -49,26 +48,19 @@ pub fn setupBaseS(
                 ((&mut (&mut o_kemcontext)[0usize..])[0usize..32usize]).copy_from_slice(
                     &o_pkE[0usize..32usize]
                 );
-                ();
                 let o_pkRm: (&mut [u8], &mut [u8]) = (&mut o_kemcontext).split_at_mut(32usize);
                 let o_pkR: &mut [u8] = o_pkRm.1;
                 (o_pkR[0usize..32usize]).copy_from_slice(&pkR[0usize..32usize]);
-                ();
                 let o_dhm: &[u8] = &o_dh;
                 let mut o_eae_prk: [u8; 32] = [0u8; 32usize];
                 let mut suite_id_kem: [u8; 5] = [0u8; 5usize];
                 let uu____1: (&mut [u8], &mut [u8]) = (&mut suite_id_kem).split_at_mut(0usize);
                 uu____1.1[0usize] = 0x4bu8;
-                ();
                 uu____1.1[1usize] = 0x45u8;
-                ();
                 uu____1.1[2usize] = 0x4du8;
-                ();
                 let uu____2: (&mut [u8], &mut [u8]) = uu____1.1.split_at_mut(3usize);
                 uu____2.1[0usize] = 0u8;
-                ();
                 uu____2.1[1usize] = 32u8;
-                ();
                 let empty: (&[u8], &[u8]) = uu____2.0.split_at(0usize);
                 let label_eae_prk: [u8; 7] =
                     [0x65u8, 0x61u8, 0x65u8, 0x5fu8, 0x70u8, 0x72u8, 0x6bu8];
@@ -76,67 +68,45 @@ pub fn setupBaseS(
                 let mut tmp: Vec<u8> = vec![0u8; len as usize];
                 let uu____3: (&mut [u8], &mut [u8]) = (&mut tmp).split_at_mut(0usize);
                 uu____3.1[0usize] = 0x48u8;
-                ();
                 uu____3.1[1usize] = 0x50u8;
-                ();
                 uu____3.1[2usize] = 0x4bu8;
-                ();
                 uu____3.1[3usize] = 0x45u8;
-                ();
                 uu____3.1[4usize] = 0x2du8;
-                ();
                 uu____3.1[5usize] = 0x76u8;
-                ();
                 uu____3.1[6usize] = 0x31u8;
-                ();
                 ((&mut (&mut tmp)[7usize..])[0usize..5usize]).copy_from_slice(
                     &(&suite_id_kem)[0usize..5usize]
                 );
-                ();
                 ((&mut (&mut tmp)[12usize..])[0usize..7usize]).copy_from_slice(
                     &(&label_eae_prk)[0usize..7usize]
                 );
-                ();
                 ((&mut (&mut tmp)[19usize..])[0usize..32usize]).copy_from_slice(
                     &o_dhm[0usize..32usize]
                 );
-                ();
                 crate::hacl::hkdf::extract_sha2_256(&mut o_eae_prk, empty.1, 0u32, &tmp, len);
-                ();
                 let label_shared_secret: [u8; 13] =
                     [0x73u8, 0x68u8, 0x61u8, 0x72u8, 0x65u8, 0x64u8, 0x5fu8, 0x73u8, 0x65u8, 0x63u8,
                         0x72u8, 0x65u8, 0x74u8];
                 let len0: u32 = 91u32;
                 let mut tmp0: Vec<u8> = vec![0u8; len0 as usize];
                 crate::lowstar::endianness::store16_be(&mut (&mut tmp0)[0usize..], 32u32 as u16);
-                ();
                 let uu____4: (&mut [u8], &mut [u8]) = (&mut tmp0).split_at_mut(2usize);
                 uu____4.1[0usize] = 0x48u8;
-                ();
                 uu____4.1[1usize] = 0x50u8;
-                ();
                 uu____4.1[2usize] = 0x4bu8;
-                ();
                 uu____4.1[3usize] = 0x45u8;
-                ();
                 uu____4.1[4usize] = 0x2du8;
-                ();
                 uu____4.1[5usize] = 0x76u8;
-                ();
                 uu____4.1[6usize] = 0x31u8;
-                ();
                 ((&mut (&mut tmp0)[9usize..])[0usize..5usize]).copy_from_slice(
                     &(&suite_id_kem)[0usize..5usize]
                 );
-                ();
                 ((&mut (&mut tmp0)[14usize..])[0usize..13usize]).copy_from_slice(
                     &(&label_shared_secret)[0usize..13usize]
                 );
-                ();
                 ((&mut (&mut tmp0)[27usize..])[0usize..64usize]).copy_from_slice(
                     &(&o_kemcontext)[0usize..64usize]
                 );
-                ();
                 crate::hacl::hkdf::expand_sha2_256(
                     &mut o_shared,
                     &o_eae_prk,
@@ -145,8 +115,6 @@ pub fn setupBaseS(
                     len0,
                     32u32
                 );
-                ();
-                ();
                 0u32
             }
             else
@@ -365,22 +333,16 @@ pub fn setupBaseR(
                     ((&mut (&mut kemcontext)[0usize..])[0usize..32usize]).copy_from_slice(
                         &enc[0usize..32usize]
                     );
-                    ();
                     let dhm: &[u8] = &dh;
                     let mut o_eae_prk: [u8; 32] = [0u8; 32usize];
                     let mut suite_id_kem: [u8; 5] = [0u8; 5usize];
                     let uu____1: (&mut [u8], &mut [u8]) = (&mut suite_id_kem).split_at_mut(0usize);
                     uu____1.1[0usize] = 0x4bu8;
-                    ();
                     uu____1.1[1usize] = 0x45u8;
-                    ();
                     uu____1.1[2usize] = 0x4du8;
-                    ();
                     let uu____2: (&mut [u8], &mut [u8]) = uu____1.1.split_at_mut(3usize);
                     uu____2.1[0usize] = 0u8;
-                    ();
                     uu____2.1[1usize] = 32u8;
-                    ();
                     let empty: (&[u8], &[u8]) = uu____2.0.split_at(0usize);
                     let label_eae_prk: [u8; 7] =
                         [0x65u8, 0x61u8, 0x65u8, 0x5fu8, 0x70u8, 0x72u8, 0x6bu8];
@@ -388,67 +350,45 @@ pub fn setupBaseR(
                     let mut tmp: Vec<u8> = vec![0u8; len as usize];
                     let uu____3: (&mut [u8], &mut [u8]) = (&mut tmp).split_at_mut(0usize);
                     uu____3.1[0usize] = 0x48u8;
-                    ();
                     uu____3.1[1usize] = 0x50u8;
-                    ();
                     uu____3.1[2usize] = 0x4bu8;
-                    ();
                     uu____3.1[3usize] = 0x45u8;
-                    ();
                     uu____3.1[4usize] = 0x2du8;
-                    ();
                     uu____3.1[5usize] = 0x76u8;
-                    ();
                     uu____3.1[6usize] = 0x31u8;
-                    ();
                     ((&mut (&mut tmp)[7usize..])[0usize..5usize]).copy_from_slice(
                         &(&suite_id_kem)[0usize..5usize]
                     );
-                    ();
                     ((&mut (&mut tmp)[12usize..])[0usize..7usize]).copy_from_slice(
                         &(&label_eae_prk)[0usize..7usize]
                     );
-                    ();
                     ((&mut (&mut tmp)[19usize..])[0usize..32usize]).copy_from_slice(
                         &dhm[0usize..32usize]
                     );
-                    ();
                     crate::hacl::hkdf::extract_sha2_256(&mut o_eae_prk, empty.1, 0u32, &tmp, len);
-                    ();
                     let label_shared_secret: [u8; 13] =
                         [0x73u8, 0x68u8, 0x61u8, 0x72u8, 0x65u8, 0x64u8, 0x5fu8, 0x73u8, 0x65u8,
                             0x63u8, 0x72u8, 0x65u8, 0x74u8];
                     let len0: u32 = 91u32;
                     let mut tmp0: Vec<u8> = vec![0u8; len0 as usize];
                     crate::lowstar::endianness::store16_be(&mut (&mut tmp0)[0usize..], 32u32 as u16);
-                    ();
                     let uu____4: (&mut [u8], &mut [u8]) = (&mut tmp0).split_at_mut(2usize);
                     uu____4.1[0usize] = 0x48u8;
-                    ();
                     uu____4.1[1usize] = 0x50u8;
-                    ();
                     uu____4.1[2usize] = 0x4bu8;
-                    ();
                     uu____4.1[3usize] = 0x45u8;
-                    ();
                     uu____4.1[4usize] = 0x2du8;
-                    ();
                     uu____4.1[5usize] = 0x76u8;
-                    ();
                     uu____4.1[6usize] = 0x31u8;
-                    ();
                     ((&mut (&mut tmp0)[9usize..])[0usize..5usize]).copy_from_slice(
                         &(&suite_id_kem)[0usize..5usize]
                     );
-                    ();
                     ((&mut (&mut tmp0)[14usize..])[0usize..13usize]).copy_from_slice(
                         &(&label_shared_secret)[0usize..13usize]
                     );
-                    ();
                     ((&mut (&mut tmp0)[27usize..])[0usize..64usize]).copy_from_slice(
                         &(&kemcontext)[0usize..64usize]
                     );
-                    ();
                     crate::hacl::hkdf::expand_sha2_256(
                         &mut shared,
                         &o_eae_prk,
@@ -457,8 +397,6 @@ pub fn setupBaseR(
                         len0,
                         32u32
                     );
-                    ();
-                    ();
                     0u32
                 }
                 else
@@ -709,7 +647,6 @@ pub fn sealBase(
             {
                 let s·: u64 = s1.wrapping_add(1u64);
                 o_ctx.ctx_seq[0usize] = s·;
-                ();
                 0u32
             };
         let res10: u32 = res1;

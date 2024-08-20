@@ -455,32 +455,22 @@ pub(crate) fn make_point_inf(b: &mut [u64])
             let dyyi: (&mut [u64], &mut [u64]) = y2.1.split_at_mut(5usize);
             let dyy: (&mut [u64], &mut [u64]) = dyyi.1.split_at_mut(5usize);
             y2.0[0usize] = 1u64;
-            ();
             y2.0[1usize] = 0u64;
-            ();
             y2.0[2usize] = 0u64;
-            ();
             y2.0[3usize] = 0u64;
-            ();
             y2.0[4usize] = 0u64;
-            ();
             fsquare(dyyi.0, y);
             times_d(dyy.1, dyyi.0);
             let mut a_copy: [u64; 5] = [0u64; 5usize];
             ((&mut a_copy)[0usize..5usize]).copy_from_slice(&dyy.1[0usize..5usize]);
-            ();
             fsum(dyy.1, &a_copy, y2.0);
-            ();
             reduce_513(dyy.1);
             inverse(dyy.0, dyy.1);
             fdifference(x2.1, dyyi.0, y2.0);
             let mut inp_copy: [u64; 5] = [0u64; 5usize];
             ((&mut inp_copy)[0usize..5usize]).copy_from_slice(&x2.1[0usize..5usize]);
-            ();
             fmul(x2.1, &inp_copy, dyy.0);
-            ();
             reduce(x2.1);
-            ();
             let x2_is_0: bool = is_0(x2.1);
             let z: u8 =
                 if x2_is_0
@@ -488,15 +478,10 @@ pub(crate) fn make_point_inf(b: &mut [u64])
                     if sign == 0u64
                     {
                         x[0usize] = 0u64;
-                        ();
                         x[1usize] = 0u64;
-                        ();
                         x[2usize] = 0u64;
-                        ();
                         x[3usize] = 0u64;
-                        ();
                         x[4usize] = 0u64;
-                        ();
                         1u8
                     }
                     else
@@ -518,9 +503,7 @@ pub(crate) fn make_point_inf(b: &mut [u64])
                 fsquare(t0.1, t0.0);
                 let mut a_copy0: [u64; 5] = [0u64; 5usize];
                 ((&mut a_copy0)[0usize..5usize]).copy_from_slice(&t0.1[0usize..5usize]);
-                ();
                 fdifference(t0.1, &a_copy0, x30.0);
-                ();
                 reduce_513(t0.1);
                 reduce(t0.1);
                 let t0_is_0: bool = is_0(t0.1);
@@ -531,9 +514,7 @@ pub(crate) fn make_point_inf(b: &mut [u64])
                 fsquare(t00.1, x31.1);
                 let mut a_copy1: [u64; 5] = [0u64; 5usize];
                 ((&mut a_copy1)[0usize..5usize]).copy_from_slice(&t00.1[0usize..5usize]);
-                ();
                 fdifference(t00.1, &a_copy1, x211.1);
-                ();
                 reduce_513(t00.1);
                 reduce(t00.1);
                 let z1: bool = is_0(t00.1);
@@ -549,25 +530,17 @@ pub(crate) fn make_point_inf(b: &mut [u64])
                     if ! (x01 == sign)
                     {
                         t01.1[0usize] = 0u64;
-                        ();
                         t01.1[1usize] = 0u64;
-                        ();
                         t01.1[2usize] = 0u64;
-                        ();
                         t01.1[3usize] = 0u64;
-                        ();
                         t01.1[4usize] = 0u64;
-                        ();
                         let mut b_copy: [u64; 5] = [0u64; 5usize];
                         ((&mut b_copy)[0usize..5usize]).copy_from_slice(&x32.1[0usize..5usize]);
-                        ();
                         fdifference(x32.1, t01.1, &b_copy);
-                        ();
                         reduce_513(x32.1);
                         reduce(x32.1)
                     };
                     (x[0usize..5usize]).copy_from_slice(&x32.1[0usize..5usize]);
-                    ();
                     true
                 }
             }
@@ -596,19 +569,12 @@ pub(crate) fn point_decompress(out: &mut [u64], s: &[u8]) -> bool
             let outz: (&mut [u64], &mut [u64]) = outy.1.split_at_mut(5usize);
             let outt: (&mut [u64], &mut [u64]) = outz.1.split_at_mut(5usize);
             (outy.0[0usize..5usize]).copy_from_slice(&x.1[0usize..5usize]);
-            ();
             (outz.0[0usize..5usize]).copy_from_slice(&x.0[0usize..5usize]);
-            ();
             outt.0[0usize] = 1u64;
-            ();
             outt.0[1usize] = 0u64;
-            ();
             outt.0[2usize] = 0u64;
-            ();
             outt.0[3usize] = 0u64;
-            ();
             outt.0[4usize] = 0u64;
-            ();
             fmul(outt.1, x.1, x.0);
             true
         };

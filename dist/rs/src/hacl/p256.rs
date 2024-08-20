@@ -96,7 +96,6 @@
         (&mut c)[0usize] =
             crate::lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t12, t22, res_i2.1)
     };
-    ();
     let c0: u64 = (&c)[0usize];
     let mut tmp: [u64; 4] = [0u64; 4usize];
     let mut c1: [u64; 1] = [0u64; 1usize];
@@ -123,7 +122,6 @@
         (&mut c1)[0usize] =
             crate::lib::inttypes_intrinsics::sub_borrow_u64((&c1)[0usize], t12, t22, res_i2.1)
     };
-    ();
     let c10: u64 = (&c1)[0usize];
     let c2: u64 = c0.wrapping_sub(c10);
     krml::unroll_for!(
@@ -164,7 +162,6 @@
         (&mut c)[0usize] =
             crate::lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, t22, res_i2.1)
     };
-    ();
     let c0: u64 = (&c)[0usize];
     c0
 }
@@ -194,7 +191,6 @@
         (&mut c)[0usize] =
             crate::lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, t22, res_i2.1)
     };
-    ();
     let c0: u64 = (&c)[0usize];
     let mut tmp: [u64; 4] = [0u64; 4usize];
     let mut c1: [u64; 1] = [0u64; 1usize];
@@ -221,7 +217,6 @@
         (&mut c1)[0usize] =
             crate::lib::inttypes_intrinsics::add_carry_u64((&c1)[0usize], t12, t22, res_i2.1)
     };
-    ();
     let c10: u64 = (&c1)[0usize];
     crate::lowstar::ignore::ignore::<u64>(c10);
     let c2: u64 = 0u64.wrapping_sub(c0);
@@ -269,7 +264,6 @@
                 (&mut c)[0usize] =
                     crate::hacl::bignum_base::mul_wide_add2_u64(a_i2, bj, (&c)[0usize], res_i2.1)
             };
-            ();
             let r: u64 = (&c)[0usize];
             res[4u32.wrapping_add(i) as usize] = r
         }
@@ -542,7 +536,6 @@
                 (&mut c)[0usize] =
                     crate::hacl::bignum_base::mul_wide_add2_u64(a_i2, qj, (&c)[0usize], res_i2.1)
             };
-            ();
             let r: u64 = (&c)[0usize];
             let c1: u64 = r;
             let res_j0: u64 = x[4u32.wrapping_add(i) as usize];
@@ -578,7 +571,6 @@
         (&mut c)[0usize] =
             crate::lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, t22, res_i2.1)
     };
-    ();
     let c1: u64 = (&c)[0usize];
     let c2: u64 = c00.wrapping_sub(c1);
     krml::unroll_for!(
@@ -1731,7 +1723,6 @@
                 (&mut c)[0usize] =
                     crate::hacl::bignum_base::mul_wide_add2_u64(a_i2, qj, (&c)[0usize], res_i2.1)
             };
-            ();
             let r: u64 = (&c)[0usize];
             let c1: u64 = r;
             let res_j0: u64 = x[4u32.wrapping_add(i) as usize];
@@ -1767,7 +1758,6 @@
         (&mut c)[0usize] =
             crate::lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, t22, res_i2.1)
     };
-    ();
     let c1: u64 = (&c)[0usize];
     let c2: u64 = c00.wrapping_sub(c1);
     krml::unroll_for!(

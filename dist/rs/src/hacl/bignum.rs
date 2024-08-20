@@ -127,7 +127,6 @@ pub(crate) fn bn_karatsuba_mul_uint32(
                             0u32,
                             res_i.1
                         );
-                    ();
                     let t110: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 1usize);
@@ -138,7 +137,6 @@ pub(crate) fn bn_karatsuba_mul_uint32(
                             0u32,
                             res_i0.1
                         );
-                    ();
                     let t111: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 2usize);
@@ -149,7 +147,6 @@ pub(crate) fn bn_karatsuba_mul_uint32(
                             0u32,
                             res_i1.1
                         );
-                    ();
                     let t112: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 3usize);
@@ -160,11 +157,8 @@ pub(crate) fn bn_karatsuba_mul_uint32(
                             0u32,
                             res_i2.1
                         );
-                    ();
-                    ();
                     ()
                 };
-                ();
                 for
                 i
                 in
@@ -183,7 +177,6 @@ pub(crate) fn bn_karatsuba_mul_uint32(
                             0u32,
                             res_i.1
                         );
-                    ();
                     ()
                 };
                 let c110: u32 = (&c8)[0usize];
@@ -319,7 +312,6 @@ pub(crate) fn bn_karatsuba_mul_uint64(
                             0u64,
                             res_i.1
                         );
-                    ();
                     let t110: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 1usize);
@@ -330,7 +322,6 @@ pub(crate) fn bn_karatsuba_mul_uint64(
                             0u64,
                             res_i0.1
                         );
-                    ();
                     let t111: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 2usize);
@@ -341,7 +332,6 @@ pub(crate) fn bn_karatsuba_mul_uint64(
                             0u64,
                             res_i1.1
                         );
-                    ();
                     let t112: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 3usize);
@@ -352,11 +342,8 @@ pub(crate) fn bn_karatsuba_mul_uint64(
                             0u64,
                             res_i2.1
                         );
-                    ();
-                    ();
                     ()
                 };
-                ();
                 for
                 i
                 in
@@ -375,7 +362,6 @@ pub(crate) fn bn_karatsuba_mul_uint64(
                             0u64,
                             res_i.1
                         );
-                    ();
                     ()
                 };
                 let c110: u64 = (&c8)[0usize];
@@ -477,7 +463,6 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
                             0u32,
                             res_i.1
                         );
-                    ();
                     let t10: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 1usize);
@@ -488,7 +473,6 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
                             0u32,
                             res_i0.1
                         );
-                    ();
                     let t11: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 2usize);
@@ -499,7 +483,6 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
                             0u32,
                             res_i1.1
                         );
-                    ();
                     let t12: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 3usize);
@@ -510,11 +493,8 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
                             0u32,
                             res_i2.1
                         );
-                    ();
-                    ();
                     ()
                 };
-                ();
                 for
                 i
                 in
@@ -533,7 +513,6 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
                             0u32,
                             res_i.1
                         );
-                    ();
                     ()
                 };
                 let c10: u32 = (&c4)[0usize];
@@ -635,7 +614,6 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
                             0u64,
                             res_i.1
                         );
-                    ();
                     let t10: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 1usize);
@@ -646,7 +624,6 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
                             0u64,
                             res_i0.1
                         );
-                    ();
                     let t11: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 2usize);
@@ -657,7 +634,6 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
                             0u64,
                             res_i1.1
                         );
-                    ();
                     let t12: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 3usize);
@@ -668,11 +644,8 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
                             0u64,
                             res_i2.1
                         );
-                    ();
-                    ();
                     ()
                 };
-                ();
                 for
                 i
                 in
@@ -691,7 +664,6 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
                             0u64,
                             res_i.1
                         );
-                    ();
                     ()
                 };
                 let c10: u64 = (&c4)[0usize];
@@ -1615,7 +1587,6 @@ pub(crate) fn bn_check_mod_exp_u32(len: u32, n: &[u32], a: &[u32], bBits: u32, b
             let i: u32 = bBits.wrapping_div(32u32);
             let j: u32 = bBits.wrapping_rem(32u32);
             (&mut b2)[i as usize] = (&b2)[i as usize] | 1u32.wrapping_shl(j);
-            ();
             let mut acc0: [u32; 1] = [0u32; 1usize];
             for i0 in 0u32..bLen
             {
@@ -2082,7 +2053,6 @@ pub(crate) fn bn_check_mod_exp_u64(len: u32, n: &[u64], a: &[u64], bBits: u32, b
             let i: u32 = bBits.wrapping_div(64u32);
             let j: u32 = bBits.wrapping_rem(64u32);
             (&mut b2)[i as usize] = (&b2)[i as usize] | 1u64.wrapping_shl(j);
-            ();
             let mut acc0: [u64; 1] = [0u64; 1usize];
             for i0 in 0u32..bLen
             {
