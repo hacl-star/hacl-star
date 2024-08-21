@@ -1370,7 +1370,7 @@ new_bn_from_bytes_be(len: u32, b: &[u8]) ->
 {
     if
     len == 0u32 || ! (len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32) <= 536870911u32)
-    { (&[]).to_vec() }
+    { [].to_vec() }
     else
     {
         let mut res: Vec<u64> =
@@ -1419,7 +1419,7 @@ new_bn_from_bytes_le(len: u32, b: &[u8]) ->
 {
     if
     len == 0u32 || ! (len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32) <= 536870911u32)
-    { (&[]).to_vec() }
+    { [].to_vec() }
     else
     {
         let mut res: Vec<u64> =
