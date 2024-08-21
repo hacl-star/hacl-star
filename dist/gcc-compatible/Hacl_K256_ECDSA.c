@@ -358,7 +358,7 @@ static inline uint64_t load_qelem_check(uint64_t *f, uint8_t *b)
     1U,
     uint64_t beq = FStar_UInt64_eq_mask(f[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(f[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL))););
+    acc = (beq & acc) | (~beq & blt););
   uint64_t is_lt_q = acc;
   return ~is_zero & is_lt_q;
 }

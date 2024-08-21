@@ -463,7 +463,7 @@ bool Hacl_Bignum4096_mod(uint64_t *n, uint64_t *a, uint64_t *res)
   {
     uint64_t beq = FStar_UInt64_eq_mask(one[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(one[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint64_t m1 = acc;
   uint64_t is_valid_m = m0 & m1;
@@ -494,7 +494,7 @@ static uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
   {
     uint64_t beq = FStar_UInt64_eq_mask(one[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(one[i], n[i]);
-    acc0 = (beq & acc0) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc0 = (beq & acc0) | (~beq & blt);
   }
   uint64_t m10 = acc0;
   uint64_t m00 = m0 & m10;
@@ -521,7 +521,7 @@ static uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
     {
       uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
       uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
-      acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+      acc = (beq & acc) | (~beq & blt);
     }
     uint64_t res = acc;
     m1 = res;
@@ -535,7 +535,7 @@ static uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
   {
     uint64_t beq = FStar_UInt64_eq_mask(a[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(a[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint64_t m2 = acc;
   uint64_t m = m1 & m2;
@@ -980,7 +980,7 @@ bool Hacl_Bignum4096_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *r
   {
     uint64_t beq = FStar_UInt64_eq_mask(one[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(one[i], n[i]);
-    acc0 = (beq & acc0) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc0 = (beq & acc0) | (~beq & blt);
   }
   uint64_t m1 = acc0;
   uint64_t m00 = m0 & m1;
@@ -999,7 +999,7 @@ bool Hacl_Bignum4096_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *r
   {
     uint64_t beq = FStar_UInt64_eq_mask(a[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(a[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint64_t m2 = acc;
   uint64_t is_valid_m = (m00 & ~m10) & m2;
@@ -1384,7 +1384,7 @@ uint64_t Hacl_Bignum4096_lt_mask(uint64_t *a, uint64_t *b)
   {
     uint64_t beq = FStar_UInt64_eq_mask(a[i], b[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(a[i], b[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc = (beq & acc) | (~beq & blt);
   }
   return acc;
 }

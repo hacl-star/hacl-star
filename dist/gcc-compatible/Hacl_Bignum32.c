@@ -232,7 +232,7 @@ bool Hacl_Bignum32_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res)
   {
     uint32_t beq = FStar_UInt32_eq_mask(one[i], n[i]);
     uint32_t blt = ~FStar_UInt32_gte_mask(one[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFU) | (~blt & 0U)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint32_t m1 = acc;
   uint32_t is_valid_m = m0 & m1;
@@ -390,7 +390,7 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
   {
     uint32_t beq = FStar_UInt32_eq_mask(one[i], n[i]);
     uint32_t blt = ~FStar_UInt32_gte_mask(one[i], n[i]);
-    acc0 = (beq & acc0) | (~beq & ((blt & 0xFFFFFFFFU) | (~blt & 0U)));
+    acc0 = (beq & acc0) | (~beq & blt);
   }
   uint32_t m1 = acc0;
   uint32_t m00 = m0 & m1;
@@ -411,7 +411,7 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
   {
     uint32_t beq = FStar_UInt32_eq_mask(a[i], n[i]);
     uint32_t blt = ~FStar_UInt32_gte_mask(a[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFU) | (~blt & 0U)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint32_t m2 = acc;
   uint32_t is_valid_m = (m00 & ~m10) & m2;
@@ -858,7 +858,7 @@ uint32_t Hacl_Bignum32_lt_mask(uint32_t len, uint32_t *a, uint32_t *b)
   {
     uint32_t beq = FStar_UInt32_eq_mask(a[i], b[i]);
     uint32_t blt = ~FStar_UInt32_gte_mask(a[i], b[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFU) | (~blt & 0U)));
+    acc = (beq & acc) | (~beq & blt);
   }
   return acc;
 }
