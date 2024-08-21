@@ -423,8 +423,7 @@ fn sqr4(a: &[u64], res: &mut [u64])
         {
             let beq: u64 = crate::fstar::uint64::eq_mask(f[i as usize], (&n)[i as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask(f[i as usize], (&n)[i as usize]);
-            (&mut acc)[0usize] =
-                beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
         }
     );
     let is_lt_q: u64 = (&acc)[0usize];

@@ -88,8 +88,7 @@
         {
             let beq: u64 = crate::fstar::uint64::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
-            (&mut acc)[0usize] =
-                beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
         };
         let res: u64 = (&acc)[0usize];
         res
@@ -110,8 +109,7 @@
     {
         let beq: u64 = crate::fstar::uint64::eq_mask((&b2)[i0 as usize], n[i0 as usize]);
         let blt: u64 = ! crate::fstar::uint64::gte_mask((&b2)[i0 as usize], n[i0 as usize]);
-        (&mut acc)[0usize] =
-            beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let res: u64 = (&acc)[0usize];
     let m1: u64 = res;
@@ -474,8 +472,7 @@ rsapss_verify(
         {
             let beq: u64 = crate::fstar::uint64::eq_mask((&s)[i as usize], r2.0[i as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask((&s)[i as usize], r2.0[i as usize]);
-            (&mut acc)[0usize] =
-                beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
         };
         let mask: u64 = (&acc)[0usize];
         let res: bool =

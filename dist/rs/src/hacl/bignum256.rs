@@ -582,8 +582,7 @@ r#mod(n: &[u64], a: &[u64], res: &mut [u64]) ->
         {
             let beq: u64 = crate::fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
-            (&mut acc)[0usize] =
-                beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
         }
     );
     let m1: u64 = (&acc)[0usize];
@@ -618,8 +617,7 @@ fn exp_check(n: &[u64], a: &[u64], bBits: u32, b: &[u64]) -> u64
         {
             let beq: u64 = crate::fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
-            (&mut acc)[0usize] =
-                beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
         }
     );
     let m1: u64 = (&acc)[0usize];
@@ -641,8 +639,7 @@ fn exp_check(n: &[u64], a: &[u64], bBits: u32, b: &[u64]) -> u64
             {
                 let beq: u64 = crate::fstar::uint64::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 let blt: u64 = ! crate::fstar::uint64::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
-                (&mut acc0)[0usize] =
-                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+                (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
             };
             let res: u64 = (&acc0)[0usize];
             res
@@ -658,8 +655,7 @@ fn exp_check(n: &[u64], a: &[u64], bBits: u32, b: &[u64]) -> u64
         {
             let beq: u64 = crate::fstar::uint64::eq_mask(a[i as usize], n[i as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask(a[i as usize], n[i as usize]);
-            (&mut acc0)[0usize] =
-                beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
         }
     );
     let m2: u64 = (&acc0)[0usize];
@@ -1178,8 +1174,7 @@ mod_inv_prime_vartime(n: &[u64], a: &[u64], res: &mut [u64]) ->
         {
             let beq: u64 = crate::fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
-            (&mut acc)[0usize] =
-                beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
         }
     );
     let m1: u64 = (&acc)[0usize];
@@ -1208,8 +1203,7 @@ mod_inv_prime_vartime(n: &[u64], a: &[u64], res: &mut [u64]) ->
         {
             let beq: u64 = crate::fstar::uint64::eq_mask(a[i as usize], n[i as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask(a[i as usize], n[i as usize]);
-            (&mut acc0)[0usize] =
-                beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
         }
     );
     let m2: u64 = (&acc0)[0usize];
@@ -1582,8 +1576,7 @@ lt_mask(a: &[u64], b: &[u64]) ->
         {
             let beq: u64 = crate::fstar::uint64::eq_mask(a[i as usize], b[i as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask(a[i as usize], b[i as usize]);
-            (&mut acc)[0usize] =
-                beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
         }
     );
     (&acc)[0usize]

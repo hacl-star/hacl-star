@@ -499,7 +499,7 @@ r#mod(n: &[u32], a: &[u32], res: &mut [u32]) ->
     {
         let beq: u32 = crate::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
         let blt: u32 = ! crate::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
-        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32)
+        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
     let is_valid_m: u32 = m0 & m1;
@@ -528,7 +528,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
     {
         let beq: u32 = crate::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
         let blt: u32 = ! crate::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
-        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32)
+        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
     let m00: u32 = m0 & m1;
@@ -549,8 +549,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
             {
                 let beq: u32 = crate::fstar::uint32::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 let blt: u32 = ! crate::fstar::uint32::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
-                (&mut acc0)[0usize] =
-                    beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32)
+                (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
             };
             let res: u32 = (&acc0)[0usize];
             res
@@ -562,7 +561,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
     {
         let beq: u32 = crate::fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
         let blt: u32 = ! crate::fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
-        (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32)
+        (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
     };
     let m2: u32 = (&acc0)[0usize];
     let m: u32 = m10 & m2;
@@ -1052,7 +1051,7 @@ mod_inv_prime_vartime(n: &[u32], a: &[u32], res: &mut [u32]) ->
     {
         let beq: u32 = crate::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
         let blt: u32 = ! crate::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
-        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32)
+        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
     let m00: u32 = m0 & m1;
@@ -1071,7 +1070,7 @@ mod_inv_prime_vartime(n: &[u32], a: &[u32], res: &mut [u32]) ->
     {
         let beq: u32 = crate::fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
         let blt: u32 = ! crate::fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
-        (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32)
+        (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
     };
     let m2: u32 = (&acc0)[0usize];
     let is_valid_m: u32 = m00 & ! m10 & m2;
@@ -1500,7 +1499,7 @@ lt_mask(a: &[u32], b: &[u32]) ->
     {
         let beq: u32 = crate::fstar::uint32::eq_mask(a[i as usize], b[i as usize]);
         let blt: u32 = ! crate::fstar::uint32::gte_mask(a[i as usize], b[i as usize]);
-        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFu32 | ! blt & 0u32)
+        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     (&acc)[0usize]
 }

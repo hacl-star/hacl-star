@@ -126,8 +126,7 @@
     {
         let beq: u64 = crate::fstar::uint64::eq_mask((&b2)[i0 as usize], pk_n[i0 as usize]);
         let blt: u64 = ! crate::fstar::uint64::gte_mask((&b2)[i0 as usize], pk_n[i0 as usize]);
-        (&mut acc)[0usize] =
-            beq & (&acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let res: u64 = (&acc)[0usize];
     let m0: u64 = res;
@@ -136,8 +135,7 @@
     {
         let beq: u64 = crate::fstar::uint64::eq_mask(pk_n[i0 as usize], (&p_n1)[i0 as usize]);
         let blt: u64 = ! crate::fstar::uint64::gte_mask(pk_n[i0 as usize], (&p_n1)[i0 as usize]);
-        (&mut acc0)[0usize] =
-            beq & (&acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+        (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
     };
     let m1: u64 = (&acc0)[0usize];
     m0 & m1
