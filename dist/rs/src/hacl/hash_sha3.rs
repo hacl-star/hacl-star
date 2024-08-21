@@ -90,7 +90,7 @@ fn absorb_inner_32(b: &[u8], s: &mut [u64])
     (&mut ws)[30usize] = u29;
     let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
-    krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] = s[i as usize] ^ (&ws)[i as usize]);
+    krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
     krml::unroll_for!(
         24,
         "i",
@@ -128,8 +128,7 @@ fn absorb_inner_32(b: &[u8], s: &mut [u64])
                         "i1",
                         0u32,
                         1u32,
-                        s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] =
-                            s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^ _D
+                        s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^= _D
                     )
                 }
             );
@@ -194,7 +193,7 @@ fn absorb_inner_32(b: &[u8], s: &mut [u64])
                 }
             );
             let c: u64 = (&keccak_rndc)[i as usize];
-            s[0usize] = s[0usize] ^ c
+            s[0usize] ^= c
         }
     )
 }
@@ -350,7 +349,7 @@ fn update_last_sha3(
         (&mut ws)[30usize] = u29;
         let u30: u64 = crate::lowstar::endianness::load64_le(&b2[248usize..]);
         (&mut ws)[31usize] = u30;
-        krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] = s[i as usize] ^ (&ws)[i as usize]);
+        krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
         if ! (suffix & 0x80u8 == 0u8) && 0u32.wrapping_rem(len) == len.wrapping_sub(1u32)
         {
             krml::unroll_for!(
@@ -391,8 +390,7 @@ fn update_last_sha3(
                                 "i1",
                                 0u32,
                                 1u32,
-                                s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] =
-                                    s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^ _D
+                                s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^= _D
                             )
                         }
                     );
@@ -459,7 +457,7 @@ fn update_last_sha3(
                         }
                     );
                     let c: u64 = (&keccak_rndc)[i as usize];
-                    s[0usize] = s[0usize] ^ c
+                    s[0usize] ^= c
                 }
             )
         };
@@ -547,7 +545,7 @@ fn update_last_sha3(
         (&mut ws)[30usize] = u29;
         let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
         (&mut ws)[31usize] = u30;
-        krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] = s[i as usize] ^ (&ws)[i as usize]);
+        krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
         if ! (suffix & 0x80u8 == 0u8) && input_len.wrapping_rem(len) == len.wrapping_sub(1u32)
         {
             krml::unroll_for!(
@@ -588,8 +586,7 @@ fn update_last_sha3(
                                 "i1",
                                 0u32,
                                 1u32,
-                                s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] =
-                                    s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^ _D
+                                s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^= _D
                             )
                         }
                     );
@@ -656,7 +653,7 @@ fn update_last_sha3(
                         }
                     );
                     let c: u64 = (&keccak_rndc)[i as usize];
-                    s[0usize] = s[0usize] ^ c
+                    s[0usize] ^= c
                 }
             )
         };
@@ -954,8 +951,7 @@ fn digest_(
                                 "i2",
                                 0u32,
                                 1u32,
-                                s1[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] =
-                                    s1[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] ^ _D
+                                s1[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] ^= _D
                             )
                         }
                     );
@@ -1022,7 +1018,7 @@ fn digest_(
                         }
                     );
                     let c: u64 = (&keccak_rndc)[i0 as usize];
-                    s1[0usize] = s1[0usize] ^ c
+                    s1[0usize] ^= c
                 }
             )
         };
@@ -1106,8 +1102,7 @@ fn digest_(
                                 "i2",
                                 0u32,
                                 1u32,
-                                s1[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] =
-                                    s1[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] ^ _D
+                                s1[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] ^= _D
                             )
                         }
                     );
@@ -1174,7 +1169,7 @@ fn digest_(
                         }
                     );
                     let c: u64 = (&keccak_rndc)[i0 as usize];
-                    s1[0usize] = s1[0usize] ^ c
+                    s1[0usize] ^= c
                 }
             )
         };
@@ -1325,7 +1320,7 @@ pub fn absorb_inner_320(rateInBytes: u32, b: &[u8], s: &mut [u64])
     (&mut ws)[30usize] = u29;
     let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
-    krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] = s[i as usize] ^ (&ws)[i as usize]);
+    krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
     krml::unroll_for!(
         24,
         "i",
@@ -1363,8 +1358,7 @@ pub fn absorb_inner_320(rateInBytes: u32, b: &[u8], s: &mut [u64])
                         "i1",
                         0u32,
                         1u32,
-                        s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] =
-                            s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^ _D
+                        s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^= _D
                     )
                 }
             );
@@ -1429,7 +1423,7 @@ pub fn absorb_inner_320(rateInBytes: u32, b: &[u8], s: &mut [u64])
                 }
             );
             let c: u64 = (&keccak_rndc)[i as usize];
-            s[0usize] = s[0usize] ^ c
+            s[0usize] ^= c
         }
     )
 }
@@ -3097,13 +3091,7 @@ shake128_absorb_final(state: &mut [u64], input: &[u8], inputByteLen: u32)
     (&mut ws)[30usize] = u29;
     let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
-    krml::unroll_for!(
-        25,
-        "i",
-        0u32,
-        1u32,
-        state[i as usize] = state[i as usize] ^ (&ws)[i as usize]
-    );
+    krml::unroll_for!(25, "i", 0u32, 1u32, state[i as usize] ^= (&ws)[i as usize]);
     let mut b2: [u8; 256] = [0u8; 256usize];
     let b3: &mut [u8] = &mut b2;
     let b01: &mut [u8] = b3;
@@ -3183,8 +3171,7 @@ shake128_squeeze_nblocks(state: &mut [u64], output: &mut [u8], outputByteLen: u3
                             "i2",
                             0u32,
                             1u32,
-                            state[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] =
-                                state[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] ^ _D
+                            state[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] ^= _D
                         )
                     }
                 );
@@ -3249,7 +3236,7 @@ shake128_squeeze_nblocks(state: &mut [u64], output: &mut [u8], outputByteLen: u3
                     }
                 );
                 let c: u64 = (&keccak_rndc)[i0 as usize];
-                state[0usize] = state[0usize] ^ c
+                state[0usize] ^= c
             }
         )
     }

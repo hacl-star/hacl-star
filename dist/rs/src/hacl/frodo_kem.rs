@@ -33,9 +33,7 @@ pub(crate) fn shake128_4x(
         {
             for i0 in 0u32..n2
             {
-                a[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
-                    a[i.wrapping_mul(n2).wrapping_add(i0) as usize]
-                    &
+                a[i.wrapping_mul(n2).wrapping_add(i0) as usize] &=
                     1u16.wrapping_shl(logq).wrapping_sub(1u16)
             }
         }

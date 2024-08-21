@@ -1056,7 +1056,7 @@ pub(crate) fn bn_precomp_r2_mod_n_u32(len: u32, nBits: u32, n: &[u32], res: &mut
     (res[0usize..len as usize]).copy_from_slice(&vec![0u32; len as usize]);
     let i: u32 = nBits.wrapping_div(32u32);
     let j: u32 = nBits.wrapping_rem(32u32);
-    res[i as usize] = res[i as usize] | 1u32.wrapping_shl(j);
+    res[i as usize] |= 1u32.wrapping_shl(j);
     for _i in 0u32..64u32.wrapping_mul(len).wrapping_sub(nBits)
     {
         let mut a_copy: Vec<u32> = vec![0u32; len as usize];
@@ -1224,7 +1224,7 @@ pub(crate) fn bn_precomp_r2_mod_n_u64(len: u32, nBits: u32, n: &[u64], res: &mut
     (res[0usize..len as usize]).copy_from_slice(&vec![0u64; len as usize]);
     let i: u32 = nBits.wrapping_div(64u32);
     let j: u32 = nBits.wrapping_rem(64u32);
-    res[i as usize] = res[i as usize] | 1u64.wrapping_shl(j);
+    res[i as usize] |= 1u64.wrapping_shl(j);
     for _i in 0u32..128u32.wrapping_mul(len).wrapping_sub(nBits)
     {
         let mut a_copy: Vec<u64> = vec![0u64; len as usize];

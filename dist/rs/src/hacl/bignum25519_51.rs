@@ -812,8 +812,8 @@ pub(crate) fn store_felem(u64s: &mut [u64], f: &[u64])
         1u32,
         {
             let dummy: u64 = mask & (p1[i as usize] ^ p2[i as usize]);
-            p1[i as usize] = p1[i as usize] ^ dummy;
-            p2[i as usize] = p2[i as usize] ^ dummy
+            p1[i as usize] ^= dummy;
+            p2[i as usize] ^= dummy
         }
     )
 }

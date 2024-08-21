@@ -367,7 +367,7 @@ sqr(a: &[u64], res: &mut [u64])
     (res[0usize..4usize]).copy_from_slice(&[0u64; 4usize]);
     let i: u32 = nBits.wrapping_div(64u32);
     let j: u32 = nBits.wrapping_rem(64u32);
-    res[i as usize] = res[i as usize] | 1u64.wrapping_shl(j);
+    res[i as usize] |= 1u64.wrapping_shl(j);
     for _i in 0u32..512u32.wrapping_sub(nBits)
     {
         let mut a_copy: [u64; 4] = [0u64; 4usize];

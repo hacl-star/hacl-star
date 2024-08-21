@@ -231,7 +231,7 @@ exp_consttime(
             for i0 in 0u32..len1
             {
                 let dummy: u64 = 0u64.wrapping_sub(sw1) & (resM[i0 as usize] ^ (&aMc)[i0 as usize]);
-                resM[i0 as usize] = resM[i0 as usize] ^ dummy;
+                resM[i0 as usize] ^= dummy;
                 (&mut aMc)[i0 as usize] = (&aMc)[i0 as usize] ^ dummy
             };
             let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
@@ -251,7 +251,7 @@ exp_consttime(
         for i in 0u32..len1
         {
             let dummy: u64 = 0u64.wrapping_sub(sw0) & (resM[i as usize] ^ (&aMc)[i as usize]);
-            resM[i as usize] = resM[i as usize] ^ dummy;
+            resM[i as usize] ^= dummy;
             (&mut aMc)[i as usize] = (&aMc)[i as usize] ^ dummy
         }
     }
