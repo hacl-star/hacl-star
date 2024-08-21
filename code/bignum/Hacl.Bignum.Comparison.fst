@@ -100,7 +100,8 @@ let bn_lt_mask #t len a b =
     Loops.unfold_repeat_gen (v len) (S.bn_lt_mask_t t (v len)) (spec h0) (refl h0 0) (v i);
     let beq = eq_mask a.(i) b.(i) in
     let blt = lt_mask a.(i) b.(i) in
-    acc.(0ul) <- mask_select beq acc.(0ul) (mask_select blt (ones t SEC) (zeros t SEC))
+    mask_select_lemma2 blt;
+    acc.(0ul) <- mask_select beq acc.(0ul) blt
   );
   let mask = acc.(0ul) in
   pop_frame ();
