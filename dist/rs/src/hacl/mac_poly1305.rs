@@ -434,12 +434,7 @@ pub fn malloc(key: &[u8]) -> Vec<state_t>
     let k·0: &[u8] = &k·;
     let s: state_t =
         state_t
-        {
-            block_state: block_state.to_vec(),
-            buf: buf,
-            total_len: 0u32 as u64,
-            p_key: k·0.to_vec()
-        };
+        { block_state: block_state.to_vec(), buf, total_len: 0u32 as u64, p_key: k·0.to_vec() };
     let p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();

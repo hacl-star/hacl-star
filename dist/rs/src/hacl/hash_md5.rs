@@ -1359,8 +1359,7 @@ pub fn malloc() -> Vec<crate::hacl::streaming_types::state_32>
     let mut block_state: Vec<u32> = vec![0u32; 4usize];
     init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
-        crate::hacl::streaming_types::state_32
-        { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+        crate::hacl::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
     let p: Vec<crate::hacl::streaming_types::state_32> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
@@ -1521,8 +1520,7 @@ pub fn copy(state: &[crate::hacl::streaming_types::state_32]) ->
     let mut block_state: Vec<u32> = vec![0u32; 4usize];
     ((&mut block_state)[0usize..4usize]).copy_from_slice(&block_state0[0usize..4usize]);
     let s: crate::hacl::streaming_types::state_32 =
-        crate::hacl::streaming_types::state_32
-        { block_state: block_state, buf: buf, total_len: total_len0 };
+        crate::hacl::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
     let p: Vec<crate::hacl::streaming_types::state_32> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();

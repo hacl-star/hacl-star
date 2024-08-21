@@ -685,7 +685,7 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
     let mut block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
     let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    let s0: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+    let s0: state_t = state_t { block_state, buf, total_len: 0u32 as u64 };
     let p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -710,7 +710,7 @@ pub fn copy(state: &[state_t]) -> Vec<state_t>
     let s_src: &[u64] = &(*block_state0).snd;
     let s_dst: &mut [u64] = &mut block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
-    let s: state_t = state_t { block_state: block_state, buf: buf, total_len: total_len0 };
+    let s: state_t = state_t { block_state, buf, total_len: total_len0 };
     let p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();

@@ -51,7 +51,7 @@ field_init(len: u32, n: &[u64]) ->
     crate::hacl::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, r21);
     let mu: u64 = crate::hacl::bignum::mod_inv_uint64(n[0usize]);
     let res: crate::hacl::bignum::bn_mont_ctx_u64 =
-        crate::hacl::bignum::bn_mont_ctx_u64 { len: len, n: n11.to_vec(), mu: mu, r2: r21.to_vec() };
+        crate::hacl::bignum::bn_mont_ctx_u64 { len, n: n11.to_vec(), mu, r2: r21.to_vec() };
     let buf: Vec<crate::hacl::bignum::bn_mont_ctx_u64> =
         {
             let mut tmp: Vec<crate::hacl::bignum::bn_mont_ctx_u64> = Vec::new();

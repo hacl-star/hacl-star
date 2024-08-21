@@ -992,7 +992,7 @@ fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
     let kk1: u8 = (p[0usize]).key_length;
     let nn: u8 = (p[0usize]).digest_length;
     let last_node: bool = block_state.thd;
-    let i: index = index { key_length: kk1, digest_length: nn, last_node: last_node };
+    let i: index = index { key_length: kk1, digest_length: nn, last_node };
     let kk2: u32 = i.key_length as u32;
     let k·: &[u8] = key.snd;
     if ! (kk2 == 0u32)
@@ -1007,7 +1007,7 @@ fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
     init_with_params(&mut block_state.f4, pv);
     let kk10: u8 = kk.key_length;
     let ite: u32 = if kk10 != 0u8 { 128u32 } else { 0u32 };
-    let s: state_t = state_t { block_state: block_state, buf: buf, total_len: ite as u64 };
+    let s: state_t = state_t { block_state, buf, total_len: ite as u64 };
     let p0: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -1023,7 +1023,7 @@ fn index_of_state(s: &[state_t]) -> index
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
     let kk1: u8 = (*block_state).fst;
-    index { key_length: kk1, digest_length: nn, last_node: last_node }
+    index { key_length: kk1, digest_length: nn, last_node }
 }
 
 fn reset_raw(state: &mut [state_t], key: params_and_key)
@@ -1033,7 +1033,7 @@ fn reset_raw(state: &mut [state_t], key: params_and_key)
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
     let kk1: u8 = (*block_state).fst;
-    let i: index = index { key_length: kk1, digest_length: nn, last_node: last_node };
+    let i: index = index { key_length: kk1, digest_length: nn, last_node };
     let p: &[blake2_params] = key.fst;
     let kk10: u8 = (p[0usize]).key_length;
     let nn0: u8 = (p[0usize]).digest_length;
@@ -1290,7 +1290,7 @@ digest(s: &[state_t], dst: &mut [u8]) ->
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
     let kk: u8 = (*block_state).fst;
-    let i1: index = index { key_length: kk, digest_length: nn, last_node: last_node };
+    let i1: index = index { key_length: kk, digest_length: nn, last_node };
     let block_state0: &block_state_t = &(s[0usize]).block_state;
     let buf_: &[u8] = &(s[0usize]).buf;
     let total_len: u64 = (s[0usize]).total_len;
@@ -1358,7 +1358,7 @@ pub fn info(s: &[state_t]) -> index
     let last_node: bool = (*block_state).thd;
     let nn: u8 = (*block_state).snd;
     let kk: u8 = (*block_state).fst;
-    index { key_length: kk, digest_length: nn, last_node: last_node }
+    index { key_length: kk, digest_length: nn, last_node }
 }
 
 /**
@@ -1374,7 +1374,7 @@ copy(state: &[state_t]) ->
     let last_node: bool = (*block_state0).thd;
     let nn: u8 = (*block_state0).snd;
     let kk1: u8 = (*block_state0).fst;
-    let i: index = index { key_length: kk1, digest_length: nn, last_node: last_node };
+    let i: index = index { key_length: kk1, digest_length: nn, last_node };
     let mut buf: Vec<u8> = vec![0u8; 128usize];
     ((&mut buf)[0usize..128usize]).copy_from_slice(&buf0[0usize..128usize]);
     let wv: Vec<u64> = vec![0u64; 16usize];
@@ -1384,7 +1384,7 @@ copy(state: &[state_t]) ->
     let src_b: &[u64] = &(*block_state0).f4;
     let dst_b: &mut [u64] = &mut block_state.f4;
     (dst_b[0usize..16usize]).copy_from_slice(&src_b[0usize..16usize]);
-    let s: state_t = state_t { block_state: block_state, buf: buf, total_len: total_len0 };
+    let s: state_t = state_t { block_state, buf, total_len: total_len0 };
     let p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
