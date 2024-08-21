@@ -167,7 +167,7 @@ static inline uint64_t check_num_bits_u64(uint32_t bs, uint64_t *b)
   {
     uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint64_t res = acc;
   return res;
@@ -189,7 +189,7 @@ static inline uint64_t check_modulus_u64(uint32_t modBits, uint64_t *n)
   {
     uint64_t beq = FStar_UInt64_eq_mask(b2[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(b2[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint64_t res = acc;
   uint64_t m1 = res;
@@ -553,7 +553,7 @@ Hacl_RSAPSS_rsapss_verify(
     {
       uint64_t beq = FStar_UInt64_eq_mask(s[i], n[i]);
       uint64_t blt = ~FStar_UInt64_gte_mask(s[i], n[i]);
-      acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+      acc = (beq & acc) | (~beq & blt);
     }
     uint64_t mask = acc;
     bool res;
