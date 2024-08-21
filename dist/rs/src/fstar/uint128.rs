@@ -52,7 +52,7 @@ pub fn eq_mask(a: uint128, b: uint128) -> uint128 {
     let minus_x = (!x).wrapping_add(1u128);
     let x_or_minus_x = x | minus_x;
     let xnx = x_or_minus_x.wrapping_shr(127);
-    return xnx.wrapping_sub(1u128);
+    xnx.wrapping_sub(1u128)
 }
 pub fn gte_mask(a: uint128, b: uint128) -> uint128 {
     let x = a;
@@ -63,7 +63,7 @@ pub fn gte_mask(a: uint128, b: uint128) -> uint128 {
     let q = x_xor_y | x_sub_y_xor_y;
     let x_xor_q = x ^ q;
     let x_xor_q_ = x_xor_q.wrapping_shr(127);
-    return x_xor_q_.wrapping_sub(1u128);
+    x_xor_q_.wrapping_sub(1u128)
 }
 pub fn uint64_to_uint128(x: u64) -> uint128 {
     x as u128
