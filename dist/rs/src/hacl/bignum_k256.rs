@@ -69,7 +69,7 @@
             let u: u64 = crate::lowstar::endianness::load64_be(bj.1);
             let r: u64 = u;
             let x: u64 = r;
-            let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
+            let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );

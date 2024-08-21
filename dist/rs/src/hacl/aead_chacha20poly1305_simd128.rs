@@ -1173,7 +1173,7 @@
     (&mut [crate::lib::intvector_intrinsics::vec128],
     &mut [crate::lib::intvector_intrinsics::vec128])
     =
-        (&mut ctx).split_at_mut(5usize);
+        ctx.split_at_mut(5usize);
     let
     acc:
     (&mut [crate::lib::intvector_intrinsics::vec128],
@@ -1484,7 +1484,7 @@ encrypt(
         nonce,
         0u32
     );
-    let key1: (&[u8], &[u8]) = (&tmp).split_at(0usize);
+    let key1: (&[u8], &[u8]) = tmp.split_at(0usize);
     poly1305_do_128(key1.1, data_len, data, input_len, output, tag)
 }
 
@@ -1532,7 +1532,7 @@ decrypt(
         nonce,
         0u32
     );
-    let key1: (&[u8], &[u8]) = (&tmp).split_at(0usize);
+    let key1: (&[u8], &[u8]) = tmp.split_at(0usize);
     poly1305_do_128(key1.1, data_len, data, input_len, input, &mut computed_tag);
     let mut res: [u8; 1] = [255u8; 1usize];
     krml::unroll_for!(

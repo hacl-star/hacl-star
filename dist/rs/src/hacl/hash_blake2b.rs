@@ -44,7 +44,7 @@ fn update_block(
             let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
-            let os: (&mut [u64], &mut [u64]) = (&mut m_w).split_at_mut(0usize);
+            let os: (&mut [u64], &mut [u64]) = m_w.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -77,7 +77,7 @@ fn update_block(
         {
             let start_idx: u32 = i.wrapping_rem(10u32).wrapping_mul(16u32);
             let mut m_st: [u64; 16] = [0u64; 16usize];
-            let r0: (&mut [u64], &mut [u64]) = (&mut m_st).split_at_mut(0usize);
+            let r0: (&mut [u64], &mut [u64]) = m_st.split_at_mut(0usize);
             let r1: (&mut [u64], &mut [u64]) = r0.1.split_at_mut(4usize);
             let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(4usize);
             let r3: (&mut [u64], &mut [u64]) = r2.1.split_at_mut(4usize);
@@ -688,7 +688,7 @@ pub(crate) fn init(hash: &mut [u64], kk: u32, nn: u32)
     r3.1[3usize] = iv7;
     let kk1: u8 = kk as u8;
     let nn1: u8 = nn as u8;
-    let uu____0: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(4usize);
+    let uu____0: (&mut [u64], &mut [u64]) = tmp.split_at_mut(4usize);
     krml::unroll_for!(
         2,
         "i",
@@ -780,7 +780,7 @@ fn init_with_params(hash: &mut [u64], p: blake2_params)
     r3.1[3usize] = iv7;
     let kk: u8 = p.key_length;
     let nn: u8 = p.digest_length;
-    let uu____0: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(4usize);
+    let uu____0: (&mut [u64], &mut [u64]) = tmp.split_at_mut(4usize);
     krml::unroll_for!(
         2,
         "i",
@@ -935,7 +935,7 @@ fn update_blocks(
 pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[u64])
 {
     let mut b: [u8; 64] = [0u8; 64usize];
-    let first: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
+    let first: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
     let second: (&mut [u8], &mut [u8]) = first.1.split_at_mut(32usize);
     let row0: (&[u64], &[u64]) = hash.split_at(0usize);
     let row1: (&[u64], &[u64]) = row0.1.split_at(4usize);
@@ -960,7 +960,7 @@ pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[u64])
         )
     );
     crate::lowstar::ignore::ignore::<&[u8]>(&b);
-    let r#final: (&[u8], &[u8]) = (&b).split_at(0usize);
+    let r#final: (&[u8], &[u8]) = b.split_at(0usize);
     (output[0usize..nn as usize]).copy_from_slice(&r#final.1[0usize..nn as usize]);
     crate::lib::memzero0::memzero::<u8>(&mut b, 64u32)
 }
@@ -997,7 +997,7 @@ fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
     let k·: &[u8] = key.snd;
     if ! (kk2 == 0u32)
     {
-        let sub_b: (&mut [u8], &mut [u8]) = (&mut buf).split_at_mut(kk2 as usize);
+        let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
         (sub_b.1[0usize..128u32.wrapping_sub(kk2) as usize]).copy_from_slice(
             &vec![0u8; 128u32.wrapping_sub(kk2) as usize]
         );
@@ -1441,7 +1441,7 @@ hash_with_key_and_params(
     let mut b: [u64; 16] = [0u64; 16usize];
     let mut b1: [u64; 16] = [0u64; 16usize];
     let mut tmp: [u64; 8] = [0u64; 8usize];
-    let r0: (&mut [u64], &mut [u64]) = (&mut b).split_at_mut(0usize);
+    let r0: (&mut [u64], &mut [u64]) = b.split_at_mut(0usize);
     let r1: (&mut [u64], &mut [u64]) = r0.1.split_at_mut(4usize);
     let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(4usize);
     let r3: (&mut [u64], &mut [u64]) = r2.1.split_at_mut(4usize);
@@ -1463,7 +1463,7 @@ hash_with_key_and_params(
     r3.1[3usize] = iv7;
     let kk: u8 = params.key_length;
     let nn: u8 = params.digest_length;
-    let uu____0: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(4usize);
+    let uu____0: (&mut [u64], &mut [u64]) = tmp.split_at_mut(4usize);
     krml::unroll_for!(
         2,
         "i",

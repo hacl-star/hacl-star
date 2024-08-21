@@ -236,7 +236,7 @@ pub(crate) fn sha256_update_last(totlen: u64, len: u32, b: &[u8], hash: &mut [u3
     ((&mut last)[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
         &(&totlen_buf)[0usize..8usize]
     );
-    let last0: (&[u8], &[u8]) = (&last).split_at(0usize);
+    let last0: (&[u8], &[u8]) = last.split_at(0usize);
     let last1: (&[u8], &[u8]) = last0.1.split_at(64usize);
     let l0: &[u8] = last1.0;
     let l1: &[u8] = last1.1;
@@ -487,7 +487,7 @@ pub(crate) fn sha512_update_last(
     ((&mut last)[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize + 16usize]).copy_from_slice(
         &(&totlen_buf)[0usize..16usize]
     );
-    let last0: (&[u8], &[u8]) = (&last).split_at(0usize);
+    let last0: (&[u8], &[u8]) = last.split_at(0usize);
     let last1: (&[u8], &[u8]) = last0.1.split_at(128usize);
     let l0: &[u8] = last1.0;
     let l1: &[u8] = last1.1;

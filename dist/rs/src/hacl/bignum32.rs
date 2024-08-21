@@ -360,7 +360,7 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
             if 1u32 < len
             {
                 let a1: (&[u32], &[u32]) = n.split_at(1usize);
-                let res10: (&mut [u32], &mut [u32]) = (&mut n2).split_at_mut(1usize);
+                let res10: (&mut [u32], &mut [u32]) = n2.split_at_mut(1usize);
                 let mut c: [u32; 1] = [c0; 1usize];
                 for i in 0u32..len.wrapping_sub(1u32).wrapping_div(4u32)
                 {
@@ -610,7 +610,7 @@ mod_inv_prime_vartime_precomp(
         if 1u32 < len1
         {
             let a1: (&[u32], &[u32]) = n.split_at(1usize);
-            let res1: (&mut [u32], &mut [u32]) = (&mut n2).split_at_mut(1usize);
+            let res1: (&mut [u32], &mut [u32]) = n2.split_at_mut(1usize);
             let mut c: [u32; 1] = [c0; 1usize];
             for i in 0u32..len1.wrapping_sub(1u32).wrapping_div(4u32)
             {
@@ -762,7 +762,7 @@ new_bn_from_bytes_le(len: u32, b: &[u8]) ->
             ((&mut tmp)[0usize..len as usize]).copy_from_slice(&b[0usize..len as usize]);
             for i in 0u32..len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32)
             {
-                let bj: (&[u8], &[u8]) = (&tmp).split_at(i.wrapping_mul(4u32) as usize);
+                let bj: (&[u8], &[u8]) = tmp.split_at(i.wrapping_mul(4u32) as usize);
                 let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
                 let r1: u32 = u;
                 let x: u32 = r1;

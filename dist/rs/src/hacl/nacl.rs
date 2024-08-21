@@ -20,7 +20,7 @@ fn secretbox_detached(mlen: u32, c: &mut [u8], tag: &mut [u8], k: &[u8], n: &[u8
 {
     let mut xkeys: [u8; 96] = [0u8; 96usize];
     secretbox_init(&mut xkeys, k, n);
-    let mkey: (&[u8], &[u8]) = (&xkeys).split_at(32usize);
+    let mkey: (&[u8], &[u8]) = xkeys.split_at(32usize);
     let n1: (&[u8], &[u8]) = n.split_at(16usize);
     let subkey: (&[u8], &[u8]) = mkey.0.split_at(0usize);
     let ekey0: (&[u8], &[u8]) = mkey.1.split_at(32usize);
@@ -37,7 +37,7 @@ fn secretbox_detached(mlen: u32, c: &mut [u8], tag: &mut [u8], k: &[u8], n: &[u8
         1u32,
         {
             let x: u8 = (&block0)[i as usize] ^ ekey0.1[i as usize];
-            let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
+            let os: (&mut [u8], &mut [u8]) = block0.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -53,7 +53,7 @@ fn secretbox_open_detached(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]
 {
     let mut xkeys: [u8; 96] = [0u8; 96usize];
     secretbox_init(&mut xkeys, k, n);
-    let mkey: (&[u8], &[u8]) = (&xkeys).split_at(32usize);
+    let mkey: (&[u8], &[u8]) = xkeys.split_at(32usize);
     let mut tag·: [u8; 16] = [0u8; 16usize];
     crate::hacl::mac_poly1305::mac(&mut tag·, c, mlen, mkey.1);
     let mut res: [u8; 1] = [255u8; 1usize];
@@ -86,7 +86,7 @@ fn secretbox_open_detached(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]
             1u32,
             {
                 let x: u8 = (&block0)[i as usize] ^ ekey0.1[i as usize];
-                let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
+                let os: (&mut [u8], &mut [u8]) = block0.split_at_mut(0usize);
                 os.1[i as usize] = x
             }
         );

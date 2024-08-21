@@ -910,7 +910,7 @@ fn digest_(
                 )
             );
             let b0: &mut [u8] = output;
-            let uu____0: (&[u8], &[u8]) = (&hbuf).split_at(0usize);
+            let uu____0: (&[u8], &[u8]) = hbuf.split_at(0usize);
             (b0[i.wrapping_mul(block_len(a11)) as usize..i.wrapping_mul(block_len(a11)) as usize
             +
             block_len(a11) as usize]).copy_from_slice(&uu____0.1[0usize..block_len(a11) as usize]);
@@ -1062,7 +1062,7 @@ fn digest_(
                 )
             );
             let b0: &mut [u8] = output;
-            let uu____3: (&[u8], &[u8]) = (&hbuf).split_at(0usize);
+            let uu____3: (&[u8], &[u8]) = hbuf.split_at(0usize);
             (b0[i.wrapping_mul(block_len(a11)) as usize..i.wrapping_mul(block_len(a11)) as usize
             +
             block_len(a11) as usize]).copy_from_slice(&uu____3.1[0usize..block_len(a11) as usize]);
@@ -1192,7 +1192,7 @@ fn digest_(
                 (&ws)[i as usize]
             )
         );
-        let uu____6: (&[u8], &[u8]) = (&hbuf).split_at(0usize);
+        let uu____6: (&[u8], &[u8]) = hbuf.split_at(0usize);
         (output[(hash_len(a11)).wrapping_sub(remOut) as usize..(hash_len(a11)).wrapping_sub(remOut)
         as
         usize

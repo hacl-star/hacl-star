@@ -233,7 +233,7 @@ point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
                     &scalar[4u32.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
                 );
             let x: u64 = u;
-            let os: (&mut [u64], &mut [u64]) = (&mut scalar_q).split_at_mut(0usize);
+            let os: (&mut [u64], &mut [u64]) = scalar_q.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -272,7 +272,7 @@ pub fn
 point_load(b: &[u8], out: &mut [u64])
 {
     let mut p_aff: [u64; 10] = [0u64; 10usize];
-    let px: (&mut [u64], &mut [u64]) = (&mut p_aff).split_at_mut(0usize);
+    let px: (&mut [u64], &mut [u64]) = p_aff.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
     let pxb: (&[u8], &[u8]) = b.split_at(0usize);
     let pyb: (&[u8], &[u8]) = pxb.1.split_at(32usize);

@@ -54,7 +54,7 @@
     for i in 0u32..len
     {
         let x: u8 = p[i as usize];
-        let os: (&mut [u8], &mut [u8]) = (&mut p_s).split_at_mut(0usize);
+        let os: (&mut [u8], &mut [u8]) = p_s.split_at_mut(0usize);
         os.1[i as usize] = x
     };
     crate::hacl::bignum_base::bn_from_bytes_be_uint64(ffdhe_len(a), &p_s, r2_n.0);
@@ -80,7 +80,7 @@
     if 1u32 < nLen
     {
         let a1: (&[u64], &[u64]) = p_n.split_at(1usize);
-        let res1: (&mut [u64], &mut [u64]) = (&mut p_n1).split_at_mut(1usize);
+        let res1: (&mut [u64], &mut [u64]) = p_n1.split_at_mut(1usize);
         let mut c: [u64; 1] = [c0; 1usize];
         for i in 0u32..nLen.wrapping_sub(1u32).wrapping_div(4u32)
         {
@@ -199,7 +199,7 @@ pub fn ffdhe_secret_to_public_precomp(
     let mut g: [u8; 1] = [0u8; 1usize];
     {
         let x: u8 = (&crate::hacl::impl_ffdhe_constants::ffdhe_g2)[0u32 as usize];
-        let os: (&mut [u8], &mut [u8]) = (&mut g).split_at_mut(0usize);
+        let os: (&mut [u8], &mut [u8]) = g.split_at_mut(0usize);
         os.1[0u32 as usize] = x
     };
     crate::hacl::bignum_base::bn_from_bytes_be_uint64(1u32, &g, &mut (&mut g_n)[0usize..]);

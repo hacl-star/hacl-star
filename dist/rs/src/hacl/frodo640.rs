@@ -18,7 +18,7 @@ pub fn crypto_kem_keypair(pk: &mut [u8], sk: &mut [u8]) -> u32
 {
     let mut coins: [u8; 48] = [0u8; 48usize];
     crate::hacl::frodo_kem::randombytes_(48u32, &mut coins);
-    let s: (&[u8], &[u8]) = (&coins).split_at(0usize);
+    let s: (&[u8], &[u8]) = coins.split_at(0usize);
     let seed_se: (&[u8], &[u8]) = s.1.split_at(16usize);
     let z: (&[u8], &[u8]) = seed_se.1.split_at(16usize);
     let seed_a: (&mut [u8], &mut [u8]) = pk.split_at_mut(0usize);
@@ -72,7 +72,7 @@ pub fn crypto_kem_enc(ct: &mut [u8], ss: &mut [u8], pk: &[u8]) -> u32
     crate::hacl::hash_sha3::shake128(&mut (&mut pkh_mu)[0usize..], 16u32, pk, 9616u32);
     ((&mut pkh_mu)[16usize..16usize + 16usize]).copy_from_slice(&(&coins)[0usize..16usize]);
     crate::hacl::hash_sha3::shake128(&mut seed_se_k, 32u32, &pkh_mu, 32u32);
-    let seed_se: (&[u8], &[u8]) = (&seed_se_k).split_at(0usize);
+    let seed_se: (&[u8], &[u8]) = seed_se_k.split_at(0usize);
     let k: (&[u8], &[u8]) = seed_se.1.split_at(16usize);
     let seed_a: (&[u8], &[u8]) = pk.split_at(0usize);
     let b: (&[u8], &[u8]) = seed_a.1.split_at(16usize);
@@ -163,7 +163,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &[u8], sk: &[u8]) -> u32
         &(&mu_decode)[0usize..16usize]
     );
     crate::hacl::hash_sha3::shake128(&mut seed_se_k, 32u32, &pkh_mu_decode, pkh_mu_decode_len);
-    let seed_se: (&[u8], &[u8]) = (&seed_se_k).split_at(0usize);
+    let seed_se: (&[u8], &[u8]) = seed_se_k.split_at(0usize);
     let kp: (&[u8], &[u8]) = seed_se.1.split_at(16usize);
     let s: (&[u8], &[u8]) = s_bytes.0.split_at(0usize);
     let mut bpp_matrix: [u16; 5120] = [0u16; 5120usize];
@@ -235,7 +235,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &[u8], sk: &[u8]) -> u32
         {
             let uu____0: u8 = pk.0[i as usize];
             let x: u8 = uu____0 ^ mask0 as u8 & (kp.1[i as usize] ^ uu____0);
-            let os: (&mut [u8], &mut [u8]) = (&mut kp_s).split_at_mut(0usize);
+            let os: (&mut [u8], &mut [u8]) = kp_s.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );

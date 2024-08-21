@@ -61,8 +61,8 @@
     let mut acc: Vec<u8> = vec![0u8; accLen as usize];
     for i in 0u32..n
     {
-        let acc_i: (&mut [u8], &mut [u8]) = (&mut acc).split_at_mut(i.wrapping_mul(hLen) as usize);
-        let c: (&mut [u8], &mut [u8]) = (&mut mgfseed_counter).split_at_mut(len as usize);
+        let acc_i: (&mut [u8], &mut [u8]) = acc.split_at_mut(i.wrapping_mul(hLen) as usize);
+        let c: (&mut [u8], &mut [u8]) = mgfseed_counter.split_at_mut(len as usize);
         c.1[0usize] = i.wrapping_shr(24u32) as u8;
         c.1[1usize] = i.wrapping_shr(16u32) as u8;
         c.1[2usize] = i.wrapping_shr(8u32) as u8;
@@ -170,7 +170,7 @@
     for i in 0u32..dbLen
     {
         let x: u8 = (&db)[i as usize] ^ (&dbMask)[i as usize];
-        let os: (&mut [u8], &mut [u8]) = (&mut db).split_at_mut(0usize);
+        let os: (&mut [u8], &mut [u8]) = db.split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let msBits: u32 = emBits.wrapping_rem(8u32);
@@ -215,7 +215,7 @@
         for i in 0u32..dbLen
         {
             let x: u8 = (&dbMask)[i as usize] ^ m1Hash.0[i as usize];
-            let os: (&mut [u8], &mut [u8]) = (&mut dbMask).split_at_mut(0usize);
+            let os: (&mut [u8], &mut [u8]) = dbMask.split_at_mut(0usize);
             os.1[i as usize] = x
         };
         let msBits1: u32 = emBits.wrapping_rem(8u32);
@@ -227,7 +227,7 @@
         let padLen: u32 = emLen1.wrapping_sub(saltLen).wrapping_sub(hLen).wrapping_sub(1u32);
         let mut pad2: Vec<u8> = vec![0u8; padLen as usize];
         (&mut pad2)[padLen.wrapping_sub(1u32) as usize] = 0x01u8;
-        let pad: (&[u8], &[u8]) = (&dbMask).split_at(0usize);
+        let pad: (&[u8], &[u8]) = dbMask.split_at(0usize);
         let salt: (&[u8], &[u8]) = pad.1.split_at(padLen as usize);
         let mut res: [u8; 1] = [255u8; 1usize];
         for i in 0u32..padLen
@@ -407,7 +407,7 @@ rsapss_sign(
         {
             let x: u64 = (&s)[i as usize];
             let x0: u64 = eq_m & x;
-            let os: (&mut [u64], &mut [u64]) = (&mut s).split_at_mut(0usize);
+            let os: (&mut [u64], &mut [u64]) = s.split_at_mut(0usize);
             os.1[i as usize] = x0
         };
         let eq_b: bool = eq_m == 0xFFFFFFFFFFFFFFFFu64;
@@ -514,7 +514,7 @@ rsapss_verify(
             let emBits: u32 = modBits.wrapping_sub(1u32);
             let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
             let mut em: Vec<u8> = vec![0u8; emLen as usize];
-            let m1: (&[u64], &[u64]) = (&m).split_at(0usize);
+            let m1: (&[u64], &[u64]) = m.split_at(0usize);
             crate::hacl::bignum_base::bn_to_bytes_be_uint64(emLen, m1.1, &mut em);
             let res0: bool = pss_verify(a, saltLen, msgLen, msg, emBits, &em);
             res0

@@ -26,7 +26,7 @@
             let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = (&mut m_w).split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = m_w.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -63,7 +63,7 @@
             (&mut [crate::lib::intvector_intrinsics::vec128],
             &mut [crate::lib::intvector_intrinsics::vec128])
             =
-                (&mut m_st).split_at_mut(0usize);
+                m_st.split_at_mut(0usize);
             let
             r1:
             (&mut [crate::lib::intvector_intrinsics::vec128],
@@ -595,7 +595,7 @@ pub(crate) fn init(hash: &mut [crate::lib::intvector_intrinsics::vec128], kk: u3
     let iv7: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[7usize];
     r3.0[0usize] = crate::lib::intvector_intrinsics::vec128_load32s(iv0, iv1, iv2, iv3);
     r3.1[0usize] = crate::lib::intvector_intrinsics::vec128_load32s(iv4, iv5, iv6, iv7);
-    let uu____0: (&mut [u32], &mut [u32]) = (&mut tmp).split_at_mut(4usize);
+    let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
     krml::unroll_for!(
         2,
         "i",
@@ -697,7 +697,7 @@ fn init_with_params(
     let iv7: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[7usize];
     r3.0[0usize] = crate::lib::intvector_intrinsics::vec128_load32s(iv0, iv1, iv2, iv3);
     r3.1[0usize] = crate::lib::intvector_intrinsics::vec128_load32s(iv4, iv5, iv6, iv7);
-    let uu____0: (&mut [u32], &mut [u32]) = (&mut tmp).split_at_mut(4usize);
+    let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
     krml::unroll_for!(
         2,
         "i",
@@ -855,7 +855,7 @@ pub(crate) fn finish(
 )
 {
     let mut b: [u8; 32] = [0u8; 32usize];
-    let first: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
+    let first: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
     let second: (&mut [u8], &mut [u8]) = first.1.split_at_mut(16usize);
     let
     row0:
@@ -870,7 +870,7 @@ pub(crate) fn finish(
     crate::lib::intvector_intrinsics::vec128_store32_le(second.0, row1.0[0usize]);
     crate::lib::intvector_intrinsics::vec128_store32_le(second.1, row1.1[0usize]);
     crate::lowstar::ignore::ignore::<&[u8]>(&b);
-    let r#final: (&[u8], &[u8]) = (&b).split_at(0usize);
+    let r#final: (&[u8], &[u8]) = b.split_at(0usize);
     (output[0usize..nn as usize]).copy_from_slice(&r#final.1[0usize..nn as usize]);
     crate::lib::memzero0::memzero::<u8>(&mut b, 32u32)
 }
@@ -920,7 +920,7 @@ fn malloc_raw(
     let k·: &[u8] = key.snd;
     if ! (kk2 == 0u32)
     {
-        let sub_b: (&mut [u8], &mut [u8]) = (&mut buf).split_at_mut(kk2 as usize);
+        let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
         (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
             &vec![0u8; 64u32.wrapping_sub(kk2) as usize]
         );
@@ -1343,7 +1343,7 @@ hash_with_key_and_params(
     (&mut [crate::lib::intvector_intrinsics::vec128],
     &mut [crate::lib::intvector_intrinsics::vec128])
     =
-        (&mut b).split_at_mut(0usize);
+        b.split_at_mut(0usize);
     let
     r1:
     (&mut [crate::lib::intvector_intrinsics::vec128],
@@ -1372,7 +1372,7 @@ hash_with_key_and_params(
     let iv7: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[7usize];
     r3.0[0usize] = crate::lib::intvector_intrinsics::vec128_load32s(iv0, iv1, iv2, iv3);
     r3.1[0usize] = crate::lib::intvector_intrinsics::vec128_load32s(iv4, iv5, iv6, iv7);
-    let uu____0: (&mut [u32], &mut [u32]) = (&mut tmp).split_at_mut(4usize);
+    let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
     krml::unroll_for!(
         2,
         "i",

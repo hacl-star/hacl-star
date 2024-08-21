@@ -198,7 +198,7 @@
             os[i as usize] = x
         }
     );
-    let uu____0: (&mut [u32], &mut [u32]) = (&mut ctx1).split_at_mut(4usize);
+    let uu____0: (&mut [u32], &mut [u32]) = ctx1.split_at_mut(4usize);
     krml::unroll_for!(
         8,
         "i",
@@ -214,7 +214,7 @@
         }
     );
     (&mut ctx1)[12usize] = ctr;
-    let uu____1: (&mut [u32], &mut [u32]) = (&mut ctx1).split_at_mut(13usize);
+    let uu____1: (&mut [u32], &mut [u32]) = ctx1.split_at_mut(13usize);
     krml::unroll_for!(
         3,
         "i",

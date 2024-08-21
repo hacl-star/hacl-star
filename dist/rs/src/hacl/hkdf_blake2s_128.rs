@@ -30,7 +30,7 @@ expand_blake2s_128(
     let n: u32 = len.wrapping_div(tlen);
     let output: (&mut [u8], &mut [u8]) = okm.split_at_mut(0usize);
     let mut text: Vec<u8> = vec![0u8; tlen.wrapping_add(infolen).wrapping_add(1u32) as usize];
-    let text0: (&mut [u8], &mut [u8]) = (&mut text).split_at_mut(tlen as usize);
+    let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
     let tag: (&mut [u8], &mut [u8]) = text0.1.split_at_mut(0usize - tlen as usize);
     let ctr: (&mut [u8], &mut [u8]) = tag.1.split_at_mut(tlen.wrapping_add(infolen) as usize);
     ((&mut (&mut text)[tlen as usize..])[0usize..infolen as usize]).copy_from_slice(

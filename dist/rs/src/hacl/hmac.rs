@@ -19,7 +19,7 @@ compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u3
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
-    let nkey: (&mut [u8], &mut [u8]) = (&mut key_block).split_at_mut(0usize);
+    let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 20u32 };
     let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
     crate::lowstar::ignore::ignore::<&[u8]>(zeroes.1);
@@ -73,7 +73,7 @@ compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u3
             rem_len
         )
     };
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hacl::hash_sha1::finish(&s, dst1.1);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
     crate::hacl::hash_sha1::init(&mut s);
@@ -116,7 +116,7 @@ compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
-    let nkey: (&mut [u8], &mut [u8]) = (&mut key_block).split_at_mut(0usize);
+    let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 32u32 };
     let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
     crate::lowstar::ignore::ignore::<&[u8]>(zeroes.1);
@@ -146,7 +146,7 @@ compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         1u32,
         {
             let x: u32 = (&crate::hacl::hash_sha2::h256)[i as usize];
-            let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = st.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -183,7 +183,7 @@ compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
             s
         )
     };
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hacl::hash_sha2::sha256_finish(s, dst1.1);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
     crate::hacl::hash_sha2::sha256_init(s);
@@ -226,7 +226,7 @@ compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
-    let nkey: (&mut [u8], &mut [u8]) = (&mut key_block).split_at_mut(0usize);
+    let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 128u32 { key_len } else { 48u32 };
     let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
     crate::lowstar::ignore::ignore::<&[u8]>(zeroes.1);
@@ -256,7 +256,7 @@ compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         1u32,
         {
             let x: u64 = (&crate::hacl::hash_sha2::h384)[i as usize];
-            let os: (&mut [u64], &mut [u64]) = (&mut st).split_at_mut(0usize);
+            let os: (&mut [u64], &mut [u64]) = st.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -307,7 +307,7 @@ compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
             s
         )
     };
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hacl::hash_sha2::sha384_finish(s, dst1.1);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
     crate::hacl::hash_sha2::sha384_init(s);
@@ -356,7 +356,7 @@ compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
-    let nkey: (&mut [u8], &mut [u8]) = (&mut key_block).split_at_mut(0usize);
+    let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 128u32 { key_len } else { 64u32 };
     let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
     crate::lowstar::ignore::ignore::<&[u8]>(zeroes.1);
@@ -386,7 +386,7 @@ compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         1u32,
         {
             let x: u64 = (&crate::hacl::hash_sha2::h512)[i as usize];
-            let os: (&mut [u64], &mut [u64]) = (&mut st).split_at_mut(0usize);
+            let os: (&mut [u64], &mut [u64]) = st.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -437,7 +437,7 @@ compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
             s
         )
     };
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hacl::hash_sha2::sha512_finish(s, dst1.1);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
     crate::hacl::hash_sha2::sha512_init(s);
@@ -486,7 +486,7 @@ compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
-    let nkey: (&mut [u8], &mut [u8]) = (&mut key_block).split_at_mut(0usize);
+    let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 32u32 };
     let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
     crate::lowstar::ignore::ignore::<&[u8]>(zeroes.1);
@@ -557,7 +557,7 @@ compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
             rem0.1
         )
     };
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hacl::hash_blake2s::finish(32u32, dst1.1, s0);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
     crate::hacl::hash_blake2s::init(s0, 0u32, 32u32);
@@ -613,7 +613,7 @@ compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
 {
     let l: u32 = 128u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
-    let nkey: (&mut [u8], &mut [u8]) = (&mut key_block).split_at_mut(0usize);
+    let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 128u32 { key_len } else { 64u32 };
     let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
     crate::lowstar::ignore::ignore::<&[u8]>(zeroes.1);
@@ -702,7 +702,7 @@ compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
             rem0.1
         )
     };
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hacl::hash_blake2b::finish(64u32, dst1.1, s0);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
     crate::hacl::hash_blake2b::init(s0, 0u32, 64u32);

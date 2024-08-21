@@ -149,7 +149,7 @@ pub(crate) fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len:
         ).wrapping_add(8u32);
     let tmp_len: u32 = rest_len.wrapping_add(pad_len);
     let mut tmp_twoblocks: [u8; 128] = [0u8; 128usize];
-    let tmp: (&mut [u8], &mut [u8]) = (&mut tmp_twoblocks).split_at_mut(0usize);
+    let tmp: (&mut [u8], &mut [u8]) = tmp_twoblocks.split_at_mut(0usize);
     let tmp_rest: (&mut [u8], &mut [u8]) = tmp.1.split_at_mut(0usize);
     let tmp_pad: (&mut [u8], &mut [u8]) = tmp_rest.1.split_at_mut(rest_len as usize);
     (tmp_pad.0[0usize..rest_len as usize]).copy_from_slice(&rest.1[0usize..rest_len as usize]);

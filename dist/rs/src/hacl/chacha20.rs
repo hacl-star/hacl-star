@@ -152,7 +152,7 @@ fn chacha20_encrypt_block(ctx: &[u32], out: &mut [u8], incr: u32, text: &[u8])
             let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = bl.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -163,7 +163,7 @@ fn chacha20_encrypt_block(ctx: &[u32], out: &mut [u8], incr: u32, text: &[u8])
         1u32,
         {
             let x: u32 = (&bl)[i as usize] ^ (&k)[i as usize];
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = bl.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );

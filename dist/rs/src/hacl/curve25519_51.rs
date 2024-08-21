@@ -110,7 +110,7 @@ fn montgomery_ladder(out: &mut [u64], key: &[u8], init: &[u64])
     let tmp2: [crate::fstar::uint128::uint128; 10] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
     let mut p01_tmp1_swap: [u64; 41] = [0u64; 41usize];
-    let p01: (&mut [u64], &mut [u64]) = (&mut p01_tmp1_swap).split_at_mut(0usize);
+    let p01: (&mut [u64], &mut [u64]) = p01_tmp1_swap.split_at_mut(0usize);
     let p03: (&mut [u64], &mut [u64]) = p01.1.split_at_mut(0usize);
     let p11: (&mut [u64], &mut [u64]) = p03.1.split_at_mut(10usize);
     (p11.1[0usize..10usize]).copy_from_slice(&init[0usize..10usize]);
@@ -187,7 +187,7 @@ pub(crate) fn fsquare_times(
 pub(crate) fn finv(o: &mut [u64], i: &[u64], tmp: &[crate::fstar::uint128::uint128])
 {
     let mut t1: [u64; 20] = [0u64; 20usize];
-    let a1: (&mut [u64], &mut [u64]) = (&mut t1).split_at_mut(0usize);
+    let a1: (&mut [u64], &mut [u64]) = t1.split_at_mut(0usize);
     let b1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(5usize);
     let t01: (&mut [u64], &mut [u64]) = b1.1.split_at_mut(10usize);
     let tmp1: (&[crate::fstar::uint128::uint128], &[crate::fstar::uint128::uint128]) =
@@ -310,13 +310,13 @@ scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
             let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
-            let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
+            let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
     let tmp3: u64 = (&tmp)[3usize];
     (&mut tmp)[3usize] = tmp3 & 0x7fffffffffffffffu64;
-    let x: (&mut [u64], &mut [u64]) = (&mut init).split_at_mut(0usize);
+    let x: (&mut [u64], &mut [u64]) = init.split_at_mut(0usize);
     let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(5usize);
     z.1[0usize] = 1u64;
     z.1[1usize] = 0u64;
@@ -360,7 +360,7 @@ secret_to_public(r#pub: &mut [u8], r#priv: &[u8])
         1u32,
         {
             let x: u8 = (&g25519)[i as usize];
-            let os: (&mut [u8], &mut [u8]) = (&mut basepoint).split_at_mut(0usize);
+            let os: (&mut [u8], &mut [u8]) = basepoint.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );

@@ -415,7 +415,7 @@
     let b2: &[u8] = b.snd.snd.fst;
     let b1: &[u8] = b.snd.fst;
     let b0: &[u8] = b.fst;
-    let last0: (&mut [u8], &mut [u8]) = (&mut last).split_at_mut(0usize);
+    let last0: (&mut [u8], &mut [u8]) = last.split_at_mut(0usize);
     let last1: (&mut [u8], &mut [u8]) = last0.1.split_at_mut(128usize);
     let last2: (&mut [u8], &mut [u8]) = last1.1.split_at_mut(128usize);
     let last3: (&mut [u8], &mut [u8]) = last2.1.split_at_mut(128usize);
@@ -1033,7 +1033,7 @@ pub fn sha224_4(
     let b2: &[u8] = b.snd.snd.fst;
     let b1: &[u8] = b.snd.fst;
     let b0: &[u8] = b.fst;
-    let last0: (&mut [u8], &mut [u8]) = (&mut last).split_at_mut(0usize);
+    let last0: (&mut [u8], &mut [u8]) = last.split_at_mut(0usize);
     let last1: (&mut [u8], &mut [u8]) = last0.1.split_at_mut(128usize);
     let last2: (&mut [u8], &mut [u8]) = last1.1.split_at_mut(128usize);
     let last3: (&mut [u8], &mut [u8]) = last2.1.split_at_mut(128usize);

@@ -169,14 +169,14 @@ pub(crate) fn shake128_4x(
     );
     for i in 0u32..n.wrapping_div(4u32)
     {
-        let r0: (&mut [u8], &mut [u8]) = (&mut r).split_at_mut(0u32.wrapping_mul(n) as usize);
+        let r0: (&mut [u8], &mut [u8]) = r.split_at_mut(0u32.wrapping_mul(n) as usize);
         let r1: (&mut [u8], &mut [u8]) =
             r0.1.split_at_mut(2u32.wrapping_mul(n) as usize - 0u32.wrapping_mul(n) as usize);
         let r2: (&mut [u8], &mut [u8]) =
             r1.1.split_at_mut(4u32.wrapping_mul(n) as usize - 2u32.wrapping_mul(n) as usize);
         let r3: (&mut [u8], &mut [u8]) =
             r2.1.split_at_mut(6u32.wrapping_mul(n) as usize - 4u32.wrapping_mul(n) as usize);
-        let tmp_seed0: (&mut [u8], &mut [u8]) = (&mut tmp_seed).split_at_mut(0usize);
+        let tmp_seed0: (&mut [u8], &mut [u8]) = tmp_seed.split_at_mut(0usize);
         let tmp_seed1: (&mut [u8], &mut [u8]) = tmp_seed0.1.split_at_mut(18usize);
         let tmp_seed2: (&mut [u8], &mut [u8]) = tmp_seed1.1.split_at_mut(18usize);
         let tmp_seed3: (&mut [u8], &mut [u8]) = tmp_seed2.1.split_at_mut(18usize);
@@ -449,7 +449,7 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
                 )
             );
         crate::lowstar::endianness::store128_be(&mut v16, templong);
-        let src: (&[u8], &[u8]) = (&v16).split_at(16u32.wrapping_sub(d) as usize);
+        let src: (&[u8], &[u8]) = v16.split_at(16u32.wrapping_sub(d) as usize);
         (r.1[0usize..d as usize]).copy_from_slice(&src.1[0usize..d as usize])
     }
 }
@@ -587,7 +587,7 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
         let templong0: u64 = (&templong)[0usize];
         let mut v8: [u8; 8] = [0u8; 8usize];
         crate::lowstar::endianness::store64_le(&mut v8, templong0);
-        let tmp: (&[u8], &[u8]) = (&v8).split_at(0usize);
+        let tmp: (&[u8], &[u8]) = v8.split_at(0usize);
         (res[i.wrapping_mul(b) as usize..i.wrapping_mul(b) as usize + b as usize]).copy_from_slice(
             &tmp.1[0usize..b as usize]
         )

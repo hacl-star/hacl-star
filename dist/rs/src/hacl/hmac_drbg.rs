@@ -177,7 +177,7 @@ instantiate(
                       )
                   );
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
               if
               entropy_input_len.wrapping_add(nonce_len).wrapping_add(personalization_string_len)
@@ -212,7 +212,7 @@ instantiate(
                           )
                       );
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                   if
                   entropy_input_len.wrapping_add(nonce_len).wrapping_add(personalization_string_len)
@@ -270,7 +270,7 @@ instantiate(
                       )
                   );
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
               if
               entropy_input_len.wrapping_add(nonce_len).wrapping_add(personalization_string_len)
@@ -305,7 +305,7 @@ instantiate(
                           )
                       );
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                   if
                   entropy_input_len.wrapping_add(nonce_len).wrapping_add(personalization_string_len)
@@ -363,7 +363,7 @@ instantiate(
                       )
                   );
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
               if
               entropy_input_len.wrapping_add(nonce_len).wrapping_add(personalization_string_len)
@@ -398,7 +398,7 @@ instantiate(
                           )
                       );
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                   if
                   entropy_input_len.wrapping_add(nonce_len).wrapping_add(personalization_string_len)
@@ -456,7 +456,7 @@ instantiate(
                       )
                   );
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
               if
               entropy_input_len.wrapping_add(nonce_len).wrapping_add(personalization_string_len)
@@ -491,7 +491,7 @@ instantiate(
                           )
                       );
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                   if
                   entropy_input_len.wrapping_add(nonce_len).wrapping_add(personalization_string_len)
@@ -560,7 +560,7 @@ reseed(
               let input_len: u32 =
                   21u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
               {
@@ -585,7 +585,7 @@ reseed(
                   let input_len0: u32 =
                       21u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                   if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
                   {
@@ -626,7 +626,7 @@ reseed(
               let input_len: u32 =
                   33u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
               {
@@ -651,7 +651,7 @@ reseed(
                   let input_len0: u32 =
                       33u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                   if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
                   {
@@ -692,7 +692,7 @@ reseed(
               let input_len: u32 =
                   49u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
               {
@@ -717,7 +717,7 @@ reseed(
                   let input_len0: u32 =
                       49u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                   if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
                   {
@@ -758,7 +758,7 @@ reseed(
               let input_len: u32 =
                   65u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
               {
@@ -783,7 +783,7 @@ reseed(
                   let input_len0: u32 =
                       65u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                   if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
                   {
@@ -845,7 +845,7 @@ generate(
               {
                   let input_len: u32 = 21u32.wrapping_add(additional_input_len);
                   let mut input: Vec<u8> = vec![0u8; input_len as usize];
-                  let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+                  let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
                   (k·.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                   if additional_input_len != 0u32
                   {
@@ -861,7 +861,7 @@ generate(
                   {
                       let input_len0: u32 = 21u32.wrapping_add(additional_input_len);
                       let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                      let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                      let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                       (k·0.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                       if additional_input_len != 0u32
                       {
@@ -896,7 +896,7 @@ generate(
               };
               let input_len: u32 = 21u32.wrapping_add(additional_input_len);
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
               if additional_input_len != 0u32
               {
@@ -912,7 +912,7 @@ generate(
               {
                   let input_len0: u32 = 21u32.wrapping_add(additional_input_len);
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                   if additional_input_len != 0u32
                   {
@@ -941,7 +941,7 @@ generate(
               {
                   let input_len: u32 = 33u32.wrapping_add(additional_input_len);
                   let mut input: Vec<u8> = vec![0u8; input_len as usize];
-                  let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+                  let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
                   (k·.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                   if additional_input_len != 0u32
                   {
@@ -957,7 +957,7 @@ generate(
                   {
                       let input_len0: u32 = 33u32.wrapping_add(additional_input_len);
                       let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                      let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                      let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                       (k·0.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                       if additional_input_len != 0u32
                       {
@@ -992,7 +992,7 @@ generate(
               };
               let input_len: u32 = 33u32.wrapping_add(additional_input_len);
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
               if additional_input_len != 0u32
               {
@@ -1008,7 +1008,7 @@ generate(
               {
                   let input_len0: u32 = 33u32.wrapping_add(additional_input_len);
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                   if additional_input_len != 0u32
                   {
@@ -1037,7 +1037,7 @@ generate(
               {
                   let input_len: u32 = 49u32.wrapping_add(additional_input_len);
                   let mut input: Vec<u8> = vec![0u8; input_len as usize];
-                  let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+                  let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
                   (k·.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                   if additional_input_len != 0u32
                   {
@@ -1053,7 +1053,7 @@ generate(
                   {
                       let input_len0: u32 = 49u32.wrapping_add(additional_input_len);
                       let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                      let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                      let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                       (k·0.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                       if additional_input_len != 0u32
                       {
@@ -1088,7 +1088,7 @@ generate(
               };
               let input_len: u32 = 49u32.wrapping_add(additional_input_len);
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
               if additional_input_len != 0u32
               {
@@ -1104,7 +1104,7 @@ generate(
               {
                   let input_len0: u32 = 49u32.wrapping_add(additional_input_len);
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                   if additional_input_len != 0u32
                   {
@@ -1133,7 +1133,7 @@ generate(
               {
                   let input_len: u32 = 65u32.wrapping_add(additional_input_len);
                   let mut input: Vec<u8> = vec![0u8; input_len as usize];
-                  let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+                  let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
                   (k·.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                   if additional_input_len != 0u32
                   {
@@ -1149,7 +1149,7 @@ generate(
                   {
                       let input_len0: u32 = 65u32.wrapping_add(additional_input_len);
                       let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                      let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                      let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                       (k·0.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                       if additional_input_len != 0u32
                       {
@@ -1184,7 +1184,7 @@ generate(
               };
               let input_len: u32 = 65u32.wrapping_add(additional_input_len);
               let mut input: Vec<u8> = vec![0u8; input_len as usize];
-              let k·: (&mut [u8], &mut [u8]) = (&mut input).split_at_mut(0usize);
+              let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
               if additional_input_len != 0u32
               {
@@ -1200,7 +1200,7 @@ generate(
               {
                   let input_len0: u32 = 65u32.wrapping_add(additional_input_len);
                   let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
-                  let k·0: (&mut [u8], &mut [u8]) = (&mut input0).split_at_mut(0usize);
+                  let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                   if additional_input_len != 0u32
                   {

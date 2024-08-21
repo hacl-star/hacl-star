@@ -26,7 +26,7 @@
             let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = (&mut m_w).split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = m_w.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -58,7 +58,7 @@
         {
             let start_idx: u32 = i.wrapping_rem(10u32).wrapping_mul(16u32);
             let mut m_st: [u32; 16] = [0u32; 16usize];
-            let r0: (&mut [u32], &mut [u32]) = (&mut m_st).split_at_mut(0usize);
+            let r0: (&mut [u32], &mut [u32]) = m_st.split_at_mut(0usize);
             let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
             let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
             let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
@@ -667,7 +667,7 @@ pub(crate) fn init(hash: &mut [u32], kk: u32, nn: u32)
     r3.1[1usize] = iv5;
     r3.1[2usize] = iv6;
     r3.1[3usize] = iv7;
-    let uu____0: (&mut [u32], &mut [u32]) = (&mut tmp).split_at_mut(4usize);
+    let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
     krml::unroll_for!(
         2,
         "i",
@@ -758,7 +758,7 @@ fn init_with_params(hash: &mut [u32], p: crate::hacl::hash_blake2b::blake2_param
     r3.1[1usize] = iv5;
     r3.1[2usize] = iv6;
     r3.1[3usize] = iv7;
-    let uu____0: (&mut [u32], &mut [u32]) = (&mut tmp).split_at_mut(4usize);
+    let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
     krml::unroll_for!(
         2,
         "i",
@@ -899,7 +899,7 @@ fn update_blocks(len: u32, wv: &mut [u32], hash: &mut [u32], prev: u64, blocks: 
 pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[u32])
 {
     let mut b: [u8; 32] = [0u8; 32usize];
-    let first: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
+    let first: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
     let second: (&mut [u8], &mut [u8]) = first.1.split_at_mut(16usize);
     let row0: (&[u32], &[u32]) = hash.split_at(0usize);
     let row1: (&[u32], &[u32]) = row0.1.split_at(4usize);
@@ -924,7 +924,7 @@ pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[u32])
         )
     );
     crate::lowstar::ignore::ignore::<&[u8]>(&b);
-    let r#final: (&[u8], &[u8]) = (&b).split_at(0usize);
+    let r#final: (&[u8], &[u8]) = b.split_at(0usize);
     (output[0usize..nn as usize]).copy_from_slice(&r#final.1[0usize..nn as usize]);
     crate::lib::memzero0::memzero::<u8>(&mut b, 32u32)
 }
@@ -966,7 +966,7 @@ fn malloc_raw(
     let k·: &[u8] = key.snd;
     if ! (kk2 == 0u32)
     {
-        let sub_b: (&mut [u8], &mut [u8]) = (&mut buf).split_at_mut(kk2 as usize);
+        let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
         (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
             &vec![0u8; 64u32.wrapping_sub(kk2) as usize]
         );
@@ -1376,7 +1376,7 @@ hash_with_key_and_params(
     let mut b: [u32; 16] = [0u32; 16usize];
     let mut b1: [u32; 16] = [0u32; 16usize];
     let mut tmp: [u32; 8] = [0u32; 8usize];
-    let r0: (&mut [u32], &mut [u32]) = (&mut b).split_at_mut(0usize);
+    let r0: (&mut [u32], &mut [u32]) = b.split_at_mut(0usize);
     let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
     let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
     let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
@@ -1396,7 +1396,7 @@ hash_with_key_and_params(
     r3.1[1usize] = iv5;
     r3.1[2usize] = iv6;
     r3.1[3usize] = iv7;
-    let uu____0: (&mut [u32], &mut [u32]) = (&mut tmp).split_at_mut(4usize);
+    let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
     krml::unroll_for!(
         2,
         "i",

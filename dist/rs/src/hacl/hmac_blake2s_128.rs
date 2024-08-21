@@ -17,7 +17,7 @@ compute_blake2s_128(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_
 {
     let l: u32 = 64u32;
     let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
-    let nkey: (&mut [u8], &mut [u8]) = (&mut key_block).split_at_mut(0usize);
+    let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 32u32 };
     let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
     crate::lowstar::ignore::ignore::<&[u8]>(zeroes.1);
@@ -101,7 +101,7 @@ compute_blake2s_128(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_
             rem0.1
         )
     };
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hacl::hash_blake2s_simd128::finish(32u32, dst1.1, s0);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
     crate::hacl::hash_blake2s_simd128::init(s0, 0u32, 32u32);
