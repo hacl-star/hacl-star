@@ -53,17 +53,14 @@ let is_qelem_zero_vartime4 ((f0,f1,f2,f3): qelem4) : bool =
 inline_for_extraction noextract
 let is_qelem_lt_q_vartime4 ((a0,a1,a2,a3): qelem4) : bool =
   let open Lib.RawIntTypes in
-  if u64_to_UInt64 a3 <. 0xffffffffffffffffuL then true
+  if u64_to_UInt64 a3 <. 0xffffffffffffffffuL || u64_to_UInt64 a2 <. 0xfffffffffffffffeuL then true
   else begin
-    if u64_to_UInt64 a2 <. 0xfffffffffffffffeuL then true
+    if u64_to_UInt64 a2 >. 0xfffffffffffffffeuL then false
     else begin
-      if u64_to_UInt64 a2 >. 0xfffffffffffffffeuL then false
+      if u64_to_UInt64 a1 <. 0xbaaedce6af48a03buL then true
       else begin
-        if u64_to_UInt64 a1 <. 0xbaaedce6af48a03buL then true
-        else begin
-          if u64_to_UInt64 a1 >. 0xbaaedce6af48a03buL then false
-          else u64_to_UInt64 a0 <. 0xbfd25e8cd0364141uL
-        end
+        if u64_to_UInt64 a1 >. 0xbaaedce6af48a03buL then false
+        else u64_to_UInt64 a0 <. 0xbfd25e8cd0364141uL
       end
     end
   end
@@ -76,13 +73,10 @@ let is_qelem_le_q_halved_vartime4 ((a0,a1,a2,a3): qelem4) : bool =
   else begin
     if u64_to_UInt64 a3 >. 0x7fffffffffffffffuL then false
     else begin
-      if u64_to_UInt64 a2 <. 0xffffffffffffffffuL then true
+      if u64_to_UInt64 a2 <. 0xffffffffffffffffuL || u64_to_UInt64 a1 <. 0x5d576e7357a4501duL then true
       else begin
-        if u64_to_UInt64 a1 <. 0x5d576e7357a4501duL then true
-        else begin
-          if u64_to_UInt64 a1 >. 0x5d576e7357a4501duL then false
-          else u64_to_UInt64 a0 <=. 0xdfe92f46681b20a0uL
-        end
+        if u64_to_UInt64 a1 >. 0x5d576e7357a4501duL then false
+        else u64_to_UInt64 a0 <=. 0xdfe92f46681b20a0uL
       end
     end
   end
