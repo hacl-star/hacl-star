@@ -431,7 +431,7 @@ exp_vartime(
             let j: u32 = i.wrapping_rem(64u32);
             let tmp: u64 = b[i1 as usize];
             let bit: u64 = tmp.wrapping_shr(j) & 1u64;
-            if ! (bit == 0u64)
+            if bit != 0u64
             {
                 let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
                 crate::hacl::bignum::bn_mont_mul_u64(len1, ctx_n0.1, uu____0.mu, resM, &aMc, resM)

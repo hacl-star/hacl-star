@@ -527,7 +527,7 @@ pub(crate) fn make_point_inf(b: &mut [u64])
                     reduce(x32.1);
                     let x00: u64 = x32.1[0usize];
                     let x01: u64 = x00 & 1u64;
-                    if ! (x01 == sign)
+                    if x01 != sign
                     {
                         t01.1[0usize] = 0u64;
                         t01.1[1usize] = 0u64;

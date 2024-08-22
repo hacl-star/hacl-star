@@ -690,10 +690,7 @@ pub fn
 new_bn_from_bytes_be(len: u32, b: &[u8]) ->
     Vec<u32>
 {
-    if
-    len == 0u32
-    ||
-    ! (len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) <= 1073741823u32)
+    if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) > 1073741823u32
     { [].to_vec() }
     else
     {
@@ -741,10 +738,7 @@ pub fn
 new_bn_from_bytes_le(len: u32, b: &[u8]) ->
     Vec<u32>
 {
-    if
-    len == 0u32
-    ||
-    ! (len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) <= 1073741823u32)
+    if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) > 1073741823u32
     { [].to_vec() }
     else
     {

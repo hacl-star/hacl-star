@@ -1627,7 +1627,7 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
             let j: u32 = i.wrapping_rem(32u32);
             let tmp: u32 = b[i1 as usize];
             let bit: u32 = tmp.wrapping_shr(j) & 1u32;
-            if ! (bit == 0u32)
+            if bit != 0u32
             {
                 let mut aM_copy: Vec<u32> = vec![0u32; len as usize];
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(
@@ -2090,7 +2090,7 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
             let j: u32 = i.wrapping_rem(64u32);
             let tmp: u64 = b[i1 as usize];
             let bit: u64 = tmp.wrapping_shr(j) & 1u64;
-            if ! (bit == 0u64)
+            if bit != 0u64
             {
                 let mut aM_copy: Vec<u64> = vec![0u64; len as usize];
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(

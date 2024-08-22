@@ -596,7 +596,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
             let j: u32 = i.wrapping_rem(32u32);
             let tmp: u32 = b[i1 as usize];
             let bit: u32 = tmp.wrapping_shr(j) & 1u32;
-            if ! (bit == 0u32)
+            if bit != 0u32
             {
                 let mut aM_copy: [u32; 128] = [0u32; 128usize];
                 ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&resM)[0usize..128usize]);
@@ -1361,10 +1361,7 @@ pub fn
 new_bn_from_bytes_be(len: u32, b: &[u8]) ->
     Vec<u32>
 {
-    if
-    len == 0u32
-    ||
-    ! (len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) <= 1073741823u32)
+    if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) > 1073741823u32
     { [].to_vec() }
     else
     {
@@ -1412,10 +1409,7 @@ pub fn
 new_bn_from_bytes_le(len: u32, b: &[u8]) ->
     Vec<u32>
 {
-    if
-    len == 0u32
-    ||
-    ! (len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) <= 1073741823u32)
+    if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) > 1073741823u32
     { [].to_vec() }
     else
     {

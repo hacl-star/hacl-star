@@ -234,7 +234,7 @@
             (&mut res)[0usize] = uu____0 & (&res)[0usize]
         };
         let z: u8 = (&res)[0usize];
-        if ! (z == 255u8)
+        if z != 255u8
         { false }
         else
         {
@@ -490,7 +490,7 @@ rsapss_verify(
                     &mut m
                 );
                 let ite: bool =
-                    if ! (modBits.wrapping_sub(1u32).wrapping_rem(8u32) == 0u32)
+                    if modBits.wrapping_sub(1u32).wrapping_rem(8u32) != 0u32
                     { true }
                     else
                     {

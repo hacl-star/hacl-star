@@ -2474,7 +2474,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { 64u32 }
                 else
                 { total_len1.wrapping_rem(64u32 as u64) as u32 };
-            if ! (sz1 == 0u32) { poly1305_update(block_state, 64u32, buf) };
+            if sz1 != 0u32 { poly1305_update(block_state, 64u32, buf) };
             let ite: u32 =
                 if (chunk_len as u64).wrapping_rem(64u32 as u64) == 0u64 && chunk_len as u64 > 0u64
                 { 64u32 }
@@ -2521,7 +2521,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { 64u32 }
                 else
                 { total_len10.wrapping_rem(64u32 as u64) as u32 };
-            if ! (sz10 == 0u32) { poly1305_update(block_state, 64u32, buf0) };
+            if sz10 != 0u32 { poly1305_update(block_state, 64u32, buf0) };
             let ite: u32 =
                 if
                 (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(64u32 as u64) == 0u64

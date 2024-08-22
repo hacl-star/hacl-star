@@ -1419,7 +1419,7 @@ update0(state: &mut [crate::hacl::streaming_types::state_32], chunk: &[u8], chun
                 { 64u32 }
                 else
                 { total_len1.wrapping_rem(64u32 as u64) as u32 };
-            if ! (sz1 == 0u32) { update_multi(block_state, buf, 1u32) };
+            if sz1 != 0u32 { update_multi(block_state, buf, 1u32) };
             let ite: u32 =
                 if (chunk_len as u64).wrapping_rem(64u32 as u64) == 0u64 && chunk_len as u64 > 0u64
                 { 64u32 }
@@ -1460,7 +1460,7 @@ update0(state: &mut [crate::hacl::streaming_types::state_32], chunk: &[u8], chun
                 { 64u32 }
                 else
                 { total_len10.wrapping_rem(64u32 as u64) as u32 };
-            if ! (sz10 == 0u32) { update_multi(block_state, buf0, 1u32) };
+            if sz10 != 0u32 { update_multi(block_state, buf0, 1u32) };
             let ite: u32 =
                 if
                 (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(64u32 as u64) == 0u64

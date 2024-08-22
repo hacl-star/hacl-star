@@ -842,7 +842,7 @@ pub(crate) fn update_last(
     if kk > 0u32
     {
         update_key(wv, hash, kk, k, ll);
-        if ! (ll == 0u32) { update_blocks(ll, wv, hash, lb, d) }
+        if ll != 0u32 { update_blocks(ll, wv, hash, lb, d) }
     }
     else
     { update_blocks(ll, wv, hash, 0u32 as u64, d) }
@@ -918,7 +918,7 @@ fn malloc_raw(
         crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node };
     let kk2: u32 = i.key_length as u32;
     let k·: &[u8] = key.snd;
-    if ! (kk2 == 0u32)
+    if kk2 != 0u32
     {
         let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
         (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
@@ -967,7 +967,7 @@ fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_k
         { key_length: kk10, digest_length: nn0, last_node: last_node0 };
     let kk2: u32 = i1.key_length as u32;
     let k·1: &[u8] = key.snd;
-    if ! (kk2 == 0u32)
+    if kk2 != 0u32
     {
         let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
         (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
@@ -1086,7 +1086,7 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { 64u32 }
                 else
                 { total_len1.wrapping_rem(64u32 as u64) as u32 };
-            if ! (sz1 == 0u32)
+            if sz1 != 0u32
             {
                 let prevlen: u64 = total_len1.wrapping_sub(sz1 as u64);
                 let hash: &mut [crate::lib::intvector_intrinsics::vec128] = &mut block_state.f4;
@@ -1137,7 +1137,7 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { 64u32 }
                 else
                 { total_len10.wrapping_rem(64u32 as u64) as u32 };
-            if ! (sz10 == 0u32)
+            if sz10 != 0u32
             {
                 let prevlen: u64 = total_len10.wrapping_sub(sz10 as u64);
                 let hash: &mut [crate::lib::intvector_intrinsics::vec128] = &mut block_state.f4;

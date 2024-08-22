@@ -350,7 +350,7 @@ fn update_last_sha3(
         let u30: u64 = crate::lowstar::endianness::load64_le(&b2[248usize..]);
         (&mut ws)[31usize] = u30;
         krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
-        if ! (suffix & 0x80u8 == 0u8) && 0u32.wrapping_rem(len) == len.wrapping_sub(1u32)
+        if suffix & 0x80u8 != 0u8 && 0u32.wrapping_rem(len) == len.wrapping_sub(1u32)
         {
             krml::unroll_for!(
                 24,
@@ -546,7 +546,7 @@ fn update_last_sha3(
         let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
         (&mut ws)[31usize] = u30;
         krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
-        if ! (suffix & 0x80u8 == 0u8) && input_len.wrapping_rem(len) == len.wrapping_sub(1u32)
+        if suffix & 0x80u8 != 0u8 && input_len.wrapping_rem(len) == len.wrapping_sub(1u32)
         {
             krml::unroll_for!(
                 24,
@@ -765,7 +765,7 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { block_len(i) }
                 else
                 { total_len1.wrapping_rem(block_len(i) as u64) as u32 };
-            if ! (sz1 == 0u32)
+            if sz1 != 0u32
             {
                 let a1: crate::hacl::streaming_types::hash_alg = block_state.fst;
                 let s1: &mut [u64] = &mut block_state.snd;
@@ -816,7 +816,7 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { block_len(i) }
                 else
                 { total_len10.wrapping_rem(block_len(i) as u64) as u32 };
-            if ! (sz10 == 0u32)
+            if sz10 != 0u32
             {
                 let a1: crate::hacl::streaming_types::hash_alg = block_state.fst;
                 let s1: &mut [u64] = &mut block_state.snd;

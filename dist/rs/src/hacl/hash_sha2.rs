@@ -669,7 +669,7 @@ reset_256(state: &mut [crate::hacl::streaming_types::state_32])
                 { 64u32 }
                 else
                 { total_len1.wrapping_rem(64u32 as u64) as u32 };
-            if ! (sz1 == 0u32) { sha256_update_nblocks(64u32, buf, block_state) };
+            if sz1 != 0u32 { sha256_update_nblocks(64u32, buf, block_state) };
             let ite: u32 =
                 if (chunk_len as u64).wrapping_rem(64u32 as u64) == 0u64 && chunk_len as u64 > 0u64
                 { 64u32 }
@@ -714,7 +714,7 @@ reset_256(state: &mut [crate::hacl::streaming_types::state_32])
                 { 64u32 }
                 else
                 { total_len10.wrapping_rem(64u32 as u64) as u32 };
-            if ! (sz10 == 0u32) { sha256_update_nblocks(64u32, buf0, block_state) };
+            if sz10 != 0u32 { sha256_update_nblocks(64u32, buf0, block_state) };
             let ite: u32 =
                 if
                 (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(64u32 as u64) == 0u64
@@ -981,7 +981,7 @@ pub fn reset_512(state: &mut [crate::hacl::streaming_types::state_64])
                 { 128u32 }
                 else
                 { total_len1.wrapping_rem(128u32 as u64) as u32 };
-            if ! (sz1 == 0u32) { sha512_update_nblocks(128u32, buf, block_state) };
+            if sz1 != 0u32 { sha512_update_nblocks(128u32, buf, block_state) };
             let ite: u32 =
                 if (chunk_len as u64).wrapping_rem(128u32 as u64) == 0u64 && chunk_len as u64 > 0u64
                 { 128u32 }
@@ -1026,7 +1026,7 @@ pub fn reset_512(state: &mut [crate::hacl::streaming_types::state_64])
                 { 128u32 }
                 else
                 { total_len10.wrapping_rem(128u32 as u64) as u32 };
-            if ! (sz10 == 0u32) { sha512_update_nblocks(128u32, buf0, block_state) };
+            if sz10 != 0u32 { sha512_update_nblocks(128u32, buf0, block_state) };
             let ite: u32 =
                 if
                 (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(128u32 as u64) == 0u64
