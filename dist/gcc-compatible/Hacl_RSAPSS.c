@@ -288,11 +288,7 @@ pss_verify(
     em_0 = 0U;
   }
   uint8_t em_last = em[emLen - 1U];
-  if (emLen < saltLen + hash_len(a) + 2U)
-  {
-    return false;
-  }
-  if (!(em_last == 0xbcU && em_0 == 0U))
+  if (emLen < saltLen + hash_len(a) + 2U || !(em_last == 0xbcU && em_0 == 0U))
   {
     return false;
   }
@@ -568,10 +564,9 @@ Hacl_RSAPSS_rsapss_verify(
         eBits,
         e,
         m);
-      bool ite;
       if (!((modBits - 1U) % 8U == 0U))
       {
-        ite = true;
+        res = true;
       }
       else
       {
@@ -579,15 +574,7 @@ Hacl_RSAPSS_rsapss_verify(
         uint32_t j = (modBits - 1U) % 64U;
         uint64_t tmp = m[i];
         uint64_t get_bit = tmp >> j & 1ULL;
-        ite = get_bit == 0ULL;
-      }
-      if (ite)
-      {
-        res = true;
-      }
-      else
-      {
-        res = false;
+        res = get_bit == 0ULL;
       }
     }
     else
