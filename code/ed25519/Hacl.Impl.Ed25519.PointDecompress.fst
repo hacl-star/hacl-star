@@ -73,8 +73,7 @@ let point_decompress_ out s tmp =
   let z = Hacl.Impl.Ed25519.RecoverX.recover_x x y sign in
 
   let res =
-  if z = false then false
-  else (
+  if z then (
     let outx = getx out in
     let outy = gety out in
     let outz = getz out in
@@ -84,7 +83,7 @@ let point_decompress_ out s tmp =
     make_one outz;
     fmul outt x y;
     true
-  ) in
+  ) else false in
   res
 
 
