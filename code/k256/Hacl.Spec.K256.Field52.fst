@@ -82,19 +82,16 @@ let is_felem_ge_prime5 ((t0,t1,t2,t3,t4): felem5) : uint64 =
 inline_for_extraction noextract
 let is_felem_lt_prime_minus_order_vartime5 ((f0,f1,f2,f3,f4): felem5) : bool =
   let open Lib.RawIntTypes in
-  if u64_to_UInt64 f4 >. 0uL then false
+  if u64_to_UInt64 f4 >. 0uL || u64_to_UInt64 f3 >. 0uL then false
   else begin
-    if u64_to_UInt64 f3 >. 0uL then false
+    if u64_to_UInt64 f2 <. 0x1455123uL then true
     else begin
-      if u64_to_UInt64 f2 <. 0x1455123uL then true
+      if u64_to_UInt64 f2 >. 0x1455123uL then false
       else begin
-        if u64_to_UInt64 f2 >. 0x1455123uL then false
+        if u64_to_UInt64 f1 <. 0x1950b75fc4402uL then true
         else begin
-          if u64_to_UInt64 f1 <. 0x1950b75fc4402uL then true
-          else begin
-            if u64_to_UInt64 f1 >. 0x1950b75fc4402uL then false
-            else u64_to_UInt64 f0 <. 0xda1722fc9baeeuL
-          end
+          if u64_to_UInt64 f1 >. 0x1950b75fc4402uL then false
+          else u64_to_UInt64 f0 <. 0xda1722fc9baeeuL
         end
       end
     end

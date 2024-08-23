@@ -290,10 +290,10 @@ let recover_x_ x y sign tmp =
       recover_x_step_3 tmp;
       let z = recover_x_step_4 tmp in
       let h1 = ST.get() in
-      if z = false then false
-      else (
+      if z then (
         recover_x_step_5 x y sign tmp;
-        true)
+        true
+      ) else false
     )
    ) in
    res
