@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -38,22 +37,15 @@
     let f2: u64 = f[2usize];
     let f3: u64 = f[3usize];
     let f4: u64 = f[4usize];
-    if f4 > 0u64
+    if f4 > 0u64 || f3 > 0u64
     { false }
-    else
-    if f3 > 0u64
-    { false }
-    else
-    if f2 < 0x1455123u64
+    else if f2 < 0x1455123u64
     { true }
-    else
-    if f2 > 0x1455123u64
+    else if f2 > 0x1455123u64
     { false }
-    else
-    if f1 < 0x1950b75fc4402u64
+    else if f1 < 0x1950b75fc4402u64
     { true }
-    else
-    if f1 > 0x1950b75fc4402u64 { false } else { f0 < 0xda1722fc9baeeu64 }
+    else if f1 > 0x1950b75fc4402u64 { false } else { f0 < 0xda1722fc9baeeu64 }
 }
 
 #[inline] pub(crate) fn load_felem(f: &mut [u64], b: &[u8])

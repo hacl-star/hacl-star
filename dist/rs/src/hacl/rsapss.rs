@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -195,10 +194,10 @@
     let msBits: u32 = emBits.wrapping_rem(8u32);
     let em_0: u8 = if msBits > 0u32 { em[0usize] & 0xffu8.wrapping_shl(msBits) } else { 0u8 };
     let em_last: u8 = em[emLen.wrapping_sub(1u32) as usize];
-    if emLen < saltLen.wrapping_add(hash_len(a)).wrapping_add(2u32)
-    { false }
-    else
-    if ! (em_last == 0xbcu8 && em_0 == 0u8)
+    if
+    emLen < saltLen.wrapping_add(hash_len(a)).wrapping_add(2u32)
+    ||
+    ! (em_last == 0xbcu8 && em_0 == 0u8)
     { false }
     else
     {
@@ -489,18 +488,16 @@ rsapss_verify(
                     e.1,
                     &mut m
                 );
-                let ite: bool =
-                    if modBits.wrapping_sub(1u32).wrapping_rem(8u32) != 0u32
-                    { true }
-                    else
-                    {
-                        let i: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32);
-                        let j: u32 = modBits.wrapping_sub(1u32).wrapping_rem(64u32);
-                        let tmp: u64 = (&m)[i as usize];
-                        let get_bit: u64 = tmp.wrapping_shr(j) & 1u64;
-                        get_bit == 0u64
-                    };
-                if ite { true } else { false }
+                if modBits.wrapping_sub(1u32).wrapping_rem(8u32) != 0u32
+                { true }
+                else
+                {
+                    let i: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32);
+                    let j: u32 = modBits.wrapping_sub(1u32).wrapping_rem(64u32);
+                    let tmp: u64 = (&m)[i as usize];
+                    let get_bit: u64 = tmp.wrapping_shr(j) & 1u64;
+                    get_bit == 0u64
+                }
             }
             else
             { false };

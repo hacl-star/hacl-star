@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -578,12 +577,7 @@ malloc_256() ->
     sha256_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_32> =
-        {
-            let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
     p
 }
 
@@ -606,12 +600,7 @@ copy_256(state: &[crate::hacl::streaming_types::state_32]) ->
     ((&mut block_state)[0usize..8usize]).copy_from_slice(&block_state0[0usize..8usize]);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
-    let p: Vec<crate::hacl::streaming_types::state_32> =
-        {
-            let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
     p
 }
 
@@ -659,8 +648,7 @@ reset_256(state: &mut [crate::hacl::streaming_types::state_32])
             let total_len2: u64 = total_len1.wrapping_add(chunk_len as u64);
             (state[0usize]).total_len = total_len2
         }
-        else
-        if sz == 0u32
+        else if sz == 0u32
         {
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
@@ -813,12 +801,7 @@ pub fn malloc_224() -> Vec<crate::hacl::streaming_types::state_32>
     sha224_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_32> =
-        {
-            let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
     p
 }
 
@@ -894,12 +877,7 @@ pub fn malloc_512() -> Vec<crate::hacl::streaming_types::state_64>
     sha512_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_64> =
-        {
-            let mut tmp: Vec<crate::hacl::streaming_types::state_64> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<crate::hacl::streaming_types::state_64> = vec![s];
     p
 }
 
@@ -922,12 +900,7 @@ copy_512(state: &[crate::hacl::streaming_types::state_64]) ->
     ((&mut block_state)[0usize..8usize]).copy_from_slice(&block_state0[0usize..8usize]);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64 { block_state, buf, total_len: total_len0 };
-    let p: Vec<crate::hacl::streaming_types::state_64> =
-        {
-            let mut tmp: Vec<crate::hacl::streaming_types::state_64> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<crate::hacl::streaming_types::state_64> = vec![s];
     p
 }
 
@@ -971,8 +944,7 @@ pub fn reset_512(state: &mut [crate::hacl::streaming_types::state_64])
             let total_len2: u64 = total_len1.wrapping_add(chunk_len as u64);
             (state[0usize]).total_len = total_len2
         }
-        else
-        if sz == 0u32
+        else if sz == 0u32
         {
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
@@ -1134,12 +1106,7 @@ pub fn malloc_384() -> Vec<crate::hacl::streaming_types::state_64>
     sha384_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_64> =
-        {
-            let mut tmp: Vec<crate::hacl::streaming_types::state_64> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<crate::hacl::streaming_types::state_64> = vec![s];
     p
 }
 

@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -491,8 +490,7 @@ pub(crate) fn make_point_inf(b: &mut [u64])
                 { 2u8 };
             if z == 0u8
             { false }
-            else
-            if z == 1u8
+            else if z == 1u8
             { true }
             else
             {
@@ -518,9 +516,7 @@ pub(crate) fn make_point_inf(b: &mut [u64])
                 reduce_513(t00.1);
                 reduce(t00.1);
                 let z1: bool = is_0(t00.1);
-                if z1 == false
-                { false }
-                else
+                if z1
                 {
                     let x32: (&mut [u64], &mut [u64]) = x31.1.split_at_mut(0usize);
                     let t01: (&mut [u64], &mut [u64]) = t00.1.split_at_mut(0usize);
@@ -543,6 +539,8 @@ pub(crate) fn make_point_inf(b: &mut [u64])
                     (x[0usize..5usize]).copy_from_slice(&x32.1[0usize..5usize]);
                     true
                 }
+                else
+                { false }
             }
         };
     let res0: bool = res;
@@ -560,9 +558,7 @@ pub(crate) fn point_decompress(out: &mut [u64], s: &[u8]) -> bool
     load_51(x.0, s);
     let z0: bool = recover_x(x.1, x.0, sign);
     let res: bool =
-        if z0 == false
-        { false }
-        else
+        if z0
         {
             let outx: (&mut [u64], &mut [u64]) = out.split_at_mut(0usize);
             let outy: (&mut [u64], &mut [u64]) = outx.1.split_at_mut(5usize);
@@ -577,7 +573,9 @@ pub(crate) fn point_decompress(out: &mut [u64], s: &[u8]) -> bool
             outt.0[4usize] = 0u64;
             fmul(outt.1, x.1, x.0);
             true
-        };
+        }
+        else
+        { false };
     let res0: bool = res;
     res0
 }
@@ -1231,23 +1229,15 @@ pub(crate) fn point_compress(z: &mut [u8], p: &[u64])
     let s4: u64 = s[4usize];
     if s4 > 0x00000010000000u64
     { true }
-    else
-    if s4 < 0x00000010000000u64
+    else if s4 < 0x00000010000000u64
     { false }
-    else
-    if s3 > 0x00000000000000u64
+    else if s3 > 0x00000000000000u64 || s2 > 0x000000000014deu64
     { true }
-    else
-    if s2 > 0x000000000014deu64
-    { true }
-    else
-    if s2 < 0x000000000014deu64
+    else if s2 < 0x000000000014deu64
     { false }
-    else
-    if s1 > 0xf9dea2f79cd658u64
+    else if s1 > 0xf9dea2f79cd658u64
     { true }
-    else
-    if s1 < 0xf9dea2f79cd658u64 { false } else if s0 >= 0x12631a5cf5d3edu64 { true } else { false }
+    else if s1 < 0xf9dea2f79cd658u64 { false } else { s0 >= 0x12631a5cf5d3edu64 }
 }
 
 #[inline] fn eq(a: &[u64], b: &[u64]) -> bool

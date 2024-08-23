@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -683,12 +682,7 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
     let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
     let s0: state_t = state_t { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<state_t> =
-        {
-            let mut tmp: Vec<state_t> = Vec::new();
-            tmp.push(s0);
-            tmp
-        };
+    let p: Vec<state_t> = vec![s0];
     p
 }
 
@@ -708,12 +702,7 @@ pub fn copy(state: &[state_t]) -> Vec<state_t>
     let s_dst: &mut [u64] = &mut block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
     let s: state_t = state_t { block_state, buf, total_len: total_len0 };
-    let p: Vec<state_t> =
-        {
-            let mut tmp: Vec<state_t> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<state_t> = vec![s];
     p
 }
 
@@ -755,8 +744,7 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let total_len2: u64 = total_len1.wrapping_add(chunk_len as u64);
             (state[0usize]).total_len = total_len2
         }
-        else
-        if sz == 0u32
+        else if sz == 0u32
         {
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
@@ -1221,8 +1209,7 @@ pub fn squeeze(s: &[state_t], dst: &mut [u8], l: u32) ->
     ||
     a1 == crate::hacl::streaming_types::hash_alg::Shake256)
     { crate::hacl::streaming_types::error_code::InvalidAlgorithm }
-    else
-    if l == 0u32
+    else if l == 0u32
     { crate::hacl::streaming_types::error_code::InvalidLength }
     else
     {

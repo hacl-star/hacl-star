@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -109,12 +108,7 @@ create_in(a: crate::hacl::streaming_types::hash_alg) ->
               },
             _ => panic!("Precondition of the function most likely violated")
         };
-    let ctr: Vec<u32> =
-        {
-            let mut tmp: Vec<u32> = Vec::new();
-            tmp.push(1u32);
-            tmp
-        };
+    let ctr: Vec<u32> = vec![1u32];
     state { k: k.to_vec(), v: v.to_vec(), reseed_counter: ctr }
 }
 

@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -1800,12 +1799,7 @@ pub fn malloc(key: &[u8]) -> Vec<state_t>
     let s: state_t =
         state_t
         { block_state: block_state.to_vec(), buf, total_len: 0u32 as u64, p_key: k·0.to_vec() };
-    let p: Vec<state_t> =
-        {
-            let mut tmp: Vec<state_t> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<state_t> = vec![s];
     p
 }
 
@@ -1857,8 +1851,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             (state[0usize]).total_len = total_len2;
             (state[0usize]).p_key = k·1.to_vec()
         }
-        else
-        if sz == 0u32
+        else if sz == 0u32
         {
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;

@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -453,19 +452,13 @@ fn sqr4(a: &[u64], res: &mut [u64])
     let a2: u64 = f[2usize];
     let a3: u64 = f[3usize];
     let is_lt_q_b: bool =
-        if a3 < 0xffffffffffffffffu64
+        if a3 < 0xffffffffffffffffu64 || a2 < 0xfffffffffffffffeu64
         { true }
-        else
-        if a2 < 0xfffffffffffffffeu64
-        { true }
-        else
-        if a2 > 0xfffffffffffffffeu64
+        else if a2 > 0xfffffffffffffffeu64
         { false }
-        else
-        if a1 < 0xbaaedce6af48a03bu64
+        else if a1 < 0xbaaedce6af48a03bu64
         { true }
-        else
-        if a1 > 0xbaaedce6af48a03bu64 { false } else { a0 < 0xbfd25e8cd0364141u64 };
+        else if a1 > 0xbaaedce6af48a03bu64 { false } else { a0 < 0xbfd25e8cd0364141u64 };
     ! is_zero && is_lt_q_b
 }
 
@@ -677,17 +670,11 @@ fn sqr4(a: &[u64], res: &mut [u64])
     let a3: u64 = f[3usize];
     if a3 < 0x7fffffffffffffffu64
     { true }
-    else
-    if a3 > 0x7fffffffffffffffu64
+    else if a3 > 0x7fffffffffffffffu64
     { false }
-    else
-    if a2 < 0xffffffffffffffffu64
+    else if a2 < 0xffffffffffffffffu64 || a1 < 0x5d576e7357a4501du64
     { true }
-    else
-    if a1 < 0x5d576e7357a4501du64
-    { true }
-    else
-    if a1 > 0x5d576e7357a4501du64 { false } else { a0 <= 0xdfe92f46681b20a0u64 }
+    else if a1 > 0x5d576e7357a4501du64 { false } else { a0 <= 0xdfe92f46681b20a0u64 }
 }
 
 #[inline] fn qmul_shift_384(res: &mut [u64], a: &[u64], b: &[u64])

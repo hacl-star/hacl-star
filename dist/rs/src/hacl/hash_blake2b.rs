@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -1008,12 +1007,7 @@ fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
     let kk10: u8 = kk.key_length;
     let ite: u32 = if kk10 != 0u8 { 128u32 } else { 0u32 };
     let s: state_t = state_t { block_state, buf, total_len: ite as u64 };
-    let p0: Vec<state_t> =
-        {
-            let mut tmp: Vec<state_t> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p0: Vec<state_t> = vec![s];
     p0
 }
 
@@ -1146,8 +1140,7 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let total_len2: u64 = total_len1.wrapping_add(chunk_len as u64);
             (state[0usize]).total_len = total_len2
         }
-        else
-        if sz == 0u32
+        else if sz == 0u32
         {
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
@@ -1385,12 +1378,7 @@ copy(state: &[state_t]) ->
     let dst_b: &mut [u64] = &mut block_state.f4;
     (dst_b[0usize..16usize]).copy_from_slice(&src_b[0usize..16usize]);
     let s: state_t = state_t { block_state, buf, total_len: total_len0 };
-    let p: Vec<state_t> =
-        {
-            let mut tmp: Vec<state_t> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<state_t> = vec![s];
     p
 }
 

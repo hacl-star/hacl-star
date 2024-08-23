@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -52,16 +51,13 @@ fn update(h: &mut [u32], l: &[u8])
         let ite: u32 =
             if i < 20u32
             { _b & _c ^ ! _b & _d }
-            else
-            if 39u32 < i && i < 60u32 { _b & _c ^ (_b & _d ^ _c & _d) } else { _b ^ (_c ^ _d) };
+            else if 39u32 < i && i < 60u32 { _b & _c ^ (_b & _d ^ _c & _d) } else { _b ^ (_c ^ _d) };
         let ite0: u32 =
             if i < 20u32
             { 0x5a827999u32 }
-            else
-            if i < 40u32
+            else if i < 40u32
             { 0x6ed9eba1u32 }
-            else
-            if i < 60u32 { 0x8f1bbcdcu32 } else { 0xca62c1d6u32 };
+            else if i < 60u32 { 0x8f1bbcdcu32 } else { 0xca62c1d6u32 };
         let _T: u32 =
             (_a.wrapping_shl(5u32) | _a.wrapping_shr(27u32)).wrapping_add(ite).wrapping_add(_e).wrapping_add(
                 ite0
@@ -190,12 +186,7 @@ pub fn malloc() -> Vec<crate::hacl::streaming_types::state_32>
     init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_32> =
-        {
-            let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
     p
 }
 
@@ -239,8 +230,7 @@ update0(state: &mut [crate::hacl::streaming_types::state_32], chunk: &[u8], chun
             let total_len2: u64 = total_len1.wrapping_add(chunk_len as u64);
             (state[0usize]).total_len = total_len2
         }
-        else
-        if sz == 0u32
+        else if sz == 0u32
         {
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
@@ -351,12 +341,7 @@ pub fn copy(state: &[crate::hacl::streaming_types::state_32]) ->
     ((&mut block_state)[0usize..5usize]).copy_from_slice(&block_state0[0usize..5usize]);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
-    let p: Vec<crate::hacl::streaming_types::state_32> =
-        {
-            let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
+    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
     p
 }
 

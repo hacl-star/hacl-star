@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
-#![allow(unused_mut)]
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
@@ -1386,12 +1385,7 @@ mont_ctx_init(n: &[u32]) ->
     let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
     let res: crate::hacl::bignum::bn_mont_ctx_u32 =
         crate::hacl::bignum::bn_mont_ctx_u32 { len: 8u32, n: n11.to_vec(), mu, r2: r21.to_vec() };
-    let buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> =
-        {
-            let mut tmp: Vec<crate::hacl::bignum::bn_mont_ctx_u32> = Vec::new();
-            tmp.push(res);
-            tmp
-        };
+    let buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> = vec![res];
     buf
 }
 
