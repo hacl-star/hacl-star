@@ -485,6 +485,7 @@ let alloca #index c i t t' k =
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
   (**) B.loc_unused_in_not_unused_in_disjoint h1;
   (**) B.(modifies_only_not_unused_in loc_none h0 h1);
+  (**) assert (B.loc_disjoint B.loc_none (c.key.footprint h0 k));
   (**) c.key.frame_invariant B.loc_none k h0 h1;
 
   let block_state = c.state.alloca i in
