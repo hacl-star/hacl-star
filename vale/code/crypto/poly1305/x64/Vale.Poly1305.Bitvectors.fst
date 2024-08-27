@@ -98,7 +98,7 @@ let mul_bvshl (u:uint_t 64) :
   assert_by_tactic
     (int2bv #128 (mul_mod #128 0x10000000000000000 (uint_ext #64 #128 u)) ==
     bvmul #128 (int2bv #128 0x10000000000000000) (uint_ext #64 #128 u))
-    (fun () -> mapply (`trans); arith_to_bv_tac (); trefl ())
+    (fun () -> mapply (`FStar.Tactics.BV.Lemmas.trans); arith_to_bv_tac (); trefl ())
 
 #reset-options "--smtencoding.elim_box true"
 let plus_bvor (u h:bv_t 128) :
