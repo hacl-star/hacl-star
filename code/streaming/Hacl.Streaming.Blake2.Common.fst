@@ -707,7 +707,7 @@ let blake2 (a : alg)
       assert (nn == nn');
       let i: index a = { key_length = kk; digest_length = nn; last_node } in
       [@inline_let] let wv = get_wv #a #i #m acc in
-      [@inline_let] let h = get_state_p #a #i acc in
+      let h = get_state_p #a #i acc in
       let h0 = ST.get () in
       assert (key_invariant h0 k');
       init_key_block a i k' buf_;

@@ -28,7 +28,7 @@ open FStar.HyperStack.ST
 
 inline_for_extraction noextract
 let blake2s_128 =
-  Common.blake2 Spec.Blake2S Core.M128 Blake2s128.init_with_params Blake2s128.update_multi
+  Common.blake2 Spec.Blake2S Core.M128 Blake2s128.inline_init_with_params Blake2s128.update_multi
          Blake2s128.update_last Blake2s128.finish
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code
