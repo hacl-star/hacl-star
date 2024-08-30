@@ -472,10 +472,10 @@
         };
     let scrut: crate::hacl::sha2_types::uint8_2x4p =
         crate::hacl::sha2_types::uint8_2x4p { fst: mb0, snd: mb1 };
-    let last00: crate::hacl::sha2_types::uint8_4p = scrut.fst;
-    let last10: crate::hacl::sha2_types::uint8_4p = scrut.snd;
-    sha224_update4(last00, hash);
-    if blocks > 1u32 { sha224_update4(last10, hash) }
+    let last00: &crate::hacl::sha2_types::uint8_4p = &scrut.fst;
+    let last10: &crate::hacl::sha2_types::uint8_4p = &scrut.snd;
+    sha224_update4(*last00, hash);
+    if blocks > 1u32 { sha224_update4(*last10, hash) }
 }
 
 #[inline] fn sha224_finish4(
@@ -1090,10 +1090,10 @@ pub fn sha224_4(
         };
     let scrut: crate::hacl::sha2_types::uint8_2x4p =
         crate::hacl::sha2_types::uint8_2x4p { fst: mb0, snd: mb1 };
-    let last00: crate::hacl::sha2_types::uint8_4p = scrut.fst;
-    let last10: crate::hacl::sha2_types::uint8_4p = scrut.snd;
-    sha256_update4(last00, hash);
-    if blocks > 1u32 { sha256_update4(last10, hash) }
+    let last00: &crate::hacl::sha2_types::uint8_4p = &scrut.fst;
+    let last10: &crate::hacl::sha2_types::uint8_4p = &scrut.snd;
+    sha256_update4(*last00, hash);
+    if blocks > 1u32 { sha256_update4(*last10, hash) }
 }
 
 #[inline] fn sha256_finish4(
