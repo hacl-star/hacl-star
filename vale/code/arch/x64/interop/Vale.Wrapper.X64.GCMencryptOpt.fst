@@ -877,7 +877,7 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
     B.as_seq h b;
   }
 
-#set-options "--z3rlimit 800 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 800 --fuel 0 --ifuel 0"
 
 inline_for_extraction
 let gcm128_encrypt_opt_stdcall key iv plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b scratch_b =
