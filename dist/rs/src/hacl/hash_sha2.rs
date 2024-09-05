@@ -570,14 +570,14 @@ calling `free_256`.
 */
 pub fn
 malloc_256() ->
-    Vec<crate::hacl::streaming_types::state_32>
+    Box<[crate::hacl::streaming_types::state_32]>
 {
-    let buf: Vec<u8> = vec![0u8; 64usize];
-    let mut block_state: Vec<u32> = vec![0u32; 8usize];
+    let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
+    let mut block_state: Box<[u32]> = vec![0u32; 8usize].into_boxed_slice();
     sha256_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
+    let p: Box<[crate::hacl::streaming_types::state_32]> = vec![s].into_boxed_slice();
     p
 }
 
@@ -589,18 +589,18 @@ more (different) data into the hash in each branch.
 */
 pub fn
 copy_256(state: &[crate::hacl::streaming_types::state_32]) ->
-    Vec<crate::hacl::streaming_types::state_32>
+    Box<[crate::hacl::streaming_types::state_32]>
 {
     let block_state0: &[u32] = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
     let total_len0: u64 = (state[0usize]).total_len;
-    let mut buf: Vec<u8> = vec![0u8; 64usize];
+    let mut buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
-    let mut block_state: Vec<u32> = vec![0u32; 8usize];
+    let mut block_state: Box<[u32]> = vec![0u32; 8usize].into_boxed_slice();
     ((&mut block_state)[0usize..8usize]).copy_from_slice(&block_state0[0usize..8usize]);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
-    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
+    let p: Box<[crate::hacl::streaming_types::state_32]> = vec![s].into_boxed_slice();
     p
 }
 
@@ -794,14 +794,14 @@ hash_256(output: &mut [u8], input: &[u8], input_len: u32)
     sha256_finish(&st, rb)
 }
 
-pub fn malloc_224() -> Vec<crate::hacl::streaming_types::state_32>
+pub fn malloc_224() -> Box<[crate::hacl::streaming_types::state_32]>
 {
-    let buf: Vec<u8> = vec![0u8; 64usize];
-    let mut block_state: Vec<u32> = vec![0u32; 8usize];
+    let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
+    let mut block_state: Box<[u32]> = vec![0u32; 8usize].into_boxed_slice();
     sha224_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
+    let p: Box<[crate::hacl::streaming_types::state_32]> = vec![s].into_boxed_slice();
     p
 }
 
@@ -870,14 +870,14 @@ hash_224(output: &mut [u8], input: &[u8], input_len: u32)
     sha224_finish(&st, rb)
 }
 
-pub fn malloc_512() -> Vec<crate::hacl::streaming_types::state_64>
+pub fn malloc_512() -> Box<[crate::hacl::streaming_types::state_64]>
 {
-    let buf: Vec<u8> = vec![0u8; 128usize];
-    let mut block_state: Vec<u64> = vec![0u64; 8usize];
+    let buf: Box<[u8]> = vec![0u8; 128usize].into_boxed_slice();
+    let mut block_state: Box<[u64]> = vec![0u64; 8usize].into_boxed_slice();
     sha512_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_64> = vec![s];
+    let p: Box<[crate::hacl::streaming_types::state_64]> = vec![s].into_boxed_slice();
     p
 }
 
@@ -889,18 +889,18 @@ more (different) data into the hash in each branch.
 */
 pub fn
 copy_512(state: &[crate::hacl::streaming_types::state_64]) ->
-    Vec<crate::hacl::streaming_types::state_64>
+    Box<[crate::hacl::streaming_types::state_64]>
 {
     let block_state0: &[u64] = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
     let total_len0: u64 = (state[0usize]).total_len;
-    let mut buf: Vec<u8> = vec![0u8; 128usize];
+    let mut buf: Box<[u8]> = vec![0u8; 128usize].into_boxed_slice();
     ((&mut buf)[0usize..128usize]).copy_from_slice(&buf0[0usize..128usize]);
-    let mut block_state: Vec<u64> = vec![0u64; 8usize];
+    let mut block_state: Box<[u64]> = vec![0u64; 8usize].into_boxed_slice();
     ((&mut block_state)[0usize..8usize]).copy_from_slice(&block_state0[0usize..8usize]);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64 { block_state, buf, total_len: total_len0 };
-    let p: Vec<crate::hacl::streaming_types::state_64> = vec![s];
+    let p: Box<[crate::hacl::streaming_types::state_64]> = vec![s].into_boxed_slice();
     p
 }
 
@@ -1099,14 +1099,14 @@ hash_512(output: &mut [u8], input: &[u8], input_len: u32)
     sha512_finish(&st, rb)
 }
 
-pub fn malloc_384() -> Vec<crate::hacl::streaming_types::state_64>
+pub fn malloc_384() -> Box<[crate::hacl::streaming_types::state_64]>
 {
-    let buf: Vec<u8> = vec![0u8; 128usize];
-    let mut block_state: Vec<u64> = vec![0u64; 8usize];
+    let buf: Box<[u8]> = vec![0u8; 128usize].into_boxed_slice();
+    let mut block_state: Box<[u64]> = vec![0u64; 8usize].into_boxed_slice();
     sha384_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_64> = vec![s];
+    let p: Box<[crate::hacl::streaming_types::state_64]> = vec![s].into_boxed_slice();
     p
 }
 

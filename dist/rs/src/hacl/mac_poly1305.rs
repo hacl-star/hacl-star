@@ -420,21 +420,21 @@ pub(crate) fn poly1305_finish(tag: &mut [u8], key: &[u8], ctx: &mut [u64])
 }
 
 pub struct state_t
-{ pub block_state: Vec<u64>, pub buf: Vec<u8>, pub total_len: u64, pub p_key: Vec<u8> }
+{ pub block_state: Box<[u64]>, pub buf: Box<[u8]>, pub total_len: u64, pub p_key: Box<[u8]> }
 
-pub fn malloc(key: &[u8]) -> Vec<state_t>
+pub fn malloc(key: &[u8]) -> Box<[state_t]>
 {
-    let buf: Vec<u8> = vec![0u8; 16usize];
-    let mut r1: Vec<u64> = vec![0u64; 25usize];
+    let buf: Box<[u8]> = vec![0u8; 16usize].into_boxed_slice();
+    let mut r1: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
     let block_state: &mut [u64] = &mut r1;
     poly1305_init(block_state, key);
-    let mut k·: Vec<u8> = vec![0u8; 32usize];
+    let mut k·: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
     ((&mut k·)[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
     let k·0: &[u8] = &k·;
     let s: state_t =
         state_t
-        { block_state: block_state.to_vec(), buf, total_len: 0u32 as u64, p_key: k·0.to_vec() };
-    let p: Vec<state_t> = vec![s];
+        { block_state: (*block_state).into(), buf, total_len: 0u32 as u64, p_key: (*k·0).into() };
+    let p: Box<[state_t]> = vec![s].into_boxed_slice();
     p
 }
 
@@ -447,7 +447,7 @@ pub fn reset(state: &mut [state_t], key: &[u8])
     let k·1: &[u8] = k·;
     let total_len: u64 = 0u32 as u64;
     (state[0usize]).total_len = total_len;
-    (state[0usize]).p_key = k·1.to_vec()
+    (state[0usize]).p_key = (*k·1).into()
 }
 
 /**
@@ -482,7 +482,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             (buf2.1[0usize..chunk_len as usize]).copy_from_slice(&chunk[0usize..chunk_len as usize]);
             let total_len2: u64 = total_len1.wrapping_add(chunk_len as u64);
             (state[0usize]).total_len = total_len2;
-            (state[0usize]).p_key = k·1.to_vec()
+            (state[0usize]).p_key = (*k·1).into()
         }
         else if sz == 0u32
         {
@@ -511,7 +511,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 &data2.1[0usize..data2_len as usize]
             );
             (state[0usize]).total_len = total_len1.wrapping_add(chunk_len as u64);
-            (state[0usize]).p_key = k·1.to_vec()
+            (state[0usize]).p_key = (*k·1).into()
         }
         else
         {
@@ -531,7 +531,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let total_len2: u64 = total_len1.wrapping_add(diff as u64);
             {
                 (state[0usize]).total_len = total_len2;
-                (state[0usize]).p_key = k·1.to_vec()
+                (state[0usize]).p_key = (*k·1).into()
             };
             let buf0: &mut [u8] = &mut (state[0usize]).buf;
             let total_len10: u64 = (state[0usize]).total_len;
@@ -562,7 +562,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             );
             (state[0usize]).total_len =
                 total_len10.wrapping_add(chunk_len.wrapping_sub(diff) as u64);
-            (state[0usize]).p_key = k·10.to_vec()
+            (state[0usize]).p_key = (*k·10).into()
         };
         crate::hacl::streaming_types::error_code::Success
     }

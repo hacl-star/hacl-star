@@ -33,7 +33,7 @@ pub(crate) fn bn_from_bytes_be_uint64(len: u32, b: &[u8], res: &mut [u64])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
-    let mut tmp: Vec<u8> = vec![0u8; tmpLen as usize];
+    let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
     ((&mut tmp)[tmpLen.wrapping_sub(len) as usize..tmpLen.wrapping_sub(len) as usize + len as usize]).copy_from_slice(
         &b[0usize..len as usize]
     );
@@ -53,7 +53,7 @@ pub(crate) fn bn_to_bytes_be_uint64(len: u32, b: &[u64], res: &mut [u8])
 {
     let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
-    let mut tmp: Vec<u8> = vec![0u8; tmpLen as usize];
+    let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
     for i in 0u32..bnLen
     {
         crate::lowstar::endianness::store64_be(
@@ -265,7 +265,7 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
 #[inline] pub(crate) fn bn_mul_u32(aLen: u32, a: &[u32], bLen: u32, b: &[u32], res: &mut [u32])
 {
     (res[0usize..aLen.wrapping_add(bLen) as usize]).copy_from_slice(
-        &vec![0u32; aLen.wrapping_add(bLen) as usize]
+        &vec![0u32; aLen.wrapping_add(bLen) as usize].into_boxed_slice()
     );
     for i in 0u32..bLen
     {
@@ -302,7 +302,7 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
 #[inline] pub(crate) fn bn_mul_u64(aLen: u32, a: &[u64], bLen: u32, b: &[u64], res: &mut [u64])
 {
     (res[0usize..aLen.wrapping_add(bLen) as usize]).copy_from_slice(
-        &vec![0u64; aLen.wrapping_add(bLen) as usize]
+        &vec![0u64; aLen.wrapping_add(bLen) as usize].into_boxed_slice()
     );
     for i in 0u32..bLen
     {
@@ -339,7 +339,7 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
 #[inline] pub(crate) fn bn_sqr_u32(aLen: u32, a: &[u32], res: &mut [u32])
 {
     (res[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
-        &vec![0u32; aLen.wrapping_add(aLen) as usize]
+        &vec![0u32; aLen.wrapping_add(aLen) as usize].into_boxed_slice()
     );
     for i in 0u32..aLen
     {
@@ -372,8 +372,8 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
         let r: u32 = (&c)[0usize];
         res[i.wrapping_add(i) as usize] = r
     };
-    let mut a_copy: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
-    let mut b_copy: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
+    let mut a_copy: Box<[u32]> = vec![0u32; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
+    let mut b_copy: Box<[u32]> = vec![0u32; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
     ((&mut a_copy)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
         &res[0usize..aLen.wrapping_add(aLen) as usize]
     );
@@ -383,7 +383,7 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
     let r: u32 = bn_add_eq_len_u32(aLen.wrapping_add(aLen), &a_copy, &b_copy, res);
     let c0: u32 = r;
     crate::lowstar::ignore::ignore::<u32>(c0);
-    let mut tmp: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
+    let mut tmp: Box<[u32]> = vec![0u32; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
     for i in 0u32..aLen
     {
         let res1: u64 = (a[i as usize] as u64).wrapping_mul(a[i as usize] as u64);
@@ -392,8 +392,8 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
         (&mut tmp)[2u32.wrapping_mul(i) as usize] = lo;
         (&mut tmp)[2u32.wrapping_mul(i).wrapping_add(1u32) as usize] = hi
     };
-    let mut a_copy0: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
-    let mut b_copy0: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
+    let mut a_copy0: Box<[u32]> = vec![0u32; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
+    let mut b_copy0: Box<[u32]> = vec![0u32; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
     ((&mut a_copy0)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
         &res[0usize..aLen.wrapping_add(aLen) as usize]
     );
@@ -408,7 +408,7 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
 #[inline] pub(crate) fn bn_sqr_u64(aLen: u32, a: &[u64], res: &mut [u64])
 {
     (res[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
-        &vec![0u64; aLen.wrapping_add(aLen) as usize]
+        &vec![0u64; aLen.wrapping_add(aLen) as usize].into_boxed_slice()
     );
     for i in 0u32..aLen
     {
@@ -441,8 +441,8 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
         let r: u64 = (&c)[0usize];
         res[i.wrapping_add(i) as usize] = r
     };
-    let mut a_copy: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
-    let mut b_copy: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
+    let mut a_copy: Box<[u64]> = vec![0u64; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
+    let mut b_copy: Box<[u64]> = vec![0u64; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
     ((&mut a_copy)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
         &res[0usize..aLen.wrapping_add(aLen) as usize]
     );
@@ -452,7 +452,7 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
     let r: u64 = bn_add_eq_len_u64(aLen.wrapping_add(aLen), &a_copy, &b_copy, res);
     let c0: u64 = r;
     crate::lowstar::ignore::ignore::<u64>(c0);
-    let mut tmp: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
+    let mut tmp: Box<[u64]> = vec![0u64; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
     for i in 0u32..aLen
     {
         let res1: crate::fstar::uint128::uint128 =
@@ -465,8 +465,8 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
         (&mut tmp)[2u32.wrapping_mul(i) as usize] = lo;
         (&mut tmp)[2u32.wrapping_mul(i).wrapping_add(1u32) as usize] = hi
     };
-    let mut a_copy0: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
-    let mut b_copy0: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
+    let mut a_copy0: Box<[u64]> = vec![0u64; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
+    let mut b_copy0: Box<[u64]> = vec![0u64; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
     ((&mut a_copy0)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
         &res[0usize..aLen.wrapping_add(aLen) as usize]
     );

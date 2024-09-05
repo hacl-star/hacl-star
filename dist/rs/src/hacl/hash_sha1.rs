@@ -179,14 +179,14 @@ pub(crate) fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
 
 pub type state_t = crate::hacl::streaming_types::state_32;
 
-pub fn malloc() -> Vec<crate::hacl::streaming_types::state_32>
+pub fn malloc() -> Box<[crate::hacl::streaming_types::state_32]>
 {
-    let buf: Vec<u8> = vec![0u8; 64usize];
-    let mut block_state: Vec<u32> = vec![0u32; 5usize];
+    let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
+    let mut block_state: Box<[u32]> = vec![0u32; 5usize].into_boxed_slice();
     init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
+    let p: Box<[crate::hacl::streaming_types::state_32]> = vec![s].into_boxed_slice();
     p
 }
 
@@ -330,18 +330,18 @@ pub fn digest(state: &[crate::hacl::streaming_types::state_32], output: &mut [u8
 }
 
 pub fn copy(state: &[crate::hacl::streaming_types::state_32]) ->
-    Vec<crate::hacl::streaming_types::state_32>
+    Box<[crate::hacl::streaming_types::state_32]>
 {
     let block_state0: &[u32] = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
     let total_len0: u64 = (state[0usize]).total_len;
-    let mut buf: Vec<u8> = vec![0u8; 64usize];
+    let mut buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
-    let mut block_state: Vec<u32> = vec![0u32; 5usize];
+    let mut block_state: Box<[u32]> = vec![0u32; 5usize].into_boxed_slice();
     ((&mut block_state)[0usize..5usize]).copy_from_slice(&block_state0[0usize..5usize]);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
-    let p: Vec<crate::hacl::streaming_types::state_32> = vec![s];
+    let p: Box<[crate::hacl::streaming_types::state_32]> = vec![s].into_boxed_slice();
     p
 }
 

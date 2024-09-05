@@ -883,15 +883,15 @@ pub const salt_bytes: u32 = 16u32;
 pub const personal_bytes: u32 = 16u32;
 
 pub struct block_state_t
-{ pub fst: u8, pub snd: u8, pub thd: bool, pub f3: Vec<u64>, pub f4: Vec<u64> }
+{ pub fst: u8, pub snd: u8, pub thd: bool, pub f3: Box<[u64]>, pub f4: Box<[u64]> }
 
-pub struct state_t { pub block_state: block_state_t, pub buf: Vec<u8>, pub total_len: u64 }
+pub struct state_t { pub block_state: block_state_t, pub buf: Box<[u8]>, pub total_len: u64 }
 
-fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
+fn malloc_raw(kk: index, key: params_and_key) -> Box<[state_t]>
 {
-    let mut buf: Vec<u8> = vec![0u8; 128usize];
-    let wv: Vec<u64> = vec![0u64; 16usize];
-    let b: Vec<u64> = vec![0u64; 16usize];
+    let mut buf: Box<[u8]> = vec![0u8; 128usize].into_boxed_slice();
+    let wv: Box<[u64]> = vec![0u64; 16usize].into_boxed_slice();
+    let b: Box<[u64]> = vec![0u64; 16usize].into_boxed_slice();
     let mut block_state: block_state_t =
         block_state_t
         { fst: kk.key_length, snd: kk.digest_length, thd: kk.last_node, f3: wv, f4: b };
@@ -907,7 +907,7 @@ fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
     {
         let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
         (sub_b.1[0usize..128u32.wrapping_sub(kk2) as usize]).copy_from_slice(
-            &vec![0u8; 128u32.wrapping_sub(kk2) as usize]
+            &vec![0u8; 128u32.wrapping_sub(kk2) as usize].into_boxed_slice()
         );
         ((&mut buf)[0usize..kk2 as usize]).copy_from_slice(&k·[0usize..kk2 as usize])
     };
@@ -1003,7 +1003,7 @@ fn malloc_raw(kk: index, key: params_and_key) -> Vec<state_t>
     let kk10: u8 = kk.key_length;
     let ite: u32 = if kk10 != 0u8 { 128u32 } else { 0u32 };
     let s: state_t = state_t { block_state, buf, total_len: ite as u64 };
-    let p0: Vec<state_t> = vec![s];
+    let p0: Box<[state_t]> = vec![s].into_boxed_slice();
     p0
 }
 
@@ -1036,7 +1036,7 @@ fn reset_raw(state: &mut [state_t], key: params_and_key)
     {
         let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
         (sub_b.1[0usize..128u32.wrapping_sub(kk2) as usize]).copy_from_slice(
-            &vec![0u8; 128u32.wrapping_sub(kk2) as usize]
+            &vec![0u8; 128u32.wrapping_sub(kk2) as usize].into_boxed_slice()
         );
         (buf[0usize..kk2 as usize]).copy_from_slice(&k·1[0usize..kk2 as usize])
     };
@@ -1385,8 +1385,8 @@ digest(s: &[state_t], dst: &mut [u8]) ->
             fst: i1.key_length,
             snd: i1.digest_length,
             thd: i1.last_node,
-            f3: Vec::from(wv),
-            f4: Vec::from(b)
+            f3: Box::new(wv),
+            f4: Box::new(b)
         };
     let src_b: &[u64] = &block_state0.f4;
     let dst_b: &mut [u64] = &mut tmp_block_state.f4;
@@ -1443,7 +1443,7 @@ Copying. This preserves all parameters.
 */
 pub fn
 copy(state: &[state_t]) ->
-    Vec<state_t>
+    Box<[state_t]>
 {
     let block_state0: &block_state_t = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
@@ -1452,17 +1452,17 @@ copy(state: &[state_t]) ->
     let nn: u8 = block_state0.snd;
     let kk1: u8 = block_state0.fst;
     let i: index = index { key_length: kk1, digest_length: nn, last_node };
-    let mut buf: Vec<u8> = vec![0u8; 128usize];
+    let mut buf: Box<[u8]> = vec![0u8; 128usize].into_boxed_slice();
     ((&mut buf)[0usize..128usize]).copy_from_slice(&buf0[0usize..128usize]);
-    let wv: Vec<u64> = vec![0u64; 16usize];
-    let b: Vec<u64> = vec![0u64; 16usize];
+    let wv: Box<[u64]> = vec![0u64; 16usize].into_boxed_slice();
+    let b: Box<[u64]> = vec![0u64; 16usize].into_boxed_slice();
     let mut block_state: block_state_t =
         block_state_t { fst: i.key_length, snd: i.digest_length, thd: i.last_node, f3: wv, f4: b };
     let src_b: &[u64] = &block_state0.f4;
     let dst_b: &mut [u64] = &mut block_state.f4;
     (dst_b[0usize..16usize]).copy_from_slice(&src_b[0usize..16usize]);
     let s: state_t = state_t { block_state, buf, total_len: total_len0 };
-    let p: Vec<state_t> = vec![s];
+    let p: Box<[state_t]> = vec![s].into_boxed_slice();
     p
 }
 

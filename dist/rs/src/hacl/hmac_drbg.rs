@@ -36,7 +36,7 @@ min_length(a: crate::hacl::streaming_types::hash_alg) ->
     }
 }
 
-pub struct state { pub k: Vec<u8>, pub v: Vec<u8>, pub reseed_counter: Vec<u32> }
+pub struct state { pub k: Box<[u8]>, pub v: Box<[u8]>, pub reseed_counter: Box<[u32]> }
 
 pub fn uu___is_State(a: crate::hacl::streaming_types::hash_alg, projectee: state) -> bool
 {
@@ -63,22 +63,22 @@ create_in(a: crate::hacl::streaming_types::hash_alg) ->
         {
             crate::hacl::streaming_types::hash_alg::SHA1 =>
               {
-                  let buf: Vec<u8> = vec![0u8; 20usize];
+                  let buf: Box<[u8]> = vec![0u8; 20usize].into_boxed_slice();
                   &buf
               },
             crate::hacl::streaming_types::hash_alg::SHA2_256 =>
               {
-                  let buf: Vec<u8> = vec![0u8; 32usize];
+                  let buf: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
                   &buf
               },
             crate::hacl::streaming_types::hash_alg::SHA2_384 =>
               {
-                  let buf: Vec<u8> = vec![0u8; 48usize];
+                  let buf: Box<[u8]> = vec![0u8; 48usize].into_boxed_slice();
                   &buf
               },
             crate::hacl::streaming_types::hash_alg::SHA2_512 =>
               {
-                  let buf: Vec<u8> = vec![0u8; 64usize];
+                  let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
                   &buf
               },
             _ => panic!("Precondition of the function most likely violated")
@@ -88,28 +88,28 @@ create_in(a: crate::hacl::streaming_types::hash_alg) ->
         {
             crate::hacl::streaming_types::hash_alg::SHA1 =>
               {
-                  let buf: Vec<u8> = vec![0u8; 20usize];
+                  let buf: Box<[u8]> = vec![0u8; 20usize].into_boxed_slice();
                   &buf
               },
             crate::hacl::streaming_types::hash_alg::SHA2_256 =>
               {
-                  let buf: Vec<u8> = vec![0u8; 32usize];
+                  let buf: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
                   &buf
               },
             crate::hacl::streaming_types::hash_alg::SHA2_384 =>
               {
-                  let buf: Vec<u8> = vec![0u8; 48usize];
+                  let buf: Box<[u8]> = vec![0u8; 48usize].into_boxed_slice();
                   &buf
               },
             crate::hacl::streaming_types::hash_alg::SHA2_512 =>
               {
-                  let buf: Vec<u8> = vec![0u8; 64usize];
+                  let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
                   &buf
               },
             _ => panic!("Precondition of the function most likely violated")
         };
-    let ctr: Vec<u32> = vec![1u32];
-    state { k: k.to_vec(), v: v.to_vec(), reseed_counter: ctr }
+    let ctr: Box<[u32]> = vec![1u32].into_boxed_slice();
+    state { k: (*k).into(), v: (*v).into(), reseed_counter: ctr }
 }
 
 /**
@@ -140,13 +140,13 @@ instantiate(
     {
         crate::hacl::streaming_types::hash_alg::SHA1 =>
           {
-              let mut seed_material: Vec<u8> =
+              let mut seed_material: Box<[u8]> =
                   vec![0u8;
                       entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                           personalization_string_len
                       )
                       as
-                      usize];
+                      usize].into_boxed_slice();
               ((&mut (&mut seed_material)[0usize..])[0usize..entropy_input_len as usize]).copy_from_slice(
                   &entropy_input[0usize..entropy_input_len as usize]
               );
@@ -170,7 +170,7 @@ instantiate(
                           personalization_string_len
                       )
                   );
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
               if
@@ -205,7 +205,7 @@ instantiate(
                               personalization_string_len
                           )
                       );
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                   if
@@ -233,13 +233,13 @@ instantiate(
           },
         crate::hacl::streaming_types::hash_alg::SHA2_256 =>
           {
-              let mut seed_material: Vec<u8> =
+              let mut seed_material: Box<[u8]> =
                   vec![0u8;
                       entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                           personalization_string_len
                       )
                       as
-                      usize];
+                      usize].into_boxed_slice();
               ((&mut (&mut seed_material)[0usize..])[0usize..entropy_input_len as usize]).copy_from_slice(
                   &entropy_input[0usize..entropy_input_len as usize]
               );
@@ -263,7 +263,7 @@ instantiate(
                           personalization_string_len
                       )
                   );
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
               if
@@ -298,7 +298,7 @@ instantiate(
                               personalization_string_len
                           )
                       );
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                   if
@@ -326,13 +326,13 @@ instantiate(
           },
         crate::hacl::streaming_types::hash_alg::SHA2_384 =>
           {
-              let mut seed_material: Vec<u8> =
+              let mut seed_material: Box<[u8]> =
                   vec![0u8;
                       entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                           personalization_string_len
                       )
                       as
-                      usize];
+                      usize].into_boxed_slice();
               ((&mut (&mut seed_material)[0usize..])[0usize..entropy_input_len as usize]).copy_from_slice(
                   &entropy_input[0usize..entropy_input_len as usize]
               );
@@ -356,7 +356,7 @@ instantiate(
                           personalization_string_len
                       )
                   );
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
               if
@@ -391,7 +391,7 @@ instantiate(
                               personalization_string_len
                           )
                       );
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                   if
@@ -419,13 +419,13 @@ instantiate(
           },
         crate::hacl::streaming_types::hash_alg::SHA2_512 =>
           {
-              let mut seed_material: Vec<u8> =
+              let mut seed_material: Box<[u8]> =
                   vec![0u8;
                       entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                           personalization_string_len
                       )
                       as
-                      usize];
+                      usize].into_boxed_slice();
               ((&mut (&mut seed_material)[0usize..])[0usize..entropy_input_len as usize]).copy_from_slice(
                   &entropy_input[0usize..entropy_input_len as usize]
               );
@@ -449,7 +449,7 @@ instantiate(
                           personalization_string_len
                       )
                   );
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
               if
@@ -484,7 +484,7 @@ instantiate(
                               personalization_string_len
                           )
                       );
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                   if
@@ -538,8 +538,10 @@ reseed(
     {
         crate::hacl::streaming_types::hash_alg::SHA1 =>
           {
-              let mut seed_material: Vec<u8> =
-                  vec![0u8; entropy_input_len.wrapping_add(additional_input_input_len) as usize];
+              let mut seed_material: Box<[u8]> =
+                  vec![0u8; entropy_input_len.wrapping_add(additional_input_input_len) as usize].into_boxed_slice(
+
+                  );
               ((&mut (&mut seed_material)[0usize..])[0usize..entropy_input_len as usize]).copy_from_slice(
                   &entropy_input[0usize..entropy_input_len as usize]
               );
@@ -553,7 +555,7 @@ reseed(
               let ctr: &mut [u32] = &mut st.reseed_counter;
               let input_len: u32 =
                   21u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -578,7 +580,7 @@ reseed(
               {
                   let input_len0: u32 =
                       21u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                   if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -604,8 +606,10 @@ reseed(
           },
         crate::hacl::streaming_types::hash_alg::SHA2_256 =>
           {
-              let mut seed_material: Vec<u8> =
-                  vec![0u8; entropy_input_len.wrapping_add(additional_input_input_len) as usize];
+              let mut seed_material: Box<[u8]> =
+                  vec![0u8; entropy_input_len.wrapping_add(additional_input_input_len) as usize].into_boxed_slice(
+
+                  );
               ((&mut (&mut seed_material)[0usize..])[0usize..entropy_input_len as usize]).copy_from_slice(
                   &entropy_input[0usize..entropy_input_len as usize]
               );
@@ -619,7 +623,7 @@ reseed(
               let ctr: &mut [u32] = &mut st.reseed_counter;
               let input_len: u32 =
                   33u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -644,7 +648,7 @@ reseed(
               {
                   let input_len0: u32 =
                       33u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                   if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -670,8 +674,10 @@ reseed(
           },
         crate::hacl::streaming_types::hash_alg::SHA2_384 =>
           {
-              let mut seed_material: Vec<u8> =
-                  vec![0u8; entropy_input_len.wrapping_add(additional_input_input_len) as usize];
+              let mut seed_material: Box<[u8]> =
+                  vec![0u8; entropy_input_len.wrapping_add(additional_input_input_len) as usize].into_boxed_slice(
+
+                  );
               ((&mut (&mut seed_material)[0usize..])[0usize..entropy_input_len as usize]).copy_from_slice(
                   &entropy_input[0usize..entropy_input_len as usize]
               );
@@ -685,7 +691,7 @@ reseed(
               let ctr: &mut [u32] = &mut st.reseed_counter;
               let input_len: u32 =
                   49u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -710,7 +716,7 @@ reseed(
               {
                   let input_len0: u32 =
                       49u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                   if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -736,8 +742,10 @@ reseed(
           },
         crate::hacl::streaming_types::hash_alg::SHA2_512 =>
           {
-              let mut seed_material: Vec<u8> =
-                  vec![0u8; entropy_input_len.wrapping_add(additional_input_input_len) as usize];
+              let mut seed_material: Box<[u8]> =
+                  vec![0u8; entropy_input_len.wrapping_add(additional_input_input_len) as usize].into_boxed_slice(
+
+                  );
               ((&mut (&mut seed_material)[0usize..])[0usize..entropy_input_len as usize]).copy_from_slice(
                   &entropy_input[0usize..entropy_input_len as usize]
               );
@@ -751,7 +759,7 @@ reseed(
               let ctr: &mut [u32] = &mut st.reseed_counter;
               let input_len: u32 =
                   65u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -776,7 +784,7 @@ reseed(
               {
                   let input_len0: u32 =
                       65u32.wrapping_add(entropy_input_len.wrapping_add(additional_input_input_len));
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                   if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -838,7 +846,7 @@ generate(
               if additional_input_len > 0u32
               {
                   let input_len: u32 = 21u32.wrapping_add(additional_input_len);
-                  let mut input: Vec<u8> = vec![0u8; input_len as usize];
+                  let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
                   let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
                   (k·.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                   if additional_input_len != 0u32
@@ -854,7 +862,7 @@ generate(
                   if additional_input_len != 0u32
                   {
                       let input_len0: u32 = 21u32.wrapping_add(additional_input_len);
-                      let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                      let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                       let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                       (k·0.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                       if additional_input_len != 0u32
@@ -889,7 +897,7 @@ generate(
                   )
               };
               let input_len: u32 = 21u32.wrapping_add(additional_input_len);
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
               if additional_input_len != 0u32
@@ -905,7 +913,7 @@ generate(
               if additional_input_len != 0u32
               {
                   let input_len0: u32 = 21u32.wrapping_add(additional_input_len);
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..20usize]).copy_from_slice(&v[0usize..20usize]);
                   if additional_input_len != 0u32
@@ -934,7 +942,7 @@ generate(
               if additional_input_len > 0u32
               {
                   let input_len: u32 = 33u32.wrapping_add(additional_input_len);
-                  let mut input: Vec<u8> = vec![0u8; input_len as usize];
+                  let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
                   let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
                   (k·.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                   if additional_input_len != 0u32
@@ -950,7 +958,7 @@ generate(
                   if additional_input_len != 0u32
                   {
                       let input_len0: u32 = 33u32.wrapping_add(additional_input_len);
-                      let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                      let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                       let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                       (k·0.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                       if additional_input_len != 0u32
@@ -985,7 +993,7 @@ generate(
                   )
               };
               let input_len: u32 = 33u32.wrapping_add(additional_input_len);
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
               if additional_input_len != 0u32
@@ -1001,7 +1009,7 @@ generate(
               if additional_input_len != 0u32
               {
                   let input_len0: u32 = 33u32.wrapping_add(additional_input_len);
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..32usize]).copy_from_slice(&v[0usize..32usize]);
                   if additional_input_len != 0u32
@@ -1030,7 +1038,7 @@ generate(
               if additional_input_len > 0u32
               {
                   let input_len: u32 = 49u32.wrapping_add(additional_input_len);
-                  let mut input: Vec<u8> = vec![0u8; input_len as usize];
+                  let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
                   let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
                   (k·.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                   if additional_input_len != 0u32
@@ -1046,7 +1054,7 @@ generate(
                   if additional_input_len != 0u32
                   {
                       let input_len0: u32 = 49u32.wrapping_add(additional_input_len);
-                      let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                      let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                       let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                       (k·0.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                       if additional_input_len != 0u32
@@ -1081,7 +1089,7 @@ generate(
                   )
               };
               let input_len: u32 = 49u32.wrapping_add(additional_input_len);
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
               if additional_input_len != 0u32
@@ -1097,7 +1105,7 @@ generate(
               if additional_input_len != 0u32
               {
                   let input_len0: u32 = 49u32.wrapping_add(additional_input_len);
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..48usize]).copy_from_slice(&v[0usize..48usize]);
                   if additional_input_len != 0u32
@@ -1126,7 +1134,7 @@ generate(
               if additional_input_len > 0u32
               {
                   let input_len: u32 = 65u32.wrapping_add(additional_input_len);
-                  let mut input: Vec<u8> = vec![0u8; input_len as usize];
+                  let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
                   let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
                   (k·.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                   if additional_input_len != 0u32
@@ -1142,7 +1150,7 @@ generate(
                   if additional_input_len != 0u32
                   {
                       let input_len0: u32 = 65u32.wrapping_add(additional_input_len);
-                      let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                      let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                       let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                       (k·0.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                       if additional_input_len != 0u32
@@ -1177,7 +1185,7 @@ generate(
                   )
               };
               let input_len: u32 = 65u32.wrapping_add(additional_input_len);
-              let mut input: Vec<u8> = vec![0u8; input_len as usize];
+              let mut input: Box<[u8]> = vec![0u8; input_len as usize].into_boxed_slice();
               let k·: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
               (k·.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
               if additional_input_len != 0u32
@@ -1193,7 +1201,7 @@ generate(
               if additional_input_len != 0u32
               {
                   let input_len0: u32 = 65u32.wrapping_add(additional_input_len);
-                  let mut input0: Vec<u8> = vec![0u8; input_len0 as usize];
+                  let mut input0: Box<[u8]> = vec![0u8; input_len0 as usize].into_boxed_slice();
                   let k·0: (&mut [u8], &mut [u8]) = input0.split_at_mut(0usize);
                   (k·0.1[0usize..64usize]).copy_from_slice(&v[0usize..64usize]);
                   if additional_input_len != 0u32

@@ -542,9 +542,9 @@ fn sqr4(a: &[u64], res: &mut [u64])
 ) ->
     u64
 {
-    let mut tmp: Vec<u64> = vec![0u64; len.wrapping_add(2u32) as usize];
+    let mut tmp: Box<[u64]> = vec![0u64; len.wrapping_add(2u32) as usize].into_boxed_slice();
     ((&mut tmp)[0usize..len.wrapping_add(2u32) as usize]).copy_from_slice(
-        &vec![0u64; len.wrapping_add(2u32) as usize]
+        &vec![0u64; len.wrapping_add(2u32) as usize].into_boxed_slice()
     );
     krml::unroll_for!(
         2,

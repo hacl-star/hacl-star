@@ -38,10 +38,10 @@ Heap-allocate and initialize a montgomery context.
 */
 pub fn
 field_init(len: u32, n: &[u64]) ->
-    Vec<crate::hacl::bignum::bn_mont_ctx_u64>
+    Box<[crate::hacl::bignum::bn_mont_ctx_u64]>
 {
-    let mut r2: Vec<u64> = vec![0u64; len as usize];
-    let mut n1: Vec<u64> = vec![0u64; len as usize];
+    let mut r2: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
+    let mut n1: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
     let r21: &mut [u64] = &mut r2;
     let n11: &mut [u64] = &mut n1;
     (n11[0usize..len as usize]).copy_from_slice(&n[0usize..len as usize]);
@@ -50,8 +50,8 @@ field_init(len: u32, n: &[u64]) ->
     crate::hacl::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, r21);
     let mu: u64 = crate::hacl::bignum::mod_inv_uint64(n[0usize]);
     let res: crate::hacl::bignum::bn_mont_ctx_u64 =
-        crate::hacl::bignum::bn_mont_ctx_u64 { len, n: n11.to_vec(), mu, r2: r21.to_vec() };
-    let buf: Vec<crate::hacl::bignum::bn_mont_ctx_u64> = vec![res];
+        crate::hacl::bignum::bn_mont_ctx_u64 { len, n: (*n11).into(), mu, r2: (*r21).into() };
+    let buf: Box<[crate::hacl::bignum::bn_mont_ctx_u64]> = vec![res].into_boxed_slice();
     buf
 }
 
@@ -109,8 +109,8 @@ add(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut
 {
     let len1: u32 = field_get_len(k);
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
-    let mut a_copy: Vec<u64> = vec![0u64; len1 as usize];
-    let mut b_copy: Vec<u64> = vec![0u64; len1 as usize];
+    let mut a_copy: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
+    let mut b_copy: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
     ((&mut a_copy)[0usize..len1 as usize]).copy_from_slice(&aM[0usize..len1 as usize]);
     ((&mut b_copy)[0usize..len1 as usize]).copy_from_slice(&bM[0usize..len1 as usize]);
     crate::hacl::bignum::bn_add_mod_n_u64(len1, &uu____0.n, &a_copy, &b_copy, cM)
@@ -200,11 +200,11 @@ exp_consttime(
 {
     let len1: u32 = field_get_len(k);
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
-    let mut aMc: Vec<u64> = vec![0u64; uu____0.len as usize];
+    let mut aMc: Box<[u64]> = vec![0u64; uu____0.len as usize].into_boxed_slice();
     ((&mut aMc)[0usize..uu____0.len as usize]).copy_from_slice(&aM[0usize..uu____0.len as usize]);
     if bBits < 200u32
     {
-        let mut ctx: Vec<u64> = vec![0u64; len1.wrapping_add(len1) as usize];
+        let mut ctx: Box<[u64]> = vec![0u64; len1.wrapping_add(len1) as usize].into_boxed_slice();
         ((&mut ctx)[0usize..len1 as usize]).copy_from_slice(&(&uu____0.n)[0usize..len1 as usize]);
         ((&mut ctx)[len1 as usize..len1 as usize + len1 as usize]).copy_from_slice(
             &(&uu____0.r2)[0usize..len1 as usize]
@@ -247,13 +247,14 @@ exp_consttime(
             { 1u32 }
             else
             { bBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32) };
-        let mut ctx: Vec<u64> = vec![0u64; len1.wrapping_add(len1) as usize];
+        let mut ctx: Box<[u64]> = vec![0u64; len1.wrapping_add(len1) as usize].into_boxed_slice();
         ((&mut ctx)[0usize..len1 as usize]).copy_from_slice(&(&uu____0.n)[0usize..len1 as usize]);
         ((&mut ctx)[len1 as usize..len1 as usize + len1 as usize]).copy_from_slice(
             &(&uu____0.r2)[0usize..len1 as usize]
         );
-        let mut table: Vec<u64> = vec![0u64; 16u32.wrapping_mul(len1) as usize];
-        let mut tmp: Vec<u64> = vec![0u64; len1 as usize];
+        let mut table: Box<[u64]> =
+            vec![0u64; 16u32.wrapping_mul(len1) as usize].into_boxed_slice();
+        let mut tmp: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
         let t0: (&mut [u64], &mut [u64]) = table.split_at_mut(0usize);
         let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(len1 as usize);
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
@@ -332,7 +333,7 @@ exp_consttime(
             let ctx_r20: (&[u64], &[u64]) = ctx_n0.1.split_at(len1 as usize);
             crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
         };
-        let mut tmp0: Vec<u64> = vec![0u64; len1 as usize];
+        let mut tmp0: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
         for i in 0u32..bBits.wrapping_div(4u32)
         {
             krml::unroll_for!(
@@ -407,11 +408,11 @@ exp_vartime(
 {
     let len1: u32 = field_get_len(k);
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
-    let mut aMc: Vec<u64> = vec![0u64; uu____0.len as usize];
+    let mut aMc: Box<[u64]> = vec![0u64; uu____0.len as usize].into_boxed_slice();
     ((&mut aMc)[0usize..uu____0.len as usize]).copy_from_slice(&aM[0usize..uu____0.len as usize]);
     if bBits < 200u32
     {
-        let mut ctx: Vec<u64> = vec![0u64; len1.wrapping_add(len1) as usize];
+        let mut ctx: Box<[u64]> = vec![0u64; len1.wrapping_add(len1) as usize].into_boxed_slice();
         ((&mut ctx)[0usize..len1 as usize]).copy_from_slice(&(&uu____0.n)[0usize..len1 as usize]);
         ((&mut ctx)[len1 as usize..len1 as usize + len1 as usize]).copy_from_slice(
             &(&uu____0.r2)[0usize..len1 as usize]
@@ -441,13 +442,14 @@ exp_vartime(
             { 1u32 }
             else
             { bBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32) };
-        let mut ctx: Vec<u64> = vec![0u64; len1.wrapping_add(len1) as usize];
+        let mut ctx: Box<[u64]> = vec![0u64; len1.wrapping_add(len1) as usize].into_boxed_slice();
         ((&mut ctx)[0usize..len1 as usize]).copy_from_slice(&(&uu____0.n)[0usize..len1 as usize]);
         ((&mut ctx)[len1 as usize..len1 as usize + len1 as usize]).copy_from_slice(
             &(&uu____0.r2)[0usize..len1 as usize]
         );
-        let mut table: Vec<u64> = vec![0u64; 16u32.wrapping_mul(len1) as usize];
-        let mut tmp: Vec<u64> = vec![0u64; len1 as usize];
+        let mut table: Box<[u64]> =
+            vec![0u64; 16u32.wrapping_mul(len1) as usize].into_boxed_slice();
+        let mut tmp: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
         let t0: (&mut [u64], &mut [u64]) = table.split_at_mut(0usize);
         let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(len1 as usize);
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
@@ -508,7 +510,7 @@ exp_vartime(
             let ctx_r20: (&[u64], &[u64]) = ctx_n0.1.split_at(len1 as usize);
             crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
         };
-        let mut tmp0: Vec<u64> = vec![0u64; len1 as usize];
+        let mut tmp0: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
         for i in 0u32..bBits.wrapping_div(4u32)
         {
             krml::unroll_for!(
@@ -552,7 +554,7 @@ inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64
 {
     let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
     let len1: u32 = uu____0.len;
-    let mut n2: Vec<u64> = vec![0u64; len1 as usize];
+    let mut n2: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
     let c0: u64 =
         crate::lib::inttypes_intrinsics::sub_borrow_u64(
             0u64,

@@ -52,12 +52,13 @@
     res: &mut [u8]
 )
 {
-    let mut mgfseed_counter: Vec<u8> = vec![0u8; len.wrapping_add(4u32) as usize];
+    let mut mgfseed_counter: Box<[u8]> =
+        vec![0u8; len.wrapping_add(4u32) as usize].into_boxed_slice();
     ((&mut mgfseed_counter)[0usize..len as usize]).copy_from_slice(&mgfseed[0usize..len as usize]);
     let hLen: u32 = hash_len(a);
     let n: u32 = maskLen.wrapping_sub(1u32).wrapping_div(hLen).wrapping_add(1u32);
     let accLen: u32 = n.wrapping_mul(hLen);
-    let mut acc: Vec<u8> = vec![0u8; accLen as usize];
+    let mut acc: Box<[u8]> = vec![0u8; accLen as usize].into_boxed_slice();
     for i in 0u32..n
     {
         let acc_i: (&mut [u8], &mut [u8]) = acc.split_at_mut(i.wrapping_mul(hLen) as usize);
@@ -78,7 +79,7 @@
     { 0xFFFFFFFFFFFFFFFFu64 }
     else
     {
-        let mut b2: Vec<u64> = vec![0u64; bLen as usize];
+        let mut b2: Box<[u64]> = vec![0u64; bLen as usize].into_boxed_slice();
         let i: u32 = bs.wrapping_div(64u32);
         let j: u32 = bs.wrapping_rem(64u32);
         (&mut b2)[i as usize] = (&b2)[i as usize] | 1u64.wrapping_shl(j);
@@ -99,7 +100,7 @@
     let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
     let bits0: u64 = n[0usize] & 1u64;
     let m0: u64 = 0u64.wrapping_sub(bits0);
-    let mut b2: Vec<u64> = vec![0u64; nLen as usize];
+    let mut b2: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     let i: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32);
     let j: u32 = modBits.wrapping_sub(1u32).wrapping_rem(64u32);
     (&mut b2)[i as usize] = (&b2)[i as usize] | 1u64.wrapping_shl(j);
@@ -119,7 +120,7 @@
 #[inline] fn check_exponent_u64(eBits: u32, e: &[u64]) -> u64
 {
     let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-    let bn_zero: Vec<u64> = vec![0u64; eLen as usize];
+    let bn_zero: Box<[u64]> = vec![0u64; eLen as usize].into_boxed_slice();
     let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
     for i in 0u32..eLen
     {
@@ -144,9 +145,9 @@
 )
 {
     let hLen: u32 = hash_len(a);
-    let mut m1Hash: Vec<u8> = vec![0u8; hLen as usize];
+    let mut m1Hash: Box<[u8]> = vec![0u8; hLen as usize].into_boxed_slice();
     let m1Len: u32 = 8u32.wrapping_add(hLen).wrapping_add(saltLen);
-    let mut m1: Vec<u8> = vec![0u8; m1Len as usize];
+    let mut m1: Box<[u8]> = vec![0u8; m1Len as usize].into_boxed_slice();
     hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
     ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
     +
@@ -154,7 +155,7 @@
     hash(a, &mut m1Hash, m1Len, &m1);
     let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let dbLen: u32 = emLen.wrapping_sub(hLen).wrapping_sub(1u32);
-    let mut db: Vec<u8> = vec![0u8; dbLen as usize];
+    let mut db: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
     let last_before_salt: u32 = dbLen.wrapping_sub(saltLen).wrapping_sub(1u32);
     (&mut db)[last_before_salt as usize] = 1u8;
     ((&mut db)[last_before_salt.wrapping_add(1u32) as usize..last_before_salt.wrapping_add(1u32)
@@ -162,7 +163,7 @@
     usize
     +
     saltLen as usize]).copy_from_slice(&salt[0usize..saltLen as usize]);
-    let mut dbMask: Vec<u8> = vec![0u8; dbLen as usize];
+    let mut dbMask: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
     mgf_hash(a, hLen, &m1Hash, dbLen, &mut dbMask);
     for i in 0u32..dbLen
     {
@@ -203,11 +204,11 @@
     {
         let emLen1: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let hLen: u32 = hash_len(a);
-        let mut m1Hash0: Vec<u8> = vec![0u8; hLen as usize];
+        let mut m1Hash0: Box<[u8]> = vec![0u8; hLen as usize].into_boxed_slice();
         let dbLen: u32 = emLen1.wrapping_sub(hLen).wrapping_sub(1u32);
         let maskedDB: (&[u8], &[u8]) = em.split_at(0usize);
         let m1Hash: (&[u8], &[u8]) = maskedDB.1.split_at(dbLen as usize);
-        let mut dbMask: Vec<u8> = vec![0u8; dbLen as usize];
+        let mut dbMask: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
         mgf_hash(a, hLen, m1Hash.1, dbLen, &mut dbMask);
         for i in 0u32..dbLen
         {
@@ -222,7 +223,7 @@
                 (&dbMask)[0usize] & 0xffu8.wrapping_shr(8u32.wrapping_sub(msBits1))
         };
         let padLen: u32 = emLen1.wrapping_sub(saltLen).wrapping_sub(hLen).wrapping_sub(1u32);
-        let mut pad2: Vec<u8> = vec![0u8; padLen as usize];
+        let mut pad2: Box<[u8]> = vec![0u8; padLen as usize].into_boxed_slice();
         (&mut pad2)[padLen.wrapping_sub(1u32) as usize] = 0x01u8;
         let pad: (&[u8], &[u8]) = dbMask.split_at(0usize);
         let salt: (&[u8], &[u8]) = pad.1.split_at(padLen as usize);
@@ -238,7 +239,7 @@
         else
         {
             let m1Len: u32 = 8u32.wrapping_add(hLen).wrapping_add(saltLen);
-            let mut m1: Vec<u8> = vec![0u8; m1Len as usize];
+            let mut m1: Box<[u8]> = vec![0u8; m1Len as usize].into_boxed_slice();
             hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
             ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
             +
@@ -348,16 +349,16 @@ rsapss_sign(
     if b
     {
         let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-        let mut m: Vec<u64> = vec![0u64; nLen as usize];
+        let mut m: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
         let emBits: u32 = modBits.wrapping_sub(1u32);
         let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-        let mut em: Vec<u8> = vec![0u8; emLen as usize];
+        let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
         pss_encode(a, saltLen, salt, msgLen, msg, emBits, &mut em);
         crate::hacl::bignum_base::bn_from_bytes_be_uint64(emLen, &em, &mut (&mut m)[0usize..]);
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-        let mut s: Vec<u64> = vec![0u64; nLen1 as usize];
-        let mut m·: Vec<u64> = vec![0u64; nLen1 as usize];
+        let mut s: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
+        let mut m·: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let n: (&[u64], &[u64]) = skey.split_at(0usize);
@@ -456,10 +457,10 @@ rsapss_verify(
     if b
     {
         let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-        let mut m: Vec<u64> = vec![0u64; nLen as usize];
+        let mut m: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-        let mut s: Vec<u64> = vec![0u64; nLen1 as usize];
+        let mut s: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
         crate::hacl::bignum_base::bn_from_bytes_be_uint64(k, sgnt, &mut s);
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let n: (&[u64], &[u64]) = pkey.split_at(0usize);
@@ -507,7 +508,7 @@ rsapss_verify(
         {
             let emBits: u32 = modBits.wrapping_sub(1u32);
             let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-            let mut em: Vec<u8> = vec![0u8; emLen as usize];
+            let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
             let m1: (&[u64], &[u64]) = m.split_at(0usize);
             crate::hacl::bignum_base::bn_to_bytes_be_uint64(emLen, m1.1, &mut em);
             let res0: bool = pss_verify(a, saltLen, msgLen, msg, emBits, &em);
@@ -532,7 +533,7 @@ Load a public key from key parts.
 */
 pub fn
 new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
-    Vec<u64>
+    Box<[u64]>
 {
     let ite: bool =
         if 1u32 < modBits && 0u32 < eBits
@@ -546,13 +547,13 @@ new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
         else
         { false };
     if ! ite
-    { [].to_vec() }
+    { (*&[]).into() }
     else
     {
         let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let pkeyLen: u32 = nLen.wrapping_add(nLen).wrapping_add(eLen);
-        let mut pkey: Vec<u64> = vec![0u64; pkeyLen as usize];
+        let mut pkey: Box<[u64]> = vec![0u64; pkeyLen as usize].into_boxed_slice();
         if false
         { pkey }
         else
@@ -578,7 +579,7 @@ new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
             let m1: u64 = check_exponent_u64(eBits, e.1);
             let m: u64 = m0 & m1;
             let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
-            if b { pkey2.to_vec() } else { [].to_vec() }
+            if b { (*pkey2).into() } else { (*&[]).into() }
         }
     }
 }
@@ -597,7 +598,7 @@ Load a secret key from key parts.
 */
 pub fn
 new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8], db: &[u8]) ->
-    Vec<u64>
+    Box<[u64]>
 {
     let ite: bool =
         if 1u32 < modBits && 0u32 < eBits
@@ -623,14 +624,14 @@ new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8],
         else
         { false };
     if ! ite0
-    { [].to_vec() }
+    { (*&[]).into() }
     else
     {
         let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let dLen: u32 = dBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let skeyLen: u32 = nLen.wrapping_add(nLen).wrapping_add(eLen).wrapping_add(dLen);
-        let mut skey: Vec<u64> = vec![0u64; skeyLen as usize];
+        let mut skey: Box<[u64]> = vec![0u64; skeyLen as usize].into_boxed_slice();
         if false
         { skey }
         else
@@ -665,7 +666,7 @@ new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8],
             crate::hacl::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
             let m10: u64 = check_exponent_u64(dBits, d.1);
             let b0: bool = b && m10 == 0xFFFFFFFFFFFFFFFFu64;
-            if b0 { skey2.to_vec() } else { [].to_vec() }
+            if b0 { (*skey2).into() } else { (*&[]).into() }
         }
     }
 }
@@ -708,13 +709,13 @@ rsapss_skey_sign(
 ) ->
     bool
 {
-    let mut skey: Vec<u64> =
+    let mut skey: Box<[u64]> =
         vec![0u64;
             2u32.wrapping_mul(modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32)).wrapping_add(
                 eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32)
             ).wrapping_add(dBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32))
             as
-            usize];
+            usize].into_boxed_slice();
     let b: bool = load_skey(modBits, eBits, dBits, nb, eb, db, &mut skey);
     if b
     { rsapss_sign(a, modBits, eBits, dBits, &skey, saltLen, salt, msgLen, msg, sgnt) }
@@ -756,13 +757,13 @@ rsapss_pkey_verify(
 ) ->
     bool
 {
-    let mut pkey: Vec<u64> =
+    let mut pkey: Box<[u64]> =
         vec![0u64;
             2u32.wrapping_mul(modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32)).wrapping_add(
                 eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32)
             )
             as
-            usize];
+            usize].into_boxed_slice();
     let b: bool = load_pkey(modBits, eBits, nb, eb, &mut pkey);
     if b
     { rsapss_verify(a, modBits, eBits, &pkey, saltLen, sgntLen, sgnt, msgLen, msg) }

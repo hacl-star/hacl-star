@@ -155,14 +155,14 @@ pub(crate) fn shake128_4x(
 
 #[inline] pub(crate) fn frodo_gen_matrix_shake_4x(n: u32, seed: &[u8], res: &mut [u16])
 {
-    let mut r: Vec<u8> = vec![0u8; 8u32.wrapping_mul(n) as usize];
+    let mut r: Box<[u8]> = vec![0u8; 8u32.wrapping_mul(n) as usize].into_boxed_slice();
     let mut tmp_seed: [u8; 72] = [0u8; 72usize];
     ((&mut (&mut tmp_seed)[2usize..])[0usize..16usize]).copy_from_slice(&seed[0usize..16usize]);
     ((&mut (&mut tmp_seed)[20usize..])[0usize..16usize]).copy_from_slice(&seed[0usize..16usize]);
     ((&mut (&mut tmp_seed)[38usize..])[0usize..16usize]).copy_from_slice(&seed[0usize..16usize]);
     ((&mut (&mut tmp_seed)[56usize..])[0usize..16usize]).copy_from_slice(&seed[0usize..16usize]);
     (res[0usize..n.wrapping_mul(n) as usize]).copy_from_slice(
-        &vec![0u16; n.wrapping_mul(n) as usize]
+        &vec![0u16; n.wrapping_mul(n) as usize].into_boxed_slice()
     );
     for i in 0u32..n.wrapping_div(4u32)
     {
@@ -255,7 +255,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
 #[inline] pub(crate) fn frodo_sample_matrix64(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
-        &vec![0u16; n1.wrapping_mul(n2) as usize]
+        &vec![0u16; n1.wrapping_mul(n2) as usize].into_boxed_slice()
     );
     for i in 0u32..n1
     {
@@ -286,7 +286,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
 #[inline] pub(crate) fn frodo_sample_matrix640(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
-        &vec![0u16; n1.wrapping_mul(n2) as usize]
+        &vec![0u16; n1.wrapping_mul(n2) as usize].into_boxed_slice()
     );
     for i in 0u32..n1
     {
@@ -317,7 +317,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
 #[inline] pub(crate) fn frodo_sample_matrix976(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
-        &vec![0u16; n1.wrapping_mul(n2) as usize]
+        &vec![0u16; n1.wrapping_mul(n2) as usize].into_boxed_slice()
     );
     for i in 0u32..n1
     {
@@ -348,7 +348,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
 #[inline] pub(crate) fn frodo_sample_matrix1344(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
-        &vec![0u16; n1.wrapping_mul(n2) as usize]
+        &vec![0u16; n1.wrapping_mul(n2) as usize].into_boxed_slice()
     );
     for i in 0u32..n1
     {

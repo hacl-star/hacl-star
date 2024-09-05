@@ -7130,10 +7130,10 @@ Allocate quadruple state buffer (200-bytes for each)
 */
 pub fn
 state_malloc() ->
-    Vec<crate::lib::intvector_intrinsics::vec256>
+    Box<[crate::lib::intvector_intrinsics::vec256]>
 {
-    let buf: Vec<crate::lib::intvector_intrinsics::vec256> =
-        vec![crate::lib::intvector_intrinsics::vec256_zero; 25usize];
+    let buf: Box<[crate::lib::intvector_intrinsics::vec256]> =
+        vec![crate::lib::intvector_intrinsics::vec256_zero; 25usize].into_boxed_slice();
     buf
 }
 

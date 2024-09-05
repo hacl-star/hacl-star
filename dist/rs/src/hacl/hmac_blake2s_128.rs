@@ -15,7 +15,7 @@ pub fn
 compute_blake2s_128(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32)
 {
     let l: u32 = 64u32;
-    let mut key_block: Vec<u8> = vec![0x00u8; l as usize];
+    let mut key_block: Box<[u8]> = vec![0x00u8; l as usize].into_boxed_slice();
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 32u32 };
     let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
@@ -24,14 +24,14 @@ compute_blake2s_128(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
     else
     { crate::hacl::hash_blake2s_simd128::hash_with_key(zeroes.0, 32u32, key, key_len, &[], 0u32) };
-    let mut ipad: Vec<u8> = vec![0x36u8; l as usize];
+    let mut ipad: Box<[u8]> = vec![0x36u8; l as usize].into_boxed_slice();
     for i in 0u32..l
     {
         let xi: u8 = (&ipad)[i as usize];
         let yi: u8 = (&key_block)[i as usize];
         (&mut ipad)[i as usize] = xi ^ yi
     };
-    let mut opad: Vec<u8> = vec![0x5cu8; l as usize];
+    let mut opad: Box<[u8]> = vec![0x5cu8; l as usize].into_boxed_slice();
     for i in 0u32..l
     {
         let xi: u8 = (&opad)[i as usize];

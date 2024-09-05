@@ -33,6 +33,6 @@ pub enum error_code
     MaximumLengthExceeded
 }
 
-pub struct state_32 { pub block_state: Vec<u32>, pub buf: Vec<u8>, pub total_len: u64 }
+pub struct state_32 { pub block_state: Box<[u32]>, pub buf: Box<[u8]>, pub total_len: u64 }
 
-pub struct state_64 { pub block_state: Vec<u64>, pub buf: Vec<u8>, pub total_len: u64 }
+pub struct state_64 { pub block_state: Box<[u64]>, pub buf: Box<[u8]>, pub total_len: u64 }

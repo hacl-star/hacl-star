@@ -539,7 +539,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
     let m10: u32 =
         if bBits < 32u32.wrapping_mul(bLen)
         {
-            let mut b2: Vec<u32> = vec![0u32; bLen as usize];
+            let mut b2: Box<[u32]> = vec![0u32; bLen as usize].into_boxed_slice();
             let i: u32 = bBits.wrapping_div(32u32);
             let j: u32 = bBits.wrapping_rem(32u32);
             (&mut b2)[i as usize] = (&b2)[i as usize] | 1u32.wrapping_shl(j);
@@ -1164,10 +1164,10 @@ Heap-allocate and initialize a montgomery context.
 */
 pub fn
 mont_ctx_init(n: &[u32]) ->
-    Vec<crate::hacl::bignum::bn_mont_ctx_u32>
+    Box<[crate::hacl::bignum::bn_mont_ctx_u32]>
 {
-    let mut r2: Vec<u32> = vec![0u32; 128usize];
-    let mut n1: Vec<u32> = vec![0u32; 128usize];
+    let mut r2: Box<[u32]> = vec![0u32; 128usize].into_boxed_slice();
+    let mut n1: Box<[u32]> = vec![0u32; 128usize].into_boxed_slice();
     let r21: &mut [u32] = &mut r2;
     let n11: &mut [u32] = &mut n1;
     (n11[0usize..128usize]).copy_from_slice(&n[0usize..128usize]);
@@ -1175,8 +1175,9 @@ mont_ctx_init(n: &[u32]) ->
     precompr2(nBits, n, r21);
     let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
     let res: crate::hacl::bignum::bn_mont_ctx_u32 =
-        crate::hacl::bignum::bn_mont_ctx_u32 { len: 128u32, n: n11.to_vec(), mu, r2: r21.to_vec() };
-    let buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> = vec![res];
+        crate::hacl::bignum::bn_mont_ctx_u32
+        { len: 128u32, n: (*n11).into(), mu, r2: (*r21).into() };
+    let buf: Box<[crate::hacl::bignum::bn_mont_ctx_u32]> = vec![res].into_boxed_slice();
     buf
 }
 
@@ -1353,14 +1354,16 @@ Load a bid-endian bignum from memory.
 */
 pub fn
 new_bn_from_bytes_be(len: u32, b: &[u8]) ->
-    Vec<u32>
+    Box<[u32]>
 {
     if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) > 1073741823u32
-    { [].to_vec() }
+    { (*&[]).into() }
     else
     {
-        let mut res: Vec<u32> =
-            vec![0u32; len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) as usize];
+        let mut res: Box<[u32]> =
+            vec![0u32; len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) as usize].into_boxed_slice(
+
+            );
         if false
         { res }
         else
@@ -1369,7 +1372,7 @@ new_bn_from_bytes_be(len: u32, b: &[u8]) ->
             let res2: &mut [u32] = res1;
             let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32);
             let tmpLen: u32 = 4u32.wrapping_mul(bnLen);
-            let mut tmp: Vec<u8> = vec![0u8; tmpLen as usize];
+            let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
             ((&mut tmp)[tmpLen.wrapping_sub(len) as usize..tmpLen.wrapping_sub(len) as usize
             +
             len as usize]).copy_from_slice(&b[0usize..len as usize]);
@@ -1383,7 +1386,7 @@ new_bn_from_bytes_be(len: u32, b: &[u8]) ->
                 let os: (&mut [u32], &mut [u32]) = res2.split_at_mut(0usize);
                 os.1[i as usize] = x
             };
-            res2.to_vec()
+            (*res2).into()
         }
     }
 }
@@ -1401,14 +1404,16 @@ Load a little-endian bignum from memory.
 */
 pub fn
 new_bn_from_bytes_le(len: u32, b: &[u8]) ->
-    Vec<u32>
+    Box<[u32]>
 {
     if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) > 1073741823u32
-    { [].to_vec() }
+    { (*&[]).into() }
     else
     {
-        let mut res: Vec<u32> =
-            vec![0u32; len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) as usize];
+        let mut res: Box<[u32]> =
+            vec![0u32; len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) as usize].into_boxed_slice(
+
+            );
         if false
         { res }
         else
@@ -1417,7 +1422,7 @@ new_bn_from_bytes_le(len: u32, b: &[u8]) ->
             let res2: &mut [u32] = res1;
             let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32);
             let tmpLen: u32 = 4u32.wrapping_mul(bnLen);
-            let mut tmp: Vec<u8> = vec![0u8; tmpLen as usize];
+            let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
             ((&mut tmp)[0usize..len as usize]).copy_from_slice(&b[0usize..len as usize]);
             for i in 0u32..len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32)
             {
@@ -1428,7 +1433,7 @@ new_bn_from_bytes_le(len: u32, b: &[u8]) ->
                 let os: (&mut [u32], &mut [u32]) = res2.split_at_mut(0usize);
                 os.1[i as usize] = x
             };
-            res2.to_vec()
+            (*res2).into()
         }
     }
 }

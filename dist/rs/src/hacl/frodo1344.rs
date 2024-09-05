@@ -139,7 +139,7 @@ pub fn crypto_kem_enc(ct: &mut [u8], ss: &mut [u8], pk: &[u8]) -> u32
     crate::lib::memzero0::memzero::<u16>(&mut ep_matrix, 10752u32);
     crate::lib::memzero0::memzero::<u16>(&mut epp_matrix, 64u32);
     let ss_init_len: u32 = 21664u32;
-    let mut shake_input_ss: Vec<u8> = vec![0u8; ss_init_len as usize];
+    let mut shake_input_ss: Box<[u8]> = vec![0u8; ss_init_len as usize].into_boxed_slice();
     ((&mut shake_input_ss)[0usize..21632usize]).copy_from_slice(&ct[0usize..21632usize]);
     ((&mut shake_input_ss)[21632usize..21632usize + 32usize]).copy_from_slice(
         &k.1[0usize..32usize]
@@ -171,7 +171,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &[u8], sk: &[u8]) -> u32
     crate::lib::memzero0::memzero::<u16>(&mut m_matrix, 64u32);
     let mut seed_se_k: [u8; 64] = [0u8; 64usize];
     let pkh_mu_decode_len: u32 = 64u32;
-    let mut pkh_mu_decode: Vec<u8> = vec![0u8; pkh_mu_decode_len as usize];
+    let mut pkh_mu_decode: Box<[u8]> = vec![0u8; pkh_mu_decode_len as usize].into_boxed_slice();
     let pkh: (&[u8], &[u8]) = s_bytes.1.split_at(21504usize);
     ((&mut pkh_mu_decode)[0usize..32usize]).copy_from_slice(&pkh.1[0usize..32usize]);
     ((&mut pkh_mu_decode)[32usize..32usize + 32usize]).copy_from_slice(
@@ -255,7 +255,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &[u8], sk: &[u8]) -> u32
         }
     );
     let ss_init_len: u32 = 21664u32;
-    let mut ss_init: Vec<u8> = vec![0u8; ss_init_len as usize];
+    let mut ss_init: Box<[u8]> = vec![0u8; ss_init_len as usize].into_boxed_slice();
     ((&mut ss_init)[0usize..21632usize]).copy_from_slice(&ct[0usize..21632usize]);
     ((&mut ss_init)[21632usize..21632usize + 32usize]).copy_from_slice(&(&kp_s)[0usize..32usize]);
     crate::hacl::hash_sha3::shake256(ss, 32u32, &ss_init, ss_init_len);

@@ -664,9 +664,9 @@ fn update_last_sha3(
     }
 }
 
-pub struct hash_buf { pub fst: crate::hacl::streaming_types::hash_alg, pub snd: Vec<u64> }
+pub struct hash_buf { pub fst: crate::hacl::streaming_types::hash_alg, pub snd: Box<[u64]> }
 
-pub struct state_t { pub block_state: hash_buf, pub buf: Vec<u8>, pub total_len: u64 }
+pub struct state_t { pub block_state: hash_buf, pub buf: Box<[u8]>, pub total_len: u64 }
 
 pub fn get_alg(s: &[state_t]) -> crate::hacl::streaming_types::hash_alg
 {
@@ -674,35 +674,35 @@ pub fn get_alg(s: &[state_t]) -> crate::hacl::streaming_types::hash_alg
     block_state.fst
 }
 
-pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
+pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Box<[state_t]>
 {
-    let buf: Vec<u8> = vec![0u8; block_len(a) as usize];
-    let buf0: Vec<u64> = vec![0u64; 25usize];
+    let buf: Box<[u8]> = vec![0u8; block_len(a) as usize].into_boxed_slice();
+    let buf0: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
     let mut block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
     let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
     let s0: state_t = state_t { block_state, buf, total_len: 0u32 as u64 };
-    let p: Vec<state_t> = vec![s0];
+    let p: Box<[state_t]> = vec![s0].into_boxed_slice();
     p
 }
 
-pub fn copy(state: &[state_t]) -> Vec<state_t>
+pub fn copy(state: &[state_t]) -> Box<[state_t]>
 {
     let block_state0: &hash_buf = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
     let total_len0: u64 = (state[0usize]).total_len;
     let i: crate::hacl::streaming_types::hash_alg = block_state0.fst;
-    let mut buf: Vec<u8> = vec![0u8; block_len(i) as usize];
+    let mut buf: Box<[u8]> = vec![0u8; block_len(i) as usize].into_boxed_slice();
     ((&mut buf)[0usize..block_len(i) as usize]).copy_from_slice(
         &buf0[0usize..block_len(i) as usize]
     );
-    let buf1: Vec<u64> = vec![0u64; 25usize];
+    let buf1: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
     let mut block_state: hash_buf = hash_buf { fst: i, snd: buf1 };
     let s_src: &[u64] = &block_state0.snd;
     let s_dst: &mut [u64] = &mut block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
     let s: state_t = state_t { block_state, buf, total_len: total_len0 };
-    let p: Vec<state_t> = vec![s];
+    let p: Box<[state_t]> = vec![s].into_boxed_slice();
     p
 }
 
@@ -855,7 +855,7 @@ fn digest_(
         { total_len.wrapping_rem(block_len(a) as u64) as u32 };
     let buf_1: (&[u8], &[u8]) = buf_.split_at(0usize);
     let buf: [u64; 25] = [0u64; 25usize];
-    let mut tmp_block_state: hash_buf = hash_buf { fst: a, snd: Vec::from(buf) };
+    let mut tmp_block_state: hash_buf = hash_buf { fst: a, snd: Box::new(buf) };
     let s_src: &[u64] = &block_state.snd;
     let s_dst: &mut [u64] = &mut tmp_block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
@@ -2944,9 +2944,9 @@ Allocate state buffer of 200-bytes
 */
 pub fn
 state_malloc() ->
-    Vec<u64>
+    Box<[u64]>
 {
-    let buf: Vec<u64> = vec![0u64; 25usize];
+    let buf: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
     buf
 }
 

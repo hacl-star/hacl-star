@@ -63,7 +63,7 @@ pub fn setupBaseS(
                 let label_eae_prk: [u8; 7] =
                     [0x65u8, 0x61u8, 0x65u8, 0x5fu8, 0x70u8, 0x72u8, 0x6bu8];
                 let len: u32 = 51u32;
-                let mut tmp: Vec<u8> = vec![0u8; len as usize];
+                let mut tmp: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
                 let uu____3: (&mut [u8], &mut [u8]) = tmp.split_at_mut(0usize);
                 uu____3.1[0usize] = 0x48u8;
                 uu____3.1[1usize] = 0x50u8;
@@ -86,7 +86,7 @@ pub fn setupBaseS(
                     [0x73u8, 0x68u8, 0x61u8, 0x72u8, 0x65u8, 0x64u8, 0x5fu8, 0x73u8, 0x65u8, 0x63u8,
                         0x72u8, 0x65u8, 0x74u8];
                 let len0: u32 = 91u32;
-                let mut tmp0: Vec<u8> = vec![0u8; len0 as usize];
+                let mut tmp0: Box<[u8]> = vec![0u8; len0 as usize].into_boxed_slice();
                 crate::lowstar::endianness::store16_be(&mut (&mut tmp0)[0usize..], 32u32 as u16);
                 let uu____4: (&mut [u8], &mut [u8]) = tmp0.split_at_mut(2usize);
                 uu____4.1[0usize] = 0x48u8;
@@ -144,7 +144,7 @@ pub fn setupBaseS(
         let mut o_psk_id_hash: [u8; 32] = [0u8; 32usize];
         let empty: (&[u8], &[u8]) = uu____6.0.split_at(0usize);
         let len: u32 = 28u32;
-        let mut tmp: Vec<u8> = vec![0u8; len as usize];
+        let mut tmp: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
         let uu____9: (&mut [u8], &mut [u8]) = tmp.split_at_mut(0usize);
         uu____9.1[0usize] = 0x48u8;
         uu____9.1[1usize] = 0x50u8;
@@ -165,7 +165,7 @@ pub fn setupBaseS(
             [0x69u8, 0x6eu8, 0x66u8, 0x6fu8, 0x5fu8, 0x68u8, 0x61u8, 0x73u8, 0x68u8];
         let mut o_info_hash: [u8; 32] = [0u8; 32usize];
         let len0: u32 = 26u32.wrapping_add(infolen);
-        let mut tmp0: Vec<u8> = vec![0u8; len0 as usize];
+        let mut tmp0: Box<[u8]> = vec![0u8; len0 as usize].into_boxed_slice();
         let uu____10: (&mut [u8], &mut [u8]) = tmp0.split_at_mut(0usize);
         uu____10.1[0usize] = 0x48u8;
         uu____10.1[1usize] = 0x50u8;
@@ -193,7 +193,7 @@ pub fn setupBaseS(
         );
         let label_secret: [u8; 6] = [0x73u8, 0x65u8, 0x63u8, 0x72u8, 0x65u8, 0x74u8];
         let len1: u32 = 23u32;
-        let mut tmp1: Vec<u8> = vec![0u8; len1 as usize];
+        let mut tmp1: Box<[u8]> = vec![0u8; len1 as usize].into_boxed_slice();
         let uu____11: (&mut [u8], &mut [u8]) = tmp1.split_at_mut(0usize);
         uu____11.1[0usize] = 0x48u8;
         uu____11.1[1usize] = 0x50u8;
@@ -212,7 +212,7 @@ pub fn setupBaseS(
         crate::hacl::hkdf::extract_sha2_256(&mut o_secret, &o_shared, 32u32, &tmp1, len1);
         let label_exp: [u8; 3] = [0x65u8, 0x78u8, 0x70u8];
         let len2: u32 = 87u32;
-        let mut tmp2: Vec<u8> = vec![0u8; len2 as usize];
+        let mut tmp2: Box<[u8]> = vec![0u8; len2 as usize].into_boxed_slice();
         crate::lowstar::endianness::store16_be(&mut (&mut tmp2)[0usize..], 32u32 as u16);
         let uu____12: (&mut [u8], &mut [u8]) = tmp2.split_at_mut(2usize);
         uu____12.1[0usize] = 0x48u8;
@@ -234,7 +234,7 @@ pub fn setupBaseS(
         crate::hacl::hkdf::expand_sha2_256(o_ctx.ctx_exporter, &o_secret, 32u32, &tmp2, len2, 32u32);
         let label_key: [u8; 3] = [0x6bu8, 0x65u8, 0x79u8];
         let len3: u32 = 87u32;
-        let mut tmp3: Vec<u8> = vec![0u8; len3 as usize];
+        let mut tmp3: Box<[u8]> = vec![0u8; len3 as usize].into_boxed_slice();
         crate::lowstar::endianness::store16_be(&mut (&mut tmp3)[0usize..], 32u32 as u16);
         let uu____13: (&mut [u8], &mut [u8]) = tmp3.split_at_mut(2usize);
         uu____13.1[0usize] = 0x48u8;
@@ -257,7 +257,7 @@ pub fn setupBaseS(
         let label_base_nonce: [u8; 10] =
             [0x62u8, 0x61u8, 0x73u8, 0x65u8, 0x5fu8, 0x6eu8, 0x6fu8, 0x6eu8, 0x63u8, 0x65u8];
         let len4: u32 = 94u32;
-        let mut tmp4: Vec<u8> = vec![0u8; len4 as usize];
+        let mut tmp4: Box<[u8]> = vec![0u8; len4 as usize].into_boxed_slice();
         crate::lowstar::endianness::store16_be(&mut (&mut tmp4)[0usize..], 12u32 as u16);
         let uu____14: (&mut [u8], &mut [u8]) = tmp4.split_at_mut(2usize);
         uu____14.1[0usize] = 0x48u8;
@@ -345,7 +345,7 @@ pub fn setupBaseR(
                     let label_eae_prk: [u8; 7] =
                         [0x65u8, 0x61u8, 0x65u8, 0x5fu8, 0x70u8, 0x72u8, 0x6bu8];
                     let len: u32 = 51u32;
-                    let mut tmp: Vec<u8> = vec![0u8; len as usize];
+                    let mut tmp: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
                     let uu____3: (&mut [u8], &mut [u8]) = tmp.split_at_mut(0usize);
                     uu____3.1[0usize] = 0x48u8;
                     uu____3.1[1usize] = 0x50u8;
@@ -368,7 +368,7 @@ pub fn setupBaseR(
                         [0x73u8, 0x68u8, 0x61u8, 0x72u8, 0x65u8, 0x64u8, 0x5fu8, 0x73u8, 0x65u8,
                             0x63u8, 0x72u8, 0x65u8, 0x74u8];
                     let len0: u32 = 91u32;
-                    let mut tmp0: Vec<u8> = vec![0u8; len0 as usize];
+                    let mut tmp0: Box<[u8]> = vec![0u8; len0 as usize].into_boxed_slice();
                     crate::lowstar::endianness::store16_be(&mut (&mut tmp0)[0usize..], 32u32 as u16);
                     let uu____4: (&mut [u8], &mut [u8]) = tmp0.split_at_mut(2usize);
                     uu____4.1[0usize] = 0x48u8;
@@ -427,7 +427,7 @@ pub fn setupBaseR(
             let mut o_psk_id_hash: [u8; 32] = [0u8; 32usize];
             let empty: (&[u8], &[u8]) = uu____6.0.split_at(0usize);
             let len: u32 = 28u32;
-            let mut tmp: Vec<u8> = vec![0u8; len as usize];
+            let mut tmp: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
             let uu____9: (&mut [u8], &mut [u8]) = tmp.split_at_mut(0usize);
             uu____9.1[0usize] = 0x48u8;
             uu____9.1[1usize] = 0x50u8;
@@ -448,7 +448,7 @@ pub fn setupBaseR(
                 [0x69u8, 0x6eu8, 0x66u8, 0x6fu8, 0x5fu8, 0x68u8, 0x61u8, 0x73u8, 0x68u8];
             let mut o_info_hash: [u8; 32] = [0u8; 32usize];
             let len0: u32 = 26u32.wrapping_add(infolen);
-            let mut tmp0: Vec<u8> = vec![0u8; len0 as usize];
+            let mut tmp0: Box<[u8]> = vec![0u8; len0 as usize].into_boxed_slice();
             let uu____10: (&mut [u8], &mut [u8]) = tmp0.split_at_mut(0usize);
             uu____10.1[0usize] = 0x48u8;
             uu____10.1[1usize] = 0x50u8;
@@ -476,7 +476,7 @@ pub fn setupBaseR(
             );
             let label_secret: [u8; 6] = [0x73u8, 0x65u8, 0x63u8, 0x72u8, 0x65u8, 0x74u8];
             let len1: u32 = 23u32;
-            let mut tmp1: Vec<u8> = vec![0u8; len1 as usize];
+            let mut tmp1: Box<[u8]> = vec![0u8; len1 as usize].into_boxed_slice();
             let uu____11: (&mut [u8], &mut [u8]) = tmp1.split_at_mut(0usize);
             uu____11.1[0usize] = 0x48u8;
             uu____11.1[1usize] = 0x50u8;
@@ -497,7 +497,7 @@ pub fn setupBaseR(
             crate::hacl::hkdf::extract_sha2_256(&mut o_secret, &shared, 32u32, &tmp1, len1);
             let label_exp: [u8; 3] = [0x65u8, 0x78u8, 0x70u8];
             let len2: u32 = 87u32;
-            let mut tmp2: Vec<u8> = vec![0u8; len2 as usize];
+            let mut tmp2: Box<[u8]> = vec![0u8; len2 as usize].into_boxed_slice();
             crate::lowstar::endianness::store16_be(&mut (&mut tmp2)[0usize..], 32u32 as u16);
             let uu____12: (&mut [u8], &mut [u8]) = tmp2.split_at_mut(2usize);
             uu____12.1[0usize] = 0x48u8;
@@ -526,7 +526,7 @@ pub fn setupBaseR(
             );
             let label_key: [u8; 3] = [0x6bu8, 0x65u8, 0x79u8];
             let len3: u32 = 87u32;
-            let mut tmp3: Vec<u8> = vec![0u8; len3 as usize];
+            let mut tmp3: Box<[u8]> = vec![0u8; len3 as usize].into_boxed_slice();
             crate::lowstar::endianness::store16_be(&mut (&mut tmp3)[0usize..], 32u32 as u16);
             let uu____13: (&mut [u8], &mut [u8]) = tmp3.split_at_mut(2usize);
             uu____13.1[0usize] = 0x48u8;
@@ -549,7 +549,7 @@ pub fn setupBaseR(
             let label_base_nonce: [u8; 10] =
                 [0x62u8, 0x61u8, 0x73u8, 0x65u8, 0x5fu8, 0x6eu8, 0x6fu8, 0x6eu8, 0x63u8, 0x65u8];
             let len4: u32 = 94u32;
-            let mut tmp4: Vec<u8> = vec![0u8; len4 as usize];
+            let mut tmp4: Box<[u8]> = vec![0u8; len4 as usize].into_boxed_slice();
             crate::lowstar::endianness::store16_be(&mut (&mut tmp4)[0usize..], 12u32 as u16);
             let uu____14: (&mut [u8], &mut [u8]) = tmp4.split_at_mut(2usize);
             uu____14.1[0usize] = 0x48u8;
