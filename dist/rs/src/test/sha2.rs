@@ -4,8 +4,8 @@
 
 #[test]
 pub fn test_sha2() {
-    let state = crate::hacl::hash_sha2::malloc_256();
-    let state_ref = &mut*state.into_boxed_slice();
+    let mut state = crate::hacl::hash_sha2::malloc_256();
+    let state_ref = &mut state;
     // Meh. Copy.
     let input = b"BsPzn7jdiXtsl/u/InjqfivA0iPjoMFTD6QcLkZUh0dYchilWrlinINHfSZL+5or5NtNGL1aJDHfckYuWKEsMrm+8ebESvApqA+dJHSna5RYtSMbB8r8gii/nmC9hxmw85RHCtDeQTE9NQdsl+kKg21741E2bjU4MX6Glos6SEIoRfHKWEXbHz9qcdl6aD46LnhtBuhvyNIa4XRL0yTiM0o1PLQUX6sB8WMXUFCtqSy6WYRiIvtR8qFfr+5mBpGSCX7t8ihmvLn5eeme3K+1NAQAkhc/IISkqH57AmEi/vapQ/Jyi0KnPSwlb8Gs/iPK9yn/qSJsdnhHKH+8BPraP7Nw4OAlDyfbhNjG0HbTnnfwDF4m+fLhfnACSTPEN5QHpWr+/ECF9ivhalEAR0GeeZLYJ3o8UYhh8IxzpeHjD6Mi4LB39g3AUz1DDAfdfUBUmNK8rUOzEUE31gXcUY5/elg3LUfyKg8FRU0IAo3fDhcegFQpzDmLYoDEORlVLIaXe349ERRsrPpMKZ49DMK4mt4i+bbNC93gfkbCiufOo+sc1EANY4kISzVD6vvk89zGKxVLpl7dwJQZydsr8jGb8I78cLbRDHQSFlpwdUEm7bqrB7y2al8kExE/N/dh+FX+upf7nF+9TCYfW3lqAbrjMU6xstOLZB5UlMk2ZVf3tAPOkG/I1X+eUDeBrdAtpcbErXGGSkQo3WMxBB8afRbfqUDzH8AVmtdxIrzpMgaBqwGidaVqLIircfKsRUl+2XZX+EAzx4FJS4tMFQ5Jsx+fUenN/o8jD/3iH0JVH+M8XcmMeJYacPDvt283Pe6BpKp1Fshq+AsUoAjWdlj1x9m6LUYlsFnxQnlGNpH4iGmbdi44nreYdO+4xVNFV14nD583Yt+lrzBRmFQ3/TGPqlESdraPwiT1aU8f4isLv13E3xY8g96GDBuI71hhbVAHIgamKtkb9X9eQnUZ8zFSW05jdcTykG4iMEE2QA/NHlQy1H1jzsm8wquhGSzHOwWfBAMWwM0rkNz0l7jelGJpZcvlukmENIGya7yfCtMww6fYZFQ9InTlAQ2G3V2NxqIf7bVBm7wJG8YFz5JggFN3Bh6H37AvOgb59KeRGtsKmLCffA00zzJROE357kiKnyVMB9fem3cvKT2QFmGYC3F8lQ+x8GfaEA3uxaGUyvenf2ujvZsl/D15MEllX1BE7xUYo9+IbPXkr37VYj9GlMSavjiLW8KXzJdNXBPpSTNEllrLxFCw715c9lG5d+fIlApcxQ/Fp+JKf3eNNnDDKIKh7d90QH2T6/cY0CiOY15dwYaDVQX7f+A4trFPXFLKYm+0jr9xP3NrjKEslxC/NTQACQCQ+g==\n";
     let mut input_ = *input;
@@ -51,7 +51,7 @@ const tag1_224: [u8; 28] = [
   0x55, 0xb3, 0x2a, 0xad, 0xbc, 0xe4, 0xbd,
   0xa0, 0xb3, 0xf7, 0xe3, 0x6c, 0x9d, 0xa7
 ];
- 
+
 const tag1_256: [u8; 32] = [
   0xba, 0x78, 0x16, 0xbf, 0x8f, 0x01, 0xcf, 0xea,
   0x41, 0x41, 0x40, 0xde, 0x5d, 0xae, 0x22, 0x23,
@@ -233,7 +233,7 @@ pub fn test_shas() {
   crate::hacl::hash_sha2::update_256(&mut state_256, &mut input4, input4.len() as u32);
   crate::hacl::hash_sha2::digest_256(&mut state_256, &mut tag_256);
   assert_eq!(tag_256, tag4_256);
-  
+
   // SHA-384
   let mut tag_384 = [0u8; 48];
   let mut state_384 = crate::hacl::hash_sha2::malloc_384();
