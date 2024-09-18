@@ -47,10 +47,10 @@
     out: &mut [u64],
     f1: &[u64],
     f2: &[u64],
-    uu___: &[crate::fstar::uint128::uint128]
+    _uu___: &[crate::fstar::uint128::uint128]
 )
 {
-    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(uu___);
+    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(_uu___);
     let f10: u64 = f1[0usize];
     let f11: u64 = f1[1usize];
     let f12: u64 = f1[2usize];
@@ -159,10 +159,10 @@
     out: &mut [u64],
     f1: &[u64],
     f2: &[u64],
-    uu___: &[crate::fstar::uint128::uint128]
+    _uu___: &[crate::fstar::uint128::uint128]
 )
 {
-    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(uu___);
+    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(_uu___);
     let f10: u64 = f1[0usize];
     let f11: u64 = f1[1usize];
     let f12: u64 = f1[2usize];
@@ -434,10 +434,10 @@
 #[inline] pub(crate) fn fsqr(
     out: &mut [u64],
     f: &[u64],
-    uu___: &[crate::fstar::uint128::uint128]
+    _uu___: &[crate::fstar::uint128::uint128]
 )
 {
-    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(uu___);
+    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(_uu___);
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
     let f2: u64 = f[2usize];
@@ -537,10 +537,10 @@
 #[inline] pub(crate) fn fsqr2(
     out: &mut [u64],
     f: &[u64],
-    uu___: &[crate::fstar::uint128::uint128]
+    _uu___: &[crate::fstar::uint128::uint128]
 )
 {
-    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(uu___);
+    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(_uu___);
     let f10: u64 = f[0usize];
     let f11: u64 = f[1usize];
     let f12: u64 = f[2usize];

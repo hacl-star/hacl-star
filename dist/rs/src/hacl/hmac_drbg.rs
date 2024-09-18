@@ -38,10 +38,10 @@ min_length(a: crate::hacl::streaming_types::hash_alg) ->
 
 pub struct state { pub k: Box<[u8]>, pub v: Box<[u8]>, pub reseed_counter: Box<[u32]> }
 
-pub fn uu___is_State(a: crate::hacl::streaming_types::hash_alg, projectee: state) -> bool
+pub fn uu___is_State(_a: crate::hacl::streaming_types::hash_alg, _projectee: state) -> bool
 {
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(a);
-    crate::lowstar::ignore::ignore::<state>(projectee);
+    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(_a);
+    crate::lowstar::ignore::ignore::<state>(_projectee);
     true
 }
 

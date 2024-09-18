@@ -747,7 +747,7 @@ fn update_key(wv: &mut [u32], hash: &mut [u32], kk: u32, k: &[u8], ll: u32)
 }
 
 pub(crate) fn update_multi(
-    len: u32,
+    _len: u32,
     wv: &mut [u32],
     hash: &mut [u32],
     prev: u64,
@@ -755,7 +755,7 @@ pub(crate) fn update_multi(
     nb: u32
 )
 {
-    crate::lowstar::ignore::ignore::<u32>(len);
+    crate::lowstar::ignore::ignore::<u32>(_len);
     for i in 0u32..nb
     {
         let totlen: u64 = prev.wrapping_add(i.wrapping_add(1u32).wrapping_mul(64u32) as u64);
@@ -867,108 +867,115 @@ fn malloc_raw(
     let p: &[crate::hacl::hash_blake2b::blake2_params] = key.fst;
     let kk1: u8 = (p[0usize]).key_length;
     let nn: u8 = (p[0usize]).digest_length;
-    let last_node: bool = block_state.thd;
-    let i: crate::hacl::hash_blake2b::index =
-        crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node };
-    let h: &mut [u32] = &mut block_state.f4;
-    let kk2: u32 = i.key_length as u32;
-    let k·: &[u8] = key.snd;
-    if kk2 != 0u32
+    match block_state
     {
-        let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
-        (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
-            &vec![0u8; 64u32.wrapping_sub(kk2) as usize].into_boxed_slice()
-        );
-        ((&mut buf)[0usize..kk2 as usize]).copy_from_slice(&k·[0usize..kk2 as usize])
+        block_state_t { thd: last_node, .. } =>
+          {
+              let i: crate::hacl::hash_blake2b::index =
+                  crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node };
+              let h: &mut [u32] = &mut block_state.f4;
+              let kk2: u32 = i.key_length as u32;
+              let k·: &[u8] = key.snd;
+              if kk2 != 0u32
+              {
+                  let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
+                  (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
+                      &vec![0u8; 64u32.wrapping_sub(kk2) as usize].into_boxed_slice()
+                  );
+                  ((&mut buf)[0usize..kk2 as usize]).copy_from_slice(&k·[0usize..kk2 as usize])
+              };
+              let pv: &crate::hacl::hash_blake2b::blake2_params = &p[0usize];
+              let mut tmp: [u32; 8] = [0u32; 8usize];
+              let r0: (&mut [u32], &mut [u32]) = h.split_at_mut(0usize);
+              let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
+              let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
+              let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
+              let iv0: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[0usize];
+              let iv1: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[1usize];
+              let iv2: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[2usize];
+              let iv3: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[3usize];
+              let iv4: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[4usize];
+              let iv5: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[5usize];
+              let iv6: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[6usize];
+              let iv7: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[7usize];
+              r3.0[0usize] = iv0;
+              r3.0[1usize] = iv1;
+              r3.0[2usize] = iv2;
+              r3.0[3usize] = iv3;
+              r3.1[0usize] = iv4;
+              r3.1[1usize] = iv5;
+              r3.1[2usize] = iv6;
+              r3.1[3usize] = iv7;
+              let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
+              krml::unroll_for!(
+                  2,
+                  "i0",
+                  0u32,
+                  1u32,
+                  {
+                      let bj: &[u8] = &pv.salt[i0.wrapping_mul(4u32) as usize..];
+                      let u: u32 = crate::lowstar::endianness::load32_le(bj);
+                      let r4: u32 = u;
+                      let x: u32 = r4;
+                      let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+                      os.1[i0 as usize] = x
+                  }
+              );
+              let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
+              krml::unroll_for!(
+                  2,
+                  "i0",
+                  0u32,
+                  1u32,
+                  {
+                      let bj: &[u8] = &pv.personal[i0.wrapping_mul(4u32) as usize..];
+                      let u: u32 = crate::lowstar::endianness::load32_le(bj);
+                      let r4: u32 = u;
+                      let x: u32 = r4;
+                      let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+                      os.1[i0 as usize] = x
+                  }
+              );
+              (&mut tmp)[0usize] =
+                  pv.digest_length as u32
+                  ^
+                  ((pv.key_length as u32).wrapping_shl(8u32)
+                  ^
+                  ((pv.fanout as u32).wrapping_shl(16u32) ^ (pv.depth as u32).wrapping_shl(24u32)));
+              (&mut tmp)[1usize] = pv.leaf_length;
+              (&mut tmp)[2usize] = pv.node_offset as u32;
+              (&mut tmp)[3usize] =
+                  pv.node_offset.wrapping_shr(32u32) as u32
+                  ^
+                  ((pv.node_depth as u32).wrapping_shl(16u32)
+                  ^
+                  (pv.inner_length as u32).wrapping_shl(24u32));
+              let tmp0: u32 = (&tmp)[0usize];
+              let tmp1: u32 = (&tmp)[1usize];
+              let tmp2: u32 = (&tmp)[2usize];
+              let tmp3: u32 = (&tmp)[3usize];
+              let tmp4: u32 = (&tmp)[4usize];
+              let tmp5: u32 = (&tmp)[5usize];
+              let tmp6: u32 = (&tmp)[6usize];
+              let tmp7: u32 = (&tmp)[7usize];
+              let iv0·: u32 = iv0 ^ tmp0;
+              let iv1·: u32 = iv1 ^ tmp1;
+              let iv2·: u32 = iv2 ^ tmp2;
+              let iv3·: u32 = iv3 ^ tmp3;
+              let iv4·: u32 = iv4 ^ tmp4;
+              let iv5·: u32 = iv5 ^ tmp5;
+              let iv6·: u32 = iv6 ^ tmp6;
+              let iv7·: u32 = iv7 ^ tmp7;
+              r1.0[0usize] = iv0·;
+              r1.0[1usize] = iv1·;
+              r1.0[2usize] = iv2·;
+              r1.0[3usize] = iv3·;
+              r2.0[0usize] = iv4·;
+              r2.0[1usize] = iv5·;
+              r2.0[2usize] = iv6·;
+              r2.0[3usize] = iv7·
+          }
     };
-    let pv: &crate::hacl::hash_blake2b::blake2_params = &p[0usize];
-    let mut tmp: [u32; 8] = [0u32; 8usize];
-    let r0: (&mut [u32], &mut [u32]) = h.split_at_mut(0usize);
-    let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
-    let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
-    let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
-    let iv0: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[0usize];
-    let iv1: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[1usize];
-    let iv2: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[2usize];
-    let iv3: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[3usize];
-    let iv4: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[4usize];
-    let iv5: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[5usize];
-    let iv6: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[6usize];
-    let iv7: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[7usize];
-    r3.0[0usize] = iv0;
-    r3.0[1usize] = iv1;
-    r3.0[2usize] = iv2;
-    r3.0[3usize] = iv3;
-    r3.1[0usize] = iv4;
-    r3.1[1usize] = iv5;
-    r3.1[2usize] = iv6;
-    r3.1[3usize] = iv7;
-    let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
-    krml::unroll_for!(
-        2,
-        "i0",
-        0u32,
-        1u32,
-        {
-            let bj: &[u8] = &pv.salt[i0.wrapping_mul(4u32) as usize..];
-            let u: u32 = crate::lowstar::endianness::load32_le(bj);
-            let r4: u32 = u;
-            let x: u32 = r4;
-            let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x
-        }
-    );
-    let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
-    krml::unroll_for!(
-        2,
-        "i0",
-        0u32,
-        1u32,
-        {
-            let bj: &[u8] = &pv.personal[i0.wrapping_mul(4u32) as usize..];
-            let u: u32 = crate::lowstar::endianness::load32_le(bj);
-            let r4: u32 = u;
-            let x: u32 = r4;
-            let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x
-        }
-    );
-    (&mut tmp)[0usize] =
-        pv.digest_length as u32
-        ^
-        ((pv.key_length as u32).wrapping_shl(8u32)
-        ^
-        ((pv.fanout as u32).wrapping_shl(16u32) ^ (pv.depth as u32).wrapping_shl(24u32)));
-    (&mut tmp)[1usize] = pv.leaf_length;
-    (&mut tmp)[2usize] = pv.node_offset as u32;
-    (&mut tmp)[3usize] =
-        pv.node_offset.wrapping_shr(32u32) as u32
-        ^
-        ((pv.node_depth as u32).wrapping_shl(16u32) ^ (pv.inner_length as u32).wrapping_shl(24u32));
-    let tmp0: u32 = (&tmp)[0usize];
-    let tmp1: u32 = (&tmp)[1usize];
-    let tmp2: u32 = (&tmp)[2usize];
-    let tmp3: u32 = (&tmp)[3usize];
-    let tmp4: u32 = (&tmp)[4usize];
-    let tmp5: u32 = (&tmp)[5usize];
-    let tmp6: u32 = (&tmp)[6usize];
-    let tmp7: u32 = (&tmp)[7usize];
-    let iv0·: u32 = iv0 ^ tmp0;
-    let iv1·: u32 = iv1 ^ tmp1;
-    let iv2·: u32 = iv2 ^ tmp2;
-    let iv3·: u32 = iv3 ^ tmp3;
-    let iv4·: u32 = iv4 ^ tmp4;
-    let iv5·: u32 = iv5 ^ tmp5;
-    let iv6·: u32 = iv6 ^ tmp6;
-    let iv7·: u32 = iv7 ^ tmp7;
-    r1.0[0usize] = iv0·;
-    r1.0[1usize] = iv1·;
-    r1.0[2usize] = iv2·;
-    r1.0[3usize] = iv3·;
-    r2.0[0usize] = iv4·;
-    r2.0[1usize] = iv5·;
-    r2.0[2usize] = iv6·;
-    r2.0[3usize] = iv7·;
     let kk10: u8 = kk.key_length;
     let ite: u32 = if kk10 != 0u8 { 64u32 } else { 0u32 };
     let s: state_t = state_t { block_state, buf, total_len: ite as u64 };
@@ -979,129 +986,137 @@ fn malloc_raw(
 fn index_of_state(s: &[state_t]) -> crate::hacl::hash_blake2b::index
 {
     let block_state: &block_state_t = &(s[0usize]).block_state;
-    let last_node: bool = block_state.thd;
-    let nn: u8 = block_state.snd;
-    let kk1: u8 = block_state.fst;
-    crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
+    match *block_state
+    {
+        block_state_t { fst: kk1, snd: nn, thd: last_node, .. } =>
+          crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
+    }
 }
 
 fn reset_raw(state: &mut [state_t], key: crate::hacl::hash_blake2b::params_and_key)
 {
     let block_state: &mut block_state_t = &mut (state[0usize]).block_state;
     let buf: &mut [u8] = &mut (state[0usize]).buf;
-    let last_node: bool = block_state.thd;
-    let nn: u8 = block_state.snd;
-    let kk1: u8 = block_state.fst;
     let i: crate::hacl::hash_blake2b::index =
-        crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node };
+        match *block_state
+        {
+            block_state_t { fst: kk1, snd: nn, thd: last_node, .. } =>
+              crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
+        };
     let p: &[crate::hacl::hash_blake2b::blake2_params] = key.fst;
-    let kk10: u8 = (p[0usize]).key_length;
-    let nn0: u8 = (p[0usize]).digest_length;
-    let last_node0: bool = block_state.thd;
-    let i1: crate::hacl::hash_blake2b::index =
-        crate::hacl::hash_blake2b::index
-        { key_length: kk10, digest_length: nn0, last_node: last_node0 };
-    let h: &mut [u32] = &mut block_state.f4;
-    let kk2: u32 = i1.key_length as u32;
-    let k·1: &[u8] = key.snd;
-    if kk2 != 0u32
+    let kk1: u8 = (p[0usize]).key_length;
+    let nn: u8 = (p[0usize]).digest_length;
+    match *block_state
     {
-        let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
-        (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
-            &vec![0u8; 64u32.wrapping_sub(kk2) as usize].into_boxed_slice()
-        );
-        (buf[0usize..kk2 as usize]).copy_from_slice(&k·1[0usize..kk2 as usize])
+        block_state_t { thd: last_node, .. } =>
+          {
+              let i1: crate::hacl::hash_blake2b::index =
+                  crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node };
+              let h: &mut [u32] = &mut block_state.f4;
+              let kk2: u32 = i1.key_length as u32;
+              let k·1: &[u8] = key.snd;
+              if kk2 != 0u32
+              {
+                  let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
+                  (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
+                      &vec![0u8; 64u32.wrapping_sub(kk2) as usize].into_boxed_slice()
+                  );
+                  (buf[0usize..kk2 as usize]).copy_from_slice(&k·1[0usize..kk2 as usize])
+              };
+              let pv: &crate::hacl::hash_blake2b::blake2_params = &p[0usize];
+              let mut tmp: [u32; 8] = [0u32; 8usize];
+              let r0: (&mut [u32], &mut [u32]) = h.split_at_mut(0usize);
+              let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
+              let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
+              let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
+              let iv0: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[0usize];
+              let iv1: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[1usize];
+              let iv2: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[2usize];
+              let iv3: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[3usize];
+              let iv4: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[4usize];
+              let iv5: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[5usize];
+              let iv6: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[6usize];
+              let iv7: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[7usize];
+              r3.0[0usize] = iv0;
+              r3.0[1usize] = iv1;
+              r3.0[2usize] = iv2;
+              r3.0[3usize] = iv3;
+              r3.1[0usize] = iv4;
+              r3.1[1usize] = iv5;
+              r3.1[2usize] = iv6;
+              r3.1[3usize] = iv7;
+              let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
+              krml::unroll_for!(
+                  2,
+                  "i0",
+                  0u32,
+                  1u32,
+                  {
+                      let bj: &[u8] = &pv.salt[i0.wrapping_mul(4u32) as usize..];
+                      let u: u32 = crate::lowstar::endianness::load32_le(bj);
+                      let r: u32 = u;
+                      let x: u32 = r;
+                      let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+                      os.1[i0 as usize] = x
+                  }
+              );
+              let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
+              krml::unroll_for!(
+                  2,
+                  "i0",
+                  0u32,
+                  1u32,
+                  {
+                      let bj: &[u8] = &pv.personal[i0.wrapping_mul(4u32) as usize..];
+                      let u: u32 = crate::lowstar::endianness::load32_le(bj);
+                      let r: u32 = u;
+                      let x: u32 = r;
+                      let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+                      os.1[i0 as usize] = x
+                  }
+              );
+              (&mut tmp)[0usize] =
+                  pv.digest_length as u32
+                  ^
+                  ((pv.key_length as u32).wrapping_shl(8u32)
+                  ^
+                  ((pv.fanout as u32).wrapping_shl(16u32) ^ (pv.depth as u32).wrapping_shl(24u32)));
+              (&mut tmp)[1usize] = pv.leaf_length;
+              (&mut tmp)[2usize] = pv.node_offset as u32;
+              (&mut tmp)[3usize] =
+                  pv.node_offset.wrapping_shr(32u32) as u32
+                  ^
+                  ((pv.node_depth as u32).wrapping_shl(16u32)
+                  ^
+                  (pv.inner_length as u32).wrapping_shl(24u32));
+              let tmp0: u32 = (&tmp)[0usize];
+              let tmp1: u32 = (&tmp)[1usize];
+              let tmp2: u32 = (&tmp)[2usize];
+              let tmp3: u32 = (&tmp)[3usize];
+              let tmp4: u32 = (&tmp)[4usize];
+              let tmp5: u32 = (&tmp)[5usize];
+              let tmp6: u32 = (&tmp)[6usize];
+              let tmp7: u32 = (&tmp)[7usize];
+              let iv0·: u32 = iv0 ^ tmp0;
+              let iv1·: u32 = iv1 ^ tmp1;
+              let iv2·: u32 = iv2 ^ tmp2;
+              let iv3·: u32 = iv3 ^ tmp3;
+              let iv4·: u32 = iv4 ^ tmp4;
+              let iv5·: u32 = iv5 ^ tmp5;
+              let iv6·: u32 = iv6 ^ tmp6;
+              let iv7·: u32 = iv7 ^ tmp7;
+              r1.0[0usize] = iv0·;
+              r1.0[1usize] = iv1·;
+              r1.0[2usize] = iv2·;
+              r1.0[3usize] = iv3·;
+              r2.0[0usize] = iv4·;
+              r2.0[1usize] = iv5·;
+              r2.0[2usize] = iv6·;
+              r2.0[3usize] = iv7·
+          }
     };
-    let pv: &crate::hacl::hash_blake2b::blake2_params = &p[0usize];
-    let mut tmp: [u32; 8] = [0u32; 8usize];
-    let r0: (&mut [u32], &mut [u32]) = h.split_at_mut(0usize);
-    let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
-    let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
-    let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
-    let iv0: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[0usize];
-    let iv1: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[1usize];
-    let iv2: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[2usize];
-    let iv3: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[3usize];
-    let iv4: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[4usize];
-    let iv5: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[5usize];
-    let iv6: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[6usize];
-    let iv7: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[7usize];
-    r3.0[0usize] = iv0;
-    r3.0[1usize] = iv1;
-    r3.0[2usize] = iv2;
-    r3.0[3usize] = iv3;
-    r3.1[0usize] = iv4;
-    r3.1[1usize] = iv5;
-    r3.1[2usize] = iv6;
-    r3.1[3usize] = iv7;
-    let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
-    krml::unroll_for!(
-        2,
-        "i0",
-        0u32,
-        1u32,
-        {
-            let bj: &[u8] = &pv.salt[i0.wrapping_mul(4u32) as usize..];
-            let u: u32 = crate::lowstar::endianness::load32_le(bj);
-            let r: u32 = u;
-            let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x
-        }
-    );
-    let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
-    krml::unroll_for!(
-        2,
-        "i0",
-        0u32,
-        1u32,
-        {
-            let bj: &[u8] = &pv.personal[i0.wrapping_mul(4u32) as usize..];
-            let u: u32 = crate::lowstar::endianness::load32_le(bj);
-            let r: u32 = u;
-            let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
-            os.1[i0 as usize] = x
-        }
-    );
-    (&mut tmp)[0usize] =
-        pv.digest_length as u32
-        ^
-        ((pv.key_length as u32).wrapping_shl(8u32)
-        ^
-        ((pv.fanout as u32).wrapping_shl(16u32) ^ (pv.depth as u32).wrapping_shl(24u32)));
-    (&mut tmp)[1usize] = pv.leaf_length;
-    (&mut tmp)[2usize] = pv.node_offset as u32;
-    (&mut tmp)[3usize] =
-        pv.node_offset.wrapping_shr(32u32) as u32
-        ^
-        ((pv.node_depth as u32).wrapping_shl(16u32) ^ (pv.inner_length as u32).wrapping_shl(24u32));
-    let tmp0: u32 = (&tmp)[0usize];
-    let tmp1: u32 = (&tmp)[1usize];
-    let tmp2: u32 = (&tmp)[2usize];
-    let tmp3: u32 = (&tmp)[3usize];
-    let tmp4: u32 = (&tmp)[4usize];
-    let tmp5: u32 = (&tmp)[5usize];
-    let tmp6: u32 = (&tmp)[6usize];
-    let tmp7: u32 = (&tmp)[7usize];
-    let iv0·: u32 = iv0 ^ tmp0;
-    let iv1·: u32 = iv1 ^ tmp1;
-    let iv2·: u32 = iv2 ^ tmp2;
-    let iv3·: u32 = iv3 ^ tmp3;
-    let iv4·: u32 = iv4 ^ tmp4;
-    let iv5·: u32 = iv5 ^ tmp5;
-    let iv6·: u32 = iv6 ^ tmp6;
-    let iv7·: u32 = iv7 ^ tmp7;
-    r1.0[0usize] = iv0·;
-    r1.0[1usize] = iv1·;
-    r1.0[2usize] = iv2·;
-    r1.0[3usize] = iv3·;
-    r2.0[0usize] = iv4·;
-    r2.0[1usize] = iv5·;
-    r2.0[2usize] = iv6·;
-    r2.0[3usize] = iv7·;
-    let kk11: u8 = i.key_length;
-    let ite: u32 = if kk11 != 0u8 { 64u32 } else { 0u32 };
+    let kk10: u8 = i.key_length;
+    let ite: u32 = if kk10 != 0u8 { 64u32 } else { 0u32 };
     let total_len: u64 = ite as u64;
     (state[0usize]).total_len = total_len
 }
@@ -1211,10 +1226,14 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             if sz1 != 0u32
             {
                 let prevlen: u64 = total_len1.wrapping_sub(sz1 as u64);
-                let hash: &mut [u32] = &mut block_state.f4;
-                let wv: &mut [u32] = &mut block_state.f3;
-                let nb: u32 = 1u32;
-                update_multi(64u32, wv, hash, prevlen, buf, nb)
+                match *block_state
+                {
+                    block_state_t { f3: ref mut wv, f4: ref mut hash, .. } =>
+                      {
+                          let nb: u32 = 1u32;
+                          update_multi(64u32, wv, hash, prevlen, buf, nb)
+                      }
+                }
             };
             let ite: u32 =
                 if (chunk_len as u64).wrapping_rem(64u32 as u64) == 0u64 && chunk_len as u64 > 0u64
@@ -1226,10 +1245,14 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            let hash: &mut [u32] = &mut block_state.f4;
-            let wv: &mut [u32] = &mut block_state.f3;
-            let nb: u32 = data1_len.wrapping_div(64u32);
-            update_multi(data1_len, wv, hash, total_len1, data2.0, nb);
+            match *block_state
+            {
+                block_state_t { f3: ref mut wv, f4: ref mut hash, .. } =>
+                  {
+                      let nb: u32 = data1_len.wrapping_div(64u32);
+                      update_multi(data1_len, wv, hash, total_len1, data2.0, nb)
+                  }
+            };
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -1262,10 +1285,14 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             if sz10 != 0u32
             {
                 let prevlen: u64 = total_len10.wrapping_sub(sz10 as u64);
-                let hash: &mut [u32] = &mut block_state.f4;
-                let wv: &mut [u32] = &mut block_state.f3;
-                let nb: u32 = 1u32;
-                update_multi(64u32, wv, hash, prevlen, buf0, nb)
+                match *block_state
+                {
+                    block_state_t { f3: ref mut wv, f4: ref mut hash, .. } =>
+                      {
+                          let nb: u32 = 1u32;
+                          update_multi(64u32, wv, hash, prevlen, buf0, nb)
+                      }
+                }
             };
             let ite: u32 =
                 if
@@ -1280,10 +1307,14 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            let hash: &mut [u32] = &mut block_state.f4;
-            let wv: &mut [u32] = &mut block_state.f3;
-            let nb: u32 = data1_len.wrapping_div(64u32);
-            update_multi(data1_len, wv, hash, total_len10, data2.0, nb);
+            match *block_state
+            {
+                block_state_t { f3: ref mut wv, f4: ref mut hash, .. } =>
+                  {
+                      let nb: u32 = data1_len.wrapping_div(64u32);
+                      update_multi(data1_len, wv, hash, total_len10, data2.0, nb)
+                  }
+            };
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -1311,11 +1342,12 @@ digest(s: &[state_t], dst: &mut [u8]) ->
     u8
 {
     let block_state: &block_state_t = &(s[0usize]).block_state;
-    let last_node: bool = block_state.thd;
-    let nn: u8 = block_state.snd;
-    let kk: u8 = block_state.fst;
     let i1: crate::hacl::hash_blake2b::index =
-        crate::hacl::hash_blake2b::index { key_length: kk, digest_length: nn, last_node };
+        match *block_state
+        {
+            block_state_t { fst: kk, snd: nn, thd: last_node, .. } =>
+              crate::hacl::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
+        };
     let block_state0: &block_state_t = &(s[0usize]).block_state;
     let buf_: &[u8] = &(s[0usize]).buf;
     let total_len: u64 = (s[0usize]).total_len;
@@ -1336,39 +1368,52 @@ digest(s: &[state_t], dst: &mut [u8]) ->
             f3: Box::new(wv),
             f4: Box::new(b)
         };
-    let src_b: &[u32] = &block_state0.f4;
-    let dst_b: &mut [u32] = &mut tmp_block_state.f4;
-    (dst_b[0usize..16usize]).copy_from_slice(&src_b[0usize..16usize]);
+    match *block_state0
+    {
+        block_state_t { f4: ref src_b, .. } =>
+          match tmp_block_state
+          {
+              block_state_t { f4: ref mut dst_b, .. } =>
+                (dst_b[0usize..16usize]).copy_from_slice(&src_b[0usize..16usize])
+          }
+    };
     let prev_len: u64 = total_len.wrapping_sub(r as u64);
     let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
     let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
-    let hash: &mut [u32] = &mut tmp_block_state.f4;
-    let wv0: &mut [u32] = &mut tmp_block_state.f3;
-    let nb: u32 = 0u32;
-    update_multi(0u32, wv0, hash, prev_len, buf_last.0, nb);
+    match tmp_block_state
+    {
+        block_state_t { f3: ref mut wv0, f4: ref mut hash, .. } =>
+          {
+              let nb: u32 = 0u32;
+              update_multi(0u32, wv0, hash, prev_len, buf_last.0, nb)
+          }
+    };
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
-    let hash0: &mut [u32] = &mut tmp_block_state.f4;
-    let wv1: &mut [u32] = &mut tmp_block_state.f3;
-    let last_node0: bool = tmp_block_state.thd;
-    update_last(r, wv1, hash0, last_node0, prev_len_last, r, buf_last.1);
-    let nn0: u8 = tmp_block_state.snd;
-    finish(nn0 as u32, dst, &tmp_block_state.f4);
+    match tmp_block_state
+    {
+        block_state_t { thd: last_node, f3: ref mut wv0, f4: ref mut hash, .. } =>
+          update_last(r, wv0, hash, last_node, prev_len_last, r, buf_last.1)
+    };
+    match tmp_block_state
+    { block_state_t { snd: nn, .. } => finish(nn as u32, dst, &tmp_block_state.f4) };
     let block_state1: &block_state_t = &(s[0usize]).block_state;
-    let last_node1: bool = block_state1.thd;
-    let nn1: u8 = block_state1.snd;
-    let kk0: u8 = block_state1.fst;
-    crate::hacl::hash_blake2b::index { key_length: kk0, digest_length: nn1, last_node: last_node1 }.digest_length
+    match *block_state1
+    {
+        block_state_t { fst: kk, snd: nn, thd: last_node, .. } =>
+          crate::hacl::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
+    }.digest_length
 }
 
 pub fn info(s: &[state_t]) -> crate::hacl::hash_blake2b::index
 {
     let block_state: &block_state_t = &(s[0usize]).block_state;
-    let last_node: bool = block_state.thd;
-    let nn: u8 = block_state.snd;
-    let kk: u8 = block_state.fst;
-    crate::hacl::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
+    match *block_state
+    {
+        block_state_t { fst: kk, snd: nn, thd: last_node, .. } =>
+          crate::hacl::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
+    }
 }
 
 /**
@@ -1381,20 +1426,27 @@ copy(state: &[state_t]) ->
     let block_state0: &block_state_t = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
     let total_len0: u64 = (state[0usize]).total_len;
-    let last_node: bool = block_state0.thd;
-    let nn: u8 = block_state0.snd;
-    let kk1: u8 = block_state0.fst;
     let i: crate::hacl::hash_blake2b::index =
-        crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node };
+        match *block_state0
+        {
+            block_state_t { fst: kk1, snd: nn, thd: last_node, .. } =>
+              crate::hacl::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
+        };
     let mut buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
     let wv: Box<[u32]> = vec![0u32; 16usize].into_boxed_slice();
     let b: Box<[u32]> = vec![0u32; 16usize].into_boxed_slice();
     let mut block_state: block_state_t =
         block_state_t { fst: i.key_length, snd: i.digest_length, thd: i.last_node, f3: wv, f4: b };
-    let src_b: &[u32] = &block_state0.f4;
-    let dst_b: &mut [u32] = &mut block_state.f4;
-    (dst_b[0usize..16usize]).copy_from_slice(&src_b[0usize..16usize]);
+    match *block_state0
+    {
+        block_state_t { f4: ref src_b, .. } =>
+          match block_state
+          {
+              block_state_t { f4: ref mut dst_b, .. } =>
+                (dst_b[0usize..16usize]).copy_from_slice(&src_b[0usize..16usize])
+          }
+    };
     let s: state_t = state_t { block_state, buf, total_len: total_len0 };
     let p: Box<[state_t]> = vec![s].into_boxed_slice();
     p

@@ -1238,9 +1238,9 @@ pub fn is_shake(s: &[state_t]) -> bool
     uu____0 == crate::hacl::streaming_types::hash_alg::Shake256
 }
 
-pub fn absorb_inner_320(rateInBytes: u32, b: &[u8], s: &mut [u64])
+pub fn absorb_inner_320(_rateInBytes: u32, b: &[u8], s: &mut [u64])
 {
-    crate::lowstar::ignore::ignore::<u32>(rateInBytes);
+    crate::lowstar::ignore::ignore::<u32>(_rateInBytes);
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b;
     let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
