@@ -278,25 +278,25 @@ fn mod_exp_bytes_be_precomp(n_bytes: &mut [u8], a_bytes: &mut [u8], b_bits: u32,
   let mut res = [ 0u64; 64 ];
   let b_bytes_len = (b_bits - 1u32) / 8u32 + 1u32;
 
-  let a = crate::hacl::bignum4096::new_bn_from_bytes_be(512, a_bytes);
-  let n = crate::hacl::bignum4096::new_bn_from_bytes_be(512, n_bytes);
-  let b = crate::hacl::bignum4096::new_bn_from_bytes_be(b_bytes_len, b_bytes);
-  let k = crate::hacl::bignum4096::mont_ctx_init(&n);
+  let a = crate::bignum4096::new_bn_from_bytes_be(512, a_bytes);
+  let n = crate::bignum4096::new_bn_from_bytes_be(512, n_bytes);
+  let b = crate::bignum4096::new_bn_from_bytes_be(b_bytes_len, b_bytes);
+  let k = crate::bignum4096::mont_ctx_init(&n);
 
-  crate::hacl::bignum4096::mod_exp_vartime_precomp(&k, &a, b_bits, &b, &mut res);
-  crate::hacl::bignum4096::bn_to_bytes_be(&res, res_bytes);
+  crate::bignum4096::mod_exp_vartime_precomp(&k, &a, b_bits, &b, &mut res);
+  crate::bignum4096::bn_to_bytes_be(&res, res_bytes);
 }
 
 fn mod_exp_bytes_be(n_bytes: &mut [u8], a_bytes: &mut [u8], b_bits: u32, b_bytes: &mut [u8], res_bytes: &mut [u8]) {
   let mut res = [ 0u64; 64 ];
   let b_bytes_len = (b_bits - 1u32) / 8u32 + 1u32;
 
-  let a = crate::hacl::bignum4096::new_bn_from_bytes_be(512, a_bytes);
-  let n = crate::hacl::bignum4096::new_bn_from_bytes_be(512, n_bytes);
-  let b = crate::hacl::bignum4096::new_bn_from_bytes_be(b_bytes_len, b_bytes);
+  let a = crate::bignum4096::new_bn_from_bytes_be(512, a_bytes);
+  let n = crate::bignum4096::new_bn_from_bytes_be(512, n_bytes);
+  let b = crate::bignum4096::new_bn_from_bytes_be(b_bytes_len, b_bytes);
 
-  crate::hacl::bignum4096::mod_exp_vartime(&n, &a, b_bits, &b, &mut res);
-  crate::hacl::bignum4096::bn_to_bytes_be(&res, res_bytes);
+  crate::bignum4096::mod_exp_vartime(&n, &a, b_bits, &b, &mut res);
+  crate::bignum4096::bn_to_bytes_be(&res, res_bytes);
 }
 
 #[test]
@@ -314,6 +314,6 @@ pub fn test_bignum () {
 
   // test mod_exp_vartime
   let mut res = [ 0u64; 64 ];
-  crate::hacl::bignum4096::mod_exp_vartime(&mut test1_n, &mut test1_a, 4096, &mut test1_b, &mut res);
+  crate::bignum4096::mod_exp_vartime(&mut test1_n, &mut test1_a, 4096, &mut test1_b, &mut res);
   assert_eq!(res, test1_res);
 }

@@ -69,3 +69,21 @@ pub mod chacha20_vec32;
 // pub mod hpke_curve64_cp32_sha512;
 // pub mod ec_ed25519;
 // pub mod hpke_curve51_cp256_sha256;
+
+pub mod test {
+   pub mod blake2;
+   pub mod chacha20;
+   pub mod chachapoly;
+   pub mod curve;
+   pub mod ecdhp256;
+   pub mod ed25519;
+   pub mod hmac;
+   pub mod ffdhe;
+   pub mod p256;
+   pub mod poly1305;
+   pub mod rsapss;
+   pub mod salsa20;
+   pub mod sha1;
+   pub mod sha2;
+   pub mod sha3;
+}
