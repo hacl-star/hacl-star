@@ -264,19 +264,19 @@ fn mul4(a: &[u64], b: &[u64], res: &mut [u64])
                 let res_i: (&mut [u64], &mut [u64]) =
                     res_j.1.split_at_mut(4u32.wrapping_mul(0u32) as usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i, bj, (&c)[0usize], res_i.1);
+                    bignum::bignum_base::mul_wide_add2_u64(a_i, bj, (&c)[0usize], res_i.1);
                 let a_i0: u64 = a[4u32.wrapping_mul(0u32).wrapping_add(1u32) as usize];
                 let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i0, bj, (&c)[0usize], res_i0.1);
+                    bignum::bignum_base::mul_wide_add2_u64(a_i0, bj, (&c)[0usize], res_i0.1);
                 let a_i1: u64 = a[4u32.wrapping_mul(0u32).wrapping_add(2u32) as usize];
                 let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i1, bj, (&c)[0usize], res_i1.1);
+                    bignum::bignum_base::mul_wide_add2_u64(a_i1, bj, (&c)[0usize], res_i1.1);
                 let a_i2: u64 = a[4u32.wrapping_mul(0u32).wrapping_add(3u32) as usize];
                 let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i2, bj, (&c)[0usize], res_i2.1)
+                    bignum::bignum_base::mul_wide_add2_u64(a_i2, bj, (&c)[0usize], res_i2.1)
             };
             let r: u64 = (&c)[0usize];
             res[4u32.wrapping_add(i) as usize] = r
@@ -303,26 +303,26 @@ fn sqr4(a: &[u64], res: &mut [u64])
                 let res_i: (&mut [u64], &mut [u64]) =
                     res_j.1.split_at_mut(4u32.wrapping_mul(i0) as usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i, a_j, (&c)[0usize], res_i.1);
+                    bignum::bignum_base::mul_wide_add2_u64(a_i, a_j, (&c)[0usize], res_i.1);
                 let a_i0: u64 = ab.1[4u32.wrapping_mul(i0).wrapping_add(1u32) as usize];
                 let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i0, a_j, (&c)[0usize], res_i0.1);
+                    bignum::bignum_base::mul_wide_add2_u64(a_i0, a_j, (&c)[0usize], res_i0.1);
                 let a_i1: u64 = ab.1[4u32.wrapping_mul(i0).wrapping_add(2u32) as usize];
                 let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i1, a_j, (&c)[0usize], res_i1.1);
+                    bignum::bignum_base::mul_wide_add2_u64(a_i1, a_j, (&c)[0usize], res_i1.1);
                 let a_i2: u64 = ab.1[4u32.wrapping_mul(i0).wrapping_add(3u32) as usize];
                 let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i2, a_j, (&c)[0usize], res_i2.1)
+                    bignum::bignum_base::mul_wide_add2_u64(a_i2, a_j, (&c)[0usize], res_i2.1)
             };
             for i0 in i.wrapping_div(4u32).wrapping_mul(4u32)..i
             {
                 let a_i: u64 = ab.1[i0 as usize];
                 let res_i: (&mut [u64], &mut [u64]) = res_j.1.split_at_mut(i0 as usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i, a_j, (&c)[0usize], res_i.1)
+                    bignum::bignum_base::mul_wide_add2_u64(a_i, a_j, (&c)[0usize], res_i.1)
             };
             let r: u64 = (&c)[0usize];
             res[i.wrapping_add(i) as usize] = r
@@ -332,7 +332,7 @@ fn sqr4(a: &[u64], res: &mut [u64])
     let mut b_copy: [u64; 8] = [0u64; 8usize];
     ((&mut a_copy)[0usize..8usize]).copy_from_slice(&res[0usize..8usize]);
     ((&mut b_copy)[0usize..8usize]).copy_from_slice(&res[0usize..8usize]);
-    let r: u64 = crate::bignum_base::bn_add_eq_len_u64(8u32, &a_copy, &b_copy, res);
+    let r: u64 = bignum::bignum_base::bn_add_eq_len_u64(8u32, &a_copy, &b_copy, res);
     let c0: u64 = r;
     lowstar::ignore::ignore::<u64>(c0);
     let mut tmp: [u64; 8] = [0u64; 8usize];
@@ -357,7 +357,7 @@ fn sqr4(a: &[u64], res: &mut [u64])
     let mut b_copy0: [u64; 8] = [0u64; 8usize];
     ((&mut a_copy0)[0usize..8usize]).copy_from_slice(&res[0usize..8usize]);
     ((&mut b_copy0)[0usize..8usize]).copy_from_slice(&(&tmp)[0usize..8usize]);
-    let r0: u64 = crate::bignum_base::bn_add_eq_len_u64(8u32, &a_copy0, &b_copy0, res);
+    let r0: u64 = bignum::bignum_base::bn_add_eq_len_u64(8u32, &a_copy0, &b_copy0, res);
     let c1: u64 = r0;
     lowstar::ignore::ignore::<u64>(c1)
 }
@@ -561,26 +561,26 @@ fn sqr4(a: &[u64], res: &mut [u64])
                 let res_i: (&mut [u64], &mut [u64]) =
                     res_j.1.split_at_mut(4u32.wrapping_mul(i0) as usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i, bj, (&c)[0usize], res_i.1);
+                    bignum::bignum_base::mul_wide_add2_u64(a_i, bj, (&c)[0usize], res_i.1);
                 let a_i0: u64 = a[4u32.wrapping_mul(i0).wrapping_add(1u32) as usize];
                 let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i0, bj, (&c)[0usize], res_i0.1);
+                    bignum::bignum_base::mul_wide_add2_u64(a_i0, bj, (&c)[0usize], res_i0.1);
                 let a_i1: u64 = a[4u32.wrapping_mul(i0).wrapping_add(2u32) as usize];
                 let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i1, bj, (&c)[0usize], res_i1.1);
+                    bignum::bignum_base::mul_wide_add2_u64(a_i1, bj, (&c)[0usize], res_i1.1);
                 let a_i2: u64 = a[4u32.wrapping_mul(i0).wrapping_add(3u32) as usize];
                 let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i2, bj, (&c)[0usize], res_i2.1)
+                    bignum::bignum_base::mul_wide_add2_u64(a_i2, bj, (&c)[0usize], res_i2.1)
             };
             for i0 in len.wrapping_div(4u32).wrapping_mul(4u32)..len
             {
                 let a_i: u64 = a[i0 as usize];
                 let res_i: (&mut [u64], &mut [u64]) = res_j.1.split_at_mut(i0 as usize);
                 (&mut c)[0usize] =
-                    crate::bignum_base::mul_wide_add2_u64(a_i, bj, (&c)[0usize], res_i.1)
+                    bignum::bignum_base::mul_wide_add2_u64(a_i, bj, (&c)[0usize], res_i.1)
             };
             let r: u64 = (&c)[0usize];
             (&mut tmp)[len.wrapping_add(i) as usize] = r
@@ -910,15 +910,15 @@ pub(crate) fn make_point_at_inf(p: &mut [u64])
     let y1: (&[u64], &[u64]) = x1.1.split_at(5usize);
     let z1: (&[u64], &[u64]) = y1.1.split_at(5usize);
     let mut zinv: [u64; 5] = [0u64; 5usize];
-    crate::bignum_k256::finv(&mut zinv, z1.1);
-    crate::bignum_k256::fmul(y.0, y1.0, &zinv);
-    crate::bignum_k256::fmul(y.1, z1.0, &zinv);
+    bignum::bignum_k256::finv(&mut zinv, z1.1);
+    bignum::bignum_k256::fmul(y.0, y1.0, &zinv);
+    bignum::bignum_k256::fmul(y.1, z1.0, &zinv);
     let mut f_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy)[0usize..5usize]).copy_from_slice(&y.0[0usize..5usize]);
-    crate::bignum_k256::fnormalize(y.0, &f_copy);
+    bignum::bignum_k256::fnormalize(y.0, &f_copy);
     let mut f_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy0)[0usize..5usize]).copy_from_slice(&y.1[0usize..5usize]);
-    crate::bignum_k256::fnormalize(y.1, &f_copy0)
+    bignum::bignum_k256::fnormalize(y.1, &f_copy0)
 }
 
 #[inline] fn to_aff_point_x(x: &mut [u64], p: &[u64])
@@ -926,11 +926,11 @@ pub(crate) fn make_point_at_inf(p: &mut [u64])
     let x1: (&[u64], &[u64]) = p.split_at(0usize);
     let z1: (&[u64], &[u64]) = x1.1.split_at(10usize);
     let mut zinv: [u64; 5] = [0u64; 5usize];
-    crate::bignum_k256::finv(&mut zinv, z1.1);
-    crate::bignum_k256::fmul(x, z1.0, &zinv);
+    bignum::bignum_k256::finv(&mut zinv, z1.1);
+    bignum::bignum_k256::fmul(x, z1.0, &zinv);
     let mut f_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy)[0usize..5usize]).copy_from_slice(&x[0usize..5usize]);
-    crate::bignum_k256::fnormalize(x, &f_copy)
+    bignum::bignum_k256::fnormalize(x, &f_copy)
 }
 
 #[inline] fn is_on_curve_vartime(p: &[u64]) -> bool
@@ -944,22 +944,22 @@ pub(crate) fn make_point_at_inf(p: &mut [u64])
     (&mut b)[2usize] = 0u64;
     (&mut b)[3usize] = 0u64;
     (&mut b)[4usize] = 0u64;
-    crate::bignum_k256::fsqr(&mut y2_exp, y.0);
+    bignum::bignum_k256::fsqr(&mut y2_exp, y.0);
     let mut f1_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&(&y2_exp)[0usize..5usize]);
-    crate::bignum_k256::fmul(&mut y2_exp, &f1_copy, y.0);
+    bignum::bignum_k256::fmul(&mut y2_exp, &f1_copy, y.0);
     let mut f1_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&(&y2_exp)[0usize..5usize]);
-    crate::bignum_k256::fadd(&mut y2_exp, &f1_copy0, &b);
+    bignum::bignum_k256::fadd(&mut y2_exp, &f1_copy0, &b);
     let mut f_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy)[0usize..5usize]).copy_from_slice(&(&y2_exp)[0usize..5usize]);
-    crate::bignum_k256::fnormalize(&mut y2_exp, &f_copy);
+    bignum::bignum_k256::fnormalize(&mut y2_exp, &f_copy);
     let mut y2_comp: [u64; 5] = [0u64; 5usize];
-    crate::bignum_k256::fsqr(&mut y2_comp, y.1);
+    bignum::bignum_k256::fsqr(&mut y2_comp, y.1);
     let mut f_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy0)[0usize..5usize]).copy_from_slice(&(&y2_comp)[0usize..5usize]);
-    crate::bignum_k256::fnormalize(&mut y2_comp, &f_copy0);
-    let res: bool = crate::bignum_k256::is_felem_eq_vartime(&y2_exp, &y2_comp);
+    bignum::bignum_k256::fnormalize(&mut y2_comp, &f_copy0);
+    let res: bool = bignum::bignum_k256::is_felem_eq_vartime(&y2_exp, &y2_comp);
     let res0: bool = res;
     res0
 }
@@ -1004,7 +1004,7 @@ pub(crate) fn point_negate(out: &mut [u64], p: &[u64])
     oz.0[4usize] = f4;
     let mut f_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy)[0usize..5usize]).copy_from_slice(&oz.0[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(oz.0, &f_copy)
+    bignum::bignum_k256::fnormalize_weak(oz.0, &f_copy)
 }
 
 #[inline] fn point_negate_conditional_vartime(p: &mut [u64], is_negate: bool)
@@ -1021,8 +1021,8 @@ pub(crate) fn point_negate(out: &mut [u64], p: &[u64])
 {
     let px: (&[u64], &[u64]) = p.split_at(0usize);
     let py: (&[u64], &[u64]) = px.1.split_at(5usize);
-    crate::bignum_k256::store_felem(&mut out[0usize..], py.0);
-    crate::bignum_k256::store_felem(&mut out[32usize..], py.1)
+    bignum::bignum_k256::store_felem(&mut out[0usize..], py.0);
+    bignum::bignum_k256::store_felem(&mut out[32usize..], py.1)
 }
 
 pub(crate) fn point_store(out: &mut [u8], p: &[u64])
@@ -1038,8 +1038,8 @@ pub(crate) fn aff_point_load_vartime(p: &mut [u64], b: &[u8]) -> bool
     let py: (&[u8], &[u8]) = px.1.split_at(32usize);
     let bn_px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let bn_py: (&mut [u64], &mut [u64]) = bn_px.1.split_at_mut(5usize);
-    let is_x_valid: bool = crate::bignum_k256::load_felem_lt_prime_vartime(bn_py.0, py.0);
-    let is_y_valid: bool = crate::bignum_k256::load_felem_lt_prime_vartime(bn_py.1, py.1);
+    let is_x_valid: bool = bignum::bignum_k256::load_felem_lt_prime_vartime(bn_py.0, py.0);
+    let is_y_valid: bool = bignum::bignum_k256::load_felem_lt_prime_vartime(bn_py.1, py.1);
     if is_x_valid && is_y_valid { is_on_curve_vartime(p) } else { false }
 }
 
@@ -1071,7 +1071,7 @@ pub(crate) fn aff_point_load_vartime(p: &mut [u64], b: &[u8]) -> bool
     else
     {
         let xb: (&[u8], &[u8]) = s.split_at(1usize);
-        let is_x_valid: bool = crate::bignum_k256::load_felem_lt_prime_vartime(x, xb.1);
+        let is_x_valid: bool = bignum::bignum_k256::load_felem_lt_prime_vartime(x, xb.1);
         let is_y_odd: bool = s01 == 0x03u8;
         if ! is_x_valid
         { false }
@@ -1084,26 +1084,26 @@ pub(crate) fn aff_point_load_vartime(p: &mut [u64], b: &[u8]) -> bool
             (&mut b)[2usize] = 0u64;
             (&mut b)[3usize] = 0u64;
             (&mut b)[4usize] = 0u64;
-            crate::bignum_k256::fsqr(&mut y2, x);
+            bignum::bignum_k256::fsqr(&mut y2, x);
             let mut f1_copy: [u64; 5] = [0u64; 5usize];
             ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&(&y2)[0usize..5usize]);
-            crate::bignum_k256::fmul(&mut y2, &f1_copy, x);
+            bignum::bignum_k256::fmul(&mut y2, &f1_copy, x);
             let mut f1_copy0: [u64; 5] = [0u64; 5usize];
             ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&(&y2)[0usize..5usize]);
-            crate::bignum_k256::fadd(&mut y2, &f1_copy0, &b);
+            bignum::bignum_k256::fadd(&mut y2, &f1_copy0, &b);
             let mut f_copy: [u64; 5] = [0u64; 5usize];
             ((&mut f_copy)[0usize..5usize]).copy_from_slice(&(&y2)[0usize..5usize]);
-            crate::bignum_k256::fnormalize(&mut y2, &f_copy);
-            crate::bignum_k256::fsqrt(y, &y2);
+            bignum::bignum_k256::fnormalize(&mut y2, &f_copy);
+            bignum::bignum_k256::fsqrt(y, &y2);
             let mut f_copy0: [u64; 5] = [0u64; 5usize];
             ((&mut f_copy0)[0usize..5usize]).copy_from_slice(&y[0usize..5usize]);
-            crate::bignum_k256::fnormalize(y, &f_copy0);
+            bignum::bignum_k256::fnormalize(y, &f_copy0);
             let mut y2_comp: [u64; 5] = [0u64; 5usize];
-            crate::bignum_k256::fsqr(&mut y2_comp, y);
+            bignum::bignum_k256::fsqr(&mut y2_comp, y);
             let mut f_copy1: [u64; 5] = [0u64; 5usize];
             ((&mut f_copy1)[0usize..5usize]).copy_from_slice(&(&y2_comp)[0usize..5usize]);
-            crate::bignum_k256::fnormalize(&mut y2_comp, &f_copy1);
-            let res: bool = crate::bignum_k256::is_felem_eq_vartime(&y2, &y2_comp);
+            bignum::bignum_k256::fnormalize(&mut y2_comp, &f_copy1);
+            let res: bool = bignum::bignum_k256::is_felem_eq_vartime(&y2, &y2_comp);
             let is_y_valid: bool = res;
             let is_y_valid0: bool = is_y_valid;
             if ! is_y_valid0
@@ -1112,7 +1112,7 @@ pub(crate) fn aff_point_load_vartime(p: &mut [u64], b: &[u8]) -> bool
             {
                 let x0: u64 = y[0usize];
                 let is_y_odd1: bool = x0 & 1u64 == 1u64;
-                crate::bignum_k256::fnegate_conditional_vartime(y, is_y_odd1 != is_y_odd);
+                bignum::bignum_k256::fnegate_conditional_vartime(y, is_y_odd1 != is_y_odd);
                 true
             }
         }
@@ -1133,45 +1133,45 @@ pub(crate) fn point_double(out: &mut [u64], p: &[u64])
     let bzz3: (&mut [u64], &mut [u64]) = zz.1.split_at_mut(5usize);
     let bzz9: (&mut [u64], &mut [u64]) = bzz3.1.split_at_mut(5usize);
     let tmp1: (&mut [u64], &mut [u64]) = bzz9.1.split_at_mut(5usize);
-    crate::bignum_k256::fsqr(zz.0, z1.0);
-    crate::bignum_k256::fsqr(bzz3.0, z1.1);
-    crate::bignum_k256::fmul_small_num(y3.0, y1.0, 2u64);
+    bignum::bignum_k256::fsqr(zz.0, z1.0);
+    bignum::bignum_k256::fsqr(bzz3.0, z1.1);
+    bignum::bignum_k256::fmul_small_num(y3.0, y1.0, 2u64);
     let mut f1_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&y3.0[0usize..5usize]);
-    crate::bignum_k256::fmul(y3.0, &f1_copy, z1.0);
-    crate::bignum_k256::fmul(tmp1.1, zz.0, z1.0);
-    crate::bignum_k256::fmul(z3.1, tmp1.1, z1.1);
+    bignum::bignum_k256::fmul(y3.0, &f1_copy, z1.0);
+    bignum::bignum_k256::fmul(tmp1.1, zz.0, z1.0);
+    bignum::bignum_k256::fmul(z3.1, tmp1.1, z1.1);
     let mut f_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy)[0usize..5usize]).copy_from_slice(&z3.1[0usize..5usize]);
-    crate::bignum_k256::fmul_small_num(z3.1, &f_copy, 8u64);
+    bignum::bignum_k256::fmul_small_num(z3.1, &f_copy, 8u64);
     let mut f_copy1: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy1)[0usize..5usize]).copy_from_slice(&z3.1[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(z3.1, &f_copy1);
-    crate::bignum_k256::fmul_small_num(bzz9.0, bzz3.0, 21u64);
+    bignum::bignum_k256::fnormalize_weak(z3.1, &f_copy1);
+    bignum::bignum_k256::fmul_small_num(bzz9.0, bzz3.0, 21u64);
     let mut f_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy0)[0usize..5usize]).copy_from_slice(&bzz9.0[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(bzz9.0, &f_copy0);
-    crate::bignum_k256::fmul_small_num(tmp1.0, bzz9.0, 3u64);
+    bignum::bignum_k256::fnormalize_weak(bzz9.0, &f_copy0);
+    bignum::bignum_k256::fmul_small_num(tmp1.0, bzz9.0, 3u64);
     let mut f2_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f2_copy)[0usize..5usize]).copy_from_slice(&tmp1.0[0usize..5usize]);
-    crate::bignum_k256::fsub(tmp1.0, zz.0, &f2_copy, 6u64);
-    crate::bignum_k256::fadd(tmp1.1, zz.0, bzz9.0);
+    bignum::bignum_k256::fsub(tmp1.0, zz.0, &f2_copy, 6u64);
+    bignum::bignum_k256::fadd(tmp1.1, zz.0, bzz9.0);
     let mut f2_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f2_copy0)[0usize..5usize]).copy_from_slice(&tmp1.1[0usize..5usize]);
-    crate::bignum_k256::fmul(tmp1.1, tmp1.0, &f2_copy0);
-    crate::bignum_k256::fmul(z3.0, zz.0, bzz3.0);
+    bignum::bignum_k256::fmul(tmp1.1, tmp1.0, &f2_copy0);
+    bignum::bignum_k256::fmul(z3.0, zz.0, bzz3.0);
     let mut f1_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&y3.0[0usize..5usize]);
-    crate::bignum_k256::fmul(y3.0, &f1_copy0, tmp1.0);
+    bignum::bignum_k256::fmul(y3.0, &f1_copy0, tmp1.0);
     let mut f_copy2: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy2)[0usize..5usize]).copy_from_slice(&z3.0[0usize..5usize]);
-    crate::bignum_k256::fmul_small_num(z3.0, &f_copy2, 168u64);
+    bignum::bignum_k256::fmul_small_num(z3.0, &f_copy2, 168u64);
     let mut f2_copy1: [u64; 5] = [0u64; 5usize];
     ((&mut f2_copy1)[0usize..5usize]).copy_from_slice(&z3.0[0usize..5usize]);
-    crate::bignum_k256::fadd(z3.0, tmp1.1, &f2_copy1);
+    bignum::bignum_k256::fadd(z3.0, tmp1.1, &f2_copy1);
     let mut f_copy3: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy3)[0usize..5usize]).copy_from_slice(&z3.0[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(z3.0, &f_copy3)
+    bignum::bignum_k256::fnormalize_weak(z3.0, &f_copy3)
 }
 
 pub(crate) fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
@@ -1195,81 +1195,81 @@ pub(crate) fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
     let yy_m_bzz3: (&mut [u64], &mut [u64]) = xz_pairs.1.split_at_mut(5usize);
     let yy_p_bzz3: (&mut [u64], &mut [u64]) = yy_m_bzz3.1.split_at_mut(5usize);
     let tmp1: (&mut [u64], &mut [u64]) = yy_p_bzz3.1.split_at_mut(5usize);
-    crate::bignum_k256::fmul(yy.0, y1.0, y2.0);
-    crate::bignum_k256::fmul(zz.0, z1.0, z2.0);
-    crate::bignum_k256::fmul(xy_pairs.0, z1.1, z2.1);
-    crate::bignum_k256::fadd(yz_pairs.0, y1.0, z1.0);
-    crate::bignum_k256::fadd(tmp1.1, y2.0, z2.0);
+    bignum::bignum_k256::fmul(yy.0, y1.0, y2.0);
+    bignum::bignum_k256::fmul(zz.0, z1.0, z2.0);
+    bignum::bignum_k256::fmul(xy_pairs.0, z1.1, z2.1);
+    bignum::bignum_k256::fadd(yz_pairs.0, y1.0, z1.0);
+    bignum::bignum_k256::fadd(tmp1.1, y2.0, z2.0);
     let mut f1_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&yz_pairs.0[0usize..5usize]);
-    crate::bignum_k256::fmul(yz_pairs.0, &f1_copy, tmp1.1);
-    crate::bignum_k256::fadd(tmp1.1, yy.0, zz.0);
+    bignum::bignum_k256::fmul(yz_pairs.0, &f1_copy, tmp1.1);
+    bignum::bignum_k256::fadd(tmp1.1, yy.0, zz.0);
     let mut f1_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&yz_pairs.0[0usize..5usize]);
-    crate::bignum_k256::fsub(yz_pairs.0, &f1_copy0, tmp1.1, 4u64);
-    crate::bignum_k256::fadd(xz_pairs.0, z1.0, z1.1);
-    crate::bignum_k256::fadd(tmp1.1, z2.0, z2.1);
+    bignum::bignum_k256::fsub(yz_pairs.0, &f1_copy0, tmp1.1, 4u64);
+    bignum::bignum_k256::fadd(xz_pairs.0, z1.0, z1.1);
+    bignum::bignum_k256::fadd(tmp1.1, z2.0, z2.1);
     let mut f1_copy1: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy1)[0usize..5usize]).copy_from_slice(&xz_pairs.0[0usize..5usize]);
-    crate::bignum_k256::fmul(xz_pairs.0, &f1_copy1, tmp1.1);
-    crate::bignum_k256::fadd(tmp1.1, zz.0, xy_pairs.0);
+    bignum::bignum_k256::fmul(xz_pairs.0, &f1_copy1, tmp1.1);
+    bignum::bignum_k256::fadd(tmp1.1, zz.0, xy_pairs.0);
     let mut f1_copy2: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy2)[0usize..5usize]).copy_from_slice(&xz_pairs.0[0usize..5usize]);
-    crate::bignum_k256::fsub(xz_pairs.0, &f1_copy2, tmp1.1, 4u64);
-    crate::bignum_k256::fadd(yy_m_bzz3.0, y1.0, z1.1);
-    crate::bignum_k256::fadd(tmp1.1, y2.0, z2.1);
+    bignum::bignum_k256::fsub(xz_pairs.0, &f1_copy2, tmp1.1, 4u64);
+    bignum::bignum_k256::fadd(yy_m_bzz3.0, y1.0, z1.1);
+    bignum::bignum_k256::fadd(tmp1.1, y2.0, z2.1);
     let mut f1_copy3: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy3)[0usize..5usize]).copy_from_slice(&yy_m_bzz3.0[0usize..5usize]);
-    crate::bignum_k256::fmul(yy_m_bzz3.0, &f1_copy3, tmp1.1);
-    crate::bignum_k256::fadd(tmp1.1, yy.0, xy_pairs.0);
+    bignum::bignum_k256::fmul(yy_m_bzz3.0, &f1_copy3, tmp1.1);
+    bignum::bignum_k256::fadd(tmp1.1, yy.0, xy_pairs.0);
     let mut f1_copy4: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy4)[0usize..5usize]).copy_from_slice(&yy_m_bzz3.0[0usize..5usize]);
-    crate::bignum_k256::fsub(yy_m_bzz3.0, &f1_copy4, tmp1.1, 4u64);
-    crate::bignum_k256::fmul_small_num(tmp1.1, xy_pairs.0, 21u64);
+    bignum::bignum_k256::fsub(yy_m_bzz3.0, &f1_copy4, tmp1.1, 4u64);
+    bignum::bignum_k256::fmul_small_num(tmp1.1, xy_pairs.0, 21u64);
     let mut f_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy)[0usize..5usize]).copy_from_slice(&tmp1.1[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(tmp1.1, &f_copy);
-    crate::bignum_k256::fsub(yy_p_bzz3.0, zz.0, tmp1.1, 2u64);
-    crate::bignum_k256::fadd(tmp1.0, zz.0, tmp1.1);
-    crate::bignum_k256::fmul_small_num(y3.0, xz_pairs.0, 21u64);
+    bignum::bignum_k256::fnormalize_weak(tmp1.1, &f_copy);
+    bignum::bignum_k256::fsub(yy_p_bzz3.0, zz.0, tmp1.1, 2u64);
+    bignum::bignum_k256::fadd(tmp1.0, zz.0, tmp1.1);
+    bignum::bignum_k256::fmul_small_num(y3.0, xz_pairs.0, 21u64);
     let mut f_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy0)[0usize..5usize]).copy_from_slice(&y3.0[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(y3.0, &f_copy0);
-    crate::bignum_k256::fmul_small_num(z3.1, yy.0, 3u64);
-    crate::bignum_k256::fmul_small_num(z3.0, z3.1, 21u64);
+    bignum::bignum_k256::fnormalize_weak(y3.0, &f_copy0);
+    bignum::bignum_k256::fmul_small_num(z3.1, yy.0, 3u64);
+    bignum::bignum_k256::fmul_small_num(z3.0, z3.1, 21u64);
     let mut f_copy1: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy1)[0usize..5usize]).copy_from_slice(&z3.0[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(z3.0, &f_copy1);
-    crate::bignum_k256::fmul(tmp1.1, yz_pairs.0, yy_p_bzz3.0);
+    bignum::bignum_k256::fnormalize_weak(z3.0, &f_copy1);
+    bignum::bignum_k256::fmul(tmp1.1, yz_pairs.0, yy_p_bzz3.0);
     let mut f1_copy5: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy5)[0usize..5usize]).copy_from_slice(&y3.0[0usize..5usize]);
-    crate::bignum_k256::fmul(y3.0, &f1_copy5, yy_m_bzz3.0);
+    bignum::bignum_k256::fmul(y3.0, &f1_copy5, yy_m_bzz3.0);
     let mut f2_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f2_copy)[0usize..5usize]).copy_from_slice(&y3.0[0usize..5usize]);
-    crate::bignum_k256::fsub(y3.0, tmp1.1, &f2_copy, 2u64);
+    bignum::bignum_k256::fsub(y3.0, tmp1.1, &f2_copy, 2u64);
     let mut f_copy2: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy2)[0usize..5usize]).copy_from_slice(&y3.0[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(y3.0, &f_copy2);
-    crate::bignum_k256::fmul(tmp1.1, tmp1.0, yy_p_bzz3.0);
+    bignum::bignum_k256::fnormalize_weak(y3.0, &f_copy2);
+    bignum::bignum_k256::fmul(tmp1.1, tmp1.0, yy_p_bzz3.0);
     let mut f1_copy6: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy6)[0usize..5usize]).copy_from_slice(&z3.0[0usize..5usize]);
-    crate::bignum_k256::fmul(z3.0, &f1_copy6, yy_m_bzz3.0);
+    bignum::bignum_k256::fmul(z3.0, &f1_copy6, yy_m_bzz3.0);
     let mut f2_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f2_copy0)[0usize..5usize]).copy_from_slice(&z3.0[0usize..5usize]);
-    crate::bignum_k256::fadd(z3.0, tmp1.1, &f2_copy0);
+    bignum::bignum_k256::fadd(z3.0, tmp1.1, &f2_copy0);
     let mut f_copy3: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy3)[0usize..5usize]).copy_from_slice(&z3.0[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(z3.0, &f_copy3);
-    crate::bignum_k256::fmul(tmp1.1, xz_pairs.0, tmp1.0);
+    bignum::bignum_k256::fnormalize_weak(z3.0, &f_copy3);
+    bignum::bignum_k256::fmul(tmp1.1, xz_pairs.0, tmp1.0);
     let mut f1_copy7: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy7)[0usize..5usize]).copy_from_slice(&z3.1[0usize..5usize]);
-    crate::bignum_k256::fmul(z3.1, &f1_copy7, yz_pairs.0);
+    bignum::bignum_k256::fmul(z3.1, &f1_copy7, yz_pairs.0);
     let mut f2_copy1: [u64; 5] = [0u64; 5usize];
     ((&mut f2_copy1)[0usize..5usize]).copy_from_slice(&z3.1[0usize..5usize]);
-    crate::bignum_k256::fadd(z3.1, tmp1.1, &f2_copy1);
+    bignum::bignum_k256::fadd(z3.1, tmp1.1, &f2_copy1);
     let mut f_copy4: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy4)[0usize..5usize]).copy_from_slice(&z3.1[0usize..5usize]);
-    crate::bignum_k256::fnormalize_weak(z3.1, &f_copy4)
+    bignum::bignum_k256::fnormalize_weak(z3.1, &f_copy4)
 }
 
 #[inline] fn scalar_split_lambda(r1: &mut [u64], r2: &mut [u64], k: &[u64])
@@ -1325,7 +1325,7 @@ pub(crate) fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
     (&mut beta)[2usize] = 0xc3434e99cf049u64;
     (&mut beta)[3usize] = 0x7106e64479eau64;
     (&mut beta)[4usize] = 0x7ae96a2b657cu64;
-    crate::bignum_k256::fmul(ry.0, &beta, py.0);
+    bignum::bignum_k256::fmul(ry.0, &beta, py.0);
     rz.0[0usize] = pz.0[0usize];
     rz.0[1usize] = pz.0[1usize];
     rz.0[2usize] = pz.0[2usize];
@@ -1349,7 +1349,7 @@ pub(crate) fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
     (&mut beta)[4usize] = 0x7ae96a2b657cu64;
     let mut f2_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f2_copy)[0usize..5usize]).copy_from_slice(&rx.1[0usize..5usize]);
-    crate::bignum_k256::fmul(rx.1, &beta, &f2_copy)
+    bignum::bignum_k256::fmul(rx.1, &beta, &f2_copy)
 }
 
 struct __bool_bool { pub fst: bool, pub snd: bool }
@@ -1435,7 +1435,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
             }
         );
         let k: u32 = 256u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-        let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(4u32, scalar, k, 4u32);
+        let bits_l: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, scalar, k, 4u32);
         lowstar::ignore::ignore::<&[u64]>(&table);
         ((&mut tmp0)[0usize..15usize]).copy_from_slice(
             &(&(&table)[0usize..] as &[u64])[0usize..15usize]
@@ -1555,7 +1555,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
                 }
             );
             let k: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-            let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
+            let bits_l: u64 = bignum::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
             lowstar::ignore::ignore::<&[u64]>(
                 &crate::k256_precomptable::precomp_g_pow2_192_table_w4
             );
@@ -1568,7 +1568,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
             ((&mut p_copy)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
             point_add(out, &p_copy, &tmp);
             let k0: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-            let bits_l0: u64 = crate::bignum_base::bn_get_bits_u64(1u32, r4.0, k0, 4u32);
+            let bits_l0: u64 = bignum::bignum_base::bn_get_bits_u64(1u32, r4.0, k0, 4u32);
             lowstar::ignore::ignore::<&[u64]>(
                 &crate::k256_precomptable::precomp_g_pow2_128_table_w4
             );
@@ -1581,7 +1581,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
             ((&mut p_copy0)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
             point_add(out, &p_copy0, &tmp);
             let k1: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-            let bits_l1: u64 = crate::bignum_base::bn_get_bits_u64(1u32, r3.0, k1, 4u32);
+            let bits_l1: u64 = bignum::bignum_base::bn_get_bits_u64(1u32, r3.0, k1, 4u32);
             lowstar::ignore::ignore::<&[u64]>(
                 &crate::k256_precomptable::precomp_g_pow2_64_table_w4
             );
@@ -1594,7 +1594,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
             ((&mut p_copy1)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
             point_add(out, &p_copy1, &tmp);
             let k2: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-            let bits_l2: u64 = crate::bignum_base::bn_get_bits_u64(1u32, r2.0, k2, 4u32);
+            let bits_l2: u64 = bignum::bignum_base::bn_get_bits_u64(1u32, r2.0, k2, 4u32);
             lowstar::ignore::ignore::<&[u64]>(
                 &crate::k256_precomptable::precomp_basepoint_table_w4
             );
@@ -1676,7 +1676,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
     );
     let mut tmp0: [u64; 15] = [0u64; 15usize];
     let i: u32 = 255u32;
-    let bits_c: u64 = crate::bignum_base::bn_get_bits_u64(4u32, scalar1, i, 5u32);
+    let bits_c: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, scalar1, i, 5u32);
     let bits_l32: u32 = bits_c as u32;
     let a_bits_l: &[u64] =
         &(&crate::k256_precomptable::precomp_basepoint_table_w5)[bits_l32.wrapping_mul(15u32)
@@ -1684,7 +1684,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
         usize..];
     (out[0usize..15usize]).copy_from_slice(&a_bits_l[0usize..15usize]);
     let i0: u32 = 255u32;
-    let bits_c0: u64 = crate::bignum_base::bn_get_bits_u64(4u32, scalar2, i0, 5u32);
+    let bits_c0: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, scalar2, i0, 5u32);
     let bits_l320: u32 = bits_c0 as u32;
     let a_bits_l0: (&[u64], &[u64]) = table2.split_at(bits_l320.wrapping_mul(15u32) as usize);
     ((&mut tmp0)[0usize..15usize]).copy_from_slice(&a_bits_l0.1[0usize..15usize]);
@@ -1706,7 +1706,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
             }
         );
         let k: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
-        let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(4u32, scalar2, k, 5u32);
+        let bits_l: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, scalar2, k, 5u32);
         lowstar::ignore::ignore::<&[u64]>(&table2);
         let bits_l321: u32 = bits_l as u32;
         let a_bits_l1: (&[u64], &[u64]) = table2.split_at(bits_l321.wrapping_mul(15u32) as usize);
@@ -1715,7 +1715,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
         ((&mut p_copy0)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
         point_add(out, &p_copy0, &tmp1);
         let k0: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
-        let bits_l0: u64 = crate::bignum_base::bn_get_bits_u64(4u32, scalar1, k0, 5u32);
+        let bits_l0: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, scalar1, k0, 5u32);
         lowstar::ignore::ignore::<&[u64]>(
             &crate::k256_precomptable::precomp_basepoint_table_w5
         );
@@ -1790,7 +1790,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
     let mut tmp0: [u64; 15] = [0u64; 15usize];
     let mut tmp1: [u64; 15] = [0u64; 15usize];
     let i: u32 = 125u32;
-    let bits_c: u64 = crate::bignum_base::bn_get_bits_u64(4u32, r1, i, 5u32);
+    let bits_c: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, r1, i, 5u32);
     let bits_l32: u32 = bits_c as u32;
     let a_bits_l: &[u64] =
         &(&crate::k256_precomptable::precomp_basepoint_table_w5)[bits_l32.wrapping_mul(15u32)
@@ -1799,7 +1799,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
     (out[0usize..15usize]).copy_from_slice(&a_bits_l[0usize..15usize]);
     point_negate_conditional_vartime(out, is_negate1);
     let i0: u32 = 125u32;
-    let bits_c0: u64 = crate::bignum_base::bn_get_bits_u64(4u32, r2, i0, 5u32);
+    let bits_c0: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, r2, i0, 5u32);
     let bits_l320: u32 = bits_c0 as u32;
     let a_bits_l0: &[u64] =
         &(&crate::k256_precomptable::precomp_basepoint_table_w5)[bits_l320.wrapping_mul(15u32)
@@ -1813,13 +1813,13 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
     point_add(out, &p_copy, &tmp1);
     let mut tmp10: [u64; 15] = [0u64; 15usize];
     let i1: u32 = 125u32;
-    let bits_c1: u64 = crate::bignum_base::bn_get_bits_u64(4u32, r3, i1, 5u32);
+    let bits_c1: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, r3, i1, 5u32);
     let bits_l321: u32 = bits_c1 as u32;
     let a_bits_l1: (&[u64], &[u64]) = table2.split_at(bits_l321.wrapping_mul(15u32) as usize);
     ((&mut tmp0)[0usize..15usize]).copy_from_slice(&a_bits_l1.1[0usize..15usize]);
     point_negate_conditional_vartime(&mut tmp0, is_negate3);
     let i2: u32 = 125u32;
-    let bits_c2: u64 = crate::bignum_base::bn_get_bits_u64(4u32, r4, i2, 5u32);
+    let bits_c2: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, r4, i2, 5u32);
     let bits_l322: u32 = bits_c2 as u32;
     let a_bits_l2: (&[u64], &[u64]) =
         a_bits_l1.1.split_at(
@@ -1853,7 +1853,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
                 }
             );
             let k: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
-            let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(4u32, r4, k, 5u32);
+            let bits_l: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, r4, k, 5u32);
             lowstar::ignore::ignore::<&[u64]>(&table2);
             let bits_l323: u32 = bits_l as u32;
             let a_bits_l3: (&[u64], &[u64]) =
@@ -1865,7 +1865,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
             ((&mut p_copy2)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
             point_add(out, &p_copy2, &tmp2);
             let k0: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
-            let bits_l0: u64 = crate::bignum_base::bn_get_bits_u64(4u32, r3, k0, 5u32);
+            let bits_l0: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, r3, k0, 5u32);
             lowstar::ignore::ignore::<&[u64]>(&table2);
             let bits_l324: u32 = bits_l0 as u32;
             let a_bits_l4: (&[u64], &[u64]) =
@@ -1876,7 +1876,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
             ((&mut p_copy3)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
             point_add(out, &p_copy3, &tmp2);
             let k1: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
-            let bits_l1: u64 = crate::bignum_base::bn_get_bits_u64(4u32, r2, k1, 5u32);
+            let bits_l1: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, r2, k1, 5u32);
             lowstar::ignore::ignore::<&[u64]>(
                 &crate::k256_precomptable::precomp_basepoint_table_w5
             );
@@ -1894,7 +1894,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
             ((&mut p_copy4)[0usize..15usize]).copy_from_slice(&out[0usize..15usize]);
             point_add(out, &p_copy4, &tmp2);
             let k2: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
-            let bits_l2: u64 = crate::bignum_base::bn_get_bits_u64(4u32, r1, k2, 5u32);
+            let bits_l2: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, r1, k2, 5u32);
             lowstar::ignore::ignore::<&[u64]>(
                 &crate::k256_precomptable::precomp_basepoint_table_w5
             );
@@ -2001,11 +2001,11 @@ struct __bool_bool_bool_bool { pub fst: bool, pub snd: bool, pub thd: bool, pub 
 #[inline] fn fmul_eq_vartime(r: &[u64], z: &[u64], x: &[u64]) -> bool
 {
     let mut tmp: [u64; 5] = [0u64; 5usize];
-    crate::bignum_k256::fmul(&mut tmp, r, z);
+    bignum::bignum_k256::fmul(&mut tmp, r, z);
     let mut f_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f_copy)[0usize..5usize]).copy_from_slice(&(&tmp)[0usize..5usize]);
-    crate::bignum_k256::fnormalize(&mut tmp, &f_copy);
-    let b: bool = crate::bignum_k256::is_felem_eq_vartime(&tmp, x);
+    bignum::bignum_k256::fnormalize(&mut tmp, &f_copy);
+    let b: bool = bignum::bignum_k256::is_felem_eq_vartime(&tmp, x);
     b
 }
 
@@ -2070,7 +2070,7 @@ ecdsa_sign_hashed_msg(signature: &mut [u8], msgHash: &[u8], private_key: &[u8], 
     let mut p: [u64; 15] = [0u64; 15usize];
     point_mul_g(&mut p, k_q.1);
     to_aff_point_x(&mut tmp, &p);
-    crate::bignum_k256::store_felem(&mut x_bytes, &tmp);
+    bignum::bignum_k256::store_felem(&mut x_bytes, &tmp);
     load_qelem_modq(s_q.0, &x_bytes);
     let mut z: [u64; 4] = [0u64; 4usize];
     let mut kinv: [u64; 4] = [0u64; 4usize];
@@ -2161,8 +2161,8 @@ ecdsa_verify_hashed_msg(m: &[u8], public_key: &[u8], signature: &[u8]) ->
         point_mul_g_double_split_lambda_vartime(&mut res, u2.0, m_q.0, r_q.0);
         let mut tmp1: [u64; 5] = [0u64; 5usize];
         let pz: (&[u64], &[u64]) = res.split_at(10usize);
-        crate::bignum_k256::fnormalize(&mut tmp1, pz.1);
-        let b: bool = crate::bignum_k256::is_felem_zero_vartime(&tmp1);
+        bignum::bignum_k256::fnormalize(&mut tmp1, pz.1);
+        let b: bool = bignum::bignum_k256::is_felem_zero_vartime(&tmp1);
         if b
         { false }
         else
@@ -2174,13 +2174,13 @@ ecdsa_verify_hashed_msg(m: &[u8], public_key: &[u8], signature: &[u8]) ->
             let mut tmp_q: [u64; 5] = [0u64; 5usize];
             let mut tmp_x: [u64; 5] = [0u64; 5usize];
             store_qelem(&mut r_bytes, s_q.0);
-            crate::bignum_k256::load_felem(&mut r_fe, &r_bytes);
-            crate::bignum_k256::fnormalize(&mut tmp_x, x.1);
+            bignum::bignum_k256::load_felem(&mut r_fe, &r_bytes);
+            bignum::bignum_k256::fnormalize(&mut tmp_x, x.1);
             let is_rz_x: bool = fmul_eq_vartime(&r_fe, z.1, &tmp_x);
             if ! is_rz_x
             {
                 let is_r_lt_p_m_q: bool =
-                    crate::bignum_k256::is_felem_lt_prime_minus_order_vartime(&r_fe);
+                    bignum::bignum_k256::is_felem_lt_prime_minus_order_vartime(&r_fe);
                 if is_r_lt_p_m_q
                 {
                     (&mut tmp_q)[0usize] = 0x25e8cd0364141u64;
@@ -2190,7 +2190,7 @@ ecdsa_verify_hashed_msg(m: &[u8], public_key: &[u8], signature: &[u8]) ->
                     (&mut tmp_q)[4usize] = 0xffffffffffffu64;
                     let mut f2_copy: [u64; 5] = [0u64; 5usize];
                     ((&mut f2_copy)[0usize..5usize]).copy_from_slice(&(&tmp_q)[0usize..5usize]);
-                    crate::bignum_k256::fadd(&mut tmp_q, &r_fe, &f2_copy);
+                    bignum::bignum_k256::fadd(&mut tmp_q, &r_fe, &f2_copy);
                     fmul_eq_vartime(&tmp_q, z.1, &tmp_x)
                 }
                 else
@@ -2425,7 +2425,7 @@ public_key_compressed_to_raw(pk_raw: &mut [u8], pk: &[u8]) ->
     if b
     {
         (pk_raw[0usize..32usize]).copy_from_slice(&pk_xb.1[0usize..32usize]);
-        crate::bignum_k256::store_felem(&mut pk_raw[32usize..], &ya)
+        bignum::bignum_k256::store_felem(&mut pk_raw[32usize..], &ya)
     };
     b
 }

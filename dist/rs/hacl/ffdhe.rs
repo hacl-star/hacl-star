@@ -56,8 +56,8 @@
         let os: (&mut [u8], &mut [u8]) = p_s.split_at_mut(0usize);
         os.1[i as usize] = x
     };
-    crate::bignum_base::bn_from_bytes_be_uint64(ffdhe_len(a), &p_s, r2_n.0);
-    crate::bignum::bn_precomp_r2_mod_n_u64(
+    bignum::bignum_base::bn_from_bytes_be_uint64(ffdhe_len(a), &p_s, r2_n.0);
+    bignum::bignum::bn_precomp_r2_mod_n_u64(
         (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32),
         8u32.wrapping_mul(ffdhe_len(a)).wrapping_sub(1u32),
         r2_n.0,
@@ -152,8 +152,8 @@
     let p_n: (&[u64], &[u64]) = p_r2_n.split_at(0usize);
     let r2_n: (&[u64], &[u64]) = p_n.1.split_at(nLen as usize);
     let mut res_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
-    let mu: u64 = crate::bignum::mod_inv_uint64(r2_n.0[0usize]);
-    crate::bignum::bn_mod_exp_consttime_precomp_u64(
+    let mu: u64 = bignum::bignum::mod_inv_uint64(r2_n.0[0usize]);
+    bignum::bignum::bn_mod_exp_consttime_precomp_u64(
         (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32),
         r2_n.0,
         mu,
@@ -163,7 +163,7 @@
         sk_n,
         &mut res_n
     );
-    crate::bignum_base::bn_to_bytes_be_uint64(ffdhe_len(a), &res_n, res)
+    bignum::bignum_base::bn_to_bytes_be_uint64(ffdhe_len(a), &res_n, res)
 }
 
 pub fn ffdhe_len0(a: crate::spec::ffdhe_alg) -> u32 { ffdhe_len(a) }
@@ -199,9 +199,9 @@ pub fn ffdhe_secret_to_public_precomp(
         let os: (&mut [u8], &mut [u8]) = g.split_at_mut(0usize);
         os.1[0u32 as usize] = x
     };
-    crate::bignum_base::bn_from_bytes_be_uint64(1u32, &g, &mut (&mut g_n)[0usize..]);
+    bignum::bignum_base::bn_from_bytes_be_uint64(1u32, &g, &mut (&mut g_n)[0usize..]);
     let mut sk_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
-    crate::bignum_base::bn_from_bytes_be_uint64(len, sk, &mut sk_n);
+    bignum::bignum_base::bn_from_bytes_be_uint64(len, sk, &mut sk_n);
     ffdhe_compute_exp(a, p_r2_n, &sk_n, &g_n, pk)
 }
 
@@ -228,8 +228,8 @@ pub fn ffdhe_shared_secret_precomp(
     let p_n: (&[u64], &[u64]) = p_r2_n.split_at(0usize);
     let mut sk_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     let mut pk_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
-    crate::bignum_base::bn_from_bytes_be_uint64(len, sk, &mut sk_n);
-    crate::bignum_base::bn_from_bytes_be_uint64(len, pk, &mut pk_n);
+    bignum::bignum_base::bn_from_bytes_be_uint64(len, sk, &mut sk_n);
+    bignum::bignum_base::bn_from_bytes_be_uint64(len, pk, &mut pk_n);
     let m: u64 = ffdhe_check_pk(a, &pk_n, p_n.1);
     if m == 0xFFFFFFFFFFFFFFFFu64 { ffdhe_compute_exp(a, p_r2_n, &sk_n, &pk_n, ss) };
     m

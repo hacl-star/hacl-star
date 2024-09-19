@@ -47,7 +47,7 @@ Write `a + b mod p` in `out`.
 pub fn
 felem_add(a: &[u64], b: &[u64], out: &mut [u64])
 {
-    crate::bignum25519_51::fadd(out, a, b);
+    bignum::bignum25519_51::fadd(out, a, b);
     crate::ed25519::reduce_513(out)
 }
 
@@ -63,7 +63,7 @@ Write `a - b mod p` in `out`.
 pub fn
 felem_sub(a: &[u64], b: &[u64], out: &mut [u64])
 {
-    crate::bignum25519_51::fsub(out, a, b);
+    bignum::bignum25519_51::fsub(out, a, b);
     crate::ed25519::reduce_513(out)
 }
 
@@ -81,7 +81,7 @@ felem_mul(a: &[u64], b: &[u64], out: &mut [u64])
 {
     let tmp: [fstar::uint128::uint128; 10] =
         [fstar::uint128::uint64_to_uint128(0u64); 10usize];
-    crate::bignum25519_51::fmul(out, a, b, &tmp)
+    bignum::bignum25519_51::fmul(out, a, b, &tmp)
 }
 
 /**
@@ -98,7 +98,7 @@ felem_sqr(a: &[u64], out: &mut [u64])
 {
     let tmp: [fstar::uint128::uint128; 5] =
         [fstar::uint128::uint64_to_uint128(0u64); 5usize];
-    crate::bignum25519_51::fsqr(out, a, &tmp)
+    bignum::bignum25519_51::fsqr(out, a, &tmp)
 }
 
 /**

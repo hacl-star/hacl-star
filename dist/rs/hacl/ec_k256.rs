@@ -38,8 +38,8 @@ Write `a + b mod p` in `out`.
 pub fn
 felem_add(a: &[u64], b: &[u64], out: &mut [u64])
 {
-    crate::bignum_k256::fadd(out, a, b);
-    crate::bignum_k256::fnormalize_weak(out, out)
+    bignum::bignum_k256::fadd(out, a, b);
+    bignum::bignum_k256::fnormalize_weak(out, out)
 }
 
 /**
@@ -54,8 +54,8 @@ Write `a - b mod p` in `out`.
 pub fn
 felem_sub(a: &[u64], b: &[u64], out: &mut [u64])
 {
-    crate::bignum_k256::fsub(out, a, b, 2u64);
-    crate::bignum_k256::fnormalize_weak(out, out)
+    bignum::bignum_k256::fsub(out, a, b, 2u64);
+    bignum::bignum_k256::fnormalize_weak(out, out)
 }
 
 /**
@@ -69,7 +69,7 @@ Write `a * b mod p` in `out`.
 */
 pub fn
 felem_mul(a: &[u64], b: &[u64], out: &mut [u64])
-{ crate::bignum_k256::fmul(out, a, b) }
+{ bignum::bignum_k256::fmul(out, a, b) }
 
 /**
 Write `a * a mod p` in `out`.
@@ -82,7 +82,7 @@ Write `a * a mod p` in `out`.
 */
 pub fn
 felem_sqr(a: &[u64], out: &mut [u64])
-{ crate::bignum_k256::fsqr(out, a) }
+{ bignum::bignum_k256::fsqr(out, a) }
 
 /**
 Write `a ^ (p - 2) mod p` in `out`.
@@ -97,7 +97,7 @@ Write `a ^ (p - 2) mod p` in `out`.
 */
 pub fn
 felem_inv(a: &[u64], out: &mut [u64])
-{ crate::bignum_k256::finv(out, a) }
+{ bignum::bignum_k256::finv(out, a) }
 
 /**
 Load a bid-endian field element from memory.
@@ -111,7 +111,7 @@ Load a bid-endian field element from memory.
 */
 pub fn
 felem_load(b: &[u8], out: &mut [u64])
-{ crate::bignum_k256::load_felem(out, b) }
+{ bignum::bignum_k256::load_felem(out, b) }
 
 /**
 Serialize a field element into big-endian memory.
@@ -127,8 +127,8 @@ pub fn
 felem_store(a: &[u64], out: &mut [u8])
 {
     let mut tmp: [u64; 5] = [0u64; 5usize];
-    crate::bignum_k256::fnormalize(&mut tmp, a);
-    crate::bignum_k256::store_felem(out, &tmp)
+    bignum::bignum_k256::fnormalize(&mut tmp, a);
+    bignum::bignum_k256::store_felem(out, &tmp)
 }
 
 /**
@@ -275,8 +275,8 @@ point_load(b: &[u8], out: &mut [u64])
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
     let pxb: (&[u8], &[u8]) = b.split_at(0usize);
     let pyb: (&[u8], &[u8]) = pxb.1.split_at(32usize);
-    crate::bignum_k256::load_felem(py.0, pyb.0);
-    crate::bignum_k256::load_felem(py.1, pyb.1);
+    bignum::bignum_k256::load_felem(py.0, pyb.0);
+    bignum::bignum_k256::load_felem(py.1, pyb.1);
     let x: (&[u64], &[u64]) = py.0.split_at(0usize);
     let y: (&[u64], &[u64]) = py.1.split_at(0usize);
     let x1: (&mut [u64], &mut [u64]) = out.split_at_mut(0usize);

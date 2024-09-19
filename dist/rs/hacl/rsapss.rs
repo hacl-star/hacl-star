@@ -268,14 +268,14 @@
     let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen as usize);
     let e: (&mut [u64], &mut [u64]) =
         r2.1.split_at_mut(nLen.wrapping_add(nLen) as usize - nLen as usize);
-    crate::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
-    crate::bignum::bn_precomp_r2_mod_n_u64(
+    bignum::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
+    bignum::bignum::bn_precomp_r2_mod_n_u64(
         modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
         modBits.wrapping_sub(1u32),
         r2.0,
         e.0
     );
-    crate::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
+    bignum::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
     let m0: u64 = check_modulus_u64(modBits, r2.0);
     let m1: u64 = check_exponent_u64(eBits, e.1);
     let m: u64 = m0 & m1;
@@ -300,7 +300,7 @@
     let pkey: (&mut [u64], &mut [u64]) = skey.split_at_mut(0usize);
     let d: (&mut [u64], &mut [u64]) = pkey.1.split_at_mut(pkeyLen as usize);
     let b: bool = load_pkey(modBits, eBits, nb, eb, d.0);
-    crate::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
+    bignum::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
     let m1: u64 = check_exponent_u64(dBits, d.1);
     b && m1 == 0xFFFFFFFFFFFFFFFFu64
 }
@@ -354,7 +354,7 @@ rsapss_sign(
         let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
         pss_encode(a, saltLen, salt, msgLen, msg, emBits, &mut em);
-        crate::bignum_base::bn_from_bytes_be_uint64(emLen, &em, &mut (&mut m)[0usize..]);
+        bignum::bignum_base::bn_from_bytes_be_uint64(emLen, &em, &mut (&mut m)[0usize..]);
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut s: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
@@ -371,8 +371,8 @@ rsapss_sign(
                 -
                 nLen2.wrapping_add(nLen2) as usize
             );
-        let mu: u64 = crate::bignum::mod_inv_uint64(r2.0[0usize]);
-        crate::bignum::bn_mod_exp_consttime_precomp_u64(
+        let mu: u64 = bignum::bignum::mod_inv_uint64(r2.0[0usize]);
+        bignum::bignum::bn_mod_exp_consttime_precomp_u64(
             modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
             r2.0,
             mu,
@@ -382,8 +382,8 @@ rsapss_sign(
             d.1,
             &mut s
         );
-        let mu0: u64 = crate::bignum::mod_inv_uint64(r2.0[0usize]);
-        crate::bignum::bn_mod_exp_vartime_precomp_u64(
+        let mu0: u64 = bignum::bignum::mod_inv_uint64(r2.0[0usize]);
+        bignum::bignum::bn_mod_exp_vartime_precomp_u64(
             modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
             r2.0,
             mu0,
@@ -409,7 +409,7 @@ rsapss_sign(
             os.1[i as usize] = x0
         };
         let eq_b: bool = eq_m == 0xFFFFFFFFFFFFFFFFu64;
-        crate::bignum_base::bn_to_bytes_be_uint64(k, &s, sgnt);
+        bignum::bignum_base::bn_to_bytes_be_uint64(k, &s, sgnt);
         let eq_b0: bool = eq_b;
         eq_b0
     }
@@ -461,7 +461,7 @@ rsapss_verify(
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut s: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
-        crate::bignum_base::bn_from_bytes_be_uint64(k, sgnt, &mut s);
+        bignum::bignum_base::bn_from_bytes_be_uint64(k, sgnt, &mut s);
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let n: (&[u64], &[u64]) = pkey.split_at(0usize);
         let r2: (&[u64], &[u64]) = n.1.split_at(nLen2 as usize);
@@ -478,8 +478,8 @@ rsapss_verify(
         let res: bool =
             if mask == 0xFFFFFFFFFFFFFFFFu64
             {
-                let mu: u64 = crate::bignum::mod_inv_uint64(r2.0[0usize]);
-                crate::bignum::bn_mod_exp_vartime_precomp_u64(
+                let mu: u64 = bignum::bignum::mod_inv_uint64(r2.0[0usize]);
+                bignum::bignum::bn_mod_exp_vartime_precomp_u64(
                     modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
                     r2.0,
                     mu,
@@ -510,7 +510,7 @@ rsapss_verify(
             let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
             let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
             let m1: (&[u64], &[u64]) = m.split_at(0usize);
-            crate::bignum_base::bn_to_bytes_be_uint64(emLen, m1.1, &mut em);
+            bignum::bignum_base::bn_to_bytes_be_uint64(emLen, m1.1, &mut em);
             let res0: bool = pss_verify(a, saltLen, msgLen, msg, emBits, &em);
             res0
         }
@@ -567,14 +567,14 @@ new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
             let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen1 as usize);
             let e: (&mut [u64], &mut [u64]) =
                 r2.1.split_at_mut(nLen1.wrapping_add(nLen1) as usize - nLen1 as usize);
-            crate::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
-            crate::bignum::bn_precomp_r2_mod_n_u64(
+            bignum::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
+            bignum::bignum::bn_precomp_r2_mod_n_u64(
                 modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
                 modBits.wrapping_sub(1u32),
                 r2.0,
                 e.0
             );
-            crate::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
+            bignum::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
             let m0: u64 = check_modulus_u64(modBits, r2.0);
             let m1: u64 = check_exponent_u64(eBits, e.1);
             let m: u64 = m0 & m1;
@@ -651,19 +651,19 @@ new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8],
             let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
             let e: (&mut [u64], &mut [u64]) =
                 r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
-            crate::bignum_base::bn_from_bytes_be_uint64(nbLen1, nb, r2.0);
-            crate::bignum::bn_precomp_r2_mod_n_u64(
+            bignum::bignum_base::bn_from_bytes_be_uint64(nbLen1, nb, r2.0);
+            bignum::bignum::bn_precomp_r2_mod_n_u64(
                 modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
                 modBits.wrapping_sub(1u32),
                 r2.0,
                 e.0
             );
-            crate::bignum_base::bn_from_bytes_be_uint64(ebLen1, eb, e.1);
+            bignum::bignum_base::bn_from_bytes_be_uint64(ebLen1, eb, e.1);
             let m0: u64 = check_modulus_u64(modBits, r2.0);
             let m1: u64 = check_exponent_u64(eBits, e.1);
             let m: u64 = m0 & m1;
             let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
-            crate::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
+            bignum::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
             let m10: u64 = check_exponent_u64(dBits, d.1);
             let b0: bool = b && m10 == 0xFFFFFFFFFFFFFFFFu64;
             if b0 { (*skey2).into() } else { (*&[]).into() }
