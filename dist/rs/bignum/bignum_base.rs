@@ -17,7 +17,7 @@
 #[inline] pub(crate) fn mul_wide_add2_u64(a: u64, b: u64, c_in: u64, out: &mut [u64]) -> u64
 {
     let out0: u64 = out[0usize];
-    let res: crate::fstar::uint128::uint128 =
+    let res: ::fstar::uint128::uint128 =
         crate::fstar::uint128::add(
             crate::fstar::uint128::add(
                 crate::fstar::uint128::mul_wide(a, b),
