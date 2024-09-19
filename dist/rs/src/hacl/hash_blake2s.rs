@@ -747,7 +747,7 @@ fn update_key(wv: &mut [u32], hash: &mut [u32], kk: u32, k: &[u8], ll: u32)
 }
 
 pub(crate) fn update_multi(
-    _len: u32,
+    len: u32,
     wv: &mut [u32],
     hash: &mut [u32],
     prev: u64,
@@ -755,7 +755,7 @@ pub(crate) fn update_multi(
     nb: u32
 )
 {
-    crate::lowstar::ignore::ignore::<u32>(_len);
+    crate::lowstar::ignore::ignore::<u32>(len);
     for i in 0u32..nb
     {
         let totlen: u64 = prev.wrapping_add(i.wrapping_add(1u32).wrapping_mul(64u32) as u64);

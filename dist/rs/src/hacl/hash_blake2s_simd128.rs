@@ -675,7 +675,7 @@ fn update_key(
 }
 
 pub(crate) fn update_multi(
-    _len: u32,
+    len: u32,
     wv: &mut [crate::lib::intvector_intrinsics::vec128],
     hash: &mut [crate::lib::intvector_intrinsics::vec128],
     prev: u64,
@@ -683,7 +683,7 @@ pub(crate) fn update_multi(
     nb: u32
 )
 {
-    crate::lowstar::ignore::ignore::<u32>(_len);
+    crate::lowstar::ignore::ignore::<u32>(len);
     for i in 0u32..nb
     {
         let totlen: u64 = prev.wrapping_add(i.wrapping_add(1u32).wrapping_mul(64u32) as u64);

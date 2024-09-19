@@ -6,12 +6,12 @@
 #![allow(const_item_mutation)]
 
 pub fn absorb_inner_256(
-    _rateInBytes: u32,
+    rateInBytes: u32,
     b: crate::hacl::sha2_types::uint8_4p,
     s: &mut [crate::lib::intvector_intrinsics::vec256]
 )
 {
-    crate::lowstar::ignore::ignore::<u32>(_rateInBytes);
+    crate::lowstar::ignore::ignore::<u32>(rateInBytes);
     let mut ws: [crate::lib::intvector_intrinsics::vec256; 32] =
         [crate::lib::intvector_intrinsics::vec256_zero; 32usize];
     match b
