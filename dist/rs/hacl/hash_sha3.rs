@@ -25,69 +25,69 @@ fn absorb_inner_32(b: &[u8], s: &mut [u64])
 {
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b;
-    let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
     (&mut ws)[0usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
     (&mut ws)[1usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+    let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
     (&mut ws)[2usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+    let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
     (&mut ws)[3usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+    let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
     (&mut ws)[4usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+    let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
     (&mut ws)[5usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+    let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
     (&mut ws)[6usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+    let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
     (&mut ws)[7usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+    let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
     (&mut ws)[8usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+    let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
     (&mut ws)[9usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+    let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
     (&mut ws)[10usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+    let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
     (&mut ws)[11usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+    let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
     (&mut ws)[12usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+    let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
     (&mut ws)[13usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+    let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
     (&mut ws)[14usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+    let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+    let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
     (&mut ws)[16usize] = u15;
-    let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+    let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
     (&mut ws)[17usize] = u16;
-    let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+    let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
     (&mut ws)[18usize] = u17;
-    let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+    let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
     (&mut ws)[19usize] = u18;
-    let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+    let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
     (&mut ws)[20usize] = u19;
-    let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+    let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
     (&mut ws)[21usize] = u20;
-    let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+    let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
     (&mut ws)[22usize] = u21;
-    let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+    let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
     (&mut ws)[23usize] = u22;
-    let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+    let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
     (&mut ws)[24usize] = u23;
-    let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+    let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
     (&mut ws)[25usize] = u24;
-    let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+    let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
     (&mut ws)[26usize] = u25;
-    let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+    let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
     (&mut ws)[27usize] = u26;
-    let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+    let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
     (&mut ws)[28usize] = u27;
-    let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+    let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
     (&mut ws)[29usize] = u28;
-    let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+    let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
     (&mut ws)[30usize] = u29;
-    let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+    let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
     krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
     krml::unroll_for!(
@@ -197,34 +197,34 @@ fn absorb_inner_32(b: &[u8], s: &mut [u64])
     )
 }
 
-fn block_len(a: crate::hacl::streaming_types::hash_alg) -> u32
+fn block_len(a: crate::streaming_types::hash_alg) -> u32
 {
     match a
     {
-        crate::hacl::streaming_types::hash_alg::SHA3_224 => 144u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_256 => 136u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_384 => 104u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_512 => 72u32,
-        crate::hacl::streaming_types::hash_alg::Shake128 => 168u32,
-        crate::hacl::streaming_types::hash_alg::Shake256 => 136u32,
+        crate::streaming_types::hash_alg::SHA3_224 => 144u32,
+        crate::streaming_types::hash_alg::SHA3_256 => 136u32,
+        crate::streaming_types::hash_alg::SHA3_384 => 104u32,
+        crate::streaming_types::hash_alg::SHA3_512 => 72u32,
+        crate::streaming_types::hash_alg::Shake128 => 168u32,
+        crate::streaming_types::hash_alg::Shake256 => 136u32,
         _ => panic!("Precondition of the function most likely violated")
     }
 }
 
-fn hash_len(a: crate::hacl::streaming_types::hash_alg) -> u32
+fn hash_len(a: crate::streaming_types::hash_alg) -> u32
 {
     match a
     {
-        crate::hacl::streaming_types::hash_alg::SHA3_224 => 28u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_256 => 32u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_384 => 48u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_512 => 64u32,
+        crate::streaming_types::hash_alg::SHA3_224 => 28u32,
+        crate::streaming_types::hash_alg::SHA3_256 => 32u32,
+        crate::streaming_types::hash_alg::SHA3_384 => 48u32,
+        crate::streaming_types::hash_alg::SHA3_512 => 64u32,
         _ => panic!("Precondition of the function most likely violated")
     }
 }
 
 fn update_multi_sha3(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     s: &mut [u64],
     blocks: &[u8],
     n_blocks: u32
@@ -241,13 +241,13 @@ fn update_multi_sha3(
         (bl0[0usize..block_len(a) as usize]).copy_from_slice(
             &uu____0.1[0usize..block_len(a) as usize]
         );
-        crate::lowstar::ignore::ignore::<u32>(block_len(a));
+        lowstar::ignore::ignore::<u32>(block_len(a));
         absorb_inner_32(b·, s)
     }
 }
 
 fn update_last_sha3(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     s: &mut [u64],
     input: &[u8],
     input_len: u32
@@ -255,9 +255,9 @@ fn update_last_sha3(
 {
     let suffix: u8 =
         if
-        a == crate::hacl::streaming_types::hash_alg::Shake128
+        a == crate::streaming_types::hash_alg::Shake128
         ||
-        a == crate::hacl::streaming_types::hash_alg::Shake256
+        a == crate::streaming_types::hash_alg::Shake256
         { 0x1fu8 }
         else
         { 0x06u8 };
@@ -284,69 +284,69 @@ fn update_last_sha3(
         b01[0u32.wrapping_rem(len) as usize] = suffix;
         let mut ws: [u64; 32] = [0u64; 32usize];
         let b2: &[u8] = b·0;
-        let u: u64 = crate::lowstar::endianness::load64_le(&b2[0usize..]);
+        let u: u64 = lowstar::endianness::load64_le(&b2[0usize..]);
         (&mut ws)[0usize] = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&b2[8usize..]);
+        let u0: u64 = lowstar::endianness::load64_le(&b2[8usize..]);
         (&mut ws)[1usize] = u0;
-        let u1: u64 = crate::lowstar::endianness::load64_le(&b2[16usize..]);
+        let u1: u64 = lowstar::endianness::load64_le(&b2[16usize..]);
         (&mut ws)[2usize] = u1;
-        let u2: u64 = crate::lowstar::endianness::load64_le(&b2[24usize..]);
+        let u2: u64 = lowstar::endianness::load64_le(&b2[24usize..]);
         (&mut ws)[3usize] = u2;
-        let u3: u64 = crate::lowstar::endianness::load64_le(&b2[32usize..]);
+        let u3: u64 = lowstar::endianness::load64_le(&b2[32usize..]);
         (&mut ws)[4usize] = u3;
-        let u4: u64 = crate::lowstar::endianness::load64_le(&b2[40usize..]);
+        let u4: u64 = lowstar::endianness::load64_le(&b2[40usize..]);
         (&mut ws)[5usize] = u4;
-        let u5: u64 = crate::lowstar::endianness::load64_le(&b2[48usize..]);
+        let u5: u64 = lowstar::endianness::load64_le(&b2[48usize..]);
         (&mut ws)[6usize] = u5;
-        let u6: u64 = crate::lowstar::endianness::load64_le(&b2[56usize..]);
+        let u6: u64 = lowstar::endianness::load64_le(&b2[56usize..]);
         (&mut ws)[7usize] = u6;
-        let u7: u64 = crate::lowstar::endianness::load64_le(&b2[64usize..]);
+        let u7: u64 = lowstar::endianness::load64_le(&b2[64usize..]);
         (&mut ws)[8usize] = u7;
-        let u8: u64 = crate::lowstar::endianness::load64_le(&b2[72usize..]);
+        let u8: u64 = lowstar::endianness::load64_le(&b2[72usize..]);
         (&mut ws)[9usize] = u8;
-        let u9: u64 = crate::lowstar::endianness::load64_le(&b2[80usize..]);
+        let u9: u64 = lowstar::endianness::load64_le(&b2[80usize..]);
         (&mut ws)[10usize] = u9;
-        let u10: u64 = crate::lowstar::endianness::load64_le(&b2[88usize..]);
+        let u10: u64 = lowstar::endianness::load64_le(&b2[88usize..]);
         (&mut ws)[11usize] = u10;
-        let u11: u64 = crate::lowstar::endianness::load64_le(&b2[96usize..]);
+        let u11: u64 = lowstar::endianness::load64_le(&b2[96usize..]);
         (&mut ws)[12usize] = u11;
-        let u12: u64 = crate::lowstar::endianness::load64_le(&b2[104usize..]);
+        let u12: u64 = lowstar::endianness::load64_le(&b2[104usize..]);
         (&mut ws)[13usize] = u12;
-        let u13: u64 = crate::lowstar::endianness::load64_le(&b2[112usize..]);
+        let u13: u64 = lowstar::endianness::load64_le(&b2[112usize..]);
         (&mut ws)[14usize] = u13;
-        let u14: u64 = crate::lowstar::endianness::load64_le(&b2[120usize..]);
+        let u14: u64 = lowstar::endianness::load64_le(&b2[120usize..]);
         (&mut ws)[15usize] = u14;
-        let u15: u64 = crate::lowstar::endianness::load64_le(&b2[128usize..]);
+        let u15: u64 = lowstar::endianness::load64_le(&b2[128usize..]);
         (&mut ws)[16usize] = u15;
-        let u16: u64 = crate::lowstar::endianness::load64_le(&b2[136usize..]);
+        let u16: u64 = lowstar::endianness::load64_le(&b2[136usize..]);
         (&mut ws)[17usize] = u16;
-        let u17: u64 = crate::lowstar::endianness::load64_le(&b2[144usize..]);
+        let u17: u64 = lowstar::endianness::load64_le(&b2[144usize..]);
         (&mut ws)[18usize] = u17;
-        let u18: u64 = crate::lowstar::endianness::load64_le(&b2[152usize..]);
+        let u18: u64 = lowstar::endianness::load64_le(&b2[152usize..]);
         (&mut ws)[19usize] = u18;
-        let u19: u64 = crate::lowstar::endianness::load64_le(&b2[160usize..]);
+        let u19: u64 = lowstar::endianness::load64_le(&b2[160usize..]);
         (&mut ws)[20usize] = u19;
-        let u20: u64 = crate::lowstar::endianness::load64_le(&b2[168usize..]);
+        let u20: u64 = lowstar::endianness::load64_le(&b2[168usize..]);
         (&mut ws)[21usize] = u20;
-        let u21: u64 = crate::lowstar::endianness::load64_le(&b2[176usize..]);
+        let u21: u64 = lowstar::endianness::load64_le(&b2[176usize..]);
         (&mut ws)[22usize] = u21;
-        let u22: u64 = crate::lowstar::endianness::load64_le(&b2[184usize..]);
+        let u22: u64 = lowstar::endianness::load64_le(&b2[184usize..]);
         (&mut ws)[23usize] = u22;
-        let u23: u64 = crate::lowstar::endianness::load64_le(&b2[192usize..]);
+        let u23: u64 = lowstar::endianness::load64_le(&b2[192usize..]);
         (&mut ws)[24usize] = u23;
-        let u24: u64 = crate::lowstar::endianness::load64_le(&b2[200usize..]);
+        let u24: u64 = lowstar::endianness::load64_le(&b2[200usize..]);
         (&mut ws)[25usize] = u24;
-        let u25: u64 = crate::lowstar::endianness::load64_le(&b2[208usize..]);
+        let u25: u64 = lowstar::endianness::load64_le(&b2[208usize..]);
         (&mut ws)[26usize] = u25;
-        let u26: u64 = crate::lowstar::endianness::load64_le(&b2[216usize..]);
+        let u26: u64 = lowstar::endianness::load64_le(&b2[216usize..]);
         (&mut ws)[27usize] = u26;
-        let u27: u64 = crate::lowstar::endianness::load64_le(&b2[224usize..]);
+        let u27: u64 = lowstar::endianness::load64_le(&b2[224usize..]);
         (&mut ws)[28usize] = u27;
-        let u28: u64 = crate::lowstar::endianness::load64_le(&b2[232usize..]);
+        let u28: u64 = lowstar::endianness::load64_le(&b2[232usize..]);
         (&mut ws)[29usize] = u28;
-        let u29: u64 = crate::lowstar::endianness::load64_le(&b2[240usize..]);
+        let u29: u64 = lowstar::endianness::load64_le(&b2[240usize..]);
         (&mut ws)[30usize] = u29;
-        let u30: u64 = crate::lowstar::endianness::load64_le(&b2[248usize..]);
+        let u30: u64 = lowstar::endianness::load64_le(&b2[248usize..]);
         (&mut ws)[31usize] = u30;
         krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
         if suffix & 0x80u8 != 0u8 && 0u32.wrapping_rem(len) == len.wrapping_sub(1u32)
@@ -480,69 +480,69 @@ fn update_last_sha3(
         b00[input_len.wrapping_rem(len) as usize] = suffix;
         let mut ws: [u64; 32] = [0u64; 32usize];
         let b1: &[u8] = b·;
-        let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+        let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
         (&mut ws)[0usize] = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+        let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
         (&mut ws)[1usize] = u0;
-        let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+        let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
         (&mut ws)[2usize] = u1;
-        let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+        let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
         (&mut ws)[3usize] = u2;
-        let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+        let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
         (&mut ws)[4usize] = u3;
-        let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+        let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
         (&mut ws)[5usize] = u4;
-        let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+        let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
         (&mut ws)[6usize] = u5;
-        let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+        let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
         (&mut ws)[7usize] = u6;
-        let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+        let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
         (&mut ws)[8usize] = u7;
-        let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+        let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
         (&mut ws)[9usize] = u8;
-        let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+        let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
         (&mut ws)[10usize] = u9;
-        let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+        let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
         (&mut ws)[11usize] = u10;
-        let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+        let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
         (&mut ws)[12usize] = u11;
-        let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+        let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
         (&mut ws)[13usize] = u12;
-        let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+        let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
         (&mut ws)[14usize] = u13;
-        let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+        let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
         (&mut ws)[15usize] = u14;
-        let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+        let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
         (&mut ws)[16usize] = u15;
-        let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+        let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
         (&mut ws)[17usize] = u16;
-        let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+        let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
         (&mut ws)[18usize] = u17;
-        let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+        let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
         (&mut ws)[19usize] = u18;
-        let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+        let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
         (&mut ws)[20usize] = u19;
-        let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+        let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
         (&mut ws)[21usize] = u20;
-        let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+        let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
         (&mut ws)[22usize] = u21;
-        let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+        let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
         (&mut ws)[23usize] = u22;
-        let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+        let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
         (&mut ws)[24usize] = u23;
-        let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+        let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
         (&mut ws)[25usize] = u24;
-        let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+        let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
         (&mut ws)[26usize] = u25;
-        let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+        let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
         (&mut ws)[27usize] = u26;
-        let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+        let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
         (&mut ws)[28usize] = u27;
-        let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+        let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
         (&mut ws)[29usize] = u28;
-        let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+        let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
         (&mut ws)[30usize] = u29;
-        let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+        let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
         (&mut ws)[31usize] = u30;
         krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
         if suffix & 0x80u8 != 0u8 && input_len.wrapping_rem(len) == len.wrapping_sub(1u32)
@@ -664,17 +664,17 @@ fn update_last_sha3(
     }
 }
 
-pub struct hash_buf { pub fst: crate::hacl::streaming_types::hash_alg, pub snd: Box<[u64]> }
+pub struct hash_buf { pub fst: crate::streaming_types::hash_alg, pub snd: Box<[u64]> }
 
 pub struct state_t { pub block_state: hash_buf, pub buf: Box<[u8]>, pub total_len: u64 }
 
-pub fn get_alg(s: &[state_t]) -> crate::hacl::streaming_types::hash_alg
+pub fn get_alg(s: &[state_t]) -> crate::streaming_types::hash_alg
 {
     let block_state: &hash_buf = &(s[0usize]).block_state;
     block_state.fst
 }
 
-pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Box<[state_t]>
+pub fn malloc(a: crate::streaming_types::hash_alg) -> Box<[state_t]>
 {
     let buf: Box<[u8]> = vec![0u8; block_len(a) as usize].into_boxed_slice();
     let buf0: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
@@ -691,7 +691,7 @@ pub fn copy(state: &[state_t]) -> Box<[state_t]>
     let block_state0: &hash_buf = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
     let total_len0: u64 = (state[0usize]).total_len;
-    let i: crate::hacl::streaming_types::hash_alg = block_state0.fst;
+    let i: crate::streaming_types::hash_alg = block_state0.fst;
     let mut buf: Box<[u8]> = vec![0u8; block_len(i) as usize].into_boxed_slice();
     ((&mut buf)[0usize..block_len(i) as usize]).copy_from_slice(
         &buf0[0usize..block_len(i) as usize]
@@ -716,13 +716,13 @@ pub fn reset(state: &mut [state_t])
 }
 
 pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
-    crate::hacl::streaming_types::error_code
+    crate::streaming_types::error_code
 {
     let block_state: &mut hash_buf = &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
-    let i: crate::hacl::streaming_types::hash_alg = block_state.fst;
+    let i: crate::streaming_types::hash_alg = block_state.fst;
     if chunk_len as u64 > 0xFFFFFFFFFFFFFFFFu64.wrapping_sub(total_len)
-    { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
+    { crate::streaming_types::error_code::MaximumLengthExceeded }
     else
     {
         let sz: u32 =
@@ -755,7 +755,7 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { total_len1.wrapping_rem(block_len(i) as u64) as u32 };
             if sz1 != 0u32
             {
-                let a1: crate::hacl::streaming_types::hash_alg = block_state.fst;
+                let a1: crate::streaming_types::hash_alg = block_state.fst;
                 let s1: &mut [u64] = &mut block_state.snd;
                 update_multi_sha3(a1, s1, buf, (block_len(i)).wrapping_div(block_len(a1)))
             };
@@ -772,7 +772,7 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            let a1: crate::hacl::streaming_types::hash_alg = block_state.fst;
+            let a1: crate::streaming_types::hash_alg = block_state.fst;
             let s1: &mut [u64] = &mut block_state.snd;
             update_multi_sha3(a1, s1, data2.0, data1_len.wrapping_div(block_len(a1)));
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
@@ -806,7 +806,7 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { total_len10.wrapping_rem(block_len(i) as u64) as u32 };
             if sz10 != 0u32
             {
-                let a1: crate::hacl::streaming_types::hash_alg = block_state.fst;
+                let a1: crate::streaming_types::hash_alg = block_state.fst;
                 let s1: &mut [u64] = &mut block_state.snd;
                 update_multi_sha3(a1, s1, buf0, (block_len(i)).wrapping_div(block_len(a1)))
             };
@@ -824,7 +824,7 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            let a1: crate::hacl::streaming_types::hash_alg = block_state.fst;
+            let a1: crate::streaming_types::hash_alg = block_state.fst;
             let s1: &mut [u64] = &mut block_state.snd;
             update_multi_sha3(a1, s1, data2.0, data1_len.wrapping_div(block_len(a1)));
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
@@ -834,12 +834,12 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             (state[0usize]).total_len =
                 total_len10.wrapping_add(chunk_len.wrapping_sub(diff) as u64)
         };
-        crate::hacl::streaming_types::error_code::Success
+        crate::streaming_types::error_code::Success
     }
 }
 
 fn digest_(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     state: &[state_t],
     output: &mut [u8],
     l: u32
@@ -866,18 +866,18 @@ fn digest_(
         else
         { r.wrapping_rem(block_len(a)) };
     let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
-    let a1: crate::hacl::streaming_types::hash_alg = tmp_block_state.fst;
+    let a1: crate::streaming_types::hash_alg = tmp_block_state.fst;
     let s: &mut [u64] = &mut tmp_block_state.snd;
     update_multi_sha3(a1, s, buf_last.0, 0u32.wrapping_div(block_len(a1)));
-    let a10: crate::hacl::streaming_types::hash_alg = tmp_block_state.fst;
+    let a10: crate::streaming_types::hash_alg = tmp_block_state.fst;
     let s0: &mut [u64] = &mut tmp_block_state.snd;
     update_last_sha3(a10, s0, buf_last.1, r);
-    let a11: crate::hacl::streaming_types::hash_alg = tmp_block_state.fst;
+    let a11: crate::streaming_types::hash_alg = tmp_block_state.fst;
     let s1: &mut [u64] = &mut tmp_block_state.snd;
     if
-    a11 == crate::hacl::streaming_types::hash_alg::Shake128
+    a11 == crate::streaming_types::hash_alg::Shake128
     ||
-    a11 == crate::hacl::streaming_types::hash_alg::Shake256
+    a11 == crate::streaming_types::hash_alg::Shake256
     {
         for i in 0u32..l.wrapping_div(block_len(a11))
         {
@@ -889,7 +889,7 @@ fn digest_(
                 "i0",
                 0u32,
                 1u32,
-                crate::lowstar::endianness::store64_le(
+                lowstar::endianness::store64_le(
                     &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
                     (&ws)[i0 as usize]
                 )
@@ -1019,7 +1019,7 @@ fn digest_(
             "i",
             0u32,
             1u32,
-            crate::lowstar::endianness::store64_le(
+            lowstar::endianness::store64_le(
                 &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
                 (&ws)[i as usize]
             )
@@ -1040,7 +1040,7 @@ fn digest_(
                 "i0",
                 0u32,
                 1u32,
-                crate::lowstar::endianness::store64_le(
+                lowstar::endianness::store64_le(
                     &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
                     (&ws)[i0 as usize]
                 )
@@ -1170,7 +1170,7 @@ fn digest_(
             "i",
             0u32,
             1u32,
-            crate::lowstar::endianness::store64_le(
+            lowstar::endianness::store64_le(
                 &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
                 (&ws)[i as usize]
             )
@@ -1184,128 +1184,128 @@ fn digest_(
     }
 }
 
-pub fn digest(state: &[state_t], output: &mut [u8]) -> crate::hacl::streaming_types::error_code
+pub fn digest(state: &[state_t], output: &mut [u8]) -> crate::streaming_types::error_code
 {
-    let a1: crate::hacl::streaming_types::hash_alg = get_alg(state);
+    let a1: crate::streaming_types::hash_alg = get_alg(state);
     if
-    a1 == crate::hacl::streaming_types::hash_alg::Shake128
+    a1 == crate::streaming_types::hash_alg::Shake128
     ||
-    a1 == crate::hacl::streaming_types::hash_alg::Shake256
-    { crate::hacl::streaming_types::error_code::InvalidAlgorithm }
+    a1 == crate::streaming_types::hash_alg::Shake256
+    { crate::streaming_types::error_code::InvalidAlgorithm }
     else
     {
         digest_(a1, state, output, hash_len(a1));
-        crate::hacl::streaming_types::error_code::Success
+        crate::streaming_types::error_code::Success
     }
 }
 
 pub fn squeeze(s: &[state_t], dst: &mut [u8], l: u32) ->
-    crate::hacl::streaming_types::error_code
+    crate::streaming_types::error_code
 {
-    let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
+    let a1: crate::streaming_types::hash_alg = get_alg(s);
     if
     !
-    (a1 == crate::hacl::streaming_types::hash_alg::Shake128
+    (a1 == crate::streaming_types::hash_alg::Shake128
     ||
-    a1 == crate::hacl::streaming_types::hash_alg::Shake256)
-    { crate::hacl::streaming_types::error_code::InvalidAlgorithm }
+    a1 == crate::streaming_types::hash_alg::Shake256)
+    { crate::streaming_types::error_code::InvalidAlgorithm }
     else if l == 0u32
-    { crate::hacl::streaming_types::error_code::InvalidLength }
+    { crate::streaming_types::error_code::InvalidLength }
     else
     {
         digest_(a1, s, dst, l);
-        crate::hacl::streaming_types::error_code::Success
+        crate::streaming_types::error_code::Success
     }
 }
 
 pub fn block_len0(s: &[state_t]) -> u32
 {
-    let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
+    let a1: crate::streaming_types::hash_alg = get_alg(s);
     block_len(a1)
 }
 
 pub fn hash_len0(s: &[state_t]) -> u32
 {
-    let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
+    let a1: crate::streaming_types::hash_alg = get_alg(s);
     hash_len(a1)
 }
 
 pub fn is_shake(s: &[state_t]) -> bool
 {
-    let uu____0: crate::hacl::streaming_types::hash_alg = get_alg(s);
-    uu____0 == crate::hacl::streaming_types::hash_alg::Shake128
+    let uu____0: crate::streaming_types::hash_alg = get_alg(s);
+    uu____0 == crate::streaming_types::hash_alg::Shake128
     ||
-    uu____0 == crate::hacl::streaming_types::hash_alg::Shake256
+    uu____0 == crate::streaming_types::hash_alg::Shake256
 }
 
 pub fn absorb_inner_320(rateInBytes: u32, b: &[u8], s: &mut [u64])
 {
-    crate::lowstar::ignore::ignore::<u32>(rateInBytes);
+    lowstar::ignore::ignore::<u32>(rateInBytes);
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b;
-    let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
     (&mut ws)[0usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
     (&mut ws)[1usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+    let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
     (&mut ws)[2usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+    let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
     (&mut ws)[3usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+    let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
     (&mut ws)[4usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+    let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
     (&mut ws)[5usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+    let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
     (&mut ws)[6usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+    let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
     (&mut ws)[7usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+    let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
     (&mut ws)[8usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+    let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
     (&mut ws)[9usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+    let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
     (&mut ws)[10usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+    let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
     (&mut ws)[11usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+    let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
     (&mut ws)[12usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+    let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
     (&mut ws)[13usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+    let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
     (&mut ws)[14usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+    let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+    let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
     (&mut ws)[16usize] = u15;
-    let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+    let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
     (&mut ws)[17usize] = u16;
-    let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+    let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
     (&mut ws)[18usize] = u17;
-    let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+    let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
     (&mut ws)[19usize] = u18;
-    let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+    let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
     (&mut ws)[20usize] = u19;
-    let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+    let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
     (&mut ws)[21usize] = u20;
-    let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+    let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
     (&mut ws)[22usize] = u21;
-    let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+    let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
     (&mut ws)[23usize] = u22;
-    let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+    let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
     (&mut ws)[24usize] = u23;
-    let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+    let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
     (&mut ws)[25usize] = u24;
-    let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+    let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
     (&mut ws)[26usize] = u25;
-    let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+    let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
     (&mut ws)[27usize] = u26;
-    let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+    let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
     (&mut ws)[28usize] = u27;
-    let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+    let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
     (&mut ws)[29usize] = u28;
-    let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+    let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
     (&mut ws)[30usize] = u29;
-    let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+    let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
     krml::unroll_for!(25, "i", 0u32, 1u32, s[i as usize] ^= (&ws)[i as usize]);
     krml::unroll_for!(
@@ -1444,69 +1444,69 @@ pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
     b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b·;
-    let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
     (&mut ws)[0usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
     (&mut ws)[1usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+    let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
     (&mut ws)[2usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+    let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
     (&mut ws)[3usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+    let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
     (&mut ws)[4usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+    let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
     (&mut ws)[5usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+    let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
     (&mut ws)[6usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+    let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
     (&mut ws)[7usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+    let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
     (&mut ws)[8usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+    let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
     (&mut ws)[9usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+    let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
     (&mut ws)[10usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+    let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
     (&mut ws)[11usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+    let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
     (&mut ws)[12usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+    let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
     (&mut ws)[13usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+    let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
     (&mut ws)[14usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+    let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+    let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
     (&mut ws)[16usize] = u15;
-    let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+    let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
     (&mut ws)[17usize] = u16;
-    let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+    let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
     (&mut ws)[18usize] = u17;
-    let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+    let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
     (&mut ws)[19usize] = u18;
-    let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+    let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
     (&mut ws)[20usize] = u19;
-    let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+    let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
     (&mut ws)[21usize] = u20;
-    let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+    let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
     (&mut ws)[22usize] = u21;
-    let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+    let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
     (&mut ws)[23usize] = u22;
-    let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+    let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
     (&mut ws)[24usize] = u23;
-    let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+    let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
     (&mut ws)[25usize] = u24;
-    let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+    let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
     (&mut ws)[26usize] = u25;
-    let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+    let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
     (&mut ws)[27usize] = u26;
-    let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+    let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
     (&mut ws)[28usize] = u27;
-    let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+    let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
     (&mut ws)[29usize] = u28;
-    let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+    let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
     (&mut ws)[30usize] = u29;
-    let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+    let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
     krml::unroll_for!(
         25,
@@ -1530,7 +1530,7 @@ pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
             "i0",
             0u32,
             1u32,
-            crate::lowstar::endianness::store64_le(
+            lowstar::endianness::store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
                 (&ws0)[i0 as usize]
             )
@@ -1659,7 +1659,7 @@ pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
             (&ws0)[i as usize]
         )
@@ -1698,69 +1698,69 @@ pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
     b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b·;
-    let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
     (&mut ws)[0usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
     (&mut ws)[1usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+    let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
     (&mut ws)[2usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+    let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
     (&mut ws)[3usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+    let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
     (&mut ws)[4usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+    let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
     (&mut ws)[5usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+    let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
     (&mut ws)[6usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+    let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
     (&mut ws)[7usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+    let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
     (&mut ws)[8usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+    let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
     (&mut ws)[9usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+    let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
     (&mut ws)[10usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+    let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
     (&mut ws)[11usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+    let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
     (&mut ws)[12usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+    let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
     (&mut ws)[13usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+    let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
     (&mut ws)[14usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+    let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+    let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
     (&mut ws)[16usize] = u15;
-    let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+    let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
     (&mut ws)[17usize] = u16;
-    let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+    let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
     (&mut ws)[18usize] = u17;
-    let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+    let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
     (&mut ws)[19usize] = u18;
-    let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+    let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
     (&mut ws)[20usize] = u19;
-    let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+    let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
     (&mut ws)[21usize] = u20;
-    let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+    let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
     (&mut ws)[22usize] = u21;
-    let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+    let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
     (&mut ws)[23usize] = u22;
-    let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+    let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
     (&mut ws)[24usize] = u23;
-    let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+    let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
     (&mut ws)[25usize] = u24;
-    let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+    let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
     (&mut ws)[26usize] = u25;
-    let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+    let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
     (&mut ws)[27usize] = u26;
-    let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+    let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
     (&mut ws)[28usize] = u27;
-    let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+    let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
     (&mut ws)[29usize] = u28;
-    let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+    let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
     (&mut ws)[30usize] = u29;
-    let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+    let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
     krml::unroll_for!(
         25,
@@ -1784,7 +1784,7 @@ pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
             "i0",
             0u32,
             1u32,
-            crate::lowstar::endianness::store64_le(
+            lowstar::endianness::store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
                 (&ws0)[i0 as usize]
             )
@@ -1913,7 +1913,7 @@ pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
             (&ws0)[i as usize]
         )
@@ -1952,69 +1952,69 @@ pub fn sha3_224(output: &mut [u8], input: &[u8], inputByteLen: u32)
     b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b·;
-    let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
     (&mut ws)[0usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
     (&mut ws)[1usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+    let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
     (&mut ws)[2usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+    let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
     (&mut ws)[3usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+    let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
     (&mut ws)[4usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+    let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
     (&mut ws)[5usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+    let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
     (&mut ws)[6usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+    let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
     (&mut ws)[7usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+    let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
     (&mut ws)[8usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+    let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
     (&mut ws)[9usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+    let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
     (&mut ws)[10usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+    let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
     (&mut ws)[11usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+    let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
     (&mut ws)[12usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+    let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
     (&mut ws)[13usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+    let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
     (&mut ws)[14usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+    let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+    let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
     (&mut ws)[16usize] = u15;
-    let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+    let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
     (&mut ws)[17usize] = u16;
-    let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+    let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
     (&mut ws)[18usize] = u17;
-    let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+    let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
     (&mut ws)[19usize] = u18;
-    let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+    let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
     (&mut ws)[20usize] = u19;
-    let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+    let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
     (&mut ws)[21usize] = u20;
-    let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+    let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
     (&mut ws)[22usize] = u21;
-    let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+    let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
     (&mut ws)[23usize] = u22;
-    let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+    let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
     (&mut ws)[24usize] = u23;
-    let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+    let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
     (&mut ws)[25usize] = u24;
-    let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+    let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
     (&mut ws)[26usize] = u25;
-    let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+    let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
     (&mut ws)[27usize] = u26;
-    let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+    let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
     (&mut ws)[28usize] = u27;
-    let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+    let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
     (&mut ws)[29usize] = u28;
-    let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+    let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
     (&mut ws)[30usize] = u29;
-    let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+    let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
     krml::unroll_for!(
         25,
@@ -2038,7 +2038,7 @@ pub fn sha3_224(output: &mut [u8], input: &[u8], inputByteLen: u32)
             "i0",
             0u32,
             1u32,
-            crate::lowstar::endianness::store64_le(
+            lowstar::endianness::store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
                 (&ws0)[i0 as usize]
             )
@@ -2167,7 +2167,7 @@ pub fn sha3_224(output: &mut [u8], input: &[u8], inputByteLen: u32)
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
             (&ws0)[i as usize]
         )
@@ -2206,69 +2206,69 @@ pub fn sha3_256(output: &mut [u8], input: &[u8], inputByteLen: u32)
     b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b·;
-    let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
     (&mut ws)[0usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
     (&mut ws)[1usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+    let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
     (&mut ws)[2usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+    let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
     (&mut ws)[3usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+    let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
     (&mut ws)[4usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+    let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
     (&mut ws)[5usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+    let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
     (&mut ws)[6usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+    let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
     (&mut ws)[7usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+    let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
     (&mut ws)[8usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+    let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
     (&mut ws)[9usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+    let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
     (&mut ws)[10usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+    let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
     (&mut ws)[11usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+    let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
     (&mut ws)[12usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+    let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
     (&mut ws)[13usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+    let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
     (&mut ws)[14usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+    let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+    let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
     (&mut ws)[16usize] = u15;
-    let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+    let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
     (&mut ws)[17usize] = u16;
-    let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+    let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
     (&mut ws)[18usize] = u17;
-    let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+    let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
     (&mut ws)[19usize] = u18;
-    let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+    let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
     (&mut ws)[20usize] = u19;
-    let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+    let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
     (&mut ws)[21usize] = u20;
-    let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+    let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
     (&mut ws)[22usize] = u21;
-    let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+    let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
     (&mut ws)[23usize] = u22;
-    let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+    let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
     (&mut ws)[24usize] = u23;
-    let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+    let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
     (&mut ws)[25usize] = u24;
-    let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+    let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
     (&mut ws)[26usize] = u25;
-    let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+    let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
     (&mut ws)[27usize] = u26;
-    let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+    let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
     (&mut ws)[28usize] = u27;
-    let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+    let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
     (&mut ws)[29usize] = u28;
-    let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+    let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
     (&mut ws)[30usize] = u29;
-    let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+    let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
     krml::unroll_for!(
         25,
@@ -2292,7 +2292,7 @@ pub fn sha3_256(output: &mut [u8], input: &[u8], inputByteLen: u32)
             "i0",
             0u32,
             1u32,
-            crate::lowstar::endianness::store64_le(
+            lowstar::endianness::store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
                 (&ws0)[i0 as usize]
             )
@@ -2421,7 +2421,7 @@ pub fn sha3_256(output: &mut [u8], input: &[u8], inputByteLen: u32)
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
             (&ws0)[i as usize]
         )
@@ -2460,69 +2460,69 @@ pub fn sha3_384(output: &mut [u8], input: &[u8], inputByteLen: u32)
     b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b·;
-    let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
     (&mut ws)[0usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
     (&mut ws)[1usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+    let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
     (&mut ws)[2usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+    let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
     (&mut ws)[3usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+    let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
     (&mut ws)[4usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+    let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
     (&mut ws)[5usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+    let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
     (&mut ws)[6usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+    let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
     (&mut ws)[7usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+    let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
     (&mut ws)[8usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+    let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
     (&mut ws)[9usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+    let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
     (&mut ws)[10usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+    let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
     (&mut ws)[11usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+    let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
     (&mut ws)[12usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+    let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
     (&mut ws)[13usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+    let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
     (&mut ws)[14usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+    let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+    let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
     (&mut ws)[16usize] = u15;
-    let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+    let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
     (&mut ws)[17usize] = u16;
-    let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+    let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
     (&mut ws)[18usize] = u17;
-    let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+    let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
     (&mut ws)[19usize] = u18;
-    let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+    let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
     (&mut ws)[20usize] = u19;
-    let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+    let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
     (&mut ws)[21usize] = u20;
-    let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+    let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
     (&mut ws)[22usize] = u21;
-    let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+    let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
     (&mut ws)[23usize] = u22;
-    let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+    let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
     (&mut ws)[24usize] = u23;
-    let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+    let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
     (&mut ws)[25usize] = u24;
-    let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+    let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
     (&mut ws)[26usize] = u25;
-    let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+    let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
     (&mut ws)[27usize] = u26;
-    let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+    let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
     (&mut ws)[28usize] = u27;
-    let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+    let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
     (&mut ws)[29usize] = u28;
-    let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+    let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
     (&mut ws)[30usize] = u29;
-    let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+    let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
     krml::unroll_for!(
         25,
@@ -2546,7 +2546,7 @@ pub fn sha3_384(output: &mut [u8], input: &[u8], inputByteLen: u32)
             "i0",
             0u32,
             1u32,
-            crate::lowstar::endianness::store64_le(
+            lowstar::endianness::store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
                 (&ws0)[i0 as usize]
             )
@@ -2675,7 +2675,7 @@ pub fn sha3_384(output: &mut [u8], input: &[u8], inputByteLen: u32)
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
             (&ws0)[i as usize]
         )
@@ -2714,69 +2714,69 @@ pub fn sha3_512(output: &mut [u8], input: &[u8], inputByteLen: u32)
     b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b·;
-    let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
     (&mut ws)[0usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
     (&mut ws)[1usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+    let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
     (&mut ws)[2usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+    let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
     (&mut ws)[3usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+    let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
     (&mut ws)[4usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+    let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
     (&mut ws)[5usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+    let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
     (&mut ws)[6usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+    let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
     (&mut ws)[7usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+    let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
     (&mut ws)[8usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+    let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
     (&mut ws)[9usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+    let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
     (&mut ws)[10usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+    let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
     (&mut ws)[11usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+    let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
     (&mut ws)[12usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+    let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
     (&mut ws)[13usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+    let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
     (&mut ws)[14usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+    let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+    let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
     (&mut ws)[16usize] = u15;
-    let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+    let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
     (&mut ws)[17usize] = u16;
-    let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+    let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
     (&mut ws)[18usize] = u17;
-    let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+    let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
     (&mut ws)[19usize] = u18;
-    let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+    let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
     (&mut ws)[20usize] = u19;
-    let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+    let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
     (&mut ws)[21usize] = u20;
-    let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+    let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
     (&mut ws)[22usize] = u21;
-    let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+    let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
     (&mut ws)[23usize] = u22;
-    let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+    let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
     (&mut ws)[24usize] = u23;
-    let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+    let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
     (&mut ws)[25usize] = u24;
-    let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+    let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
     (&mut ws)[26usize] = u25;
-    let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+    let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
     (&mut ws)[27usize] = u26;
-    let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+    let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
     (&mut ws)[28usize] = u27;
-    let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+    let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
     (&mut ws)[29usize] = u28;
-    let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+    let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
     (&mut ws)[30usize] = u29;
-    let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+    let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
     krml::unroll_for!(
         25,
@@ -2800,7 +2800,7 @@ pub fn sha3_512(output: &mut [u8], input: &[u8], inputByteLen: u32)
             "i0",
             0u32,
             1u32,
-            crate::lowstar::endianness::store64_le(
+            lowstar::endianness::store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
                 (&ws0)[i0 as usize]
             )
@@ -2929,7 +2929,7 @@ pub fn sha3_512(output: &mut [u8], input: &[u8], inputByteLen: u32)
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
             (&ws0)[i as usize]
         )
@@ -3014,69 +3014,69 @@ shake128_absorb_final(state: &mut [u64], input: &[u8], inputByteLen: u32)
     b00[inputByteLen.wrapping_rem(168u32) as usize] = 0x1Fu8;
     let mut ws: [u64; 32] = [0u64; 32usize];
     let b1: &[u8] = b·;
-    let u: u64 = crate::lowstar::endianness::load64_le(&b1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&b1[0usize..]);
     (&mut ws)[0usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&b1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&b1[8usize..]);
     (&mut ws)[1usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_le(&b1[16usize..]);
+    let u1: u64 = lowstar::endianness::load64_le(&b1[16usize..]);
     (&mut ws)[2usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_le(&b1[24usize..]);
+    let u2: u64 = lowstar::endianness::load64_le(&b1[24usize..]);
     (&mut ws)[3usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_le(&b1[32usize..]);
+    let u3: u64 = lowstar::endianness::load64_le(&b1[32usize..]);
     (&mut ws)[4usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_le(&b1[40usize..]);
+    let u4: u64 = lowstar::endianness::load64_le(&b1[40usize..]);
     (&mut ws)[5usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_le(&b1[48usize..]);
+    let u5: u64 = lowstar::endianness::load64_le(&b1[48usize..]);
     (&mut ws)[6usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_le(&b1[56usize..]);
+    let u6: u64 = lowstar::endianness::load64_le(&b1[56usize..]);
     (&mut ws)[7usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_le(&b1[64usize..]);
+    let u7: u64 = lowstar::endianness::load64_le(&b1[64usize..]);
     (&mut ws)[8usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_le(&b1[72usize..]);
+    let u8: u64 = lowstar::endianness::load64_le(&b1[72usize..]);
     (&mut ws)[9usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_le(&b1[80usize..]);
+    let u9: u64 = lowstar::endianness::load64_le(&b1[80usize..]);
     (&mut ws)[10usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_le(&b1[88usize..]);
+    let u10: u64 = lowstar::endianness::load64_le(&b1[88usize..]);
     (&mut ws)[11usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_le(&b1[96usize..]);
+    let u11: u64 = lowstar::endianness::load64_le(&b1[96usize..]);
     (&mut ws)[12usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_le(&b1[104usize..]);
+    let u12: u64 = lowstar::endianness::load64_le(&b1[104usize..]);
     (&mut ws)[13usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_le(&b1[112usize..]);
+    let u13: u64 = lowstar::endianness::load64_le(&b1[112usize..]);
     (&mut ws)[14usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_le(&b1[120usize..]);
+    let u14: u64 = lowstar::endianness::load64_le(&b1[120usize..]);
     (&mut ws)[15usize] = u14;
-    let u15: u64 = crate::lowstar::endianness::load64_le(&b1[128usize..]);
+    let u15: u64 = lowstar::endianness::load64_le(&b1[128usize..]);
     (&mut ws)[16usize] = u15;
-    let u16: u64 = crate::lowstar::endianness::load64_le(&b1[136usize..]);
+    let u16: u64 = lowstar::endianness::load64_le(&b1[136usize..]);
     (&mut ws)[17usize] = u16;
-    let u17: u64 = crate::lowstar::endianness::load64_le(&b1[144usize..]);
+    let u17: u64 = lowstar::endianness::load64_le(&b1[144usize..]);
     (&mut ws)[18usize] = u17;
-    let u18: u64 = crate::lowstar::endianness::load64_le(&b1[152usize..]);
+    let u18: u64 = lowstar::endianness::load64_le(&b1[152usize..]);
     (&mut ws)[19usize] = u18;
-    let u19: u64 = crate::lowstar::endianness::load64_le(&b1[160usize..]);
+    let u19: u64 = lowstar::endianness::load64_le(&b1[160usize..]);
     (&mut ws)[20usize] = u19;
-    let u20: u64 = crate::lowstar::endianness::load64_le(&b1[168usize..]);
+    let u20: u64 = lowstar::endianness::load64_le(&b1[168usize..]);
     (&mut ws)[21usize] = u20;
-    let u21: u64 = crate::lowstar::endianness::load64_le(&b1[176usize..]);
+    let u21: u64 = lowstar::endianness::load64_le(&b1[176usize..]);
     (&mut ws)[22usize] = u21;
-    let u22: u64 = crate::lowstar::endianness::load64_le(&b1[184usize..]);
+    let u22: u64 = lowstar::endianness::load64_le(&b1[184usize..]);
     (&mut ws)[23usize] = u22;
-    let u23: u64 = crate::lowstar::endianness::load64_le(&b1[192usize..]);
+    let u23: u64 = lowstar::endianness::load64_le(&b1[192usize..]);
     (&mut ws)[24usize] = u23;
-    let u24: u64 = crate::lowstar::endianness::load64_le(&b1[200usize..]);
+    let u24: u64 = lowstar::endianness::load64_le(&b1[200usize..]);
     (&mut ws)[25usize] = u24;
-    let u25: u64 = crate::lowstar::endianness::load64_le(&b1[208usize..]);
+    let u25: u64 = lowstar::endianness::load64_le(&b1[208usize..]);
     (&mut ws)[26usize] = u25;
-    let u26: u64 = crate::lowstar::endianness::load64_le(&b1[216usize..]);
+    let u26: u64 = lowstar::endianness::load64_le(&b1[216usize..]);
     (&mut ws)[27usize] = u26;
-    let u27: u64 = crate::lowstar::endianness::load64_le(&b1[224usize..]);
+    let u27: u64 = lowstar::endianness::load64_le(&b1[224usize..]);
     (&mut ws)[28usize] = u27;
-    let u28: u64 = crate::lowstar::endianness::load64_le(&b1[232usize..]);
+    let u28: u64 = lowstar::endianness::load64_le(&b1[232usize..]);
     (&mut ws)[29usize] = u28;
-    let u29: u64 = crate::lowstar::endianness::load64_le(&b1[240usize..]);
+    let u29: u64 = lowstar::endianness::load64_le(&b1[240usize..]);
     (&mut ws)[30usize] = u29;
-    let u30: u64 = crate::lowstar::endianness::load64_le(&b1[248usize..]);
+    let u30: u64 = lowstar::endianness::load64_le(&b1[248usize..]);
     (&mut ws)[31usize] = u30;
     krml::unroll_for!(25, "i", 0u32, 1u32, state[i as usize] ^= (&ws)[i as usize]);
     let mut b2: [u8; 256] = [0u8; 256usize];
@@ -3110,7 +3110,7 @@ shake128_squeeze_nblocks(state: &mut [u64], output: &mut [u8], outputByteLen: u3
             "i0",
             0u32,
             1u32,
-            crate::lowstar::endianness::store64_le(
+            lowstar::endianness::store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
                 (&ws)[i0 as usize]
             )

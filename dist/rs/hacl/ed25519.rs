@@ -6,10 +6,10 @@
 #![allow(const_item_mutation)]
 
 #[inline] fn fsum(out: &mut [u64], a: &[u64], b: &[u64])
-{ crate::hacl::bignum25519_51::fadd(out, a, b) }
+{ crate::bignum25519_51::fadd(out, a, b) }
 
 #[inline] fn fdifference(out: &mut [u64], a: &[u64], b: &[u64])
-{ crate::hacl::bignum25519_51::fsub(out, a, b) }
+{ crate::bignum25519_51::fsub(out, a, b) }
 
 pub(crate) fn reduce_513(a: &mut [u64])
 {
@@ -45,9 +45,9 @@ pub(crate) fn reduce_513(a: &mut [u64])
 
 #[inline] fn fmul(output: &mut [u64], input: &[u64], input2: &[u64])
 {
-    let tmp: [crate::fstar::uint128::uint128; 10] =
-        [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
-    crate::hacl::bignum25519_51::fmul(output, input, input2, &tmp)
+    let tmp: [fstar::uint128::uint128; 10] =
+        [fstar::uint128::uint64_to_uint128(0u64); 10usize];
+    crate::bignum25519_51::fmul(output, input, input2, &tmp)
 }
 
 #[inline] fn times_2(out: &mut [u64], a: &[u64])
@@ -93,32 +93,32 @@ pub(crate) fn reduce_513(a: &mut [u64])
 
 #[inline] fn fsquare(out: &mut [u64], a: &[u64])
 {
-    let tmp: [crate::fstar::uint128::uint128; 5] =
-        [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
-    crate::hacl::bignum25519_51::fsqr(out, a, &tmp)
+    let tmp: [fstar::uint128::uint128; 5] =
+        [fstar::uint128::uint64_to_uint128(0u64); 5usize];
+    crate::bignum25519_51::fsqr(out, a, &tmp)
 }
 
 #[inline] fn fsquare_times(output: &mut [u64], input: &[u64], count: u32)
 {
-    let tmp: [crate::fstar::uint128::uint128; 5] =
-        [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
-    crate::hacl::curve25519_51::fsquare_times(output, input, &tmp, count)
+    let tmp: [fstar::uint128::uint128; 5] =
+        [fstar::uint128::uint64_to_uint128(0u64); 5usize];
+    crate::curve25519_51::fsquare_times(output, input, &tmp, count)
 }
 
 #[inline] fn fsquare_times_inplace(output: &mut [u64], count: u32)
 {
-    let tmp: [crate::fstar::uint128::uint128; 5] =
-        [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
+    let tmp: [fstar::uint128::uint128; 5] =
+        [fstar::uint128::uint64_to_uint128(0u64); 5usize];
     let mut input: [u64; 5] = [0u64; 5usize];
     ((&mut input)[0usize..5usize]).copy_from_slice(&output[0usize..5usize]);
-    crate::hacl::curve25519_51::fsquare_times(output, &input, &tmp, count)
+    crate::curve25519_51::fsquare_times(output, &input, &tmp, count)
 }
 
 pub(crate) fn inverse(out: &mut [u64], a: &[u64])
 {
-    let tmp: [crate::fstar::uint128::uint128; 10] =
-        [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
-    crate::hacl::curve25519_51::finv(out, a, &tmp)
+    let tmp: [fstar::uint128::uint128; 10] =
+        [fstar::uint128::uint64_to_uint128(0u64); 10usize];
+    crate::curve25519_51::finv(out, a, &tmp)
 }
 
 #[inline] fn reduce(out: &mut [u64])
@@ -151,11 +151,11 @@ pub(crate) fn inverse(out: &mut [u64], a: &[u64])
     let f2: u64 = tmp2;
     let f3: u64 = tmp3;
     let f4: u64 = tmp4;
-    let m0: u64 = crate::fstar::uint64::gte_mask(f0, 0x7ffffffffffedu64);
-    let m1: u64 = crate::fstar::uint64::eq_mask(f1, 0x7ffffffffffffu64);
-    let m2: u64 = crate::fstar::uint64::eq_mask(f2, 0x7ffffffffffffu64);
-    let m3: u64 = crate::fstar::uint64::eq_mask(f3, 0x7ffffffffffffu64);
-    let m4: u64 = crate::fstar::uint64::eq_mask(f4, 0x7ffffffffffffu64);
+    let m0: u64 = fstar::uint64::gte_mask(f0, 0x7ffffffffffedu64);
+    let m1: u64 = fstar::uint64::eq_mask(f1, 0x7ffffffffffffu64);
+    let m2: u64 = fstar::uint64::eq_mask(f2, 0x7ffffffffffffu64);
+    let m3: u64 = fstar::uint64::eq_mask(f3, 0x7ffffffffffffu64);
+    let m4: u64 = fstar::uint64::eq_mask(f4, 0x7ffffffffffffu64);
     let mask: u64 = m0 & m1 & m2 & m3 & m4;
     let f0·: u64 = f0.wrapping_sub(mask & 0x7ffffffffffedu64);
     let f1·: u64 = f1.wrapping_sub(mask & 0x7ffffffffffffu64);
@@ -184,7 +184,7 @@ pub(crate) fn load_51(output: &mut [u64], input: &[u8])
         1u32,
         {
             let bj: (&[u8], &[u8]) = input.split_at(i.wrapping_mul(8u32) as usize);
-            let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
+            let u: u64 = lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = u64s.split_at_mut(0usize);
@@ -208,13 +208,13 @@ pub(crate) fn load_51(output: &mut [u64], input: &[u8])
 pub(crate) fn store_51(output: &mut [u8], input: &[u64])
 {
     let mut u64s: [u64; 4] = [0u64; 4usize];
-    crate::hacl::bignum25519_51::store_felem(&mut u64s, input);
+    crate::bignum25519_51::store_felem(&mut u64s, input);
     krml::unroll_for!(
         4,
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut output[i.wrapping_mul(8u32) as usize..],
             (&u64s)[i as usize]
         )
@@ -656,109 +656,109 @@ pub(crate) fn point_compress(z: &mut [u8], p: &[u64])
     let q2: u64 = z2;
     let q3: u64 = z3;
     let q4: u64 = z4;
-    let xy00: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q0, mu0);
-    let xy01: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q0, mu1);
-    let xy02: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q0, mu2);
-    let xy03: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q0, mu3);
-    let xy04: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q0, mu4);
-    let xy10: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q1, mu0);
-    let xy11: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q1, mu1);
-    let xy12: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q1, mu2);
-    let xy13: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q1, mu3);
-    let xy14: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q1, mu4);
-    let xy20: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q2, mu0);
-    let xy21: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q2, mu1);
-    let xy22: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q2, mu2);
-    let xy23: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q2, mu3);
-    let xy24: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q2, mu4);
-    let xy30: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q3, mu0);
-    let xy31: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q3, mu1);
-    let xy32: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q3, mu2);
-    let xy33: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q3, mu3);
-    let xy34: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q3, mu4);
-    let xy40: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q4, mu0);
-    let xy41: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q4, mu1);
-    let xy42: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q4, mu2);
-    let xy43: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q4, mu3);
-    let xy44: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(q4, mu4);
-    let z00: crate::fstar::uint128::uint128 = xy00;
-    let z10: crate::fstar::uint128::uint128 = crate::fstar::uint128::add_mod(xy01, xy10);
-    let z20: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy02, xy11), xy20);
-    let z30: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(
-            crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy03, xy12), xy21),
+    let xy00: fstar::uint128::uint128 = fstar::uint128::mul_wide(q0, mu0);
+    let xy01: fstar::uint128::uint128 = fstar::uint128::mul_wide(q0, mu1);
+    let xy02: fstar::uint128::uint128 = fstar::uint128::mul_wide(q0, mu2);
+    let xy03: fstar::uint128::uint128 = fstar::uint128::mul_wide(q0, mu3);
+    let xy04: fstar::uint128::uint128 = fstar::uint128::mul_wide(q0, mu4);
+    let xy10: fstar::uint128::uint128 = fstar::uint128::mul_wide(q1, mu0);
+    let xy11: fstar::uint128::uint128 = fstar::uint128::mul_wide(q1, mu1);
+    let xy12: fstar::uint128::uint128 = fstar::uint128::mul_wide(q1, mu2);
+    let xy13: fstar::uint128::uint128 = fstar::uint128::mul_wide(q1, mu3);
+    let xy14: fstar::uint128::uint128 = fstar::uint128::mul_wide(q1, mu4);
+    let xy20: fstar::uint128::uint128 = fstar::uint128::mul_wide(q2, mu0);
+    let xy21: fstar::uint128::uint128 = fstar::uint128::mul_wide(q2, mu1);
+    let xy22: fstar::uint128::uint128 = fstar::uint128::mul_wide(q2, mu2);
+    let xy23: fstar::uint128::uint128 = fstar::uint128::mul_wide(q2, mu3);
+    let xy24: fstar::uint128::uint128 = fstar::uint128::mul_wide(q2, mu4);
+    let xy30: fstar::uint128::uint128 = fstar::uint128::mul_wide(q3, mu0);
+    let xy31: fstar::uint128::uint128 = fstar::uint128::mul_wide(q3, mu1);
+    let xy32: fstar::uint128::uint128 = fstar::uint128::mul_wide(q3, mu2);
+    let xy33: fstar::uint128::uint128 = fstar::uint128::mul_wide(q3, mu3);
+    let xy34: fstar::uint128::uint128 = fstar::uint128::mul_wide(q3, mu4);
+    let xy40: fstar::uint128::uint128 = fstar::uint128::mul_wide(q4, mu0);
+    let xy41: fstar::uint128::uint128 = fstar::uint128::mul_wide(q4, mu1);
+    let xy42: fstar::uint128::uint128 = fstar::uint128::mul_wide(q4, mu2);
+    let xy43: fstar::uint128::uint128 = fstar::uint128::mul_wide(q4, mu3);
+    let xy44: fstar::uint128::uint128 = fstar::uint128::mul_wide(q4, mu4);
+    let z00: fstar::uint128::uint128 = xy00;
+    let z10: fstar::uint128::uint128 = fstar::uint128::add_mod(xy01, xy10);
+    let z20: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(fstar::uint128::add_mod(xy02, xy11), xy20);
+    let z30: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(fstar::uint128::add_mod(xy03, xy12), xy21),
             xy30
         );
-    let z40: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(
-            crate::fstar::uint128::add_mod(
-                crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy04, xy13), xy22),
+    let z40: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(fstar::uint128::add_mod(xy04, xy13), xy22),
                 xy31
             ),
             xy40
         );
-    let z5: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(
-            crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy14, xy23), xy32),
+    let z5: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(fstar::uint128::add_mod(xy14, xy23), xy32),
             xy41
         );
-    let z6: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy24, xy33), xy42);
-    let z7: crate::fstar::uint128::uint128 = crate::fstar::uint128::add_mod(xy34, xy43);
-    let z8: crate::fstar::uint128::uint128 = xy44;
-    let carry: crate::fstar::uint128::uint128 = crate::fstar::uint128::shift_right(z00, 56u32);
-    let c0: crate::fstar::uint128::uint128 = carry;
-    let carry0: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z10, c0), 56u32);
-    let c1: crate::fstar::uint128::uint128 = carry0;
-    let carry1: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z20, c1), 56u32);
-    let c2: crate::fstar::uint128::uint128 = carry1;
-    let carry2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z30, c2), 56u32);
-    let c3: crate::fstar::uint128::uint128 = carry2;
-    let carry3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z40, c3), 56u32);
+    let z6: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(fstar::uint128::add_mod(xy24, xy33), xy42);
+    let z7: fstar::uint128::uint128 = fstar::uint128::add_mod(xy34, xy43);
+    let z8: fstar::uint128::uint128 = xy44;
+    let carry: fstar::uint128::uint128 = fstar::uint128::shift_right(z00, 56u32);
+    let c0: fstar::uint128::uint128 = carry;
+    let carry0: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z10, c0), 56u32);
+    let c1: fstar::uint128::uint128 = carry0;
+    let carry1: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z20, c1), 56u32);
+    let c2: fstar::uint128::uint128 = carry1;
+    let carry2: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z30, c2), 56u32);
+    let c3: fstar::uint128::uint128 = carry2;
+    let carry3: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z40, c3), 56u32);
     let t10: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z40, c3))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z40, c3))
         &
         0xffffffffffffffu64;
-    let c4: crate::fstar::uint128::uint128 = carry3;
+    let c4: fstar::uint128::uint128 = carry3;
     let t41: u64 = t10;
-    let carry4: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z5, c4), 56u32);
+    let carry4: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z5, c4), 56u32);
     let t100: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z5, c4))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z5, c4))
         &
         0xffffffffffffffu64;
-    let c5: crate::fstar::uint128::uint128 = carry4;
+    let c5: fstar::uint128::uint128 = carry4;
     let t51: u64 = t100;
-    let carry5: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z6, c5), 56u32);
+    let carry5: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z6, c5), 56u32);
     let t101: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z6, c5))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z6, c5))
         &
         0xffffffffffffffu64;
-    let c6: crate::fstar::uint128::uint128 = carry5;
+    let c6: fstar::uint128::uint128 = carry5;
     let t61: u64 = t101;
-    let carry6: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z7, c6), 56u32);
+    let carry6: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z7, c6), 56u32);
     let t102: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z7, c6))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z7, c6))
         &
         0xffffffffffffffu64;
-    let c7: crate::fstar::uint128::uint128 = carry6;
+    let c7: fstar::uint128::uint128 = carry6;
     let t71: u64 = t102;
-    let carry7: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z8, c7), 56u32);
+    let carry7: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z8, c7), 56u32);
     let t103: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z8, c7))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z8, c7))
         &
         0xffffffffffffffu64;
-    let c8: crate::fstar::uint128::uint128 = carry7;
+    let c8: fstar::uint128::uint128 = carry7;
     let t81: u64 = t103;
-    let t91: u64 = crate::fstar::uint128::uint128_to_uint64(c8);
+    let t91: u64 = fstar::uint128::uint128_to_uint64(c8);
     let qmu4·: u64 = t41;
     let qmu5·: u64 = t51;
     let qmu6·: u64 = t61;
@@ -790,63 +790,63 @@ pub(crate) fn point_compress(z: &mut [u8], p: &[u64])
     let r2: u64 = t2;
     let r3: u64 = t3;
     let r4: u64 = t4 & 0xffffffffffu64;
-    let xy000: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv0, m00);
-    let xy010: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv0, m10);
-    let xy020: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv0, m20);
-    let xy030: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv0, m30);
-    let xy040: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv0, m40);
-    let xy100: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv1, m00);
-    let xy110: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv1, m10);
-    let xy120: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv1, m20);
-    let xy130: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv1, m30);
-    let xy200: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv2, m00);
-    let xy210: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv2, m10);
-    let xy220: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv2, m20);
-    let xy300: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv3, m00);
-    let xy310: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv3, m10);
-    let xy400: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(qdiv4, m00);
-    let carry8: crate::fstar::uint128::uint128 = crate::fstar::uint128::shift_right(xy000, 56u32);
-    let t104: u64 = crate::fstar::uint128::uint128_to_uint64(xy000) & 0xffffffffffffffu64;
-    let c00: crate::fstar::uint128::uint128 = carry8;
+    let xy000: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv0, m00);
+    let xy010: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv0, m10);
+    let xy020: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv0, m20);
+    let xy030: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv0, m30);
+    let xy040: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv0, m40);
+    let xy100: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv1, m00);
+    let xy110: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv1, m10);
+    let xy120: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv1, m20);
+    let xy130: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv1, m30);
+    let xy200: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv2, m00);
+    let xy210: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv2, m10);
+    let xy220: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv2, m20);
+    let xy300: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv3, m00);
+    let xy310: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv3, m10);
+    let xy400: fstar::uint128::uint128 = fstar::uint128::mul_wide(qdiv4, m00);
+    let carry8: fstar::uint128::uint128 = fstar::uint128::shift_right(xy000, 56u32);
+    let t104: u64 = fstar::uint128::uint128_to_uint64(xy000) & 0xffffffffffffffu64;
+    let c00: fstar::uint128::uint128 = carry8;
     let t01: u64 = t104;
-    let carry9: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(
-            crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy010, xy100), c00),
+    let carry9: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(
+            fstar::uint128::add_mod(fstar::uint128::add_mod(xy010, xy100), c00),
             56u32
         );
     let t105: u64 =
-        crate::fstar::uint128::uint128_to_uint64(
-            crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy010, xy100), c00)
+        fstar::uint128::uint128_to_uint64(
+            fstar::uint128::add_mod(fstar::uint128::add_mod(xy010, xy100), c00)
         )
         &
         0xffffffffffffffu64;
-    let c10: crate::fstar::uint128::uint128 = carry9;
+    let c10: fstar::uint128::uint128 = carry9;
     let t11: u64 = t105;
-    let carry10: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(
-            crate::fstar::uint128::add_mod(
-                crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy020, xy110), xy200),
+    let carry10: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(fstar::uint128::add_mod(xy020, xy110), xy200),
                 c10
             ),
             56u32
         );
     let t106: u64 =
-        crate::fstar::uint128::uint128_to_uint64(
-            crate::fstar::uint128::add_mod(
-                crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy020, xy110), xy200),
+        fstar::uint128::uint128_to_uint64(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(fstar::uint128::add_mod(xy020, xy110), xy200),
                 c10
             )
         )
         &
         0xffffffffffffffu64;
-    let c20: crate::fstar::uint128::uint128 = carry10;
+    let c20: fstar::uint128::uint128 = carry10;
     let t21: u64 = t106;
-    let carry11: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(
-            crate::fstar::uint128::add_mod(
-                crate::fstar::uint128::add_mod(
-                    crate::fstar::uint128::add_mod(
-                        crate::fstar::uint128::add_mod(xy030, xy120),
+    let carry11: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(
+                    fstar::uint128::add_mod(
+                        fstar::uint128::add_mod(xy030, xy120),
                         xy210
                     ),
                     xy300
@@ -856,11 +856,11 @@ pub(crate) fn point_compress(z: &mut [u8], p: &[u64])
             56u32
         );
     let t107: u64 =
-        crate::fstar::uint128::uint128_to_uint64(
-            crate::fstar::uint128::add_mod(
-                crate::fstar::uint128::add_mod(
-                    crate::fstar::uint128::add_mod(
-                        crate::fstar::uint128::add_mod(xy030, xy120),
+        fstar::uint128::uint128_to_uint64(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(
+                    fstar::uint128::add_mod(
+                        fstar::uint128::add_mod(xy030, xy120),
                         xy210
                     ),
                     xy300
@@ -870,15 +870,15 @@ pub(crate) fn point_compress(z: &mut [u8], p: &[u64])
         )
         &
         0xffffffffffffffu64;
-    let c30: crate::fstar::uint128::uint128 = carry11;
+    let c30: fstar::uint128::uint128 = carry11;
     let t31: u64 = t107;
     let t410: u64 =
-        crate::fstar::uint128::uint128_to_uint64(
-            crate::fstar::uint128::add_mod(
-                crate::fstar::uint128::add_mod(
-                    crate::fstar::uint128::add_mod(
-                        crate::fstar::uint128::add_mod(
-                            crate::fstar::uint128::add_mod(xy040, xy130),
+        fstar::uint128::uint128_to_uint64(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(
+                    fstar::uint128::add_mod(
+                        fstar::uint128::add_mod(
+                            fstar::uint128::add_mod(xy040, xy130),
                             xy220
                         ),
                         xy310
@@ -990,126 +990,126 @@ pub(crate) fn point_compress(z: &mut [u8], p: &[u64])
     let y2: u64 = y[2usize];
     let y3: u64 = y[3usize];
     let y4: u64 = y[4usize];
-    let xy00: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x0, y0);
-    let xy01: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x0, y1);
-    let xy02: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x0, y2);
-    let xy03: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x0, y3);
-    let xy04: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x0, y4);
-    let xy10: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x1, y0);
-    let xy11: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x1, y1);
-    let xy12: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x1, y2);
-    let xy13: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x1, y3);
-    let xy14: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x1, y4);
-    let xy20: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x2, y0);
-    let xy21: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x2, y1);
-    let xy22: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x2, y2);
-    let xy23: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x2, y3);
-    let xy24: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x2, y4);
-    let xy30: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x3, y0);
-    let xy31: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x3, y1);
-    let xy32: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x3, y2);
-    let xy33: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x3, y3);
-    let xy34: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x3, y4);
-    let xy40: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x4, y0);
-    let xy41: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x4, y1);
-    let xy42: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x4, y2);
-    let xy43: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x4, y3);
-    let xy44: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(x4, y4);
-    let z0: crate::fstar::uint128::uint128 = xy00;
-    let z1: crate::fstar::uint128::uint128 = crate::fstar::uint128::add_mod(xy01, xy10);
-    let z2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy02, xy11), xy20);
-    let z3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(
-            crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy03, xy12), xy21),
+    let xy00: fstar::uint128::uint128 = fstar::uint128::mul_wide(x0, y0);
+    let xy01: fstar::uint128::uint128 = fstar::uint128::mul_wide(x0, y1);
+    let xy02: fstar::uint128::uint128 = fstar::uint128::mul_wide(x0, y2);
+    let xy03: fstar::uint128::uint128 = fstar::uint128::mul_wide(x0, y3);
+    let xy04: fstar::uint128::uint128 = fstar::uint128::mul_wide(x0, y4);
+    let xy10: fstar::uint128::uint128 = fstar::uint128::mul_wide(x1, y0);
+    let xy11: fstar::uint128::uint128 = fstar::uint128::mul_wide(x1, y1);
+    let xy12: fstar::uint128::uint128 = fstar::uint128::mul_wide(x1, y2);
+    let xy13: fstar::uint128::uint128 = fstar::uint128::mul_wide(x1, y3);
+    let xy14: fstar::uint128::uint128 = fstar::uint128::mul_wide(x1, y4);
+    let xy20: fstar::uint128::uint128 = fstar::uint128::mul_wide(x2, y0);
+    let xy21: fstar::uint128::uint128 = fstar::uint128::mul_wide(x2, y1);
+    let xy22: fstar::uint128::uint128 = fstar::uint128::mul_wide(x2, y2);
+    let xy23: fstar::uint128::uint128 = fstar::uint128::mul_wide(x2, y3);
+    let xy24: fstar::uint128::uint128 = fstar::uint128::mul_wide(x2, y4);
+    let xy30: fstar::uint128::uint128 = fstar::uint128::mul_wide(x3, y0);
+    let xy31: fstar::uint128::uint128 = fstar::uint128::mul_wide(x3, y1);
+    let xy32: fstar::uint128::uint128 = fstar::uint128::mul_wide(x3, y2);
+    let xy33: fstar::uint128::uint128 = fstar::uint128::mul_wide(x3, y3);
+    let xy34: fstar::uint128::uint128 = fstar::uint128::mul_wide(x3, y4);
+    let xy40: fstar::uint128::uint128 = fstar::uint128::mul_wide(x4, y0);
+    let xy41: fstar::uint128::uint128 = fstar::uint128::mul_wide(x4, y1);
+    let xy42: fstar::uint128::uint128 = fstar::uint128::mul_wide(x4, y2);
+    let xy43: fstar::uint128::uint128 = fstar::uint128::mul_wide(x4, y3);
+    let xy44: fstar::uint128::uint128 = fstar::uint128::mul_wide(x4, y4);
+    let z0: fstar::uint128::uint128 = xy00;
+    let z1: fstar::uint128::uint128 = fstar::uint128::add_mod(xy01, xy10);
+    let z2: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(fstar::uint128::add_mod(xy02, xy11), xy20);
+    let z3: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(fstar::uint128::add_mod(xy03, xy12), xy21),
             xy30
         );
-    let z4: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(
-            crate::fstar::uint128::add_mod(
-                crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy04, xy13), xy22),
+    let z4: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(fstar::uint128::add_mod(xy04, xy13), xy22),
                 xy31
             ),
             xy40
         );
-    let z5: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(
-            crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy14, xy23), xy32),
+    let z5: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(fstar::uint128::add_mod(xy14, xy23), xy32),
             xy41
         );
-    let z6: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(crate::fstar::uint128::add_mod(xy24, xy33), xy42);
-    let z7: crate::fstar::uint128::uint128 = crate::fstar::uint128::add_mod(xy34, xy43);
-    let z8: crate::fstar::uint128::uint128 = xy44;
-    let carry: crate::fstar::uint128::uint128 = crate::fstar::uint128::shift_right(z0, 56u32);
-    let t: u64 = crate::fstar::uint128::uint128_to_uint64(z0) & 0xffffffffffffffu64;
-    let c0: crate::fstar::uint128::uint128 = carry;
+    let z6: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(fstar::uint128::add_mod(xy24, xy33), xy42);
+    let z7: fstar::uint128::uint128 = fstar::uint128::add_mod(xy34, xy43);
+    let z8: fstar::uint128::uint128 = xy44;
+    let carry: fstar::uint128::uint128 = fstar::uint128::shift_right(z0, 56u32);
+    let t: u64 = fstar::uint128::uint128_to_uint64(z0) & 0xffffffffffffffu64;
+    let c0: fstar::uint128::uint128 = carry;
     let t0: u64 = t;
-    let carry0: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z1, c0), 56u32);
+    let carry0: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z1, c0), 56u32);
     let t1: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z1, c0))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z1, c0))
         &
         0xffffffffffffffu64;
-    let c1: crate::fstar::uint128::uint128 = carry0;
+    let c1: fstar::uint128::uint128 = carry0;
     let t10: u64 = t1;
-    let carry1: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z2, c1), 56u32);
+    let carry1: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z2, c1), 56u32);
     let t2: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z2, c1))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z2, c1))
         &
         0xffffffffffffffu64;
-    let c2: crate::fstar::uint128::uint128 = carry1;
+    let c2: fstar::uint128::uint128 = carry1;
     let t20: u64 = t2;
-    let carry2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z3, c2), 56u32);
+    let carry2: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z3, c2), 56u32);
     let t3: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z3, c2))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z3, c2))
         &
         0xffffffffffffffu64;
-    let c3: crate::fstar::uint128::uint128 = carry2;
+    let c3: fstar::uint128::uint128 = carry2;
     let t30: u64 = t3;
-    let carry3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z4, c3), 56u32);
+    let carry3: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z4, c3), 56u32);
     let t4: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z4, c3))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z4, c3))
         &
         0xffffffffffffffu64;
-    let c4: crate::fstar::uint128::uint128 = carry3;
+    let c4: fstar::uint128::uint128 = carry3;
     let t40: u64 = t4;
-    let carry4: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z5, c4), 56u32);
+    let carry4: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z5, c4), 56u32);
     let t5: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z5, c4))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z5, c4))
         &
         0xffffffffffffffu64;
-    let c5: crate::fstar::uint128::uint128 = carry4;
+    let c5: fstar::uint128::uint128 = carry4;
     let t50: u64 = t5;
-    let carry5: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z6, c5), 56u32);
+    let carry5: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z6, c5), 56u32);
     let t6: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z6, c5))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z6, c5))
         &
         0xffffffffffffffu64;
-    let c6: crate::fstar::uint128::uint128 = carry5;
+    let c6: fstar::uint128::uint128 = carry5;
     let t60: u64 = t6;
-    let carry6: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z7, c6), 56u32);
+    let carry6: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z7, c6), 56u32);
     let t7: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z7, c6))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z7, c6))
         &
         0xffffffffffffffu64;
-    let c7: crate::fstar::uint128::uint128 = carry6;
+    let c7: fstar::uint128::uint128 = carry6;
     let t70: u64 = t7;
-    let carry7: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::shift_right(crate::fstar::uint128::add_mod(z8, c7), 56u32);
+    let carry7: fstar::uint128::uint128 =
+        fstar::uint128::shift_right(fstar::uint128::add_mod(z8, c7), 56u32);
     let t8: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::add_mod(z8, c7))
+        fstar::uint128::uint128_to_uint64(fstar::uint128::add_mod(z8, c7))
         &
         0xffffffffffffffu64;
-    let c8: crate::fstar::uint128::uint128 = carry7;
+    let c8: fstar::uint128::uint128 = carry7;
     let t80: u64 = t8;
-    let t9: u64 = crate::fstar::uint128::uint128_to_uint64(c8);
+    let t9: u64 = fstar::uint128::uint128_to_uint64(c8);
     let z00: u64 = t0;
     let z10: u64 = t10;
     let z20: u64 = t20;
@@ -1313,7 +1313,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
         1u32,
         {
             let bj: (&[u8], &[u8]) = scalar.split_at(i.wrapping_mul(8u32) as usize);
-            let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
+            let u: u64 = lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = bscalar.split_at_mut(0usize);
@@ -1326,7 +1326,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
     let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(20usize);
     make_point_inf(t1.0);
     (t1.1[0usize..20usize]).copy_from_slice(&q[0usize..20usize]);
-    crate::lowstar::ignore::ignore::<&[u64]>(&table);
+    lowstar::ignore::ignore::<&[u64]>(&table);
     krml::unroll_for!(
         7,
         "i",
@@ -1375,8 +1375,8 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
             }
         );
         let k: u32 = 256u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-        let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, &bscalar, k, 4u32);
-        crate::lowstar::ignore::ignore::<&[u64]>(&table);
+        let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(4u32, &bscalar, k, 4u32);
+        lowstar::ignore::ignore::<&[u64]>(&table);
         ((&mut tmp0)[0usize..20usize]).copy_from_slice(
             &(&(&table)[0usize..] as &[u64])[0usize..20usize]
         );
@@ -1386,7 +1386,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
             0u32,
             1u32,
             {
-                let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
+                let c: u64 = fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
                 let res_j: (&[u64], &[u64]) =
                     table.split_at(i0.wrapping_add(1u32).wrapping_mul(20u32) as usize);
                 krml::unroll_for!(
@@ -1417,7 +1417,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
         0u32,
         1u32,
         {
-            let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i.wrapping_add(1u32) as u64);
+            let c: u64 = fstar::uint64::eq_mask(bits_l, i.wrapping_add(1u32) as u64);
             let res_j: (&[u64], &[u64]) =
                 table.split_at(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
             krml::unroll_for!(
@@ -1445,7 +1445,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
         1u32,
         {
             let bj: (&[u8], &[u8]) = scalar.split_at(i.wrapping_mul(8u32) as usize);
-            let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
+            let u: u64 = lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = bscalar.split_at_mut(0usize);
@@ -1519,12 +1519,12 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
                 }
             );
             let k: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-            let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
-            crate::lowstar::ignore::ignore::<&[u64]>(
-                &crate::hacl::ed25519_precomptable::precomp_g_pow2_192_table_w4
+            let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
+            lowstar::ignore::ignore::<&[u64]>(
+                &crate::ed25519_precomptable::precomp_g_pow2_192_table_w4
             );
             precomp_get_consttime(
-                &crate::hacl::ed25519_precomptable::precomp_g_pow2_192_table_w4,
+                &crate::ed25519_precomptable::precomp_g_pow2_192_table_w4,
                 bits_l,
                 &mut tmp
             );
@@ -1532,12 +1532,12 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
             ((&mut p_copy)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
             point_add(out, &p_copy, &tmp);
             let k0: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-            let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.0, k0, 4u32);
-            crate::lowstar::ignore::ignore::<&[u64]>(
-                &crate::hacl::ed25519_precomptable::precomp_g_pow2_128_table_w4
+            let bits_l0: u64 = crate::bignum_base::bn_get_bits_u64(1u32, r4.0, k0, 4u32);
+            lowstar::ignore::ignore::<&[u64]>(
+                &crate::ed25519_precomptable::precomp_g_pow2_128_table_w4
             );
             precomp_get_consttime(
-                &crate::hacl::ed25519_precomptable::precomp_g_pow2_128_table_w4,
+                &crate::ed25519_precomptable::precomp_g_pow2_128_table_w4,
                 bits_l0,
                 &mut tmp
             );
@@ -1545,12 +1545,12 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
             ((&mut p_copy0)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
             point_add(out, &p_copy0, &tmp);
             let k1: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-            let bits_l1: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r3.0, k1, 4u32);
-            crate::lowstar::ignore::ignore::<&[u64]>(
-                &crate::hacl::ed25519_precomptable::precomp_g_pow2_64_table_w4
+            let bits_l1: u64 = crate::bignum_base::bn_get_bits_u64(1u32, r3.0, k1, 4u32);
+            lowstar::ignore::ignore::<&[u64]>(
+                &crate::ed25519_precomptable::precomp_g_pow2_64_table_w4
             );
             precomp_get_consttime(
-                &crate::hacl::ed25519_precomptable::precomp_g_pow2_64_table_w4,
+                &crate::ed25519_precomptable::precomp_g_pow2_64_table_w4,
                 bits_l1,
                 &mut tmp
             );
@@ -1558,12 +1558,12 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
             ((&mut p_copy1)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
             point_add(out, &p_copy1, &tmp);
             let k2: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
-            let bits_l2: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r2.0, k2, 4u32);
-            crate::lowstar::ignore::ignore::<&[u64]>(
-                &crate::hacl::ed25519_precomptable::precomp_basepoint_table_w4
+            let bits_l2: u64 = crate::bignum_base::bn_get_bits_u64(1u32, r2.0, k2, 4u32);
+            lowstar::ignore::ignore::<&[u64]>(
+                &crate::ed25519_precomptable::precomp_basepoint_table_w4
             );
             precomp_get_consttime(
-                &crate::hacl::ed25519_precomptable::precomp_basepoint_table_w4,
+                &crate::ed25519_precomptable::precomp_basepoint_table_w4,
                 bits_l2,
                 &mut tmp
             );
@@ -1572,9 +1572,9 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
             point_add(out, &p_copy2, &tmp)
         }
     );
-    crate::lowstar::ignore::ignore::<&[u64]>(&q2);
-    crate::lowstar::ignore::ignore::<&[u64]>(&q3);
-    crate::lowstar::ignore::ignore::<&[u64]>(&q4)
+    lowstar::ignore::ignore::<&[u64]>(&q2);
+    lowstar::ignore::ignore::<&[u64]>(&q3);
+    lowstar::ignore::ignore::<&[u64]>(&q4)
 }
 
 #[inline] fn point_mul_g_double_vartime(
@@ -1619,7 +1619,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
         1u32,
         {
             let bj: (&[u8], &[u8]) = scalar1.split_at(i.wrapping_mul(8u32) as usize);
-            let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
+            let u: u64 = lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = bscalar2.0.split_at_mut(0usize);
@@ -1633,7 +1633,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
         1u32,
         {
             let bj: (&[u8], &[u8]) = scalar2.split_at(i.wrapping_mul(8u32) as usize);
-            let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
+            let u: u64 = lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = bscalar2.1.split_at_mut(0usize);
@@ -1646,7 +1646,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
     let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(20usize);
     make_point_inf(t1.0);
     (t1.1[0usize..20usize]).copy_from_slice(&q2[0usize..20usize]);
-    crate::lowstar::ignore::ignore::<&[u64]>(&table2);
+    lowstar::ignore::ignore::<&[u64]>(&table2);
     krml::unroll_for!(
         15,
         "i",
@@ -1683,17 +1683,17 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
     );
     let mut tmp10: [u64; 20] = [0u64; 20usize];
     let i: u32 = 255u32;
-    let bits_c: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, bscalar2.0, i, 5u32);
+    let bits_c: u64 = crate::bignum_base::bn_get_bits_u64(4u32, bscalar2.0, i, 5u32);
     let bits_l32: u32 = bits_c as u32;
     let a_bits_l: &[u64] =
-        &(&crate::hacl::ed25519_precomptable::precomp_basepoint_table_w5)[bits_l32.wrapping_mul(
+        &(&crate::ed25519_precomptable::precomp_basepoint_table_w5)[bits_l32.wrapping_mul(
             20u32
         )
         as
         usize..];
     (out[0usize..20usize]).copy_from_slice(&a_bits_l[0usize..20usize]);
     let i0: u32 = 255u32;
-    let bits_c0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, bscalar2.1, i0, 5u32);
+    let bits_c0: u64 = crate::bignum_base::bn_get_bits_u64(4u32, bscalar2.1, i0, 5u32);
     let bits_l320: u32 = bits_c0 as u32;
     let a_bits_l0: (&[u64], &[u64]) = table2.split_at(bits_l320.wrapping_mul(20u32) as usize);
     ((&mut tmp10)[0usize..20usize]).copy_from_slice(&a_bits_l0.1[0usize..20usize]);
@@ -1715,8 +1715,8 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
             }
         );
         let k: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
-        let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, bscalar2.1, k, 5u32);
-        crate::lowstar::ignore::ignore::<&[u64]>(&table2);
+        let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(4u32, bscalar2.1, k, 5u32);
+        lowstar::ignore::ignore::<&[u64]>(&table2);
         let bits_l321: u32 = bits_l as u32;
         let a_bits_l1: (&[u64], &[u64]) = table2.split_at(bits_l321.wrapping_mul(20u32) as usize);
         ((&mut tmp11)[0usize..20usize]).copy_from_slice(&a_bits_l1.1[0usize..20usize]);
@@ -1724,13 +1724,13 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
         ((&mut p_copy0)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
         point_add(out, &p_copy0, &tmp11);
         let k0: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
-        let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, bscalar2.0, k0, 5u32);
-        crate::lowstar::ignore::ignore::<&[u64]>(
-            &crate::hacl::ed25519_precomptable::precomp_basepoint_table_w5
+        let bits_l0: u64 = crate::bignum_base::bn_get_bits_u64(4u32, bscalar2.0, k0, 5u32);
+        lowstar::ignore::ignore::<&[u64]>(
+            &crate::ed25519_precomptable::precomp_basepoint_table_w5
         );
         let bits_l322: u32 = bits_l0 as u32;
         let a_bits_l2: &[u64] =
-            &(&crate::hacl::ed25519_precomptable::precomp_basepoint_table_w5)[bits_l322.wrapping_mul(
+            &(&crate::ed25519_precomptable::precomp_basepoint_table_w5)[bits_l322.wrapping_mul(
                 20u32
             )
             as
@@ -1763,52 +1763,52 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
     let b4: u64 = b[4usize];
     let b4·: u32 = b4 as u32;
     let b8: (&mut [u8], &mut [u8]) = out.split_at_mut(0usize);
-    crate::lowstar::endianness::store64_le(b8.1, b0);
+    lowstar::endianness::store64_le(b8.1, b0);
     let b80: (&mut [u8], &mut [u8]) = b8.1.split_at_mut(7usize);
-    crate::lowstar::endianness::store64_le(b80.1, b1);
+    lowstar::endianness::store64_le(b80.1, b1);
     let b81: (&mut [u8], &mut [u8]) = b80.1.split_at_mut(7usize);
-    crate::lowstar::endianness::store64_le(b81.1, b2);
+    lowstar::endianness::store64_le(b81.1, b2);
     let b82: (&mut [u8], &mut [u8]) = b81.1.split_at_mut(7usize);
-    crate::lowstar::endianness::store64_le(b82.1, b3);
-    crate::lowstar::endianness::store32_le(&mut out[28usize..], b4·)
+    lowstar::endianness::store64_le(b82.1, b3);
+    lowstar::endianness::store32_le(&mut out[28usize..], b4·)
 }
 
 #[inline] fn load_64_bytes(out: &mut [u64], b: &[u8])
 {
     let b8: (&[u8], &[u8]) = b.split_at(0usize);
-    let u: u64 = crate::lowstar::endianness::load64_le(b8.1);
+    let u: u64 = lowstar::endianness::load64_le(b8.1);
     let z: u64 = u;
     let b0: u64 = z & 0xffffffffffffffu64;
     let b80: (&[u8], &[u8]) = b8.1.split_at(7usize);
-    let u0: u64 = crate::lowstar::endianness::load64_le(b80.1);
+    let u0: u64 = lowstar::endianness::load64_le(b80.1);
     let z0: u64 = u0;
     let b1: u64 = z0 & 0xffffffffffffffu64;
     let b81: (&[u8], &[u8]) = b80.1.split_at(7usize);
-    let u1: u64 = crate::lowstar::endianness::load64_le(b81.1);
+    let u1: u64 = lowstar::endianness::load64_le(b81.1);
     let z1: u64 = u1;
     let b2: u64 = z1 & 0xffffffffffffffu64;
     let b82: (&[u8], &[u8]) = b81.1.split_at(7usize);
-    let u2: u64 = crate::lowstar::endianness::load64_le(b82.1);
+    let u2: u64 = lowstar::endianness::load64_le(b82.1);
     let z2: u64 = u2;
     let b3: u64 = z2 & 0xffffffffffffffu64;
     let b83: (&[u8], &[u8]) = b82.1.split_at(7usize);
-    let u3: u64 = crate::lowstar::endianness::load64_le(b83.1);
+    let u3: u64 = lowstar::endianness::load64_le(b83.1);
     let z3: u64 = u3;
     let b4: u64 = z3 & 0xffffffffffffffu64;
     let b84: (&[u8], &[u8]) = b83.1.split_at(7usize);
-    let u4: u64 = crate::lowstar::endianness::load64_le(b84.1);
+    let u4: u64 = lowstar::endianness::load64_le(b84.1);
     let z4: u64 = u4;
     let b5: u64 = z4 & 0xffffffffffffffu64;
     let b85: (&[u8], &[u8]) = b84.1.split_at(7usize);
-    let u5: u64 = crate::lowstar::endianness::load64_le(b85.1);
+    let u5: u64 = lowstar::endianness::load64_le(b85.1);
     let z5: u64 = u5;
     let b6: u64 = z5 & 0xffffffffffffffu64;
     let b86: (&[u8], &[u8]) = b85.1.split_at(7usize);
-    let u6: u64 = crate::lowstar::endianness::load64_le(b86.1);
+    let u6: u64 = lowstar::endianness::load64_le(b86.1);
     let z6: u64 = u6;
     let b7: u64 = z6 & 0xffffffffffffffu64;
     let b87: (&[u8], &[u8]) = b86.1.split_at(7usize);
-    let u7: u64 = crate::lowstar::endianness::load64_le(b87.1);
+    let u7: u64 = lowstar::endianness::load64_le(b87.1);
     let z7: u64 = u7;
     let b88: u64 = z7 & 0xffffffffffffffu64;
     let b63: u8 = b[63usize];
@@ -1828,22 +1828,22 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
 #[inline] fn load_32_bytes(out: &mut [u64], b: &[u8])
 {
     let b8: (&[u8], &[u8]) = b.split_at(0usize);
-    let u: u64 = crate::lowstar::endianness::load64_le(b8.1);
+    let u: u64 = lowstar::endianness::load64_le(b8.1);
     let z: u64 = u;
     let b0: u64 = z & 0xffffffffffffffu64;
     let b80: (&[u8], &[u8]) = b8.1.split_at(7usize);
-    let u0: u64 = crate::lowstar::endianness::load64_le(b80.1);
+    let u0: u64 = lowstar::endianness::load64_le(b80.1);
     let z0: u64 = u0;
     let b1: u64 = z0 & 0xffffffffffffffu64;
     let b81: (&[u8], &[u8]) = b80.1.split_at(7usize);
-    let u1: u64 = crate::lowstar::endianness::load64_le(b81.1);
+    let u1: u64 = lowstar::endianness::load64_le(b81.1);
     let z1: u64 = u1;
     let b2: u64 = z1 & 0xffffffffffffffu64;
     let b82: (&[u8], &[u8]) = b81.1.split_at(7usize);
-    let u2: u64 = crate::lowstar::endianness::load64_le(b82.1);
+    let u2: u64 = lowstar::endianness::load64_le(b82.1);
     let z2: u64 = u2;
     let b3: u64 = z2 & 0xffffffffffffffu64;
-    let u3: u32 = crate::lowstar::endianness::load32_le(&b[28usize..]);
+    let u3: u32 = lowstar::endianness::load32_le(&b[28usize..]);
     let b4: u32 = u3;
     let b41: u64 = b4 as u64;
     out[0usize] = b0;
@@ -1857,19 +1857,19 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
 {
     let buf: [u8; 128] = [0u8; 128usize];
     let mut block_state: [u64; 8] = [0u64; 8usize];
-    crate::hacl::hash_sha2::sha512_init(&mut block_state);
-    let s: crate::hacl::streaming_types::state_64 =
-        crate::hacl::streaming_types::state_64
+    crate::hash_sha2::sha512_init(&mut block_state);
+    let s: crate::streaming_types::state_64 =
+        crate::streaming_types::state_64
         { block_state: Box::new(block_state), buf: Box::new(buf), total_len: 0u32 as u64 };
-    let mut p: [crate::hacl::streaming_types::state_64; 1] = [s; 1usize];
-    let st: &mut [crate::hacl::streaming_types::state_64] = &mut p;
-    let err0: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, prefix, 32u32);
-    let err1: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, input, len);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err0);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err1);
-    crate::hacl::hash_sha2::digest_512(st, hash)
+    let mut p: [crate::streaming_types::state_64; 1] = [s; 1usize];
+    let st: &mut [crate::streaming_types::state_64] = &mut p;
+    let err0: crate::streaming_types::error_code =
+        crate::hash_sha2::update_512(st, prefix, 32u32);
+    let err1: crate::streaming_types::error_code =
+        crate::hash_sha2::update_512(st, input, len);
+    lowstar::ignore::ignore::<crate::streaming_types::error_code>(err0);
+    lowstar::ignore::ignore::<crate::streaming_types::error_code>(err1);
+    crate::hash_sha2::digest_512(st, hash)
 }
 
 #[inline] fn sha512_pre_pre2_msg(
@@ -1882,22 +1882,22 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
 {
     let buf: [u8; 128] = [0u8; 128usize];
     let mut block_state: [u64; 8] = [0u64; 8usize];
-    crate::hacl::hash_sha2::sha512_init(&mut block_state);
-    let s: crate::hacl::streaming_types::state_64 =
-        crate::hacl::streaming_types::state_64
+    crate::hash_sha2::sha512_init(&mut block_state);
+    let s: crate::streaming_types::state_64 =
+        crate::streaming_types::state_64
         { block_state: Box::new(block_state), buf: Box::new(buf), total_len: 0u32 as u64 };
-    let mut p: [crate::hacl::streaming_types::state_64; 1] = [s; 1usize];
-    let st: &mut [crate::hacl::streaming_types::state_64] = &mut p;
-    let err0: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, prefix, 32u32);
-    let err1: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, prefix2, 32u32);
-    let err2: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, input, len);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err0);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err1);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err2);
-    crate::hacl::hash_sha2::digest_512(st, hash)
+    let mut p: [crate::streaming_types::state_64; 1] = [s; 1usize];
+    let st: &mut [crate::streaming_types::state_64] = &mut p;
+    let err0: crate::streaming_types::error_code =
+        crate::hash_sha2::update_512(st, prefix, 32u32);
+    let err1: crate::streaming_types::error_code =
+        crate::hash_sha2::update_512(st, prefix2, 32u32);
+    let err2: crate::streaming_types::error_code =
+        crate::hash_sha2::update_512(st, input, len);
+    lowstar::ignore::ignore::<crate::streaming_types::error_code>(err0);
+    lowstar::ignore::ignore::<crate::streaming_types::error_code>(err1);
+    lowstar::ignore::ignore::<crate::streaming_types::error_code>(err2);
+    crate::hash_sha2::digest_512(st, hash)
 }
 
 #[inline] fn sha512_modq_pre(out: &mut [u64], prefix: &[u8], len: u32, input: &[u8])
@@ -1933,7 +1933,7 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u8], q: &[u64])
 
 #[inline] fn secret_expand(expanded: &mut [u8], secret: &[u8])
 {
-    crate::hacl::hash_sha2::hash_512(expanded, secret, 32u32);
+    crate::hash_sha2::hash_512(expanded, secret, 32u32);
     let h_low: (&mut [u8], &mut [u8]) = expanded.split_at_mut(0usize);
     let h_low0: u8 = h_low.1[0usize];
     let h_low31: u8 = h_low.1[31usize];

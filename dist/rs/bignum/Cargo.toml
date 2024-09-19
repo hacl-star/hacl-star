@@ -10,6 +10,7 @@ name = "bignum"
 path = "lib.rs"
 
 [dependencies]
+lib = { path = "../lib" }
 krml = { path = "../krml" }
 fstar = { path = "../fstar" }
 lowstar = { path = "../lowstar" }

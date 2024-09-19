@@ -25,7 +25,7 @@ fn update(h: &mut [u32], l: &[u8])
             if i < 16u32
             {
                 let b: (&[u8], &[u8]) = l.split_at(i.wrapping_mul(4u32) as usize);
-                let u: u32 = crate::lowstar::endianness::load32_be(b.1);
+                let u: u32 = lowstar::endianness::load32_be(b.1);
                 u
             }
             else
@@ -101,7 +101,7 @@ fn pad(len: u64, dst: &mut [u8])
             as
             usize
         );
-    crate::lowstar::endianness::store64_be(dst3.1, len.wrapping_shl(3u32))
+    lowstar::endianness::store64_be(dst3.1, len.wrapping_shl(3u32))
 }
 
 pub(crate) fn finish(s: &[u32], dst: &mut [u8])
@@ -111,7 +111,7 @@ pub(crate) fn finish(s: &[u32], dst: &mut [u8])
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store32_be(
+        lowstar::endianness::store32_be(
             &mut dst[i.wrapping_mul(4u32) as usize..],
             (&s[0usize..])[i as usize]
         )
@@ -177,20 +177,20 @@ pub(crate) fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
     finish(&s, output)
 }
 
-pub type state_t = crate::hacl::streaming_types::state_32;
+pub type state_t = crate::streaming_types::state_32;
 
-pub fn malloc() -> Box<[crate::hacl::streaming_types::state_32]>
+pub fn malloc() -> Box<[crate::streaming_types::state_32]>
 {
     let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     let mut block_state: Box<[u32]> = vec![0u32; 5usize].into_boxed_slice();
     init(&mut block_state);
-    let s: crate::hacl::streaming_types::state_32 =
-        crate::hacl::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Box<[crate::hacl::streaming_types::state_32]> = vec![s].into_boxed_slice();
+    let s: crate::streaming_types::state_32 =
+        crate::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
+    let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
     p
 }
 
-pub fn reset(state: &mut [crate::hacl::streaming_types::state_32])
+pub fn reset(state: &mut [crate::streaming_types::state_32])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     init(block_state);
@@ -202,13 +202,13 @@ pub fn reset(state: &mut [crate::hacl::streaming_types::state_32])
 0 = success, 1 = max length exceeded
 */
 pub fn
-update0(state: &mut [crate::hacl::streaming_types::state_32], chunk: &[u8], chunk_len: u32) ->
-    crate::hacl::streaming_types::error_code
+update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len: u32) ->
+    crate::streaming_types::error_code
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     if chunk_len as u64 > 2305843009213693951u64.wrapping_sub(total_len)
-    { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
+    { crate::streaming_types::error_code::MaximumLengthExceeded }
     else
     {
         let sz: u32 =
@@ -302,11 +302,11 @@ update0(state: &mut [crate::hacl::streaming_types::state_32], chunk: &[u8], chun
             (state[0usize]).total_len =
                 total_len10.wrapping_add(chunk_len.wrapping_sub(diff) as u64)
         };
-        crate::hacl::streaming_types::error_code::Success
+        crate::streaming_types::error_code::Success
     }
 }
 
-pub fn digest(state: &[crate::hacl::streaming_types::state_32], output: &mut [u8])
+pub fn digest(state: &[crate::streaming_types::state_32], output: &mut [u8])
 {
     let block_state: &[u32] = &(state[0usize]).block_state;
     let buf_: &[u8] = &(state[0usize]).buf;
@@ -329,8 +329,8 @@ pub fn digest(state: &[crate::hacl::streaming_types::state_32], output: &mut [u8
     finish(&tmp_block_state, output)
 }
 
-pub fn copy(state: &[crate::hacl::streaming_types::state_32]) ->
-    Box<[crate::hacl::streaming_types::state_32]>
+pub fn copy(state: &[crate::streaming_types::state_32]) ->
+    Box<[crate::streaming_types::state_32]>
 {
     let block_state0: &[u32] = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
@@ -339,9 +339,9 @@ pub fn copy(state: &[crate::hacl::streaming_types::state_32]) ->
     ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
     let mut block_state: Box<[u32]> = vec![0u32; 5usize].into_boxed_slice();
     ((&mut block_state)[0usize..5usize]).copy_from_slice(&block_state0[0usize..5usize]);
-    let s: crate::hacl::streaming_types::state_32 =
-        crate::hacl::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
-    let p: Box<[crate::hacl::streaming_types::state_32]> = vec![s].into_boxed_slice();
+    let s: crate::streaming_types::state_32 =
+        crate::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
+    let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
     p
 }
 

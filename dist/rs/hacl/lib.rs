@@ -1,4 +1,3 @@
-pub mod inttypes_intrinsics;
 pub mod inttypes_intrinsics_128;
 pub mod streaming_types;
 pub mod spec;

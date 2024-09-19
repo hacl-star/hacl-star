@@ -34,7 +34,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc: u32 = abcd[2usize];
     let vd: u32 = abcd[3usize];
     let b: (&[u8], &[u8]) = x.split_at(0usize);
-    let u: u32 = crate::lowstar::endianness::load32_le(b.1);
+    let u: u32 = lowstar::endianness::load32_le(b.1);
     let xk: u32 = u;
     let ti: u32 = (&_t)[0usize];
     let v: u32 =
@@ -53,7 +53,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc0: u32 = abcd[1usize];
     let vd0: u32 = abcd[2usize];
     let b0: (&[u8], &[u8]) = b.1.split_at(4usize);
-    let u0: u32 = crate::lowstar::endianness::load32_le(b0.1);
+    let u0: u32 = lowstar::endianness::load32_le(b0.1);
     let xk0: u32 = u0;
     let ti0: u32 = (&_t)[1usize];
     let v0: u32 =
@@ -72,7 +72,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc1: u32 = abcd[0usize];
     let vd1: u32 = abcd[1usize];
     let b1: (&[u8], &[u8]) = b0.1.split_at(4usize);
-    let u1: u32 = crate::lowstar::endianness::load32_le(b1.1);
+    let u1: u32 = lowstar::endianness::load32_le(b1.1);
     let xk1: u32 = u1;
     let ti1: u32 = (&_t)[2usize];
     let v1: u32 =
@@ -91,7 +91,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc2: u32 = abcd[3usize];
     let vd2: u32 = abcd[0usize];
     let b2: (&[u8], &[u8]) = b1.1.split_at(4usize);
-    let u2: u32 = crate::lowstar::endianness::load32_le(b2.1);
+    let u2: u32 = lowstar::endianness::load32_le(b2.1);
     let xk2: u32 = u2;
     let ti2: u32 = (&_t)[3usize];
     let v2: u32 =
@@ -110,7 +110,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc3: u32 = abcd[2usize];
     let vd3: u32 = abcd[3usize];
     let b3: (&[u8], &[u8]) = b2.1.split_at(4usize);
-    let u3: u32 = crate::lowstar::endianness::load32_le(b3.1);
+    let u3: u32 = lowstar::endianness::load32_le(b3.1);
     let xk3: u32 = u3;
     let ti3: u32 = (&_t)[4usize];
     let v3: u32 =
@@ -129,7 +129,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc4: u32 = abcd[1usize];
     let vd4: u32 = abcd[2usize];
     let b4: (&[u8], &[u8]) = b3.1.split_at(4usize);
-    let u4: u32 = crate::lowstar::endianness::load32_le(b4.1);
+    let u4: u32 = lowstar::endianness::load32_le(b4.1);
     let xk4: u32 = u4;
     let ti4: u32 = (&_t)[5usize];
     let v4: u32 =
@@ -148,7 +148,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc5: u32 = abcd[0usize];
     let vd5: u32 = abcd[1usize];
     let b5: (&[u8], &[u8]) = b4.1.split_at(4usize);
-    let u5: u32 = crate::lowstar::endianness::load32_le(b5.1);
+    let u5: u32 = lowstar::endianness::load32_le(b5.1);
     let xk5: u32 = u5;
     let ti5: u32 = (&_t)[6usize];
     let v5: u32 =
@@ -167,7 +167,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc6: u32 = abcd[3usize];
     let vd6: u32 = abcd[0usize];
     let b6: (&[u8], &[u8]) = b5.1.split_at(4usize);
-    let u6: u32 = crate::lowstar::endianness::load32_le(b6.1);
+    let u6: u32 = lowstar::endianness::load32_le(b6.1);
     let xk6: u32 = u6;
     let ti6: u32 = (&_t)[7usize];
     let v6: u32 =
@@ -186,7 +186,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc7: u32 = abcd[2usize];
     let vd7: u32 = abcd[3usize];
     let b7: (&[u8], &[u8]) = b6.1.split_at(4usize);
-    let u7: u32 = crate::lowstar::endianness::load32_le(b7.1);
+    let u7: u32 = lowstar::endianness::load32_le(b7.1);
     let xk7: u32 = u7;
     let ti7: u32 = (&_t)[8usize];
     let v7: u32 =
@@ -205,7 +205,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc8: u32 = abcd[1usize];
     let vd8: u32 = abcd[2usize];
     let b8: (&[u8], &[u8]) = b7.1.split_at(4usize);
-    let u8: u32 = crate::lowstar::endianness::load32_le(b8.1);
+    let u8: u32 = lowstar::endianness::load32_le(b8.1);
     let xk8: u32 = u8;
     let ti8: u32 = (&_t)[9usize];
     let v8: u32 =
@@ -224,7 +224,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc9: u32 = abcd[0usize];
     let vd9: u32 = abcd[1usize];
     let b9: (&[u8], &[u8]) = b8.1.split_at(4usize);
-    let u9: u32 = crate::lowstar::endianness::load32_le(b9.1);
+    let u9: u32 = lowstar::endianness::load32_le(b9.1);
     let xk9: u32 = u9;
     let ti9: u32 = (&_t)[10usize];
     let v9: u32 =
@@ -243,7 +243,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc10: u32 = abcd[3usize];
     let vd10: u32 = abcd[0usize];
     let b10: (&[u8], &[u8]) = b9.1.split_at(4usize);
-    let u10: u32 = crate::lowstar::endianness::load32_le(b10.1);
+    let u10: u32 = lowstar::endianness::load32_le(b10.1);
     let xk10: u32 = u10;
     let ti10: u32 = (&_t)[11usize];
     let v10: u32 =
@@ -262,7 +262,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc11: u32 = abcd[2usize];
     let vd11: u32 = abcd[3usize];
     let b11: (&[u8], &[u8]) = b10.1.split_at(4usize);
-    let u11: u32 = crate::lowstar::endianness::load32_le(b11.1);
+    let u11: u32 = lowstar::endianness::load32_le(b11.1);
     let xk11: u32 = u11;
     let ti11: u32 = (&_t)[12usize];
     let v11: u32 =
@@ -281,7 +281,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc12: u32 = abcd[1usize];
     let vd12: u32 = abcd[2usize];
     let b12: (&[u8], &[u8]) = b11.1.split_at(4usize);
-    let u12: u32 = crate::lowstar::endianness::load32_le(b12.1);
+    let u12: u32 = lowstar::endianness::load32_le(b12.1);
     let xk12: u32 = u12;
     let ti12: u32 = (&_t)[13usize];
     let v12: u32 =
@@ -300,7 +300,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc13: u32 = abcd[0usize];
     let vd13: u32 = abcd[1usize];
     let b13: (&[u8], &[u8]) = b12.1.split_at(4usize);
-    let u13: u32 = crate::lowstar::endianness::load32_le(b13.1);
+    let u13: u32 = lowstar::endianness::load32_le(b13.1);
     let xk13: u32 = u13;
     let ti13: u32 = (&_t)[14usize];
     let v13: u32 =
@@ -319,7 +319,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc14: u32 = abcd[3usize];
     let vd14: u32 = abcd[0usize];
     let b14: (&[u8], &[u8]) = b13.1.split_at(4usize);
-    let u14: u32 = crate::lowstar::endianness::load32_le(b14.1);
+    let u14: u32 = lowstar::endianness::load32_le(b14.1);
     let xk14: u32 = u14;
     let ti14: u32 = (&_t)[15usize];
     let v14: u32 =
@@ -338,7 +338,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc15: u32 = abcd[2usize];
     let vd15: u32 = abcd[3usize];
     let b15: (&[u8], &[u8]) = b1.0.split_at(0usize);
-    let u15: u32 = crate::lowstar::endianness::load32_le(b15.1);
+    let u15: u32 = lowstar::endianness::load32_le(b15.1);
     let xk15: u32 = u15;
     let ti15: u32 = (&_t)[16usize];
     let v15: u32 =
@@ -357,7 +357,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc16: u32 = abcd[1usize];
     let vd16: u32 = abcd[2usize];
     let b16: (&[u8], &[u8]) = b6.0.split_at(0usize);
-    let u16: u32 = crate::lowstar::endianness::load32_le(b16.1);
+    let u16: u32 = lowstar::endianness::load32_le(b16.1);
     let xk16: u32 = u16;
     let ti16: u32 = (&_t)[17usize];
     let v16: u32 =
@@ -376,7 +376,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc17: u32 = abcd[0usize];
     let vd17: u32 = abcd[1usize];
     let b17: (&[u8], &[u8]) = b11.0.split_at(0usize);
-    let u17: u32 = crate::lowstar::endianness::load32_le(b17.1);
+    let u17: u32 = lowstar::endianness::load32_le(b17.1);
     let xk17: u32 = u17;
     let ti17: u32 = (&_t)[18usize];
     let v17: u32 =
@@ -395,7 +395,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc18: u32 = abcd[3usize];
     let vd18: u32 = abcd[0usize];
     let b18: (&[u8], &[u8]) = b0.0.split_at(0usize);
-    let u18: u32 = crate::lowstar::endianness::load32_le(b18.1);
+    let u18: u32 = lowstar::endianness::load32_le(b18.1);
     let xk18: u32 = u18;
     let ti18: u32 = (&_t)[19usize];
     let v18: u32 =
@@ -414,7 +414,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc19: u32 = abcd[2usize];
     let vd19: u32 = abcd[3usize];
     let b19: (&[u8], &[u8]) = b5.0.split_at(0usize);
-    let u19: u32 = crate::lowstar::endianness::load32_le(b19.1);
+    let u19: u32 = lowstar::endianness::load32_le(b19.1);
     let xk19: u32 = u19;
     let ti19: u32 = (&_t)[20usize];
     let v19: u32 =
@@ -433,7 +433,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc20: u32 = abcd[1usize];
     let vd20: u32 = abcd[2usize];
     let b20: (&[u8], &[u8]) = b10.0.split_at(0usize);
-    let u20: u32 = crate::lowstar::endianness::load32_le(b20.1);
+    let u20: u32 = lowstar::endianness::load32_le(b20.1);
     let xk20: u32 = u20;
     let ti20: u32 = (&_t)[21usize];
     let v20: u32 =
@@ -452,7 +452,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc21: u32 = abcd[0usize];
     let vd21: u32 = abcd[1usize];
     let b21: (&[u8], &[u8]) = b14.1.split_at(0usize);
-    let u21: u32 = crate::lowstar::endianness::load32_le(b21.1);
+    let u21: u32 = lowstar::endianness::load32_le(b21.1);
     let xk21: u32 = u21;
     let ti21: u32 = (&_t)[22usize];
     let v21: u32 =
@@ -471,7 +471,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc22: u32 = abcd[3usize];
     let vd22: u32 = abcd[0usize];
     let b22: (&[u8], &[u8]) = b4.0.split_at(0usize);
-    let u22: u32 = crate::lowstar::endianness::load32_le(b22.1);
+    let u22: u32 = lowstar::endianness::load32_le(b22.1);
     let xk22: u32 = u22;
     let ti22: u32 = (&_t)[23usize];
     let v22: u32 =
@@ -490,7 +490,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc23: u32 = abcd[2usize];
     let vd23: u32 = abcd[3usize];
     let b23: (&[u8], &[u8]) = b9.0.split_at(0usize);
-    let u23: u32 = crate::lowstar::endianness::load32_le(b23.1);
+    let u23: u32 = lowstar::endianness::load32_le(b23.1);
     let xk23: u32 = u23;
     let ti23: u32 = (&_t)[24usize];
     let v23: u32 =
@@ -509,7 +509,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc24: u32 = abcd[1usize];
     let vd24: u32 = abcd[2usize];
     let b24: (&[u8], &[u8]) = b14.0.split_at(0usize);
-    let u24: u32 = crate::lowstar::endianness::load32_le(b24.1);
+    let u24: u32 = lowstar::endianness::load32_le(b24.1);
     let xk24: u32 = u24;
     let ti24: u32 = (&_t)[25usize];
     let v24: u32 =
@@ -528,7 +528,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc25: u32 = abcd[0usize];
     let vd25: u32 = abcd[1usize];
     let b25: (&[u8], &[u8]) = b3.0.split_at(0usize);
-    let u25: u32 = crate::lowstar::endianness::load32_le(b25.1);
+    let u25: u32 = lowstar::endianness::load32_le(b25.1);
     let xk25: u32 = u25;
     let ti25: u32 = (&_t)[26usize];
     let v25: u32 =
@@ -547,7 +547,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc26: u32 = abcd[3usize];
     let vd26: u32 = abcd[0usize];
     let b26: (&[u8], &[u8]) = b8.0.split_at(0usize);
-    let u26: u32 = crate::lowstar::endianness::load32_le(b26.1);
+    let u26: u32 = lowstar::endianness::load32_le(b26.1);
     let xk26: u32 = u26;
     let ti26: u32 = (&_t)[27usize];
     let v26: u32 =
@@ -566,7 +566,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc27: u32 = abcd[2usize];
     let vd27: u32 = abcd[3usize];
     let b27: (&[u8], &[u8]) = b13.0.split_at(0usize);
-    let u27: u32 = crate::lowstar::endianness::load32_le(b27.1);
+    let u27: u32 = lowstar::endianness::load32_le(b27.1);
     let xk27: u32 = u27;
     let ti27: u32 = (&_t)[28usize];
     let v27: u32 =
@@ -585,7 +585,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc28: u32 = abcd[1usize];
     let vd28: u32 = abcd[2usize];
     let b28: (&[u8], &[u8]) = b2.0.split_at(0usize);
-    let u28: u32 = crate::lowstar::endianness::load32_le(b28.1);
+    let u28: u32 = lowstar::endianness::load32_le(b28.1);
     let xk28: u32 = u28;
     let ti28: u32 = (&_t)[29usize];
     let v28: u32 =
@@ -604,7 +604,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc29: u32 = abcd[0usize];
     let vd29: u32 = abcd[1usize];
     let b29: (&[u8], &[u8]) = b7.0.split_at(0usize);
-    let u29: u32 = crate::lowstar::endianness::load32_le(b29.1);
+    let u29: u32 = lowstar::endianness::load32_le(b29.1);
     let xk29: u32 = u29;
     let ti29: u32 = (&_t)[30usize];
     let v29: u32 =
@@ -623,7 +623,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc30: u32 = abcd[3usize];
     let vd30: u32 = abcd[0usize];
     let b30: (&[u8], &[u8]) = b12.0.split_at(0usize);
-    let u30: u32 = crate::lowstar::endianness::load32_le(b30.1);
+    let u30: u32 = lowstar::endianness::load32_le(b30.1);
     let xk30: u32 = u30;
     let ti30: u32 = (&_t)[31usize];
     let v30: u32 =
@@ -642,7 +642,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc31: u32 = abcd[2usize];
     let vd31: u32 = abcd[3usize];
     let b31: (&[u8], &[u8]) = b19.1.split_at(0usize);
-    let u31: u32 = crate::lowstar::endianness::load32_le(b31.1);
+    let u31: u32 = lowstar::endianness::load32_le(b31.1);
     let xk31: u32 = u31;
     let ti31: u32 = (&_t)[32usize];
     let v31: u32 =
@@ -661,7 +661,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc32: u32 = abcd[1usize];
     let vd32: u32 = abcd[2usize];
     let b32: (&[u8], &[u8]) = b26.1.split_at(0usize);
-    let u32: u32 = crate::lowstar::endianness::load32_le(b32.1);
+    let u32: u32 = lowstar::endianness::load32_le(b32.1);
     let xk32: u32 = u32;
     let ti32: u32 = (&_t)[33usize];
     let v32: u32 =
@@ -680,7 +680,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc33: u32 = abcd[0usize];
     let vd33: u32 = abcd[1usize];
     let b33: (&[u8], &[u8]) = b17.1.split_at(0usize);
-    let u33: u32 = crate::lowstar::endianness::load32_le(b33.1);
+    let u33: u32 = lowstar::endianness::load32_le(b33.1);
     let xk33: u32 = u33;
     let ti33: u32 = (&_t)[34usize];
     let v33: u32 =
@@ -699,7 +699,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc34: u32 = abcd[3usize];
     let vd34: u32 = abcd[0usize];
     let b34: (&[u8], &[u8]) = b24.1.split_at(0usize);
-    let u34: u32 = crate::lowstar::endianness::load32_le(b34.1);
+    let u34: u32 = lowstar::endianness::load32_le(b34.1);
     let xk34: u32 = u34;
     let ti34: u32 = (&_t)[35usize];
     let v34: u32 =
@@ -718,7 +718,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc35: u32 = abcd[2usize];
     let vd35: u32 = abcd[3usize];
     let b35: (&[u8], &[u8]) = b15.1.split_at(0usize);
-    let u35: u32 = crate::lowstar::endianness::load32_le(b35.1);
+    let u35: u32 = lowstar::endianness::load32_le(b35.1);
     let xk35: u32 = u35;
     let ti35: u32 = (&_t)[36usize];
     let v35: u32 =
@@ -737,7 +737,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc36: u32 = abcd[1usize];
     let vd36: u32 = abcd[2usize];
     let b36: (&[u8], &[u8]) = b22.1.split_at(0usize);
-    let u36: u32 = crate::lowstar::endianness::load32_le(b36.1);
+    let u36: u32 = lowstar::endianness::load32_le(b36.1);
     let xk36: u32 = u36;
     let ti36: u32 = (&_t)[37usize];
     let v36: u32 =
@@ -756,7 +756,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc37: u32 = abcd[0usize];
     let vd37: u32 = abcd[1usize];
     let b37: (&[u8], &[u8]) = b29.1.split_at(0usize);
-    let u37: u32 = crate::lowstar::endianness::load32_le(b37.1);
+    let u37: u32 = lowstar::endianness::load32_le(b37.1);
     let xk37: u32 = u37;
     let ti37: u32 = (&_t)[38usize];
     let v37: u32 =
@@ -775,7 +775,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc38: u32 = abcd[3usize];
     let vd38: u32 = abcd[0usize];
     let b38: (&[u8], &[u8]) = b20.1.split_at(0usize);
-    let u38: u32 = crate::lowstar::endianness::load32_le(b38.1);
+    let u38: u32 = lowstar::endianness::load32_le(b38.1);
     let xk38: u32 = u38;
     let ti38: u32 = (&_t)[39usize];
     let v38: u32 =
@@ -794,7 +794,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc39: u32 = abcd[2usize];
     let vd39: u32 = abcd[3usize];
     let b39: (&[u8], &[u8]) = b27.1.split_at(0usize);
-    let u39: u32 = crate::lowstar::endianness::load32_le(b39.1);
+    let u39: u32 = lowstar::endianness::load32_le(b39.1);
     let xk39: u32 = u39;
     let ti39: u32 = (&_t)[40usize];
     let v39: u32 =
@@ -813,7 +813,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc40: u32 = abcd[1usize];
     let vd40: u32 = abcd[2usize];
     let b40: (&[u8], &[u8]) = b18.1.split_at(0usize);
-    let u40: u32 = crate::lowstar::endianness::load32_le(b40.1);
+    let u40: u32 = lowstar::endianness::load32_le(b40.1);
     let xk40: u32 = u40;
     let ti40: u32 = (&_t)[41usize];
     let v40: u32 =
@@ -832,7 +832,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc41: u32 = abcd[0usize];
     let vd41: u32 = abcd[1usize];
     let b41: (&[u8], &[u8]) = b25.1.split_at(0usize);
-    let u41: u32 = crate::lowstar::endianness::load32_le(b41.1);
+    let u41: u32 = lowstar::endianness::load32_le(b41.1);
     let xk41: u32 = u41;
     let ti41: u32 = (&_t)[42usize];
     let v41: u32 =
@@ -851,7 +851,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc42: u32 = abcd[3usize];
     let vd42: u32 = abcd[0usize];
     let b42: (&[u8], &[u8]) = b16.1.split_at(0usize);
-    let u42: u32 = crate::lowstar::endianness::load32_le(b42.1);
+    let u42: u32 = lowstar::endianness::load32_le(b42.1);
     let xk42: u32 = u42;
     let ti42: u32 = (&_t)[43usize];
     let v42: u32 =
@@ -870,7 +870,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc43: u32 = abcd[2usize];
     let vd43: u32 = abcd[3usize];
     let b43: (&[u8], &[u8]) = b23.1.split_at(0usize);
-    let u43: u32 = crate::lowstar::endianness::load32_le(b43.1);
+    let u43: u32 = lowstar::endianness::load32_le(b43.1);
     let xk43: u32 = u43;
     let ti43: u32 = (&_t)[44usize];
     let v43: u32 =
@@ -889,7 +889,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc44: u32 = abcd[1usize];
     let vd44: u32 = abcd[2usize];
     let b44: (&[u8], &[u8]) = b30.1.split_at(0usize);
-    let u44: u32 = crate::lowstar::endianness::load32_le(b44.1);
+    let u44: u32 = lowstar::endianness::load32_le(b44.1);
     let xk44: u32 = u44;
     let ti44: u32 = (&_t)[45usize];
     let v44: u32 =
@@ -908,7 +908,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc45: u32 = abcd[0usize];
     let vd45: u32 = abcd[1usize];
     let b45: (&[u8], &[u8]) = b21.1.split_at(0usize);
-    let u45: u32 = crate::lowstar::endianness::load32_le(b45.1);
+    let u45: u32 = lowstar::endianness::load32_le(b45.1);
     let xk45: u32 = u45;
     let ti45: u32 = (&_t)[46usize];
     let v45: u32 =
@@ -927,7 +927,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc46: u32 = abcd[3usize];
     let vd46: u32 = abcd[0usize];
     let b46: (&[u8], &[u8]) = b28.1.split_at(0usize);
-    let u46: u32 = crate::lowstar::endianness::load32_le(b46.1);
+    let u46: u32 = lowstar::endianness::load32_le(b46.1);
     let xk46: u32 = u46;
     let ti46: u32 = (&_t)[47usize];
     let v46: u32 =
@@ -946,7 +946,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc47: u32 = abcd[2usize];
     let vd47: u32 = abcd[3usize];
     let b47: (&[u8], &[u8]) = b40.1.split_at(0usize);
-    let u47: u32 = crate::lowstar::endianness::load32_le(b47.1);
+    let u47: u32 = lowstar::endianness::load32_le(b47.1);
     let xk47: u32 = u47;
     let ti47: u32 = (&_t)[48usize];
     let v47: u32 =
@@ -965,7 +965,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc48: u32 = abcd[1usize];
     let vd48: u32 = abcd[2usize];
     let b48: (&[u8], &[u8]) = b37.1.split_at(0usize);
-    let u48: u32 = crate::lowstar::endianness::load32_le(b48.1);
+    let u48: u32 = lowstar::endianness::load32_le(b48.1);
     let xk48: u32 = u48;
     let ti48: u32 = (&_t)[49usize];
     let v48: u32 =
@@ -984,7 +984,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc49: u32 = abcd[0usize];
     let vd49: u32 = abcd[1usize];
     let b49: (&[u8], &[u8]) = b34.1.split_at(0usize);
-    let u49: u32 = crate::lowstar::endianness::load32_le(b49.1);
+    let u49: u32 = lowstar::endianness::load32_le(b49.1);
     let xk49: u32 = u49;
     let ti49: u32 = (&_t)[50usize];
     let v49: u32 =
@@ -1003,7 +1003,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc50: u32 = abcd[3usize];
     let vd50: u32 = abcd[0usize];
     let b50: (&[u8], &[u8]) = b31.1.split_at(0usize);
-    let u50: u32 = crate::lowstar::endianness::load32_le(b50.1);
+    let u50: u32 = lowstar::endianness::load32_le(b50.1);
     let xk50: u32 = u50;
     let ti50: u32 = (&_t)[51usize];
     let v50: u32 =
@@ -1022,7 +1022,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc51: u32 = abcd[2usize];
     let vd51: u32 = abcd[3usize];
     let b51: (&[u8], &[u8]) = b44.1.split_at(0usize);
-    let u51: u32 = crate::lowstar::endianness::load32_le(b51.1);
+    let u51: u32 = lowstar::endianness::load32_le(b51.1);
     let xk51: u32 = u51;
     let ti51: u32 = (&_t)[52usize];
     let v51: u32 =
@@ -1041,7 +1041,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc52: u32 = abcd[1usize];
     let vd52: u32 = abcd[2usize];
     let b52: (&[u8], &[u8]) = b41.1.split_at(0usize);
-    let u52: u32 = crate::lowstar::endianness::load32_le(b52.1);
+    let u52: u32 = lowstar::endianness::load32_le(b52.1);
     let xk52: u32 = u52;
     let ti52: u32 = (&_t)[53usize];
     let v52: u32 =
@@ -1060,7 +1060,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc53: u32 = abcd[0usize];
     let vd53: u32 = abcd[1usize];
     let b53: (&[u8], &[u8]) = b38.1.split_at(0usize);
-    let u53: u32 = crate::lowstar::endianness::load32_le(b53.1);
+    let u53: u32 = lowstar::endianness::load32_le(b53.1);
     let xk53: u32 = u53;
     let ti53: u32 = (&_t)[54usize];
     let v53: u32 =
@@ -1079,7 +1079,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc54: u32 = abcd[3usize];
     let vd54: u32 = abcd[0usize];
     let b54: (&[u8], &[u8]) = b35.1.split_at(0usize);
-    let u54: u32 = crate::lowstar::endianness::load32_le(b54.1);
+    let u54: u32 = lowstar::endianness::load32_le(b54.1);
     let xk54: u32 = u54;
     let ti54: u32 = (&_t)[55usize];
     let v54: u32 =
@@ -1098,7 +1098,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc55: u32 = abcd[2usize];
     let vd55: u32 = abcd[3usize];
     let b55: (&[u8], &[u8]) = b32.1.split_at(0usize);
-    let u55: u32 = crate::lowstar::endianness::load32_le(b55.1);
+    let u55: u32 = lowstar::endianness::load32_le(b55.1);
     let xk55: u32 = u55;
     let ti55: u32 = (&_t)[56usize];
     let v55: u32 =
@@ -1117,7 +1117,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc56: u32 = abcd[1usize];
     let vd56: u32 = abcd[2usize];
     let b56: (&[u8], &[u8]) = b45.1.split_at(0usize);
-    let u56: u32 = crate::lowstar::endianness::load32_le(b56.1);
+    let u56: u32 = lowstar::endianness::load32_le(b56.1);
     let xk56: u32 = u56;
     let ti56: u32 = (&_t)[57usize];
     let v56: u32 =
@@ -1136,7 +1136,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc57: u32 = abcd[0usize];
     let vd57: u32 = abcd[1usize];
     let b57: (&[u8], &[u8]) = b42.1.split_at(0usize);
-    let u57: u32 = crate::lowstar::endianness::load32_le(b57.1);
+    let u57: u32 = lowstar::endianness::load32_le(b57.1);
     let xk57: u32 = u57;
     let ti57: u32 = (&_t)[58usize];
     let v57: u32 =
@@ -1155,7 +1155,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc58: u32 = abcd[3usize];
     let vd58: u32 = abcd[0usize];
     let b58: (&[u8], &[u8]) = b39.1.split_at(0usize);
-    let u58: u32 = crate::lowstar::endianness::load32_le(b58.1);
+    let u58: u32 = lowstar::endianness::load32_le(b58.1);
     let xk58: u32 = u58;
     let ti58: u32 = (&_t)[59usize];
     let v58: u32 =
@@ -1174,7 +1174,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc59: u32 = abcd[2usize];
     let vd59: u32 = abcd[3usize];
     let b59: (&[u8], &[u8]) = b36.1.split_at(0usize);
-    let u59: u32 = crate::lowstar::endianness::load32_le(b59.1);
+    let u59: u32 = lowstar::endianness::load32_le(b59.1);
     let xk59: u32 = u59;
     let ti59: u32 = (&_t)[60usize];
     let v59: u32 =
@@ -1193,7 +1193,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc60: u32 = abcd[1usize];
     let vd60: u32 = abcd[2usize];
     let b60: (&[u8], &[u8]) = b33.1.split_at(0usize);
-    let u60: u32 = crate::lowstar::endianness::load32_le(b60.1);
+    let u60: u32 = lowstar::endianness::load32_le(b60.1);
     let xk60: u32 = u60;
     let ti60: u32 = (&_t)[61usize];
     let v60: u32 =
@@ -1212,7 +1212,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc61: u32 = abcd[0usize];
     let vd61: u32 = abcd[1usize];
     let b61: (&[u8], &[u8]) = b46.1.split_at(0usize);
-    let u61: u32 = crate::lowstar::endianness::load32_le(b61.1);
+    let u61: u32 = lowstar::endianness::load32_le(b61.1);
     let xk61: u32 = u61;
     let ti61: u32 = (&_t)[62usize];
     let v61: u32 =
@@ -1231,7 +1231,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let vc62: u32 = abcd[3usize];
     let vd62: u32 = abcd[0usize];
     let b62: (&[u8], &[u8]) = b43.1.split_at(0usize);
-    let u62: u32 = crate::lowstar::endianness::load32_le(b62.1);
+    let u62: u32 = lowstar::endianness::load32_le(b62.1);
     let xk62: u32 = u62;
     let ti62: u32 = (&_t)[63usize];
     let v62: u32 =
@@ -1275,7 +1275,7 @@ fn pad(len: u64, dst: &mut [u8])
             as
             usize
         );
-    crate::lowstar::endianness::store64_le(dst3.1, len.wrapping_shl(3u32))
+    lowstar::endianness::store64_le(dst3.1, len.wrapping_shl(3u32))
 }
 
 fn finish(s: &[u32], dst: &mut [u8])
@@ -1285,7 +1285,7 @@ fn finish(s: &[u32], dst: &mut [u8])
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store32_le(
+        lowstar::endianness::store32_le(
             &mut dst[i.wrapping_mul(4u32) as usize..],
             (&s[0usize..])[i as usize]
         )
@@ -1350,20 +1350,20 @@ fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
     finish(&s, output)
 }
 
-pub type state_t = crate::hacl::streaming_types::state_32;
+pub type state_t = crate::streaming_types::state_32;
 
-pub fn malloc() -> Box<[crate::hacl::streaming_types::state_32]>
+pub fn malloc() -> Box<[crate::streaming_types::state_32]>
 {
     let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     let mut block_state: Box<[u32]> = vec![0u32; 4usize].into_boxed_slice();
     init(&mut block_state);
-    let s: crate::hacl::streaming_types::state_32 =
-        crate::hacl::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Box<[crate::hacl::streaming_types::state_32]> = vec![s].into_boxed_slice();
+    let s: crate::streaming_types::state_32 =
+        crate::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
+    let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
     p
 }
 
-pub fn reset(state: &mut [crate::hacl::streaming_types::state_32])
+pub fn reset(state: &mut [crate::streaming_types::state_32])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     init(block_state);
@@ -1375,13 +1375,13 @@ pub fn reset(state: &mut [crate::hacl::streaming_types::state_32])
 0 = success, 1 = max length exceeded
 */
 pub fn
-update0(state: &mut [crate::hacl::streaming_types::state_32], chunk: &[u8], chunk_len: u32) ->
-    crate::hacl::streaming_types::error_code
+update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len: u32) ->
+    crate::streaming_types::error_code
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     if chunk_len as u64 > 2305843009213693951u64.wrapping_sub(total_len)
-    { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
+    { crate::streaming_types::error_code::MaximumLengthExceeded }
     else
     {
         let sz: u32 =
@@ -1475,11 +1475,11 @@ update0(state: &mut [crate::hacl::streaming_types::state_32], chunk: &[u8], chun
             (state[0usize]).total_len =
                 total_len10.wrapping_add(chunk_len.wrapping_sub(diff) as u64)
         };
-        crate::hacl::streaming_types::error_code::Success
+        crate::streaming_types::error_code::Success
     }
 }
 
-pub fn digest(state: &[crate::hacl::streaming_types::state_32], output: &mut [u8])
+pub fn digest(state: &[crate::streaming_types::state_32], output: &mut [u8])
 {
     let block_state: &[u32] = &(state[0usize]).block_state;
     let buf_: &[u8] = &(state[0usize]).buf;
@@ -1502,8 +1502,8 @@ pub fn digest(state: &[crate::hacl::streaming_types::state_32], output: &mut [u8
     finish(&tmp_block_state, output)
 }
 
-pub fn copy(state: &[crate::hacl::streaming_types::state_32]) ->
-    Box<[crate::hacl::streaming_types::state_32]>
+pub fn copy(state: &[crate::streaming_types::state_32]) ->
+    Box<[crate::streaming_types::state_32]>
 {
     let block_state0: &[u32] = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
@@ -1512,9 +1512,9 @@ pub fn copy(state: &[crate::hacl::streaming_types::state_32]) ->
     ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
     let mut block_state: Box<[u32]> = vec![0u32; 4usize].into_boxed_slice();
     ((&mut block_state)[0usize..4usize]).copy_from_slice(&block_state0[0usize..4usize]);
-    let s: crate::hacl::streaming_types::state_32 =
-        crate::hacl::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
-    let p: Box<[crate::hacl::streaming_types::state_32]> = vec![s].into_boxed_slice();
+    let s: crate::streaming_types::state_32 =
+        crate::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
+    let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
     p
 }
 

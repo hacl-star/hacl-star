@@ -144,7 +144,7 @@
         0u32,
         1u32,
         {
-            let x: u32 = (&crate::hacl::chacha20::chacha20_constants)[i as usize];
+            let x: u32 = (&crate::chacha20::chacha20_constants)[i as usize];
             let os: &mut [u32] = &mut (&mut (&mut ctx1)[0usize..])[0usize..];
             os[i as usize] = x
         }
@@ -157,7 +157,7 @@
         1u32,
         {
             let bj: (&[u8], &[u8]) = k.split_at(i.wrapping_mul(4u32) as usize);
-            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
             let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
@@ -173,7 +173,7 @@
         1u32,
         {
             let bj: (&[u8], &[u8]) = n.split_at(i.wrapping_mul(4u32) as usize);
-            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
             let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
@@ -223,12 +223,12 @@ pub fn chacha20_encrypt_32(
             1u32,
             {
                 let u: u32 =
-                    crate::lowstar::endianness::load32_le(
+                    lowstar::endianness::load32_le(
                         &uu____1.1[i0.wrapping_mul(4u32) as usize..]
                     );
                 let x: u32 = u;
                 let y: u32 = x ^ (&k)[i0 as usize];
-                crate::lowstar::endianness::store32_le(
+                lowstar::endianness::store32_le(
                     &mut uu____0.1[i0.wrapping_mul(4u32) as usize..],
                     y
                 )
@@ -251,12 +251,12 @@ pub fn chacha20_encrypt_32(
             1u32,
             {
                 let u: u32 =
-                    crate::lowstar::endianness::load32_le(
+                    lowstar::endianness::load32_le(
                         &(&plain)[i.wrapping_mul(4u32) as usize..]
                     );
                 let x: u32 = u;
                 let y: u32 = x ^ (&k)[i as usize];
-                crate::lowstar::endianness::store32_le(
+                lowstar::endianness::store32_le(
                     &mut (&mut plain)[i.wrapping_mul(4u32) as usize..],
                     y
                 )
@@ -295,12 +295,12 @@ pub fn chacha20_decrypt_32(
             1u32,
             {
                 let u: u32 =
-                    crate::lowstar::endianness::load32_le(
+                    lowstar::endianness::load32_le(
                         &uu____1.1[i0.wrapping_mul(4u32) as usize..]
                     );
                 let x: u32 = u;
                 let y: u32 = x ^ (&k)[i0 as usize];
-                crate::lowstar::endianness::store32_le(
+                lowstar::endianness::store32_le(
                     &mut uu____0.1[i0.wrapping_mul(4u32) as usize..],
                     y
                 )
@@ -323,12 +323,12 @@ pub fn chacha20_decrypt_32(
             1u32,
             {
                 let u: u32 =
-                    crate::lowstar::endianness::load32_le(
+                    lowstar::endianness::load32_le(
                         &(&plain)[i.wrapping_mul(4u32) as usize..]
                     );
                 let x: u32 = u;
                 let y: u32 = x ^ (&k)[i as usize];
-                crate::lowstar::endianness::store32_le(
+                lowstar::endianness::store32_le(
                     &mut (&mut plain)[i.wrapping_mul(4u32) as usize..],
                     y
                 )

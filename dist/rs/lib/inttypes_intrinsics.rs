@@ -25,7 +25,7 @@ pub fn add_carry_u64(cin: u64, x: u64, y: u64, r: &mut [u64]) -> u64
 {
     let res: u64 = x.wrapping_add(cin).wrapping_add(y);
     let c: u64 =
-        (! crate::fstar::uint64::gte_mask(res, x) | crate::fstar::uint64::eq_mask(res, x) & cin)
+        (! fstar::uint64::gte_mask(res, x) | fstar::uint64::eq_mask(res, x) & cin)
         &
         1u64;
     r[0usize] = res;
@@ -36,9 +36,9 @@ pub fn sub_borrow_u64(cin: u64, x: u64, y: u64, r: &mut [u64]) -> u64
 {
     let res: u64 = x.wrapping_sub(y).wrapping_sub(cin);
     let c: u64 =
-        (crate::fstar::uint64::gte_mask(res, x) & ! crate::fstar::uint64::eq_mask(res, x)
+        (fstar::uint64::gte_mask(res, x) & ! fstar::uint64::eq_mask(res, x)
         |
-        crate::fstar::uint64::eq_mask(res, x) & cin)
+        fstar::uint64::eq_mask(res, x) & cin)
         &
         1u64;
     r[0usize] = res;

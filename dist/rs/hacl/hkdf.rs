@@ -34,7 +34,7 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
         {
-            crate::hacl::hmac::compute_sha2_256(
+            crate::hmac::compute_sha2_256(
                 ctr.0,
                 prk,
                 prklen,
@@ -44,7 +44,7 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         }
         else
         {
-            crate::hacl::hmac::compute_sha2_256(
+            crate::hmac::compute_sha2_256(
                 ctr.0,
                 prk,
                 prklen,
@@ -61,7 +61,7 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
         {
-            crate::hacl::hmac::compute_sha2_256(
+            crate::hmac::compute_sha2_256(
                 ctr.0,
                 prk,
                 prklen,
@@ -71,7 +71,7 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         }
         else
         {
-            crate::hacl::hmac::compute_sha2_256(
+            crate::hmac::compute_sha2_256(
                 ctr.0,
                 prk,
                 prklen,
@@ -97,7 +97,7 @@ Extract a fixed-length pseudorandom key from input keying material.
 */
 pub fn
 extract_sha2_256(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
-{ crate::hacl::hmac::compute_sha2_256(prk, salt, saltlen, ikm, ikmlen) }
+{ crate::hmac::compute_sha2_256(prk, salt, saltlen, ikm, ikmlen) }
 
 /**
 Expand pseudorandom key to desired length.
@@ -128,7 +128,7 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
         {
-            crate::hacl::hmac::compute_sha2_384(
+            crate::hmac::compute_sha2_384(
                 ctr.0,
                 prk,
                 prklen,
@@ -138,7 +138,7 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         }
         else
         {
-            crate::hacl::hmac::compute_sha2_384(
+            crate::hmac::compute_sha2_384(
                 ctr.0,
                 prk,
                 prklen,
@@ -155,7 +155,7 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
         {
-            crate::hacl::hmac::compute_sha2_384(
+            crate::hmac::compute_sha2_384(
                 ctr.0,
                 prk,
                 prklen,
@@ -165,7 +165,7 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         }
         else
         {
-            crate::hacl::hmac::compute_sha2_384(
+            crate::hmac::compute_sha2_384(
                 ctr.0,
                 prk,
                 prklen,
@@ -191,7 +191,7 @@ Extract a fixed-length pseudorandom key from input keying material.
 */
 pub fn
 extract_sha2_384(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
-{ crate::hacl::hmac::compute_sha2_384(prk, salt, saltlen, ikm, ikmlen) }
+{ crate::hmac::compute_sha2_384(prk, salt, saltlen, ikm, ikmlen) }
 
 /**
 Expand pseudorandom key to desired length.
@@ -222,7 +222,7 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
         {
-            crate::hacl::hmac::compute_sha2_512(
+            crate::hmac::compute_sha2_512(
                 ctr.0,
                 prk,
                 prklen,
@@ -232,7 +232,7 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         }
         else
         {
-            crate::hacl::hmac::compute_sha2_512(
+            crate::hmac::compute_sha2_512(
                 ctr.0,
                 prk,
                 prklen,
@@ -249,7 +249,7 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
         {
-            crate::hacl::hmac::compute_sha2_512(
+            crate::hmac::compute_sha2_512(
                 ctr.0,
                 prk,
                 prklen,
@@ -259,7 +259,7 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         }
         else
         {
-            crate::hacl::hmac::compute_sha2_512(
+            crate::hmac::compute_sha2_512(
                 ctr.0,
                 prk,
                 prklen,
@@ -285,7 +285,7 @@ Extract a fixed-length pseudorandom key from input keying material.
 */
 pub fn
 extract_sha2_512(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
-{ crate::hacl::hmac::compute_sha2_512(prk, salt, saltlen, ikm, ikmlen) }
+{ crate::hmac::compute_sha2_512(prk, salt, saltlen, ikm, ikmlen) }
 
 /**
 Expand pseudorandom key to desired length.
@@ -316,7 +316,7 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
         {
-            crate::hacl::hmac::compute_blake2s_32(
+            crate::hmac::compute_blake2s_32(
                 ctr.0,
                 prk,
                 prklen,
@@ -326,7 +326,7 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         }
         else
         {
-            crate::hacl::hmac::compute_blake2s_32(
+            crate::hmac::compute_blake2s_32(
                 ctr.0,
                 prk,
                 prklen,
@@ -343,7 +343,7 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
         {
-            crate::hacl::hmac::compute_blake2s_32(
+            crate::hmac::compute_blake2s_32(
                 ctr.0,
                 prk,
                 prklen,
@@ -353,7 +353,7 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         }
         else
         {
-            crate::hacl::hmac::compute_blake2s_32(
+            crate::hmac::compute_blake2s_32(
                 ctr.0,
                 prk,
                 prklen,
@@ -379,7 +379,7 @@ Extract a fixed-length pseudorandom key from input keying material.
 */
 pub fn
 extract_blake2s_32(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
-{ crate::hacl::hmac::compute_blake2s_32(prk, salt, saltlen, ikm, ikmlen) }
+{ crate::hmac::compute_blake2s_32(prk, salt, saltlen, ikm, ikmlen) }
 
 /**
 Expand pseudorandom key to desired length.
@@ -410,7 +410,7 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
         {
-            crate::hacl::hmac::compute_blake2b_32(
+            crate::hmac::compute_blake2b_32(
                 ctr.0,
                 prk,
                 prklen,
@@ -420,7 +420,7 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         }
         else
         {
-            crate::hacl::hmac::compute_blake2b_32(
+            crate::hmac::compute_blake2b_32(
                 ctr.0,
                 prk,
                 prklen,
@@ -437,7 +437,7 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
         {
-            crate::hacl::hmac::compute_blake2b_32(
+            crate::hmac::compute_blake2b_32(
                 ctr.0,
                 prk,
                 prklen,
@@ -447,7 +447,7 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         }
         else
         {
-            crate::hacl::hmac::compute_blake2b_32(
+            crate::hmac::compute_blake2b_32(
                 ctr.0,
                 prk,
                 prklen,
@@ -473,4 +473,4 @@ Extract a fixed-length pseudorandom key from input keying material.
 */
 pub fn
 extract_blake2b_32(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
-{ crate::hacl::hmac::compute_blake2b_32(prk, salt, saltlen, ikm, ikmlen) }
+{ crate::hmac::compute_blake2b_32(prk, salt, saltlen, ikm, ikmlen) }

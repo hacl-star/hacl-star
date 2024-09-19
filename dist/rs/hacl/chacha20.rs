@@ -111,7 +111,7 @@ fn chacha20_init(ctx: &mut [u32], k: &[u8], n: &[u8], ctr: u32)
         1u32,
         {
             let bj: (&[u8], &[u8]) = k.split_at(i.wrapping_mul(4u32) as usize);
-            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
             let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
@@ -127,7 +127,7 @@ fn chacha20_init(ctx: &mut [u32], k: &[u8], n: &[u8], ctr: u32)
         1u32,
         {
             let bj: (&[u8], &[u8]) = n.split_at(i.wrapping_mul(4u32) as usize);
-            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
             let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
@@ -148,7 +148,7 @@ fn chacha20_encrypt_block(ctx: &[u32], out: &mut [u8], incr: u32, text: &[u8])
         1u32,
         {
             let bj: (&[u8], &[u8]) = text.split_at(i.wrapping_mul(4u32) as usize);
-            let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+            let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
             let os: (&mut [u32], &mut [u32]) = bl.split_at_mut(0usize);
@@ -171,7 +171,7 @@ fn chacha20_encrypt_block(ctx: &[u32], out: &mut [u8], incr: u32, text: &[u8])
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store32_le(
+        lowstar::endianness::store32_le(
             &mut out[i.wrapping_mul(4u32) as usize..],
             (&bl)[i as usize]
         )

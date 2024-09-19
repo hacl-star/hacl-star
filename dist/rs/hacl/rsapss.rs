@@ -5,28 +5,28 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-#[inline] fn hash_len(a: crate::hacl::streaming_types::hash_alg) -> u32
+#[inline] fn hash_len(a: crate::streaming_types::hash_alg) -> u32
 {
     match a
     {
-        crate::hacl::streaming_types::hash_alg::MD5 => 16u32,
-        crate::hacl::streaming_types::hash_alg::SHA1 => 20u32,
-        crate::hacl::streaming_types::hash_alg::SHA2_224 => 28u32,
-        crate::hacl::streaming_types::hash_alg::SHA2_256 => 32u32,
-        crate::hacl::streaming_types::hash_alg::SHA2_384 => 48u32,
-        crate::hacl::streaming_types::hash_alg::SHA2_512 => 64u32,
-        crate::hacl::streaming_types::hash_alg::Blake2S => 32u32,
-        crate::hacl::streaming_types::hash_alg::Blake2B => 64u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_224 => 28u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_256 => 32u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_384 => 48u32,
-        crate::hacl::streaming_types::hash_alg::SHA3_512 => 64u32,
+        crate::streaming_types::hash_alg::MD5 => 16u32,
+        crate::streaming_types::hash_alg::SHA1 => 20u32,
+        crate::streaming_types::hash_alg::SHA2_224 => 28u32,
+        crate::streaming_types::hash_alg::SHA2_256 => 32u32,
+        crate::streaming_types::hash_alg::SHA2_384 => 48u32,
+        crate::streaming_types::hash_alg::SHA2_512 => 64u32,
+        crate::streaming_types::hash_alg::Blake2S => 32u32,
+        crate::streaming_types::hash_alg::Blake2B => 64u32,
+        crate::streaming_types::hash_alg::SHA3_224 => 28u32,
+        crate::streaming_types::hash_alg::SHA3_256 => 32u32,
+        crate::streaming_types::hash_alg::SHA3_384 => 48u32,
+        crate::streaming_types::hash_alg::SHA3_512 => 64u32,
         _ => panic!("Precondition of the function most likely violated")
     }
 }
 
 #[inline] fn hash(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     mHash: &mut [u8],
     msgLen: u32,
     msg: &[u8]
@@ -34,18 +34,18 @@
 {
     match a
     {
-        crate::hacl::streaming_types::hash_alg::SHA2_256 =>
-          crate::hacl::hash_sha2::hash_256(mHash, msg, msgLen),
-        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
-          crate::hacl::hash_sha2::hash_384(mHash, msg, msgLen),
-        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
-          crate::hacl::hash_sha2::hash_512(mHash, msg, msgLen),
+        crate::streaming_types::hash_alg::SHA2_256 =>
+          crate::hash_sha2::hash_256(mHash, msg, msgLen),
+        crate::streaming_types::hash_alg::SHA2_384 =>
+          crate::hash_sha2::hash_384(mHash, msg, msgLen),
+        crate::streaming_types::hash_alg::SHA2_512 =>
+          crate::hash_sha2::hash_512(mHash, msg, msgLen),
         _ => panic!("Precondition of the function most likely violated")
     }
 }
 
 #[inline] fn mgf_hash(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     len: u32,
     mgfseed: &[u8],
     maskLen: u32,
@@ -86,8 +86,8 @@
         let mut acc: [u64; 1] = [0u64; 1usize];
         for i0 in 0u32..bLen
         {
-            let beq: u64 = crate::fstar::uint64::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
-            let blt: u64 = ! crate::fstar::uint64::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
+            let beq: u64 = fstar::uint64::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
+            let blt: u64 = ! fstar::uint64::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
             (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
         };
         let res: u64 = (&acc)[0usize];
@@ -107,8 +107,8 @@
     let mut acc: [u64; 1] = [0u64; 1usize];
     for i0 in 0u32..nLen
     {
-        let beq: u64 = crate::fstar::uint64::eq_mask((&b2)[i0 as usize], n[i0 as usize]);
-        let blt: u64 = ! crate::fstar::uint64::gte_mask((&b2)[i0 as usize], n[i0 as usize]);
+        let beq: u64 = fstar::uint64::eq_mask((&b2)[i0 as usize], n[i0 as usize]);
+        let blt: u64 = ! fstar::uint64::gte_mask((&b2)[i0 as usize], n[i0 as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let res: u64 = (&acc)[0usize];
@@ -124,7 +124,7 @@
     let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
     for i in 0u32..eLen
     {
-        let uu____0: u64 = crate::fstar::uint64::eq_mask(e[i as usize], (&bn_zero)[i as usize]);
+        let uu____0: u64 = fstar::uint64::eq_mask(e[i as usize], (&bn_zero)[i as usize]);
         (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
     };
     let mask1: u64 = (&mask)[0usize];
@@ -135,7 +135,7 @@
 }
 
 #[inline] fn pss_encode(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     saltLen: u32,
     salt: &[u8],
     msgLen: u32,
@@ -182,7 +182,7 @@
 }
 
 #[inline] fn pss_verify(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     saltLen: u32,
     msgLen: u32,
     msg: &[u8],
@@ -230,7 +230,7 @@
         let mut res: [u8; 1] = [255u8; 1usize];
         for i in 0u32..padLen
         {
-            let uu____0: u8 = crate::fstar::uint8::eq_mask(salt.0[i as usize], (&pad2)[i as usize]);
+            let uu____0: u8 = fstar::uint8::eq_mask(salt.0[i as usize], (&pad2)[i as usize]);
             (&mut res)[0usize] = uu____0 & (&res)[0usize]
         };
         let z: u8 = (&res)[0usize];
@@ -249,7 +249,7 @@
             for i in 0u32..hLen
             {
                 let uu____1: u8 =
-                    crate::fstar::uint8::eq_mask((&m1Hash0)[i as usize], m1Hash.1[i as usize]);
+                    fstar::uint8::eq_mask((&m1Hash0)[i as usize], m1Hash.1[i as usize]);
                 (&mut res0)[0usize] = uu____1 & (&res0)[0usize]
             };
             let z0: u8 = (&res0)[0usize];
@@ -268,14 +268,14 @@
     let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen as usize);
     let e: (&mut [u64], &mut [u64]) =
         r2.1.split_at_mut(nLen.wrapping_add(nLen) as usize - nLen as usize);
-    crate::hacl::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
-    crate::hacl::bignum::bn_precomp_r2_mod_n_u64(
+    crate::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
+    crate::bignum::bn_precomp_r2_mod_n_u64(
         modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
         modBits.wrapping_sub(1u32),
         r2.0,
         e.0
     );
-    crate::hacl::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
+    crate::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
     let m0: u64 = check_modulus_u64(modBits, r2.0);
     let m1: u64 = check_exponent_u64(eBits, e.1);
     let m: u64 = m0 & m1;
@@ -300,7 +300,7 @@
     let pkey: (&mut [u64], &mut [u64]) = skey.split_at_mut(0usize);
     let d: (&mut [u64], &mut [u64]) = pkey.1.split_at_mut(pkeyLen as usize);
     let b: bool = load_pkey(modBits, eBits, nb, eb, d.0);
-    crate::hacl::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
+    crate::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
     let m1: u64 = check_exponent_u64(dBits, d.1);
     b && m1 == 0xFFFFFFFFFFFFFFFFu64
 }
@@ -326,7 +326,7 @@ Sign a message `msg` and write the signature to `sgnt`.
 */
 pub fn
 rsapss_sign(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
     dBits: u32,
@@ -354,7 +354,7 @@ rsapss_sign(
         let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
         pss_encode(a, saltLen, salt, msgLen, msg, emBits, &mut em);
-        crate::hacl::bignum_base::bn_from_bytes_be_uint64(emLen, &em, &mut (&mut m)[0usize..]);
+        crate::bignum_base::bn_from_bytes_be_uint64(emLen, &em, &mut (&mut m)[0usize..]);
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut s: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
@@ -371,8 +371,8 @@ rsapss_sign(
                 -
                 nLen2.wrapping_add(nLen2) as usize
             );
-        let mu: u64 = crate::hacl::bignum::mod_inv_uint64(r2.0[0usize]);
-        crate::hacl::bignum::bn_mod_exp_consttime_precomp_u64(
+        let mu: u64 = crate::bignum::mod_inv_uint64(r2.0[0usize]);
+        crate::bignum::bn_mod_exp_consttime_precomp_u64(
             modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
             r2.0,
             mu,
@@ -382,8 +382,8 @@ rsapss_sign(
             d.1,
             &mut s
         );
-        let mu0: u64 = crate::hacl::bignum::mod_inv_uint64(r2.0[0usize]);
-        crate::hacl::bignum::bn_mod_exp_vartime_precomp_u64(
+        let mu0: u64 = crate::bignum::mod_inv_uint64(r2.0[0usize]);
+        crate::bignum::bn_mod_exp_vartime_precomp_u64(
             modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
             r2.0,
             mu0,
@@ -396,7 +396,7 @@ rsapss_sign(
         let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
         for i in 0u32..nLen2
         {
-            let uu____0: u64 = crate::fstar::uint64::eq_mask((&m)[i as usize], (&m·)[i as usize]);
+            let uu____0: u64 = fstar::uint64::eq_mask((&m)[i as usize], (&m·)[i as usize]);
             (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
         };
         let mask1: u64 = (&mask)[0usize];
@@ -409,7 +409,7 @@ rsapss_sign(
             os.1[i as usize] = x0
         };
         let eq_b: bool = eq_m == 0xFFFFFFFFFFFFFFFFu64;
-        crate::hacl::bignum_base::bn_to_bytes_be_uint64(k, &s, sgnt);
+        crate::bignum_base::bn_to_bytes_be_uint64(k, &s, sgnt);
         let eq_b0: bool = eq_b;
         eq_b0
     }
@@ -437,7 +437,7 @@ Verify the signature `sgnt` of a message `msg`.
 */
 pub fn
 rsapss_verify(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
     pkey: &[u64],
@@ -461,7 +461,7 @@ rsapss_verify(
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut s: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
-        crate::hacl::bignum_base::bn_from_bytes_be_uint64(k, sgnt, &mut s);
+        crate::bignum_base::bn_from_bytes_be_uint64(k, sgnt, &mut s);
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let n: (&[u64], &[u64]) = pkey.split_at(0usize);
         let r2: (&[u64], &[u64]) = n.1.split_at(nLen2 as usize);
@@ -470,16 +470,16 @@ rsapss_verify(
         let mut acc: [u64; 1] = [0u64; 1usize];
         for i in 0u32..nLen2
         {
-            let beq: u64 = crate::fstar::uint64::eq_mask((&s)[i as usize], r2.0[i as usize]);
-            let blt: u64 = ! crate::fstar::uint64::gte_mask((&s)[i as usize], r2.0[i as usize]);
+            let beq: u64 = fstar::uint64::eq_mask((&s)[i as usize], r2.0[i as usize]);
+            let blt: u64 = ! fstar::uint64::gte_mask((&s)[i as usize], r2.0[i as usize]);
             (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
         };
         let mask: u64 = (&acc)[0usize];
         let res: bool =
             if mask == 0xFFFFFFFFFFFFFFFFu64
             {
-                let mu: u64 = crate::hacl::bignum::mod_inv_uint64(r2.0[0usize]);
-                crate::hacl::bignum::bn_mod_exp_vartime_precomp_u64(
+                let mu: u64 = crate::bignum::mod_inv_uint64(r2.0[0usize]);
+                crate::bignum::bn_mod_exp_vartime_precomp_u64(
                     modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
                     r2.0,
                     mu,
@@ -510,7 +510,7 @@ rsapss_verify(
             let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
             let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
             let m1: (&[u64], &[u64]) = m.split_at(0usize);
-            crate::hacl::bignum_base::bn_to_bytes_be_uint64(emLen, m1.1, &mut em);
+            crate::bignum_base::bn_to_bytes_be_uint64(emLen, m1.1, &mut em);
             let res0: bool = pss_verify(a, saltLen, msgLen, msg, emBits, &em);
             res0
         }
@@ -567,14 +567,14 @@ new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
             let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen1 as usize);
             let e: (&mut [u64], &mut [u64]) =
                 r2.1.split_at_mut(nLen1.wrapping_add(nLen1) as usize - nLen1 as usize);
-            crate::hacl::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
-            crate::hacl::bignum::bn_precomp_r2_mod_n_u64(
+            crate::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
+            crate::bignum::bn_precomp_r2_mod_n_u64(
                 modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
                 modBits.wrapping_sub(1u32),
                 r2.0,
                 e.0
             );
-            crate::hacl::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
+            crate::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
             let m0: u64 = check_modulus_u64(modBits, r2.0);
             let m1: u64 = check_exponent_u64(eBits, e.1);
             let m: u64 = m0 & m1;
@@ -651,19 +651,19 @@ new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8],
             let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
             let e: (&mut [u64], &mut [u64]) =
                 r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
-            crate::hacl::bignum_base::bn_from_bytes_be_uint64(nbLen1, nb, r2.0);
-            crate::hacl::bignum::bn_precomp_r2_mod_n_u64(
+            crate::bignum_base::bn_from_bytes_be_uint64(nbLen1, nb, r2.0);
+            crate::bignum::bn_precomp_r2_mod_n_u64(
                 modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
                 modBits.wrapping_sub(1u32),
                 r2.0,
                 e.0
             );
-            crate::hacl::bignum_base::bn_from_bytes_be_uint64(ebLen1, eb, e.1);
+            crate::bignum_base::bn_from_bytes_be_uint64(ebLen1, eb, e.1);
             let m0: u64 = check_modulus_u64(modBits, r2.0);
             let m1: u64 = check_exponent_u64(eBits, e.1);
             let m: u64 = m0 & m1;
             let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
-            crate::hacl::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
+            crate::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
             let m10: u64 = check_exponent_u64(dBits, d.1);
             let b0: bool = b && m10 == 0xFFFFFFFFFFFFFFFFu64;
             if b0 { (*skey2).into() } else { (*&[]).into() }
@@ -694,7 +694,7 @@ Sign a message `msg` and write the signature to `sgnt`.
 */
 pub fn
 rsapss_skey_sign(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
     dBits: u32,
@@ -744,7 +744,7 @@ Verify the signature `sgnt` of a message `msg`.
 */
 pub fn
 rsapss_pkey_verify(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
     nb: &[u8],
@@ -777,7 +777,7 @@ The mask generation function defined in the Public Key Cryptography Standard #1
 */
 pub fn
 mgf_hash0(
-    a: crate::hacl::streaming_types::hash_alg,
+    a: crate::streaming_types::hash_alg,
     len: u32,
     mgfseed: &[u8],
     maskLen: u32,

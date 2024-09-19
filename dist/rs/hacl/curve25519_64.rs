@@ -11,7 +11,7 @@
     { crate::vale::inline_x64_fadd_inline::add_scalar(out, f1, f2) }
     else
     {
-        crate::lowstar::ignore::ignore::<u64>(
+        lowstar::ignore::ignore::<u64>(
             crate::vale::stdcalls_x64_fadd::add_scalar_e(out, f1, f2)
         )
     }
@@ -22,7 +22,7 @@
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fadd_inline::fadd(out, f1, f2) }
     else
-    { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fadd::fadd_e(out, f1, f2)) }
+    { lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fadd::fadd_e(out, f1, f2)) }
 }
 
 #[inline] fn fsub(out: &mut [u64], f1: &[u64], f2: &[u64])
@@ -30,7 +30,7 @@
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fadd_inline::fsub(out, f1, f2) }
     else
-    { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsub::fsub_e(out, f1, f2)) }
+    { lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsub::fsub_e(out, f1, f2)) }
 }
 
 #[inline] fn fmul(out: &mut [u64], f1: &[u64], f2: &mut [u64], tmp: &mut [u64])
@@ -39,7 +39,7 @@
     { crate::vale::inline_x64_fmul_inline::fmul(out, f1, f2, &mut tmp[0usize..]) }
     else
     {
-        crate::lowstar::ignore::ignore::<u64>(
+        lowstar::ignore::ignore::<u64>(
             crate::vale::stdcalls_x64_fmul::fmul_e(&mut tmp[0usize..], f1, out, f2)
         )
     }
@@ -51,7 +51,7 @@
     { crate::vale::inline_x64_fmul_inline::fmul2(out, f1, f2, tmp) }
     else
     {
-        crate::lowstar::ignore::ignore::<u64>(
+        lowstar::ignore::ignore::<u64>(
             crate::vale::stdcalls_x64_fmul::fmul2_e(tmp, f1, out, f2)
         )
     }
@@ -63,7 +63,7 @@
     { crate::vale::inline_x64_fmul_inline::fmul_scalar(out, f1, f2) }
     else
     {
-        crate::lowstar::ignore::ignore::<u64>(
+        lowstar::ignore::ignore::<u64>(
             crate::vale::stdcalls_x64_fmul::fmul_scalar_e(out, f1, f2)
         )
     }
@@ -74,7 +74,7 @@
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fsqr_inline::fsqr(out, f1, tmp) }
     else
-    { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsqr::fsqr_e(tmp, f1, out)) }
+    { lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsqr::fsqr_e(tmp, f1, out)) }
 }
 
 #[inline] fn fsqr2(out: &mut [u64], f: &[u64], tmp: &mut [u64])
@@ -82,7 +82,7 @@
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fsqr_inline::fsqr2(out, f, tmp) }
     else
-    { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsqr::fsqr2_e(tmp, f, out)) }
+    { lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsqr::fsqr2_e(tmp, f, out)) }
 }
 
 #[inline] fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64])
@@ -91,7 +91,7 @@
     { crate::vale::inline_x64_fswap_inline::cswap2(bit, p1, p2) }
     else
     {
-        crate::lowstar::ignore::ignore::<u64>(
+        lowstar::ignore::ignore::<u64>(
             crate::vale::stdcalls_x64_fswap::cswap2_e(bit, p1, p2)
         )
     }
@@ -343,10 +343,10 @@ fn store_felem(b: &mut [u64], f: &mut [u64])
     let f1: u64 = f[1usize];
     let f2: u64 = f[2usize];
     let f31: u64 = f[3usize];
-    let m0: u64 = crate::fstar::uint64::gte_mask(f0, 0xffffffffffffffedu64);
-    let m1: u64 = crate::fstar::uint64::eq_mask(f1, 0xffffffffffffffffu64);
-    let m2: u64 = crate::fstar::uint64::eq_mask(f2, 0xffffffffffffffffu64);
-    let m3: u64 = crate::fstar::uint64::eq_mask(f31, 0x7fffffffffffffffu64);
+    let m0: u64 = fstar::uint64::gte_mask(f0, 0xffffffffffffffedu64);
+    let m1: u64 = fstar::uint64::eq_mask(f1, 0xffffffffffffffffu64);
+    let m2: u64 = fstar::uint64::eq_mask(f2, 0xffffffffffffffffu64);
+    let m3: u64 = fstar::uint64::eq_mask(f31, 0x7fffffffffffffffu64);
     let mask: u64 = m0 & m1 & m2 & m3;
     let f0·: u64 = f0.wrapping_sub(mask & 0xffffffffffffffedu64);
     let f1·: u64 = f1.wrapping_sub(mask & 0xffffffffffffffffu64);
@@ -379,7 +379,7 @@ fn encode_point(o: &mut [u8], i: &mut [u64])
         "i0",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut o[i0.wrapping_mul(8u32) as usize..],
             (&u64s)[i0 as usize]
         )
@@ -406,7 +406,7 @@ scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
         1u32,
         {
             let bj: (&[u8], &[u8]) = r#pub.split_at(i.wrapping_mul(8u32) as usize);
-            let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
+            let u: u64 = lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
@@ -476,7 +476,7 @@ ecdh(out: &mut [u8], r#priv: &[u8], r#pub: &[u8]) ->
         0u32,
         1u32,
         {
-            let uu____0: u8 = crate::fstar::uint8::eq_mask(out[i as usize], (&zeros)[i as usize]);
+            let uu____0: u8 = fstar::uint8::eq_mask(out[i as usize], (&zeros)[i as usize]);
             (&mut res)[0usize] = uu____0 & (&res)[0usize]
         }
     );

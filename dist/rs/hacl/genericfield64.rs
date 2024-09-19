@@ -5,7 +5,7 @@
 #![allow(unreachable_patterns)]
 #![allow(const_item_mutation)]
 
-pub type pbn_mont_ctx_u64 <'a> = &'a [crate::hacl::bignum::bn_mont_ctx_u64];
+pub type pbn_mont_ctx_u64 <'a> = &'a [crate::bignum::bn_mont_ctx_u64];
 
 /**
 Check whether this library will work for a modulus `n`.
@@ -19,7 +19,7 @@ pub fn
 field_modulus_check(len: u32, n: &[u64]) ->
     bool
 {
-    let m: u64 = crate::hacl::bignum::bn_check_modulus_u64(len, n);
+    let m: u64 = crate::bignum::bn_check_modulus_u64(len, n);
     m == 0xFFFFFFFFFFFFFFFFu64
 }
 
@@ -38,7 +38,7 @@ Heap-allocate and initialize a montgomery context.
 */
 pub fn
 field_init(len: u32, n: &[u64]) ->
-    Box<[crate::hacl::bignum::bn_mont_ctx_u64]>
+    Box<[crate::bignum::bn_mont_ctx_u64]>
 {
     let mut r2: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
     let mut n1: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
@@ -46,12 +46,12 @@ field_init(len: u32, n: &[u64]) ->
     let n11: &mut [u64] = &mut n1;
     (n11[0usize..len as usize]).copy_from_slice(&n[0usize..len as usize]);
     let nBits: u32 =
-        64u32.wrapping_mul(crate::hacl::bignum_base::bn_get_top_index_u64(len, n) as u32);
-    crate::hacl::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, r21);
-    let mu: u64 = crate::hacl::bignum::mod_inv_uint64(n[0usize]);
-    let res: crate::hacl::bignum::bn_mont_ctx_u64 =
-        crate::hacl::bignum::bn_mont_ctx_u64 { len, n: (*n11).into(), mu, r2: (*r21).into() };
-    let buf: Box<[crate::hacl::bignum::bn_mont_ctx_u64]> = vec![res].into_boxed_slice();
+        64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
+    crate::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, r21);
+    let mu: u64 = crate::bignum::mod_inv_uint64(n[0usize]);
+    let res: crate::bignum::bn_mont_ctx_u64 =
+        crate::bignum::bn_mont_ctx_u64 { len, n: (*n11).into(), mu, r2: (*r21).into() };
+    let buf: Box<[crate::bignum::bn_mont_ctx_u64]> = vec![res].into_boxed_slice();
     buf
 }
 
@@ -61,7 +61,7 @@ Return the size of a modulus `n` in limbs.
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
 pub fn
-field_get_len(k: &[crate::hacl::bignum::bn_mont_ctx_u64]) ->
+field_get_len(k: &[crate::bignum::bn_mont_ctx_u64]) ->
     u32
 { (k[0usize]).len }
 
@@ -74,11 +74,11 @@ Convert a bignum from the regular representation to the Montgomery representatio
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
 pub fn
-to_field(k: &[crate::hacl::bignum::bn_mont_ctx_u64], a: &[u64], aM: &mut [u64])
+to_field(k: &[crate::bignum::bn_mont_ctx_u64], a: &[u64], aM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
-    crate::hacl::bignum::bn_to_mont_u64(len1, &uu____0.n, uu____0.mu, &uu____0.r2, a, aM)
+    let uu____0: &crate::bignum::bn_mont_ctx_u64 = &k[0usize];
+    crate::bignum::bn_to_mont_u64(len1, &uu____0.n, uu____0.mu, &uu____0.r2, a, aM)
 }
 
 /**
@@ -91,11 +91,11 @@ Convert a result back from the Montgomery representation to the regular represen
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
 pub fn
-from_field(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], a: &mut [u64])
+from_field(k: &[crate::bignum::bn_mont_ctx_u64], aM: &[u64], a: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
-    crate::hacl::bignum::bn_from_mont_u64(len1, &uu____0.n, uu____0.mu, aM, a)
+    let uu____0: &crate::bignum::bn_mont_ctx_u64 = &k[0usize];
+    crate::bignum::bn_from_mont_u64(len1, &uu____0.n, uu____0.mu, aM, a)
 }
 
 /**
@@ -105,15 +105,15 @@ Write `aM + bM mod n` in `cM`.
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
 pub fn
-add(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
+add(k: &[crate::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
+    let uu____0: &crate::bignum::bn_mont_ctx_u64 = &k[0usize];
     let mut a_copy: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
     let mut b_copy: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
     ((&mut a_copy)[0usize..len1 as usize]).copy_from_slice(&aM[0usize..len1 as usize]);
     ((&mut b_copy)[0usize..len1 as usize]).copy_from_slice(&bM[0usize..len1 as usize]);
-    crate::hacl::bignum::bn_add_mod_n_u64(len1, &uu____0.n, &a_copy, &b_copy, cM)
+    crate::bignum::bn_add_mod_n_u64(len1, &uu____0.n, &a_copy, &b_copy, cM)
 }
 
 /**
@@ -123,10 +123,10 @@ Write `aM - bM mod n` to `cM`.
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
 pub fn
-sub(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
+sub(k: &[crate::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
-    crate::hacl::bignum::bn_sub_mod_n_u64(len1, &(k[0usize]).n, aM, bM, cM)
+    crate::bignum::bn_sub_mod_n_u64(len1, &(k[0usize]).n, aM, bM, cM)
 }
 
 /**
@@ -136,11 +136,11 @@ Write `aM * bM mod n` in `cM`.
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
 pub fn
-mul(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
+mul(k: &[crate::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
-    crate::hacl::bignum::bn_mont_mul_u64(len1, &uu____0.n, uu____0.mu, aM, bM, cM)
+    let uu____0: &crate::bignum::bn_mont_ctx_u64 = &k[0usize];
+    crate::bignum::bn_mont_mul_u64(len1, &uu____0.n, uu____0.mu, aM, bM, cM)
 }
 
 /**
@@ -150,11 +150,11 @@ Write `aM * aM mod n` in `cM`.
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
 pub fn
-sqr(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], cM: &mut [u64])
+sqr(k: &[crate::bignum::bn_mont_ctx_u64], aM: &[u64], cM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
-    crate::hacl::bignum::bn_mont_sqr_u64(len1, &uu____0.n, uu____0.mu, aM, cM)
+    let uu____0: &crate::bignum::bn_mont_ctx_u64 = &k[0usize];
+    crate::bignum::bn_mont_sqr_u64(len1, &uu____0.n, uu____0.mu, aM, cM)
 }
 
 /**
@@ -164,11 +164,11 @@ Convert a bignum `one` to its Montgomery representation.
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
 pub fn
-one(k: &[crate::hacl::bignum::bn_mont_ctx_u64], oneM: &mut [u64])
+one(k: &[crate::bignum::bn_mont_ctx_u64], oneM: &mut [u64])
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
-    crate::hacl::bignum::bn_from_mont_u64(len1, &uu____0.n, uu____0.mu, &uu____0.r2, oneM)
+    let uu____0: &crate::bignum::bn_mont_ctx_u64 = &k[0usize];
+    crate::bignum::bn_from_mont_u64(len1, &uu____0.n, uu____0.mu, &uu____0.r2, oneM)
 }
 
 /**
@@ -191,7 +191,7 @@ Write `aM ^ b mod n` in `resM`.
 */
 pub fn
 exp_consttime(
-    k: &[crate::hacl::bignum::bn_mont_ctx_u64],
+    k: &[crate::bignum::bn_mont_ctx_u64],
     aM: &[u64],
     bBits: u32,
     b: &[u64],
@@ -199,7 +199,7 @@ exp_consttime(
 )
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
+    let uu____0: &crate::bignum::bn_mont_ctx_u64 = &k[0usize];
     let mut aMc: Box<[u64]> = vec![0u64; uu____0.len as usize].into_boxed_slice();
     ((&mut aMc)[0usize..uu____0.len as usize]).copy_from_slice(&aM[0usize..uu____0.len as usize]);
     if bBits < 200u32
@@ -212,7 +212,7 @@ exp_consttime(
         let mut sw: [u64; 1] = [0u64; 1usize];
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
         let ctx_r2: (&[u64], &[u64]) = ctx_n.1.split_at(len1 as usize);
-        crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, resM);
+        crate::bignum::bn_from_mont_u64(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, resM);
         for i in 0u32..bBits
         {
             let i1: u32 = bBits.wrapping_sub(i).wrapping_sub(1u32).wrapping_div(64u32);
@@ -227,9 +227,9 @@ exp_consttime(
                 (&mut aMc)[i0 as usize] = (&aMc)[i0 as usize] ^ dummy
             };
             let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_mul_u64(len1, ctx_n0.1, uu____0.mu, &aMc, resM, &mut aMc);
+            crate::bignum::bn_mont_mul_u64(len1, ctx_n0.1, uu____0.mu, &aMc, resM, &mut aMc);
             let ctx_n1: (&[u64], &[u64]) = ctx_n0.1.split_at(0usize);
-            crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n1.1, uu____0.mu, resM, resM);
+            crate::bignum::bn_mont_sqr_u64(len1, ctx_n1.1, uu____0.mu, resM, resM);
             (&mut sw)[0usize] = bit
         };
         let sw0: u64 = (&sw)[0usize];
@@ -259,9 +259,9 @@ exp_consttime(
         let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(len1 as usize);
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
         let ctx_r2: (&[u64], &[u64]) = ctx_n.1.split_at(len1 as usize);
-        crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, t1.0);
+        crate::bignum::bn_from_mont_u64(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len1 as usize]).copy_from_slice(&(&aMc)[0usize..len1 as usize]);
-        crate::lowstar::ignore::ignore::<&[u64]>(&table);
+        lowstar::ignore::ignore::<&[u64]>(&table);
         krml::unroll_for!(
             7,
             "i",
@@ -271,7 +271,7 @@ exp_consttime(
                 let t11: (&[u64], &[u64]) =
                     table.split_at(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
                 let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
-                crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, t11.1, &mut tmp);
+                crate::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, t11.1, &mut tmp);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(2u32).wrapping_mul(len1)
@@ -284,7 +284,7 @@ exp_consttime(
                         2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
                     );
                 let ctx_n1: (&[u64], &[u64]) = ctx_n0.1.split_at(0usize);
-                crate::hacl::bignum::bn_mont_mul_u64(
+                crate::bignum::bn_mont_mul_u64(
                     len1,
                     ctx_n1.1,
                     uu____0.mu,
@@ -304,7 +304,7 @@ exp_consttime(
         if bBits.wrapping_rem(4u32) != 0u32
         {
             let i: u32 = bBits.wrapping_div(4u32).wrapping_mul(4u32);
-            let bits_c: u64 = crate::hacl::bignum_base::bn_get_bits_u64(bLen, b, i, 4u32);
+            let bits_c: u64 = crate::bignum_base::bn_get_bits_u64(bLen, b, i, 4u32);
             (resM[0usize..len1 as usize]).copy_from_slice(
                 &(&(&table)[0u32.wrapping_mul(len1) as usize..] as &[u64])[0usize..len1 as usize]
             );
@@ -315,7 +315,7 @@ exp_consttime(
                 1u32,
                 {
                     let c: u64 =
-                        crate::fstar::uint64::eq_mask(bits_c, i0.wrapping_add(1u32) as u64);
+                        fstar::uint64::eq_mask(bits_c, i0.wrapping_add(1u32) as u64);
                     let res_j: (&[u64], &[u64]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(len1) as usize);
                     for i1 in 0u32..len1
@@ -331,7 +331,7 @@ exp_consttime(
         {
             let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
             let ctx_r20: (&[u64], &[u64]) = ctx_n0.1.split_at(len1 as usize);
-            crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
+            crate::bignum::bn_from_mont_u64(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
         };
         let mut tmp0: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -343,15 +343,15 @@ exp_consttime(
                 1u32,
                 {
                     let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
-                    crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, resM, resM)
+                    crate::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, resM, resM)
                 }
             );
             let k2: u32 =
                 bBits.wrapping_sub(bBits.wrapping_rem(4u32)).wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(
                     4u32
                 );
-            let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(bLen, b, k2, 4u32);
-            crate::lowstar::ignore::ignore::<&[u64]>(&table);
+            let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(bLen, b, k2, 4u32);
+            lowstar::ignore::ignore::<&[u64]>(&table);
             ((&mut tmp0)[0usize..len1 as usize]).copy_from_slice(
                 &(&(&table)[0u32.wrapping_mul(len1) as usize..] as &[u64])[0usize..len1 as usize]
             );
@@ -362,7 +362,7 @@ exp_consttime(
                 1u32,
                 {
                     let c: u64 =
-                        crate::fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
+                        fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
                     let res_j: (&[u64], &[u64]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(len1) as usize);
                     for i1 in 0u32..len1
@@ -374,7 +374,7 @@ exp_consttime(
                 }
             );
             let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_mul_u64(len1, ctx_n0.1, uu____0.mu, resM, &tmp0, resM)
+            crate::bignum::bn_mont_mul_u64(len1, ctx_n0.1, uu____0.mu, resM, &tmp0, resM)
         }
     }
 }
@@ -399,7 +399,7 @@ Write `aM ^ b mod n` in `resM`.
 */
 pub fn
 exp_vartime(
-    k: &[crate::hacl::bignum::bn_mont_ctx_u64],
+    k: &[crate::bignum::bn_mont_ctx_u64],
     aM: &[u64],
     bBits: u32,
     b: &[u64],
@@ -407,7 +407,7 @@ exp_vartime(
 )
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
+    let uu____0: &crate::bignum::bn_mont_ctx_u64 = &k[0usize];
     let mut aMc: Box<[u64]> = vec![0u64; uu____0.len as usize].into_boxed_slice();
     ((&mut aMc)[0usize..uu____0.len as usize]).copy_from_slice(&aM[0usize..uu____0.len as usize]);
     if bBits < 200u32
@@ -419,7 +419,7 @@ exp_vartime(
         );
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
         let ctx_r2: (&[u64], &[u64]) = ctx_n.1.split_at(len1 as usize);
-        crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, resM);
+        crate::bignum::bn_from_mont_u64(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, resM);
         for i in 0u32..bBits
         {
             let i1: u32 = i.wrapping_div(64u32);
@@ -429,10 +429,10 @@ exp_vartime(
             if bit != 0u64
             {
                 let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
-                crate::hacl::bignum::bn_mont_mul_u64(len1, ctx_n0.1, uu____0.mu, resM, &aMc, resM)
+                crate::bignum::bn_mont_mul_u64(len1, ctx_n0.1, uu____0.mu, resM, &aMc, resM)
             };
             let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, &aMc, &mut aMc)
+            crate::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, &aMc, &mut aMc)
         }
     }
     else
@@ -454,9 +454,9 @@ exp_vartime(
         let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(len1 as usize);
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
         let ctx_r2: (&[u64], &[u64]) = ctx_n.1.split_at(len1 as usize);
-        crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, t1.0);
+        crate::bignum::bn_from_mont_u64(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len1 as usize]).copy_from_slice(&(&aMc)[0usize..len1 as usize]);
-        crate::lowstar::ignore::ignore::<&[u64]>(&table);
+        lowstar::ignore::ignore::<&[u64]>(&table);
         krml::unroll_for!(
             7,
             "i",
@@ -466,7 +466,7 @@ exp_vartime(
                 let t11: (&[u64], &[u64]) =
                     table.split_at(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
                 let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
-                crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, t11.1, &mut tmp);
+                crate::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, t11.1, &mut tmp);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(2u32).wrapping_mul(len1)
@@ -479,7 +479,7 @@ exp_vartime(
                         2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
                     );
                 let ctx_n1: (&[u64], &[u64]) = ctx_n0.1.split_at(0usize);
-                crate::hacl::bignum::bn_mont_mul_u64(
+                crate::bignum::bn_mont_mul_u64(
                     len1,
                     ctx_n1.1,
                     uu____0.mu,
@@ -499,7 +499,7 @@ exp_vartime(
         if bBits.wrapping_rem(4u32) != 0u32
         {
             let i: u32 = bBits.wrapping_div(4u32).wrapping_mul(4u32);
-            let bits_c: u64 = crate::hacl::bignum_base::bn_get_bits_u64(bLen, b, i, 4u32);
+            let bits_c: u64 = crate::bignum_base::bn_get_bits_u64(bLen, b, i, 4u32);
             let bits_l32: u32 = bits_c as u32;
             let a_bits_l: (&[u64], &[u64]) = table.split_at(bits_l32.wrapping_mul(len1) as usize);
             (resM[0usize..len1 as usize]).copy_from_slice(&a_bits_l.1[0usize..len1 as usize])
@@ -508,7 +508,7 @@ exp_vartime(
         {
             let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
             let ctx_r20: (&[u64], &[u64]) = ctx_n0.1.split_at(len1 as usize);
-            crate::hacl::bignum::bn_from_mont_u64(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
+            crate::bignum::bn_from_mont_u64(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
         };
         let mut tmp0: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -520,20 +520,20 @@ exp_vartime(
                 1u32,
                 {
                     let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
-                    crate::hacl::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, resM, resM)
+                    crate::bignum::bn_mont_sqr_u64(len1, ctx_n0.1, uu____0.mu, resM, resM)
                 }
             );
             let k2: u32 =
                 bBits.wrapping_sub(bBits.wrapping_rem(4u32)).wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(
                     4u32
                 );
-            let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(bLen, b, k2, 4u32);
-            crate::lowstar::ignore::ignore::<&[u64]>(&table);
+            let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(bLen, b, k2, 4u32);
+            lowstar::ignore::ignore::<&[u64]>(&table);
             let bits_l32: u32 = bits_l as u32;
             let a_bits_l: (&[u64], &[u64]) = table.split_at(bits_l32.wrapping_mul(len1) as usize);
             ((&mut tmp0)[0usize..len1 as usize]).copy_from_slice(&a_bits_l.1[0usize..len1 as usize]);
             let ctx_n0: (&[u64], &[u64]) = ctx_r2.1.split_at(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_mul_u64(len1, ctx_n0.1, uu____0.mu, resM, &tmp0, resM)
+            crate::bignum::bn_mont_mul_u64(len1, ctx_n0.1, uu____0.mu, resM, &tmp0, resM)
         }
     }
 }
@@ -550,13 +550,13 @@ Write `aM ^ (-1) mod n` in `aInvM`.
   • 0 < aM
 */
 pub fn
-inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64])
+inverse(k: &[crate::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64])
 {
-    let uu____0: &crate::hacl::bignum::bn_mont_ctx_u64 = &k[0usize];
+    let uu____0: &crate::bignum::bn_mont_ctx_u64 = &k[0usize];
     let len1: u32 = uu____0.len;
     let mut n2: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
     let c0: u64 =
-        crate::lib::inttypes_intrinsics::sub_borrow_u64(
+        lib::inttypes_intrinsics::sub_borrow_u64(
             0u64,
             (&uu____0.n)[0usize],
             2u64,
@@ -574,11 +574,11 @@ inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64
                 let res_i: (&mut [u64], &mut [u64]) =
                     res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
                 (&mut c)[0usize] =
-                    crate::lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1);
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1);
                 let t10: u64 = a1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                 let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                    lib::inttypes_intrinsics::sub_borrow_u64(
                         (&c)[0usize],
                         t10,
                         0u64,
@@ -587,7 +587,7 @@ inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64
                 let t11: u64 = a1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                 let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                    lib::inttypes_intrinsics::sub_borrow_u64(
                         (&c)[0usize],
                         t11,
                         0u64,
@@ -596,7 +596,7 @@ inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64
                 let t12: u64 = a1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                 let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                    lib::inttypes_intrinsics::sub_borrow_u64(
                         (&c)[0usize],
                         t12,
                         0u64,
@@ -611,13 +611,13 @@ inverse(k: &[crate::hacl::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64
                 let t1: u64 = a1[i as usize];
                 let res_i: (&mut [u64], &mut [u64]) = res1.1.split_at_mut(i as usize);
                 (&mut c)[0usize] =
-                    crate::lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1)
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1)
             };
             let c1: u64 = (&c)[0usize];
             c1
         }
         else
         { c0 };
-    crate::lowstar::ignore::ignore::<u64>(c);
+    lowstar::ignore::ignore::<u64>(c);
     exp_vartime(k, aM, uu____0.len.wrapping_mul(64u32), &n2, aInvM)
 }

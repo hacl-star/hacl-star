@@ -38,8 +38,8 @@ Write `a + b mod p` in `out`.
 pub fn
 felem_add(a: &[u64], b: &[u64], out: &mut [u64])
 {
-    crate::hacl::bignum_k256::fadd(out, a, b);
-    crate::hacl::bignum_k256::fnormalize_weak(out, out)
+    crate::bignum_k256::fadd(out, a, b);
+    crate::bignum_k256::fnormalize_weak(out, out)
 }
 
 /**
@@ -54,8 +54,8 @@ Write `a - b mod p` in `out`.
 pub fn
 felem_sub(a: &[u64], b: &[u64], out: &mut [u64])
 {
-    crate::hacl::bignum_k256::fsub(out, a, b, 2u64);
-    crate::hacl::bignum_k256::fnormalize_weak(out, out)
+    crate::bignum_k256::fsub(out, a, b, 2u64);
+    crate::bignum_k256::fnormalize_weak(out, out)
 }
 
 /**
@@ -69,7 +69,7 @@ Write `a * b mod p` in `out`.
 */
 pub fn
 felem_mul(a: &[u64], b: &[u64], out: &mut [u64])
-{ crate::hacl::bignum_k256::fmul(out, a, b) }
+{ crate::bignum_k256::fmul(out, a, b) }
 
 /**
 Write `a * a mod p` in `out`.
@@ -82,7 +82,7 @@ Write `a * a mod p` in `out`.
 */
 pub fn
 felem_sqr(a: &[u64], out: &mut [u64])
-{ crate::hacl::bignum_k256::fsqr(out, a) }
+{ crate::bignum_k256::fsqr(out, a) }
 
 /**
 Write `a ^ (p - 2) mod p` in `out`.
@@ -97,7 +97,7 @@ Write `a ^ (p - 2) mod p` in `out`.
 */
 pub fn
 felem_inv(a: &[u64], out: &mut [u64])
-{ crate::hacl::bignum_k256::finv(out, a) }
+{ crate::bignum_k256::finv(out, a) }
 
 /**
 Load a bid-endian field element from memory.
@@ -111,7 +111,7 @@ Load a bid-endian field element from memory.
 */
 pub fn
 felem_load(b: &[u8], out: &mut [u64])
-{ crate::hacl::bignum_k256::load_felem(out, b) }
+{ crate::bignum_k256::load_felem(out, b) }
 
 /**
 Serialize a field element into big-endian memory.
@@ -127,8 +127,8 @@ pub fn
 felem_store(a: &[u64], out: &mut [u8])
 {
     let mut tmp: [u64; 5] = [0u64; 5usize];
-    crate::hacl::bignum_k256::fnormalize(&mut tmp, a);
-    crate::hacl::bignum_k256::store_felem(out, &tmp)
+    crate::bignum_k256::fnormalize(&mut tmp, a);
+    crate::bignum_k256::store_felem(out, &tmp)
 }
 
 /**
@@ -138,7 +138,7 @@ Write the point at infinity (additive identity) in `p`.
 */
 pub fn
 mk_point_at_inf(p: &mut [u64])
-{ crate::hacl::k256_ecdsa::make_point_at_inf(p) }
+{ crate::k256_ecdsa::make_point_at_inf(p) }
 
 /**
 Write the base point (generator) in `p`.
@@ -176,7 +176,7 @@ Write `-p` in `out` (point negation).
 */
 pub fn
 point_negate(p: &[u64], out: &mut [u64])
-{ crate::hacl::k256_ecdsa::point_negate(out, p) }
+{ crate::k256_ecdsa::point_negate(out, p) }
 
 /**
 Write `p + q` in `out` (point addition).
@@ -189,7 +189,7 @@ Write `p + q` in `out` (point addition).
 */
 pub fn
 point_add(p: &[u64], q: &[u64], out: &mut [u64])
-{ crate::hacl::k256_ecdsa::point_add(out, p, q) }
+{ crate::k256_ecdsa::point_add(out, p, q) }
 
 /**
 Write `p + p` in `out` (point doubling).
@@ -202,7 +202,7 @@ Write `p + p` in `out` (point doubling).
 */
 pub fn
 point_double(p: &[u64], out: &mut [u64])
-{ crate::hacl::k256_ecdsa::point_double(out, p) }
+{ crate::k256_ecdsa::point_double(out, p) }
 
 /**
 Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
@@ -228,7 +228,7 @@ point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
         1u32,
         {
             let u: u64 =
-                crate::lowstar::endianness::load64_be(
+                lowstar::endianness::load64_be(
                     &scalar[4u32.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
                 );
             let x: u64 = u;
@@ -236,7 +236,7 @@ point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
             os.1[i as usize] = x
         }
     );
-    crate::hacl::k256_ecdsa::point_mul(out, &scalar_q, p)
+    crate::k256_ecdsa::point_mul(out, &scalar_q, p)
 }
 
 /**
@@ -254,7 +254,7 @@ Convert a point from projective coordinates to its raw form.
 */
 pub fn
 point_store(p: &[u64], out: &mut [u8])
-{ crate::hacl::k256_ecdsa::point_store(out, p) }
+{ crate::k256_ecdsa::point_store(out, p) }
 
 /**
 Convert a point to projective coordinates from its raw form.
@@ -275,8 +275,8 @@ point_load(b: &[u8], out: &mut [u64])
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
     let pxb: (&[u8], &[u8]) = b.split_at(0usize);
     let pyb: (&[u8], &[u8]) = pxb.1.split_at(32usize);
-    crate::hacl::bignum_k256::load_felem(py.0, pyb.0);
-    crate::hacl::bignum_k256::load_felem(py.1, pyb.1);
+    crate::bignum_k256::load_felem(py.0, pyb.0);
+    crate::bignum_k256::load_felem(py.1, pyb.1);
     let x: (&[u64], &[u64]) = py.0.split_at(0usize);
     let y: (&[u64], &[u64]) = py.1.split_at(0usize);
     let x1: (&mut [u64], &mut [u64]) = out.split_at_mut(0usize);
@@ -306,6 +306,6 @@ is_point_valid(b: &[u8]) ->
     bool
 {
     let mut p: [u64; 10] = [0u64; 10usize];
-    let res: bool = crate::hacl::k256_ecdsa::aff_point_load_vartime(&mut p, b);
+    let res: bool = crate::k256_ecdsa::aff_point_load_vartime(&mut p, b);
     res
 }

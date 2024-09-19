@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "fstar",
  "krml",
+ "lib",
  "lowstar",
 ]
 
@@ -21,12 +22,20 @@ version = "0.1.0"
 dependencies = [
  "fstar",
  "krml",
+ "lib",
  "lowstar",
 ]
 
 [[package]]
 name = "krml"
 version = "0.1.0"
+
+[[package]]
+name = "lib"
+version = "0.1.0"
+dependencies = [
+ "fstar",
+]
 
 [[package]]
 name = "lowstar"

@@ -18,10 +18,10 @@ pub(crate) fn shake128_4x(
     output3: &mut [u8]
 )
 {
-    crate::hacl::hash_sha3::shake128(output0, output_len, input0, input_len);
-    crate::hacl::hash_sha3::shake128(output1, output_len, input1, input_len);
-    crate::hacl::hash_sha3::shake128(output2, output_len, input2, input_len);
-    crate::hacl::hash_sha3::shake128(output3, output_len, input3, input_len)
+    crate::hash_sha3::shake128(output0, output_len, input0, input_len);
+    crate::hash_sha3::shake128(output1, output_len, input1, input_len);
+    crate::hash_sha3::shake128(output2, output_len, input2, input_len);
+    crate::hash_sha3::shake128(output3, output_len, input3, input_len)
 }
 
 #[inline] pub(crate) fn mod_pow2(n1: u32, n2: u32, logq: u32, a: &mut [u16])
@@ -124,7 +124,7 @@ pub(crate) fn shake128_4x(
     let mut res: [u16; 1] = [0xFFFFu16; 1usize];
     for i in 0u32..n1.wrapping_mul(n2)
     {
-        let uu____0: u16 = crate::fstar::uint16::eq_mask(a[i as usize], b[i as usize]);
+        let uu____0: u16 = fstar::uint16::eq_mask(a[i as usize], b[i as usize]);
         (&mut res)[0usize] = uu____0 & (&res)[0usize]
     };
     let r: u16 = (&res)[0usize];
@@ -135,7 +135,7 @@ pub(crate) fn shake128_4x(
 {
     for i in 0u32..n1.wrapping_mul(n2)
     {
-        crate::lowstar::endianness::store16_le(
+        lowstar::endianness::store16_le(
             &mut res[2u32.wrapping_mul(i) as usize..],
             m[i as usize]
         )
@@ -146,7 +146,7 @@ pub(crate) fn shake128_4x(
 {
     for i in 0u32..n1.wrapping_mul(n2)
     {
-        let u: u16 = crate::lowstar::endianness::load16_le(&b[2u32.wrapping_mul(i) as usize..]);
+        let u: u16 = lowstar::endianness::load16_le(&b[2u32.wrapping_mul(i) as usize..]);
         let x: u16 = u;
         let os: (&mut [u16], &mut [u16]) = res.split_at_mut(0usize);
         os.1[i as usize] = x
@@ -177,19 +177,19 @@ pub(crate) fn shake128_4x(
         let tmp_seed1: (&mut [u8], &mut [u8]) = tmp_seed0.1.split_at_mut(18usize);
         let tmp_seed2: (&mut [u8], &mut [u8]) = tmp_seed1.1.split_at_mut(18usize);
         let tmp_seed3: (&mut [u8], &mut [u8]) = tmp_seed2.1.split_at_mut(18usize);
-        crate::lowstar::endianness::store16_le(
+        lowstar::endianness::store16_le(
             &mut tmp_seed1.0[0usize..],
             4u32.wrapping_mul(i).wrapping_add(0u32) as u16
         );
-        crate::lowstar::endianness::store16_le(
+        lowstar::endianness::store16_le(
             &mut tmp_seed2.0[0usize..],
             4u32.wrapping_mul(i).wrapping_add(1u32) as u16
         );
-        crate::lowstar::endianness::store16_le(
+        lowstar::endianness::store16_le(
             &mut tmp_seed3.0[0usize..],
             4u32.wrapping_mul(i).wrapping_add(2u32) as u16
         );
-        crate::lowstar::endianness::store16_le(
+        lowstar::endianness::store16_le(
             &mut tmp_seed3.1[0usize..],
             4u32.wrapping_mul(i).wrapping_add(3u32) as u16
         );
@@ -211,16 +211,16 @@ pub(crate) fn shake128_4x(
             let resij1: (&[u8], &[u8]) = r2.0.split_at(i0.wrapping_mul(2u32) as usize);
             let resij2: (&[u8], &[u8]) = r3.0.split_at(i0.wrapping_mul(2u32) as usize);
             let resij3: (&[u8], &[u8]) = r3.1.split_at(i0.wrapping_mul(2u32) as usize);
-            let u: u16 = crate::lowstar::endianness::load16_le(resij0.1);
+            let u: u16 = lowstar::endianness::load16_le(resij0.1);
             res[4u32.wrapping_mul(i).wrapping_add(0u32).wrapping_mul(n).wrapping_add(i0) as usize] =
                 u;
-            let u0: u16 = crate::lowstar::endianness::load16_le(resij1.1);
+            let u0: u16 = lowstar::endianness::load16_le(resij1.1);
             res[4u32.wrapping_mul(i).wrapping_add(1u32).wrapping_mul(n).wrapping_add(i0) as usize] =
                 u0;
-            let u1: u16 = crate::lowstar::endianness::load16_le(resij2.1);
+            let u1: u16 = lowstar::endianness::load16_le(resij2.1);
             res[4u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(n).wrapping_add(i0) as usize] =
                 u1;
-            let u2: u16 = crate::lowstar::endianness::load16_le(resij3.1);
+            let u2: u16 = lowstar::endianness::load16_le(resij3.1);
             res[4u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(n).wrapping_add(i0) as usize] =
                 u2
         }
@@ -228,7 +228,7 @@ pub(crate) fn shake128_4x(
 }
 
 #[inline] pub(crate) fn frodo_gen_matrix(
-    a: crate::hacl::spec::frodo_gen_a,
+    a: crate::spec::frodo_gen_a,
     n: u32,
     seed: &[u8],
     a_matrix: &mut [u16]
@@ -236,7 +236,7 @@ pub(crate) fn shake128_4x(
 {
     match a
     {
-        crate::hacl::spec::frodo_gen_a::SHAKE128 => frodo_gen_matrix_shake_4x(n, seed, a_matrix),
+        crate::spec::frodo_gen_a::SHAKE128 => frodo_gen_matrix_shake_4x(n, seed, a_matrix),
         _ => panic!("Precondition of the function most likely violated")
     }
 }
@@ -263,7 +263,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
         {
             let resij: (&[u8], &[u8]) =
                 r.split_at(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
-            let u: u16 = crate::lowstar::endianness::load16_le(resij.1);
+            let u: u16 = lowstar::endianness::load16_le(resij.1);
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
             let sign: u16 = uu____0 & 1u16;
@@ -294,7 +294,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
         {
             let resij: (&[u8], &[u8]) =
                 r.split_at(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
-            let u: u16 = crate::lowstar::endianness::load16_le(resij.1);
+            let u: u16 = lowstar::endianness::load16_le(resij.1);
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
             let sign: u16 = uu____0 & 1u16;
@@ -325,7 +325,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
         {
             let resij: (&[u8], &[u8]) =
                 r.split_at(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
-            let u: u16 = crate::lowstar::endianness::load16_le(resij.1);
+            let u: u16 = lowstar::endianness::load16_le(resij.1);
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
             let sign: u16 = uu____0 & 1u16;
@@ -356,7 +356,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
         {
             let resij: (&[u8], &[u8]) =
                 r.split_at(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
-            let u: u16 = crate::lowstar::endianness::load16_le(resij.1);
+            let u: u16 = lowstar::endianness::load16_le(resij.1);
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
             let sign: u16 = uu____0 & 1u16;
@@ -378,7 +378,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
 
 pub(crate) fn randombytes_(len: u32, res: &mut [u8])
 {
-    crate::lowstar::ignore::ignore::<bool>(crate::lib::randombuffer_system::randombytes(res, len))
+    lowstar::ignore::ignore::<bool>(lib::randombuffer_system::randombytes(res, len))
 }
 
 #[inline] pub(crate) fn frodo_pack(n1: u32, n2: u32, d: u32, a: &[u16], res: &mut [u8])
@@ -398,54 +398,54 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
         let a5: u16 = a1.1[5usize] & maskd;
         let a6: u16 = a1.1[6usize] & maskd;
         let a7: u16 = a1.1[7usize] & maskd;
-        let templong: crate::fstar::uint128::uint128 =
-            crate::fstar::uint128::logor(
-                crate::fstar::uint128::logor(
-                    crate::fstar::uint128::logor(
-                        crate::fstar::uint128::logor(
-                            crate::fstar::uint128::logor(
-                                crate::fstar::uint128::logor(
-                                    crate::fstar::uint128::logor(
-                                        crate::fstar::uint128::shift_left(
-                                            crate::fstar::uint128::uint64_to_uint128(a0 as u64),
+        let templong: fstar::uint128::uint128 =
+            fstar::uint128::logor(
+                fstar::uint128::logor(
+                    fstar::uint128::logor(
+                        fstar::uint128::logor(
+                            fstar::uint128::logor(
+                                fstar::uint128::logor(
+                                    fstar::uint128::logor(
+                                        fstar::uint128::shift_left(
+                                            fstar::uint128::uint64_to_uint128(a0 as u64),
                                             7u32.wrapping_mul(d)
                                         ),
-                                        crate::fstar::uint128::shift_left(
-                                            crate::fstar::uint128::uint64_to_uint128(a11 as u64),
+                                        fstar::uint128::shift_left(
+                                            fstar::uint128::uint64_to_uint128(a11 as u64),
                                             6u32.wrapping_mul(d)
                                         )
                                     ),
-                                    crate::fstar::uint128::shift_left(
-                                        crate::fstar::uint128::uint64_to_uint128(a2 as u64),
+                                    fstar::uint128::shift_left(
+                                        fstar::uint128::uint64_to_uint128(a2 as u64),
                                         5u32.wrapping_mul(d)
                                     )
                                 ),
-                                crate::fstar::uint128::shift_left(
-                                    crate::fstar::uint128::uint64_to_uint128(a3 as u64),
+                                fstar::uint128::shift_left(
+                                    fstar::uint128::uint64_to_uint128(a3 as u64),
                                     4u32.wrapping_mul(d)
                                 )
                             ),
-                            crate::fstar::uint128::shift_left(
-                                crate::fstar::uint128::uint64_to_uint128(a4 as u64),
+                            fstar::uint128::shift_left(
+                                fstar::uint128::uint64_to_uint128(a4 as u64),
                                 3u32.wrapping_mul(d)
                             )
                         ),
-                        crate::fstar::uint128::shift_left(
-                            crate::fstar::uint128::uint64_to_uint128(a5 as u64),
+                        fstar::uint128::shift_left(
+                            fstar::uint128::uint64_to_uint128(a5 as u64),
                             2u32.wrapping_mul(d)
                         )
                     ),
-                    crate::fstar::uint128::shift_left(
-                        crate::fstar::uint128::uint64_to_uint128(a6 as u64),
+                    fstar::uint128::shift_left(
+                        fstar::uint128::uint64_to_uint128(a6 as u64),
                         1u32.wrapping_mul(d)
                     )
                 ),
-                crate::fstar::uint128::shift_left(
-                    crate::fstar::uint128::uint64_to_uint128(a7 as u64),
+                fstar::uint128::shift_left(
+                    fstar::uint128::uint64_to_uint128(a7 as u64),
                     0u32.wrapping_mul(d)
                 )
             );
-        crate::lowstar::endianness::store128_be(&mut v16, templong);
+        lowstar::endianness::store128_be(&mut v16, templong);
         let src: (&[u8], &[u8]) = v16.split_at(16u32.wrapping_sub(d) as usize);
         (r.1[0usize..d as usize]).copy_from_slice(&src.1[0usize..d as usize])
     }
@@ -463,67 +463,67 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
         ((&mut src)[16u32.wrapping_sub(d) as usize..16u32.wrapping_sub(d) as usize + d as usize]).copy_from_slice(
             &b1.1[0usize..d as usize]
         );
-        let u: crate::fstar::uint128::uint128 = crate::lowstar::endianness::load128_be(&src);
-        let templong: crate::fstar::uint128::uint128 = u;
+        let u: fstar::uint128::uint128 = lowstar::endianness::load128_be(&src);
+        let templong: fstar::uint128::uint128 = u;
         r.1[0usize] =
-            crate::fstar::uint128::uint128_to_uint64(
-                crate::fstar::uint128::shift_right(templong, 7u32.wrapping_mul(d))
+            fstar::uint128::uint128_to_uint64(
+                fstar::uint128::shift_right(templong, 7u32.wrapping_mul(d))
             )
             as
             u16
             &
             maskd;
         r.1[1usize] =
-            crate::fstar::uint128::uint128_to_uint64(
-                crate::fstar::uint128::shift_right(templong, 6u32.wrapping_mul(d))
+            fstar::uint128::uint128_to_uint64(
+                fstar::uint128::shift_right(templong, 6u32.wrapping_mul(d))
             )
             as
             u16
             &
             maskd;
         r.1[2usize] =
-            crate::fstar::uint128::uint128_to_uint64(
-                crate::fstar::uint128::shift_right(templong, 5u32.wrapping_mul(d))
+            fstar::uint128::uint128_to_uint64(
+                fstar::uint128::shift_right(templong, 5u32.wrapping_mul(d))
             )
             as
             u16
             &
             maskd;
         r.1[3usize] =
-            crate::fstar::uint128::uint128_to_uint64(
-                crate::fstar::uint128::shift_right(templong, 4u32.wrapping_mul(d))
+            fstar::uint128::uint128_to_uint64(
+                fstar::uint128::shift_right(templong, 4u32.wrapping_mul(d))
             )
             as
             u16
             &
             maskd;
         r.1[4usize] =
-            crate::fstar::uint128::uint128_to_uint64(
-                crate::fstar::uint128::shift_right(templong, 3u32.wrapping_mul(d))
+            fstar::uint128::uint128_to_uint64(
+                fstar::uint128::shift_right(templong, 3u32.wrapping_mul(d))
             )
             as
             u16
             &
             maskd;
         r.1[5usize] =
-            crate::fstar::uint128::uint128_to_uint64(
-                crate::fstar::uint128::shift_right(templong, 2u32.wrapping_mul(d))
+            fstar::uint128::uint128_to_uint64(
+                fstar::uint128::shift_right(templong, 2u32.wrapping_mul(d))
             )
             as
             u16
             &
             maskd;
         r.1[6usize] =
-            crate::fstar::uint128::uint128_to_uint64(
-                crate::fstar::uint128::shift_right(templong, 1u32.wrapping_mul(d))
+            fstar::uint128::uint128_to_uint64(
+                fstar::uint128::shift_right(templong, 1u32.wrapping_mul(d))
             )
             as
             u16
             &
             maskd;
         r.1[7usize] =
-            crate::fstar::uint128::uint128_to_uint64(
-                crate::fstar::uint128::shift_right(templong, 0u32.wrapping_mul(d))
+            fstar::uint128::uint128_to_uint64(
+                fstar::uint128::shift_right(templong, 0u32.wrapping_mul(d))
             )
             as
             u16
@@ -539,7 +539,7 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
         let mut v8: [u8; 8] = [0u8; 8usize];
         let chunk: (&[u8], &[u8]) = a.split_at(i.wrapping_mul(b) as usize);
         ((&mut v8)[0usize..b as usize]).copy_from_slice(&chunk.1[0usize..b as usize]);
-        let u: u64 = crate::lowstar::endianness::load64_le(&v8);
+        let u: u64 = lowstar::endianness::load64_le(&v8);
         let x: u64 = u;
         let x0: u64 = x;
         krml::unroll_for!(
@@ -583,7 +583,7 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
         );
         let templong0: u64 = (&templong)[0usize];
         let mut v8: [u8; 8] = [0u8; 8usize];
-        crate::lowstar::endianness::store64_le(&mut v8, templong0);
+        lowstar::endianness::store64_le(&mut v8, templong0);
         let tmp: (&[u8], &[u8]) = v8.split_at(0usize);
         (res[i.wrapping_mul(b) as usize..i.wrapping_mul(b) as usize + b as usize]).copy_from_slice(
             &tmp.1[0usize..b as usize]

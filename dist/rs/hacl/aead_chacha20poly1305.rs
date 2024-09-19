@@ -19,9 +19,9 @@
     {
         let block: (&[u8], &[u8]) = rem.0.split_at(i.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
-        let u: u64 = crate::lowstar::endianness::load64_le(&block.1[0usize..]);
+        let u: u64 = lowstar::endianness::load64_le(&block.1[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&block.1[8usize..]);
+        let u0: u64 = lowstar::endianness::load64_le(&block.1[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -141,9 +141,9 @@
         let mut e: [u64; 5] = [0u64; 5usize];
         let mut tmp: [u8; 16] = [0u8; 16usize];
         ((&mut tmp)[0usize..rem1 as usize]).copy_from_slice(&last.1[0usize..rem1 as usize]);
-        let u: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[0usize..]);
+        let u: u64 = lowstar::endianness::load64_le(&(&tmp)[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[8usize..]);
+        let u0: u64 = lowstar::endianness::load64_le(&(&tmp)[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -264,9 +264,9 @@
         let pre0: (&[u64], &[u64]) = pre.1.split_at(0usize);
         let acc0: (&mut [u64], &mut [u64]) = acc.1.split_at_mut(0usize);
         let mut e: [u64; 5] = [0u64; 5usize];
-        let u: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[0usize..]);
+        let u: u64 = lowstar::endianness::load64_le(&(&tmp)[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[8usize..]);
+        let u0: u64 = lowstar::endianness::load64_le(&(&tmp)[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -393,17 +393,17 @@
 {
     let mut ctx: [u64; 25] = [0u64; 25usize];
     let mut block: [u8; 16] = [0u8; 16usize];
-    crate::hacl::mac_poly1305::poly1305_init(&mut ctx, k);
+    crate::mac_poly1305::poly1305_init(&mut ctx, k);
     if aadlen != 0u32 { poly1305_padded_32(&mut ctx, aadlen, aad) };
     if mlen != 0u32 { poly1305_padded_32(&mut ctx, mlen, m) };
-    crate::lowstar::endianness::store64_le(&mut (&mut block)[0usize..], aadlen as u64);
-    crate::lowstar::endianness::store64_le(&mut (&mut block)[8usize..], mlen as u64);
+    lowstar::endianness::store64_le(&mut (&mut block)[0usize..], aadlen as u64);
+    lowstar::endianness::store64_le(&mut (&mut block)[8usize..], mlen as u64);
     let pre: (&mut [u64], &mut [u64]) = ctx.split_at_mut(5usize);
     let acc: (&mut [u64], &mut [u64]) = pre.0.split_at_mut(0usize);
     let mut e: [u64; 5] = [0u64; 5usize];
-    let u: u64 = crate::lowstar::endianness::load64_le(&(&block)[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&(&block)[0usize..]);
     let lo: u64 = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&(&block)[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&(&block)[8usize..]);
     let hi: u64 = u0;
     let f0: u64 = lo;
     let f1: u64 = hi;
@@ -516,7 +516,7 @@
     acc.1[2usize] = o2;
     acc.1[3usize] = o3;
     acc.1[4usize] = o4;
-    crate::hacl::mac_poly1305::poly1305_finish(out, k, &mut ctx)
+    crate::mac_poly1305::poly1305_finish(out, k, &mut ctx)
 }
 
 /**
@@ -546,10 +546,10 @@ encrypt(
     nonce: &[u8]
 )
 {
-    crate::hacl::chacha20::chacha20_encrypt(input_len, output, input, key, nonce, 1u32);
+    crate::chacha20::chacha20_encrypt(input_len, output, input, key, nonce, 1u32);
     let mut tmp: [u8; 64] = [0u8; 64usize];
     let tmp_copy: [u8; 64] = [0u8; 64usize];
-    crate::hacl::chacha20::chacha20_encrypt(64u32, &mut tmp, &tmp_copy, key, nonce, 0u32);
+    crate::chacha20::chacha20_encrypt(64u32, &mut tmp, &tmp_copy, key, nonce, 0u32);
     let key1: (&[u8], &[u8]) = tmp.split_at(0usize);
     poly1305_do_32(key1.1, data_len, data, input_len, output, tag)
 }
@@ -590,7 +590,7 @@ decrypt(
     let mut computed_tag: [u8; 16] = [0u8; 16usize];
     let mut tmp: [u8; 64] = [0u8; 64usize];
     let tmp_copy: [u8; 64] = [0u8; 64usize];
-    crate::hacl::chacha20::chacha20_encrypt(64u32, &mut tmp, &tmp_copy, key, nonce, 0u32);
+    crate::chacha20::chacha20_encrypt(64u32, &mut tmp, &tmp_copy, key, nonce, 0u32);
     let key1: (&[u8], &[u8]) = tmp.split_at(0usize);
     poly1305_do_32(key1.1, data_len, data, input_len, input, &mut computed_tag);
     let mut res: [u8; 1] = [255u8; 1usize];
@@ -601,14 +601,14 @@ decrypt(
         1u32,
         {
             let uu____0: u8 =
-                crate::fstar::uint8::eq_mask((&computed_tag)[i as usize], tag[i as usize]);
+                fstar::uint8::eq_mask((&computed_tag)[i as usize], tag[i as usize]);
             (&mut res)[0usize] = uu____0 & (&res)[0usize]
         }
     );
     let z: u8 = (&res)[0usize];
     if z == 255u8
     {
-        crate::hacl::chacha20::chacha20_encrypt(input_len, output, input, key, nonce, 1u32);
+        crate::chacha20::chacha20_encrypt(input_len, output, input, key, nonce, 1u32);
         0u32
     }
     else

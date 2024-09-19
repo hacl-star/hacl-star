@@ -15,9 +15,9 @@ pub(crate) fn poly1305_init(ctx: &mut [u64], key: &[u8])
     pre.0[2usize] = 0u64;
     pre.0[3usize] = 0u64;
     pre.0[4usize] = 0u64;
-    let u: u64 = crate::lowstar::endianness::load64_le(&kr.1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&kr.1[0usize..]);
     let lo: u64 = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&kr.1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&kr.1[8usize..]);
     let hi: u64 = u0;
     let mask0: u64 = 0x0ffffffc0fffffffu64;
     let mask1: u64 = 0x0ffffffc0ffffffcu64;
@@ -76,9 +76,9 @@ fn poly1305_update(ctx: &mut [u64], len: u32, text: &[u8])
     {
         let block: (&[u8], &[u8]) = text.split_at(i.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
-        let u: u64 = crate::lowstar::endianness::load64_le(&block.1[0usize..]);
+        let u: u64 = lowstar::endianness::load64_le(&block.1[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&block.1[8usize..]);
+        let u0: u64 = lowstar::endianness::load64_le(&block.1[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -198,9 +198,9 @@ fn poly1305_update(ctx: &mut [u64], len: u32, text: &[u8])
         let mut e: [u64; 5] = [0u64; 5usize];
         let mut tmp: [u8; 16] = [0u8; 16usize];
         ((&mut tmp)[0usize..rem as usize]).copy_from_slice(&last.1[0usize..rem as usize]);
-        let u: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[0usize..]);
+        let u: u64 = lowstar::endianness::load64_le(&(&tmp)[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&(&tmp)[8usize..]);
+        let u0: u64 = lowstar::endianness::load64_le(&(&tmp)[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -367,11 +367,11 @@ pub(crate) fn poly1305_finish(tag: &mut [u8], key: &[u8], ctx: &mut [u64])
     let f42: u64 = tmp40;
     let mh: u64 = 0x3ffffffu64;
     let ml: u64 = 0x3fffffbu64;
-    let mask: u64 = crate::fstar::uint64::eq_mask(f42, mh);
-    let mask1: u64 = mask & crate::fstar::uint64::eq_mask(f32, mh);
-    let mask2: u64 = mask1 & crate::fstar::uint64::eq_mask(f22, mh);
-    let mask3: u64 = mask2 & crate::fstar::uint64::eq_mask(f12, mh);
-    let mask4: u64 = mask3 & ! ! crate::fstar::uint64::gte_mask(f02, ml);
+    let mask: u64 = fstar::uint64::eq_mask(f42, mh);
+    let mask1: u64 = mask & fstar::uint64::eq_mask(f32, mh);
+    let mask2: u64 = mask1 & fstar::uint64::eq_mask(f22, mh);
+    let mask3: u64 = mask2 & fstar::uint64::eq_mask(f12, mh);
+    let mask4: u64 = mask3 & ! ! fstar::uint64::gte_mask(f02, ml);
     let ph: u64 = mask4 & mh;
     let pl: u64 = mask4 & ml;
     let o0: u64 = f02.wrapping_sub(pl);
@@ -403,9 +403,9 @@ pub(crate) fn poly1305_finish(tag: &mut [u8], key: &[u8], ctx: &mut [u64])
     let hi: u64 = f211.wrapping_shr(12u32) | f311.wrapping_shl(14u32) | f411.wrapping_shl(40u32);
     let f100: u64 = lo;
     let f112: u64 = hi;
-    let u: u64 = crate::lowstar::endianness::load64_le(&ks.1[0usize..]);
+    let u: u64 = lowstar::endianness::load64_le(&ks.1[0usize..]);
     let lo0: u64 = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&ks.1[8usize..]);
+    let u0: u64 = lowstar::endianness::load64_le(&ks.1[8usize..]);
     let hi0: u64 = u0;
     let f200: u64 = lo0;
     let f212: u64 = hi0;
@@ -415,8 +415,8 @@ pub(crate) fn poly1305_finish(tag: &mut [u8], key: &[u8], ctx: &mut [u64])
     let r11: u64 = r1.wrapping_add(c);
     let f300: u64 = r0;
     let f312: u64 = r11;
-    crate::lowstar::endianness::store64_le(&mut tag[0usize..], f300);
-    crate::lowstar::endianness::store64_le(&mut tag[8usize..], f312)
+    lowstar::endianness::store64_le(&mut tag[0usize..], f300);
+    lowstar::endianness::store64_le(&mut tag[8usize..], f312)
 }
 
 pub struct state_t
@@ -455,12 +455,12 @@ pub fn reset(state: &mut [state_t], key: &[u8])
 */
 pub fn
 update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
-    crate::hacl::streaming_types::error_code
+    crate::streaming_types::error_code
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     if chunk_len as u64 > 0xffffffffu64.wrapping_sub(total_len)
-    { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
+    { crate::streaming_types::error_code::MaximumLengthExceeded }
     else
     {
         let sz: u32 =
@@ -564,7 +564,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 total_len10.wrapping_add(chunk_len.wrapping_sub(diff) as u64);
             (state[0usize]).p_key = (*k·10).into()
         };
-        crate::hacl::streaming_types::error_code::Success
+        crate::streaming_types::error_code::Success
     }
 }
 

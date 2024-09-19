@@ -28,7 +28,7 @@ fn update_block(
     hash: &mut [u64],
     flag: bool,
     last_node: bool,
-    totlen: crate::fstar::uint128::uint128,
+    totlen: fstar::uint128::uint128,
     d: &[u8]
 )
 {
@@ -40,7 +40,7 @@ fn update_block(
         1u32,
         {
             let bj: (&[u8], &[u8]) = d.split_at(i.wrapping_mul(8u32) as usize);
-            let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
+            let u: u64 = lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = m_w.split_at_mut(0usize);
@@ -50,9 +50,9 @@ fn update_block(
     let mut mask: [u64; 4] = [0u64; 4usize];
     let wv_14: u64 = if flag { 0xFFFFFFFFFFFFFFFFu64 } else { 0u64 };
     let wv_15: u64 = if last_node { 0xFFFFFFFFFFFFFFFFu64 } else { 0u64 };
-    (&mut mask)[0usize] = crate::fstar::uint128::uint128_to_uint64(totlen);
+    (&mut mask)[0usize] = fstar::uint128::uint128_to_uint64(totlen);
     (&mut mask)[1usize] =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(totlen, 64u32));
+        fstar::uint128::uint128_to_uint64(fstar::uint128::shift_right(totlen, 64u32));
     (&mut mask)[2usize] = wv_14;
     (&mut mask)[3usize] = wv_15;
     (wv[0usize..16usize]).copy_from_slice(&hash[0usize..16usize]);
@@ -81,67 +81,67 @@ fn update_block(
             let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(4usize);
             let r3: (&mut [u64], &mut [u64]) = r2.1.split_at_mut(4usize);
             let s0: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(0u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(0u32)
                 as
                 usize];
             let s1: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(1u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(1u32)
                 as
                 usize];
             let s2: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(2u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(2u32)
                 as
                 usize];
             let s3: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(3u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(3u32)
                 as
                 usize];
             let s4: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(4u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(4u32)
                 as
                 usize];
             let s5: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(5u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(5u32)
                 as
                 usize];
             let s6: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(6u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(6u32)
                 as
                 usize];
             let s7: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(7u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(7u32)
                 as
                 usize];
             let s8: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(8u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(8u32)
                 as
                 usize];
             let s9: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(9u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(9u32)
                 as
                 usize];
             let s10: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(10u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(10u32)
                 as
                 usize];
             let s11: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(11u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(11u32)
                 as
                 usize];
             let s12: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(12u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(12u32)
                 as
                 usize];
             let s13: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(13u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(13u32)
                 as
                 usize];
             let s14: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(14u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(14u32)
                 as
                 usize];
             let s15: u32 =
-                (&crate::hacl::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(15u32)
+                (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(15u32)
                 as
                 usize];
             let uu____0: u64 = (&m_w)[s2 as usize];
@@ -669,14 +669,14 @@ pub(crate) fn init(hash: &mut [u64], kk: u32, nn: u32)
     let r1: (&mut [u64], &mut [u64]) = r0.1.split_at_mut(4usize);
     let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(4usize);
     let r3: (&mut [u64], &mut [u64]) = r2.1.split_at_mut(4usize);
-    let iv0: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[0usize];
-    let iv1: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[1usize];
-    let iv2: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[2usize];
-    let iv3: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[3usize];
-    let iv4: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[4usize];
-    let iv5: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[5usize];
-    let iv6: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[6usize];
-    let iv7: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[7usize];
+    let iv0: u64 = (&crate::impl_blake2_constants::ivTable_B)[0usize];
+    let iv1: u64 = (&crate::impl_blake2_constants::ivTable_B)[1usize];
+    let iv2: u64 = (&crate::impl_blake2_constants::ivTable_B)[2usize];
+    let iv3: u64 = (&crate::impl_blake2_constants::ivTable_B)[3usize];
+    let iv4: u64 = (&crate::impl_blake2_constants::ivTable_B)[4usize];
+    let iv5: u64 = (&crate::impl_blake2_constants::ivTable_B)[5usize];
+    let iv6: u64 = (&crate::impl_blake2_constants::ivTable_B)[6usize];
+    let iv7: u64 = (&crate::impl_blake2_constants::ivTable_B)[7usize];
     r3.0[0usize] = iv0;
     r3.0[1usize] = iv1;
     r3.0[2usize] = iv2;
@@ -695,7 +695,7 @@ pub(crate) fn init(hash: &mut [u64], kk: u32, nn: u32)
         1u32,
         {
             let bj: &[u8] = &p.salt[i.wrapping_mul(8u32) as usize..];
-            let u: u64 = crate::lowstar::endianness::load64_le(bj);
+            let u: u64 = lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = uu____0.1.split_at_mut(0usize);
@@ -710,7 +710,7 @@ pub(crate) fn init(hash: &mut [u64], kk: u32, nn: u32)
         1u32,
         {
             let bj: &[u8] = &p.personal[i.wrapping_mul(8u32) as usize..];
-            let u: u64 = crate::lowstar::endianness::load64_le(bj);
+            let u: u64 = lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = uu____1.1.split_at_mut(0usize);
@@ -756,33 +756,33 @@ pub(crate) fn init(hash: &mut [u64], kk: u32, nn: u32)
 
 fn update_key(wv: &mut [u64], hash: &mut [u64], kk: u32, k: &[u8], ll: u32)
 {
-    let lb: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::uint64_to_uint128(128u32 as u64);
+    let lb: fstar::uint128::uint128 =
+        fstar::uint128::uint64_to_uint128(128u32 as u64);
     let mut b: [u8; 128] = [0u8; 128usize];
     ((&mut b)[0usize..kk as usize]).copy_from_slice(&k[0usize..kk as usize]);
     if ll == 0u32
     { update_block(wv, hash, true, false, lb, &b) }
     else
     { update_block(wv, hash, false, false, lb, &b) };
-    crate::lib::memzero0::memzero::<u8>(&mut b, 128u32)
+    lib::memzero0::memzero::<u8>(&mut b, 128u32)
 }
 
 pub(crate) fn update_multi(
     len: u32,
     wv: &mut [u64],
     hash: &mut [u64],
-    prev: crate::fstar::uint128::uint128,
+    prev: fstar::uint128::uint128,
     blocks: &[u8],
     nb: u32
 )
 {
-    crate::lowstar::ignore::ignore::<u32>(len);
+    lowstar::ignore::ignore::<u32>(len);
     for i in 0u32..nb
     {
-        let totlen: crate::fstar::uint128::uint128 =
-            crate::fstar::uint128::add_mod(
+        let totlen: fstar::uint128::uint128 =
+            fstar::uint128::add_mod(
                 prev,
-                crate::fstar::uint128::uint64_to_uint128(
+                fstar::uint128::uint64_to_uint128(
                     i.wrapping_add(1u32).wrapping_mul(128u32) as u64
                 )
             );
@@ -796,7 +796,7 @@ pub(crate) fn update_last(
     wv: &mut [u64],
     hash: &mut [u64],
     last_node: bool,
-    prev: crate::fstar::uint128::uint128,
+    prev: fstar::uint128::uint128,
     rem: u32,
     d: &[u8]
 )
@@ -804,17 +804,17 @@ pub(crate) fn update_last(
     let mut b: [u8; 128] = [0u8; 128usize];
     let last: (&[u8], &[u8]) = d.split_at(len.wrapping_sub(rem) as usize);
     ((&mut b)[0usize..rem as usize]).copy_from_slice(&last.1[0usize..rem as usize]);
-    let totlen: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add_mod(prev, crate::fstar::uint128::uint64_to_uint128(len as u64));
+    let totlen: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(prev, fstar::uint128::uint64_to_uint128(len as u64));
     update_block(wv, hash, true, last_node, totlen, &b);
-    crate::lib::memzero0::memzero::<u8>(&mut b, 128u32)
+    lib::memzero0::memzero::<u8>(&mut b, 128u32)
 }
 
 fn update_blocks(
     len: u32,
     wv: &mut [u64],
     hash: &mut [u64],
-    prev: crate::fstar::uint128::uint128,
+    prev: fstar::uint128::uint128,
     blocks: &[u8]
 )
 {
@@ -828,15 +828,15 @@ fn update_blocks(
 
 #[inline] fn update(wv: &mut [u64], hash: &mut [u64], kk: u32, k: &[u8], ll: u32, d: &[u8])
 {
-    let lb: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::uint64_to_uint128(128u32 as u64);
+    let lb: fstar::uint128::uint128 =
+        fstar::uint128::uint64_to_uint128(128u32 as u64);
     if kk > 0u32
     {
         update_key(wv, hash, kk, k, ll);
         if ll != 0u32 { update_blocks(ll, wv, hash, lb, d) }
     }
     else
-    { update_blocks(ll, wv, hash, crate::fstar::uint128::uint64_to_uint128(0u32 as u64), d) }
+    { update_blocks(ll, wv, hash, fstar::uint128::uint64_to_uint128(0u32 as u64), d) }
 }
 
 pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[u64])
@@ -851,7 +851,7 @@ pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[u64])
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut second.0[i.wrapping_mul(8u32) as usize..],
             row1.0[i as usize]
         )
@@ -861,15 +861,15 @@ pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[u64])
         "i",
         0u32,
         1u32,
-        crate::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut second.1[i.wrapping_mul(8u32) as usize..],
             row1.1[i as usize]
         )
     );
-    crate::lowstar::ignore::ignore::<&[u8]>(&b);
+    lowstar::ignore::ignore::<&[u8]>(&b);
     let r#final: (&[u8], &[u8]) = b.split_at(0usize);
     (output[0usize..nn as usize]).copy_from_slice(&r#final.1[0usize..nn as usize]);
-    crate::lib::memzero0::memzero::<u8>(&mut b, 64u32)
+    lib::memzero0::memzero::<u8>(&mut b, 64u32)
 }
 
 pub const block_bytes: u32 = 128u32;
@@ -920,14 +920,14 @@ fn malloc_raw(kk: index, key: params_and_key) -> Box<[state_t]>
               let r1: (&mut [u64], &mut [u64]) = r0.1.split_at_mut(4usize);
               let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(4usize);
               let r3: (&mut [u64], &mut [u64]) = r2.1.split_at_mut(4usize);
-              let iv0: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[0usize];
-              let iv1: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[1usize];
-              let iv2: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[2usize];
-              let iv3: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[3usize];
-              let iv4: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[4usize];
-              let iv5: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[5usize];
-              let iv6: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[6usize];
-              let iv7: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[7usize];
+              let iv0: u64 = (&crate::impl_blake2_constants::ivTable_B)[0usize];
+              let iv1: u64 = (&crate::impl_blake2_constants::ivTable_B)[1usize];
+              let iv2: u64 = (&crate::impl_blake2_constants::ivTable_B)[2usize];
+              let iv3: u64 = (&crate::impl_blake2_constants::ivTable_B)[3usize];
+              let iv4: u64 = (&crate::impl_blake2_constants::ivTable_B)[4usize];
+              let iv5: u64 = (&crate::impl_blake2_constants::ivTable_B)[5usize];
+              let iv6: u64 = (&crate::impl_blake2_constants::ivTable_B)[6usize];
+              let iv7: u64 = (&crate::impl_blake2_constants::ivTable_B)[7usize];
               r3.0[0usize] = iv0;
               r3.0[1usize] = iv1;
               r3.0[2usize] = iv2;
@@ -946,7 +946,7 @@ fn malloc_raw(kk: index, key: params_and_key) -> Box<[state_t]>
                   1u32,
                   {
                       let bj: &[u8] = &pv.salt[i0.wrapping_mul(8u32) as usize..];
-                      let u: u64 = crate::lowstar::endianness::load64_le(bj);
+                      let u: u64 = lowstar::endianness::load64_le(bj);
                       let r4: u64 = u;
                       let x: u64 = r4;
                       let os: (&mut [u64], &mut [u64]) = uu____0.1.split_at_mut(0usize);
@@ -961,7 +961,7 @@ fn malloc_raw(kk: index, key: params_and_key) -> Box<[state_t]>
                   1u32,
                   {
                       let bj: &[u8] = &pv.personal[i0.wrapping_mul(8u32) as usize..];
-                      let u: u64 = crate::lowstar::endianness::load64_le(bj);
+                      let u: u64 = lowstar::endianness::load64_le(bj);
                       let r4: u64 = u;
                       let x: u64 = r4;
                       let os: (&mut [u64], &mut [u64]) = uu____1.1.split_at_mut(0usize);
@@ -1060,14 +1060,14 @@ fn reset_raw(state: &mut [state_t], key: params_and_key)
               let r1: (&mut [u64], &mut [u64]) = r0.1.split_at_mut(4usize);
               let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(4usize);
               let r3: (&mut [u64], &mut [u64]) = r2.1.split_at_mut(4usize);
-              let iv0: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[0usize];
-              let iv1: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[1usize];
-              let iv2: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[2usize];
-              let iv3: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[3usize];
-              let iv4: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[4usize];
-              let iv5: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[5usize];
-              let iv6: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[6usize];
-              let iv7: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[7usize];
+              let iv0: u64 = (&crate::impl_blake2_constants::ivTable_B)[0usize];
+              let iv1: u64 = (&crate::impl_blake2_constants::ivTable_B)[1usize];
+              let iv2: u64 = (&crate::impl_blake2_constants::ivTable_B)[2usize];
+              let iv3: u64 = (&crate::impl_blake2_constants::ivTable_B)[3usize];
+              let iv4: u64 = (&crate::impl_blake2_constants::ivTable_B)[4usize];
+              let iv5: u64 = (&crate::impl_blake2_constants::ivTable_B)[5usize];
+              let iv6: u64 = (&crate::impl_blake2_constants::ivTable_B)[6usize];
+              let iv7: u64 = (&crate::impl_blake2_constants::ivTable_B)[7usize];
               r3.0[0usize] = iv0;
               r3.0[1usize] = iv1;
               r3.0[2usize] = iv2;
@@ -1086,7 +1086,7 @@ fn reset_raw(state: &mut [state_t], key: params_and_key)
                   1u32,
                   {
                       let bj: &[u8] = &pv.salt[i0.wrapping_mul(8u32) as usize..];
-                      let u: u64 = crate::lowstar::endianness::load64_le(bj);
+                      let u: u64 = lowstar::endianness::load64_le(bj);
                       let r: u64 = u;
                       let x: u64 = r;
                       let os: (&mut [u64], &mut [u64]) = uu____0.1.split_at_mut(0usize);
@@ -1101,7 +1101,7 @@ fn reset_raw(state: &mut [state_t], key: params_and_key)
                   1u32,
                   {
                       let bj: &[u8] = &pv.personal[i0.wrapping_mul(8u32) as usize..];
-                      let u: u64 = crate::lowstar::endianness::load64_le(bj);
+                      let u: u64 = lowstar::endianness::load64_le(bj);
                       let r: u64 = u;
                       let x: u64 = r;
                       let os: (&mut [u64], &mut [u64]) = uu____1.1.split_at_mut(0usize);
@@ -1164,7 +1164,7 @@ is unspecified if you violate this precondition.
 pub fn
 reset_with_key_and_params(s: &mut [state_t], p: &[blake2_params], k: &[u8])
 {
-    crate::lowstar::ignore::ignore::<index>(index_of_state(s));
+    lowstar::ignore::ignore::<index>(index_of_state(s));
     reset_raw(s, params_and_key { fst: p, snd: k })
 }
 
@@ -1216,12 +1216,12 @@ Update function; 0 = success, 1 = max length exceeded
 */
 pub fn
 update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
-    crate::hacl::streaming_types::error_code
+    crate::streaming_types::error_code
 {
     let block_state: &mut block_state_t = &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     if chunk_len as u64 > 0xffffffffffffffffu64.wrapping_sub(total_len)
-    { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
+    { crate::streaming_types::error_code::MaximumLengthExceeded }
     else
     {
         let sz: u32 =
@@ -1264,7 +1264,7 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                               128u32,
                               wv,
                               hash,
-                              crate::fstar::uint128::uint64_to_uint128(prevlen),
+                              fstar::uint128::uint64_to_uint128(prevlen),
                               buf,
                               nb
                           )
@@ -1290,7 +1290,7 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                           data1_len,
                           wv,
                           hash,
-                          crate::fstar::uint128::uint64_to_uint128(total_len1),
+                          fstar::uint128::uint64_to_uint128(total_len1),
                           data2.0,
                           nb
                       )
@@ -1337,7 +1337,7 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                               128u32,
                               wv,
                               hash,
-                              crate::fstar::uint128::uint64_to_uint128(prevlen),
+                              fstar::uint128::uint64_to_uint128(prevlen),
                               buf0,
                               nb
                           )
@@ -1366,7 +1366,7 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                           data1_len,
                           wv,
                           hash,
-                          crate::fstar::uint128::uint64_to_uint128(total_len10),
+                          fstar::uint128::uint64_to_uint128(total_len10),
                           data2.0,
                           nb
                       )
@@ -1379,7 +1379,7 @@ update0(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             (state[0usize]).total_len =
                 total_len10.wrapping_add(chunk_len.wrapping_sub(diff) as u64)
         };
-        crate::hacl::streaming_types::error_code::Success
+        crate::streaming_types::error_code::Success
     }
 }
 
@@ -1448,7 +1448,7 @@ digest(s: &[state_t], dst: &mut [u8]) ->
                   0u32,
                   wv0,
                   hash,
-                  crate::fstar::uint128::uint64_to_uint128(prev_len),
+                  fstar::uint128::uint64_to_uint128(prev_len),
                   buf_last.0,
                   nb
               )
@@ -1463,7 +1463,7 @@ digest(s: &[state_t], dst: &mut [u8]) ->
               wv0,
               hash,
               last_node,
-              crate::fstar::uint128::uint64_to_uint128(prev_len_last),
+              fstar::uint128::uint64_to_uint128(prev_len_last),
               r,
               buf_last.1
           )
@@ -1549,8 +1549,8 @@ hash_with_key(
     init(&mut b, key_len, output_len);
     update(&mut b1, &mut b, key_len, key, input_len, input);
     finish(output_len, output, &b);
-    crate::lib::memzero0::memzero::<u64>(&mut b1, 16u32);
-    crate::lib::memzero0::memzero::<u64>(&mut b, 16u32)
+    lib::memzero0::memzero::<u64>(&mut b1, 16u32);
+    lib::memzero0::memzero::<u64>(&mut b, 16u32)
 }
 
 /**
@@ -1575,14 +1575,14 @@ hash_with_key_and_params(
     let r1: (&mut [u64], &mut [u64]) = r0.1.split_at_mut(4usize);
     let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(4usize);
     let r3: (&mut [u64], &mut [u64]) = r2.1.split_at_mut(4usize);
-    let iv0: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[0usize];
-    let iv1: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[1usize];
-    let iv2: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[2usize];
-    let iv3: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[3usize];
-    let iv4: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[4usize];
-    let iv5: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[5usize];
-    let iv6: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[6usize];
-    let iv7: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[7usize];
+    let iv0: u64 = (&crate::impl_blake2_constants::ivTable_B)[0usize];
+    let iv1: u64 = (&crate::impl_blake2_constants::ivTable_B)[1usize];
+    let iv2: u64 = (&crate::impl_blake2_constants::ivTable_B)[2usize];
+    let iv3: u64 = (&crate::impl_blake2_constants::ivTable_B)[3usize];
+    let iv4: u64 = (&crate::impl_blake2_constants::ivTable_B)[4usize];
+    let iv5: u64 = (&crate::impl_blake2_constants::ivTable_B)[5usize];
+    let iv6: u64 = (&crate::impl_blake2_constants::ivTable_B)[6usize];
+    let iv7: u64 = (&crate::impl_blake2_constants::ivTable_B)[7usize];
     r3.0[0usize] = iv0;
     r3.0[1usize] = iv1;
     r3.0[2usize] = iv2;
@@ -1601,7 +1601,7 @@ hash_with_key_and_params(
         1u32,
         {
             let bj: &[u8] = &params.salt[i.wrapping_mul(8u32) as usize..];
-            let u: u64 = crate::lowstar::endianness::load64_le(bj);
+            let u: u64 = lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = uu____0.1.split_at_mut(0usize);
@@ -1616,7 +1616,7 @@ hash_with_key_and_params(
         1u32,
         {
             let bj: &[u8] = &params.personal[i.wrapping_mul(8u32) as usize..];
-            let u: u64 = crate::lowstar::endianness::load64_le(bj);
+            let u: u64 = lowstar::endianness::load64_le(bj);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = uu____1.1.split_at_mut(0usize);
@@ -1660,6 +1660,6 @@ hash_with_key_and_params(
     r2.0[3usize] = iv7·;
     update(&mut b1, &mut b, params.key_length as u32, key, input_len, input);
     finish(params.digest_length as u32, output, &b);
-    crate::lib::memzero0::memzero::<u64>(&mut b1, 16u32);
-    crate::lib::memzero0::memzero::<u64>(&mut b, 16u32)
+    lib::memzero0::memzero::<u64>(&mut b1, 16u32);
+    lib::memzero0::memzero::<u64>(&mut b, 16u32)
 }

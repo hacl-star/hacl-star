@@ -47,8 +47,8 @@ Write `a + b mod p` in `out`.
 pub fn
 felem_add(a: &[u64], b: &[u64], out: &mut [u64])
 {
-    crate::hacl::bignum25519_51::fadd(out, a, b);
-    crate::hacl::ed25519::reduce_513(out)
+    crate::bignum25519_51::fadd(out, a, b);
+    crate::ed25519::reduce_513(out)
 }
 
 /**
@@ -63,8 +63,8 @@ Write `a - b mod p` in `out`.
 pub fn
 felem_sub(a: &[u64], b: &[u64], out: &mut [u64])
 {
-    crate::hacl::bignum25519_51::fsub(out, a, b);
-    crate::hacl::ed25519::reduce_513(out)
+    crate::bignum25519_51::fsub(out, a, b);
+    crate::ed25519::reduce_513(out)
 }
 
 /**
@@ -79,9 +79,9 @@ Write `a * b mod p` in `out`.
 pub fn
 felem_mul(a: &[u64], b: &[u64], out: &mut [u64])
 {
-    let tmp: [crate::fstar::uint128::uint128; 10] =
-        [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
-    crate::hacl::bignum25519_51::fmul(out, a, b, &tmp)
+    let tmp: [fstar::uint128::uint128; 10] =
+        [fstar::uint128::uint64_to_uint128(0u64); 10usize];
+    crate::bignum25519_51::fmul(out, a, b, &tmp)
 }
 
 /**
@@ -96,9 +96,9 @@ Write `a * a mod p` in `out`.
 pub fn
 felem_sqr(a: &[u64], out: &mut [u64])
 {
-    let tmp: [crate::fstar::uint128::uint128; 5] =
-        [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
-    crate::hacl::bignum25519_51::fsqr(out, a, &tmp)
+    let tmp: [fstar::uint128::uint128; 5] =
+        [fstar::uint128::uint64_to_uint128(0u64); 5usize];
+    crate::bignum25519_51::fsqr(out, a, &tmp)
 }
 
 /**
@@ -115,8 +115,8 @@ Write `a ^ (p - 2) mod p` in `out`.
 pub fn
 felem_inv(a: &[u64], out: &mut [u64])
 {
-    crate::hacl::ed25519::inverse(out, a);
-    crate::hacl::ed25519::reduce_513(out)
+    crate::ed25519::inverse(out, a);
+    crate::ed25519::reduce_513(out)
 }
 
 /**
@@ -133,7 +133,7 @@ Load a little-endian field element from memory.
 */
 pub fn
 felem_load(b: &[u8], out: &mut [u64])
-{ crate::hacl::ed25519::load_51(out, b) }
+{ crate::ed25519::load_51(out, b) }
 
 /**
 Serialize a field element into little-endian memory.
@@ -147,7 +147,7 @@ Serialize a field element into little-endian memory.
 */
 pub fn
 felem_store(a: &[u64], out: &mut [u8])
-{ crate::hacl::ed25519::store_51(out, a) }
+{ crate::ed25519::store_51(out, a) }
 
 /**
 Write the point at infinity (additive identity) in `p`.
@@ -156,7 +156,7 @@ Write the point at infinity (additive identity) in `p`.
 */
 pub fn
 mk_point_at_inf(p: &mut [u64])
-{ crate::hacl::ed25519::make_point_inf(p) }
+{ crate::ed25519::make_point_inf(p) }
 
 /**
 Write the base point (generator) in `p`.
@@ -203,7 +203,7 @@ Write `-p` in `out` (point negation).
 */
 pub fn
 point_negate(p: &[u64], out: &mut [u64])
-{ crate::hacl::ed25519::point_negate(p, out) }
+{ crate::ed25519::point_negate(p, out) }
 
 /**
 Write `p + q` in `out` (point addition).
@@ -216,7 +216,7 @@ Write `p + q` in `out` (point addition).
 */
 pub fn
 point_add(p: &[u64], q: &[u64], out: &mut [u64])
-{ crate::hacl::ed25519::point_add(out, p, q) }
+{ crate::ed25519::point_add(out, p, q) }
 
 /**
 Write `p + p` in `out` (point doubling).
@@ -229,7 +229,7 @@ Write `p + p` in `out` (point doubling).
 */
 pub fn
 point_double(p: &[u64], out: &mut [u64])
-{ crate::hacl::ed25519::point_double(out, p) }
+{ crate::ed25519::point_double(out, p) }
 
 /**
 Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
@@ -246,7 +246,7 @@ Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 */
 pub fn
 point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
-{ crate::hacl::ed25519::point_mul(out, scalar, p) }
+{ crate::ed25519::point_mul(out, scalar, p) }
 
 /**
 Checks whether `p` is equal to `q` (point equality).
@@ -262,7 +262,7 @@ Checks whether `p` is equal to `q` (point equality).
 pub fn
 point_eq(p: &[u64], q: &[u64]) ->
     bool
-{ crate::hacl::ed25519::point_equal(p, q) }
+{ crate::ed25519::point_equal(p, q) }
 
 /**
 Compress a point in extended homogeneous coordinates to its compressed form.
@@ -279,7 +279,7 @@ Compress a point in extended homogeneous coordinates to its compressed form.
 */
 pub fn
 point_compress(p: &[u64], out: &mut [u8])
-{ crate::hacl::ed25519::point_compress(out, p) }
+{ crate::ed25519::point_compress(out, p) }
 
 /**
 Decompress a point in extended homogeneous coordinates from its compressed form.
@@ -297,4 +297,4 @@ Decompress a point in extended homogeneous coordinates from its compressed form.
 pub fn
 point_decompress(s: &[u8], out: &mut [u64]) ->
     bool
-{ crate::hacl::ed25519::point_decompress(out, s) }
+{ crate::ed25519::point_decompress(out, s) }
