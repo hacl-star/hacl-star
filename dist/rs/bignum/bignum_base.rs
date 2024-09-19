@@ -18,15 +18,15 @@
 {
     let out0: u64 = out[0usize];
     let res: ::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(a, b),
-                crate::fstar::uint128::uint64_to_uint128(c_in)
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(a, b),
+                ::fstar::uint128::uint64_to_uint128(c_in)
             ),
-            crate::fstar::uint128::uint64_to_uint128(out0)
+            ::fstar::uint128::uint64_to_uint128(out0)
         );
-    out[0usize] = crate::fstar::uint128::uint128_to_uint64(res);
-    crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(res, 64u32))
+    out[0usize] = ::fstar::uint128::uint128_to_uint64(res);
+    ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(res, 64u32))
 }
 
 pub(crate) fn bn_from_bytes_be_uint64(len: u32, b: &[u8], res: &mut [u64])
@@ -40,7 +40,7 @@ pub(crate) fn bn_from_bytes_be_uint64(len: u32, b: &[u8], res: &mut [u64])
     for i in 0u32..bnLen
     {
         let u: u64 =
-            crate::lowstar::endianness::load64_be(
+            ::lowstar::endianness::load64_be(
                 &(&tmp)[bnLen.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
             );
         let x: u64 = u;
@@ -56,7 +56,7 @@ pub(crate) fn bn_to_bytes_be_uint64(len: u32, b: &[u64], res: &mut [u8])
     let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
     for i in 0u32..bnLen
     {
-        crate::lowstar::endianness::store64_be(
+        ::lowstar::endianness::store64_be(
             &mut (&mut tmp)[i.wrapping_mul(8u32) as usize..],
             b[bnLen.wrapping_sub(i).wrapping_sub(1u32) as usize]
         )
@@ -71,7 +71,7 @@ pub(crate) fn bn_get_top_index_u32(len: u32, b: &[u32]) -> u32
     let mut r#priv: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
     {
-        let mask: u32 = crate::fstar::uint32::eq_mask(b[i as usize], 0u32);
+        let mask: u32 = ::fstar::uint32::eq_mask(b[i as usize], 0u32);
         (&mut r#priv)[0usize] = mask & (&r#priv)[0usize] | ! mask & i
     };
     (&r#priv)[0usize]
@@ -82,7 +82,7 @@ pub(crate) fn bn_get_top_index_u64(len: u32, b: &[u64]) -> u64
     let mut r#priv: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
-        let mask: u64 = crate::fstar::uint64::eq_mask(b[i as usize], 0u64);
+        let mask: u64 = ::fstar::uint64::eq_mask(b[i as usize], 0u64);
         (&mut r#priv)[0usize] = mask & (&r#priv)[0usize] | ! mask & i as u64
     };
     (&r#priv)[0usize]
@@ -382,7 +382,7 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
     );
     let r: u32 = bn_add_eq_len_u32(aLen.wrapping_add(aLen), &a_copy, &b_copy, res);
     let c0: u32 = r;
-    crate::lowstar::ignore::ignore::<u32>(c0);
+    ::lowstar::ignore::ignore::<u32>(c0);
     let mut tmp: Box<[u32]> = vec![0u32; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
     for i in 0u32..aLen
     {
@@ -402,7 +402,7 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
     );
     let r0: u32 = bn_add_eq_len_u32(aLen.wrapping_add(aLen), &a_copy0, &b_copy0, res);
     let c1: u32 = r0;
-    crate::lowstar::ignore::ignore::<u32>(c1)
+    ::lowstar::ignore::ignore::<u32>(c1)
 }
 
 #[inline] pub(crate) fn bn_sqr_u64(aLen: u32, a: &[u64], res: &mut [u64])
@@ -451,17 +451,17 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
     );
     let r: u64 = bn_add_eq_len_u64(aLen.wrapping_add(aLen), &a_copy, &b_copy, res);
     let c0: u64 = r;
-    crate::lowstar::ignore::ignore::<u64>(c0);
+    ::lowstar::ignore::ignore::<u64>(c0);
     let mut tmp: Box<[u64]> = vec![0u64; aLen.wrapping_add(aLen) as usize].into_boxed_slice();
     for i in 0u32..aLen
     {
-        let res1: crate::fstar::uint128::uint128 =
-            crate::fstar::uint128::mul_wide(a[i as usize], a[i as usize]);
+        let res1: ::fstar::uint128::uint128 =
+            ::fstar::uint128::mul_wide(a[i as usize], a[i as usize]);
         let hi: u64 =
-            crate::fstar::uint128::uint128_to_uint64(
-                crate::fstar::uint128::shift_right(res1, 64u32)
+            ::fstar::uint128::uint128_to_uint64(
+                ::fstar::uint128::shift_right(res1, 64u32)
             );
-        let lo: u64 = crate::fstar::uint128::uint128_to_uint64(res1);
+        let lo: u64 = ::fstar::uint128::uint128_to_uint64(res1);
         (&mut tmp)[2u32.wrapping_mul(i) as usize] = lo;
         (&mut tmp)[2u32.wrapping_mul(i).wrapping_add(1u32) as usize] = hi
     };
@@ -475,5 +475,5 @@ pub(crate) fn bn_add_eq_len_u64(aLen: u32, a: &[u64], b: &[u64], res: &mut [u64]
     );
     let r0: u64 = bn_add_eq_len_u64(aLen.wrapping_add(aLen), &a_copy0, &b_copy0, res);
     let c1: u64 = r0;
-    crate::lowstar::ignore::ignore::<u64>(c1)
+    ::lowstar::ignore::ignore::<u64>(c1)
 }

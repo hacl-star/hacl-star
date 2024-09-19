@@ -187,8 +187,8 @@ r#mod(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
@@ -323,8 +323,8 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
@@ -333,7 +333,7 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
     let mut mask: [u32; 1] = [0xFFFFFFFFu32; 1usize];
     for i in 0u32..len
     {
-        let uu____0: u32 = crate::fstar::uint32::eq_mask(a[i as usize], (&bn_zero)[i as usize]);
+        let uu____0: u32 = ::fstar::uint32::eq_mask(a[i as usize], (&bn_zero)[i as usize]);
         (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
     };
     let mask1: u32 = (&mask)[0usize];
@@ -342,8 +342,8 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
     let mut acc0: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
         (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
     };
     let m2: u32 = (&acc0)[0usize];
@@ -425,7 +425,7 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
             }
             else
             { c0 };
-        crate::lowstar::ignore::ignore::<u32>(c);
+        ::lowstar::ignore::ignore::<u32>(c);
         crate::hacl::bignum::bn_mod_exp_vartime_u32(
             len,
             nBits,
@@ -660,7 +660,7 @@ mod_inv_prime_vartime_precomp(
         }
         else
         { c0 };
-    crate::lowstar::ignore::ignore::<u32>(c);
+    ::lowstar::ignore::ignore::<u32>(c);
     crate::hacl::bignum::bn_mod_exp_vartime_precomp_u32(
         len1,
         n,
@@ -711,7 +711,7 @@ new_bn_from_bytes_be(len: u32, b: &[u8]) ->
             for i in 0u32..bnLen
             {
                 let u: u32 =
-                    crate::lowstar::endianness::load32_be(
+                    ::lowstar::endianness::load32_be(
                         &(&tmp)[bnLen.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(4u32) as usize..]
                     );
                 let x: u32 = u;
@@ -759,7 +759,7 @@ new_bn_from_bytes_le(len: u32, b: &[u8]) ->
             for i in 0u32..len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32)
             {
                 let bj: (&[u8], &[u8]) = tmp.split_at(i.wrapping_mul(4u32) as usize);
-                let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+                let u: u32 = ::lowstar::endianness::load32_le(bj.1);
                 let r1: u32 = u;
                 let x: u32 = r1;
                 let os: (&mut [u32], &mut [u32]) = res2.split_at_mut(0usize);
@@ -787,7 +787,7 @@ bn_to_bytes_be(len: u32, b: &[u32], res: &mut [u8])
     let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
     for i in 0u32..bnLen
     {
-        crate::lowstar::endianness::store32_be(
+        ::lowstar::endianness::store32_be(
             &mut (&mut tmp)[i.wrapping_mul(4u32) as usize..],
             b[bnLen.wrapping_sub(i).wrapping_sub(1u32) as usize]
         )
@@ -814,7 +814,7 @@ bn_to_bytes_le(len: u32, b: &[u32], res: &mut [u8])
     let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
     for i in 0u32..bnLen
     {
-        crate::lowstar::endianness::store32_le(
+        ::lowstar::endianness::store32_le(
             &mut (&mut tmp)[i.wrapping_mul(4u32) as usize..],
             b[i as usize]
         )
@@ -838,8 +838,8 @@ lt_mask(len: u32, a: &[u32], b: &[u32]) ->
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask(a[i as usize], b[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask(a[i as usize], b[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask(a[i as usize], b[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask(a[i as usize], b[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     (&acc)[0usize]
@@ -861,7 +861,7 @@ eq_mask(len: u32, a: &[u32], b: &[u32]) ->
     let mut mask: [u32; 1] = [0xFFFFFFFFu32; 1usize];
     for i in 0u32..len
     {
-        let uu____0: u32 = crate::fstar::uint32::eq_mask(a[i as usize], b[i as usize]);
+        let uu____0: u32 = ::fstar::uint32::eq_mask(a[i as usize], b[i as usize]);
         (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
     };
     let mask1: u32 = (&mask)[0usize];

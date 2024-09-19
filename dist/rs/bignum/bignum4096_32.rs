@@ -248,7 +248,7 @@ sub_mod(n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
         }
     );
     let c10: u32 = (&c1)[0usize];
-    crate::lowstar::ignore::ignore::<u32>(c10);
+    ::lowstar::ignore::ignore::<u32>(c10);
     let c2: u32 = 0u32.wrapping_sub(c0);
     for i in 0u32..128u32
     {
@@ -440,7 +440,7 @@ sqr(a: &[u32], res: &mut [u32])
     let c00: u32 = (&c0)[0usize];
     let mut tmp: [u32; 128] = [0u32; 128usize];
     let c1: u32 = sub(res, n, &mut tmp);
-    crate::lowstar::ignore::ignore::<u32>(c1);
+    ::lowstar::ignore::ignore::<u32>(c1);
     let m: u32 = 0u32.wrapping_sub(c00);
     for i in 0u32..128u32
     {
@@ -496,8 +496,8 @@ r#mod(n: &[u32], a: &[u32], res: &mut [u32]) ->
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..128u32
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
@@ -525,8 +525,8 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..128u32
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
@@ -546,8 +546,8 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
             let mut acc0: [u32; 1] = [0u32; 1usize];
             for i0 in 0u32..bLen
             {
-                let beq: u32 = crate::fstar::uint32::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
-                let blt: u32 = ! crate::fstar::uint32::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
+                let beq: u32 = ::fstar::uint32::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
+                let blt: u32 = ! ::fstar::uint32::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
             };
             let res: u32 = (&acc0)[0usize];
@@ -558,8 +558,8 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
     let mut acc0: [u32; 1] = [0u32; 1usize];
     for i in 0u32..128u32
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
         (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
     };
     let m2: u32 = (&acc0)[0usize];
@@ -588,7 +588,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
         let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(128usize);
         from(ctx_r2.0, mu, ctx_r2.1, &mut resM);
-        crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+        ::lowstar::ignore::ignore::<&[u32]>(&ctx);
         for i in 0u32..bBits
         {
             let i1: u32 = i.wrapping_div(32u32);
@@ -601,13 +601,13 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                 ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&resM)[0usize..128usize]);
                 let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
                 amont_mul(ctx_n0.1, mu, &aM_copy, &aM, &mut resM);
-                crate::lowstar::ignore::ignore::<&[u32]>(&ctx)
+                ::lowstar::ignore::ignore::<&[u32]>(&ctx)
             };
             let mut aM_copy: [u32; 128] = [0u32; 128usize];
             ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&aM)[0usize..128usize]);
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
             amont_sqr(ctx_n0.1, mu, &aM_copy, &mut aM);
-            crate::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
         from(n, mu, &resM, res)
     }
@@ -631,9 +631,9 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
         let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(128usize);
         from(ctx_r2.0, mu, ctx_r2.1, t1.0);
-        crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+        ::lowstar::ignore::ignore::<&[u32]>(&ctx);
         (t1.1[0usize..128usize]).copy_from_slice(&(&aM)[0usize..128usize]);
-        crate::lowstar::ignore::ignore::<&[u32]>(&table);
+        ::lowstar::ignore::ignore::<&[u32]>(&table);
         krml::unroll_for!(
             7,
             "i",
@@ -646,7 +646,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                 ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&t11.1[0usize..128usize]);
                 let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
                 amont_sqr(ctx_n0.1, mu, &aM_copy, &mut tmp);
-                crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+                ::lowstar::ignore::ignore::<&[u32]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(128u32) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(2u32).wrapping_mul(128u32)
@@ -662,7 +662,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                 ((&mut aM_copy0)[0usize..128usize]).copy_from_slice(&(&aM)[0usize..128usize]);
                 let ctx_n1: (&[u32], &[u32]) = ctx.split_at(0usize);
                 amont_mul(ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
-                crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+                ::lowstar::ignore::ignore::<&[u32]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(128u32) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(3u32).wrapping_mul(128u32)
@@ -685,7 +685,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
             let ctx_r20: (&[u32], &[u32]) = ctx_n0.1.split_at(128usize);
             from(ctx_r20.0, mu, ctx_r20.1, &mut resM);
-            crate::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
         let mut tmp0: [u32; 128] = [0u32; 128usize];
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -700,7 +700,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                     ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&resM)[0usize..128usize]);
                     let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
                     amont_sqr(ctx_n0.1, mu, &aM_copy, &mut resM);
-                    crate::lowstar::ignore::ignore::<&[u32]>(&ctx)
+                    ::lowstar::ignore::ignore::<&[u32]>(&ctx)
                 }
             );
             let k: u32 =
@@ -708,7 +708,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                     4u32
                 );
             let bits_l: u32 = crate::hacl::bignum_base::bn_get_bits_u32(bLen, b, k, 4u32);
-            crate::lowstar::ignore::ignore::<&[u32]>(&table);
+            ::lowstar::ignore::ignore::<&[u32]>(&table);
             let bits_l32: u32 = bits_l;
             let a_bits_l: (&[u32], &[u32]) = table.split_at(bits_l32.wrapping_mul(128u32) as usize);
             ((&mut tmp0)[0usize..128usize]).copy_from_slice(&a_bits_l.1[0usize..128usize]);
@@ -716,7 +716,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
             ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&resM)[0usize..128usize]);
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
             amont_mul(ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
-            crate::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
         from(n, mu, &resM, res)
     }
@@ -744,7 +744,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
         let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(128usize);
         from(ctx_r2.0, mu, ctx_r2.1, &mut resM);
-        crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+        ::lowstar::ignore::ignore::<&[u32]>(&ctx);
         for i in 0u32..bBits
         {
             let i1: u32 = bBits.wrapping_sub(i).wrapping_sub(1u32).wrapping_div(32u32);
@@ -763,12 +763,12 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
             ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&aM)[0usize..128usize]);
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
             amont_mul(ctx_n0.1, mu, &aM_copy, &resM, &mut aM);
-            crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+            ::lowstar::ignore::ignore::<&[u32]>(&ctx);
             let mut aM_copy0: [u32; 128] = [0u32; 128usize];
             ((&mut aM_copy0)[0usize..128usize]).copy_from_slice(&(&resM)[0usize..128usize]);
             let ctx_n1: (&[u32], &[u32]) = ctx.split_at(0usize);
             amont_sqr(ctx_n1.1, mu, &aM_copy0, &mut resM);
-            crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+            ::lowstar::ignore::ignore::<&[u32]>(&ctx);
             (&mut sw)[0usize] = bit
         };
         let sw0: u32 = (&sw)[0usize];
@@ -800,9 +800,9 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
         let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(128usize);
         from(ctx_r2.0, mu, ctx_r2.1, t1.0);
-        crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+        ::lowstar::ignore::ignore::<&[u32]>(&ctx);
         (t1.1[0usize..128usize]).copy_from_slice(&(&aM)[0usize..128usize]);
-        crate::lowstar::ignore::ignore::<&[u32]>(&table);
+        ::lowstar::ignore::ignore::<&[u32]>(&table);
         krml::unroll_for!(
             7,
             "i",
@@ -815,7 +815,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                 ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&t11.1[0usize..128usize]);
                 let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
                 amont_sqr(ctx_n0.1, mu, &aM_copy, &mut tmp);
-                crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+                ::lowstar::ignore::ignore::<&[u32]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(128u32) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(2u32).wrapping_mul(128u32)
@@ -831,7 +831,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                 ((&mut aM_copy0)[0usize..128usize]).copy_from_slice(&(&aM)[0usize..128usize]);
                 let ctx_n1: (&[u32], &[u32]) = ctx.split_at(0usize);
                 amont_mul(ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
-                crate::lowstar::ignore::ignore::<&[u32]>(&ctx);
+                ::lowstar::ignore::ignore::<&[u32]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(128u32) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(3u32).wrapping_mul(128u32)
@@ -854,7 +854,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                 0u32,
                 1u32,
                 {
-                    let c: u32 = crate::fstar::uint32::eq_mask(bits_c, i0.wrapping_add(1u32));
+                    let c: u32 = ::fstar::uint32::eq_mask(bits_c, i0.wrapping_add(1u32));
                     let res_j: (&[u32], &[u32]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(128u32) as usize);
                     for i1 in 0u32..128u32
@@ -871,7 +871,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
             let ctx_r20: (&[u32], &[u32]) = ctx_n0.1.split_at(128usize);
             from(ctx_r20.0, mu, ctx_r20.1, &mut resM);
-            crate::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
         let mut tmp0: [u32; 128] = [0u32; 128usize];
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -886,7 +886,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                     ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&resM)[0usize..128usize]);
                     let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
                     amont_sqr(ctx_n0.1, mu, &aM_copy, &mut resM);
-                    crate::lowstar::ignore::ignore::<&[u32]>(&ctx)
+                    ::lowstar::ignore::ignore::<&[u32]>(&ctx)
                 }
             );
             let k: u32 =
@@ -894,7 +894,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                     4u32
                 );
             let bits_l: u32 = crate::hacl::bignum_base::bn_get_bits_u32(bLen, b, k, 4u32);
-            crate::lowstar::ignore::ignore::<&[u32]>(&table);
+            ::lowstar::ignore::ignore::<&[u32]>(&table);
             ((&mut tmp0)[0usize..128usize]).copy_from_slice(
                 &(&(&table)[0usize..] as &[u32])[0usize..128usize]
             );
@@ -904,7 +904,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
                 0u32,
                 1u32,
                 {
-                    let c: u32 = crate::fstar::uint32::eq_mask(bits_l, i0.wrapping_add(1u32));
+                    let c: u32 = ::fstar::uint32::eq_mask(bits_l, i0.wrapping_add(1u32));
                     let res_j: (&[u32], &[u32]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(128u32) as usize);
                     for i1 in 0u32..128u32
@@ -919,7 +919,7 @@ fn exp_check(n: &[u32], a: &[u32], bBits: u32, b: &[u32]) -> u32
             ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&resM)[0usize..128usize]);
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
             amont_mul(ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
-            crate::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
         from(n, mu, &resM, res)
     }
@@ -1048,8 +1048,8 @@ mod_inv_prime_vartime(n: &[u32], a: &[u32], res: &mut [u32]) ->
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..128u32
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
@@ -1058,7 +1058,7 @@ mod_inv_prime_vartime(n: &[u32], a: &[u32], res: &mut [u32]) ->
     let mut mask: [u32; 1] = [0xFFFFFFFFu32; 1usize];
     for i in 0u32..128u32
     {
-        let uu____0: u32 = crate::fstar::uint32::eq_mask(a[i as usize], (&bn_zero)[i as usize]);
+        let uu____0: u32 = ::fstar::uint32::eq_mask(a[i as usize], (&bn_zero)[i as usize]);
         (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
     };
     let mask1: u32 = (&mask)[0usize];
@@ -1067,8 +1067,8 @@ mod_inv_prime_vartime(n: &[u32], a: &[u32], res: &mut [u32]) ->
     let mut acc0: [u32; 1] = [0u32; 1usize];
     for i in 0u32..128u32
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
         (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
     };
     let m2: u32 = (&acc0)[0usize];
@@ -1141,7 +1141,7 @@ mod_inv_prime_vartime(n: &[u32], a: &[u32], res: &mut [u32]) ->
         );
         let c1: u32 = (&c)[0usize];
         let c2: u32 = c1;
-        crate::lowstar::ignore::ignore::<u32>(c2);
+        ::lowstar::ignore::ignore::<u32>(c2);
         exp_vartime(nBits, n, a, 4096u32, &n2, res)
     }
     else
@@ -1337,7 +1337,7 @@ mod_inv_prime_vartime_precomp(
     );
     let c1: u32 = (&c)[0usize];
     let c2: u32 = c1;
-    crate::lowstar::ignore::ignore::<u32>(c2);
+    ::lowstar::ignore::ignore::<u32>(c2);
     exp_vartime_precomp(n, mu, r2, a, 4096u32, &n2, res)
 }
 
@@ -1379,7 +1379,7 @@ new_bn_from_bytes_be(len: u32, b: &[u8]) ->
             for i in 0u32..bnLen
             {
                 let u: u32 =
-                    crate::lowstar::endianness::load32_be(
+                    ::lowstar::endianness::load32_be(
                         &(&tmp)[bnLen.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(4u32) as usize..]
                     );
                 let x: u32 = u;
@@ -1427,7 +1427,7 @@ new_bn_from_bytes_le(len: u32, b: &[u8]) ->
             for i in 0u32..len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32)
             {
                 let bj: (&[u8], &[u8]) = tmp.split_at(i.wrapping_mul(4u32) as usize);
-                let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+                let u: u32 = ::lowstar::endianness::load32_le(bj.1);
                 let r1: u32 = u;
                 let x: u32 = r1;
                 let os: (&mut [u32], &mut [u32]) = res2.split_at_mut(0usize);
@@ -1448,10 +1448,10 @@ pub fn
 bn_to_bytes_be(b: &[u32], res: &mut [u8])
 {
     let tmp: [u8; 512] = [0u8; 512usize];
-    crate::lowstar::ignore::ignore::<&[u8]>(&tmp);
+    ::lowstar::ignore::ignore::<&[u8]>(&tmp);
     for i in 0u32..128u32
     {
-        crate::lowstar::endianness::store32_be(
+        ::lowstar::endianness::store32_be(
             &mut res[i.wrapping_mul(4u32) as usize..],
             b[128u32.wrapping_sub(i).wrapping_sub(1u32) as usize]
         )
@@ -1468,10 +1468,10 @@ pub fn
 bn_to_bytes_le(b: &[u32], res: &mut [u8])
 {
     let tmp: [u8; 512] = [0u8; 512usize];
-    crate::lowstar::ignore::ignore::<&[u8]>(&tmp);
+    ::lowstar::ignore::ignore::<&[u8]>(&tmp);
     for i in 0u32..128u32
     {
-        crate::lowstar::endianness::store32_le(
+        ::lowstar::endianness::store32_le(
             &mut res[i.wrapping_mul(4u32) as usize..],
             b[i as usize]
         )
@@ -1490,8 +1490,8 @@ lt_mask(a: &[u32], b: &[u32]) ->
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..128u32
     {
-        let beq: u32 = crate::fstar::uint32::eq_mask(a[i as usize], b[i as usize]);
-        let blt: u32 = ! crate::fstar::uint32::gte_mask(a[i as usize], b[i as usize]);
+        let beq: u32 = ::fstar::uint32::eq_mask(a[i as usize], b[i as usize]);
+        let blt: u32 = ! ::fstar::uint32::gte_mask(a[i as usize], b[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     (&acc)[0usize]
@@ -1509,7 +1509,7 @@ eq_mask(a: &[u32], b: &[u32]) ->
     let mut mask: [u32; 1] = [0xFFFFFFFFu32; 1usize];
     for i in 0u32..128u32
     {
-        let uu____0: u32 = crate::fstar::uint32::eq_mask(a[i as usize], b[i as usize]);
+        let uu____0: u32 = ::fstar::uint32::eq_mask(a[i as usize], b[i as usize]);
         (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
     };
     let mask1: u32 = (&mask)[0usize];

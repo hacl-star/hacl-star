@@ -47,10 +47,10 @@
     out: &mut [u64],
     f1: &[u64],
     f2: &[u64],
-    uu___: &[crate::fstar::uint128::uint128]
+    uu___: &[::fstar::uint128::uint128]
 )
 {
-    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(uu___);
+    ::lowstar::ignore::ignore::<&[::fstar::uint128::uint128]>(uu___);
     let f10: u64 = f1[0usize];
     let f11: u64 = f1[1usize];
     let f12: u64 = f1[2usize];
@@ -65,81 +65,81 @@
     let tmp2: u64 = f22.wrapping_mul(19u64);
     let tmp3: u64 = f23.wrapping_mul(19u64);
     let tmp4: u64 = f24.wrapping_mul(19u64);
-    let o0: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f20);
-    let o1: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f21);
-    let o2: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f22);
-    let o3: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f23);
-    let o4: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f24);
-    let o01: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o0, crate::fstar::uint128::mul_wide(f11, tmp4));
-    let o11: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o1, crate::fstar::uint128::mul_wide(f11, f20));
-    let o21: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o2, crate::fstar::uint128::mul_wide(f11, f21));
-    let o31: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o3, crate::fstar::uint128::mul_wide(f11, f22));
-    let o41: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o4, crate::fstar::uint128::mul_wide(f11, f23));
-    let o02: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o01, crate::fstar::uint128::mul_wide(f12, tmp3));
-    let o12: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o11, crate::fstar::uint128::mul_wide(f12, tmp4));
-    let o22: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o21, crate::fstar::uint128::mul_wide(f12, f20));
-    let o32: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o31, crate::fstar::uint128::mul_wide(f12, f21));
-    let o42: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o41, crate::fstar::uint128::mul_wide(f12, f22));
-    let o03: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o02, crate::fstar::uint128::mul_wide(f13, tmp2));
-    let o13: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o12, crate::fstar::uint128::mul_wide(f13, tmp3));
-    let o23: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o22, crate::fstar::uint128::mul_wide(f13, tmp4));
-    let o33: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o32, crate::fstar::uint128::mul_wide(f13, f20));
-    let o43: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o42, crate::fstar::uint128::mul_wide(f13, f21));
-    let o04: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o03, crate::fstar::uint128::mul_wide(f14, tmp1));
-    let o14: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o13, crate::fstar::uint128::mul_wide(f14, tmp2));
-    let o24: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o23, crate::fstar::uint128::mul_wide(f14, tmp3));
-    let o34: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o33, crate::fstar::uint128::mul_wide(f14, tmp4));
-    let o44: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o43, crate::fstar::uint128::mul_wide(f14, f20));
-    let tmp_w0: crate::fstar::uint128::uint128 = o04;
-    let tmp_w1: crate::fstar::uint128::uint128 = o14;
-    let tmp_w2: crate::fstar::uint128::uint128 = o24;
-    let tmp_w3: crate::fstar::uint128::uint128 = o34;
-    let tmp_w4: crate::fstar::uint128::uint128 = o44;
-    let l·: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w0, crate::fstar::uint128::uint64_to_uint128(0u64));
-    let tmp01: u64 = crate::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
+    let o0: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f20);
+    let o1: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f21);
+    let o2: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f22);
+    let o3: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f23);
+    let o4: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f24);
+    let o01: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o0, ::fstar::uint128::mul_wide(f11, tmp4));
+    let o11: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o1, ::fstar::uint128::mul_wide(f11, f20));
+    let o21: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o2, ::fstar::uint128::mul_wide(f11, f21));
+    let o31: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o3, ::fstar::uint128::mul_wide(f11, f22));
+    let o41: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o4, ::fstar::uint128::mul_wide(f11, f23));
+    let o02: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o01, ::fstar::uint128::mul_wide(f12, tmp3));
+    let o12: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o11, ::fstar::uint128::mul_wide(f12, tmp4));
+    let o22: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o21, ::fstar::uint128::mul_wide(f12, f20));
+    let o32: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o31, ::fstar::uint128::mul_wide(f12, f21));
+    let o42: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o41, ::fstar::uint128::mul_wide(f12, f22));
+    let o03: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o02, ::fstar::uint128::mul_wide(f13, tmp2));
+    let o13: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o12, ::fstar::uint128::mul_wide(f13, tmp3));
+    let o23: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o22, ::fstar::uint128::mul_wide(f13, tmp4));
+    let o33: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o32, ::fstar::uint128::mul_wide(f13, f20));
+    let o43: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o42, ::fstar::uint128::mul_wide(f13, f21));
+    let o04: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o03, ::fstar::uint128::mul_wide(f14, tmp1));
+    let o14: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o13, ::fstar::uint128::mul_wide(f14, tmp2));
+    let o24: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o23, ::fstar::uint128::mul_wide(f14, tmp3));
+    let o34: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o33, ::fstar::uint128::mul_wide(f14, tmp4));
+    let o44: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o43, ::fstar::uint128::mul_wide(f14, f20));
+    let tmp_w0: ::fstar::uint128::uint128 = o04;
+    let tmp_w1: ::fstar::uint128::uint128 = o14;
+    let tmp_w2: ::fstar::uint128::uint128 = o24;
+    let tmp_w3: ::fstar::uint128::uint128 = o34;
+    let tmp_w4: ::fstar::uint128::uint128 = o44;
+    let l·: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w0, ::fstar::uint128::uint64_to_uint128(0u64));
+    let tmp01: u64 = ::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
     let c0: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·, 51u32));
-    let l·0: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w1, crate::fstar::uint128::uint64_to_uint128(c0));
-    let tmp11: u64 = crate::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·, 51u32));
+    let l·0: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w1, ::fstar::uint128::uint64_to_uint128(c0));
+    let tmp11: u64 = ::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
     let c1: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·0, 51u32));
-    let l·1: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w2, crate::fstar::uint128::uint64_to_uint128(c1));
-    let tmp21: u64 = crate::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·0, 51u32));
+    let l·1: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w2, ::fstar::uint128::uint64_to_uint128(c1));
+    let tmp21: u64 = ::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
     let c2: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·1, 51u32));
-    let l·2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w3, crate::fstar::uint128::uint64_to_uint128(c2));
-    let tmp31: u64 = crate::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·1, 51u32));
+    let l·2: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w3, ::fstar::uint128::uint64_to_uint128(c2));
+    let tmp31: u64 = ::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
     let c3: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·2, 51u32));
-    let l·3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w4, crate::fstar::uint128::uint64_to_uint128(c3));
-    let tmp41: u64 = crate::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·2, 51u32));
+    let l·3: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w4, ::fstar::uint128::uint64_to_uint128(c3));
+    let tmp41: u64 = ::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
     let c4: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·3, 51u32));
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·3, 51u32));
     let l·4: u64 = tmp01.wrapping_add(c4.wrapping_mul(19u64));
     let tmp0·: u64 = l·4 & 0x7ffffffffffffu64;
     let c5: u64 = l·4.wrapping_shr(51u32);
@@ -159,10 +159,10 @@
     out: &mut [u64],
     f1: &[u64],
     f2: &[u64],
-    uu___: &[crate::fstar::uint128::uint128]
+    uu___: &[::fstar::uint128::uint128]
 )
 {
-    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(uu___);
+    ::lowstar::ignore::ignore::<&[::fstar::uint128::uint128]>(uu___);
     let f10: u64 = f1[0usize];
     let f11: u64 = f1[1usize];
     let f12: u64 = f1[2usize];
@@ -191,131 +191,131 @@
     let tmp22: u64 = f42.wrapping_mul(19u64);
     let tmp23: u64 = f43.wrapping_mul(19u64);
     let tmp24: u64 = f44.wrapping_mul(19u64);
-    let o0: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f20);
-    let o1: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f21);
-    let o2: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f22);
-    let o3: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f23);
-    let o4: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f10, f24);
-    let o01: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o0, crate::fstar::uint128::mul_wide(f11, tmp14));
-    let o11: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o1, crate::fstar::uint128::mul_wide(f11, f20));
-    let o21: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o2, crate::fstar::uint128::mul_wide(f11, f21));
-    let o31: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o3, crate::fstar::uint128::mul_wide(f11, f22));
-    let o41: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o4, crate::fstar::uint128::mul_wide(f11, f23));
-    let o02: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o01, crate::fstar::uint128::mul_wide(f12, tmp13));
-    let o12: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o11, crate::fstar::uint128::mul_wide(f12, tmp14));
-    let o22: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o21, crate::fstar::uint128::mul_wide(f12, f20));
-    let o32: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o31, crate::fstar::uint128::mul_wide(f12, f21));
-    let o42: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o41, crate::fstar::uint128::mul_wide(f12, f22));
-    let o03: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o02, crate::fstar::uint128::mul_wide(f13, tmp12));
-    let o13: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o12, crate::fstar::uint128::mul_wide(f13, tmp13));
-    let o23: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o22, crate::fstar::uint128::mul_wide(f13, tmp14));
-    let o33: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o32, crate::fstar::uint128::mul_wide(f13, f20));
-    let o43: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o42, crate::fstar::uint128::mul_wide(f13, f21));
-    let o04: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o03, crate::fstar::uint128::mul_wide(f14, tmp11));
-    let o14: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o13, crate::fstar::uint128::mul_wide(f14, tmp12));
-    let o24: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o23, crate::fstar::uint128::mul_wide(f14, tmp13));
-    let o34: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o33, crate::fstar::uint128::mul_wide(f14, tmp14));
-    let o44: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o43, crate::fstar::uint128::mul_wide(f14, f20));
-    let tmp_w10: crate::fstar::uint128::uint128 = o04;
-    let tmp_w11: crate::fstar::uint128::uint128 = o14;
-    let tmp_w12: crate::fstar::uint128::uint128 = o24;
-    let tmp_w13: crate::fstar::uint128::uint128 = o34;
-    let tmp_w14: crate::fstar::uint128::uint128 = o44;
-    let o00: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f30, f40);
-    let o10: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f30, f41);
-    let o20: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f30, f42);
-    let o30: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f30, f43);
-    let o40: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f30, f44);
-    let o010: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o00, crate::fstar::uint128::mul_wide(f31, tmp24));
-    let o110: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o10, crate::fstar::uint128::mul_wide(f31, f40));
-    let o210: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o20, crate::fstar::uint128::mul_wide(f31, f41));
-    let o310: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o30, crate::fstar::uint128::mul_wide(f31, f42));
-    let o410: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o40, crate::fstar::uint128::mul_wide(f31, f43));
-    let o020: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o010, crate::fstar::uint128::mul_wide(f32, tmp23));
-    let o120: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o110, crate::fstar::uint128::mul_wide(f32, tmp24));
-    let o220: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o210, crate::fstar::uint128::mul_wide(f32, f40));
-    let o320: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o310, crate::fstar::uint128::mul_wide(f32, f41));
-    let o420: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o410, crate::fstar::uint128::mul_wide(f32, f42));
-    let o030: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o020, crate::fstar::uint128::mul_wide(f33, tmp22));
-    let o130: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o120, crate::fstar::uint128::mul_wide(f33, tmp23));
-    let o230: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o220, crate::fstar::uint128::mul_wide(f33, tmp24));
-    let o330: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o320, crate::fstar::uint128::mul_wide(f33, f40));
-    let o430: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o420, crate::fstar::uint128::mul_wide(f33, f41));
-    let o040: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o030, crate::fstar::uint128::mul_wide(f34, tmp21));
-    let o140: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o130, crate::fstar::uint128::mul_wide(f34, tmp22));
-    let o240: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o230, crate::fstar::uint128::mul_wide(f34, tmp23));
-    let o340: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o330, crate::fstar::uint128::mul_wide(f34, tmp24));
-    let o440: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o430, crate::fstar::uint128::mul_wide(f34, f40));
-    let tmp_w20: crate::fstar::uint128::uint128 = o040;
-    let tmp_w21: crate::fstar::uint128::uint128 = o140;
-    let tmp_w22: crate::fstar::uint128::uint128 = o240;
-    let tmp_w23: crate::fstar::uint128::uint128 = o340;
-    let tmp_w24: crate::fstar::uint128::uint128 = o440;
-    let l·: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w10, crate::fstar::uint128::uint64_to_uint128(0u64));
-    let tmp0: u64 = crate::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
+    let o0: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f20);
+    let o1: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f21);
+    let o2: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f22);
+    let o3: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f23);
+    let o4: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f10, f24);
+    let o01: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o0, ::fstar::uint128::mul_wide(f11, tmp14));
+    let o11: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o1, ::fstar::uint128::mul_wide(f11, f20));
+    let o21: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o2, ::fstar::uint128::mul_wide(f11, f21));
+    let o31: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o3, ::fstar::uint128::mul_wide(f11, f22));
+    let o41: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o4, ::fstar::uint128::mul_wide(f11, f23));
+    let o02: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o01, ::fstar::uint128::mul_wide(f12, tmp13));
+    let o12: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o11, ::fstar::uint128::mul_wide(f12, tmp14));
+    let o22: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o21, ::fstar::uint128::mul_wide(f12, f20));
+    let o32: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o31, ::fstar::uint128::mul_wide(f12, f21));
+    let o42: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o41, ::fstar::uint128::mul_wide(f12, f22));
+    let o03: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o02, ::fstar::uint128::mul_wide(f13, tmp12));
+    let o13: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o12, ::fstar::uint128::mul_wide(f13, tmp13));
+    let o23: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o22, ::fstar::uint128::mul_wide(f13, tmp14));
+    let o33: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o32, ::fstar::uint128::mul_wide(f13, f20));
+    let o43: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o42, ::fstar::uint128::mul_wide(f13, f21));
+    let o04: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o03, ::fstar::uint128::mul_wide(f14, tmp11));
+    let o14: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o13, ::fstar::uint128::mul_wide(f14, tmp12));
+    let o24: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o23, ::fstar::uint128::mul_wide(f14, tmp13));
+    let o34: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o33, ::fstar::uint128::mul_wide(f14, tmp14));
+    let o44: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o43, ::fstar::uint128::mul_wide(f14, f20));
+    let tmp_w10: ::fstar::uint128::uint128 = o04;
+    let tmp_w11: ::fstar::uint128::uint128 = o14;
+    let tmp_w12: ::fstar::uint128::uint128 = o24;
+    let tmp_w13: ::fstar::uint128::uint128 = o34;
+    let tmp_w14: ::fstar::uint128::uint128 = o44;
+    let o00: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f30, f40);
+    let o10: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f30, f41);
+    let o20: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f30, f42);
+    let o30: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f30, f43);
+    let o40: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f30, f44);
+    let o010: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o00, ::fstar::uint128::mul_wide(f31, tmp24));
+    let o110: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o10, ::fstar::uint128::mul_wide(f31, f40));
+    let o210: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o20, ::fstar::uint128::mul_wide(f31, f41));
+    let o310: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o30, ::fstar::uint128::mul_wide(f31, f42));
+    let o410: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o40, ::fstar::uint128::mul_wide(f31, f43));
+    let o020: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o010, ::fstar::uint128::mul_wide(f32, tmp23));
+    let o120: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o110, ::fstar::uint128::mul_wide(f32, tmp24));
+    let o220: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o210, ::fstar::uint128::mul_wide(f32, f40));
+    let o320: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o310, ::fstar::uint128::mul_wide(f32, f41));
+    let o420: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o410, ::fstar::uint128::mul_wide(f32, f42));
+    let o030: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o020, ::fstar::uint128::mul_wide(f33, tmp22));
+    let o130: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o120, ::fstar::uint128::mul_wide(f33, tmp23));
+    let o230: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o220, ::fstar::uint128::mul_wide(f33, tmp24));
+    let o330: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o320, ::fstar::uint128::mul_wide(f33, f40));
+    let o430: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o420, ::fstar::uint128::mul_wide(f33, f41));
+    let o040: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o030, ::fstar::uint128::mul_wide(f34, tmp21));
+    let o140: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o130, ::fstar::uint128::mul_wide(f34, tmp22));
+    let o240: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o230, ::fstar::uint128::mul_wide(f34, tmp23));
+    let o340: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o330, ::fstar::uint128::mul_wide(f34, tmp24));
+    let o440: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o430, ::fstar::uint128::mul_wide(f34, f40));
+    let tmp_w20: ::fstar::uint128::uint128 = o040;
+    let tmp_w21: ::fstar::uint128::uint128 = o140;
+    let tmp_w22: ::fstar::uint128::uint128 = o240;
+    let tmp_w23: ::fstar::uint128::uint128 = o340;
+    let tmp_w24: ::fstar::uint128::uint128 = o440;
+    let l·: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w10, ::fstar::uint128::uint64_to_uint128(0u64));
+    let tmp0: u64 = ::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
     let c0: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·, 51u32));
-    let l·0: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w11, crate::fstar::uint128::uint64_to_uint128(c0));
-    let tmp1: u64 = crate::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·, 51u32));
+    let l·0: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w11, ::fstar::uint128::uint64_to_uint128(c0));
+    let tmp1: u64 = ::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
     let c1: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·0, 51u32));
-    let l·1: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w12, crate::fstar::uint128::uint64_to_uint128(c1));
-    let tmp2: u64 = crate::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·0, 51u32));
+    let l·1: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w12, ::fstar::uint128::uint64_to_uint128(c1));
+    let tmp2: u64 = ::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
     let c2: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·1, 51u32));
-    let l·2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w13, crate::fstar::uint128::uint64_to_uint128(c2));
-    let tmp3: u64 = crate::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·1, 51u32));
+    let l·2: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w13, ::fstar::uint128::uint64_to_uint128(c2));
+    let tmp3: u64 = ::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
     let c3: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·2, 51u32));
-    let l·3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w14, crate::fstar::uint128::uint64_to_uint128(c3));
-    let tmp4: u64 = crate::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·2, 51u32));
+    let l·3: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w14, ::fstar::uint128::uint64_to_uint128(c3));
+    let tmp4: u64 = ::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
     let c4: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·3, 51u32));
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·3, 51u32));
     let l·4: u64 = tmp0.wrapping_add(c4.wrapping_mul(19u64));
     let tmp0·: u64 = l·4 & 0x7ffffffffffffu64;
     let c5: u64 = l·4.wrapping_shr(51u32);
@@ -324,31 +324,31 @@
     let o121: u64 = tmp2;
     let o131: u64 = tmp3;
     let o141: u64 = tmp4;
-    let l·5: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w20, crate::fstar::uint128::uint64_to_uint128(0u64));
-    let tmp00: u64 = crate::fstar::uint128::uint128_to_uint64(l·5) & 0x7ffffffffffffu64;
+    let l·5: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w20, ::fstar::uint128::uint64_to_uint128(0u64));
+    let tmp00: u64 = ::fstar::uint128::uint128_to_uint64(l·5) & 0x7ffffffffffffu64;
     let c00: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·5, 51u32));
-    let l·6: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w21, crate::fstar::uint128::uint64_to_uint128(c00));
-    let tmp10: u64 = crate::fstar::uint128::uint128_to_uint64(l·6) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·5, 51u32));
+    let l·6: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w21, ::fstar::uint128::uint64_to_uint128(c00));
+    let tmp10: u64 = ::fstar::uint128::uint128_to_uint64(l·6) & 0x7ffffffffffffu64;
     let c10: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·6, 51u32));
-    let l·7: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w22, crate::fstar::uint128::uint64_to_uint128(c10));
-    let tmp20: u64 = crate::fstar::uint128::uint128_to_uint64(l·7) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·6, 51u32));
+    let l·7: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w22, ::fstar::uint128::uint64_to_uint128(c10));
+    let tmp20: u64 = ::fstar::uint128::uint128_to_uint64(l·7) & 0x7ffffffffffffu64;
     let c20: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·7, 51u32));
-    let l·8: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w23, crate::fstar::uint128::uint64_to_uint128(c20));
-    let tmp30: u64 = crate::fstar::uint128::uint128_to_uint64(l·8) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·7, 51u32));
+    let l·8: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w23, ::fstar::uint128::uint64_to_uint128(c20));
+    let tmp30: u64 = ::fstar::uint128::uint128_to_uint64(l·8) & 0x7ffffffffffffu64;
     let c30: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·8, 51u32));
-    let l·9: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w24, crate::fstar::uint128::uint64_to_uint128(c30));
-    let tmp40: u64 = crate::fstar::uint128::uint128_to_uint64(l·9) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·8, 51u32));
+    let l·9: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w24, ::fstar::uint128::uint64_to_uint128(c30));
+    let tmp40: u64 = ::fstar::uint128::uint128_to_uint64(l·9) & 0x7ffffffffffffu64;
     let c40: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·9, 51u32));
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·9, 51u32));
     let l·10: u64 = tmp00.wrapping_add(c40.wrapping_mul(19u64));
     let tmp0·0: u64 = l·10 & 0x7ffffffffffffu64;
     let c50: u64 = l·10.wrapping_shr(51u32);
@@ -386,36 +386,36 @@
     let f12: u64 = f1[2usize];
     let f13: u64 = f1[3usize];
     let f14: u64 = f1[4usize];
-    let tmp_w0: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f2, f10);
-    let tmp_w1: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f2, f11);
-    let tmp_w2: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f2, f12);
-    let tmp_w3: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f2, f13);
-    let tmp_w4: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f2, f14);
-    let l·: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w0, crate::fstar::uint128::uint64_to_uint128(0u64));
-    let tmp0: u64 = crate::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
+    let tmp_w0: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f2, f10);
+    let tmp_w1: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f2, f11);
+    let tmp_w2: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f2, f12);
+    let tmp_w3: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f2, f13);
+    let tmp_w4: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(f2, f14);
+    let l·: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w0, ::fstar::uint128::uint64_to_uint128(0u64));
+    let tmp0: u64 = ::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
     let c0: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·, 51u32));
-    let l·0: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w1, crate::fstar::uint128::uint64_to_uint128(c0));
-    let tmp1: u64 = crate::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·, 51u32));
+    let l·0: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w1, ::fstar::uint128::uint64_to_uint128(c0));
+    let tmp1: u64 = ::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
     let c1: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·0, 51u32));
-    let l·1: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w2, crate::fstar::uint128::uint64_to_uint128(c1));
-    let tmp2: u64 = crate::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·0, 51u32));
+    let l·1: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w2, ::fstar::uint128::uint64_to_uint128(c1));
+    let tmp2: u64 = ::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
     let c2: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·1, 51u32));
-    let l·2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w3, crate::fstar::uint128::uint64_to_uint128(c2));
-    let tmp3: u64 = crate::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·1, 51u32));
+    let l·2: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w3, ::fstar::uint128::uint64_to_uint128(c2));
+    let tmp3: u64 = ::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
     let c3: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·2, 51u32));
-    let l·3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(tmp_w4, crate::fstar::uint128::uint64_to_uint128(c3));
-    let tmp4: u64 = crate::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·2, 51u32));
+    let l·3: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(tmp_w4, ::fstar::uint128::uint64_to_uint128(c3));
+    let tmp4: u64 = ::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
     let c4: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·3, 51u32));
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·3, 51u32));
     let l·4: u64 = tmp0.wrapping_add(c4.wrapping_mul(19u64));
     let tmp0·: u64 = l·4 & 0x7ffffffffffffu64;
     let c5: u64 = l·4.wrapping_shr(51u32);
@@ -434,10 +434,10 @@
 #[inline] pub(crate) fn fsqr(
     out: &mut [u64],
     f: &[u64],
-    uu___: &[crate::fstar::uint128::uint128]
+    uu___: &[::fstar::uint128::uint128]
 )
 {
-    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(uu___);
+    ::lowstar::ignore::ignore::<&[::fstar::uint128::uint128]>(uu___);
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
     let f2: u64 = f[2usize];
@@ -449,76 +449,76 @@
     let d3: u64 = 19u64.wrapping_mul(f3);
     let d419: u64 = 19u64.wrapping_mul(f4);
     let d4: u64 = 2u64.wrapping_mul(d419);
-    let s0: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(f0, f0),
-                crate::fstar::uint128::mul_wide(d4, f1)
+    let s0: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(f0, f0),
+                ::fstar::uint128::mul_wide(d4, f1)
             ),
-            crate::fstar::uint128::mul_wide(d2, f3)
+            ::fstar::uint128::mul_wide(d2, f3)
         );
-    let s1: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d0, f1),
-                crate::fstar::uint128::mul_wide(d4, f2)
+    let s1: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d0, f1),
+                ::fstar::uint128::mul_wide(d4, f2)
             ),
-            crate::fstar::uint128::mul_wide(d3, f3)
+            ::fstar::uint128::mul_wide(d3, f3)
         );
-    let s2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d0, f2),
-                crate::fstar::uint128::mul_wide(f1, f1)
+    let s2: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d0, f2),
+                ::fstar::uint128::mul_wide(f1, f1)
             ),
-            crate::fstar::uint128::mul_wide(d4, f3)
+            ::fstar::uint128::mul_wide(d4, f3)
         );
-    let s3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d0, f3),
-                crate::fstar::uint128::mul_wide(d1, f2)
+    let s3: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d0, f3),
+                ::fstar::uint128::mul_wide(d1, f2)
             ),
-            crate::fstar::uint128::mul_wide(f4, d419)
+            ::fstar::uint128::mul_wide(f4, d419)
         );
-    let s4: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d0, f4),
-                crate::fstar::uint128::mul_wide(d1, f3)
+    let s4: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d0, f4),
+                ::fstar::uint128::mul_wide(d1, f3)
             ),
-            crate::fstar::uint128::mul_wide(f2, f2)
+            ::fstar::uint128::mul_wide(f2, f2)
         );
-    let o0: crate::fstar::uint128::uint128 = s0;
-    let o1: crate::fstar::uint128::uint128 = s1;
-    let o2: crate::fstar::uint128::uint128 = s2;
-    let o3: crate::fstar::uint128::uint128 = s3;
-    let o4: crate::fstar::uint128::uint128 = s4;
-    let l·: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o0, crate::fstar::uint128::uint64_to_uint128(0u64));
-    let tmp0: u64 = crate::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
+    let o0: ::fstar::uint128::uint128 = s0;
+    let o1: ::fstar::uint128::uint128 = s1;
+    let o2: ::fstar::uint128::uint128 = s2;
+    let o3: ::fstar::uint128::uint128 = s3;
+    let o4: ::fstar::uint128::uint128 = s4;
+    let l·: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o0, ::fstar::uint128::uint64_to_uint128(0u64));
+    let tmp0: u64 = ::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
     let c0: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·, 51u32));
-    let l·0: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o1, crate::fstar::uint128::uint64_to_uint128(c0));
-    let tmp1: u64 = crate::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·, 51u32));
+    let l·0: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o1, ::fstar::uint128::uint64_to_uint128(c0));
+    let tmp1: u64 = ::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
     let c1: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·0, 51u32));
-    let l·1: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o2, crate::fstar::uint128::uint64_to_uint128(c1));
-    let tmp2: u64 = crate::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·0, 51u32));
+    let l·1: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o2, ::fstar::uint128::uint64_to_uint128(c1));
+    let tmp2: u64 = ::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
     let c2: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·1, 51u32));
-    let l·2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o3, crate::fstar::uint128::uint64_to_uint128(c2));
-    let tmp3: u64 = crate::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·1, 51u32));
+    let l·2: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o3, ::fstar::uint128::uint64_to_uint128(c2));
+    let tmp3: u64 = ::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
     let c3: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·2, 51u32));
-    let l·3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o4, crate::fstar::uint128::uint64_to_uint128(c3));
-    let tmp4: u64 = crate::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·2, 51u32));
+    let l·3: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o4, ::fstar::uint128::uint64_to_uint128(c3));
+    let tmp4: u64 = ::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
     let c4: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·3, 51u32));
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·3, 51u32));
     let l·4: u64 = tmp0.wrapping_add(c4.wrapping_mul(19u64));
     let tmp0·: u64 = l·4 & 0x7ffffffffffffu64;
     let c5: u64 = l·4.wrapping_shr(51u32);
@@ -537,10 +537,10 @@
 #[inline] pub(crate) fn fsqr2(
     out: &mut [u64],
     f: &[u64],
-    uu___: &[crate::fstar::uint128::uint128]
+    uu___: &[::fstar::uint128::uint128]
 )
 {
-    crate::lowstar::ignore::ignore::<&[crate::fstar::uint128::uint128]>(uu___);
+    ::lowstar::ignore::ignore::<&[::fstar::uint128::uint128]>(uu___);
     let f10: u64 = f[0usize];
     let f11: u64 = f[1usize];
     let f12: u64 = f[2usize];
@@ -557,127 +557,127 @@
     let d3: u64 = 19u64.wrapping_mul(f13);
     let d419: u64 = 19u64.wrapping_mul(f14);
     let d4: u64 = 2u64.wrapping_mul(d419);
-    let s0: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(f10, f10),
-                crate::fstar::uint128::mul_wide(d4, f11)
+    let s0: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(f10, f10),
+                ::fstar::uint128::mul_wide(d4, f11)
             ),
-            crate::fstar::uint128::mul_wide(d2, f13)
+            ::fstar::uint128::mul_wide(d2, f13)
         );
-    let s1: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d0, f11),
-                crate::fstar::uint128::mul_wide(d4, f12)
+    let s1: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d0, f11),
+                ::fstar::uint128::mul_wide(d4, f12)
             ),
-            crate::fstar::uint128::mul_wide(d3, f13)
+            ::fstar::uint128::mul_wide(d3, f13)
         );
-    let s2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d0, f12),
-                crate::fstar::uint128::mul_wide(f11, f11)
+    let s2: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d0, f12),
+                ::fstar::uint128::mul_wide(f11, f11)
             ),
-            crate::fstar::uint128::mul_wide(d4, f13)
+            ::fstar::uint128::mul_wide(d4, f13)
         );
-    let s3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d0, f13),
-                crate::fstar::uint128::mul_wide(d1, f12)
+    let s3: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d0, f13),
+                ::fstar::uint128::mul_wide(d1, f12)
             ),
-            crate::fstar::uint128::mul_wide(f14, d419)
+            ::fstar::uint128::mul_wide(f14, d419)
         );
-    let s4: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d0, f14),
-                crate::fstar::uint128::mul_wide(d1, f13)
+    let s4: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d0, f14),
+                ::fstar::uint128::mul_wide(d1, f13)
             ),
-            crate::fstar::uint128::mul_wide(f12, f12)
+            ::fstar::uint128::mul_wide(f12, f12)
         );
-    let o10: crate::fstar::uint128::uint128 = s0;
-    let o11: crate::fstar::uint128::uint128 = s1;
-    let o12: crate::fstar::uint128::uint128 = s2;
-    let o13: crate::fstar::uint128::uint128 = s3;
-    let o14: crate::fstar::uint128::uint128 = s4;
+    let o10: ::fstar::uint128::uint128 = s0;
+    let o11: ::fstar::uint128::uint128 = s1;
+    let o12: ::fstar::uint128::uint128 = s2;
+    let o13: ::fstar::uint128::uint128 = s3;
+    let o14: ::fstar::uint128::uint128 = s4;
     let d00: u64 = 2u64.wrapping_mul(f20);
     let d10: u64 = 2u64.wrapping_mul(f21);
     let d20: u64 = 38u64.wrapping_mul(f22);
     let d30: u64 = 19u64.wrapping_mul(f23);
     let d4190: u64 = 19u64.wrapping_mul(f24);
     let d40: u64 = 2u64.wrapping_mul(d4190);
-    let s00: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(f20, f20),
-                crate::fstar::uint128::mul_wide(d40, f21)
+    let s00: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(f20, f20),
+                ::fstar::uint128::mul_wide(d40, f21)
             ),
-            crate::fstar::uint128::mul_wide(d20, f23)
+            ::fstar::uint128::mul_wide(d20, f23)
         );
-    let s10: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d00, f21),
-                crate::fstar::uint128::mul_wide(d40, f22)
+    let s10: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d00, f21),
+                ::fstar::uint128::mul_wide(d40, f22)
             ),
-            crate::fstar::uint128::mul_wide(d30, f23)
+            ::fstar::uint128::mul_wide(d30, f23)
         );
-    let s20: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d00, f22),
-                crate::fstar::uint128::mul_wide(f21, f21)
+    let s20: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d00, f22),
+                ::fstar::uint128::mul_wide(f21, f21)
             ),
-            crate::fstar::uint128::mul_wide(d40, f23)
+            ::fstar::uint128::mul_wide(d40, f23)
         );
-    let s30: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d00, f23),
-                crate::fstar::uint128::mul_wide(d10, f22)
+    let s30: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d00, f23),
+                ::fstar::uint128::mul_wide(d10, f22)
             ),
-            crate::fstar::uint128::mul_wide(f24, d4190)
+            ::fstar::uint128::mul_wide(f24, d4190)
         );
-    let s40: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(
-            crate::fstar::uint128::add(
-                crate::fstar::uint128::mul_wide(d00, f24),
-                crate::fstar::uint128::mul_wide(d10, f23)
+    let s40: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(
+            ::fstar::uint128::add(
+                ::fstar::uint128::mul_wide(d00, f24),
+                ::fstar::uint128::mul_wide(d10, f23)
             ),
-            crate::fstar::uint128::mul_wide(f22, f22)
+            ::fstar::uint128::mul_wide(f22, f22)
         );
-    let o20: crate::fstar::uint128::uint128 = s00;
-    let o21: crate::fstar::uint128::uint128 = s10;
-    let o22: crate::fstar::uint128::uint128 = s20;
-    let o23: crate::fstar::uint128::uint128 = s30;
-    let o24: crate::fstar::uint128::uint128 = s40;
-    let l·: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o10, crate::fstar::uint128::uint64_to_uint128(0u64));
-    let tmp0: u64 = crate::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
+    let o20: ::fstar::uint128::uint128 = s00;
+    let o21: ::fstar::uint128::uint128 = s10;
+    let o22: ::fstar::uint128::uint128 = s20;
+    let o23: ::fstar::uint128::uint128 = s30;
+    let o24: ::fstar::uint128::uint128 = s40;
+    let l·: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o10, ::fstar::uint128::uint64_to_uint128(0u64));
+    let tmp0: u64 = ::fstar::uint128::uint128_to_uint64(l·) & 0x7ffffffffffffu64;
     let c0: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·, 51u32));
-    let l·0: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o11, crate::fstar::uint128::uint64_to_uint128(c0));
-    let tmp1: u64 = crate::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·, 51u32));
+    let l·0: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o11, ::fstar::uint128::uint64_to_uint128(c0));
+    let tmp1: u64 = ::fstar::uint128::uint128_to_uint64(l·0) & 0x7ffffffffffffu64;
     let c1: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·0, 51u32));
-    let l·1: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o12, crate::fstar::uint128::uint64_to_uint128(c1));
-    let tmp2: u64 = crate::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·0, 51u32));
+    let l·1: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o12, ::fstar::uint128::uint64_to_uint128(c1));
+    let tmp2: u64 = ::fstar::uint128::uint128_to_uint64(l·1) & 0x7ffffffffffffu64;
     let c2: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·1, 51u32));
-    let l·2: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o13, crate::fstar::uint128::uint64_to_uint128(c2));
-    let tmp3: u64 = crate::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·1, 51u32));
+    let l·2: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o13, ::fstar::uint128::uint64_to_uint128(c2));
+    let tmp3: u64 = ::fstar::uint128::uint128_to_uint64(l·2) & 0x7ffffffffffffu64;
     let c3: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·2, 51u32));
-    let l·3: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o14, crate::fstar::uint128::uint64_to_uint128(c3));
-    let tmp4: u64 = crate::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·2, 51u32));
+    let l·3: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o14, ::fstar::uint128::uint64_to_uint128(c3));
+    let tmp4: u64 = ::fstar::uint128::uint128_to_uint64(l·3) & 0x7ffffffffffffu64;
     let c4: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·3, 51u32));
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·3, 51u32));
     let l·4: u64 = tmp0.wrapping_add(c4.wrapping_mul(19u64));
     let tmp0·: u64 = l·4 & 0x7ffffffffffffu64;
     let c5: u64 = l·4.wrapping_shr(51u32);
@@ -686,31 +686,31 @@
     let o121: u64 = tmp2;
     let o131: u64 = tmp3;
     let o141: u64 = tmp4;
-    let l·5: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o20, crate::fstar::uint128::uint64_to_uint128(0u64));
-    let tmp00: u64 = crate::fstar::uint128::uint128_to_uint64(l·5) & 0x7ffffffffffffu64;
+    let l·5: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o20, ::fstar::uint128::uint64_to_uint128(0u64));
+    let tmp00: u64 = ::fstar::uint128::uint128_to_uint64(l·5) & 0x7ffffffffffffu64;
     let c00: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·5, 51u32));
-    let l·6: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o21, crate::fstar::uint128::uint64_to_uint128(c00));
-    let tmp10: u64 = crate::fstar::uint128::uint128_to_uint64(l·6) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·5, 51u32));
+    let l·6: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o21, ::fstar::uint128::uint64_to_uint128(c00));
+    let tmp10: u64 = ::fstar::uint128::uint128_to_uint64(l·6) & 0x7ffffffffffffu64;
     let c10: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·6, 51u32));
-    let l·7: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o22, crate::fstar::uint128::uint64_to_uint128(c10));
-    let tmp20: u64 = crate::fstar::uint128::uint128_to_uint64(l·7) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·6, 51u32));
+    let l·7: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o22, ::fstar::uint128::uint64_to_uint128(c10));
+    let tmp20: u64 = ::fstar::uint128::uint128_to_uint64(l·7) & 0x7ffffffffffffu64;
     let c20: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·7, 51u32));
-    let l·8: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o23, crate::fstar::uint128::uint64_to_uint128(c20));
-    let tmp30: u64 = crate::fstar::uint128::uint128_to_uint64(l·8) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·7, 51u32));
+    let l·8: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o23, ::fstar::uint128::uint64_to_uint128(c20));
+    let tmp30: u64 = ::fstar::uint128::uint128_to_uint64(l·8) & 0x7ffffffffffffu64;
     let c30: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·8, 51u32));
-    let l·9: crate::fstar::uint128::uint128 =
-        crate::fstar::uint128::add(o24, crate::fstar::uint128::uint64_to_uint128(c30));
-    let tmp40: u64 = crate::fstar::uint128::uint128_to_uint64(l·9) & 0x7ffffffffffffu64;
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·8, 51u32));
+    let l·9: ::fstar::uint128::uint128 =
+        ::fstar::uint128::add(o24, ::fstar::uint128::uint64_to_uint128(c30));
+    let tmp40: u64 = ::fstar::uint128::uint128_to_uint64(l·9) & 0x7ffffffffffffu64;
     let c40: u64 =
-        crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(l·9, 51u32));
+        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(l·9, 51u32));
     let l·10: u64 = tmp00.wrapping_add(c40.wrapping_mul(19u64));
     let tmp0·0: u64 = l·10 & 0x7ffffffffffffu64;
     let c50: u64 = l·10.wrapping_shr(51u32);
@@ -771,11 +771,11 @@ pub(crate) fn store_felem(u64s: &mut [u64], f: &[u64])
     let f21: u64 = tmp2;
     let f31: u64 = tmp3;
     let f41: u64 = tmp4;
-    let m0: u64 = crate::fstar::uint64::gte_mask(f01, 0x7ffffffffffedu64);
-    let m1: u64 = crate::fstar::uint64::eq_mask(f11, 0x7ffffffffffffu64);
-    let m2: u64 = crate::fstar::uint64::eq_mask(f21, 0x7ffffffffffffu64);
-    let m3: u64 = crate::fstar::uint64::eq_mask(f31, 0x7ffffffffffffu64);
-    let m4: u64 = crate::fstar::uint64::eq_mask(f41, 0x7ffffffffffffu64);
+    let m0: u64 = ::fstar::uint64::gte_mask(f01, 0x7ffffffffffedu64);
+    let m1: u64 = ::fstar::uint64::eq_mask(f11, 0x7ffffffffffffu64);
+    let m2: u64 = ::fstar::uint64::eq_mask(f21, 0x7ffffffffffffu64);
+    let m3: u64 = ::fstar::uint64::eq_mask(f31, 0x7ffffffffffffu64);
+    let m4: u64 = ::fstar::uint64::eq_mask(f41, 0x7ffffffffffffu64);
     let mask: u64 = m0 & m1 & m2 & m3 & m4;
     let f0·: u64 = f01.wrapping_sub(mask & 0x7ffffffffffedu64);
     let f1·: u64 = f11.wrapping_sub(mask & 0x7ffffffffffffu64);
