@@ -139,8 +139,8 @@ fn absorb_inner_32(b: &[u8], s: &mut [u64])
                 0u32,
                 1u32,
                 {
-                    let _Y: u32 = (&keccak_piln)[i0 as usize];
-                    let r: u32 = (&keccak_rotc)[i0 as usize];
+                    let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i0 as usize];
+                    let r: u32 = (&crate::hash_sha3::keccak_rotc)[i0 as usize];
                     let temp: u64 = s[_Y as usize];
                     let uu____1: u64 = (&current)[0usize];
                     s[_Y as usize] =
@@ -191,7 +191,7 @@ fn absorb_inner_32(b: &[u8], s: &mut [u64])
                     s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
                 }
             );
-            let c: u64 = (&keccak_rndc)[i as usize];
+            let c: u64 = (&crate::hash_sha3::keccak_rndc)[i as usize];
             s[0usize] ^= c
         }
     )
@@ -230,19 +230,20 @@ fn update_multi_sha3(
     n_blocks: u32
 )
 {
-    let l: u32 = (block_len(a)).wrapping_mul(n_blocks);
-    for i in 0u32..l.wrapping_div(block_len(a))
+    let l: u32 = (crate::hash_sha3::block_len(a)).wrapping_mul(n_blocks);
+    for i in 0u32..l.wrapping_div(crate::hash_sha3::block_len(a))
     {
         let mut b: [u8; 256] = [0u8; 256usize];
         let b·: &mut [u8] = &mut b;
         let b0: &[u8] = blocks;
         let bl0: &mut [u8] = b·;
-        let uu____0: (&[u8], &[u8]) = b0.split_at(i.wrapping_mul(block_len(a)) as usize);
-        (bl0[0usize..block_len(a) as usize]).copy_from_slice(
-            &uu____0.1[0usize..block_len(a) as usize]
+        let uu____0: (&[u8], &[u8]) =
+            b0.split_at(i.wrapping_mul(crate::hash_sha3::block_len(a)) as usize);
+        (bl0[0usize..crate::hash_sha3::block_len(a) as usize]).copy_from_slice(
+            &uu____0.1[0usize..crate::hash_sha3::block_len(a) as usize]
         );
-        lowstar::ignore::ignore::<u32>(block_len(a));
-        absorb_inner_32(b·, s)
+        lowstar::ignore::ignore::<u32>(crate::hash_sha3::block_len(a));
+        crate::hash_sha3::absorb_inner_32(b·, s)
     }
 }
 
@@ -261,7 +262,7 @@ fn update_last_sha3(
         { 0x1fu8 }
         else
         { 0x06u8 };
-    let len: u32 = block_len(a);
+    let len: u32 = crate::hash_sha3::block_len(a);
     if input_len == len
     {
         let mut b: [u8; 256] = [0u8; 256usize];
@@ -271,7 +272,7 @@ fn update_last_sha3(
         (bl0[0usize..len as usize]).copy_from_slice(
             &(&b0[0u32.wrapping_mul(len) as usize..])[0usize..len as usize]
         );
-        absorb_inner_32(b·, s);
+        crate::hash_sha3::absorb_inner_32(b·, s);
         let mut b1: [u8; 256] = [0u8; 256usize];
         let b·0: &mut [u8] = &mut b1;
         let rem: u32 = 0u32.wrapping_rem(len);
@@ -401,8 +402,8 @@ fn update_last_sha3(
                         0u32,
                         1u32,
                         {
-                            let _Y: u32 = (&keccak_piln)[i0 as usize];
-                            let r: u32 = (&keccak_rotc)[i0 as usize];
+                            let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i0 as usize];
+                            let r: u32 = (&crate::hash_sha3::keccak_rotc)[i0 as usize];
                             let temp: u64 = s[_Y as usize];
                             let uu____1: u64 = (&current)[0usize];
                             s[_Y as usize] =
@@ -455,7 +456,7 @@ fn update_last_sha3(
                             s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
                         }
                     );
-                    let c: u64 = (&keccak_rndc)[i as usize];
+                    let c: u64 = (&crate::hash_sha3::keccak_rndc)[i as usize];
                     s[0usize] ^= c
                 }
             )
@@ -464,7 +465,7 @@ fn update_last_sha3(
         let b4: &mut [u8] = &mut b3;
         let b02: &mut [u8] = b4;
         b02[len.wrapping_sub(1u32) as usize] = 0x80u8;
-        absorb_inner_32(b4, s)
+        crate::hash_sha3::absorb_inner_32(b4, s)
     }
     else
     {
@@ -597,8 +598,8 @@ fn update_last_sha3(
                         0u32,
                         1u32,
                         {
-                            let _Y: u32 = (&keccak_piln)[i0 as usize];
-                            let r: u32 = (&keccak_rotc)[i0 as usize];
+                            let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i0 as usize];
+                            let r: u32 = (&crate::hash_sha3::keccak_rotc)[i0 as usize];
                             let temp: u64 = s[_Y as usize];
                             let uu____3: u64 = (&current)[0usize];
                             s[_Y as usize] =
@@ -651,7 +652,7 @@ fn update_last_sha3(
                             s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
                         }
                     );
-                    let c: u64 = (&keccak_rndc)[i as usize];
+                    let c: u64 = (&crate::hash_sha3::keccak_rndc)[i as usize];
                     s[0usize] ^= c
                 }
             )
@@ -660,65 +661,70 @@ fn update_last_sha3(
         let b3: &mut [u8] = &mut b2;
         let b01: &mut [u8] = b3;
         b01[len.wrapping_sub(1u32) as usize] = 0x80u8;
-        absorb_inner_32(b3, s)
+        crate::hash_sha3::absorb_inner_32(b3, s)
     }
 }
 
 pub struct hash_buf { pub fst: crate::streaming_types::hash_alg, pub snd: Box<[u64]> }
 
-pub struct state_t { pub block_state: hash_buf, pub buf: Box<[u8]>, pub total_len: u64 }
+pub struct state_t
+{ pub block_state: crate::hash_sha3::hash_buf, pub buf: Box<[u8]>, pub total_len: u64 }
 
-pub fn get_alg(s: &[state_t]) -> crate::streaming_types::hash_alg
+pub fn get_alg(s: &[crate::hash_sha3::state_t]) -> crate::streaming_types::hash_alg
 {
-    let block_state: &hash_buf = &(s[0usize]).block_state;
+    let block_state: &crate::hash_sha3::hash_buf = &(s[0usize]).block_state;
     block_state.fst
 }
 
-pub fn malloc(a: crate::streaming_types::hash_alg) -> Box<[state_t]>
+pub fn malloc(a: crate::streaming_types::hash_alg) -> Box<[crate::hash_sha3::state_t]>
 {
-    let buf: Box<[u8]> = vec![0u8; block_len(a) as usize].into_boxed_slice();
+    let buf: Box<[u8]> = vec![0u8; crate::hash_sha3::block_len(a) as usize].into_boxed_slice();
     let buf0: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
-    let mut block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
+    let mut block_state: crate::hash_sha3::hash_buf =
+        crate::hash_sha3::hash_buf { fst: a, snd: buf0 };
     let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    let s0: state_t = state_t { block_state, buf, total_len: 0u32 as u64 };
-    let p: Box<[state_t]> = vec![s0].into_boxed_slice();
+    let s0: crate::hash_sha3::state_t =
+        crate::hash_sha3::state_t { block_state, buf, total_len: 0u32 as u64 };
+    let p: Box<[crate::hash_sha3::state_t]> = vec![s0].into_boxed_slice();
     p
 }
 
-pub fn copy(state: &[state_t]) -> Box<[state_t]>
+pub fn copy(state: &[crate::hash_sha3::state_t]) -> Box<[crate::hash_sha3::state_t]>
 {
-    let block_state0: &hash_buf = &(state[0usize]).block_state;
+    let block_state0: &crate::hash_sha3::hash_buf = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
     let total_len0: u64 = (state[0usize]).total_len;
     let i: crate::streaming_types::hash_alg = block_state0.fst;
-    let mut buf: Box<[u8]> = vec![0u8; block_len(i) as usize].into_boxed_slice();
-    ((&mut buf)[0usize..block_len(i) as usize]).copy_from_slice(
-        &buf0[0usize..block_len(i) as usize]
+    let mut buf: Box<[u8]> = vec![0u8; crate::hash_sha3::block_len(i) as usize].into_boxed_slice();
+    ((&mut buf)[0usize..crate::hash_sha3::block_len(i) as usize]).copy_from_slice(
+        &buf0[0usize..crate::hash_sha3::block_len(i) as usize]
     );
     let buf1: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
-    let mut block_state: hash_buf = hash_buf { fst: i, snd: buf1 };
+    let mut block_state: crate::hash_sha3::hash_buf =
+        crate::hash_sha3::hash_buf { fst: i, snd: buf1 };
     let s_src: &[u64] = &block_state0.snd;
     let s_dst: &mut [u64] = &mut block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
-    let s: state_t = state_t { block_state, buf, total_len: total_len0 };
-    let p: Box<[state_t]> = vec![s].into_boxed_slice();
+    let s: crate::hash_sha3::state_t =
+        crate::hash_sha3::state_t { block_state, buf, total_len: total_len0 };
+    let p: Box<[crate::hash_sha3::state_t]> = vec![s].into_boxed_slice();
     p
 }
 
-pub fn reset(state: &mut [state_t])
+pub fn reset(state: &mut [crate::hash_sha3::state_t])
 {
-    let block_state: &mut hash_buf = &mut (state[0usize]).block_state;
+    let block_state: &mut crate::hash_sha3::hash_buf = &mut (state[0usize]).block_state;
     let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
     let total_len: u64 = 0u32 as u64;
     (state[0usize]).total_len = total_len
 }
 
-pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
+pub fn update(state: &mut [crate::hash_sha3::state_t], chunk: &[u8], chunk_len: u32) ->
     crate::streaming_types::error_code
 {
-    let block_state: &mut hash_buf = &mut (state[0usize]).block_state;
+    let block_state: &mut crate::hash_sha3::hash_buf = &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     let i: crate::streaming_types::hash_alg = block_state.fst;
     if chunk_len as u64 > 0xFFFFFFFFFFFFFFFFu64.wrapping_sub(total_len)
@@ -726,19 +732,25 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     else
     {
         let sz: u32 =
-            if total_len.wrapping_rem(block_len(i) as u64) == 0u64 && total_len > 0u64
-            { block_len(i) }
+            if
+            total_len.wrapping_rem(crate::hash_sha3::block_len(i) as u64) == 0u64
+            &&
+            total_len > 0u64
+            { crate::hash_sha3::block_len(i) }
             else
-            { total_len.wrapping_rem(block_len(i) as u64) as u32 };
-        if chunk_len <= (block_len(i)).wrapping_sub(sz)
+            { total_len.wrapping_rem(crate::hash_sha3::block_len(i) as u64) as u32 };
+        if chunk_len <= (crate::hash_sha3::block_len(i)).wrapping_sub(sz)
         {
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
-                if total_len1.wrapping_rem(block_len(i) as u64) == 0u64 && total_len1 > 0u64
-                { block_len(i) }
+                if
+                total_len1.wrapping_rem(crate::hash_sha3::block_len(i) as u64) == 0u64
+                &&
+                total_len1 > 0u64
+                { crate::hash_sha3::block_len(i) }
                 else
-                { total_len1.wrapping_rem(block_len(i) as u64) as u32 };
+                { total_len1.wrapping_rem(crate::hash_sha3::block_len(i) as u64) as u32 };
             let buf2: (&mut [u8], &mut [u8]) = buf.split_at_mut(sz1 as usize);
             (buf2.1[0usize..chunk_len as usize]).copy_from_slice(&chunk[0usize..chunk_len as usize]);
             let total_len2: u64 = total_len1.wrapping_add(chunk_len as u64);
@@ -749,32 +761,46 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
-                if total_len1.wrapping_rem(block_len(i) as u64) == 0u64 && total_len1 > 0u64
-                { block_len(i) }
+                if
+                total_len1.wrapping_rem(crate::hash_sha3::block_len(i) as u64) == 0u64
+                &&
+                total_len1 > 0u64
+                { crate::hash_sha3::block_len(i) }
                 else
-                { total_len1.wrapping_rem(block_len(i) as u64) as u32 };
+                { total_len1.wrapping_rem(crate::hash_sha3::block_len(i) as u64) as u32 };
             if sz1 != 0u32
             {
                 let a1: crate::streaming_types::hash_alg = block_state.fst;
                 let s1: &mut [u64] = &mut block_state.snd;
-                update_multi_sha3(a1, s1, buf, (block_len(i)).wrapping_div(block_len(a1)))
+                crate::hash_sha3::update_multi_sha3(
+                    a1,
+                    s1,
+                    buf,
+                    (crate::hash_sha3::block_len(i)).wrapping_div(crate::hash_sha3::block_len(a1))
+                )
             };
             let ite: u32 =
                 if
-                (chunk_len as u64).wrapping_rem(block_len(i) as u64) == 0u64
+                (chunk_len as u64).wrapping_rem(crate::hash_sha3::block_len(i) as u64) == 0u64
                 &&
                 chunk_len as u64 > 0u64
-                { block_len(i) }
+                { crate::hash_sha3::block_len(i) }
                 else
-                { (chunk_len as u64).wrapping_rem(block_len(i) as u64) as u32 };
-            let n_blocks: u32 = chunk_len.wrapping_sub(ite).wrapping_div(block_len(i));
-            let data1_len: u32 = n_blocks.wrapping_mul(block_len(i));
+                { (chunk_len as u64).wrapping_rem(crate::hash_sha3::block_len(i) as u64) as u32 };
+            let n_blocks: u32 =
+                chunk_len.wrapping_sub(ite).wrapping_div(crate::hash_sha3::block_len(i));
+            let data1_len: u32 = n_blocks.wrapping_mul(crate::hash_sha3::block_len(i));
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
             let a1: crate::streaming_types::hash_alg = block_state.fst;
             let s1: &mut [u64] = &mut block_state.snd;
-            update_multi_sha3(a1, s1, data2.0, data1_len.wrapping_div(block_len(a1)));
+            crate::hash_sha3::update_multi_sha3(
+                a1,
+                s1,
+                data2.0,
+                data1_len.wrapping_div(crate::hash_sha3::block_len(a1))
+            );
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -783,16 +809,19 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
         }
         else
         {
-            let diff: u32 = (block_len(i)).wrapping_sub(sz);
+            let diff: u32 = (crate::hash_sha3::block_len(i)).wrapping_sub(sz);
             let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
             let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
-                if total_len1.wrapping_rem(block_len(i) as u64) == 0u64 && total_len1 > 0u64
-                { block_len(i) }
+                if
+                total_len1.wrapping_rem(crate::hash_sha3::block_len(i) as u64) == 0u64
+                &&
+                total_len1 > 0u64
+                { crate::hash_sha3::block_len(i) }
                 else
-                { total_len1.wrapping_rem(block_len(i) as u64) as u32 };
+                { total_len1.wrapping_rem(crate::hash_sha3::block_len(i) as u64) as u32 };
             let buf2: (&mut [u8], &mut [u8]) = buf.split_at_mut(sz1 as usize);
             (buf2.1[0usize..diff as usize]).copy_from_slice(&chunk2.0[0usize..diff as usize]);
             let total_len2: u64 = total_len1.wrapping_add(diff as u64);
@@ -800,33 +829,58 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let buf0: &mut [u8] = &mut (state[0usize]).buf;
             let total_len10: u64 = (state[0usize]).total_len;
             let sz10: u32 =
-                if total_len10.wrapping_rem(block_len(i) as u64) == 0u64 && total_len10 > 0u64
-                { block_len(i) }
+                if
+                total_len10.wrapping_rem(crate::hash_sha3::block_len(i) as u64) == 0u64
+                &&
+                total_len10 > 0u64
+                { crate::hash_sha3::block_len(i) }
                 else
-                { total_len10.wrapping_rem(block_len(i) as u64) as u32 };
+                { total_len10.wrapping_rem(crate::hash_sha3::block_len(i) as u64) as u32 };
             if sz10 != 0u32
             {
                 let a1: crate::streaming_types::hash_alg = block_state.fst;
                 let s1: &mut [u64] = &mut block_state.snd;
-                update_multi_sha3(a1, s1, buf0, (block_len(i)).wrapping_div(block_len(a1)))
+                crate::hash_sha3::update_multi_sha3(
+                    a1,
+                    s1,
+                    buf0,
+                    (crate::hash_sha3::block_len(i)).wrapping_div(crate::hash_sha3::block_len(a1))
+                )
             };
             let ite: u32 =
                 if
-                (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(block_len(i) as u64) == 0u64
+                (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(
+                    crate::hash_sha3::block_len(i) as u64
+                )
+                ==
+                0u64
                 &&
                 chunk_len.wrapping_sub(diff) as u64 > 0u64
-                { block_len(i) }
+                { crate::hash_sha3::block_len(i) }
                 else
-                { (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(block_len(i) as u64) as u32 };
+                {
+                    (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(
+                        crate::hash_sha3::block_len(i) as u64
+                    )
+                    as
+                    u32
+                };
             let n_blocks: u32 =
-                chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(block_len(i));
-            let data1_len: u32 = n_blocks.wrapping_mul(block_len(i));
+                chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(
+                    crate::hash_sha3::block_len(i)
+                );
+            let data1_len: u32 = n_blocks.wrapping_mul(crate::hash_sha3::block_len(i));
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
             let a1: crate::streaming_types::hash_alg = block_state.fst;
             let s1: &mut [u64] = &mut block_state.snd;
-            update_multi_sha3(a1, s1, data2.0, data1_len.wrapping_div(block_len(a1)));
+            crate::hash_sha3::update_multi_sha3(
+                a1,
+                s1,
+                data2.0,
+                data1_len.wrapping_div(crate::hash_sha3::block_len(a1))
+            );
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -840,38 +894,44 @@ pub fn update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
 
 fn digest_(
     a: crate::streaming_types::hash_alg,
-    state: &[state_t],
+    state: &[crate::hash_sha3::state_t],
     output: &mut [u8],
     l: u32
 )
 {
-    let block_state: &hash_buf = &(state[0usize]).block_state;
+    let block_state: &crate::hash_sha3::hash_buf = &(state[0usize]).block_state;
     let buf_: &[u8] = &(state[0usize]).buf;
     let total_len: u64 = (state[0usize]).total_len;
     let r: u32 =
-        if total_len.wrapping_rem(block_len(a) as u64) == 0u64 && total_len > 0u64
-        { block_len(a) }
+        if total_len.wrapping_rem(crate::hash_sha3::block_len(a) as u64) == 0u64 && total_len > 0u64
+        { crate::hash_sha3::block_len(a) }
         else
-        { total_len.wrapping_rem(block_len(a) as u64) as u32 };
+        { total_len.wrapping_rem(crate::hash_sha3::block_len(a) as u64) as u32 };
     let buf_1: (&[u8], &[u8]) = buf_.split_at(0usize);
     let buf: [u64; 25] = [0u64; 25usize];
-    let mut tmp_block_state: hash_buf = hash_buf { fst: a, snd: Box::new(buf) };
+    let mut tmp_block_state: crate::hash_sha3::hash_buf =
+        crate::hash_sha3::hash_buf { fst: a, snd: Box::new(buf) };
     let s_src: &[u64] = &block_state.snd;
     let s_dst: &mut [u64] = &mut tmp_block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
     let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
     let ite: u32 =
-        if r.wrapping_rem(block_len(a)) == 0u32 && r > 0u32
-        { block_len(a) }
+        if r.wrapping_rem(crate::hash_sha3::block_len(a)) == 0u32 && r > 0u32
+        { crate::hash_sha3::block_len(a) }
         else
-        { r.wrapping_rem(block_len(a)) };
+        { r.wrapping_rem(crate::hash_sha3::block_len(a)) };
     let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
     let a1: crate::streaming_types::hash_alg = tmp_block_state.fst;
     let s: &mut [u64] = &mut tmp_block_state.snd;
-    update_multi_sha3(a1, s, buf_last.0, 0u32.wrapping_div(block_len(a1)));
+    crate::hash_sha3::update_multi_sha3(
+        a1,
+        s,
+        buf_last.0,
+        0u32.wrapping_div(crate::hash_sha3::block_len(a1))
+    );
     let a10: crate::streaming_types::hash_alg = tmp_block_state.fst;
     let s0: &mut [u64] = &mut tmp_block_state.snd;
-    update_last_sha3(a10, s0, buf_last.1, r);
+    crate::hash_sha3::update_last_sha3(a10, s0, buf_last.1, r);
     let a11: crate::streaming_types::hash_alg = tmp_block_state.fst;
     let s1: &mut [u64] = &mut tmp_block_state.snd;
     if
@@ -879,7 +939,7 @@ fn digest_(
     ||
     a11 == crate::streaming_types::hash_alg::Shake256
     {
-        for i in 0u32..l.wrapping_div(block_len(a11))
+        for i in 0u32..l.wrapping_div(crate::hash_sha3::block_len(a11))
         {
             let mut hbuf: [u8; 256] = [0u8; 256usize];
             let mut ws: [u64; 32] = [0u64; 32usize];
@@ -896,9 +956,15 @@ fn digest_(
             );
             let b0: &mut [u8] = output;
             let uu____0: (&[u8], &[u8]) = hbuf.split_at(0usize);
-            (b0[i.wrapping_mul(block_len(a11)) as usize..i.wrapping_mul(block_len(a11)) as usize
+            (b0[i.wrapping_mul(crate::hash_sha3::block_len(a11)) as usize..i.wrapping_mul(
+                crate::hash_sha3::block_len(a11)
+            )
+            as
+            usize
             +
-            block_len(a11) as usize]).copy_from_slice(&uu____0.1[0usize..block_len(a11) as usize]);
+            crate::hash_sha3::block_len(a11) as usize]).copy_from_slice(
+                &uu____0.1[0usize..crate::hash_sha3::block_len(a11) as usize]
+            );
             krml::unroll_for!(
                 24,
                 "i0",
@@ -951,8 +1017,8 @@ fn digest_(
                         0u32,
                         1u32,
                         {
-                            let _Y: u32 = (&keccak_piln)[i1 as usize];
-                            let r1: u32 = (&keccak_rotc)[i1 as usize];
+                            let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                            let r1: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
                             let temp: u64 = s1[_Y as usize];
                             let uu____2: u64 = (&current)[0usize];
                             s1[_Y as usize] =
@@ -1005,12 +1071,12 @@ fn digest_(
                             s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                         }
                     );
-                    let c: u64 = (&keccak_rndc)[i0 as usize];
+                    let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
                     s1[0usize] ^= c
                 }
             )
         };
-        let remOut: u32 = l.wrapping_rem(block_len(a11));
+        let remOut: u32 = l.wrapping_rem(crate::hash_sha3::block_len(a11));
         let mut hbuf: [u8; 256] = [0u8; 256usize];
         let mut ws: [u64; 32] = [0u64; 32usize];
         ((&mut ws)[0usize..25usize]).copy_from_slice(&s1[0usize..25usize]);
@@ -1030,7 +1096,10 @@ fn digest_(
     }
     else
     {
-        for i in 0u32..(hash_len(a11)).wrapping_div(block_len(a11))
+        for
+        i
+        in
+        0u32..(crate::hash_sha3::hash_len(a11)).wrapping_div(crate::hash_sha3::block_len(a11))
         {
             let mut hbuf: [u8; 256] = [0u8; 256usize];
             let mut ws: [u64; 32] = [0u64; 32usize];
@@ -1047,9 +1116,15 @@ fn digest_(
             );
             let b0: &mut [u8] = output;
             let uu____3: (&[u8], &[u8]) = hbuf.split_at(0usize);
-            (b0[i.wrapping_mul(block_len(a11)) as usize..i.wrapping_mul(block_len(a11)) as usize
+            (b0[i.wrapping_mul(crate::hash_sha3::block_len(a11)) as usize..i.wrapping_mul(
+                crate::hash_sha3::block_len(a11)
+            )
+            as
+            usize
             +
-            block_len(a11) as usize]).copy_from_slice(&uu____3.1[0usize..block_len(a11) as usize]);
+            crate::hash_sha3::block_len(a11) as usize]).copy_from_slice(
+                &uu____3.1[0usize..crate::hash_sha3::block_len(a11) as usize]
+            );
             krml::unroll_for!(
                 24,
                 "i0",
@@ -1102,8 +1177,8 @@ fn digest_(
                         0u32,
                         1u32,
                         {
-                            let _Y: u32 = (&keccak_piln)[i1 as usize];
-                            let r1: u32 = (&keccak_rotc)[i1 as usize];
+                            let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                            let r1: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
                             let temp: u64 = s1[_Y as usize];
                             let uu____5: u64 = (&current)[0usize];
                             s1[_Y as usize] =
@@ -1156,12 +1231,13 @@ fn digest_(
                             s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                         }
                     );
-                    let c: u64 = (&keccak_rndc)[i0 as usize];
+                    let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
                     s1[0usize] ^= c
                 }
             )
         };
-        let remOut: u32 = (hash_len(a11)).wrapping_rem(block_len(a11));
+        let remOut: u32 =
+            (crate::hash_sha3::hash_len(a11)).wrapping_rem(crate::hash_sha3::block_len(a11));
         let mut hbuf: [u8; 256] = [0u8; 256usize];
         let mut ws: [u64; 32] = [0u64; 32usize];
         ((&mut ws)[0usize..25usize]).copy_from_slice(&s1[0usize..25usize]);
@@ -1176,7 +1252,9 @@ fn digest_(
             )
         );
         let uu____6: (&[u8], &[u8]) = hbuf.split_at(0usize);
-        (output[(hash_len(a11)).wrapping_sub(remOut) as usize..(hash_len(a11)).wrapping_sub(remOut)
+        (output[(crate::hash_sha3::hash_len(a11)).wrapping_sub(remOut) as usize..(crate::hash_sha3::hash_len(
+            a11
+        )).wrapping_sub(remOut)
         as
         usize
         +
@@ -1184,9 +1262,10 @@ fn digest_(
     }
 }
 
-pub fn digest(state: &[state_t], output: &mut [u8]) -> crate::streaming_types::error_code
+pub fn digest(state: &[crate::hash_sha3::state_t], output: &mut [u8]) ->
+    crate::streaming_types::error_code
 {
-    let a1: crate::streaming_types::hash_alg = get_alg(state);
+    let a1: crate::streaming_types::hash_alg = crate::hash_sha3::get_alg(state);
     if
     a1 == crate::streaming_types::hash_alg::Shake128
     ||
@@ -1194,15 +1273,15 @@ pub fn digest(state: &[state_t], output: &mut [u8]) -> crate::streaming_types::e
     { crate::streaming_types::error_code::InvalidAlgorithm }
     else
     {
-        digest_(a1, state, output, hash_len(a1));
+        crate::hash_sha3::digest_(a1, state, output, crate::hash_sha3::hash_len(a1));
         crate::streaming_types::error_code::Success
     }
 }
 
-pub fn squeeze(s: &[state_t], dst: &mut [u8], l: u32) ->
+pub fn squeeze(s: &[crate::hash_sha3::state_t], dst: &mut [u8], l: u32) ->
     crate::streaming_types::error_code
 {
-    let a1: crate::streaming_types::hash_alg = get_alg(s);
+    let a1: crate::streaming_types::hash_alg = crate::hash_sha3::get_alg(s);
     if
     !
     (a1 == crate::streaming_types::hash_alg::Shake128
@@ -1213,26 +1292,26 @@ pub fn squeeze(s: &[state_t], dst: &mut [u8], l: u32) ->
     { crate::streaming_types::error_code::InvalidLength }
     else
     {
-        digest_(a1, s, dst, l);
+        crate::hash_sha3::digest_(a1, s, dst, l);
         crate::streaming_types::error_code::Success
     }
 }
 
-pub fn block_len0(s: &[state_t]) -> u32
+pub fn block_len0(s: &[crate::hash_sha3::state_t]) -> u32
 {
-    let a1: crate::streaming_types::hash_alg = get_alg(s);
-    block_len(a1)
+    let a1: crate::streaming_types::hash_alg = crate::hash_sha3::get_alg(s);
+    crate::hash_sha3::block_len(a1)
 }
 
-pub fn hash_len0(s: &[state_t]) -> u32
+pub fn hash_len0(s: &[crate::hash_sha3::state_t]) -> u32
 {
-    let a1: crate::streaming_types::hash_alg = get_alg(s);
-    hash_len(a1)
+    let a1: crate::streaming_types::hash_alg = crate::hash_sha3::get_alg(s);
+    crate::hash_sha3::hash_len(a1)
 }
 
-pub fn is_shake(s: &[state_t]) -> bool
+pub fn is_shake(s: &[crate::hash_sha3::state_t]) -> bool
 {
-    let uu____0: crate::streaming_types::hash_alg = get_alg(s);
+    let uu____0: crate::streaming_types::hash_alg = crate::hash_sha3::get_alg(s);
     uu____0 == crate::streaming_types::hash_alg::Shake128
     ||
     uu____0 == crate::streaming_types::hash_alg::Shake256
@@ -1357,8 +1436,8 @@ pub fn absorb_inner_320(rateInBytes: u32, b: &[u8], s: &mut [u64])
                 0u32,
                 1u32,
                 {
-                    let _Y: u32 = (&keccak_piln)[i0 as usize];
-                    let r: u32 = (&keccak_rotc)[i0 as usize];
+                    let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i0 as usize];
+                    let r: u32 = (&crate::hash_sha3::keccak_rotc)[i0 as usize];
                     let temp: u64 = s[_Y as usize];
                     let uu____1: u64 = (&current)[0usize];
                     s[_Y as usize] =
@@ -1409,7 +1488,7 @@ pub fn absorb_inner_320(rateInBytes: u32, b: &[u8], s: &mut [u64])
                     s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
                 }
             );
-            let c: u64 = (&keccak_rndc)[i as usize];
+            let c: u64 = (&crate::hash_sha3::keccak_rndc)[i as usize];
             s[0usize] ^= c
         }
     )
@@ -1430,7 +1509,7 @@ pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
             &(&b0[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1 as usize]
         );
-        absorb_inner_320(rateInBytes1, b·, &mut s)
+        crate::hash_sha3::absorb_inner_320(rateInBytes1, b·, &mut s)
     };
     let mut b: [u8; 256] = [0u8; 256usize];
     let b·: &mut [u8] = &mut b;
@@ -1519,7 +1598,7 @@ pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
     let b3: &mut [u8] = &mut b2;
     let b01: &mut [u8] = b3;
     b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-    absorb_inner_320(rateInBytes1, b3, &mut s);
+    crate::hash_sha3::absorb_inner_320(rateInBytes1, b3, &mut s);
     for i in 0u32..outputByteLen.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -1593,8 +1672,8 @@ pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&keccak_piln)[i1 as usize];
-                        let r: u32 = (&keccak_rotc)[i1 as usize];
+                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
                         let temp: u64 = (&s)[_Y as usize];
                         let uu____1: u64 = (&current)[0usize];
                         (&mut s)[_Y as usize] =
@@ -1645,7 +1724,7 @@ pub fn shake128(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&keccak_rndc)[i0 as usize];
+                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
                 (&mut s)[0usize] = (&s)[0usize] ^ c
             }
         )
@@ -1684,7 +1763,7 @@ pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
             &(&b0[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1 as usize]
         );
-        absorb_inner_320(rateInBytes1, b·, &mut s)
+        crate::hash_sha3::absorb_inner_320(rateInBytes1, b·, &mut s)
     };
     let mut b: [u8; 256] = [0u8; 256usize];
     let b·: &mut [u8] = &mut b;
@@ -1773,7 +1852,7 @@ pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
     let b3: &mut [u8] = &mut b2;
     let b01: &mut [u8] = b3;
     b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-    absorb_inner_320(rateInBytes1, b3, &mut s);
+    crate::hash_sha3::absorb_inner_320(rateInBytes1, b3, &mut s);
     for i in 0u32..outputByteLen.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -1847,8 +1926,8 @@ pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&keccak_piln)[i1 as usize];
-                        let r: u32 = (&keccak_rotc)[i1 as usize];
+                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
                         let temp: u64 = (&s)[_Y as usize];
                         let uu____1: u64 = (&current)[0usize];
                         (&mut s)[_Y as usize] =
@@ -1899,7 +1978,7 @@ pub fn shake256(output: &mut [u8], outputByteLen: u32, input: &[u8], inputByteLe
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&keccak_rndc)[i0 as usize];
+                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
                 (&mut s)[0usize] = (&s)[0usize] ^ c
             }
         )
@@ -1938,7 +2017,7 @@ pub fn sha3_224(output: &mut [u8], input: &[u8], inputByteLen: u32)
         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
             &(&b0[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1 as usize]
         );
-        absorb_inner_320(rateInBytes1, b·, &mut s)
+        crate::hash_sha3::absorb_inner_320(rateInBytes1, b·, &mut s)
     };
     let mut b: [u8; 256] = [0u8; 256usize];
     let b·: &mut [u8] = &mut b;
@@ -2027,7 +2106,7 @@ pub fn sha3_224(output: &mut [u8], input: &[u8], inputByteLen: u32)
     let b3: &mut [u8] = &mut b2;
     let b01: &mut [u8] = b3;
     b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-    absorb_inner_320(rateInBytes1, b3, &mut s);
+    crate::hash_sha3::absorb_inner_320(rateInBytes1, b3, &mut s);
     for i in 0u32..28u32.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -2101,8 +2180,8 @@ pub fn sha3_224(output: &mut [u8], input: &[u8], inputByteLen: u32)
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&keccak_piln)[i1 as usize];
-                        let r: u32 = (&keccak_rotc)[i1 as usize];
+                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
                         let temp: u64 = (&s)[_Y as usize];
                         let uu____1: u64 = (&current)[0usize];
                         (&mut s)[_Y as usize] =
@@ -2153,7 +2232,7 @@ pub fn sha3_224(output: &mut [u8], input: &[u8], inputByteLen: u32)
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&keccak_rndc)[i0 as usize];
+                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
                 (&mut s)[0usize] = (&s)[0usize] ^ c
             }
         )
@@ -2192,7 +2271,7 @@ pub fn sha3_256(output: &mut [u8], input: &[u8], inputByteLen: u32)
         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
             &(&b0[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1 as usize]
         );
-        absorb_inner_320(rateInBytes1, b·, &mut s)
+        crate::hash_sha3::absorb_inner_320(rateInBytes1, b·, &mut s)
     };
     let mut b: [u8; 256] = [0u8; 256usize];
     let b·: &mut [u8] = &mut b;
@@ -2281,7 +2360,7 @@ pub fn sha3_256(output: &mut [u8], input: &[u8], inputByteLen: u32)
     let b3: &mut [u8] = &mut b2;
     let b01: &mut [u8] = b3;
     b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-    absorb_inner_320(rateInBytes1, b3, &mut s);
+    crate::hash_sha3::absorb_inner_320(rateInBytes1, b3, &mut s);
     for i in 0u32..32u32.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -2355,8 +2434,8 @@ pub fn sha3_256(output: &mut [u8], input: &[u8], inputByteLen: u32)
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&keccak_piln)[i1 as usize];
-                        let r: u32 = (&keccak_rotc)[i1 as usize];
+                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
                         let temp: u64 = (&s)[_Y as usize];
                         let uu____1: u64 = (&current)[0usize];
                         (&mut s)[_Y as usize] =
@@ -2407,7 +2486,7 @@ pub fn sha3_256(output: &mut [u8], input: &[u8], inputByteLen: u32)
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&keccak_rndc)[i0 as usize];
+                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
                 (&mut s)[0usize] = (&s)[0usize] ^ c
             }
         )
@@ -2446,7 +2525,7 @@ pub fn sha3_384(output: &mut [u8], input: &[u8], inputByteLen: u32)
         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
             &(&b0[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1 as usize]
         );
-        absorb_inner_320(rateInBytes1, b·, &mut s)
+        crate::hash_sha3::absorb_inner_320(rateInBytes1, b·, &mut s)
     };
     let mut b: [u8; 256] = [0u8; 256usize];
     let b·: &mut [u8] = &mut b;
@@ -2535,7 +2614,7 @@ pub fn sha3_384(output: &mut [u8], input: &[u8], inputByteLen: u32)
     let b3: &mut [u8] = &mut b2;
     let b01: &mut [u8] = b3;
     b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-    absorb_inner_320(rateInBytes1, b3, &mut s);
+    crate::hash_sha3::absorb_inner_320(rateInBytes1, b3, &mut s);
     for i in 0u32..48u32.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -2609,8 +2688,8 @@ pub fn sha3_384(output: &mut [u8], input: &[u8], inputByteLen: u32)
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&keccak_piln)[i1 as usize];
-                        let r: u32 = (&keccak_rotc)[i1 as usize];
+                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
                         let temp: u64 = (&s)[_Y as usize];
                         let uu____1: u64 = (&current)[0usize];
                         (&mut s)[_Y as usize] =
@@ -2661,7 +2740,7 @@ pub fn sha3_384(output: &mut [u8], input: &[u8], inputByteLen: u32)
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&keccak_rndc)[i0 as usize];
+                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
                 (&mut s)[0usize] = (&s)[0usize] ^ c
             }
         )
@@ -2700,7 +2779,7 @@ pub fn sha3_512(output: &mut [u8], input: &[u8], inputByteLen: u32)
         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
             &(&b0[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1 as usize]
         );
-        absorb_inner_320(rateInBytes1, b·, &mut s)
+        crate::hash_sha3::absorb_inner_320(rateInBytes1, b·, &mut s)
     };
     let mut b: [u8; 256] = [0u8; 256usize];
     let b·: &mut [u8] = &mut b;
@@ -2789,7 +2868,7 @@ pub fn sha3_512(output: &mut [u8], input: &[u8], inputByteLen: u32)
     let b3: &mut [u8] = &mut b2;
     let b01: &mut [u8] = b3;
     b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-    absorb_inner_320(rateInBytes1, b3, &mut s);
+    crate::hash_sha3::absorb_inner_320(rateInBytes1, b3, &mut s);
     for i in 0u32..64u32.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -2863,8 +2942,8 @@ pub fn sha3_512(output: &mut [u8], input: &[u8], inputByteLen: u32)
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&keccak_piln)[i1 as usize];
-                        let r: u32 = (&keccak_rotc)[i1 as usize];
+                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
                         let temp: u64 = (&s)[_Y as usize];
                         let uu____1: u64 = (&current)[0usize];
                         (&mut s)[_Y as usize] =
@@ -2915,7 +2994,7 @@ pub fn sha3_512(output: &mut [u8], input: &[u8], inputByteLen: u32)
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&keccak_rndc)[i0 as usize];
+                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
                 (&mut s)[0usize] = (&s)[0usize] ^ c
             }
         )
@@ -2980,7 +3059,7 @@ shake128_absorb_nblocks(state: &mut [u64], input: &[u8], inputByteLen: u32)
         (bl0[0usize..168usize]).copy_from_slice(
             &(&b0[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
         );
-        absorb_inner_320(168u32, b·, state)
+        crate::hash_sha3::absorb_inner_320(168u32, b·, state)
     }
 }
 
@@ -3083,7 +3162,7 @@ shake128_absorb_final(state: &mut [u64], input: &[u8], inputByteLen: u32)
     let b3: &mut [u8] = &mut b2;
     let b01: &mut [u8] = b3;
     b01[167usize] = 0x80u8;
-    absorb_inner_320(168u32, b3, state)
+    crate::hash_sha3::absorb_inner_320(168u32, b3, state)
 }
 
 /**
@@ -3170,8 +3249,8 @@ shake128_squeeze_nblocks(state: &mut [u64], output: &mut [u8], outputByteLen: u3
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&keccak_piln)[i1 as usize];
-                        let r: u32 = (&keccak_rotc)[i1 as usize];
+                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
                         let temp: u64 = state[_Y as usize];
                         let uu____1: u64 = (&current)[0usize];
                         state[_Y as usize] =
@@ -3222,7 +3301,7 @@ shake128_squeeze_nblocks(state: &mut [u64], output: &mut [u8], outputByteLen: u3
                         state[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&keccak_rndc)[i0 as usize];
+                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
                 state[0usize] ^= c
             }
         )

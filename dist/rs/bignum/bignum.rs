@@ -36,7 +36,7 @@ pub(crate) fn bn_karatsuba_mul_uint32(
             let os: (&mut [u32], &mut [u32]) = t1.0.split_at_mut(0usize);
             os.1[i as usize] = x
         };
-        ::lowstar::ignore::ignore::<u32>(c1);
+        lowstar::ignore::ignore::<u32>(c1);
         let c00: u32 = c0;
         let c01: u32 = crate::bignum_base::bn_sub_eq_len_u32(len2, b1.0, b1.1, tmp·.1);
         let c10: u32 = crate::bignum_base::bn_sub_eq_len_u32(len2, b1.1, b1.0, tmp·.0);
@@ -49,18 +49,18 @@ pub(crate) fn bn_karatsuba_mul_uint32(
             let os: (&mut [u32], &mut [u32]) = tmp·.0.split_at_mut(0usize);
             os.1[i as usize] = x
         };
-        ::lowstar::ignore::ignore::<u32>(c10);
+        lowstar::ignore::ignore::<u32>(c10);
         let c11: u32 = c01;
         let t23: (&mut [u32], &mut [u32]) = tmp·.1.split_at_mut(0usize);
         let tmp1: (&mut [u32], &mut [u32]) =
             t23.1.split_at_mut(aLen.wrapping_add(aLen) as usize - aLen as usize);
-        bn_karatsuba_mul_uint32(len2, t1.0, tmp·.0, tmp1.1, tmp1.0);
+        crate::bignum::bn_karatsuba_mul_uint32(len2, t1.0, tmp·.0, tmp1.1, tmp1.0);
         let r01: (&mut [u32], &mut [u32]) = res.split_at_mut(0usize);
         let r23: (&mut [u32], &mut [u32]) = r01.1.split_at_mut(aLen as usize);
-        bn_karatsuba_mul_uint32(len2, a1.0, b1.0, tmp1.1, r23.0);
-        bn_karatsuba_mul_uint32(len2, a1.1, b1.1, tmp1.1, r23.1);
-        ::lowstar::ignore::ignore::<&[u32]>(res);
-        ::lowstar::ignore::ignore::<&[u32]>(tmp);
+        crate::bignum::bn_karatsuba_mul_uint32(len2, a1.0, b1.0, tmp1.1, r23.0);
+        crate::bignum::bn_karatsuba_mul_uint32(len2, a1.1, b1.1, tmp1.1, r23.1);
+        lowstar::ignore::ignore::<&[u32]>(res);
+        lowstar::ignore::ignore::<&[u32]>(tmp);
         let r011: (&[u32], &[u32]) = res.split_at(0usize);
         let r231: (&[u32], &[u32]) = r011.1.split_at(aLen as usize);
         let t01: (&mut [u32], &mut [u32]) = tmp.split_at_mut(0usize);
@@ -84,7 +84,7 @@ pub(crate) fn bn_karatsuba_mul_uint32(
         };
         let c5: u32 = mask & c41 | ! mask & c31;
         let aLen2: u32 = aLen.wrapping_div(2u32);
-        ::lowstar::ignore::ignore::<&[u32]>(res);
+        lowstar::ignore::ignore::<&[u32]>(res);
         let r: (&mut [u32], &mut [u32]) = res.split_at_mut(aLen2 as usize);
         let mut a_copy: Box<[u32]> = vec![0u32; aLen as usize].into_boxed_slice();
         let mut b_copy: Box<[u32]> = vec![0u32; aLen as usize].into_boxed_slice();
@@ -95,15 +95,10 @@ pub(crate) fn bn_karatsuba_mul_uint32(
         let c: u32 = r10;
         let c6: u32 = c;
         let c7: u32 = c5.wrapping_add(c6);
-        ::lowstar::ignore::ignore::<&[u32]>(res);
+        lowstar::ignore::ignore::<&[u32]>(res);
         let r0: (&mut [u32], &mut [u32]) = res.split_at_mut(aLen.wrapping_add(aLen2) as usize);
         let c010: u32 =
-            lib::inttypes_intrinsics::add_carry_u32(
-                0u32,
-                r0.1[0usize],
-                c7,
-                &mut r0.1[0usize..]
-            );
+            lib::inttypes_intrinsics::add_carry_u32(0u32, r0.1[0usize], c7, &mut r0.1[0usize..]);
         let r11: u32 =
             if 1u32 < aLen.wrapping_add(aLen).wrapping_sub(aLen.wrapping_add(aLen2))
             {
@@ -120,42 +115,22 @@ pub(crate) fn bn_karatsuba_mul_uint32(
                     let res_i: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c8)[0usize],
-                            t11,
-                            0u32,
-                            res_i.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u32((&c8)[0usize], t11, 0u32, res_i.1);
                     let t110: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 1usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c8)[0usize],
-                            t110,
-                            0u32,
-                            res_i0.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u32((&c8)[0usize], t110, 0u32, res_i0.1);
                     let t111: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 2usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c8)[0usize],
-                            t111,
-                            0u32,
-                            res_i1.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u32((&c8)[0usize], t111, 0u32, res_i1.1);
                     let t112: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 3usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c8)[0usize],
-                            t112,
-                            0u32,
-                            res_i2.1
-                        )
+                        lib::inttypes_intrinsics::add_carry_u32((&c8)[0usize], t112, 0u32, res_i2.1)
                 };
                 for
                 i
@@ -169,12 +144,7 @@ pub(crate) fn bn_karatsuba_mul_uint32(
                     let t11: u32 = res1.1[i as usize];
                     let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(i as usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c8)[0usize],
-                            t11,
-                            0u32,
-                            res_i.1
-                        )
+                        lib::inttypes_intrinsics::add_carry_u32((&c8)[0usize], t11, 0u32, res_i.1)
                 };
                 let c110: u32 = (&c8)[0usize];
                 c110
@@ -184,7 +154,7 @@ pub(crate) fn bn_karatsuba_mul_uint32(
         let c8: u32 = r11;
         let c9: u32 = c8;
         let c12: u32 = c9;
-        ::lowstar::ignore::ignore::<u32>(c12)
+        lowstar::ignore::ignore::<u32>(c12)
     }
 }
 
@@ -219,7 +189,7 @@ pub(crate) fn bn_karatsuba_mul_uint64(
             let os: (&mut [u64], &mut [u64]) = t1.0.split_at_mut(0usize);
             os.1[i as usize] = x
         };
-        ::lowstar::ignore::ignore::<u64>(c1);
+        lowstar::ignore::ignore::<u64>(c1);
         let c00: u64 = c0;
         let c01: u64 = crate::bignum_base::bn_sub_eq_len_u64(len2, b1.0, b1.1, tmp·.1);
         let c10: u64 = crate::bignum_base::bn_sub_eq_len_u64(len2, b1.1, b1.0, tmp·.0);
@@ -232,18 +202,18 @@ pub(crate) fn bn_karatsuba_mul_uint64(
             let os: (&mut [u64], &mut [u64]) = tmp·.0.split_at_mut(0usize);
             os.1[i as usize] = x
         };
-        ::lowstar::ignore::ignore::<u64>(c10);
+        lowstar::ignore::ignore::<u64>(c10);
         let c11: u64 = c01;
         let t23: (&mut [u64], &mut [u64]) = tmp·.1.split_at_mut(0usize);
         let tmp1: (&mut [u64], &mut [u64]) =
             t23.1.split_at_mut(aLen.wrapping_add(aLen) as usize - aLen as usize);
-        bn_karatsuba_mul_uint64(len2, t1.0, tmp·.0, tmp1.1, tmp1.0);
+        crate::bignum::bn_karatsuba_mul_uint64(len2, t1.0, tmp·.0, tmp1.1, tmp1.0);
         let r01: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
         let r23: (&mut [u64], &mut [u64]) = r01.1.split_at_mut(aLen as usize);
-        bn_karatsuba_mul_uint64(len2, a1.0, b1.0, tmp1.1, r23.0);
-        bn_karatsuba_mul_uint64(len2, a1.1, b1.1, tmp1.1, r23.1);
-        ::lowstar::ignore::ignore::<&[u64]>(res);
-        ::lowstar::ignore::ignore::<&[u64]>(tmp);
+        crate::bignum::bn_karatsuba_mul_uint64(len2, a1.0, b1.0, tmp1.1, r23.0);
+        crate::bignum::bn_karatsuba_mul_uint64(len2, a1.1, b1.1, tmp1.1, r23.1);
+        lowstar::ignore::ignore::<&[u64]>(res);
+        lowstar::ignore::ignore::<&[u64]>(tmp);
         let r011: (&[u64], &[u64]) = res.split_at(0usize);
         let r231: (&[u64], &[u64]) = r011.1.split_at(aLen as usize);
         let t01: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
@@ -267,7 +237,7 @@ pub(crate) fn bn_karatsuba_mul_uint64(
         };
         let c5: u64 = mask & c41 | ! mask & c31;
         let aLen2: u32 = aLen.wrapping_div(2u32);
-        ::lowstar::ignore::ignore::<&[u64]>(res);
+        lowstar::ignore::ignore::<&[u64]>(res);
         let r: (&mut [u64], &mut [u64]) = res.split_at_mut(aLen2 as usize);
         let mut a_copy: Box<[u64]> = vec![0u64; aLen as usize].into_boxed_slice();
         let mut b_copy: Box<[u64]> = vec![0u64; aLen as usize].into_boxed_slice();
@@ -278,15 +248,10 @@ pub(crate) fn bn_karatsuba_mul_uint64(
         let c: u64 = r10;
         let c6: u64 = c;
         let c7: u64 = c5.wrapping_add(c6);
-        ::lowstar::ignore::ignore::<&[u64]>(res);
+        lowstar::ignore::ignore::<&[u64]>(res);
         let r0: (&mut [u64], &mut [u64]) = res.split_at_mut(aLen.wrapping_add(aLen2) as usize);
         let c010: u64 =
-            lib::inttypes_intrinsics::add_carry_u64(
-                0u64,
-                r0.1[0usize],
-                c7,
-                &mut r0.1[0usize..]
-            );
+            lib::inttypes_intrinsics::add_carry_u64(0u64, r0.1[0usize], c7, &mut r0.1[0usize..]);
         let r11: u64 =
             if 1u32 < aLen.wrapping_add(aLen).wrapping_sub(aLen.wrapping_add(aLen2))
             {
@@ -303,42 +268,22 @@ pub(crate) fn bn_karatsuba_mul_uint64(
                     let res_i: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c8)[0usize],
-                            t11,
-                            0u64,
-                            res_i.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u64((&c8)[0usize], t11, 0u64, res_i.1);
                     let t110: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 1usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c8)[0usize],
-                            t110,
-                            0u64,
-                            res_i0.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u64((&c8)[0usize], t110, 0u64, res_i0.1);
                     let t111: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 2usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c8)[0usize],
-                            t111,
-                            0u64,
-                            res_i1.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u64((&c8)[0usize], t111, 0u64, res_i1.1);
                     let t112: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 3usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c8)[0usize],
-                            t112,
-                            0u64,
-                            res_i2.1
-                        )
+                        lib::inttypes_intrinsics::add_carry_u64((&c8)[0usize], t112, 0u64, res_i2.1)
                 };
                 for
                 i
@@ -352,12 +297,7 @@ pub(crate) fn bn_karatsuba_mul_uint64(
                     let t11: u64 = res1.1[i as usize];
                     let res_i: (&mut [u64], &mut [u64]) = res1.1.split_at_mut(i as usize);
                     (&mut c8)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c8)[0usize],
-                            t11,
-                            0u64,
-                            res_i.1
-                        )
+                        lib::inttypes_intrinsics::add_carry_u64((&c8)[0usize], t11, 0u64, res_i.1)
                 };
                 let c110: u64 = (&c8)[0usize];
                 c110
@@ -367,7 +307,7 @@ pub(crate) fn bn_karatsuba_mul_uint64(
         let c8: u64 = r11;
         let c9: u64 = c8;
         let c12: u64 = c9;
-        ::lowstar::ignore::ignore::<u64>(c12)
+        lowstar::ignore::ignore::<u64>(c12)
     }
 }
 
@@ -393,19 +333,19 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
             let os: (&mut [u32], &mut [u32]) = tmp·.0.split_at_mut(0usize);
             os.1[i as usize] = x
         };
-        ::lowstar::ignore::ignore::<u32>(c1);
+        lowstar::ignore::ignore::<u32>(c1);
         let c00: u32 = c0;
-        ::lowstar::ignore::ignore::<u32>(c00);
+        lowstar::ignore::ignore::<u32>(c00);
         let t23: (&mut [u32], &mut [u32]) = tmp·.1.split_at_mut(0usize);
         let tmp1: (&mut [u32], &mut [u32]) =
             t23.1.split_at_mut(aLen.wrapping_add(aLen) as usize - aLen as usize);
-        bn_karatsuba_sqr_uint32(len2, tmp·.0, tmp1.1, tmp1.0);
+        crate::bignum::bn_karatsuba_sqr_uint32(len2, tmp·.0, tmp1.1, tmp1.0);
         let r01: (&mut [u32], &mut [u32]) = res.split_at_mut(0usize);
         let r23: (&mut [u32], &mut [u32]) = r01.1.split_at_mut(aLen as usize);
-        bn_karatsuba_sqr_uint32(len2, a1.0, tmp1.1, r23.0);
-        bn_karatsuba_sqr_uint32(len2, a1.1, tmp1.1, r23.1);
-        ::lowstar::ignore::ignore::<&[u32]>(res);
-        ::lowstar::ignore::ignore::<&[u32]>(tmp);
+        crate::bignum::bn_karatsuba_sqr_uint32(len2, a1.0, tmp1.1, r23.0);
+        crate::bignum::bn_karatsuba_sqr_uint32(len2, a1.1, tmp1.1, r23.1);
+        lowstar::ignore::ignore::<&[u32]>(res);
+        lowstar::ignore::ignore::<&[u32]>(tmp);
         let r011: (&[u32], &[u32]) = res.split_at(0usize);
         let r231: (&[u32], &[u32]) = r011.1.split_at(aLen as usize);
         let t01: (&mut [u32], &mut [u32]) = tmp.split_at_mut(0usize);
@@ -416,7 +356,7 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
         let c3: u32 = crate::bignum_base::bn_sub_eq_len_u32(aLen, t231.0, t45.0, t45.1);
         let c5: u32 = c2.wrapping_sub(c3);
         let aLen2: u32 = aLen.wrapping_div(2u32);
-        ::lowstar::ignore::ignore::<&[u32]>(res);
+        lowstar::ignore::ignore::<&[u32]>(res);
         let r: (&mut [u32], &mut [u32]) = res.split_at_mut(aLen2 as usize);
         let mut a_copy: Box<[u32]> = vec![0u32; aLen as usize].into_boxed_slice();
         let mut b_copy: Box<[u32]> = vec![0u32; aLen as usize].into_boxed_slice();
@@ -427,15 +367,10 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
         let c: u32 = r10;
         let c6: u32 = c;
         let c7: u32 = c5.wrapping_add(c6);
-        ::lowstar::ignore::ignore::<&[u32]>(res);
+        lowstar::ignore::ignore::<&[u32]>(res);
         let r0: (&mut [u32], &mut [u32]) = res.split_at_mut(aLen.wrapping_add(aLen2) as usize);
         let c01: u32 =
-            lib::inttypes_intrinsics::add_carry_u32(
-                0u32,
-                r0.1[0usize],
-                c7,
-                &mut r0.1[0usize..]
-            );
+            lib::inttypes_intrinsics::add_carry_u32(0u32, r0.1[0usize], c7, &mut r0.1[0usize..]);
         let r11: u32 =
             if 1u32 < aLen.wrapping_add(aLen).wrapping_sub(aLen.wrapping_add(aLen2))
             {
@@ -452,42 +387,22 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
                     let res_i: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c4)[0usize],
-                            t1,
-                            0u32,
-                            res_i.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u32((&c4)[0usize], t1, 0u32, res_i.1);
                     let t10: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 1usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c4)[0usize],
-                            t10,
-                            0u32,
-                            res_i0.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u32((&c4)[0usize], t10, 0u32, res_i0.1);
                     let t11: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 2usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c4)[0usize],
-                            t11,
-                            0u32,
-                            res_i1.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u32((&c4)[0usize], t11, 0u32, res_i1.1);
                     let t12: u32 = res1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u32], &mut [u32]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 3usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c4)[0usize],
-                            t12,
-                            0u32,
-                            res_i2.1
-                        )
+                        lib::inttypes_intrinsics::add_carry_u32((&c4)[0usize], t12, 0u32, res_i2.1)
                 };
                 for
                 i
@@ -501,12 +416,7 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
                     let t1: u32 = res1.1[i as usize];
                     let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(i as usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u32(
-                            (&c4)[0usize],
-                            t1,
-                            0u32,
-                            res_i.1
-                        )
+                        lib::inttypes_intrinsics::add_carry_u32((&c4)[0usize], t1, 0u32, res_i.1)
                 };
                 let c10: u32 = (&c4)[0usize];
                 c10
@@ -516,7 +426,7 @@ pub(crate) fn bn_karatsuba_sqr_uint32(aLen: u32, a: &[u32], tmp: &mut [u32], res
         let c8: u32 = r11;
         let c4: u32 = c8;
         let c9: u32 = c4;
-        ::lowstar::ignore::ignore::<u32>(c9)
+        lowstar::ignore::ignore::<u32>(c9)
     }
 }
 
@@ -542,19 +452,19 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
             let os: (&mut [u64], &mut [u64]) = tmp·.0.split_at_mut(0usize);
             os.1[i as usize] = x
         };
-        ::lowstar::ignore::ignore::<u64>(c1);
+        lowstar::ignore::ignore::<u64>(c1);
         let c00: u64 = c0;
-        ::lowstar::ignore::ignore::<u64>(c00);
+        lowstar::ignore::ignore::<u64>(c00);
         let t23: (&mut [u64], &mut [u64]) = tmp·.1.split_at_mut(0usize);
         let tmp1: (&mut [u64], &mut [u64]) =
             t23.1.split_at_mut(aLen.wrapping_add(aLen) as usize - aLen as usize);
-        bn_karatsuba_sqr_uint64(len2, tmp·.0, tmp1.1, tmp1.0);
+        crate::bignum::bn_karatsuba_sqr_uint64(len2, tmp·.0, tmp1.1, tmp1.0);
         let r01: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
         let r23: (&mut [u64], &mut [u64]) = r01.1.split_at_mut(aLen as usize);
-        bn_karatsuba_sqr_uint64(len2, a1.0, tmp1.1, r23.0);
-        bn_karatsuba_sqr_uint64(len2, a1.1, tmp1.1, r23.1);
-        ::lowstar::ignore::ignore::<&[u64]>(res);
-        ::lowstar::ignore::ignore::<&[u64]>(tmp);
+        crate::bignum::bn_karatsuba_sqr_uint64(len2, a1.0, tmp1.1, r23.0);
+        crate::bignum::bn_karatsuba_sqr_uint64(len2, a1.1, tmp1.1, r23.1);
+        lowstar::ignore::ignore::<&[u64]>(res);
+        lowstar::ignore::ignore::<&[u64]>(tmp);
         let r011: (&[u64], &[u64]) = res.split_at(0usize);
         let r231: (&[u64], &[u64]) = r011.1.split_at(aLen as usize);
         let t01: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
@@ -565,7 +475,7 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
         let c3: u64 = crate::bignum_base::bn_sub_eq_len_u64(aLen, t231.0, t45.0, t45.1);
         let c5: u64 = c2.wrapping_sub(c3);
         let aLen2: u32 = aLen.wrapping_div(2u32);
-        ::lowstar::ignore::ignore::<&[u64]>(res);
+        lowstar::ignore::ignore::<&[u64]>(res);
         let r: (&mut [u64], &mut [u64]) = res.split_at_mut(aLen2 as usize);
         let mut a_copy: Box<[u64]> = vec![0u64; aLen as usize].into_boxed_slice();
         let mut b_copy: Box<[u64]> = vec![0u64; aLen as usize].into_boxed_slice();
@@ -576,15 +486,10 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
         let c: u64 = r10;
         let c6: u64 = c;
         let c7: u64 = c5.wrapping_add(c6);
-        ::lowstar::ignore::ignore::<&[u64]>(res);
+        lowstar::ignore::ignore::<&[u64]>(res);
         let r0: (&mut [u64], &mut [u64]) = res.split_at_mut(aLen.wrapping_add(aLen2) as usize);
         let c01: u64 =
-            lib::inttypes_intrinsics::add_carry_u64(
-                0u64,
-                r0.1[0usize],
-                c7,
-                &mut r0.1[0usize..]
-            );
+            lib::inttypes_intrinsics::add_carry_u64(0u64, r0.1[0usize], c7, &mut r0.1[0usize..]);
         let r11: u64 =
             if 1u32 < aLen.wrapping_add(aLen).wrapping_sub(aLen.wrapping_add(aLen2))
             {
@@ -601,42 +506,22 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
                     let res_i: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c4)[0usize],
-                            t1,
-                            0u64,
-                            res_i.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u64((&c4)[0usize], t1, 0u64, res_i.1);
                     let t10: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 1usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c4)[0usize],
-                            t10,
-                            0u64,
-                            res_i0.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u64((&c4)[0usize], t10, 0u64, res_i0.1);
                     let t11: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 2usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c4)[0usize],
-                            t11,
-                            0u64,
-                            res_i1.1
-                        );
+                        lib::inttypes_intrinsics::add_carry_u64((&c4)[0usize], t11, 0u64, res_i1.1);
                     let t12: u64 = res1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u64], &mut [u64]) =
                         res1.1.split_at_mut(4u32.wrapping_mul(i) as usize + 3usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c4)[0usize],
-                            t12,
-                            0u64,
-                            res_i2.1
-                        )
+                        lib::inttypes_intrinsics::add_carry_u64((&c4)[0usize], t12, 0u64, res_i2.1)
                 };
                 for
                 i
@@ -650,12 +535,7 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
                     let t1: u64 = res1.1[i as usize];
                     let res_i: (&mut [u64], &mut [u64]) = res1.1.split_at_mut(i as usize);
                     (&mut c4)[0usize] =
-                        lib::inttypes_intrinsics::add_carry_u64(
-                            (&c4)[0usize],
-                            t1,
-                            0u64,
-                            res_i.1
-                        )
+                        lib::inttypes_intrinsics::add_carry_u64((&c4)[0usize], t1, 0u64, res_i.1)
                 };
                 let c10: u64 = (&c4)[0usize];
                 c10
@@ -665,11 +545,15 @@ pub(crate) fn bn_karatsuba_sqr_uint64(aLen: u32, a: &[u64], tmp: &mut [u64], res
         let c8: u64 = r11;
         let c4: u64 = c8;
         let c9: u64 = c4;
-        ::lowstar::ignore::ignore::<u64>(c9)
+        lowstar::ignore::ignore::<u64>(c9)
     }
 }
 
-pub(crate) fn bn_add_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_add_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
 {
     let mut c: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len1.wrapping_div(4u32)
@@ -677,31 +561,26 @@ pub(crate) fn bn_add_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: 
         let t1: u32 = a[4u32.wrapping_mul(i) as usize];
         let t2: u32 = b[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) = res.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t1, t2, res_i.1);
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t1, t2, res_i.1);
         let t10: u32 = a[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = b[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t10, t20, res_i0.1);
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t10, t20, res_i0.1);
         let t11: u32 = a[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let t21: u32 = b[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t11, t21, res_i1.1);
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t11, t21, res_i1.1);
         let t12: u32 = a[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let t22: u32 = b[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t12, t22, res_i2.1)
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t12, t22, res_i2.1)
     };
     for i in len1.wrapping_div(4u32).wrapping_mul(4u32)..len1
     {
         let t1: u32 = a[i as usize];
         let t2: u32 = b[i as usize];
         let res_i: (&mut [u32], &mut [u32]) = res.split_at_mut(i as usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t1, t2, res_i.1)
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u32((&c)[0usize], t1, t2, res_i.1)
     };
     let c0: u32 = (&c)[0usize];
     let mut tmp: Box<[u32]> = vec![0u32; len1 as usize].into_boxed_slice();
@@ -711,8 +590,7 @@ pub(crate) fn bn_add_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: 
         let t1: u32 = res[4u32.wrapping_mul(i) as usize];
         let t2: u32 = n[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t1, t2, res_i.1);
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t1, t2, res_i.1);
         let t10: u32 = res[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = n[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
@@ -734,8 +612,7 @@ pub(crate) fn bn_add_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: 
         let t1: u32 = res[i as usize];
         let t2: u32 = n[i as usize];
         let res_i: (&mut [u32], &mut [u32]) = tmp.split_at_mut(i as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t1, t2, res_i.1)
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t1, t2, res_i.1)
     };
     let c10: u32 = (&c1)[0usize];
     let c2: u32 = c0.wrapping_sub(c10);
@@ -747,7 +624,11 @@ pub(crate) fn bn_add_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: 
     }
 }
 
-pub(crate) fn bn_add_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: &mut [u64])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_add_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: &mut [u64])
 {
     let mut c: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len1.wrapping_div(4u32)
@@ -755,31 +636,26 @@ pub(crate) fn bn_add_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: 
         let t1: u64 = a[4u32.wrapping_mul(i) as usize];
         let t2: u64 = b[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u64], &mut [u64]) = res.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t1, t2, res_i.1);
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t1, t2, res_i.1);
         let t10: u64 = a[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u64 = b[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t10, t20, res_i0.1);
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t10, t20, res_i0.1);
         let t11: u64 = a[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let t21: u64 = b[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t11, t21, res_i1.1);
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t11, t21, res_i1.1);
         let t12: u64 = a[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let t22: u64 = b[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t12, t22, res_i2.1)
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t12, t22, res_i2.1)
     };
     for i in len1.wrapping_div(4u32).wrapping_mul(4u32)..len1
     {
         let t1: u64 = a[i as usize];
         let t2: u64 = b[i as usize];
         let res_i: (&mut [u64], &mut [u64]) = res.split_at_mut(i as usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t1, t2, res_i.1)
+        (&mut c)[0usize] = lib::inttypes_intrinsics::add_carry_u64((&c)[0usize], t1, t2, res_i.1)
     };
     let c0: u64 = (&c)[0usize];
     let mut tmp: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
@@ -789,8 +665,7 @@ pub(crate) fn bn_add_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: 
         let t1: u64 = res[4u32.wrapping_mul(i) as usize];
         let t2: u64 = n[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u64], &mut [u64]) = tmp.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u64((&c1)[0usize], t1, t2, res_i.1);
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::sub_borrow_u64((&c1)[0usize], t1, t2, res_i.1);
         let t10: u64 = res[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u64 = n[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
@@ -812,8 +687,7 @@ pub(crate) fn bn_add_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: 
         let t1: u64 = res[i as usize];
         let t2: u64 = n[i as usize];
         let res_i: (&mut [u64], &mut [u64]) = tmp.split_at_mut(i as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u64((&c1)[0usize], t1, t2, res_i.1)
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::sub_borrow_u64((&c1)[0usize], t1, t2, res_i.1)
     };
     let c10: u64 = (&c1)[0usize];
     let c2: u64 = c0.wrapping_sub(c10);
@@ -825,7 +699,11 @@ pub(crate) fn bn_add_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: 
     }
 }
 
-pub(crate) fn bn_sub_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_sub_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: &mut [u32])
 {
     let mut c: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len1.wrapping_div(4u32)
@@ -833,8 +711,7 @@ pub(crate) fn bn_sub_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: 
         let t1: u32 = a[4u32.wrapping_mul(i) as usize];
         let t2: u32 = b[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) = res.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, t2, res_i.1);
+        (&mut c)[0usize] = lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, t2, res_i.1);
         let t10: u32 = a[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = b[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
@@ -856,8 +733,7 @@ pub(crate) fn bn_sub_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: 
         let t1: u32 = a[i as usize];
         let t2: u32 = b[i as usize];
         let res_i: (&mut [u32], &mut [u32]) = res.split_at_mut(i as usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, t2, res_i.1)
+        (&mut c)[0usize] = lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, t2, res_i.1)
     };
     let c0: u32 = (&c)[0usize];
     let mut tmp: Box<[u32]> = vec![0u32; len1 as usize].into_boxed_slice();
@@ -867,8 +743,7 @@ pub(crate) fn bn_sub_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: 
         let t1: u32 = res[4u32.wrapping_mul(i) as usize];
         let t2: u32 = n[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u32((&c1)[0usize], t1, t2, res_i.1);
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::add_carry_u32((&c1)[0usize], t1, t2, res_i.1);
         let t10: u32 = res[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = n[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
@@ -890,11 +765,10 @@ pub(crate) fn bn_sub_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: 
         let t1: u32 = res[i as usize];
         let t2: u32 = n[i as usize];
         let res_i: (&mut [u32], &mut [u32]) = tmp.split_at_mut(i as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u32((&c1)[0usize], t1, t2, res_i.1)
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::add_carry_u32((&c1)[0usize], t1, t2, res_i.1)
     };
     let c10: u32 = (&c1)[0usize];
-    ::lowstar::ignore::ignore::<u32>(c10);
+    lowstar::ignore::ignore::<u32>(c10);
     let c2: u32 = 0u32.wrapping_sub(c0);
     for i in 0u32..len1
     {
@@ -904,7 +778,11 @@ pub(crate) fn bn_sub_mod_n_u32(len1: u32, n: &[u32], a: &[u32], b: &[u32], res: 
     }
 }
 
-pub(crate) fn bn_sub_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: &mut [u64])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_sub_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: &mut [u64])
 {
     let mut c: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len1.wrapping_div(4u32)
@@ -912,8 +790,7 @@ pub(crate) fn bn_sub_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: 
         let t1: u64 = a[4u32.wrapping_mul(i) as usize];
         let t2: u64 = b[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u64], &mut [u64]) = res.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, t2, res_i.1);
+        (&mut c)[0usize] = lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, t2, res_i.1);
         let t10: u64 = a[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u64 = b[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
@@ -935,8 +812,7 @@ pub(crate) fn bn_sub_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: 
         let t1: u64 = a[i as usize];
         let t2: u64 = b[i as usize];
         let res_i: (&mut [u64], &mut [u64]) = res.split_at_mut(i as usize);
-        (&mut c)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, t2, res_i.1)
+        (&mut c)[0usize] = lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, t2, res_i.1)
     };
     let c0: u64 = (&c)[0usize];
     let mut tmp: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
@@ -946,8 +822,7 @@ pub(crate) fn bn_sub_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: 
         let t1: u64 = res[4u32.wrapping_mul(i) as usize];
         let t2: u64 = n[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u64], &mut [u64]) = tmp.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u64((&c1)[0usize], t1, t2, res_i.1);
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::add_carry_u64((&c1)[0usize], t1, t2, res_i.1);
         let t10: u64 = res[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u64 = n[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
@@ -969,11 +844,10 @@ pub(crate) fn bn_sub_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: 
         let t1: u64 = res[i as usize];
         let t2: u64 = n[i as usize];
         let res_i: (&mut [u64], &mut [u64]) = tmp.split_at_mut(i as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::add_carry_u64((&c1)[0usize], t1, t2, res_i.1)
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::add_carry_u64((&c1)[0usize], t1, t2, res_i.1)
     };
     let c10: u64 = (&c1)[0usize];
-    ::lowstar::ignore::ignore::<u64>(c10);
+    lowstar::ignore::ignore::<u64>(c10);
     let c2: u64 = 0u64.wrapping_sub(c0);
     for i in 0u32..len1
     {
@@ -983,7 +857,12 @@ pub(crate) fn bn_sub_mod_n_u64(len1: u32, n: &[u64], a: &[u64], b: &[u64], res: 
     }
 }
 
-pub(crate) fn mod_inv_uint32(n0: u32) -> u32
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+mod_inv_uint32(n0: u32) ->
+    u32
 {
     let alpha: u32 = 2147483648u32;
     let beta: u32 = n0;
@@ -1010,7 +889,12 @@ pub(crate) fn mod_inv_uint32(n0: u32) -> u32
     (&vb)[0usize]
 }
 
-pub(crate) fn mod_inv_uint64(n0: u64) -> u64
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+mod_inv_uint64(n0: u64) ->
+    u64
 {
     let alpha: u64 = 9223372036854775808u64;
     let beta: u64 = n0;
@@ -1032,7 +916,12 @@ pub(crate) fn mod_inv_uint64(n0: u64) -> u64
     (&vb)[0usize]
 }
 
-pub(crate) fn bn_check_modulus_u32(len: u32, n: &[u32]) -> u32
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_check_modulus_u32(len: u32, n: &[u32]) ->
+    u32
 {
     let mut one: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
     ((&mut one)[0usize..len as usize]).copy_from_slice(
@@ -1044,15 +933,19 @@ pub(crate) fn bn_check_modulus_u32(len: u32, n: &[u32]) -> u32
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
     {
-        let beq: u32 = ::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u32 = ! ::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u32 = fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u32 = ! fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
     m0 & m1
 }
 
-pub(crate) fn bn_precomp_r2_mod_n_u32(len: u32, nBits: u32, n: &[u32], res: &mut [u32])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_precomp_r2_mod_n_u32(len: u32, nBits: u32, n: &[u32], res: &mut [u32])
 {
     (res[0usize..len as usize]).copy_from_slice(&vec![0u32; len as usize].into_boxed_slice());
     let i: u32 = nBits.wrapping_div(32u32);
@@ -1064,7 +957,7 @@ pub(crate) fn bn_precomp_r2_mod_n_u32(len: u32, nBits: u32, n: &[u32], res: &mut
         let mut b_copy: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
         ((&mut a_copy)[0usize..len as usize]).copy_from_slice(&res[0usize..len as usize]);
         ((&mut b_copy)[0usize..len as usize]).copy_from_slice(&res[0usize..len as usize]);
-        bn_add_mod_n_u32(len, n, &a_copy, &b_copy, res)
+        crate::bignum::bn_add_mod_n_u32(len, n, &a_copy, &b_copy, res)
     }
 }
 
@@ -1121,8 +1014,7 @@ fn bn_mont_reduction_u32(len: u32, n: &[u32], nInv: u32, c: &mut [u32], res: &mu
         let t1: u32 = res[4u32.wrapping_mul(i) as usize];
         let t2: u32 = n[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t1, t2, res_i.1);
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t1, t2, res_i.1);
         let t10: u32 = res[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = n[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
@@ -1144,8 +1036,7 @@ fn bn_mont_reduction_u32(len: u32, n: &[u32], nInv: u32, c: &mut [u32], res: &mu
         let t1: u32 = res[i as usize];
         let t2: u32 = n[i as usize];
         let res_i: (&mut [u32], &mut [u32]) = tmp.split_at_mut(i as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t1, t2, res_i.1)
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::sub_borrow_u32((&c1)[0usize], t1, t2, res_i.1)
     };
     let c10: u32 = (&c1)[0usize];
     let c2: u32 = c00.wrapping_sub(c10);
@@ -1157,52 +1048,59 @@ fn bn_mont_reduction_u32(len: u32, n: &[u32], nInv: u32, c: &mut [u32], res: &mu
     }
 }
 
-pub(crate) fn bn_to_mont_u32(
-    len: u32,
-    n: &[u32],
-    nInv: u32,
-    r2: &[u32],
-    a: &[u32],
-    aM: &mut [u32]
-)
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_to_mont_u32(len: u32, n: &[u32], nInv: u32, r2: &[u32], a: &[u32], aM: &mut [u32])
 {
     let mut c: Box<[u32]> = vec![0u32; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u32]> = vec![0u32; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_mul_uint32(len, a, r2, &mut tmp, &mut c);
-    bn_mont_reduction_u32(len, n, nInv, &mut c, aM)
+    crate::bignum::bn_karatsuba_mul_uint32(len, a, r2, &mut tmp, &mut c);
+    crate::bignum::bn_mont_reduction_u32(len, n, nInv, &mut c, aM)
 }
 
-pub(crate) fn bn_from_mont_u32(len: u32, n: &[u32], nInv_u64: u32, aM: &[u32], a: &mut [u32])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_from_mont_u32(len: u32, n: &[u32], nInv_u64: u32, aM: &[u32], a: &mut [u32])
 {
     let mut tmp: Box<[u32]> = vec![0u32; len.wrapping_add(len) as usize].into_boxed_slice();
     ((&mut tmp)[0usize..len as usize]).copy_from_slice(&aM[0usize..len as usize]);
-    bn_mont_reduction_u32(len, n, nInv_u64, &mut tmp, a)
+    crate::bignum::bn_mont_reduction_u32(len, n, nInv_u64, &mut tmp, a)
 }
 
-pub(crate) fn bn_mont_mul_u32(
-    len: u32,
-    n: &[u32],
-    nInv_u64: u32,
-    aM: &[u32],
-    bM: &[u32],
-    resM: &mut [u32]
-)
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_mont_mul_u32(len: u32, n: &[u32], nInv_u64: u32, aM: &[u32], bM: &[u32], resM: &mut [u32])
 {
     let mut c: Box<[u32]> = vec![0u32; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u32]> = vec![0u32; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_mul_uint32(len, aM, bM, &mut tmp, &mut c);
-    bn_mont_reduction_u32(len, n, nInv_u64, &mut c, resM)
+    crate::bignum::bn_karatsuba_mul_uint32(len, aM, bM, &mut tmp, &mut c);
+    crate::bignum::bn_mont_reduction_u32(len, n, nInv_u64, &mut c, resM)
 }
 
-pub(crate) fn bn_mont_sqr_u32(len: u32, n: &[u32], nInv_u64: u32, aM: &[u32], resM: &mut [u32])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_mont_sqr_u32(len: u32, n: &[u32], nInv_u64: u32, aM: &[u32], resM: &mut [u32])
 {
     let mut c: Box<[u32]> = vec![0u32; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u32]> = vec![0u32; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_sqr_uint32(len, aM, &mut tmp, &mut c);
-    bn_mont_reduction_u32(len, n, nInv_u64, &mut c, resM)
+    crate::bignum::bn_karatsuba_sqr_uint32(len, aM, &mut tmp, &mut c);
+    crate::bignum::bn_mont_reduction_u32(len, n, nInv_u64, &mut c, resM)
 }
 
-pub(crate) fn bn_check_modulus_u64(len: u32, n: &[u64]) -> u64
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_check_modulus_u64(len: u32, n: &[u64]) ->
+    u64
 {
     let mut one: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
     ((&mut one)[0usize..len as usize]).copy_from_slice(
@@ -1214,15 +1112,19 @@ pub(crate) fn bn_check_modulus_u64(len: u32, n: &[u64]) -> u64
     let mut acc: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
-        let beq: u64 = ::fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u64 = ! ::fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u64 = fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u64 = ! fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u64 = (&acc)[0usize];
     m0 & m1
 }
 
-pub(crate) fn bn_precomp_r2_mod_n_u64(len: u32, nBits: u32, n: &[u64], res: &mut [u64])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_precomp_r2_mod_n_u64(len: u32, nBits: u32, n: &[u64], res: &mut [u64])
 {
     (res[0usize..len as usize]).copy_from_slice(&vec![0u64; len as usize].into_boxed_slice());
     let i: u32 = nBits.wrapping_div(64u32);
@@ -1234,7 +1136,7 @@ pub(crate) fn bn_precomp_r2_mod_n_u64(len: u32, nBits: u32, n: &[u64], res: &mut
         let mut b_copy: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
         ((&mut a_copy)[0usize..len as usize]).copy_from_slice(&res[0usize..len as usize]);
         ((&mut b_copy)[0usize..len as usize]).copy_from_slice(&res[0usize..len as usize]);
-        bn_add_mod_n_u64(len, n, &a_copy, &b_copy, res)
+        crate::bignum::bn_add_mod_n_u64(len, n, &a_copy, &b_copy, res)
     }
 }
 
@@ -1291,8 +1193,7 @@ fn bn_mont_reduction_u64(len: u32, n: &[u64], nInv: u64, c: &mut [u64], res: &mu
         let t1: u64 = res[4u32.wrapping_mul(i) as usize];
         let t2: u64 = n[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u64], &mut [u64]) = tmp.split_at_mut(4u32.wrapping_mul(i) as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u64((&c1)[0usize], t1, t2, res_i.1);
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::sub_borrow_u64((&c1)[0usize], t1, t2, res_i.1);
         let t10: u64 = res[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u64 = n[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
@@ -1314,8 +1215,7 @@ fn bn_mont_reduction_u64(len: u32, n: &[u64], nInv: u64, c: &mut [u64], res: &mu
         let t1: u64 = res[i as usize];
         let t2: u64 = n[i as usize];
         let res_i: (&mut [u64], &mut [u64]) = tmp.split_at_mut(i as usize);
-        (&mut c1)[0usize] =
-            lib::inttypes_intrinsics::sub_borrow_u64((&c1)[0usize], t1, t2, res_i.1)
+        (&mut c1)[0usize] = lib::inttypes_intrinsics::sub_borrow_u64((&c1)[0usize], t1, t2, res_i.1)
     };
     let c10: u64 = (&c1)[0usize];
     let c2: u64 = c00.wrapping_sub(c10);
@@ -1327,49 +1227,51 @@ fn bn_mont_reduction_u64(len: u32, n: &[u64], nInv: u64, c: &mut [u64], res: &mu
     }
 }
 
-pub(crate) fn bn_to_mont_u64(
-    len: u32,
-    n: &[u64],
-    nInv: u64,
-    r2: &[u64],
-    a: &[u64],
-    aM: &mut [u64]
-)
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_to_mont_u64(len: u32, n: &[u64], nInv: u64, r2: &[u64], a: &[u64], aM: &mut [u64])
 {
     let mut c: Box<[u64]> = vec![0u64; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u64]> = vec![0u64; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_mul_uint64(len, a, r2, &mut tmp, &mut c);
-    bn_mont_reduction_u64(len, n, nInv, &mut c, aM)
+    crate::bignum::bn_karatsuba_mul_uint64(len, a, r2, &mut tmp, &mut c);
+    crate::bignum::bn_mont_reduction_u64(len, n, nInv, &mut c, aM)
 }
 
-pub(crate) fn bn_from_mont_u64(len: u32, n: &[u64], nInv_u64: u64, aM: &[u64], a: &mut [u64])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_from_mont_u64(len: u32, n: &[u64], nInv_u64: u64, aM: &[u64], a: &mut [u64])
 {
     let mut tmp: Box<[u64]> = vec![0u64; len.wrapping_add(len) as usize].into_boxed_slice();
     ((&mut tmp)[0usize..len as usize]).copy_from_slice(&aM[0usize..len as usize]);
-    bn_mont_reduction_u64(len, n, nInv_u64, &mut tmp, a)
+    crate::bignum::bn_mont_reduction_u64(len, n, nInv_u64, &mut tmp, a)
 }
 
-pub(crate) fn bn_mont_mul_u64(
-    len: u32,
-    n: &[u64],
-    nInv_u64: u64,
-    aM: &[u64],
-    bM: &[u64],
-    resM: &mut [u64]
-)
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_mont_mul_u64(len: u32, n: &[u64], nInv_u64: u64, aM: &[u64], bM: &[u64], resM: &mut [u64])
 {
     let mut c: Box<[u64]> = vec![0u64; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u64]> = vec![0u64; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_mul_uint64(len, aM, bM, &mut tmp, &mut c);
-    bn_mont_reduction_u64(len, n, nInv_u64, &mut c, resM)
+    crate::bignum::bn_karatsuba_mul_uint64(len, aM, bM, &mut tmp, &mut c);
+    crate::bignum::bn_mont_reduction_u64(len, n, nInv_u64, &mut c, resM)
 }
 
-pub(crate) fn bn_mont_sqr_u64(len: u32, n: &[u64], nInv_u64: u64, aM: &[u64], resM: &mut [u64])
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_mont_sqr_u64(len: u32, n: &[u64], nInv_u64: u64, aM: &[u64], resM: &mut [u64])
 {
     let mut c: Box<[u64]> = vec![0u64; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u64]> = vec![0u64; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_sqr_uint64(len, aM, &mut tmp, &mut c);
-    bn_mont_reduction_u64(len, n, nInv_u64, &mut c, resM)
+    crate::bignum::bn_karatsuba_sqr_uint64(len, aM, &mut tmp, &mut c);
+    crate::bignum::bn_mont_reduction_u64(len, n, nInv_u64, &mut c, resM)
 }
 
 pub(crate) fn bn_almost_mont_reduction_u32(
@@ -1426,7 +1328,7 @@ pub(crate) fn bn_almost_mont_reduction_u32(
     let c00: u32 = (&c0)[0usize];
     let mut tmp: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
     let c1: u32 = crate::bignum_base::bn_sub_eq_len_u32(len, res, n, &mut tmp);
-    ::lowstar::ignore::ignore::<u32>(c1);
+    lowstar::ignore::ignore::<u32>(c1);
     let m: u32 = 0u32.wrapping_sub(c00);
     for i in 0u32..len
     {
@@ -1447,16 +1349,16 @@ fn bn_almost_mont_mul_u32(
 {
     let mut c: Box<[u32]> = vec![0u32; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u32]> = vec![0u32; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_mul_uint32(len, aM, bM, &mut tmp, &mut c);
-    bn_almost_mont_reduction_u32(len, n, nInv_u64, &mut c, resM)
+    crate::bignum::bn_karatsuba_mul_uint32(len, aM, bM, &mut tmp, &mut c);
+    crate::bignum::bn_almost_mont_reduction_u32(len, n, nInv_u64, &mut c, resM)
 }
 
 fn bn_almost_mont_sqr_u32(len: u32, n: &[u32], nInv_u64: u32, aM: &[u32], resM: &mut [u32])
 {
     let mut c: Box<[u32]> = vec![0u32; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u32]> = vec![0u32; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_sqr_uint32(len, aM, &mut tmp, &mut c);
-    bn_almost_mont_reduction_u32(len, n, nInv_u64, &mut c, resM)
+    crate::bignum::bn_karatsuba_sqr_uint32(len, aM, &mut tmp, &mut c);
+    crate::bignum::bn_almost_mont_reduction_u32(len, n, nInv_u64, &mut c, resM)
 }
 
 pub(crate) fn bn_almost_mont_reduction_u64(
@@ -1513,7 +1415,7 @@ pub(crate) fn bn_almost_mont_reduction_u64(
     let c00: u64 = (&c0)[0usize];
     let mut tmp: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
     let c1: u64 = crate::bignum_base::bn_sub_eq_len_u64(len, res, n, &mut tmp);
-    ::lowstar::ignore::ignore::<u64>(c1);
+    lowstar::ignore::ignore::<u64>(c1);
     let m: u64 = 0u64.wrapping_sub(c00);
     for i in 0u32..len
     {
@@ -1534,16 +1436,16 @@ fn bn_almost_mont_mul_u64(
 {
     let mut c: Box<[u64]> = vec![0u64; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u64]> = vec![0u64; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_mul_uint64(len, aM, bM, &mut tmp, &mut c);
-    bn_almost_mont_reduction_u64(len, n, nInv_u64, &mut c, resM)
+    crate::bignum::bn_karatsuba_mul_uint64(len, aM, bM, &mut tmp, &mut c);
+    crate::bignum::bn_almost_mont_reduction_u64(len, n, nInv_u64, &mut c, resM)
 }
 
 fn bn_almost_mont_sqr_u64(len: u32, n: &[u64], nInv_u64: u64, aM: &[u64], resM: &mut [u64])
 {
     let mut c: Box<[u64]> = vec![0u64; len.wrapping_add(len) as usize].into_boxed_slice();
     let mut tmp: Box<[u64]> = vec![0u64; 4u32.wrapping_mul(len) as usize].into_boxed_slice();
-    bn_karatsuba_sqr_uint64(len, aM, &mut tmp, &mut c);
-    bn_almost_mont_reduction_u64(len, n, nInv_u64, &mut c, resM)
+    crate::bignum::bn_karatsuba_sqr_uint64(len, aM, &mut tmp, &mut c);
+    crate::bignum::bn_almost_mont_reduction_u64(len, n, nInv_u64, &mut c, resM)
 }
 
 pub(crate) fn bn_check_mod_exp_u32(len: u32, n: &[u32], a: &[u32], bBits: u32, b: &[u32]) ->
@@ -1559,8 +1461,8 @@ pub(crate) fn bn_check_mod_exp_u32(len: u32, n: &[u32], a: &[u32], bBits: u32, b
     let mut acc: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
     {
-        let beq: u32 = ::fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u32 = ! ::fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u32 = fstar::uint32::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u32 = ! fstar::uint32::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u32 = (&acc)[0usize];
@@ -1580,8 +1482,8 @@ pub(crate) fn bn_check_mod_exp_u32(len: u32, n: &[u32], a: &[u32], bBits: u32, b
             let mut acc0: [u32; 1] = [0u32; 1usize];
             for i0 in 0u32..bLen
             {
-                let beq: u32 = ::fstar::uint32::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
-                let blt: u32 = ! ::fstar::uint32::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
+                let beq: u32 = fstar::uint32::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
+                let blt: u32 = ! fstar::uint32::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
             };
             let res: u32 = (&acc0)[0usize];
@@ -1592,8 +1494,8 @@ pub(crate) fn bn_check_mod_exp_u32(len: u32, n: &[u32], a: &[u32], bBits: u32, b
     let mut acc0: [u32; 1] = [0u32; 1usize];
     for i in 0u32..len
     {
-        let beq: u32 = ::fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
-        let blt: u32 = ! ::fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
+        let beq: u32 = fstar::uint32::eq_mask(a[i as usize], n[i as usize]);
+        let blt: u32 = ! fstar::uint32::gte_mask(a[i as usize], n[i as usize]);
         (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
     };
     let m2: u32 = (&acc0)[0usize];
@@ -1615,7 +1517,7 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
     if bBits < 200u32
     {
         let mut aM: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
-        bn_to_mont_u32(len, n, mu, r2, a, &mut aM);
+        crate::bignum::bn_to_mont_u32(len, n, mu, r2, a, &mut aM);
         let mut resM: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
         let mut ctx: Box<[u32]> = vec![0u32; len.wrapping_add(len) as usize].into_boxed_slice();
         ((&mut ctx)[0usize..len as usize]).copy_from_slice(&n[0usize..len as usize]);
@@ -1624,8 +1526,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
         );
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
         let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(len as usize);
-        bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, &mut resM);
-        ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+        crate::bignum::bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, &mut resM);
+        lowstar::ignore::ignore::<&[u32]>(&ctx);
         for i in 0u32..bBits
         {
             let i1: u32 = i.wrapping_div(32u32);
@@ -1639,21 +1541,21 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
                     &(&resM)[0usize..len as usize]
                 );
                 let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
-                bn_almost_mont_mul_u32(len, ctx_n0.1, mu, &aM_copy, &aM, &mut resM);
-                ::lowstar::ignore::ignore::<&[u32]>(&ctx)
+                crate::bignum::bn_almost_mont_mul_u32(len, ctx_n0.1, mu, &aM_copy, &aM, &mut resM);
+                lowstar::ignore::ignore::<&[u32]>(&ctx)
             };
             let mut aM_copy: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&(&aM)[0usize..len as usize]);
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
-            bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut aM);
-            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            crate::bignum::bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut aM);
+            lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
-        bn_from_mont_u32(len, n, mu, &resM, res)
+        crate::bignum::bn_from_mont_u32(len, n, mu, &resM, res)
     }
     else
     {
         let mut aM: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
-        bn_to_mont_u32(len, n, mu, r2, a, &mut aM);
+        crate::bignum::bn_to_mont_u32(len, n, mu, r2, a, &mut aM);
         let mut resM: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
         let bLen: u32 =
             if bBits == 0u32
@@ -1671,10 +1573,10 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
         let t1: (&mut [u32], &mut [u32]) = t0.1.split_at_mut(len as usize);
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
         let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(len as usize);
-        bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
-        ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+        crate::bignum::bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
+        lowstar::ignore::ignore::<&[u32]>(&ctx);
         (t1.1[0usize..len as usize]).copy_from_slice(&(&aM)[0usize..len as usize]);
-        ::lowstar::ignore::ignore::<&[u32]>(&table);
+        lowstar::ignore::ignore::<&[u32]>(&table);
         krml::unroll_for!(
             7,
             "i",
@@ -1686,8 +1588,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
                 let mut aM_copy: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&t11.1[0usize..len as usize]);
                 let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
-                bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut tmp);
-                ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+                crate::bignum::bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut tmp);
+                lowstar::ignore::ignore::<&[u32]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(2u32).wrapping_mul(len)
@@ -1704,8 +1606,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
                     &(&aM)[0usize..len as usize]
                 );
                 let ctx_n1: (&[u32], &[u32]) = ctx.split_at(0usize);
-                bn_almost_mont_mul_u32(len, ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
-                ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+                crate::bignum::bn_almost_mont_mul_u32(len, ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
+                lowstar::ignore::ignore::<&[u32]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(3u32).wrapping_mul(len)
@@ -1727,8 +1629,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
         {
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
             let ctx_r20: (&[u32], &[u32]) = ctx_n0.1.split_at(len as usize);
-            bn_from_mont_u32(len, ctx_r20.0, mu, ctx_r20.1, &mut resM);
-            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            crate::bignum::bn_from_mont_u32(len, ctx_r20.0, mu, ctx_r20.1, &mut resM);
+            lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
         let mut tmp0: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -1744,8 +1646,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
                         &(&resM)[0usize..len as usize]
                     );
                     let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
-                    bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut resM);
-                    ::lowstar::ignore::ignore::<&[u32]>(&ctx)
+                    crate::bignum::bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut resM);
+                    lowstar::ignore::ignore::<&[u32]>(&ctx)
                 }
             );
             let k: u32 =
@@ -1753,17 +1655,17 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u32(
                     4u32
                 );
             let bits_l: u32 = crate::bignum_base::bn_get_bits_u32(bLen, b, k, 4u32);
-            ::lowstar::ignore::ignore::<&[u32]>(&table);
+            lowstar::ignore::ignore::<&[u32]>(&table);
             let bits_l32: u32 = bits_l;
             let a_bits_l: (&[u32], &[u32]) = table.split_at(bits_l32.wrapping_mul(len) as usize);
             ((&mut tmp0)[0usize..len as usize]).copy_from_slice(&a_bits_l.1[0usize..len as usize]);
             let mut aM_copy: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&(&resM)[0usize..len as usize]);
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
-            bn_almost_mont_mul_u32(len, ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
-            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            crate::bignum::bn_almost_mont_mul_u32(len, ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
+            lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
-        bn_from_mont_u32(len, n, mu, &resM, res)
+        crate::bignum::bn_from_mont_u32(len, n, mu, &resM, res)
     }
 }
 
@@ -1781,7 +1683,7 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
     if bBits < 200u32
     {
         let mut aM: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
-        bn_to_mont_u32(len, n, mu, r2, a, &mut aM);
+        crate::bignum::bn_to_mont_u32(len, n, mu, r2, a, &mut aM);
         let mut resM: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
         let mut ctx: Box<[u32]> = vec![0u32; len.wrapping_add(len) as usize].into_boxed_slice();
         ((&mut ctx)[0usize..len as usize]).copy_from_slice(&n[0usize..len as usize]);
@@ -1791,8 +1693,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
         let mut sw: [u32; 1] = [0u32; 1usize];
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
         let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(len as usize);
-        bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, &mut resM);
-        ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+        crate::bignum::bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, &mut resM);
+        lowstar::ignore::ignore::<&[u32]>(&ctx);
         for i in 0u32..bBits
         {
             let i1: u32 = bBits.wrapping_sub(i).wrapping_sub(1u32).wrapping_div(32u32);
@@ -1810,13 +1712,13 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
             let mut aM_copy: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&(&aM)[0usize..len as usize]);
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
-            bn_almost_mont_mul_u32(len, ctx_n0.1, mu, &aM_copy, &resM, &mut aM);
-            ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+            crate::bignum::bn_almost_mont_mul_u32(len, ctx_n0.1, mu, &aM_copy, &resM, &mut aM);
+            lowstar::ignore::ignore::<&[u32]>(&ctx);
             let mut aM_copy0: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
             ((&mut aM_copy0)[0usize..len as usize]).copy_from_slice(&(&resM)[0usize..len as usize]);
             let ctx_n1: (&[u32], &[u32]) = ctx.split_at(0usize);
-            bn_almost_mont_sqr_u32(len, ctx_n1.1, mu, &aM_copy0, &mut resM);
-            ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+            crate::bignum::bn_almost_mont_sqr_u32(len, ctx_n1.1, mu, &aM_copy0, &mut resM);
+            lowstar::ignore::ignore::<&[u32]>(&ctx);
             (&mut sw)[0usize] = bit
         };
         let sw0: u32 = (&sw)[0usize];
@@ -1826,12 +1728,12 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
             (&mut resM)[i as usize] = (&resM)[i as usize] ^ dummy;
             (&mut aM)[i as usize] = (&aM)[i as usize] ^ dummy
         };
-        bn_from_mont_u32(len, n, mu, &resM, res)
+        crate::bignum::bn_from_mont_u32(len, n, mu, &resM, res)
     }
     else
     {
         let mut aM: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
-        bn_to_mont_u32(len, n, mu, r2, a, &mut aM);
+        crate::bignum::bn_to_mont_u32(len, n, mu, r2, a, &mut aM);
         let mut resM: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
         let bLen: u32 =
             if bBits == 0u32
@@ -1849,10 +1751,10 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
         let t1: (&mut [u32], &mut [u32]) = t0.1.split_at_mut(len as usize);
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
         let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(len as usize);
-        bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
-        ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+        crate::bignum::bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
+        lowstar::ignore::ignore::<&[u32]>(&ctx);
         (t1.1[0usize..len as usize]).copy_from_slice(&(&aM)[0usize..len as usize]);
-        ::lowstar::ignore::ignore::<&[u32]>(&table);
+        lowstar::ignore::ignore::<&[u32]>(&table);
         krml::unroll_for!(
             7,
             "i",
@@ -1864,8 +1766,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
                 let mut aM_copy: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&t11.1[0usize..len as usize]);
                 let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
-                bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut tmp);
-                ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+                crate::bignum::bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut tmp);
+                lowstar::ignore::ignore::<&[u32]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(2u32).wrapping_mul(len)
@@ -1882,8 +1784,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
                     &(&aM)[0usize..len as usize]
                 );
                 let ctx_n1: (&[u32], &[u32]) = ctx.split_at(0usize);
-                bn_almost_mont_mul_u32(len, ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
-                ::lowstar::ignore::ignore::<&[u32]>(&ctx);
+                crate::bignum::bn_almost_mont_mul_u32(len, ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
+                lowstar::ignore::ignore::<&[u32]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(3u32).wrapping_mul(len)
@@ -1906,7 +1808,7 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
                 0u32,
                 1u32,
                 {
-                    let c: u32 = ::fstar::uint32::eq_mask(bits_c, i0.wrapping_add(1u32));
+                    let c: u32 = fstar::uint32::eq_mask(bits_c, i0.wrapping_add(1u32));
                     let res_j: (&[u32], &[u32]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(len) as usize);
                     for i1 in 0u32..len
@@ -1922,8 +1824,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
         {
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
             let ctx_r20: (&[u32], &[u32]) = ctx_n0.1.split_at(len as usize);
-            bn_from_mont_u32(len, ctx_r20.0, mu, ctx_r20.1, &mut resM);
-            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            crate::bignum::bn_from_mont_u32(len, ctx_r20.0, mu, ctx_r20.1, &mut resM);
+            lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
         let mut tmp0: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -1939,8 +1841,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
                         &(&resM)[0usize..len as usize]
                     );
                     let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
-                    bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut resM);
-                    ::lowstar::ignore::ignore::<&[u32]>(&ctx)
+                    crate::bignum::bn_almost_mont_sqr_u32(len, ctx_n0.1, mu, &aM_copy, &mut resM);
+                    lowstar::ignore::ignore::<&[u32]>(&ctx)
                 }
             );
             let k: u32 =
@@ -1948,7 +1850,7 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
                     4u32
                 );
             let bits_l: u32 = crate::bignum_base::bn_get_bits_u32(bLen, b, k, 4u32);
-            ::lowstar::ignore::ignore::<&[u32]>(&table);
+            lowstar::ignore::ignore::<&[u32]>(&table);
             ((&mut tmp0)[0usize..len as usize]).copy_from_slice(
                 &(&(&table)[0u32.wrapping_mul(len) as usize..] as &[u32])[0usize..len as usize]
             );
@@ -1958,7 +1860,7 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
                 0u32,
                 1u32,
                 {
-                    let c: u32 = ::fstar::uint32::eq_mask(bits_l, i0.wrapping_add(1u32));
+                    let c: u32 = fstar::uint32::eq_mask(bits_l, i0.wrapping_add(1u32));
                     let res_j: (&[u32], &[u32]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(len) as usize);
                     for i1 in 0u32..len
@@ -1972,10 +1874,10 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u32(
             let mut aM_copy: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&(&resM)[0usize..len as usize]);
             let ctx_n0: (&[u32], &[u32]) = ctx.split_at(0usize);
-            bn_almost_mont_mul_u32(len, ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
-            ::lowstar::ignore::ignore::<&[u32]>(&ctx)
+            crate::bignum::bn_almost_mont_mul_u32(len, ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
+            lowstar::ignore::ignore::<&[u32]>(&ctx)
         };
-        bn_from_mont_u32(len, n, mu, &resM, res)
+        crate::bignum::bn_from_mont_u32(len, n, mu, &resM, res)
     }
 }
 
@@ -1990,9 +1892,9 @@ pub(crate) fn bn_mod_exp_vartime_u32(
 )
 {
     let mut r2: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
-    bn_precomp_r2_mod_n_u32(len, nBits, n, &mut r2);
-    let mu: u32 = mod_inv_uint32(n[0usize]);
-    bn_mod_exp_vartime_precomp_u32(len, n, mu, &r2, a, bBits, b, res)
+    crate::bignum::bn_precomp_r2_mod_n_u32(len, nBits, n, &mut r2);
+    let mu: u32 = crate::bignum::mod_inv_uint32(n[0usize]);
+    crate::bignum::bn_mod_exp_vartime_precomp_u32(len, n, mu, &r2, a, bBits, b, res)
 }
 
 pub(crate) fn bn_mod_exp_consttime_u32(
@@ -2006,9 +1908,9 @@ pub(crate) fn bn_mod_exp_consttime_u32(
 )
 {
     let mut r2: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
-    bn_precomp_r2_mod_n_u32(len, nBits, n, &mut r2);
-    let mu: u32 = mod_inv_uint32(n[0usize]);
-    bn_mod_exp_consttime_precomp_u32(len, n, mu, &r2, a, bBits, b, res)
+    crate::bignum::bn_precomp_r2_mod_n_u32(len, nBits, n, &mut r2);
+    let mu: u32 = crate::bignum::mod_inv_uint32(n[0usize]);
+    crate::bignum::bn_mod_exp_consttime_precomp_u32(len, n, mu, &r2, a, bBits, b, res)
 }
 
 pub(crate) fn bn_check_mod_exp_u64(len: u32, n: &[u64], a: &[u64], bBits: u32, b: &[u64]) ->
@@ -2024,8 +1926,8 @@ pub(crate) fn bn_check_mod_exp_u64(len: u32, n: &[u64], a: &[u64], bBits: u32, b
     let mut acc: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
-        let beq: u64 = ::fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u64 = ! ::fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u64 = fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u64 = ! fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u64 = (&acc)[0usize];
@@ -2045,8 +1947,8 @@ pub(crate) fn bn_check_mod_exp_u64(len: u32, n: &[u64], a: &[u64], bBits: u32, b
             let mut acc0: [u64; 1] = [0u64; 1usize];
             for i0 in 0u32..bLen
             {
-                let beq: u64 = ::fstar::uint64::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
-                let blt: u64 = ! ::fstar::uint64::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
+                let beq: u64 = fstar::uint64::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
+                let blt: u64 = ! fstar::uint64::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
                 (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
             };
             let res: u64 = (&acc0)[0usize];
@@ -2057,8 +1959,8 @@ pub(crate) fn bn_check_mod_exp_u64(len: u32, n: &[u64], a: &[u64], bBits: u32, b
     let mut acc0: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
-        let beq: u64 = ::fstar::uint64::eq_mask(a[i as usize], n[i as usize]);
-        let blt: u64 = ! ::fstar::uint64::gte_mask(a[i as usize], n[i as usize]);
+        let beq: u64 = fstar::uint64::eq_mask(a[i as usize], n[i as usize]);
+        let blt: u64 = ! fstar::uint64::gte_mask(a[i as usize], n[i as usize]);
         (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
     };
     let m2: u64 = (&acc0)[0usize];
@@ -2066,7 +1968,11 @@ pub(crate) fn bn_check_mod_exp_u64(len: u32, n: &[u64], a: &[u64], bBits: u32, b
     m00 & m
 }
 
-pub(crate) fn bn_mod_exp_vartime_precomp_u64(
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_mod_exp_vartime_precomp_u64(
     len: u32,
     n: &[u64],
     mu: u64,
@@ -2080,7 +1986,7 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
     if bBits < 200u32
     {
         let mut aM: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
-        bn_to_mont_u64(len, n, mu, r2, a, &mut aM);
+        crate::bignum::bn_to_mont_u64(len, n, mu, r2, a, &mut aM);
         let mut resM: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
         let mut ctx: Box<[u64]> = vec![0u64; len.wrapping_add(len) as usize].into_boxed_slice();
         ((&mut ctx)[0usize..len as usize]).copy_from_slice(&n[0usize..len as usize]);
@@ -2089,8 +1995,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
         );
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
         let ctx_r2: (&[u64], &[u64]) = ctx_n.1.split_at(len as usize);
-        bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, &mut resM);
-        ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+        crate::bignum::bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, &mut resM);
+        lowstar::ignore::ignore::<&[u64]>(&ctx);
         for i in 0u32..bBits
         {
             let i1: u32 = i.wrapping_div(64u32);
@@ -2104,21 +2010,21 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
                     &(&resM)[0usize..len as usize]
                 );
                 let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
-                bn_almost_mont_mul_u64(len, ctx_n0.1, mu, &aM_copy, &aM, &mut resM);
-                ::lowstar::ignore::ignore::<&[u64]>(&ctx)
+                crate::bignum::bn_almost_mont_mul_u64(len, ctx_n0.1, mu, &aM_copy, &aM, &mut resM);
+                lowstar::ignore::ignore::<&[u64]>(&ctx)
             };
             let mut aM_copy: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&(&aM)[0usize..len as usize]);
             let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
-            bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut aM);
-            ::lowstar::ignore::ignore::<&[u64]>(&ctx)
+            crate::bignum::bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut aM);
+            lowstar::ignore::ignore::<&[u64]>(&ctx)
         };
-        bn_from_mont_u64(len, n, mu, &resM, res)
+        crate::bignum::bn_from_mont_u64(len, n, mu, &resM, res)
     }
     else
     {
         let mut aM: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
-        bn_to_mont_u64(len, n, mu, r2, a, &mut aM);
+        crate::bignum::bn_to_mont_u64(len, n, mu, r2, a, &mut aM);
         let mut resM: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
         let bLen: u32 =
             if bBits == 0u32
@@ -2136,10 +2042,10 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
         let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(len as usize);
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
         let ctx_r2: (&[u64], &[u64]) = ctx_n.1.split_at(len as usize);
-        bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
-        ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+        crate::bignum::bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
+        lowstar::ignore::ignore::<&[u64]>(&ctx);
         (t1.1[0usize..len as usize]).copy_from_slice(&(&aM)[0usize..len as usize]);
-        ::lowstar::ignore::ignore::<&[u64]>(&table);
+        lowstar::ignore::ignore::<&[u64]>(&table);
         krml::unroll_for!(
             7,
             "i",
@@ -2151,8 +2057,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
                 let mut aM_copy: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&t11.1[0usize..len as usize]);
                 let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
-                bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut tmp);
-                ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+                crate::bignum::bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut tmp);
+                lowstar::ignore::ignore::<&[u64]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(2u32).wrapping_mul(len)
@@ -2169,8 +2075,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
                     &(&aM)[0usize..len as usize]
                 );
                 let ctx_n1: (&[u64], &[u64]) = ctx.split_at(0usize);
-                bn_almost_mont_mul_u64(len, ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
-                ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+                crate::bignum::bn_almost_mont_mul_u64(len, ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
+                lowstar::ignore::ignore::<&[u64]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(3u32).wrapping_mul(len)
@@ -2192,8 +2098,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
         {
             let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
             let ctx_r20: (&[u64], &[u64]) = ctx_n0.1.split_at(len as usize);
-            bn_from_mont_u64(len, ctx_r20.0, mu, ctx_r20.1, &mut resM);
-            ::lowstar::ignore::ignore::<&[u64]>(&ctx)
+            crate::bignum::bn_from_mont_u64(len, ctx_r20.0, mu, ctx_r20.1, &mut resM);
+            lowstar::ignore::ignore::<&[u64]>(&ctx)
         };
         let mut tmp0: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -2209,8 +2115,8 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
                         &(&resM)[0usize..len as usize]
                     );
                     let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
-                    bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut resM);
-                    ::lowstar::ignore::ignore::<&[u64]>(&ctx)
+                    crate::bignum::bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut resM);
+                    lowstar::ignore::ignore::<&[u64]>(&ctx)
                 }
             );
             let k: u32 =
@@ -2218,21 +2124,25 @@ pub(crate) fn bn_mod_exp_vartime_precomp_u64(
                     4u32
                 );
             let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(bLen, b, k, 4u32);
-            ::lowstar::ignore::ignore::<&[u64]>(&table);
+            lowstar::ignore::ignore::<&[u64]>(&table);
             let bits_l32: u32 = bits_l as u32;
             let a_bits_l: (&[u64], &[u64]) = table.split_at(bits_l32.wrapping_mul(len) as usize);
             ((&mut tmp0)[0usize..len as usize]).copy_from_slice(&a_bits_l.1[0usize..len as usize]);
             let mut aM_copy: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&(&resM)[0usize..len as usize]);
             let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
-            bn_almost_mont_mul_u64(len, ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
-            ::lowstar::ignore::ignore::<&[u64]>(&ctx)
+            crate::bignum::bn_almost_mont_mul_u64(len, ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
+            lowstar::ignore::ignore::<&[u64]>(&ctx)
         };
-        bn_from_mont_u64(len, n, mu, &resM, res)
+        crate::bignum::bn_from_mont_u64(len, n, mu, &resM, res)
     }
 }
 
-pub(crate) fn bn_mod_exp_consttime_precomp_u64(
+/**
+ATTENTION: this function is public, but is intended for internal use within this workspace; callers should not rely on the availability of this function, or its behavior!
+*/
+pub fn
+bn_mod_exp_consttime_precomp_u64(
     len: u32,
     n: &[u64],
     mu: u64,
@@ -2246,7 +2156,7 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
     if bBits < 200u32
     {
         let mut aM: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
-        bn_to_mont_u64(len, n, mu, r2, a, &mut aM);
+        crate::bignum::bn_to_mont_u64(len, n, mu, r2, a, &mut aM);
         let mut resM: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
         let mut ctx: Box<[u64]> = vec![0u64; len.wrapping_add(len) as usize].into_boxed_slice();
         ((&mut ctx)[0usize..len as usize]).copy_from_slice(&n[0usize..len as usize]);
@@ -2256,8 +2166,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
         let mut sw: [u64; 1] = [0u64; 1usize];
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
         let ctx_r2: (&[u64], &[u64]) = ctx_n.1.split_at(len as usize);
-        bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, &mut resM);
-        ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+        crate::bignum::bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, &mut resM);
+        lowstar::ignore::ignore::<&[u64]>(&ctx);
         for i in 0u32..bBits
         {
             let i1: u32 = bBits.wrapping_sub(i).wrapping_sub(1u32).wrapping_div(64u32);
@@ -2275,13 +2185,13 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
             let mut aM_copy: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&(&aM)[0usize..len as usize]);
             let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
-            bn_almost_mont_mul_u64(len, ctx_n0.1, mu, &aM_copy, &resM, &mut aM);
-            ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+            crate::bignum::bn_almost_mont_mul_u64(len, ctx_n0.1, mu, &aM_copy, &resM, &mut aM);
+            lowstar::ignore::ignore::<&[u64]>(&ctx);
             let mut aM_copy0: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
             ((&mut aM_copy0)[0usize..len as usize]).copy_from_slice(&(&resM)[0usize..len as usize]);
             let ctx_n1: (&[u64], &[u64]) = ctx.split_at(0usize);
-            bn_almost_mont_sqr_u64(len, ctx_n1.1, mu, &aM_copy0, &mut resM);
-            ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+            crate::bignum::bn_almost_mont_sqr_u64(len, ctx_n1.1, mu, &aM_copy0, &mut resM);
+            lowstar::ignore::ignore::<&[u64]>(&ctx);
             (&mut sw)[0usize] = bit
         };
         let sw0: u64 = (&sw)[0usize];
@@ -2291,12 +2201,12 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
             (&mut resM)[i as usize] = (&resM)[i as usize] ^ dummy;
             (&mut aM)[i as usize] = (&aM)[i as usize] ^ dummy
         };
-        bn_from_mont_u64(len, n, mu, &resM, res)
+        crate::bignum::bn_from_mont_u64(len, n, mu, &resM, res)
     }
     else
     {
         let mut aM: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
-        bn_to_mont_u64(len, n, mu, r2, a, &mut aM);
+        crate::bignum::bn_to_mont_u64(len, n, mu, r2, a, &mut aM);
         let mut resM: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
         let bLen: u32 =
             if bBits == 0u32
@@ -2314,10 +2224,10 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
         let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(len as usize);
         let ctx_n: (&[u64], &[u64]) = ctx.split_at(0usize);
         let ctx_r2: (&[u64], &[u64]) = ctx_n.1.split_at(len as usize);
-        bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
-        ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+        crate::bignum::bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
+        lowstar::ignore::ignore::<&[u64]>(&ctx);
         (t1.1[0usize..len as usize]).copy_from_slice(&(&aM)[0usize..len as usize]);
-        ::lowstar::ignore::ignore::<&[u64]>(&table);
+        lowstar::ignore::ignore::<&[u64]>(&table);
         krml::unroll_for!(
             7,
             "i",
@@ -2329,8 +2239,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
                 let mut aM_copy: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&t11.1[0usize..len as usize]);
                 let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
-                bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut tmp);
-                ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+                crate::bignum::bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut tmp);
+                lowstar::ignore::ignore::<&[u64]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(2u32).wrapping_mul(len)
@@ -2347,8 +2257,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
                     &(&aM)[0usize..len as usize]
                 );
                 let ctx_n1: (&[u64], &[u64]) = ctx.split_at(0usize);
-                bn_almost_mont_mul_u64(len, ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
-                ::lowstar::ignore::ignore::<&[u64]>(&ctx);
+                crate::bignum::bn_almost_mont_mul_u64(len, ctx_n1.1, mu, &aM_copy0, t2.1, &mut tmp);
+                lowstar::ignore::ignore::<&[u64]>(&ctx);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(3u32).wrapping_mul(len)
@@ -2371,8 +2281,7 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
                 0u32,
                 1u32,
                 {
-                    let c: u64 =
-                        ::fstar::uint64::eq_mask(bits_c, i0.wrapping_add(1u32) as u64);
+                    let c: u64 = fstar::uint64::eq_mask(bits_c, i0.wrapping_add(1u32) as u64);
                     let res_j: (&[u64], &[u64]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(len) as usize);
                     for i1 in 0u32..len
@@ -2388,8 +2297,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
         {
             let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
             let ctx_r20: (&[u64], &[u64]) = ctx_n0.1.split_at(len as usize);
-            bn_from_mont_u64(len, ctx_r20.0, mu, ctx_r20.1, &mut resM);
-            ::lowstar::ignore::ignore::<&[u64]>(&ctx)
+            crate::bignum::bn_from_mont_u64(len, ctx_r20.0, mu, ctx_r20.1, &mut resM);
+            lowstar::ignore::ignore::<&[u64]>(&ctx)
         };
         let mut tmp0: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -2405,8 +2314,8 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
                         &(&resM)[0usize..len as usize]
                     );
                     let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
-                    bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut resM);
-                    ::lowstar::ignore::ignore::<&[u64]>(&ctx)
+                    crate::bignum::bn_almost_mont_sqr_u64(len, ctx_n0.1, mu, &aM_copy, &mut resM);
+                    lowstar::ignore::ignore::<&[u64]>(&ctx)
                 }
             );
             let k: u32 =
@@ -2414,7 +2323,7 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
                     4u32
                 );
             let bits_l: u64 = crate::bignum_base::bn_get_bits_u64(bLen, b, k, 4u32);
-            ::lowstar::ignore::ignore::<&[u64]>(&table);
+            lowstar::ignore::ignore::<&[u64]>(&table);
             ((&mut tmp0)[0usize..len as usize]).copy_from_slice(
                 &(&(&table)[0u32.wrapping_mul(len) as usize..] as &[u64])[0usize..len as usize]
             );
@@ -2424,8 +2333,7 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
                 0u32,
                 1u32,
                 {
-                    let c: u64 =
-                        ::fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
+                    let c: u64 = fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
                     let res_j: (&[u64], &[u64]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(len) as usize);
                     for i1 in 0u32..len
@@ -2439,10 +2347,10 @@ pub(crate) fn bn_mod_exp_consttime_precomp_u64(
             let mut aM_copy: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&(&resM)[0usize..len as usize]);
             let ctx_n0: (&[u64], &[u64]) = ctx.split_at(0usize);
-            bn_almost_mont_mul_u64(len, ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
-            ::lowstar::ignore::ignore::<&[u64]>(&ctx)
+            crate::bignum::bn_almost_mont_mul_u64(len, ctx_n0.1, mu, &aM_copy, &tmp0, &mut resM);
+            lowstar::ignore::ignore::<&[u64]>(&ctx)
         };
-        bn_from_mont_u64(len, n, mu, &resM, res)
+        crate::bignum::bn_from_mont_u64(len, n, mu, &resM, res)
     }
 }
 
@@ -2457,9 +2365,9 @@ pub(crate) fn bn_mod_exp_vartime_u64(
 )
 {
     let mut r2: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
-    bn_precomp_r2_mod_n_u64(len, nBits, n, &mut r2);
-    let mu: u64 = mod_inv_uint64(n[0usize]);
-    bn_mod_exp_vartime_precomp_u64(len, n, mu, &r2, a, bBits, b, res)
+    crate::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, &mut r2);
+    let mu: u64 = crate::bignum::mod_inv_uint64(n[0usize]);
+    crate::bignum::bn_mod_exp_vartime_precomp_u64(len, n, mu, &r2, a, bBits, b, res)
 }
 
 pub(crate) fn bn_mod_exp_consttime_u64(
@@ -2473,9 +2381,9 @@ pub(crate) fn bn_mod_exp_consttime_u64(
 )
 {
     let mut r2: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
-    bn_precomp_r2_mod_n_u64(len, nBits, n, &mut r2);
-    let mu: u64 = mod_inv_uint64(n[0usize]);
-    bn_mod_exp_consttime_precomp_u64(len, n, mu, &r2, a, bBits, b, res)
+    crate::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, &mut r2);
+    let mu: u64 = crate::bignum::mod_inv_uint64(n[0usize]);
+    crate::bignum::bn_mod_exp_consttime_precomp_u64(len, n, mu, &r2, a, bBits, b, res)
 }
 
 pub struct bn_mont_ctx_u32 { pub len: u32, pub n: Box<[u32]>, pub mu: u32, pub r2: Box<[u32]> }

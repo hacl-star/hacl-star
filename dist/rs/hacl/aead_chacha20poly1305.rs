@@ -394,8 +394,8 @@
     let mut ctx: [u64; 25] = [0u64; 25usize];
     let mut block: [u8; 16] = [0u8; 16usize];
     crate::mac_poly1305::poly1305_init(&mut ctx, k);
-    if aadlen != 0u32 { poly1305_padded_32(&mut ctx, aadlen, aad) };
-    if mlen != 0u32 { poly1305_padded_32(&mut ctx, mlen, m) };
+    if aadlen != 0u32 { crate::aead_chacha20poly1305::poly1305_padded_32(&mut ctx, aadlen, aad) };
+    if mlen != 0u32 { crate::aead_chacha20poly1305::poly1305_padded_32(&mut ctx, mlen, m) };
     lowstar::endianness::store64_le(&mut (&mut block)[0usize..], aadlen as u64);
     lowstar::endianness::store64_le(&mut (&mut block)[8usize..], mlen as u64);
     let pre: (&mut [u64], &mut [u64]) = ctx.split_at_mut(5usize);
@@ -551,7 +551,7 @@ encrypt(
     let tmp_copy: [u8; 64] = [0u8; 64usize];
     crate::chacha20::chacha20_encrypt(64u32, &mut tmp, &tmp_copy, key, nonce, 0u32);
     let key1: (&[u8], &[u8]) = tmp.split_at(0usize);
-    poly1305_do_32(key1.1, data_len, data, input_len, output, tag)
+    crate::aead_chacha20poly1305::poly1305_do_32(key1.1, data_len, data, input_len, output, tag)
 }
 
 /**
@@ -592,7 +592,14 @@ decrypt(
     let tmp_copy: [u8; 64] = [0u8; 64usize];
     crate::chacha20::chacha20_encrypt(64u32, &mut tmp, &tmp_copy, key, nonce, 0u32);
     let key1: (&[u8], &[u8]) = tmp.split_at(0usize);
-    poly1305_do_32(key1.1, data_len, data, input_len, input, &mut computed_tag);
+    crate::aead_chacha20poly1305::poly1305_do_32(
+        key1.1,
+        data_len,
+        data,
+        input_len,
+        input,
+        &mut computed_tag
+    );
     let mut res: [u8; 1] = [255u8; 1usize];
     krml::unroll_for!(
         16,
@@ -600,8 +607,7 @@ decrypt(
         0u32,
         1u32,
         {
-            let uu____0: u8 =
-                fstar::uint8::eq_mask((&computed_tag)[i as usize], tag[i as usize]);
+            let uu____0: u8 = fstar::uint8::eq_mask((&computed_tag)[i as usize], tag[i as usize]);
             (&mut res)[0usize] = uu____0 & (&res)[0usize]
         }
     );

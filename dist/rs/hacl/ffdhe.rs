@@ -20,7 +20,8 @@
 
 #[inline] fn ffdhe_precomp_p(a: crate::spec::ffdhe_alg, p_r2_n: &mut [u64])
 {
-    let nLen: u32 = (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+    let nLen: u32 =
+        (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let p_n: (&mut [u64], &mut [u64]) = p_r2_n.split_at_mut(0usize);
     let r2_n: (&mut [u64], &mut [u64]) = p_n.1.split_at_mut(nLen as usize);
     let sw: u32 =
@@ -37,29 +38,24 @@
     let p: &[u8] =
         match a
         {
-            crate::spec::ffdhe_alg::FFDHE2048 =>
-              &crate::impl_ffdhe_constants::ffdhe_p2048,
-            crate::spec::ffdhe_alg::FFDHE3072 =>
-              &crate::impl_ffdhe_constants::ffdhe_p3072,
-            crate::spec::ffdhe_alg::FFDHE4096 =>
-              &crate::impl_ffdhe_constants::ffdhe_p4096,
-            crate::spec::ffdhe_alg::FFDHE6144 =>
-              &crate::impl_ffdhe_constants::ffdhe_p6144,
-            crate::spec::ffdhe_alg::FFDHE8192 =>
-              &crate::impl_ffdhe_constants::ffdhe_p8192,
+            crate::spec::ffdhe_alg::FFDHE2048 => &crate::impl_ffdhe_constants::ffdhe_p2048,
+            crate::spec::ffdhe_alg::FFDHE3072 => &crate::impl_ffdhe_constants::ffdhe_p3072,
+            crate::spec::ffdhe_alg::FFDHE4096 => &crate::impl_ffdhe_constants::ffdhe_p4096,
+            crate::spec::ffdhe_alg::FFDHE6144 => &crate::impl_ffdhe_constants::ffdhe_p6144,
+            crate::spec::ffdhe_alg::FFDHE8192 => &crate::impl_ffdhe_constants::ffdhe_p8192,
             _ => panic!("Precondition of the function most likely violated")
         };
-    let len: u32 = ffdhe_len(a);
+    let len: u32 = crate::ffdhe::ffdhe_len(a);
     for i in 0u32..len
     {
         let x: u8 = p[i as usize];
         let os: (&mut [u8], &mut [u8]) = p_s.split_at_mut(0usize);
         os.1[i as usize] = x
     };
-    bignum::bignum_base::bn_from_bytes_be_uint64(ffdhe_len(a), &p_s, r2_n.0);
+    bignum::bignum_base::bn_from_bytes_be_uint64(crate::ffdhe::ffdhe_len(a), &p_s, r2_n.0);
     bignum::bignum::bn_precomp_r2_mod_n_u64(
-        (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32),
-        8u32.wrapping_mul(ffdhe_len(a)).wrapping_sub(1u32),
+        (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32),
+        8u32.wrapping_mul(crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32),
         r2_n.0,
         r2_n.1
     )
@@ -67,7 +63,8 @@
 
 #[inline] fn ffdhe_check_pk(a: crate::spec::ffdhe_alg, pk_n: &[u64], p_n: &[u64]) -> u64
 {
-    let nLen: u32 = (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+    let nLen: u32 =
+        (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let mut p_n1: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     let c0: u64 =
         lib::inttypes_intrinsics::sub_borrow_u64(
@@ -148,13 +145,14 @@
     res: &mut [u8]
 )
 {
-    let nLen: u32 = (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+    let nLen: u32 =
+        (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let p_n: (&[u64], &[u64]) = p_r2_n.split_at(0usize);
     let r2_n: (&[u64], &[u64]) = p_n.1.split_at(nLen as usize);
     let mut res_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     let mu: u64 = bignum::bignum::mod_inv_uint64(r2_n.0[0usize]);
     bignum::bignum::bn_mod_exp_consttime_precomp_u64(
-        (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32),
+        (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32),
         r2_n.0,
         mu,
         r2_n.1,
@@ -163,14 +161,15 @@
         sk_n,
         &mut res_n
     );
-    bignum::bignum_base::bn_to_bytes_be_uint64(ffdhe_len(a), &res_n, res)
+    bignum::bignum_base::bn_to_bytes_be_uint64(crate::ffdhe::ffdhe_len(a), &res_n, res)
 }
 
-pub fn ffdhe_len0(a: crate::spec::ffdhe_alg) -> u32 { ffdhe_len(a) }
+pub fn ffdhe_len0(a: crate::spec::ffdhe_alg) -> u32 { crate::ffdhe::ffdhe_len(a) }
 
 pub fn new_ffdhe_precomp_p(a: crate::spec::ffdhe_alg) -> Box<[u64]>
 {
-    let nLen: u32 = (ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+    let nLen: u32 =
+        (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let mut res: Box<[u64]> = vec![0u64; nLen.wrapping_add(nLen) as usize].into_boxed_slice();
     if false
     { res }
@@ -178,7 +177,7 @@ pub fn new_ffdhe_precomp_p(a: crate::spec::ffdhe_alg) -> Box<[u64]>
     {
         let res1: &mut [u64] = &mut res;
         let res2: &mut [u64] = res1;
-        ffdhe_precomp_p(a, res2);
+        crate::ffdhe::ffdhe_precomp_p(a, res2);
         (*res2).into()
     }
 }
@@ -190,7 +189,7 @@ pub fn ffdhe_secret_to_public_precomp(
     pk: &mut [u8]
 )
 {
-    let len: u32 = ffdhe_len(a);
+    let len: u32 = crate::ffdhe::ffdhe_len(a);
     let nLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let mut g_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     let mut g: [u8; 1] = [0u8; 1usize];
@@ -202,16 +201,16 @@ pub fn ffdhe_secret_to_public_precomp(
     bignum::bignum_base::bn_from_bytes_be_uint64(1u32, &g, &mut (&mut g_n)[0usize..]);
     let mut sk_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     bignum::bignum_base::bn_from_bytes_be_uint64(len, sk, &mut sk_n);
-    ffdhe_compute_exp(a, p_r2_n, &sk_n, &g_n, pk)
+    crate::ffdhe::ffdhe_compute_exp(a, p_r2_n, &sk_n, &g_n, pk)
 }
 
 pub fn ffdhe_secret_to_public(a: crate::spec::ffdhe_alg, sk: &[u8], pk: &mut [u8])
 {
-    let len: u32 = ffdhe_len(a);
+    let len: u32 = crate::ffdhe::ffdhe_len(a);
     let nLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let mut p_r2_n: Box<[u64]> = vec![0u64; nLen.wrapping_add(nLen) as usize].into_boxed_slice();
-    ffdhe_precomp_p(a, &mut p_r2_n);
-    ffdhe_secret_to_public_precomp(a, &p_r2_n, sk, pk)
+    crate::ffdhe::ffdhe_precomp_p(a, &mut p_r2_n);
+    crate::ffdhe::ffdhe_secret_to_public_precomp(a, &p_r2_n, sk, pk)
 }
 
 pub fn ffdhe_shared_secret_precomp(
@@ -223,30 +222,25 @@ pub fn ffdhe_shared_secret_precomp(
 ) ->
     u64
 {
-    let len: u32 = ffdhe_len(a);
+    let len: u32 = crate::ffdhe::ffdhe_len(a);
     let nLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let p_n: (&[u64], &[u64]) = p_r2_n.split_at(0usize);
     let mut sk_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     let mut pk_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     bignum::bignum_base::bn_from_bytes_be_uint64(len, sk, &mut sk_n);
     bignum::bignum_base::bn_from_bytes_be_uint64(len, pk, &mut pk_n);
-    let m: u64 = ffdhe_check_pk(a, &pk_n, p_n.1);
-    if m == 0xFFFFFFFFFFFFFFFFu64 { ffdhe_compute_exp(a, p_r2_n, &sk_n, &pk_n, ss) };
+    let m: u64 = crate::ffdhe::ffdhe_check_pk(a, &pk_n, p_n.1);
+    if m == 0xFFFFFFFFFFFFFFFFu64 { crate::ffdhe::ffdhe_compute_exp(a, p_r2_n, &sk_n, &pk_n, ss) };
     m
 }
 
-pub fn ffdhe_shared_secret(
-    a: crate::spec::ffdhe_alg,
-    sk: &[u8],
-    pk: &[u8],
-    ss: &mut [u8]
-) ->
+pub fn ffdhe_shared_secret(a: crate::spec::ffdhe_alg, sk: &[u8], pk: &[u8], ss: &mut [u8]) ->
     u64
 {
-    let len: u32 = ffdhe_len(a);
+    let len: u32 = crate::ffdhe::ffdhe_len(a);
     let nLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let mut p_n: Box<[u64]> = vec![0u64; nLen.wrapping_add(nLen) as usize].into_boxed_slice();
-    ffdhe_precomp_p(a, &mut p_n);
-    let m: u64 = ffdhe_shared_secret_precomp(a, &p_n, sk, pk, ss);
+    crate::ffdhe::ffdhe_precomp_p(a, &mut p_n);
+    let m: u64 = crate::ffdhe::ffdhe_shared_secret_precomp(a, &p_n, sk, pk, ss);
     m
 }

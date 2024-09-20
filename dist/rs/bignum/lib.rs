@@ -1,7 +1,5 @@
 pub mod bignum_base;
 pub mod bignum;
-pub mod bignum25519_51;
-pub mod bignum_k256;
 pub mod bignum32;
 pub mod bignum64;
 pub mod bignum256;

@@ -46,15 +46,7 @@ compute_blake2s_128(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_
     {
         let mut wv: [lib::intvector_intrinsics::vec128; 4] =
             [lib::intvector_intrinsics::vec128_zero; 4usize];
-        crate::hash_blake2s_simd128::update_last(
-            64u32,
-            &mut wv,
-            s0,
-            false,
-            0u64,
-            64u32,
-            &ipad
-        )
+        crate::hash_blake2s_simd128::update_last(64u32, &mut wv, s0, false, 0u64, 64u32, &ipad)
     }
     else
     {

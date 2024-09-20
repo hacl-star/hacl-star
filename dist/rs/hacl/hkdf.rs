@@ -33,15 +33,7 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
     {
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
-        {
-            crate::hmac::compute_sha2_256(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_sha2_256(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_sha2_256(
@@ -60,15 +52,7 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
     {
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
-        {
-            crate::hmac::compute_sha2_256(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_sha2_256(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_sha2_256(
@@ -127,15 +111,7 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
     {
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
-        {
-            crate::hmac::compute_sha2_384(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_sha2_384(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_sha2_384(
@@ -154,15 +130,7 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
     {
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
-        {
-            crate::hmac::compute_sha2_384(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_sha2_384(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_sha2_384(
@@ -221,15 +189,7 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
     {
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
-        {
-            crate::hmac::compute_sha2_512(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_sha2_512(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_sha2_512(
@@ -248,15 +208,7 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
     {
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
-        {
-            crate::hmac::compute_sha2_512(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_sha2_512(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_sha2_512(
@@ -315,15 +267,7 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
     {
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
-        {
-            crate::hmac::compute_blake2s_32(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_blake2s_32(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_blake2s_32(
@@ -342,15 +286,7 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
     {
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
-        {
-            crate::hmac::compute_blake2s_32(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_blake2s_32(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_blake2s_32(
@@ -409,15 +345,7 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
     {
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
         if i == 0u32
-        {
-            crate::hmac::compute_blake2b_32(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_blake2b_32(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_blake2b_32(
@@ -436,15 +364,7 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
     {
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
         if n == 0u32
-        {
-            crate::hmac::compute_blake2b_32(
-                ctr.0,
-                prk,
-                prklen,
-                tag.0,
-                infolen.wrapping_add(1u32)
-            )
-        }
+        { crate::hmac::compute_blake2b_32(ctr.0, prk, prklen, tag.0, infolen.wrapping_add(1u32)) }
         else
         {
             crate::hmac::compute_blake2b_32(

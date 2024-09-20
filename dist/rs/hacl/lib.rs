@@ -1,3 +1,5 @@
+pub mod bignum25519_51;
+pub mod bignum_k256;
 pub mod inttypes_intrinsics_128;
 pub mod streaming_types;
 pub mod spec;

@@ -49,15 +49,15 @@ compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u3
         let block_len: u32 = 64u32;
         let n_blocks: u32 = data_len.wrapping_div(block_len);
         let rem: u32 = data_len.wrapping_rem(block_len);
-        let scrut: __uint32_t_uint32_t =
+        let scrut: crate::hmac::__uint32_t_uint32_t =
             if n_blocks > 0u32 && rem == 0u32
             {
                 let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-                __uint32_t_uint32_t
+                crate::hmac::__uint32_t_uint32_t
                 { fst: n_blocks·, snd: data_len.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
             }
             else
-            { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+            { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
         let n_blocks0: u32 = scrut.fst;
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -79,15 +79,15 @@ compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u3
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 20u32.wrapping_div(block_len);
     let rem: u32 = 20u32.wrapping_rem(block_len);
-    let scrut: __uint32_t_uint32_t =
+    let scrut: crate::hmac::__uint32_t_uint32_t =
         if n_blocks > 0u32 && rem == 0u32
         {
             let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-            __uint32_t_uint32_t
+            crate::hmac::__uint32_t_uint32_t
             { fst: n_blocks·, snd: 20u32.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
         }
         else
-        { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+        { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -151,23 +151,21 @@ compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     );
     let s: &mut [u32] = &mut st;
     if data_len == 0u32
-    {
-        crate::hash_sha2::sha256_update_last(0u64.wrapping_add(64u32 as u64), 64u32, &ipad, s)
-    }
+    { crate::hash_sha2::sha256_update_last(0u64.wrapping_add(64u32 as u64), 64u32, &ipad, s) }
     else
     {
         let block_len: u32 = 64u32;
         let n_blocks: u32 = data_len.wrapping_div(block_len);
         let rem: u32 = data_len.wrapping_rem(block_len);
-        let scrut: __uint32_t_uint32_t =
+        let scrut: crate::hmac::__uint32_t_uint32_t =
             if n_blocks > 0u32 && rem == 0u32
             {
                 let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-                __uint32_t_uint32_t
+                crate::hmac::__uint32_t_uint32_t
                 { fst: n_blocks·, snd: data_len.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
             }
             else
-            { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+            { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
         let n_blocks0: u32 = scrut.fst;
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -189,15 +187,15 @@ compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 32u32.wrapping_div(block_len);
     let rem: u32 = 32u32.wrapping_rem(block_len);
-    let scrut: __uint32_t_uint32_t =
+    let scrut: crate::hmac::__uint32_t_uint32_t =
         if n_blocks > 0u32 && rem == 0u32
         {
             let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-            __uint32_t_uint32_t
+            crate::hmac::__uint32_t_uint32_t
             { fst: n_blocks·, snd: 32u32.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
         }
         else
-        { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+        { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -277,15 +275,15 @@ compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let block_len: u32 = 128u32;
         let n_blocks: u32 = data_len.wrapping_div(block_len);
         let rem: u32 = data_len.wrapping_rem(block_len);
-        let scrut: __uint32_t_uint32_t =
+        let scrut: crate::hmac::__uint32_t_uint32_t =
             if n_blocks > 0u32 && rem == 0u32
             {
                 let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-                __uint32_t_uint32_t
+                crate::hmac::__uint32_t_uint32_t
                 { fst: n_blocks·, snd: data_len.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
             }
             else
-            { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+            { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
         let n_blocks0: u32 = scrut.fst;
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -313,15 +311,15 @@ compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let block_len: u32 = 128u32;
     let n_blocks: u32 = 48u32.wrapping_div(block_len);
     let rem: u32 = 48u32.wrapping_rem(block_len);
-    let scrut: __uint32_t_uint32_t =
+    let scrut: crate::hmac::__uint32_t_uint32_t =
         if n_blocks > 0u32 && rem == 0u32
         {
             let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-            __uint32_t_uint32_t
+            crate::hmac::__uint32_t_uint32_t
             { fst: n_blocks·, snd: 48u32.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
         }
         else
-        { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+        { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -407,15 +405,15 @@ compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let block_len: u32 = 128u32;
         let n_blocks: u32 = data_len.wrapping_div(block_len);
         let rem: u32 = data_len.wrapping_rem(block_len);
-        let scrut: __uint32_t_uint32_t =
+        let scrut: crate::hmac::__uint32_t_uint32_t =
             if n_blocks > 0u32 && rem == 0u32
             {
                 let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-                __uint32_t_uint32_t
+                crate::hmac::__uint32_t_uint32_t
                 { fst: n_blocks·, snd: data_len.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
             }
             else
-            { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+            { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
         let n_blocks0: u32 = scrut.fst;
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -443,15 +441,15 @@ compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let block_len: u32 = 128u32;
     let n_blocks: u32 = 64u32.wrapping_div(block_len);
     let rem: u32 = 64u32.wrapping_rem(block_len);
-    let scrut: __uint32_t_uint32_t =
+    let scrut: crate::hmac::__uint32_t_uint32_t =
         if n_blocks > 0u32 && rem == 0u32
         {
             let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-            __uint32_t_uint32_t
+            crate::hmac::__uint32_t_uint32_t
             { fst: n_blocks·, snd: 64u32.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
         }
         else
-        { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+        { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -520,15 +518,15 @@ compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
         let block_len: u32 = 64u32;
         let n_blocks: u32 = data_len.wrapping_div(block_len);
         let rem: u32 = data_len.wrapping_rem(block_len);
-        let scrut: __uint32_t_uint32_t =
+        let scrut: crate::hmac::__uint32_t_uint32_t =
             if n_blocks > 0u32 && rem == 0u32
             {
                 let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-                __uint32_t_uint32_t
+                crate::hmac::__uint32_t_uint32_t
                 { fst: n_blocks·, snd: data_len.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
             }
             else
-            { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+            { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
         let n_blocks0: u32 = scrut.fst;
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -563,15 +561,15 @@ compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 32u32.wrapping_div(block_len);
     let rem: u32 = 32u32.wrapping_rem(block_len);
-    let scrut: __uint32_t_uint32_t =
+    let scrut: crate::hmac::__uint32_t_uint32_t =
         if n_blocks > 0u32 && rem == 0u32
         {
             let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-            __uint32_t_uint32_t
+            crate::hmac::__uint32_t_uint32_t
             { fst: n_blocks·, snd: 32u32.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
         }
         else
-        { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+        { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -655,15 +653,15 @@ compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
         let block_len: u32 = 128u32;
         let n_blocks: u32 = data_len.wrapping_div(block_len);
         let rem: u32 = data_len.wrapping_rem(block_len);
-        let scrut: __uint32_t_uint32_t =
+        let scrut: crate::hmac::__uint32_t_uint32_t =
             if n_blocks > 0u32 && rem == 0u32
             {
                 let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-                __uint32_t_uint32_t
+                crate::hmac::__uint32_t_uint32_t
                 { fst: n_blocks·, snd: data_len.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
             }
             else
-            { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+            { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
         let n_blocks0: u32 = scrut.fst;
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
@@ -708,15 +706,15 @@ compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
     let block_len: u32 = 128u32;
     let n_blocks: u32 = 64u32.wrapping_div(block_len);
     let rem: u32 = 64u32.wrapping_rem(block_len);
-    let scrut: __uint32_t_uint32_t =
+    let scrut: crate::hmac::__uint32_t_uint32_t =
         if n_blocks > 0u32 && rem == 0u32
         {
             let n_blocks·: u32 = n_blocks.wrapping_sub(1u32);
-            __uint32_t_uint32_t
+            crate::hmac::__uint32_t_uint32_t
             { fst: n_blocks·, snd: 64u32.wrapping_sub(n_blocks·.wrapping_mul(block_len)) }
         }
         else
-        { __uint32_t_uint32_t { fst: n_blocks, snd: rem } };
+        { crate::hmac::__uint32_t_uint32_t { fst: n_blocks, snd: rem } };
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);

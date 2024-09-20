@@ -105,14 +105,7 @@ pub fn setupBaseS(
                 ((&mut (&mut tmp0)[27usize..])[0usize..64usize]).copy_from_slice(
                     &(&o_kemcontext)[0usize..64usize]
                 );
-                crate::hkdf::expand_sha2_256(
-                    &mut o_shared,
-                    &o_eae_prk,
-                    32u32,
-                    &tmp0,
-                    len0,
-                    32u32
-                );
+                crate::hkdf::expand_sha2_256(&mut o_shared, &o_eae_prk, 32u32, &tmp0, len0, 32u32);
                 0u32
             }
             else
@@ -310,8 +303,7 @@ pub fn setupBaseR(
             0u32,
             1u32,
             {
-                let uu____0: u8 =
-                    fstar::uint8::eq_mask((&dh)[i as usize], (&zeros)[i as usize]);
+                let uu____0: u8 = fstar::uint8::eq_mask((&dh)[i as usize], (&zeros)[i as usize]);
                 (&mut res)[0usize] = uu____0 & (&res)[0usize]
             }
         );
@@ -387,14 +379,7 @@ pub fn setupBaseR(
                     ((&mut (&mut tmp0)[27usize..])[0usize..64usize]).copy_from_slice(
                         &(&kemcontext)[0usize..64usize]
                     );
-                    crate::hkdf::expand_sha2_256(
-                        &mut shared,
-                        &o_eae_prk,
-                        32u32,
-                        &tmp0,
-                        len0,
-                        32u32
-                    );
+                    crate::hkdf::expand_sha2_256(&mut shared, &o_eae_prk, 32u32, &tmp0, len0, 32u32);
                     0u32
                 }
                 else
@@ -516,14 +501,7 @@ pub fn setupBaseR(
             ((&mut (&mut tmp2)[22usize..])[0usize..65usize]).copy_from_slice(
                 &(&o_context)[0usize..65usize]
             );
-            crate::hkdf::expand_sha2_256(
-                o_ctx.ctx_exporter,
-                &o_secret,
-                32u32,
-                &tmp2,
-                len2,
-                32u32
-            );
+            crate::hkdf::expand_sha2_256(o_ctx.ctx_exporter, &o_secret, 32u32, &tmp2, len2, 32u32);
             let label_key: [u8; 3] = [0x6bu8, 0x65u8, 0x79u8];
             let len3: u32 = 87u32;
             let mut tmp3: Box<[u8]> = vec![0u8; len3 as usize].into_boxed_slice();
@@ -568,14 +546,7 @@ pub fn setupBaseR(
             ((&mut (&mut tmp4)[29usize..])[0usize..65usize]).copy_from_slice(
                 &(&o_context)[0usize..65usize]
             );
-            crate::hkdf::expand_sha2_256(
-                o_ctx.ctx_nonce,
-                &o_secret,
-                32u32,
-                &tmp4,
-                len4,
-                12u32
-            );
+            crate::hkdf::expand_sha2_256(o_ctx.ctx_nonce, &o_secret, 32u32, &tmp4, len4, 12u32);
             o_ctx.ctx_seq[0usize] = 0u64;
             0u32
         }
@@ -607,7 +578,8 @@ pub fn sealBase(
     let o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s =
         crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s
         { ctx_key: &ctx_key, ctx_nonce: &ctx_nonce, ctx_seq: &ctx_seq, ctx_exporter: &ctx_exporter };
-    let res: u32 = setupBaseS(o_enc, o_ctx, skE, pkR, infolen, info);
+    let res: u32 =
+        crate::hpke_curve64_cp32_sha256::setupBaseS(o_enc, o_ctx, skE, pkR, infolen, info);
     if res == 0u32
     {
         let mut nonce: [u8; 12] = [0u8; 12usize];
@@ -674,7 +646,7 @@ pub fn openBase(
     let o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s =
         crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s
         { ctx_key: &ctx_key, ctx_nonce: &ctx_nonce, ctx_seq: &ctx_seq, ctx_exporter: &ctx_exporter };
-    let res: u32 = setupBaseR(o_ctx, pkE, skR, infolen, info);
+    let res: u32 = crate::hpke_curve64_cp32_sha256::setupBaseR(o_ctx, pkE, skR, infolen, info);
     if res == 0u32
     {
         let mut nonce: [u8; 12] = [0u8; 12usize];

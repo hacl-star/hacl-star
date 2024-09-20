@@ -18,7 +18,7 @@ fn secretbox_init(xkeys: &mut [u8], k: &[u8], n: &[u8])
 fn secretbox_detached(mlen: u32, c: &mut [u8], tag: &mut [u8], k: &[u8], n: &[u8], m: &[u8])
 {
     let mut xkeys: [u8; 96] = [0u8; 96usize];
-    secretbox_init(&mut xkeys, k, n);
+    crate::nacl::secretbox_init(&mut xkeys, k, n);
     let mkey: (&[u8], &[u8]) = xkeys.split_at(32usize);
     let n1: (&[u8], &[u8]) = n.split_at(16usize);
     let subkey: (&[u8], &[u8]) = mkey.0.split_at(0usize);
@@ -51,7 +51,7 @@ fn secretbox_open_detached(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]
     u32
 {
     let mut xkeys: [u8; 96] = [0u8; 96usize];
-    secretbox_init(&mut xkeys, k, n);
+    crate::nacl::secretbox_init(&mut xkeys, k, n);
     let mkey: (&[u8], &[u8]) = xkeys.split_at(32usize);
     let mut tag·: [u8; 16] = [0u8; 16usize];
     crate::mac_poly1305::mac(&mut tag·, c, mlen, mkey.1);
@@ -105,14 +105,14 @@ fn secretbox_easy(mlen: u32, c: &mut [u8], k: &[u8], n: &[u8], m: &[u8])
 {
     let tag: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
     let cip: (&mut [u8], &mut [u8]) = tag.1.split_at_mut(16usize);
-    secretbox_detached(mlen, cip.1, cip.0, k, n, m)
+    crate::nacl::secretbox_detached(mlen, cip.1, cip.0, k, n, m)
 }
 
 fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]) -> u32
 {
     let tag: (&[u8], &[u8]) = c.split_at(0usize);
     let cip: (&[u8], &[u8]) = tag.1.split_at(16usize);
-    secretbox_open_detached(mlen, m, k, n, cip.1, cip.0)
+    crate::nacl::secretbox_open_detached(mlen, m, k, n, cip.1, cip.0)
 }
 
 #[inline] fn box_beforenm(k: &mut [u8], pk: &[u8], sk: &[u8]) -> u32
@@ -138,7 +138,7 @@ fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]) ->
 ) ->
     u32
 {
-    secretbox_detached(mlen, c, tag, k, n, m);
+    crate::nacl::secretbox_detached(mlen, c, tag, k, n, m);
     0u32
 }
 
@@ -154,8 +154,11 @@ fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]) ->
     u32
 {
     let mut k: [u8; 32] = [0u8; 32usize];
-    let r: u32 = box_beforenm(&mut k, pk, sk);
-    if r == 0u32 { box_detached_afternm(mlen, c, tag, &k, n, m) } else { 0xffffffffu32 }
+    let r: u32 = crate::nacl::box_beforenm(&mut k, pk, sk);
+    if r == 0u32
+    { crate::nacl::box_detached_afternm(mlen, c, tag, &k, n, m) }
+    else
+    { 0xffffffffu32 }
 }
 
 #[inline] fn box_open_detached_afternm(
@@ -167,7 +170,7 @@ fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]) ->
     tag: &[u8]
 ) ->
     u32
-{ secretbox_open_detached(mlen, m, k, n, c, tag) }
+{ crate::nacl::secretbox_open_detached(mlen, m, k, n, c, tag) }
 
 #[inline] fn box_open_detached(
     mlen: u32,
@@ -181,15 +184,18 @@ fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]) ->
     u32
 {
     let mut k: [u8; 32] = [0u8; 32usize];
-    let r: u32 = box_beforenm(&mut k, pk, sk);
-    if r == 0u32 { box_open_detached_afternm(mlen, m, &k, n, c, tag) } else { 0xffffffffu32 }
+    let r: u32 = crate::nacl::box_beforenm(&mut k, pk, sk);
+    if r == 0u32
+    { crate::nacl::box_open_detached_afternm(mlen, m, &k, n, c, tag) }
+    else
+    { 0xffffffffu32 }
 }
 
 #[inline] fn box_easy_afternm(mlen: u32, c: &mut [u8], k: &[u8], n: &[u8], m: &[u8]) -> u32
 {
     let tag: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
     let cip: (&mut [u8], &mut [u8]) = tag.1.split_at_mut(16usize);
-    let res: u32 = box_detached_afternm(mlen, cip.1, cip.0, k, n, m);
+    let res: u32 = crate::nacl::box_detached_afternm(mlen, cip.1, cip.0, k, n, m);
     res
 }
 
@@ -197,7 +203,7 @@ fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]) ->
 {
     let tag: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
     let cip: (&mut [u8], &mut [u8]) = tag.1.split_at_mut(16usize);
-    let res: u32 = box_detached(mlen, cip.1, cip.0, sk, pk, n, m);
+    let res: u32 = crate::nacl::box_detached(mlen, cip.1, cip.0, sk, pk, n, m);
     res
 }
 
@@ -206,7 +212,7 @@ fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]) ->
 {
     let tag: (&[u8], &[u8]) = c.split_at(0usize);
     let cip: (&[u8], &[u8]) = tag.1.split_at(16usize);
-    box_open_detached_afternm(mlen, m, k, n, cip.1, cip.0)
+    crate::nacl::box_open_detached_afternm(mlen, m, k, n, cip.1, cip.0)
 }
 
 #[inline] fn box_open_easy(mlen: u32, m: &mut [u8], pk: &[u8], sk: &[u8], n: &[u8], c: &[u8]) ->
@@ -214,7 +220,7 @@ fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &[u8], n: &[u8], c: &[u8]) ->
 {
     let tag: (&[u8], &[u8]) = c.split_at(0usize);
     let cip: (&[u8], &[u8]) = tag.1.split_at(16usize);
-    box_open_detached(mlen, m, pk, sk, n, cip.1, cip.0)
+    crate::nacl::box_open_detached(mlen, m, pk, sk, n, cip.1, cip.0)
 }
 
 /**
@@ -240,7 +246,7 @@ crypto_secretbox_detached(
 ) ->
     u32
 {
-    secretbox_detached(mlen, c, tag, k, n, m);
+    crate::nacl::secretbox_detached(mlen, c, tag, k, n, m);
     0u32
 }
 
@@ -266,7 +272,7 @@ crypto_secretbox_open_detached(
     k: &[u8]
 ) ->
     u32
-{ secretbox_open_detached(mlen, m, k, n, c, tag) }
+{ crate::nacl::secretbox_open_detached(mlen, m, k, n, c, tag) }
 
 /**
 Encrypt a message with a key and nonce.
@@ -281,7 +287,7 @@ pub fn
 crypto_secretbox_easy(c: &mut [u8], m: &[u8], mlen: u32, n: &[u8], k: &[u8]) ->
     u32
 {
-    secretbox_easy(mlen, c, k, n, m);
+    crate::nacl::secretbox_easy(mlen, c, k, n, m);
     0u32
 }
 
@@ -297,7 +303,7 @@ Verify and decrypt a ciphertext produced with `crypto_secretbox_easy`.
 pub fn
 crypto_secretbox_open_easy(m: &mut [u8], c: &[u8], clen: u32, n: &[u8], k: &[u8]) ->
     u32
-{ secretbox_open_easy(clen.wrapping_sub(16u32), m, k, n, c) }
+{ crate::nacl::secretbox_open_easy(clen.wrapping_sub(16u32), m, k, n, c) }
 
 /**
 Compute a shared secret key given a public key and secret key.
@@ -309,7 +315,7 @@ Compute a shared secret key given a public key and secret key.
 pub fn
 crypto_box_beforenm(k: &mut [u8], pk: &[u8], sk: &[u8]) ->
     u32
-{ box_beforenm(k, pk, sk) }
+{ crate::nacl::box_beforenm(k, pk, sk) }
 
 /**
 See `crypto_box_detached`.
@@ -324,7 +330,7 @@ crypto_box_detached_afternm(
     k: &[u8]
 ) ->
     u32
-{ box_detached_afternm(mlen, c, tag, k, n, m) }
+{ crate::nacl::box_detached_afternm(mlen, c, tag, k, n, m) }
 
 /**
 Encrypt a message using the recipient's public key, the sender's secret key, and a nonce.
@@ -348,7 +354,7 @@ crypto_box_detached(
     sk: &[u8]
 ) ->
     u32
-{ box_detached(mlen, c, tag, sk, pk, n, m) }
+{ crate::nacl::box_detached(mlen, c, tag, sk, pk, n, m) }
 
 /**
 See `crypto_box_open_detached`.
@@ -363,7 +369,7 @@ crypto_box_open_detached_afternm(
     k: &[u8]
 ) ->
     u32
-{ box_open_detached_afternm(mlen, m, k, n, c, tag) }
+{ crate::nacl::box_open_detached_afternm(mlen, m, k, n, c, tag) }
 
 /**
 Verify and decrypt a ciphertext produced by `crypto_box_detached`.
@@ -387,7 +393,7 @@ crypto_box_open_detached(
     sk: &[u8]
 ) ->
     u32
-{ box_open_detached(mlen, m, pk, sk, n, c, tag) }
+{ crate::nacl::box_open_detached(mlen, m, pk, sk, n, c, tag) }
 
 /**
 See `crypto_box_easy`.
@@ -395,7 +401,7 @@ See `crypto_box_easy`.
 pub fn
 crypto_box_easy_afternm(c: &mut [u8], m: &[u8], mlen: u32, n: &[u8], k: &[u8]) ->
     u32
-{ box_easy_afternm(mlen, c, k, n, m) }
+{ crate::nacl::box_easy_afternm(mlen, c, k, n, m) }
 
 /**
 Encrypt a message using the recipient's public key, the sender's secret key, and a nonce.
@@ -410,7 +416,7 @@ Encrypt a message using the recipient's public key, the sender's secret key, and
 pub fn
 crypto_box_easy(c: &mut [u8], m: &[u8], mlen: u32, n: &[u8], pk: &[u8], sk: &[u8]) ->
     u32
-{ box_easy(mlen, c, sk, pk, n, m) }
+{ crate::nacl::box_easy(mlen, c, sk, pk, n, m) }
 
 /**
 See `crypto_box_open_easy`.
@@ -418,7 +424,7 @@ See `crypto_box_open_easy`.
 pub fn
 crypto_box_open_easy_afternm(m: &mut [u8], c: &[u8], clen: u32, n: &[u8], k: &[u8]) ->
     u32
-{ box_open_easy_afternm(clen.wrapping_sub(16u32), m, k, n, c) }
+{ crate::nacl::box_open_easy_afternm(clen.wrapping_sub(16u32), m, k, n, c) }
 
 /**
 Verify and decrypt a ciphertext produced by `crypto_box_easy`.
@@ -433,4 +439,4 @@ Verify and decrypt a ciphertext produced by `crypto_box_easy`.
 pub fn
 crypto_box_open_easy(m: &mut [u8], c: &[u8], clen: u32, n: &[u8], pk: &[u8], sk: &[u8]) ->
     u32
-{ box_open_easy(clen.wrapping_sub(16u32), m, pk, sk, n, c) }
+{ crate::nacl::box_open_easy(clen.wrapping_sub(16u32), m, pk, sk, n, c) }

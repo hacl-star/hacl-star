@@ -134,20 +134,19 @@ r#mod(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) ->
     let mut acc: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
-        let beq: u64 = ::fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u64 = ! ::fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u64 = fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u64 = ! fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u64 = (&acc)[0usize];
     let is_valid_m: u64 = m0 & m1;
-    let nBits: u32 =
-        64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
+    let nBits: u32 = 64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
     if is_valid_m == 0xFFFFFFFFFFFFFFFFu64
     {
         let mut r2: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
         crate::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, &mut r2);
         let mu: u64 = crate::bignum::mod_inv_uint64(n[0usize]);
-        bn_slow_precomp(len, n, mu, &r2, a, res)
+        crate::bignum64::bn_slow_precomp(len, n, mu, &r2, a, res)
     }
     else
     { (res[0usize..len as usize]).copy_from_slice(&vec![0u64; len as usize].into_boxed_slice()) };
@@ -179,8 +178,7 @@ mod_exp_vartime(len: u32, n: &[u64], a: &[u64], bBits: u32, b: &[u64], res: &mut
     bool
 {
     let is_valid_m: u64 = crate::bignum::bn_check_mod_exp_u64(len, n, a, bBits, b);
-    let nBits: u32 =
-        64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
+    let nBits: u32 = 64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
     if is_valid_m == 0xFFFFFFFFFFFFFFFFu64
     { crate::bignum::bn_mod_exp_vartime_u64(len, nBits, n, a, bBits, b, res) }
     else
@@ -213,8 +211,7 @@ mod_exp_consttime(len: u32, n: &[u64], a: &[u64], bBits: u32, b: &[u64], res: &m
     bool
 {
     let is_valid_m: u64 = crate::bignum::bn_check_mod_exp_u64(len, n, a, bBits, b);
-    let nBits: u32 =
-        64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
+    let nBits: u32 = 64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
     if is_valid_m == 0xFFFFFFFFFFFFFFFFu64
     { crate::bignum::bn_mod_exp_consttime_u64(len, nBits, n, a, bBits, b, res) }
     else
@@ -252,8 +249,8 @@ mod_inv_prime_vartime(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) ->
     let mut acc: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
-        let beq: u64 = ::fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
-        let blt: u64 = ! ::fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
+        let beq: u64 = fstar::uint64::eq_mask((&one)[i as usize], n[i as usize]);
+        let blt: u64 = ! fstar::uint64::gte_mask((&one)[i as usize], n[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     let m1: u64 = (&acc)[0usize];
@@ -262,7 +259,7 @@ mod_inv_prime_vartime(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) ->
     let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
     for i in 0u32..len
     {
-        let uu____0: u64 = ::fstar::uint64::eq_mask(a[i as usize], (&bn_zero)[i as usize]);
+        let uu____0: u64 = fstar::uint64::eq_mask(a[i as usize], (&bn_zero)[i as usize]);
         (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
     };
     let mask1: u64 = (&mask)[0usize];
@@ -271,14 +268,13 @@ mod_inv_prime_vartime(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) ->
     let mut acc0: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
-        let beq: u64 = ::fstar::uint64::eq_mask(a[i as usize], n[i as usize]);
-        let blt: u64 = ! ::fstar::uint64::gte_mask(a[i as usize], n[i as usize]);
+        let beq: u64 = fstar::uint64::eq_mask(a[i as usize], n[i as usize]);
+        let blt: u64 = ! fstar::uint64::gte_mask(a[i as usize], n[i as usize]);
         (&mut acc0)[0usize] = beq & (&acc0)[0usize] | ! beq & blt
     };
     let m2: u64 = (&acc0)[0usize];
     let is_valid_m: u64 = m00 & ! m10 & m2;
-    let nBits: u32 =
-        64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
+    let nBits: u32 = 64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
     if is_valid_m == 0xFFFFFFFFFFFFFFFFu64
     {
         let mut n2: Box<[u64]> = vec![0u64; len as usize].into_boxed_slice();
@@ -301,39 +297,19 @@ mod_inv_prime_vartime(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) ->
                     let res_i: (&mut [u64], &mut [u64]) =
                         res10.1.split_at_mut(4u32.wrapping_mul(i) as usize);
                     (&mut c)[0usize] =
-                        lib::inttypes_intrinsics::sub_borrow_u64(
-                            (&c)[0usize],
-                            t1,
-                            0u64,
-                            res_i.1
-                        );
+                        lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1);
                     let t10: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
                     (&mut c)[0usize] =
-                        lib::inttypes_intrinsics::sub_borrow_u64(
-                            (&c)[0usize],
-                            t10,
-                            0u64,
-                            res_i0.1
-                        );
+                        lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t10, 0u64, res_i0.1);
                     let t11: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
                     (&mut c)[0usize] =
-                        lib::inttypes_intrinsics::sub_borrow_u64(
-                            (&c)[0usize],
-                            t11,
-                            0u64,
-                            res_i1.1
-                        );
+                        lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t11, 0u64, res_i1.1);
                     let t12: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
                     (&mut c)[0usize] =
-                        lib::inttypes_intrinsics::sub_borrow_u64(
-                            (&c)[0usize],
-                            t12,
-                            0u64,
-                            res_i2.1
-                        )
+                        lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, 0u64, res_i2.1)
                 };
                 for
                 i
@@ -343,28 +319,15 @@ mod_inv_prime_vartime(len: u32, n: &[u64], a: &[u64], res: &mut [u64]) ->
                     let t1: u64 = a1.1[i as usize];
                     let res_i: (&mut [u64], &mut [u64]) = res10.1.split_at_mut(i as usize);
                     (&mut c)[0usize] =
-                        lib::inttypes_intrinsics::sub_borrow_u64(
-                            (&c)[0usize],
-                            t1,
-                            0u64,
-                            res_i.1
-                        )
+                        lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1)
                 };
                 let c1: u64 = (&c)[0usize];
                 c1
             }
             else
             { c0 };
-        ::lowstar::ignore::ignore::<u64>(c);
-        crate::bignum::bn_mod_exp_vartime_u64(
-            len,
-            nBits,
-            n,
-            a,
-            64u32.wrapping_mul(len),
-            &n2,
-            res
-        )
+        lowstar::ignore::ignore::<u64>(c);
+        crate::bignum::bn_mod_exp_vartime_u64(len, nBits, n, a, 64u32.wrapping_mul(len), &n2, res)
     }
     else
     { (res[0usize..len as usize]).copy_from_slice(&vec![0u64; len as usize].into_boxed_slice()) };
@@ -393,8 +356,7 @@ mont_ctx_init(len: u32, n: &[u64]) ->
     let r21: &mut [u64] = &mut r2;
     let n11: &mut [u64] = &mut n1;
     (n11[0usize..len as usize]).copy_from_slice(&n[0usize..len as usize]);
-    let nBits: u32 =
-        64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
+    let nBits: u32 = 64u32.wrapping_mul(crate::bignum_base::bn_get_top_index_u64(len, n) as u32);
     crate::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, r21);
     let mu: u64 = crate::bignum::mod_inv_uint64(n[0usize]);
     let res: crate::bignum::bn_mont_ctx_u64 =
@@ -417,7 +379,7 @@ mod_precomp(k: &[crate::bignum::bn_mont_ctx_u64], a: &[u64], res: &mut [u64])
     let n: &[u64] = &(k[0usize]).n;
     let mu: u64 = (k[0usize]).mu;
     let r2: &[u64] = &(k[0usize]).r2;
-    bn_slow_precomp(len1, n, mu, r2, a, res)
+    crate::bignum64::bn_slow_precomp(len1, n, mu, r2, a, res)
 }
 
 /**
@@ -503,11 +465,7 @@ Write `a ^ (-1) mod n` in `res`.
   • a < n
 */
 pub fn
-mod_inv_prime_vartime_precomp(
-    k: &[crate::bignum::bn_mont_ctx_u64],
-    a: &[u64],
-    res: &mut [u64]
-)
+mod_inv_prime_vartime_precomp(k: &[crate::bignum::bn_mont_ctx_u64], a: &[u64], res: &mut [u64])
 {
     let len1: u32 = (k[0usize]).len;
     let n: &[u64] = &(k[0usize]).n;
@@ -515,12 +473,7 @@ mod_inv_prime_vartime_precomp(
     let r2: &[u64] = &(k[0usize]).r2;
     let mut n2: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
     let c0: u64 =
-        lib::inttypes_intrinsics::sub_borrow_u64(
-            0u64,
-            n[0usize],
-            2u64,
-            &mut (&mut n2)[0usize..]
-        );
+        lib::inttypes_intrinsics::sub_borrow_u64(0u64, n[0usize], 2u64, &mut (&mut n2)[0usize..]);
     let c: u64 =
         if 1u32 < len1
         {
@@ -537,30 +490,15 @@ mod_inv_prime_vartime_precomp(
                 let t10: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                 let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    lib::inttypes_intrinsics::sub_borrow_u64(
-                        (&c)[0usize],
-                        t10,
-                        0u64,
-                        res_i0.1
-                    );
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t10, 0u64, res_i0.1);
                 let t11: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                 let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    lib::inttypes_intrinsics::sub_borrow_u64(
-                        (&c)[0usize],
-                        t11,
-                        0u64,
-                        res_i1.1
-                    );
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t11, 0u64, res_i1.1);
                 let t12: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                 let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    lib::inttypes_intrinsics::sub_borrow_u64(
-                        (&c)[0usize],
-                        t12,
-                        0u64,
-                        res_i2.1
-                    )
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, 0u64, res_i2.1)
             };
             for
             i
@@ -577,7 +515,7 @@ mod_inv_prime_vartime_precomp(
         }
         else
         { c0 };
-    ::lowstar::ignore::ignore::<u64>(c);
+    lowstar::ignore::ignore::<u64>(c);
     crate::bignum::bn_mod_exp_vartime_precomp_u64(
         len1,
         n,
@@ -628,7 +566,7 @@ new_bn_from_bytes_be(len: u32, b: &[u8]) ->
             for i in 0u32..bnLen
             {
                 let u: u64 =
-                    ::lowstar::endianness::load64_be(
+                    lowstar::endianness::load64_be(
                         &(&tmp)[bnLen.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
                     );
                 let x: u64 = u;
@@ -676,7 +614,7 @@ new_bn_from_bytes_le(len: u32, b: &[u8]) ->
             for i in 0u32..len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32)
             {
                 let bj: (&[u8], &[u8]) = tmp.split_at(i.wrapping_mul(8u32) as usize);
-                let u: u64 = ::lowstar::endianness::load64_le(bj.1);
+                let u: u64 = lowstar::endianness::load64_le(bj.1);
                 let r1: u64 = u;
                 let x: u64 = r1;
                 let os: (&mut [u64], &mut [u64]) = res2.split_at_mut(0usize);
@@ -701,7 +639,7 @@ bn_to_bytes_be(len: u32, b: &[u64], res: &mut [u8])
     let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
     for i in 0u32..bnLen
     {
-        ::lowstar::endianness::store64_be(
+        lowstar::endianness::store64_be(
             &mut (&mut tmp)[i.wrapping_mul(8u32) as usize..],
             b[bnLen.wrapping_sub(i).wrapping_sub(1u32) as usize]
         )
@@ -725,7 +663,7 @@ bn_to_bytes_le(len: u32, b: &[u64], res: &mut [u8])
     let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
     for i in 0u32..bnLen
     {
-        ::lowstar::endianness::store64_le(
+        lowstar::endianness::store64_le(
             &mut (&mut tmp)[i.wrapping_mul(8u32) as usize..],
             b[i as usize]
         )
@@ -745,8 +683,8 @@ lt_mask(len: u32, a: &[u64], b: &[u64]) ->
     let mut acc: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
-        let beq: u64 = ::fstar::uint64::eq_mask(a[i as usize], b[i as usize]);
-        let blt: u64 = ! ::fstar::uint64::gte_mask(a[i as usize], b[i as usize]);
+        let beq: u64 = fstar::uint64::eq_mask(a[i as usize], b[i as usize]);
+        let blt: u64 = ! fstar::uint64::gte_mask(a[i as usize], b[i as usize]);
         (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
     };
     (&acc)[0usize]
@@ -764,7 +702,7 @@ eq_mask(len: u32, a: &[u64], b: &[u64]) ->
     let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
     for i in 0u32..len
     {
-        let uu____0: u64 = ::fstar::uint64::eq_mask(a[i as usize], b[i as usize]);
+        let uu____0: u64 = fstar::uint64::eq_mask(a[i as usize], b[i as usize]);
         (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
     };
     let mask1: u64 = (&mask)[0usize];

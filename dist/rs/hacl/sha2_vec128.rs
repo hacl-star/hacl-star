@@ -14,12 +14,9 @@
         1u32,
         {
             let hi: u32 = (&crate::hash_sha2::h224)[i as usize];
-            let x: lib::intvector_intrinsics::vec128 =
-                lib::intvector_intrinsics::vec128_load32(hi);
+            let x: lib::intvector_intrinsics::vec128 = lib::intvector_intrinsics::vec128_load32(hi);
             let
-            os:
-            (&mut [lib::intvector_intrinsics::vec128],
-            &mut [lib::intvector_intrinsics::vec128])
+            os: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
                 hash.split_at_mut(0usize);
             os.1[i as usize] = x
@@ -58,18 +55,12 @@
               (&mut ws)[7usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[16usize..]);
               (&mut ws)[8usize] = lib::intvector_intrinsics::vec128_load32_be(&b0[32usize..]);
               (&mut ws)[9usize] = lib::intvector_intrinsics::vec128_load32_be(&b1[32usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b2[32usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b3[32usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b0[48usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b1[48usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b2[48usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b3[48usize..])
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec128_load32_be(&b2[32usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[32usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec128_load32_be(&b0[48usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec128_load32_be(&b1[48usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec128_load32_be(&b2[48usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[48usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec128 = (&ws)[0usize];
@@ -267,14 +258,8 @@
                             lib::intvector_intrinsics::vec128_xor(
                                 lib::intvector_intrinsics::vec128_rotate_right32(a0, 2u32),
                                 lib::intvector_intrinsics::vec128_xor(
-                                    lib::intvector_intrinsics::vec128_rotate_right32(
-                                        a0,
-                                        13u32
-                                    ),
-                                    lib::intvector_intrinsics::vec128_rotate_right32(
-                                        a0,
-                                        22u32
-                                    )
+                                    lib::intvector_intrinsics::vec128_rotate_right32(a0, 13u32),
+                                    lib::intvector_intrinsics::vec128_rotate_right32(a0, 22u32)
                                 )
                             ),
                             lib::intvector_intrinsics::vec128_xor(
@@ -324,28 +309,16 @@
                             lib::intvector_intrinsics::vec128_xor(
                                 lib::intvector_intrinsics::vec128_rotate_right32(t2, 17u32),
                                 lib::intvector_intrinsics::vec128_xor(
-                                    lib::intvector_intrinsics::vec128_rotate_right32(
-                                        t2,
-                                        19u32
-                                    ),
-                                    lib::intvector_intrinsics::vec128_shift_right32(
-                                        t2,
-                                        10u32
-                                    )
+                                    lib::intvector_intrinsics::vec128_rotate_right32(t2, 19u32),
+                                    lib::intvector_intrinsics::vec128_shift_right32(t2, 10u32)
                                 )
                             );
                         let s0: lib::intvector_intrinsics::vec128 =
                             lib::intvector_intrinsics::vec128_xor(
                                 lib::intvector_intrinsics::vec128_rotate_right32(t15, 7u32),
                                 lib::intvector_intrinsics::vec128_xor(
-                                    lib::intvector_intrinsics::vec128_rotate_right32(
-                                        t15,
-                                        18u32
-                                    ),
-                                    lib::intvector_intrinsics::vec128_shift_right32(
-                                        t15,
-                                        3u32
-                                    )
+                                    lib::intvector_intrinsics::vec128_rotate_right32(t15, 18u32),
+                                    lib::intvector_intrinsics::vec128_shift_right32(t15, 3u32)
                                 )
                             );
                         (&mut ws)[i0 as usize] =
@@ -368,14 +341,9 @@
         1u32,
         {
             let x: lib::intvector_intrinsics::vec128 =
-                lib::intvector_intrinsics::vec128_add32(
-                    hash[i as usize],
-                    (&hash_old)[i as usize]
-                );
+                lib::intvector_intrinsics::vec128_add32(hash[i as usize], (&hash_old)[i as usize]);
             let
-            os:
-            (&mut [lib::intvector_intrinsics::vec128],
-            &mut [lib::intvector_intrinsics::vec128])
+            os: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
                 hash.split_at_mut(0usize);
             os.1[i as usize] = x
@@ -400,10 +368,7 @@
                     fst: ref b0,
                     snd:
                     crate::sha2_types::uint8_3p
-                    {
-                        fst: ref b1,
-                        snd: crate::sha2_types::uint8_2p { fst: ref b2, snd: ref b3 }
-                    }
+                    { fst: ref b1, snd: crate::sha2_types::uint8_2p { fst: ref b2, snd: ref b3 } }
                 }
                 =>
                   {
@@ -423,7 +388,7 @@
                       }
                   }
             };
-        sha224_update4(mb, st)
+        crate::sha2_vec128::sha224_update4(mb, st)
     }
 }
 
@@ -498,10 +463,7 @@
                           fst: l00,
                           snd:
                           crate::sha2_types::uint8_3p
-                          {
-                              fst: l10,
-                              snd: crate::sha2_types::uint8_2p { fst: l20, snd: l30 }
-                          }
+                          { fst: l10, snd: crate::sha2_types::uint8_2p { fst: l20, snd: l30 } }
                       };
                   let mb1: crate::sha2_types::uint8_4p =
                       crate::sha2_types::uint8_4p
@@ -509,18 +471,15 @@
                           fst: l01,
                           snd:
                           crate::sha2_types::uint8_3p
-                          {
-                              fst: l11,
-                              snd: crate::sha2_types::uint8_2p { fst: l21, snd: l31 }
-                          }
+                          { fst: l11, snd: crate::sha2_types::uint8_2p { fst: l21, snd: l31 } }
                       };
                   crate::sha2_types::uint8_2x4p { fst: mb0, snd: mb1 }
               }
         };
     let last0: &crate::sha2_types::uint8_4p = &scrut.fst;
     let last1: &crate::sha2_types::uint8_4p = &scrut.snd;
-    sha224_update4(*last0, hash);
-    if blocks > 1u32 { sha224_update4(*last1, hash) }
+    crate::sha2_vec128::sha224_update4(*last0, hash);
+    if blocks > 1u32 { crate::sha2_vec128::sha224_update4(*last1, hash) }
 }
 
 #[inline] fn sha224_finish4(
@@ -655,10 +614,10 @@ pub fn sha224_4(
         };
     let mut st: [lib::intvector_intrinsics::vec128; 8] =
         [lib::intvector_intrinsics::vec128_zero; 8usize];
-    sha224_init4(&mut st);
+    crate::sha2_vec128::sha224_init4(&mut st);
     let rem: u32 = input_len.wrapping_rem(64u32);
     let len·: u64 = input_len as u64;
-    sha224_update_nblocks4(input_len, ib, &mut st);
+    crate::sha2_vec128::sha224_update_nblocks4(input_len, ib, &mut st);
     let rem1: u32 = input_len.wrapping_rem(64u32);
     let lb: crate::sha2_types::uint8_4p =
         match ib
@@ -681,15 +640,12 @@ pub fn sha224_4(
                       fst: bl0.1,
                       snd:
                       crate::sha2_types::uint8_3p
-                      {
-                          fst: bl1.1,
-                          snd: crate::sha2_types::uint8_2p { fst: bl2.1, snd: bl3.1 }
-                      }
+                      { fst: bl1.1, snd: crate::sha2_types::uint8_2p { fst: bl2.1, snd: bl3.1 } }
                   }
               }
         };
-    sha224_update_last4(len·, rem, lb, &mut st);
-    sha224_finish4(&mut st, rb)
+    crate::sha2_vec128::sha224_update_last4(len·, rem, lb, &mut st);
+    crate::sha2_vec128::sha224_finish4(&mut st, rb)
 }
 
 #[inline] fn sha256_init4(hash: &mut [lib::intvector_intrinsics::vec128])
@@ -701,12 +657,9 @@ pub fn sha224_4(
         1u32,
         {
             let hi: u32 = (&crate::hash_sha2::h256)[i as usize];
-            let x: lib::intvector_intrinsics::vec128 =
-                lib::intvector_intrinsics::vec128_load32(hi);
+            let x: lib::intvector_intrinsics::vec128 = lib::intvector_intrinsics::vec128_load32(hi);
             let
-            os:
-            (&mut [lib::intvector_intrinsics::vec128],
-            &mut [lib::intvector_intrinsics::vec128])
+            os: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
                 hash.split_at_mut(0usize);
             os.1[i as usize] = x
@@ -745,18 +698,12 @@ pub fn sha224_4(
               (&mut ws)[7usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[16usize..]);
               (&mut ws)[8usize] = lib::intvector_intrinsics::vec128_load32_be(&b0[32usize..]);
               (&mut ws)[9usize] = lib::intvector_intrinsics::vec128_load32_be(&b1[32usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b2[32usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b3[32usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b0[48usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b1[48usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b2[48usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec128_load32_be(&b3[48usize..])
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec128_load32_be(&b2[32usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[32usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec128_load32_be(&b0[48usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec128_load32_be(&b1[48usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec128_load32_be(&b2[48usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[48usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec128 = (&ws)[0usize];
@@ -954,14 +901,8 @@ pub fn sha224_4(
                             lib::intvector_intrinsics::vec128_xor(
                                 lib::intvector_intrinsics::vec128_rotate_right32(a0, 2u32),
                                 lib::intvector_intrinsics::vec128_xor(
-                                    lib::intvector_intrinsics::vec128_rotate_right32(
-                                        a0,
-                                        13u32
-                                    ),
-                                    lib::intvector_intrinsics::vec128_rotate_right32(
-                                        a0,
-                                        22u32
-                                    )
+                                    lib::intvector_intrinsics::vec128_rotate_right32(a0, 13u32),
+                                    lib::intvector_intrinsics::vec128_rotate_right32(a0, 22u32)
                                 )
                             ),
                             lib::intvector_intrinsics::vec128_xor(
@@ -1011,28 +952,16 @@ pub fn sha224_4(
                             lib::intvector_intrinsics::vec128_xor(
                                 lib::intvector_intrinsics::vec128_rotate_right32(t2, 17u32),
                                 lib::intvector_intrinsics::vec128_xor(
-                                    lib::intvector_intrinsics::vec128_rotate_right32(
-                                        t2,
-                                        19u32
-                                    ),
-                                    lib::intvector_intrinsics::vec128_shift_right32(
-                                        t2,
-                                        10u32
-                                    )
+                                    lib::intvector_intrinsics::vec128_rotate_right32(t2, 19u32),
+                                    lib::intvector_intrinsics::vec128_shift_right32(t2, 10u32)
                                 )
                             );
                         let s0: lib::intvector_intrinsics::vec128 =
                             lib::intvector_intrinsics::vec128_xor(
                                 lib::intvector_intrinsics::vec128_rotate_right32(t15, 7u32),
                                 lib::intvector_intrinsics::vec128_xor(
-                                    lib::intvector_intrinsics::vec128_rotate_right32(
-                                        t15,
-                                        18u32
-                                    ),
-                                    lib::intvector_intrinsics::vec128_shift_right32(
-                                        t15,
-                                        3u32
-                                    )
+                                    lib::intvector_intrinsics::vec128_rotate_right32(t15, 18u32),
+                                    lib::intvector_intrinsics::vec128_shift_right32(t15, 3u32)
                                 )
                             );
                         (&mut ws)[i0 as usize] =
@@ -1055,14 +984,9 @@ pub fn sha224_4(
         1u32,
         {
             let x: lib::intvector_intrinsics::vec128 =
-                lib::intvector_intrinsics::vec128_add32(
-                    hash[i as usize],
-                    (&hash_old)[i as usize]
-                );
+                lib::intvector_intrinsics::vec128_add32(hash[i as usize], (&hash_old)[i as usize]);
             let
-            os:
-            (&mut [lib::intvector_intrinsics::vec128],
-            &mut [lib::intvector_intrinsics::vec128])
+            os: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
                 hash.split_at_mut(0usize);
             os.1[i as usize] = x
@@ -1087,10 +1011,7 @@ pub fn sha224_4(
                     fst: ref b0,
                     snd:
                     crate::sha2_types::uint8_3p
-                    {
-                        fst: ref b1,
-                        snd: crate::sha2_types::uint8_2p { fst: ref b2, snd: ref b3 }
-                    }
+                    { fst: ref b1, snd: crate::sha2_types::uint8_2p { fst: ref b2, snd: ref b3 } }
                 }
                 =>
                   {
@@ -1110,7 +1031,7 @@ pub fn sha224_4(
                       }
                   }
             };
-        sha256_update4(mb, st)
+        crate::sha2_vec128::sha256_update4(mb, st)
     }
 }
 
@@ -1185,10 +1106,7 @@ pub fn sha224_4(
                           fst: l00,
                           snd:
                           crate::sha2_types::uint8_3p
-                          {
-                              fst: l10,
-                              snd: crate::sha2_types::uint8_2p { fst: l20, snd: l30 }
-                          }
+                          { fst: l10, snd: crate::sha2_types::uint8_2p { fst: l20, snd: l30 } }
                       };
                   let mb1: crate::sha2_types::uint8_4p =
                       crate::sha2_types::uint8_4p
@@ -1196,18 +1114,15 @@ pub fn sha224_4(
                           fst: l01,
                           snd:
                           crate::sha2_types::uint8_3p
-                          {
-                              fst: l11,
-                              snd: crate::sha2_types::uint8_2p { fst: l21, snd: l31 }
-                          }
+                          { fst: l11, snd: crate::sha2_types::uint8_2p { fst: l21, snd: l31 } }
                       };
                   crate::sha2_types::uint8_2x4p { fst: mb0, snd: mb1 }
               }
         };
     let last0: &crate::sha2_types::uint8_4p = &scrut.fst;
     let last1: &crate::sha2_types::uint8_4p = &scrut.snd;
-    sha256_update4(*last0, hash);
-    if blocks > 1u32 { sha256_update4(*last1, hash) }
+    crate::sha2_vec128::sha256_update4(*last0, hash);
+    if blocks > 1u32 { crate::sha2_vec128::sha256_update4(*last1, hash) }
 }
 
 #[inline] fn sha256_finish4(
@@ -1342,10 +1257,10 @@ pub fn sha256_4(
         };
     let mut st: [lib::intvector_intrinsics::vec128; 8] =
         [lib::intvector_intrinsics::vec128_zero; 8usize];
-    sha256_init4(&mut st);
+    crate::sha2_vec128::sha256_init4(&mut st);
     let rem: u32 = input_len.wrapping_rem(64u32);
     let len·: u64 = input_len as u64;
-    sha256_update_nblocks4(input_len, ib, &mut st);
+    crate::sha2_vec128::sha256_update_nblocks4(input_len, ib, &mut st);
     let rem1: u32 = input_len.wrapping_rem(64u32);
     let lb: crate::sha2_types::uint8_4p =
         match ib
@@ -1368,13 +1283,10 @@ pub fn sha256_4(
                       fst: bl0.1,
                       snd:
                       crate::sha2_types::uint8_3p
-                      {
-                          fst: bl1.1,
-                          snd: crate::sha2_types::uint8_2p { fst: bl2.1, snd: bl3.1 }
-                      }
+                      { fst: bl1.1, snd: crate::sha2_types::uint8_2p { fst: bl2.1, snd: bl3.1 } }
                   }
               }
         };
-    sha256_update_last4(len·, rem, lb, &mut st);
-    sha256_finish4(&mut st, rb)
+    crate::sha2_vec128::sha256_update_last4(len·, rem, lb, &mut st);
+    crate::sha2_vec128::sha256_finish4(&mut st, rb)
 }

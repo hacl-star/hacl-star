@@ -33,12 +33,7 @@ pub fn crypto_kem_keypair(pk: &mut [u8], sk: &mut [u8]) -> u32
     crate::hash_sha3::shake128(&mut r, 20480u32, &shake_input_seed_se, 17u32);
     lib::memzero0::memzero::<u8>(&mut shake_input_seed_se, 17u32);
     crate::frodo_kem::frodo_sample_matrix640(640u32, 8u32, &(&r)[0usize..], &mut s_matrix);
-    crate::frodo_kem::frodo_sample_matrix640(
-        640u32,
-        8u32,
-        &(&r)[10240usize..],
-        &mut e_matrix
-    );
+    crate::frodo_kem::frodo_sample_matrix640(640u32, 8u32, &(&r)[10240usize..], &mut e_matrix);
     let mut b_matrix: [u16; 5120] = [0u16; 5120usize];
     let mut a_matrix: [u16; 409600] = [0u16; 409600usize];
     crate::frodo_kem::frodo_gen_matrix(
@@ -85,18 +80,8 @@ pub fn crypto_kem_enc(ct: &mut [u8], ss: &mut [u8], pk: &[u8]) -> u32
     crate::hash_sha3::shake128(&mut r, 20608u32, &shake_input_seed_se, 17u32);
     lib::memzero0::memzero::<u8>(&mut shake_input_seed_se, 17u32);
     crate::frodo_kem::frodo_sample_matrix640(8u32, 640u32, &(&r)[0usize..], &mut sp_matrix);
-    crate::frodo_kem::frodo_sample_matrix640(
-        8u32,
-        640u32,
-        &(&r)[10240usize..],
-        &mut ep_matrix
-    );
-    crate::frodo_kem::frodo_sample_matrix640(
-        8u32,
-        8u32,
-        &(&r)[20480usize..],
-        &mut epp_matrix
-    );
+    crate::frodo_kem::frodo_sample_matrix640(8u32, 640u32, &(&r)[10240usize..], &mut ep_matrix);
+    crate::frodo_kem::frodo_sample_matrix640(8u32, 8u32, &(&r)[20480usize..], &mut epp_matrix);
     let c1: (&mut [u8], &mut [u8]) = ct.split_at_mut(0usize);
     let c2: (&mut [u8], &mut [u8]) = c1.1.split_at_mut(9600usize);
     let mut bp_matrix: [u16; 5120] = [0u16; 5120usize];
@@ -177,18 +162,8 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &[u8], sk: &[u8]) -> u32
     crate::hash_sha3::shake128(&mut r, 20608u32, &shake_input_seed_se, 17u32);
     lib::memzero0::memzero::<u8>(&mut shake_input_seed_se, 17u32);
     crate::frodo_kem::frodo_sample_matrix640(8u32, 640u32, &(&r)[0usize..], &mut sp_matrix);
-    crate::frodo_kem::frodo_sample_matrix640(
-        8u32,
-        640u32,
-        &(&r)[10240usize..],
-        &mut ep_matrix
-    );
-    crate::frodo_kem::frodo_sample_matrix640(
-        8u32,
-        8u32,
-        &(&r)[20480usize..],
-        &mut epp_matrix
-    );
+    crate::frodo_kem::frodo_sample_matrix640(8u32, 640u32, &(&r)[10240usize..], &mut ep_matrix);
+    crate::frodo_kem::frodo_sample_matrix640(8u32, 8u32, &(&r)[20480usize..], &mut epp_matrix);
     let pk: (&[u8], &[u8]) = s.1.split_at(16usize);
     let seed_a: (&[u8], &[u8]) = pk.1.split_at(0usize);
     let b: (&[u8], &[u8]) = seed_a.1.split_at(16usize);
@@ -199,14 +174,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &[u8], sk: &[u8]) -> u32
         b.0,
         &mut a_matrix
     );
-    crate::frodo_kem::matrix_mul(
-        8u32,
-        640u32,
-        640u32,
-        &sp_matrix,
-        &a_matrix,
-        &mut bpp_matrix
-    );
+    crate::frodo_kem::matrix_mul(8u32, 640u32, 640u32, &sp_matrix, &a_matrix, &mut bpp_matrix);
     crate::frodo_kem::matrix_add(8u32, 640u32, &mut bpp_matrix, &ep_matrix);
     let mut b_matrix: [u16; 5120] = [0u16; 5120usize];
     crate::frodo_kem::frodo_unpack(640u32, 8u32, 15u32, b.1, &mut b_matrix);

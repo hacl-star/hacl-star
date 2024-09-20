@@ -38,10 +38,11 @@ min_length(a: crate::streaming_types::hash_alg) ->
 
 pub struct state { pub k: Box<[u8]>, pub v: Box<[u8]>, pub reseed_counter: Box<[u32]> }
 
-pub fn uu___is_State(a: crate::streaming_types::hash_alg, projectee: state) -> bool
+pub fn uu___is_State(a: crate::streaming_types::hash_alg, projectee: crate::hmac_drbg::state) ->
+    bool
 {
     lowstar::ignore::ignore::<crate::streaming_types::hash_alg>(a);
-    lowstar::ignore::ignore::<state>(projectee);
+    lowstar::ignore::ignore::<crate::hmac_drbg::state>(projectee);
     true
 }
 
@@ -56,7 +57,7 @@ Create a DRBG state.
 */
 pub fn
 create_in(a: crate::streaming_types::hash_alg) ->
-    state
+    crate::hmac_drbg::state
 {
     let k: &[u8] =
         match a
@@ -109,7 +110,7 @@ create_in(a: crate::streaming_types::hash_alg) ->
             _ => panic!("Precondition of the function most likely violated")
         };
     let ctr: Box<[u32]> = vec![1u32].into_boxed_slice();
-    state { k: (*k).into(), v: (*v).into(), reseed_counter: ctr }
+    crate::hmac_drbg::state { k: (*k).into(), v: (*v).into(), reseed_counter: ctr }
 }
 
 /**
@@ -127,7 +128,7 @@ Instantiate the DRBG.
 pub fn
 instantiate(
     a: crate::streaming_types::hash_alg,
-    mut st: state,
+    mut st: crate::hmac_drbg::state,
     entropy_input_len: u32,
     entropy_input: &[u8],
     nonce_len: u32,
@@ -527,7 +528,7 @@ Reseed the DRBG.
 pub fn
 reseed(
     a: crate::streaming_types::hash_alg,
-    mut st: state,
+    mut st: crate::hmac_drbg::state,
     entropy_input_len: u32,
     entropy_input: &[u8],
     additional_input_input_len: u32,
@@ -826,7 +827,7 @@ pub fn
 generate(
     a: crate::streaming_types::hash_alg,
     output: &mut [u8],
-    mut st: state,
+    mut st: crate::hmac_drbg::state,
     n: u32,
     additional_input_len: u32,
     additional_input: &[u8]
@@ -836,7 +837,7 @@ generate(
     match a
     {
         crate::streaming_types::hash_alg::SHA1 =>
-          if (&st.reseed_counter)[0usize] > reseed_interval
+          if (&st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
           { false }
           else
           {
@@ -932,7 +933,7 @@ generate(
               true
           },
         crate::streaming_types::hash_alg::SHA2_256 =>
-          if (&st.reseed_counter)[0usize] > reseed_interval
+          if (&st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
           { false }
           else
           {
@@ -1028,7 +1029,7 @@ generate(
               true
           },
         crate::streaming_types::hash_alg::SHA2_384 =>
-          if (&st.reseed_counter)[0usize] > reseed_interval
+          if (&st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
           { false }
           else
           {
@@ -1124,7 +1125,7 @@ generate(
               true
           },
         crate::streaming_types::hash_alg::SHA2_512 =>
-          if (&st.reseed_counter)[0usize] > reseed_interval
+          if (&st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
           { false }
           else
           {

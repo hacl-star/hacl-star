@@ -24,10 +24,7 @@ pub fn sub_borrow_u32(cin: u32, x: u32, y: u32, r: &mut [u32]) -> u32
 pub fn add_carry_u64(cin: u64, x: u64, y: u64, r: &mut [u64]) -> u64
 {
     let res: u64 = x.wrapping_add(cin).wrapping_add(y);
-    let c: u64 =
-        (! fstar::uint64::gte_mask(res, x) | fstar::uint64::eq_mask(res, x) & cin)
-        &
-        1u64;
+    let c: u64 = (! fstar::uint64::gte_mask(res, x) | fstar::uint64::eq_mask(res, x) & cin) & 1u64;
     r[0usize] = res;
     c
 }

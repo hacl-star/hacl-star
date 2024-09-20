@@ -21,7 +21,7 @@ const _t: [u32; 64] =
         0xf7537e82u32, 0xbd3af235u32, 0x2ad7d2bbu32, 0xeb86d391u32];
 
 fn init(s: &mut [u32])
-{ krml::unroll_for!(4, "i", 0u32, 1u32, s[i as usize] = (&_h0)[i as usize]) }
+{ krml::unroll_for!(4, "i", 0u32, 1u32, s[i as usize] = (&crate::hash_md5::_h0)[i as usize]) }
 
 fn update(abcd: &mut [u32], x: &[u8])
 {
@@ -36,7 +36,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b: (&[u8], &[u8]) = x.split_at(0usize);
     let u: u32 = lowstar::endianness::load32_le(b.1);
     let xk: u32 = u;
-    let ti: u32 = (&_t)[0usize];
+    let ti: u32 = (&crate::hash_md5::_t)[0usize];
     let v: u32 =
         vb.wrapping_add(
             va.wrapping_add(vb & vc | ! vb & vd).wrapping_add(xk).wrapping_add(ti).wrapping_shl(
@@ -55,7 +55,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b0: (&[u8], &[u8]) = b.1.split_at(4usize);
     let u0: u32 = lowstar::endianness::load32_le(b0.1);
     let xk0: u32 = u0;
-    let ti0: u32 = (&_t)[1usize];
+    let ti0: u32 = (&crate::hash_md5::_t)[1usize];
     let v0: u32 =
         vb0.wrapping_add(
             va0.wrapping_add(vb0 & vc0 | ! vb0 & vd0).wrapping_add(xk0).wrapping_add(ti0).wrapping_shl(
@@ -74,7 +74,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b1: (&[u8], &[u8]) = b0.1.split_at(4usize);
     let u1: u32 = lowstar::endianness::load32_le(b1.1);
     let xk1: u32 = u1;
-    let ti1: u32 = (&_t)[2usize];
+    let ti1: u32 = (&crate::hash_md5::_t)[2usize];
     let v1: u32 =
         vb1.wrapping_add(
             va1.wrapping_add(vb1 & vc1 | ! vb1 & vd1).wrapping_add(xk1).wrapping_add(ti1).wrapping_shl(
@@ -93,7 +93,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b2: (&[u8], &[u8]) = b1.1.split_at(4usize);
     let u2: u32 = lowstar::endianness::load32_le(b2.1);
     let xk2: u32 = u2;
-    let ti2: u32 = (&_t)[3usize];
+    let ti2: u32 = (&crate::hash_md5::_t)[3usize];
     let v2: u32 =
         vb2.wrapping_add(
             va2.wrapping_add(vb2 & vc2 | ! vb2 & vd2).wrapping_add(xk2).wrapping_add(ti2).wrapping_shl(
@@ -112,7 +112,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b3: (&[u8], &[u8]) = b2.1.split_at(4usize);
     let u3: u32 = lowstar::endianness::load32_le(b3.1);
     let xk3: u32 = u3;
-    let ti3: u32 = (&_t)[4usize];
+    let ti3: u32 = (&crate::hash_md5::_t)[4usize];
     let v3: u32 =
         vb3.wrapping_add(
             va3.wrapping_add(vb3 & vc3 | ! vb3 & vd3).wrapping_add(xk3).wrapping_add(ti3).wrapping_shl(
@@ -131,7 +131,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b4: (&[u8], &[u8]) = b3.1.split_at(4usize);
     let u4: u32 = lowstar::endianness::load32_le(b4.1);
     let xk4: u32 = u4;
-    let ti4: u32 = (&_t)[5usize];
+    let ti4: u32 = (&crate::hash_md5::_t)[5usize];
     let v4: u32 =
         vb4.wrapping_add(
             va4.wrapping_add(vb4 & vc4 | ! vb4 & vd4).wrapping_add(xk4).wrapping_add(ti4).wrapping_shl(
@@ -150,7 +150,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b5: (&[u8], &[u8]) = b4.1.split_at(4usize);
     let u5: u32 = lowstar::endianness::load32_le(b5.1);
     let xk5: u32 = u5;
-    let ti5: u32 = (&_t)[6usize];
+    let ti5: u32 = (&crate::hash_md5::_t)[6usize];
     let v5: u32 =
         vb5.wrapping_add(
             va5.wrapping_add(vb5 & vc5 | ! vb5 & vd5).wrapping_add(xk5).wrapping_add(ti5).wrapping_shl(
@@ -169,7 +169,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b6: (&[u8], &[u8]) = b5.1.split_at(4usize);
     let u6: u32 = lowstar::endianness::load32_le(b6.1);
     let xk6: u32 = u6;
-    let ti6: u32 = (&_t)[7usize];
+    let ti6: u32 = (&crate::hash_md5::_t)[7usize];
     let v6: u32 =
         vb6.wrapping_add(
             va6.wrapping_add(vb6 & vc6 | ! vb6 & vd6).wrapping_add(xk6).wrapping_add(ti6).wrapping_shl(
@@ -188,7 +188,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b7: (&[u8], &[u8]) = b6.1.split_at(4usize);
     let u7: u32 = lowstar::endianness::load32_le(b7.1);
     let xk7: u32 = u7;
-    let ti7: u32 = (&_t)[8usize];
+    let ti7: u32 = (&crate::hash_md5::_t)[8usize];
     let v7: u32 =
         vb7.wrapping_add(
             va7.wrapping_add(vb7 & vc7 | ! vb7 & vd7).wrapping_add(xk7).wrapping_add(ti7).wrapping_shl(
@@ -207,7 +207,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b8: (&[u8], &[u8]) = b7.1.split_at(4usize);
     let u8: u32 = lowstar::endianness::load32_le(b8.1);
     let xk8: u32 = u8;
-    let ti8: u32 = (&_t)[9usize];
+    let ti8: u32 = (&crate::hash_md5::_t)[9usize];
     let v8: u32 =
         vb8.wrapping_add(
             va8.wrapping_add(vb8 & vc8 | ! vb8 & vd8).wrapping_add(xk8).wrapping_add(ti8).wrapping_shl(
@@ -226,7 +226,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b9: (&[u8], &[u8]) = b8.1.split_at(4usize);
     let u9: u32 = lowstar::endianness::load32_le(b9.1);
     let xk9: u32 = u9;
-    let ti9: u32 = (&_t)[10usize];
+    let ti9: u32 = (&crate::hash_md5::_t)[10usize];
     let v9: u32 =
         vb9.wrapping_add(
             va9.wrapping_add(vb9 & vc9 | ! vb9 & vd9).wrapping_add(xk9).wrapping_add(ti9).wrapping_shl(
@@ -245,7 +245,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b10: (&[u8], &[u8]) = b9.1.split_at(4usize);
     let u10: u32 = lowstar::endianness::load32_le(b10.1);
     let xk10: u32 = u10;
-    let ti10: u32 = (&_t)[11usize];
+    let ti10: u32 = (&crate::hash_md5::_t)[11usize];
     let v10: u32 =
         vb10.wrapping_add(
             va10.wrapping_add(vb10 & vc10 | ! vb10 & vd10).wrapping_add(xk10).wrapping_add(ti10).wrapping_shl(
@@ -264,7 +264,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b11: (&[u8], &[u8]) = b10.1.split_at(4usize);
     let u11: u32 = lowstar::endianness::load32_le(b11.1);
     let xk11: u32 = u11;
-    let ti11: u32 = (&_t)[12usize];
+    let ti11: u32 = (&crate::hash_md5::_t)[12usize];
     let v11: u32 =
         vb11.wrapping_add(
             va11.wrapping_add(vb11 & vc11 | ! vb11 & vd11).wrapping_add(xk11).wrapping_add(ti11).wrapping_shl(
@@ -283,7 +283,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b12: (&[u8], &[u8]) = b11.1.split_at(4usize);
     let u12: u32 = lowstar::endianness::load32_le(b12.1);
     let xk12: u32 = u12;
-    let ti12: u32 = (&_t)[13usize];
+    let ti12: u32 = (&crate::hash_md5::_t)[13usize];
     let v12: u32 =
         vb12.wrapping_add(
             va12.wrapping_add(vb12 & vc12 | ! vb12 & vd12).wrapping_add(xk12).wrapping_add(ti12).wrapping_shl(
@@ -302,7 +302,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b13: (&[u8], &[u8]) = b12.1.split_at(4usize);
     let u13: u32 = lowstar::endianness::load32_le(b13.1);
     let xk13: u32 = u13;
-    let ti13: u32 = (&_t)[14usize];
+    let ti13: u32 = (&crate::hash_md5::_t)[14usize];
     let v13: u32 =
         vb13.wrapping_add(
             va13.wrapping_add(vb13 & vc13 | ! vb13 & vd13).wrapping_add(xk13).wrapping_add(ti13).wrapping_shl(
@@ -321,7 +321,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b14: (&[u8], &[u8]) = b13.1.split_at(4usize);
     let u14: u32 = lowstar::endianness::load32_le(b14.1);
     let xk14: u32 = u14;
-    let ti14: u32 = (&_t)[15usize];
+    let ti14: u32 = (&crate::hash_md5::_t)[15usize];
     let v14: u32 =
         vb14.wrapping_add(
             va14.wrapping_add(vb14 & vc14 | ! vb14 & vd14).wrapping_add(xk14).wrapping_add(ti14).wrapping_shl(
@@ -340,7 +340,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b15: (&[u8], &[u8]) = b1.0.split_at(0usize);
     let u15: u32 = lowstar::endianness::load32_le(b15.1);
     let xk15: u32 = u15;
-    let ti15: u32 = (&_t)[16usize];
+    let ti15: u32 = (&crate::hash_md5::_t)[16usize];
     let v15: u32 =
         vb15.wrapping_add(
             va15.wrapping_add(vb15 & vd15 | vc15 & ! vd15).wrapping_add(xk15).wrapping_add(ti15).wrapping_shl(
@@ -359,7 +359,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b16: (&[u8], &[u8]) = b6.0.split_at(0usize);
     let u16: u32 = lowstar::endianness::load32_le(b16.1);
     let xk16: u32 = u16;
-    let ti16: u32 = (&_t)[17usize];
+    let ti16: u32 = (&crate::hash_md5::_t)[17usize];
     let v16: u32 =
         vb16.wrapping_add(
             va16.wrapping_add(vb16 & vd16 | vc16 & ! vd16).wrapping_add(xk16).wrapping_add(ti16).wrapping_shl(
@@ -378,7 +378,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b17: (&[u8], &[u8]) = b11.0.split_at(0usize);
     let u17: u32 = lowstar::endianness::load32_le(b17.1);
     let xk17: u32 = u17;
-    let ti17: u32 = (&_t)[18usize];
+    let ti17: u32 = (&crate::hash_md5::_t)[18usize];
     let v17: u32 =
         vb17.wrapping_add(
             va17.wrapping_add(vb17 & vd17 | vc17 & ! vd17).wrapping_add(xk17).wrapping_add(ti17).wrapping_shl(
@@ -397,7 +397,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b18: (&[u8], &[u8]) = b0.0.split_at(0usize);
     let u18: u32 = lowstar::endianness::load32_le(b18.1);
     let xk18: u32 = u18;
-    let ti18: u32 = (&_t)[19usize];
+    let ti18: u32 = (&crate::hash_md5::_t)[19usize];
     let v18: u32 =
         vb18.wrapping_add(
             va18.wrapping_add(vb18 & vd18 | vc18 & ! vd18).wrapping_add(xk18).wrapping_add(ti18).wrapping_shl(
@@ -416,7 +416,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b19: (&[u8], &[u8]) = b5.0.split_at(0usize);
     let u19: u32 = lowstar::endianness::load32_le(b19.1);
     let xk19: u32 = u19;
-    let ti19: u32 = (&_t)[20usize];
+    let ti19: u32 = (&crate::hash_md5::_t)[20usize];
     let v19: u32 =
         vb19.wrapping_add(
             va19.wrapping_add(vb19 & vd19 | vc19 & ! vd19).wrapping_add(xk19).wrapping_add(ti19).wrapping_shl(
@@ -435,7 +435,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b20: (&[u8], &[u8]) = b10.0.split_at(0usize);
     let u20: u32 = lowstar::endianness::load32_le(b20.1);
     let xk20: u32 = u20;
-    let ti20: u32 = (&_t)[21usize];
+    let ti20: u32 = (&crate::hash_md5::_t)[21usize];
     let v20: u32 =
         vb20.wrapping_add(
             va20.wrapping_add(vb20 & vd20 | vc20 & ! vd20).wrapping_add(xk20).wrapping_add(ti20).wrapping_shl(
@@ -454,7 +454,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b21: (&[u8], &[u8]) = b14.1.split_at(0usize);
     let u21: u32 = lowstar::endianness::load32_le(b21.1);
     let xk21: u32 = u21;
-    let ti21: u32 = (&_t)[22usize];
+    let ti21: u32 = (&crate::hash_md5::_t)[22usize];
     let v21: u32 =
         vb21.wrapping_add(
             va21.wrapping_add(vb21 & vd21 | vc21 & ! vd21).wrapping_add(xk21).wrapping_add(ti21).wrapping_shl(
@@ -473,7 +473,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b22: (&[u8], &[u8]) = b4.0.split_at(0usize);
     let u22: u32 = lowstar::endianness::load32_le(b22.1);
     let xk22: u32 = u22;
-    let ti22: u32 = (&_t)[23usize];
+    let ti22: u32 = (&crate::hash_md5::_t)[23usize];
     let v22: u32 =
         vb22.wrapping_add(
             va22.wrapping_add(vb22 & vd22 | vc22 & ! vd22).wrapping_add(xk22).wrapping_add(ti22).wrapping_shl(
@@ -492,7 +492,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b23: (&[u8], &[u8]) = b9.0.split_at(0usize);
     let u23: u32 = lowstar::endianness::load32_le(b23.1);
     let xk23: u32 = u23;
-    let ti23: u32 = (&_t)[24usize];
+    let ti23: u32 = (&crate::hash_md5::_t)[24usize];
     let v23: u32 =
         vb23.wrapping_add(
             va23.wrapping_add(vb23 & vd23 | vc23 & ! vd23).wrapping_add(xk23).wrapping_add(ti23).wrapping_shl(
@@ -511,7 +511,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b24: (&[u8], &[u8]) = b14.0.split_at(0usize);
     let u24: u32 = lowstar::endianness::load32_le(b24.1);
     let xk24: u32 = u24;
-    let ti24: u32 = (&_t)[25usize];
+    let ti24: u32 = (&crate::hash_md5::_t)[25usize];
     let v24: u32 =
         vb24.wrapping_add(
             va24.wrapping_add(vb24 & vd24 | vc24 & ! vd24).wrapping_add(xk24).wrapping_add(ti24).wrapping_shl(
@@ -530,7 +530,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b25: (&[u8], &[u8]) = b3.0.split_at(0usize);
     let u25: u32 = lowstar::endianness::load32_le(b25.1);
     let xk25: u32 = u25;
-    let ti25: u32 = (&_t)[26usize];
+    let ti25: u32 = (&crate::hash_md5::_t)[26usize];
     let v25: u32 =
         vb25.wrapping_add(
             va25.wrapping_add(vb25 & vd25 | vc25 & ! vd25).wrapping_add(xk25).wrapping_add(ti25).wrapping_shl(
@@ -549,7 +549,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b26: (&[u8], &[u8]) = b8.0.split_at(0usize);
     let u26: u32 = lowstar::endianness::load32_le(b26.1);
     let xk26: u32 = u26;
-    let ti26: u32 = (&_t)[27usize];
+    let ti26: u32 = (&crate::hash_md5::_t)[27usize];
     let v26: u32 =
         vb26.wrapping_add(
             va26.wrapping_add(vb26 & vd26 | vc26 & ! vd26).wrapping_add(xk26).wrapping_add(ti26).wrapping_shl(
@@ -568,7 +568,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b27: (&[u8], &[u8]) = b13.0.split_at(0usize);
     let u27: u32 = lowstar::endianness::load32_le(b27.1);
     let xk27: u32 = u27;
-    let ti27: u32 = (&_t)[28usize];
+    let ti27: u32 = (&crate::hash_md5::_t)[28usize];
     let v27: u32 =
         vb27.wrapping_add(
             va27.wrapping_add(vb27 & vd27 | vc27 & ! vd27).wrapping_add(xk27).wrapping_add(ti27).wrapping_shl(
@@ -587,7 +587,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b28: (&[u8], &[u8]) = b2.0.split_at(0usize);
     let u28: u32 = lowstar::endianness::load32_le(b28.1);
     let xk28: u32 = u28;
-    let ti28: u32 = (&_t)[29usize];
+    let ti28: u32 = (&crate::hash_md5::_t)[29usize];
     let v28: u32 =
         vb28.wrapping_add(
             va28.wrapping_add(vb28 & vd28 | vc28 & ! vd28).wrapping_add(xk28).wrapping_add(ti28).wrapping_shl(
@@ -606,7 +606,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b29: (&[u8], &[u8]) = b7.0.split_at(0usize);
     let u29: u32 = lowstar::endianness::load32_le(b29.1);
     let xk29: u32 = u29;
-    let ti29: u32 = (&_t)[30usize];
+    let ti29: u32 = (&crate::hash_md5::_t)[30usize];
     let v29: u32 =
         vb29.wrapping_add(
             va29.wrapping_add(vb29 & vd29 | vc29 & ! vd29).wrapping_add(xk29).wrapping_add(ti29).wrapping_shl(
@@ -625,7 +625,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b30: (&[u8], &[u8]) = b12.0.split_at(0usize);
     let u30: u32 = lowstar::endianness::load32_le(b30.1);
     let xk30: u32 = u30;
-    let ti30: u32 = (&_t)[31usize];
+    let ti30: u32 = (&crate::hash_md5::_t)[31usize];
     let v30: u32 =
         vb30.wrapping_add(
             va30.wrapping_add(vb30 & vd30 | vc30 & ! vd30).wrapping_add(xk30).wrapping_add(ti30).wrapping_shl(
@@ -644,7 +644,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b31: (&[u8], &[u8]) = b19.1.split_at(0usize);
     let u31: u32 = lowstar::endianness::load32_le(b31.1);
     let xk31: u32 = u31;
-    let ti31: u32 = (&_t)[32usize];
+    let ti31: u32 = (&crate::hash_md5::_t)[32usize];
     let v31: u32 =
         vb31.wrapping_add(
             va31.wrapping_add(vb31 ^ (vc31 ^ vd31)).wrapping_add(xk31).wrapping_add(ti31).wrapping_shl(
@@ -663,7 +663,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b32: (&[u8], &[u8]) = b26.1.split_at(0usize);
     let u32: u32 = lowstar::endianness::load32_le(b32.1);
     let xk32: u32 = u32;
-    let ti32: u32 = (&_t)[33usize];
+    let ti32: u32 = (&crate::hash_md5::_t)[33usize];
     let v32: u32 =
         vb32.wrapping_add(
             va32.wrapping_add(vb32 ^ (vc32 ^ vd32)).wrapping_add(xk32).wrapping_add(ti32).wrapping_shl(
@@ -682,7 +682,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b33: (&[u8], &[u8]) = b17.1.split_at(0usize);
     let u33: u32 = lowstar::endianness::load32_le(b33.1);
     let xk33: u32 = u33;
-    let ti33: u32 = (&_t)[34usize];
+    let ti33: u32 = (&crate::hash_md5::_t)[34usize];
     let v33: u32 =
         vb33.wrapping_add(
             va33.wrapping_add(vb33 ^ (vc33 ^ vd33)).wrapping_add(xk33).wrapping_add(ti33).wrapping_shl(
@@ -701,7 +701,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b34: (&[u8], &[u8]) = b24.1.split_at(0usize);
     let u34: u32 = lowstar::endianness::load32_le(b34.1);
     let xk34: u32 = u34;
-    let ti34: u32 = (&_t)[35usize];
+    let ti34: u32 = (&crate::hash_md5::_t)[35usize];
     let v34: u32 =
         vb34.wrapping_add(
             va34.wrapping_add(vb34 ^ (vc34 ^ vd34)).wrapping_add(xk34).wrapping_add(ti34).wrapping_shl(
@@ -720,7 +720,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b35: (&[u8], &[u8]) = b15.1.split_at(0usize);
     let u35: u32 = lowstar::endianness::load32_le(b35.1);
     let xk35: u32 = u35;
-    let ti35: u32 = (&_t)[36usize];
+    let ti35: u32 = (&crate::hash_md5::_t)[36usize];
     let v35: u32 =
         vb35.wrapping_add(
             va35.wrapping_add(vb35 ^ (vc35 ^ vd35)).wrapping_add(xk35).wrapping_add(ti35).wrapping_shl(
@@ -739,7 +739,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b36: (&[u8], &[u8]) = b22.1.split_at(0usize);
     let u36: u32 = lowstar::endianness::load32_le(b36.1);
     let xk36: u32 = u36;
-    let ti36: u32 = (&_t)[37usize];
+    let ti36: u32 = (&crate::hash_md5::_t)[37usize];
     let v36: u32 =
         vb36.wrapping_add(
             va36.wrapping_add(vb36 ^ (vc36 ^ vd36)).wrapping_add(xk36).wrapping_add(ti36).wrapping_shl(
@@ -758,7 +758,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b37: (&[u8], &[u8]) = b29.1.split_at(0usize);
     let u37: u32 = lowstar::endianness::load32_le(b37.1);
     let xk37: u32 = u37;
-    let ti37: u32 = (&_t)[38usize];
+    let ti37: u32 = (&crate::hash_md5::_t)[38usize];
     let v37: u32 =
         vb37.wrapping_add(
             va37.wrapping_add(vb37 ^ (vc37 ^ vd37)).wrapping_add(xk37).wrapping_add(ti37).wrapping_shl(
@@ -777,7 +777,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b38: (&[u8], &[u8]) = b20.1.split_at(0usize);
     let u38: u32 = lowstar::endianness::load32_le(b38.1);
     let xk38: u32 = u38;
-    let ti38: u32 = (&_t)[39usize];
+    let ti38: u32 = (&crate::hash_md5::_t)[39usize];
     let v38: u32 =
         vb38.wrapping_add(
             va38.wrapping_add(vb38 ^ (vc38 ^ vd38)).wrapping_add(xk38).wrapping_add(ti38).wrapping_shl(
@@ -796,7 +796,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b39: (&[u8], &[u8]) = b27.1.split_at(0usize);
     let u39: u32 = lowstar::endianness::load32_le(b39.1);
     let xk39: u32 = u39;
-    let ti39: u32 = (&_t)[40usize];
+    let ti39: u32 = (&crate::hash_md5::_t)[40usize];
     let v39: u32 =
         vb39.wrapping_add(
             va39.wrapping_add(vb39 ^ (vc39 ^ vd39)).wrapping_add(xk39).wrapping_add(ti39).wrapping_shl(
@@ -815,7 +815,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b40: (&[u8], &[u8]) = b18.1.split_at(0usize);
     let u40: u32 = lowstar::endianness::load32_le(b40.1);
     let xk40: u32 = u40;
-    let ti40: u32 = (&_t)[41usize];
+    let ti40: u32 = (&crate::hash_md5::_t)[41usize];
     let v40: u32 =
         vb40.wrapping_add(
             va40.wrapping_add(vb40 ^ (vc40 ^ vd40)).wrapping_add(xk40).wrapping_add(ti40).wrapping_shl(
@@ -834,7 +834,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b41: (&[u8], &[u8]) = b25.1.split_at(0usize);
     let u41: u32 = lowstar::endianness::load32_le(b41.1);
     let xk41: u32 = u41;
-    let ti41: u32 = (&_t)[42usize];
+    let ti41: u32 = (&crate::hash_md5::_t)[42usize];
     let v41: u32 =
         vb41.wrapping_add(
             va41.wrapping_add(vb41 ^ (vc41 ^ vd41)).wrapping_add(xk41).wrapping_add(ti41).wrapping_shl(
@@ -853,7 +853,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b42: (&[u8], &[u8]) = b16.1.split_at(0usize);
     let u42: u32 = lowstar::endianness::load32_le(b42.1);
     let xk42: u32 = u42;
-    let ti42: u32 = (&_t)[43usize];
+    let ti42: u32 = (&crate::hash_md5::_t)[43usize];
     let v42: u32 =
         vb42.wrapping_add(
             va42.wrapping_add(vb42 ^ (vc42 ^ vd42)).wrapping_add(xk42).wrapping_add(ti42).wrapping_shl(
@@ -872,7 +872,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b43: (&[u8], &[u8]) = b23.1.split_at(0usize);
     let u43: u32 = lowstar::endianness::load32_le(b43.1);
     let xk43: u32 = u43;
-    let ti43: u32 = (&_t)[44usize];
+    let ti43: u32 = (&crate::hash_md5::_t)[44usize];
     let v43: u32 =
         vb43.wrapping_add(
             va43.wrapping_add(vb43 ^ (vc43 ^ vd43)).wrapping_add(xk43).wrapping_add(ti43).wrapping_shl(
@@ -891,7 +891,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b44: (&[u8], &[u8]) = b30.1.split_at(0usize);
     let u44: u32 = lowstar::endianness::load32_le(b44.1);
     let xk44: u32 = u44;
-    let ti44: u32 = (&_t)[45usize];
+    let ti44: u32 = (&crate::hash_md5::_t)[45usize];
     let v44: u32 =
         vb44.wrapping_add(
             va44.wrapping_add(vb44 ^ (vc44 ^ vd44)).wrapping_add(xk44).wrapping_add(ti44).wrapping_shl(
@@ -910,7 +910,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b45: (&[u8], &[u8]) = b21.1.split_at(0usize);
     let u45: u32 = lowstar::endianness::load32_le(b45.1);
     let xk45: u32 = u45;
-    let ti45: u32 = (&_t)[46usize];
+    let ti45: u32 = (&crate::hash_md5::_t)[46usize];
     let v45: u32 =
         vb45.wrapping_add(
             va45.wrapping_add(vb45 ^ (vc45 ^ vd45)).wrapping_add(xk45).wrapping_add(ti45).wrapping_shl(
@@ -929,7 +929,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b46: (&[u8], &[u8]) = b28.1.split_at(0usize);
     let u46: u32 = lowstar::endianness::load32_le(b46.1);
     let xk46: u32 = u46;
-    let ti46: u32 = (&_t)[47usize];
+    let ti46: u32 = (&crate::hash_md5::_t)[47usize];
     let v46: u32 =
         vb46.wrapping_add(
             va46.wrapping_add(vb46 ^ (vc46 ^ vd46)).wrapping_add(xk46).wrapping_add(ti46).wrapping_shl(
@@ -948,7 +948,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b47: (&[u8], &[u8]) = b40.1.split_at(0usize);
     let u47: u32 = lowstar::endianness::load32_le(b47.1);
     let xk47: u32 = u47;
-    let ti47: u32 = (&_t)[48usize];
+    let ti47: u32 = (&crate::hash_md5::_t)[48usize];
     let v47: u32 =
         vb47.wrapping_add(
             va47.wrapping_add(vc47 ^ (vb47 | ! vd47)).wrapping_add(xk47).wrapping_add(ti47).wrapping_shl(
@@ -967,7 +967,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b48: (&[u8], &[u8]) = b37.1.split_at(0usize);
     let u48: u32 = lowstar::endianness::load32_le(b48.1);
     let xk48: u32 = u48;
-    let ti48: u32 = (&_t)[49usize];
+    let ti48: u32 = (&crate::hash_md5::_t)[49usize];
     let v48: u32 =
         vb48.wrapping_add(
             va48.wrapping_add(vc48 ^ (vb48 | ! vd48)).wrapping_add(xk48).wrapping_add(ti48).wrapping_shl(
@@ -986,7 +986,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b49: (&[u8], &[u8]) = b34.1.split_at(0usize);
     let u49: u32 = lowstar::endianness::load32_le(b49.1);
     let xk49: u32 = u49;
-    let ti49: u32 = (&_t)[50usize];
+    let ti49: u32 = (&crate::hash_md5::_t)[50usize];
     let v49: u32 =
         vb49.wrapping_add(
             va49.wrapping_add(vc49 ^ (vb49 | ! vd49)).wrapping_add(xk49).wrapping_add(ti49).wrapping_shl(
@@ -1005,7 +1005,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b50: (&[u8], &[u8]) = b31.1.split_at(0usize);
     let u50: u32 = lowstar::endianness::load32_le(b50.1);
     let xk50: u32 = u50;
-    let ti50: u32 = (&_t)[51usize];
+    let ti50: u32 = (&crate::hash_md5::_t)[51usize];
     let v50: u32 =
         vb50.wrapping_add(
             va50.wrapping_add(vc50 ^ (vb50 | ! vd50)).wrapping_add(xk50).wrapping_add(ti50).wrapping_shl(
@@ -1024,7 +1024,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b51: (&[u8], &[u8]) = b44.1.split_at(0usize);
     let u51: u32 = lowstar::endianness::load32_le(b51.1);
     let xk51: u32 = u51;
-    let ti51: u32 = (&_t)[52usize];
+    let ti51: u32 = (&crate::hash_md5::_t)[52usize];
     let v51: u32 =
         vb51.wrapping_add(
             va51.wrapping_add(vc51 ^ (vb51 | ! vd51)).wrapping_add(xk51).wrapping_add(ti51).wrapping_shl(
@@ -1043,7 +1043,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b52: (&[u8], &[u8]) = b41.1.split_at(0usize);
     let u52: u32 = lowstar::endianness::load32_le(b52.1);
     let xk52: u32 = u52;
-    let ti52: u32 = (&_t)[53usize];
+    let ti52: u32 = (&crate::hash_md5::_t)[53usize];
     let v52: u32 =
         vb52.wrapping_add(
             va52.wrapping_add(vc52 ^ (vb52 | ! vd52)).wrapping_add(xk52).wrapping_add(ti52).wrapping_shl(
@@ -1062,7 +1062,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b53: (&[u8], &[u8]) = b38.1.split_at(0usize);
     let u53: u32 = lowstar::endianness::load32_le(b53.1);
     let xk53: u32 = u53;
-    let ti53: u32 = (&_t)[54usize];
+    let ti53: u32 = (&crate::hash_md5::_t)[54usize];
     let v53: u32 =
         vb53.wrapping_add(
             va53.wrapping_add(vc53 ^ (vb53 | ! vd53)).wrapping_add(xk53).wrapping_add(ti53).wrapping_shl(
@@ -1081,7 +1081,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b54: (&[u8], &[u8]) = b35.1.split_at(0usize);
     let u54: u32 = lowstar::endianness::load32_le(b54.1);
     let xk54: u32 = u54;
-    let ti54: u32 = (&_t)[55usize];
+    let ti54: u32 = (&crate::hash_md5::_t)[55usize];
     let v54: u32 =
         vb54.wrapping_add(
             va54.wrapping_add(vc54 ^ (vb54 | ! vd54)).wrapping_add(xk54).wrapping_add(ti54).wrapping_shl(
@@ -1100,7 +1100,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b55: (&[u8], &[u8]) = b32.1.split_at(0usize);
     let u55: u32 = lowstar::endianness::load32_le(b55.1);
     let xk55: u32 = u55;
-    let ti55: u32 = (&_t)[56usize];
+    let ti55: u32 = (&crate::hash_md5::_t)[56usize];
     let v55: u32 =
         vb55.wrapping_add(
             va55.wrapping_add(vc55 ^ (vb55 | ! vd55)).wrapping_add(xk55).wrapping_add(ti55).wrapping_shl(
@@ -1119,7 +1119,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b56: (&[u8], &[u8]) = b45.1.split_at(0usize);
     let u56: u32 = lowstar::endianness::load32_le(b56.1);
     let xk56: u32 = u56;
-    let ti56: u32 = (&_t)[57usize];
+    let ti56: u32 = (&crate::hash_md5::_t)[57usize];
     let v56: u32 =
         vb56.wrapping_add(
             va56.wrapping_add(vc56 ^ (vb56 | ! vd56)).wrapping_add(xk56).wrapping_add(ti56).wrapping_shl(
@@ -1138,7 +1138,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b57: (&[u8], &[u8]) = b42.1.split_at(0usize);
     let u57: u32 = lowstar::endianness::load32_le(b57.1);
     let xk57: u32 = u57;
-    let ti57: u32 = (&_t)[58usize];
+    let ti57: u32 = (&crate::hash_md5::_t)[58usize];
     let v57: u32 =
         vb57.wrapping_add(
             va57.wrapping_add(vc57 ^ (vb57 | ! vd57)).wrapping_add(xk57).wrapping_add(ti57).wrapping_shl(
@@ -1157,7 +1157,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b58: (&[u8], &[u8]) = b39.1.split_at(0usize);
     let u58: u32 = lowstar::endianness::load32_le(b58.1);
     let xk58: u32 = u58;
-    let ti58: u32 = (&_t)[59usize];
+    let ti58: u32 = (&crate::hash_md5::_t)[59usize];
     let v58: u32 =
         vb58.wrapping_add(
             va58.wrapping_add(vc58 ^ (vb58 | ! vd58)).wrapping_add(xk58).wrapping_add(ti58).wrapping_shl(
@@ -1176,7 +1176,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b59: (&[u8], &[u8]) = b36.1.split_at(0usize);
     let u59: u32 = lowstar::endianness::load32_le(b59.1);
     let xk59: u32 = u59;
-    let ti59: u32 = (&_t)[60usize];
+    let ti59: u32 = (&crate::hash_md5::_t)[60usize];
     let v59: u32 =
         vb59.wrapping_add(
             va59.wrapping_add(vc59 ^ (vb59 | ! vd59)).wrapping_add(xk59).wrapping_add(ti59).wrapping_shl(
@@ -1195,7 +1195,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b60: (&[u8], &[u8]) = b33.1.split_at(0usize);
     let u60: u32 = lowstar::endianness::load32_le(b60.1);
     let xk60: u32 = u60;
-    let ti60: u32 = (&_t)[61usize];
+    let ti60: u32 = (&crate::hash_md5::_t)[61usize];
     let v60: u32 =
         vb60.wrapping_add(
             va60.wrapping_add(vc60 ^ (vb60 | ! vd60)).wrapping_add(xk60).wrapping_add(ti60).wrapping_shl(
@@ -1214,7 +1214,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b61: (&[u8], &[u8]) = b46.1.split_at(0usize);
     let u61: u32 = lowstar::endianness::load32_le(b61.1);
     let xk61: u32 = u61;
-    let ti61: u32 = (&_t)[62usize];
+    let ti61: u32 = (&crate::hash_md5::_t)[62usize];
     let v61: u32 =
         vb61.wrapping_add(
             va61.wrapping_add(vc61 ^ (vb61 | ! vd61)).wrapping_add(xk61).wrapping_add(ti61).wrapping_shl(
@@ -1233,7 +1233,7 @@ fn update(abcd: &mut [u32], x: &[u8])
     let b62: (&[u8], &[u8]) = b43.1.split_at(0usize);
     let u62: u32 = lowstar::endianness::load32_le(b62.1);
     let xk62: u32 = u62;
-    let ti62: u32 = (&_t)[63usize];
+    let ti62: u32 = (&crate::hash_md5::_t)[63usize];
     let v62: u32 =
         vb62.wrapping_add(
             va62.wrapping_add(vc62 ^ (vb62 | ! vd62)).wrapping_add(xk62).wrapping_add(ti62).wrapping_shl(
@@ -1298,7 +1298,7 @@ fn update_multi(s: &mut [u32], blocks: &[u8], n_blocks: u32)
     {
         let sz: u32 = 64u32;
         let block: (&[u8], &[u8]) = blocks.split_at(sz.wrapping_mul(i) as usize);
-        update(s, block.1)
+        crate::hash_md5::update(s, block.1)
     }
 }
 
@@ -1309,7 +1309,7 @@ fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len: u32)
     let blocks: (&[u8], &[u8]) = input.split_at(0usize);
     let rest_len: u32 = input_len.wrapping_sub(blocks_len);
     let rest: (&[u8], &[u8]) = blocks.1.split_at(blocks_len as usize);
-    update_multi(s, rest.0, blocks_n);
+    crate::hash_md5::update_multi(s, rest.0, blocks_n);
     let total_input_len: u64 = prev_len.wrapping_add(input_len as u64);
     let pad_len: u32 =
         1u32.wrapping_add(
@@ -1323,8 +1323,8 @@ fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len: u32)
     let tmp_rest: (&mut [u8], &mut [u8]) = tmp.1.split_at_mut(0usize);
     let tmp_pad: (&mut [u8], &mut [u8]) = tmp_rest.1.split_at_mut(rest_len as usize);
     (tmp_pad.0[0usize..rest_len as usize]).copy_from_slice(&rest.1[0usize..rest_len as usize]);
-    pad(total_input_len, tmp_pad.1);
-    update_multi(s, tmp.1, tmp_len.wrapping_div(64u32))
+    crate::hash_md5::pad(total_input_len, tmp_pad.1);
+    crate::hash_md5::update_multi(s, tmp.1, tmp_len.wrapping_div(64u32))
 }
 
 fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
@@ -1345,9 +1345,9 @@ fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
     let blocks0: &[u8] = rest.0;
     let rest_len0: u32 = rest_len;
     let rest0: &[u8] = rest.1;
-    update_multi(&mut s, blocks0, blocks_n0);
-    update_last(&mut s, blocks_len0 as u64, rest0, rest_len0);
-    finish(&s, output)
+    crate::hash_md5::update_multi(&mut s, blocks0, blocks_n0);
+    crate::hash_md5::update_last(&mut s, blocks_len0 as u64, rest0, rest_len0);
+    crate::hash_md5::finish(&s, output)
 }
 
 pub type state_t = crate::streaming_types::state_32;
@@ -1356,7 +1356,7 @@ pub fn malloc() -> Box<[crate::streaming_types::state_32]>
 {
     let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     let mut block_state: Box<[u32]> = vec![0u32; 4usize].into_boxed_slice();
-    init(&mut block_state);
+    crate::hash_md5::init(&mut block_state);
     let s: crate::streaming_types::state_32 =
         crate::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
     let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
@@ -1366,7 +1366,7 @@ pub fn malloc() -> Box<[crate::streaming_types::state_32]>
 pub fn reset(state: &mut [crate::streaming_types::state_32])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
-    init(block_state);
+    crate::hash_md5::init(block_state);
     let total_len: u64 = 0u32 as u64;
     (state[0usize]).total_len = total_len
 }
@@ -1412,7 +1412,7 @@ update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len:
                 { 64u32 }
                 else
                 { total_len1.wrapping_rem(64u32 as u64) as u32 };
-            if sz1 != 0u32 { update_multi(block_state, buf, 1u32) };
+            if sz1 != 0u32 { crate::hash_md5::update_multi(block_state, buf, 1u32) };
             let ite: u32 =
                 if (chunk_len as u64).wrapping_rem(64u32 as u64) == 0u64 && chunk_len as u64 > 0u64
                 { 64u32 }
@@ -1423,7 +1423,7 @@ update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len:
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            update_multi(block_state, data2.0, data1_len.wrapping_div(64u32));
+            crate::hash_md5::update_multi(block_state, data2.0, data1_len.wrapping_div(64u32));
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -1453,7 +1453,7 @@ update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len:
                 { 64u32 }
                 else
                 { total_len10.wrapping_rem(64u32 as u64) as u32 };
-            if sz10 != 0u32 { update_multi(block_state, buf0, 1u32) };
+            if sz10 != 0u32 { crate::hash_md5::update_multi(block_state, buf0, 1u32) };
             let ite: u32 =
                 if
                 (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(64u32 as u64) == 0u64
@@ -1467,7 +1467,7 @@ update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len:
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            update_multi(block_state, data2.0, data1_len.wrapping_div(64u32));
+            crate::hash_md5::update_multi(block_state, data2.0, data1_len.wrapping_div(64u32));
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -1496,10 +1496,10 @@ pub fn digest(state: &[crate::streaming_types::state_32], output: &mut [u8])
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
     let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
-    update_multi(&mut tmp_block_state, buf_last.0, 0u32);
+    crate::hash_md5::update_multi(&mut tmp_block_state, buf_last.0, 0u32);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
-    update_last(&mut tmp_block_state, prev_len_last, buf_last.1, r);
-    finish(&tmp_block_state, output)
+    crate::hash_md5::update_last(&mut tmp_block_state, prev_len_last, buf_last.1, r);
+    crate::hash_md5::finish(&tmp_block_state, output)
 }
 
 pub fn copy(state: &[crate::streaming_types::state_32]) ->
@@ -1519,4 +1519,4 @@ pub fn copy(state: &[crate::streaming_types::state_32]) ->
 }
 
 pub fn hash(output: &mut [u8], input: &[u8], input_len: u32)
-{ hash_oneshot(output, input, input_len) }
+{ crate::hash_md5::hash_oneshot(output, input, input_len) }

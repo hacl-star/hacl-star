@@ -41,28 +41,28 @@
 
 #[inline] fn double_round(st: &mut [u32])
 {
-    quarter_round(st, 0u32, 4u32, 8u32, 12u32);
-    quarter_round(st, 5u32, 9u32, 13u32, 1u32);
-    quarter_round(st, 10u32, 14u32, 2u32, 6u32);
-    quarter_round(st, 15u32, 3u32, 7u32, 11u32);
-    quarter_round(st, 0u32, 1u32, 2u32, 3u32);
-    quarter_round(st, 5u32, 6u32, 7u32, 4u32);
-    quarter_round(st, 10u32, 11u32, 8u32, 9u32);
-    quarter_round(st, 15u32, 12u32, 13u32, 14u32)
+    crate::salsa20::quarter_round(st, 0u32, 4u32, 8u32, 12u32);
+    crate::salsa20::quarter_round(st, 5u32, 9u32, 13u32, 1u32);
+    crate::salsa20::quarter_round(st, 10u32, 14u32, 2u32, 6u32);
+    crate::salsa20::quarter_round(st, 15u32, 3u32, 7u32, 11u32);
+    crate::salsa20::quarter_round(st, 0u32, 1u32, 2u32, 3u32);
+    crate::salsa20::quarter_round(st, 5u32, 6u32, 7u32, 4u32);
+    crate::salsa20::quarter_round(st, 10u32, 11u32, 8u32, 9u32);
+    crate::salsa20::quarter_round(st, 15u32, 12u32, 13u32, 14u32)
 }
 
 #[inline] fn rounds(st: &mut [u32])
 {
-    double_round(st);
-    double_round(st);
-    double_round(st);
-    double_round(st);
-    double_round(st);
-    double_round(st);
-    double_round(st);
-    double_round(st);
-    double_round(st);
-    double_round(st)
+    crate::salsa20::double_round(st);
+    crate::salsa20::double_round(st);
+    crate::salsa20::double_round(st);
+    crate::salsa20::double_round(st);
+    crate::salsa20::double_round(st);
+    crate::salsa20::double_round(st);
+    crate::salsa20::double_round(st);
+    crate::salsa20::double_round(st);
+    crate::salsa20::double_round(st);
+    crate::salsa20::double_round(st)
 }
 
 #[inline] fn salsa20_core(k: &mut [u32], ctx: &[u32], ctr: u32)
@@ -70,7 +70,7 @@
     (k[0usize..16usize]).copy_from_slice(&ctx[0usize..16usize]);
     let ctr_u32: u32 = ctr;
     k[8usize] = (k[8usize]).wrapping_add(ctr_u32);
-    rounds(k);
+    crate::salsa20::rounds(k);
     krml::unroll_for!(
         16,
         "i",
@@ -130,16 +130,13 @@
     (&mut ctx)[10usize] = 0x79622d32u32;
     ((&mut ctx)[11usize..11usize + 4usize]).copy_from_slice(&k1.1[0usize..4usize]);
     (&mut ctx)[15usize] = 0x6b206574u32;
-    salsa20_core(&mut k, &ctx, 0u32);
+    crate::salsa20::salsa20_core(&mut k, &ctx, 0u32);
     krml::unroll_for!(
         16,
         "i",
         0u32,
         1u32,
-        lowstar::endianness::store32_le(
-            &mut out[i.wrapping_mul(4u32) as usize..],
-            (&k)[i as usize]
-        )
+        lowstar::endianness::store32_le(&mut out[i.wrapping_mul(4u32) as usize..], (&k)[i as usize])
     )
 }
 
@@ -204,7 +201,7 @@
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(64u32) as usize);
         let uu____1: (&[u8], &[u8]) = text.split_at(i.wrapping_mul(64u32) as usize);
         let mut k10: [u32; 16] = [0u32; 16usize];
-        salsa20_core(&mut k10, &ctx, i);
+        crate::salsa20::salsa20_core(&mut k10, &ctx, i);
         let mut bl: [u32; 16] = [0u32; 16usize];
         krml::unroll_for!(
             16,
@@ -250,7 +247,7 @@
             &(&text[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
         );
         let mut k10: [u32; 16] = [0u32; 16usize];
-        salsa20_core(&mut k10, &ctx, nb);
+        crate::salsa20::salsa20_core(&mut k10, &ctx, nb);
         let mut bl: [u32; 16] = [0u32; 16usize];
         krml::unroll_for!(
             16,
@@ -354,7 +351,7 @@
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(64u32) as usize);
         let uu____1: (&[u8], &[u8]) = cipher.split_at(i.wrapping_mul(64u32) as usize);
         let mut k10: [u32; 16] = [0u32; 16usize];
-        salsa20_core(&mut k10, &ctx, i);
+        crate::salsa20::salsa20_core(&mut k10, &ctx, i);
         let mut bl: [u32; 16] = [0u32; 16usize];
         krml::unroll_for!(
             16,
@@ -400,7 +397,7 @@
             &(&cipher[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
         );
         let mut k10: [u32; 16] = [0u32; 16usize];
-        salsa20_core(&mut k10, &ctx, nb);
+        crate::salsa20::salsa20_core(&mut k10, &ctx, nb);
         let mut bl: [u32; 16] = [0u32; 16usize];
         krml::unroll_for!(
             16,
@@ -485,7 +482,7 @@
     (&mut ctx)[10usize] = 0x79622d32u32;
     ((&mut ctx)[11usize..11usize + 4usize]).copy_from_slice(&k1.1[0usize..4usize]);
     (&mut ctx)[15usize] = 0x6b206574u32;
-    rounds(&mut ctx);
+    crate::salsa20::rounds(&mut ctx);
     let r0: u32 = (&ctx)[0usize];
     let r1: u32 = (&ctx)[5usize];
     let r2: u32 = (&ctx)[10usize];
@@ -508,7 +505,7 @@
 }
 
 pub fn salsa20_encrypt0(len: u32, out: &mut [u8], text: &[u8], key: &[u8], n: &[u8], ctr: u32)
-{ salsa20_encrypt(len, out, text, key, n, ctr) }
+{ crate::salsa20::salsa20_encrypt(len, out, text, key, n, ctr) }
 
 pub fn salsa20_decrypt0(
     len: u32,
@@ -518,9 +515,10 @@ pub fn salsa20_decrypt0(
     n: &[u8],
     ctr: u32
 )
-{ salsa20_decrypt(len, out, cipher, key, n, ctr) }
+{ crate::salsa20::salsa20_decrypt(len, out, cipher, key, n, ctr) }
 
 pub fn salsa20_key_block00(out: &mut [u8], key: &[u8], n: &[u8])
-{ salsa20_key_block0(out, key, n) }
+{ crate::salsa20::salsa20_key_block0(out, key, n) }
 
-pub fn hsalsa200(out: &mut [u8], key: &[u8], n: &[u8]) { hsalsa20(out, key, n) }
+pub fn hsalsa200(out: &mut [u8], key: &[u8], n: &[u8])
+{ crate::salsa20::hsalsa20(out, key, n) }

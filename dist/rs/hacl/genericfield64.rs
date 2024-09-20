@@ -45,8 +45,7 @@ field_init(len: u32, n: &[u64]) ->
     let r21: &mut [u64] = &mut r2;
     let n11: &mut [u64] = &mut n1;
     (n11[0usize..len as usize]).copy_from_slice(&n[0usize..len as usize]);
-    let nBits: u32 =
-        64u32.wrapping_mul(bignum::bignum_base::bn_get_top_index_u64(len, n) as u32);
+    let nBits: u32 = 64u32.wrapping_mul(bignum::bignum_base::bn_get_top_index_u64(len, n) as u32);
     bignum::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, r21);
     let mu: u64 = bignum::bignum::mod_inv_uint64(n[0usize]);
     let res: bignum::bignum::bn_mont_ctx_u64 =
@@ -76,7 +75,7 @@ Convert a bignum from the regular representation to the Montgomery representatio
 pub fn
 to_field(k: &[bignum::bignum::bn_mont_ctx_u64], a: &[u64], aM: &mut [u64])
 {
-    let len1: u32 = field_get_len(k);
+    let len1: u32 = crate::genericfield64::field_get_len(k);
     let uu____0: &bignum::bignum::bn_mont_ctx_u64 = &k[0usize];
     bignum::bignum::bn_to_mont_u64(len1, &uu____0.n, uu____0.mu, &uu____0.r2, a, aM)
 }
@@ -93,7 +92,7 @@ Convert a result back from the Montgomery representation to the regular represen
 pub fn
 from_field(k: &[bignum::bignum::bn_mont_ctx_u64], aM: &[u64], a: &mut [u64])
 {
-    let len1: u32 = field_get_len(k);
+    let len1: u32 = crate::genericfield64::field_get_len(k);
     let uu____0: &bignum::bignum::bn_mont_ctx_u64 = &k[0usize];
     bignum::bignum::bn_from_mont_u64(len1, &uu____0.n, uu____0.mu, aM, a)
 }
@@ -107,7 +106,7 @@ Write `aM + bM mod n` in `cM`.
 pub fn
 add(k: &[bignum::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
 {
-    let len1: u32 = field_get_len(k);
+    let len1: u32 = crate::genericfield64::field_get_len(k);
     let uu____0: &bignum::bignum::bn_mont_ctx_u64 = &k[0usize];
     let mut a_copy: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
     let mut b_copy: Box<[u64]> = vec![0u64; len1 as usize].into_boxed_slice();
@@ -125,7 +124,7 @@ Write `aM - bM mod n` to `cM`.
 pub fn
 sub(k: &[bignum::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
 {
-    let len1: u32 = field_get_len(k);
+    let len1: u32 = crate::genericfield64::field_get_len(k);
     bignum::bignum::bn_sub_mod_n_u64(len1, &(k[0usize]).n, aM, bM, cM)
 }
 
@@ -138,7 +137,7 @@ Write `aM * bM mod n` in `cM`.
 pub fn
 mul(k: &[bignum::bignum::bn_mont_ctx_u64], aM: &[u64], bM: &[u64], cM: &mut [u64])
 {
-    let len1: u32 = field_get_len(k);
+    let len1: u32 = crate::genericfield64::field_get_len(k);
     let uu____0: &bignum::bignum::bn_mont_ctx_u64 = &k[0usize];
     bignum::bignum::bn_mont_mul_u64(len1, &uu____0.n, uu____0.mu, aM, bM, cM)
 }
@@ -152,7 +151,7 @@ Write `aM * aM mod n` in `cM`.
 pub fn
 sqr(k: &[bignum::bignum::bn_mont_ctx_u64], aM: &[u64], cM: &mut [u64])
 {
-    let len1: u32 = field_get_len(k);
+    let len1: u32 = crate::genericfield64::field_get_len(k);
     let uu____0: &bignum::bignum::bn_mont_ctx_u64 = &k[0usize];
     bignum::bignum::bn_mont_sqr_u64(len1, &uu____0.n, uu____0.mu, aM, cM)
 }
@@ -166,7 +165,7 @@ Convert a bignum `one` to its Montgomery representation.
 pub fn
 one(k: &[bignum::bignum::bn_mont_ctx_u64], oneM: &mut [u64])
 {
-    let len1: u32 = field_get_len(k);
+    let len1: u32 = crate::genericfield64::field_get_len(k);
     let uu____0: &bignum::bignum::bn_mont_ctx_u64 = &k[0usize];
     bignum::bignum::bn_from_mont_u64(len1, &uu____0.n, uu____0.mu, &uu____0.r2, oneM)
 }
@@ -198,7 +197,7 @@ exp_consttime(
     resM: &mut [u64]
 )
 {
-    let len1: u32 = field_get_len(k);
+    let len1: u32 = crate::genericfield64::field_get_len(k);
     let uu____0: &bignum::bignum::bn_mont_ctx_u64 = &k[0usize];
     let mut aMc: Box<[u64]> = vec![0u64; uu____0.len as usize].into_boxed_slice();
     ((&mut aMc)[0usize..uu____0.len as usize]).copy_from_slice(&aM[0usize..uu____0.len as usize]);
@@ -284,14 +283,7 @@ exp_consttime(
                         2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
                     );
                 let ctx_n1: (&[u64], &[u64]) = ctx_n0.1.split_at(0usize);
-                bignum::bignum::bn_mont_mul_u64(
-                    len1,
-                    ctx_n1.1,
-                    uu____0.mu,
-                    &aMc,
-                    t2.1,
-                    &mut tmp
-                );
+                bignum::bignum::bn_mont_mul_u64(len1, ctx_n1.1, uu____0.mu, &aMc, t2.1, &mut tmp);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(3u32).wrapping_mul(len1)
@@ -314,8 +306,7 @@ exp_consttime(
                 0u32,
                 1u32,
                 {
-                    let c: u64 =
-                        fstar::uint64::eq_mask(bits_c, i0.wrapping_add(1u32) as u64);
+                    let c: u64 = fstar::uint64::eq_mask(bits_c, i0.wrapping_add(1u32) as u64);
                     let res_j: (&[u64], &[u64]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(len1) as usize);
                     for i1 in 0u32..len1
@@ -361,8 +352,7 @@ exp_consttime(
                 0u32,
                 1u32,
                 {
-                    let c: u64 =
-                        fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
+                    let c: u64 = fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
                     let res_j: (&[u64], &[u64]) =
                         table.split_at(i0.wrapping_add(1u32).wrapping_mul(len1) as usize);
                     for i1 in 0u32..len1
@@ -406,7 +396,7 @@ exp_vartime(
     resM: &mut [u64]
 )
 {
-    let len1: u32 = field_get_len(k);
+    let len1: u32 = crate::genericfield64::field_get_len(k);
     let uu____0: &bignum::bignum::bn_mont_ctx_u64 = &k[0usize];
     let mut aMc: Box<[u64]> = vec![0u64; uu____0.len as usize].into_boxed_slice();
     ((&mut aMc)[0usize..uu____0.len as usize]).copy_from_slice(&aM[0usize..uu____0.len as usize]);
@@ -479,14 +469,7 @@ exp_vartime(
                         2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
                     );
                 let ctx_n1: (&[u64], &[u64]) = ctx_n0.1.split_at(0usize);
-                bignum::bignum::bn_mont_mul_u64(
-                    len1,
-                    ctx_n1.1,
-                    uu____0.mu,
-                    &aMc,
-                    t2.1,
-                    &mut tmp
-                );
+                bignum::bignum::bn_mont_mul_u64(len1, ctx_n1.1, uu____0.mu, &aMc, t2.1, &mut tmp);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                     i
                 ).wrapping_add(3u32).wrapping_mul(len1)
@@ -578,30 +561,15 @@ inverse(k: &[bignum::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64])
                 let t10: u64 = a1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                 let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    lib::inttypes_intrinsics::sub_borrow_u64(
-                        (&c)[0usize],
-                        t10,
-                        0u64,
-                        res_i0.1
-                    );
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t10, 0u64, res_i0.1);
                 let t11: u64 = a1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                 let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    lib::inttypes_intrinsics::sub_borrow_u64(
-                        (&c)[0usize],
-                        t11,
-                        0u64,
-                        res_i1.1
-                    );
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t11, 0u64, res_i1.1);
                 let t12: u64 = a1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                 let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
                 (&mut c)[0usize] =
-                    lib::inttypes_intrinsics::sub_borrow_u64(
-                        (&c)[0usize],
-                        t12,
-                        0u64,
-                        res_i2.1
-                    )
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, 0u64, res_i2.1)
             };
             for
             i
@@ -619,5 +587,5 @@ inverse(k: &[bignum::bignum::bn_mont_ctx_u64], aM: &[u64], aInvM: &mut [u64])
         else
         { c0 };
     lowstar::ignore::ignore::<u64>(c);
-    exp_vartime(k, aM, uu____0.len.wrapping_mul(64u32), &n2, aInvM)
+    crate::genericfield64::exp_vartime(k, aM, uu____0.len.wrapping_mul(64u32), &n2, aInvM)
 }

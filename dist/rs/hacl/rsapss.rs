@@ -34,12 +34,9 @@
 {
     match a
     {
-        crate::streaming_types::hash_alg::SHA2_256 =>
-          crate::hash_sha2::hash_256(mHash, msg, msgLen),
-        crate::streaming_types::hash_alg::SHA2_384 =>
-          crate::hash_sha2::hash_384(mHash, msg, msgLen),
-        crate::streaming_types::hash_alg::SHA2_512 =>
-          crate::hash_sha2::hash_512(mHash, msg, msgLen),
+        crate::streaming_types::hash_alg::SHA2_256 => crate::hash_sha2::hash_256(mHash, msg, msgLen),
+        crate::streaming_types::hash_alg::SHA2_384 => crate::hash_sha2::hash_384(mHash, msg, msgLen),
+        crate::streaming_types::hash_alg::SHA2_512 => crate::hash_sha2::hash_512(mHash, msg, msgLen),
         _ => panic!("Precondition of the function most likely violated")
     }
 }
@@ -55,7 +52,7 @@
     let mut mgfseed_counter: Box<[u8]> =
         vec![0u8; len.wrapping_add(4u32) as usize].into_boxed_slice();
     ((&mut mgfseed_counter)[0usize..len as usize]).copy_from_slice(&mgfseed[0usize..len as usize]);
-    let hLen: u32 = hash_len(a);
+    let hLen: u32 = crate::rsapss::hash_len(a);
     let n: u32 = maskLen.wrapping_sub(1u32).wrapping_div(hLen).wrapping_add(1u32);
     let accLen: u32 = n.wrapping_mul(hLen);
     let mut acc: Box<[u8]> = vec![0u8; accLen as usize].into_boxed_slice();
@@ -67,7 +64,7 @@
         c.1[1usize] = i.wrapping_shr(16u32) as u8;
         c.1[2usize] = i.wrapping_shr(8u32) as u8;
         c.1[3usize] = i as u8;
-        hash(a, acc_i.1, len.wrapping_add(4u32), &mgfseed_counter)
+        crate::rsapss::hash(a, acc_i.1, len.wrapping_add(4u32), &mgfseed_counter)
     };
     (res[0usize..maskLen as usize]).copy_from_slice(&(&(&acc)[0usize..])[0usize..maskLen as usize])
 }
@@ -113,7 +110,7 @@
     };
     let res: u64 = (&acc)[0usize];
     let m1: u64 = res;
-    let m2: u64 = check_num_bits_u64(modBits, n);
+    let m2: u64 = crate::rsapss::check_num_bits_u64(modBits, n);
     m0 & (m1 & m2)
 }
 
@@ -130,7 +127,7 @@
     let mask1: u64 = (&mask)[0usize];
     let res: u64 = mask1;
     let m0: u64 = res;
-    let m1: u64 = check_num_bits_u64(eBits, e);
+    let m1: u64 = crate::rsapss::check_num_bits_u64(eBits, e);
     ! m0 & m1
 }
 
@@ -144,15 +141,15 @@
     em: &mut [u8]
 )
 {
-    let hLen: u32 = hash_len(a);
+    let hLen: u32 = crate::rsapss::hash_len(a);
     let mut m1Hash: Box<[u8]> = vec![0u8; hLen as usize].into_boxed_slice();
     let m1Len: u32 = 8u32.wrapping_add(hLen).wrapping_add(saltLen);
     let mut m1: Box<[u8]> = vec![0u8; m1Len as usize].into_boxed_slice();
-    hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
+    crate::rsapss::hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
     ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
     +
     saltLen as usize]).copy_from_slice(&salt[0usize..saltLen as usize]);
-    hash(a, &mut m1Hash, m1Len, &m1);
+    crate::rsapss::hash(a, &mut m1Hash, m1Len, &m1);
     let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let dbLen: u32 = emLen.wrapping_sub(hLen).wrapping_sub(1u32);
     let mut db: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
@@ -164,7 +161,7 @@
     +
     saltLen as usize]).copy_from_slice(&salt[0usize..saltLen as usize]);
     let mut dbMask: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
-    mgf_hash(a, hLen, &m1Hash, dbLen, &mut dbMask);
+    crate::rsapss::mgf_hash(a, hLen, &m1Hash, dbLen, &mut dbMask);
     for i in 0u32..dbLen
     {
         let x: u8 = (&db)[i as usize] ^ (&dbMask)[i as usize];
@@ -196,20 +193,20 @@
     let em_0: u8 = if msBits > 0u32 { em[0usize] & 0xffu8.wrapping_shl(msBits) } else { 0u8 };
     let em_last: u8 = em[emLen.wrapping_sub(1u32) as usize];
     if
-    emLen < saltLen.wrapping_add(hash_len(a)).wrapping_add(2u32)
+    emLen < saltLen.wrapping_add(crate::rsapss::hash_len(a)).wrapping_add(2u32)
     ||
     ! (em_last == 0xbcu8 && em_0 == 0u8)
     { false }
     else
     {
         let emLen1: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-        let hLen: u32 = hash_len(a);
+        let hLen: u32 = crate::rsapss::hash_len(a);
         let mut m1Hash0: Box<[u8]> = vec![0u8; hLen as usize].into_boxed_slice();
         let dbLen: u32 = emLen1.wrapping_sub(hLen).wrapping_sub(1u32);
         let maskedDB: (&[u8], &[u8]) = em.split_at(0usize);
         let m1Hash: (&[u8], &[u8]) = maskedDB.1.split_at(dbLen as usize);
         let mut dbMask: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
-        mgf_hash(a, hLen, m1Hash.1, dbLen, &mut dbMask);
+        crate::rsapss::mgf_hash(a, hLen, m1Hash.1, dbLen, &mut dbMask);
         for i in 0u32..dbLen
         {
             let x: u8 = (&dbMask)[i as usize] ^ m1Hash.0[i as usize];
@@ -240,11 +237,11 @@
         {
             let m1Len: u32 = 8u32.wrapping_add(hLen).wrapping_add(saltLen);
             let mut m1: Box<[u8]> = vec![0u8; m1Len as usize].into_boxed_slice();
-            hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
+            crate::rsapss::hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
             ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
             +
             saltLen as usize]).copy_from_slice(&salt.1[0usize..saltLen as usize]);
-            hash(a, &mut m1Hash0, m1Len, &m1);
+            crate::rsapss::hash(a, &mut m1Hash0, m1Len, &m1);
             let mut res0: [u8; 1] = [255u8; 1usize];
             for i in 0u32..hLen
             {
@@ -276,8 +273,8 @@
         e.0
     );
     bignum::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
-    let m0: u64 = check_modulus_u64(modBits, r2.0);
-    let m1: u64 = check_exponent_u64(eBits, e.1);
+    let m0: u64 = crate::rsapss::check_modulus_u64(modBits, r2.0);
+    let m1: u64 = crate::rsapss::check_exponent_u64(eBits, e.1);
     let m: u64 = m0 & m1;
     m == 0xFFFFFFFFFFFFFFFFu64
 }
@@ -299,9 +296,9 @@
     let pkeyLen: u32 = nLen.wrapping_add(nLen).wrapping_add(eLen);
     let pkey: (&mut [u64], &mut [u64]) = skey.split_at_mut(0usize);
     let d: (&mut [u64], &mut [u64]) = pkey.1.split_at_mut(pkeyLen as usize);
-    let b: bool = load_pkey(modBits, eBits, nb, eb, d.0);
+    let b: bool = crate::rsapss::load_pkey(modBits, eBits, nb, eb, d.0);
     bignum::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
-    let m1: u64 = check_exponent_u64(dBits, d.1);
+    let m1: u64 = crate::rsapss::check_exponent_u64(dBits, d.1);
     b && m1 == 0xFFFFFFFFFFFFFFFFu64
 }
 
@@ -339,7 +336,7 @@ rsapss_sign(
 ) ->
     bool
 {
-    let hLen: u32 = hash_len(a);
+    let hLen: u32 = crate::rsapss::hash_len(a);
     let b: bool =
         saltLen <= 0xffffffffu32.wrapping_sub(hLen).wrapping_sub(8u32)
         &&
@@ -353,7 +350,7 @@ rsapss_sign(
         let emBits: u32 = modBits.wrapping_sub(1u32);
         let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
-        pss_encode(a, saltLen, salt, msgLen, msg, emBits, &mut em);
+        crate::rsapss::pss_encode(a, saltLen, salt, msgLen, msg, emBits, &mut em);
         bignum::bignum_base::bn_from_bytes_be_uint64(emLen, &em, &mut (&mut m)[0usize..]);
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
@@ -449,7 +446,7 @@ rsapss_verify(
 ) ->
     bool
 {
-    let hLen: u32 = hash_len(a);
+    let hLen: u32 = crate::rsapss::hash_len(a);
     let b: bool =
         saltLen <= 0xffffffffu32.wrapping_sub(hLen).wrapping_sub(8u32)
         &&
@@ -511,7 +508,7 @@ rsapss_verify(
             let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
             let m1: (&[u64], &[u64]) = m.split_at(0usize);
             bignum::bignum_base::bn_to_bytes_be_uint64(emLen, m1.1, &mut em);
-            let res0: bool = pss_verify(a, saltLen, msgLen, msg, emBits, &em);
+            let res0: bool = crate::rsapss::pss_verify(a, saltLen, msgLen, msg, emBits, &em);
             res0
         }
         else
@@ -575,8 +572,8 @@ new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
                 e.0
             );
             bignum::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
-            let m0: u64 = check_modulus_u64(modBits, r2.0);
-            let m1: u64 = check_exponent_u64(eBits, e.1);
+            let m0: u64 = crate::rsapss::check_modulus_u64(modBits, r2.0);
+            let m1: u64 = crate::rsapss::check_exponent_u64(eBits, e.1);
             let m: u64 = m0 & m1;
             let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
             if b { (*pkey2).into() } else { (*&[]).into() }
@@ -659,12 +656,12 @@ new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8],
                 e.0
             );
             bignum::bignum_base::bn_from_bytes_be_uint64(ebLen1, eb, e.1);
-            let m0: u64 = check_modulus_u64(modBits, r2.0);
-            let m1: u64 = check_exponent_u64(eBits, e.1);
+            let m0: u64 = crate::rsapss::check_modulus_u64(modBits, r2.0);
+            let m1: u64 = crate::rsapss::check_exponent_u64(eBits, e.1);
             let m: u64 = m0 & m1;
             let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
             bignum::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
-            let m10: u64 = check_exponent_u64(dBits, d.1);
+            let m10: u64 = crate::rsapss::check_exponent_u64(dBits, d.1);
             let b0: bool = b && m10 == 0xFFFFFFFFFFFFFFFFu64;
             if b0 { (*skey2).into() } else { (*&[]).into() }
         }
@@ -716,9 +713,22 @@ rsapss_skey_sign(
             ).wrapping_add(dBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32))
             as
             usize].into_boxed_slice();
-    let b: bool = load_skey(modBits, eBits, dBits, nb, eb, db, &mut skey);
+    let b: bool = crate::rsapss::load_skey(modBits, eBits, dBits, nb, eb, db, &mut skey);
     if b
-    { rsapss_sign(a, modBits, eBits, dBits, &skey, saltLen, salt, msgLen, msg, sgnt) }
+    {
+        crate::rsapss::rsapss_sign(
+            a,
+            modBits,
+            eBits,
+            dBits,
+            &skey,
+            saltLen,
+            salt,
+            msgLen,
+            msg,
+            sgnt
+        )
+    }
     else
     { false }
 }
@@ -764,9 +774,9 @@ rsapss_pkey_verify(
             )
             as
             usize].into_boxed_slice();
-    let b: bool = load_pkey(modBits, eBits, nb, eb, &mut pkey);
+    let b: bool = crate::rsapss::load_pkey(modBits, eBits, nb, eb, &mut pkey);
     if b
-    { rsapss_verify(a, modBits, eBits, &pkey, saltLen, sgntLen, sgnt, msgLen, msg) }
+    { crate::rsapss::rsapss_verify(a, modBits, eBits, &pkey, saltLen, sgntLen, sgnt, msgLen, msg) }
     else
     { false }
 }
@@ -783,4 +793,4 @@ mgf_hash0(
     maskLen: u32,
     res: &mut [u8]
 )
-{ mgf_hash(a, len, mgfseed, maskLen, res) }
+{ crate::rsapss::mgf_hash(a, len, mgfseed, maskLen, res) }

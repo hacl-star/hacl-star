@@ -35,50 +35,28 @@ pub fn absorb_inner_256(
               (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[32usize..]);
               (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[64usize..]);
               (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[64usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b2[64usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b3[64usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b0[96usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b1[96usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b2[96usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b3[96usize..]);
-              (&mut ws)[16usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b0[128usize..]);
-              (&mut ws)[17usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b1[128usize..]);
-              (&mut ws)[18usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b2[128usize..]);
-              (&mut ws)[19usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b3[128usize..]);
-              (&mut ws)[20usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b0[160usize..]);
-              (&mut ws)[21usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b1[160usize..]);
-              (&mut ws)[22usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b2[160usize..]);
-              (&mut ws)[23usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b3[160usize..]);
-              (&mut ws)[24usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b0[192usize..]);
-              (&mut ws)[25usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b1[192usize..]);
-              (&mut ws)[26usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b2[192usize..]);
-              (&mut ws)[27usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b3[192usize..]);
-              (&mut ws)[28usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b0[224usize..]);
-              (&mut ws)[29usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b1[224usize..]);
-              (&mut ws)[30usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b2[224usize..]);
-              (&mut ws)[31usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b3[224usize..])
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -310,8 +288,7 @@ pub fn absorb_inner_256(
         "i",
         0u32,
         1u32,
-        s[i as usize] =
-            lib::intvector_intrinsics::vec256_xor(s[i as usize], (&ws)[i as usize])
+        s[i as usize] = lib::intvector_intrinsics::vec256_xor(s[i as usize], (&ws)[i as usize])
     );
     krml::unroll_for!(
         24,
@@ -364,10 +341,7 @@ pub fn absorb_inner_256(
                             uu____3,
                             lib::intvector_intrinsics::vec256_or(
                                 lib::intvector_intrinsics::vec256_shift_left64(uu____4, 1u32),
-                                lib::intvector_intrinsics::vec256_shift_right64(
-                                    uu____4,
-                                    63u32
-                                )
+                                lib::intvector_intrinsics::vec256_shift_right64(uu____4, 63u32)
                             )
                         );
                     krml::unroll_for!(
@@ -553,10 +527,7 @@ pub fn shake128(
                 fst: ref b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref b10,
-                    snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 }
-                }
+                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
             }
             =>
               match b·
@@ -568,8 +539,7 @@ pub fn shake128(
                       crate::sha2_types::uint8_3p
                       {
                           fst: ref mut bl1,
-                          snd:
-                          crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
+                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
                       }
                   }
                   =>
@@ -597,7 +567,7 @@ pub fn shake128(
                     }
               }
         };
-        absorb_inner_256(rateInBytes1, b·, &mut s)
+        crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
     let b0: [u8; 256] = [0u8; 256usize];
     let b1: [u8; 256] = [0u8; 256usize];
@@ -688,62 +658,34 @@ pub fn shake128(
               (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
               (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
               (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -1010,7 +952,7 @@ pub fn shake128(
               b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
-    absorb_inner_256(rateInBytes1, b, &mut s);
+    crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
     for i in 0u32..outputByteLen.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
@@ -1337,14 +1279,8 @@ pub fn shake128(
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
                                 lib::intvector_intrinsics::vec256_or(
-                                    lib::intvector_intrinsics::vec256_shift_left64(
-                                        uu____4,
-                                        1u32
-                                    ),
-                                    lib::intvector_intrinsics::vec256_shift_right64(
-                                        uu____4,
-                                        63u32
-                                    )
+                                    lib::intvector_intrinsics::vec256_shift_left64(uu____4, 1u32),
+                                    lib::intvector_intrinsics::vec256_shift_right64(uu____4, 63u32)
                                 )
                             );
                         krml::unroll_for!(
@@ -1806,10 +1742,7 @@ pub fn shake256(
                 fst: ref b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref b10,
-                    snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 }
-                }
+                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
             }
             =>
               match b·
@@ -1821,8 +1754,7 @@ pub fn shake256(
                       crate::sha2_types::uint8_3p
                       {
                           fst: ref mut bl1,
-                          snd:
-                          crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
+                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
                       }
                   }
                   =>
@@ -1850,7 +1782,7 @@ pub fn shake256(
                     }
               }
         };
-        absorb_inner_256(rateInBytes1, b·, &mut s)
+        crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
     let b0: [u8; 256] = [0u8; 256usize];
     let b1: [u8; 256] = [0u8; 256usize];
@@ -1941,62 +1873,34 @@ pub fn shake256(
               (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
               (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
               (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -2263,7 +2167,7 @@ pub fn shake256(
               b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
-    absorb_inner_256(rateInBytes1, b, &mut s);
+    crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
     for i in 0u32..outputByteLen.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
@@ -2590,14 +2494,8 @@ pub fn shake256(
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
                                 lib::intvector_intrinsics::vec256_or(
-                                    lib::intvector_intrinsics::vec256_shift_left64(
-                                        uu____4,
-                                        1u32
-                                    ),
-                                    lib::intvector_intrinsics::vec256_shift_right64(
-                                        uu____4,
-                                        63u32
-                                    )
+                                    lib::intvector_intrinsics::vec256_shift_left64(uu____4, 1u32),
+                                    lib::intvector_intrinsics::vec256_shift_right64(uu____4, 63u32)
                                 )
                             );
                         krml::unroll_for!(
@@ -3058,10 +2956,7 @@ pub fn sha3_224(
                 fst: ref b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref b10,
-                    snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 }
-                }
+                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
             }
             =>
               match b·
@@ -3073,8 +2968,7 @@ pub fn sha3_224(
                       crate::sha2_types::uint8_3p
                       {
                           fst: ref mut bl1,
-                          snd:
-                          crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
+                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
                       }
                   }
                   =>
@@ -3102,7 +2996,7 @@ pub fn sha3_224(
                     }
               }
         };
-        absorb_inner_256(rateInBytes1, b·, &mut s)
+        crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
     let b0: [u8; 256] = [0u8; 256usize];
     let b1: [u8; 256] = [0u8; 256usize];
@@ -3193,62 +3087,34 @@ pub fn sha3_224(
               (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
               (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
               (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -3515,7 +3381,7 @@ pub fn sha3_224(
               b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
-    absorb_inner_256(rateInBytes1, b, &mut s);
+    crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
     for i in 0u32..28u32.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
@@ -3842,14 +3708,8 @@ pub fn sha3_224(
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
                                 lib::intvector_intrinsics::vec256_or(
-                                    lib::intvector_intrinsics::vec256_shift_left64(
-                                        uu____4,
-                                        1u32
-                                    ),
-                                    lib::intvector_intrinsics::vec256_shift_right64(
-                                        uu____4,
-                                        63u32
-                                    )
+                                    lib::intvector_intrinsics::vec256_shift_left64(uu____4, 1u32),
+                                    lib::intvector_intrinsics::vec256_shift_right64(uu____4, 63u32)
                                 )
                             );
                         krml::unroll_for!(
@@ -4302,10 +4162,7 @@ pub fn sha3_256(
                 fst: ref b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref b10,
-                    snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 }
-                }
+                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
             }
             =>
               match b·
@@ -4317,8 +4174,7 @@ pub fn sha3_256(
                       crate::sha2_types::uint8_3p
                       {
                           fst: ref mut bl1,
-                          snd:
-                          crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
+                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
                       }
                   }
                   =>
@@ -4346,7 +4202,7 @@ pub fn sha3_256(
                     }
               }
         };
-        absorb_inner_256(rateInBytes1, b·, &mut s)
+        crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
     let b0: [u8; 256] = [0u8; 256usize];
     let b1: [u8; 256] = [0u8; 256usize];
@@ -4437,62 +4293,34 @@ pub fn sha3_256(
               (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
               (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
               (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -4759,7 +4587,7 @@ pub fn sha3_256(
               b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
-    absorb_inner_256(rateInBytes1, b, &mut s);
+    crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
     for i in 0u32..32u32.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
@@ -5086,14 +4914,8 @@ pub fn sha3_256(
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
                                 lib::intvector_intrinsics::vec256_or(
-                                    lib::intvector_intrinsics::vec256_shift_left64(
-                                        uu____4,
-                                        1u32
-                                    ),
-                                    lib::intvector_intrinsics::vec256_shift_right64(
-                                        uu____4,
-                                        63u32
-                                    )
+                                    lib::intvector_intrinsics::vec256_shift_left64(uu____4, 1u32),
+                                    lib::intvector_intrinsics::vec256_shift_right64(uu____4, 63u32)
                                 )
                             );
                         krml::unroll_for!(
@@ -5546,10 +5368,7 @@ pub fn sha3_384(
                 fst: ref b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref b10,
-                    snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 }
-                }
+                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
             }
             =>
               match b·
@@ -5561,8 +5380,7 @@ pub fn sha3_384(
                       crate::sha2_types::uint8_3p
                       {
                           fst: ref mut bl1,
-                          snd:
-                          crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
+                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
                       }
                   }
                   =>
@@ -5590,7 +5408,7 @@ pub fn sha3_384(
                     }
               }
         };
-        absorb_inner_256(rateInBytes1, b·, &mut s)
+        crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
     let b0: [u8; 256] = [0u8; 256usize];
     let b1: [u8; 256] = [0u8; 256usize];
@@ -5681,62 +5499,34 @@ pub fn sha3_384(
               (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
               (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
               (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -6003,7 +5793,7 @@ pub fn sha3_384(
               b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
-    absorb_inner_256(rateInBytes1, b, &mut s);
+    crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
     for i in 0u32..48u32.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
@@ -6330,14 +6120,8 @@ pub fn sha3_384(
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
                                 lib::intvector_intrinsics::vec256_or(
-                                    lib::intvector_intrinsics::vec256_shift_left64(
-                                        uu____4,
-                                        1u32
-                                    ),
-                                    lib::intvector_intrinsics::vec256_shift_right64(
-                                        uu____4,
-                                        63u32
-                                    )
+                                    lib::intvector_intrinsics::vec256_shift_left64(uu____4, 1u32),
+                                    lib::intvector_intrinsics::vec256_shift_right64(uu____4, 63u32)
                                 )
                             );
                         krml::unroll_for!(
@@ -6790,10 +6574,7 @@ pub fn sha3_512(
                 fst: ref b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref b10,
-                    snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 }
-                }
+                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
             }
             =>
               match b·
@@ -6805,8 +6586,7 @@ pub fn sha3_512(
                       crate::sha2_types::uint8_3p
                       {
                           fst: ref mut bl1,
-                          snd:
-                          crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
+                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
                       }
                   }
                   =>
@@ -6834,7 +6614,7 @@ pub fn sha3_512(
                     }
               }
         };
-        absorb_inner_256(rateInBytes1, b·, &mut s)
+        crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
     let b0: [u8; 256] = [0u8; 256usize];
     let b1: [u8; 256] = [0u8; 256usize];
@@ -6925,62 +6705,34 @@ pub fn sha3_512(
               (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
               (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
               (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -7247,7 +6999,7 @@ pub fn sha3_512(
               b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
-    absorb_inner_256(rateInBytes1, b, &mut s);
+    crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
     for i in 0u32..64u32.wrapping_div(rateInBytes1)
     {
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
@@ -7574,14 +7326,8 @@ pub fn sha3_512(
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
                                 lib::intvector_intrinsics::vec256_or(
-                                    lib::intvector_intrinsics::vec256_shift_left64(
-                                        uu____4,
-                                        1u32
-                                    ),
-                                    lib::intvector_intrinsics::vec256_shift_right64(
-                                        uu____4,
-                                        63u32
-                                    )
+                                    lib::intvector_intrinsics::vec256_shift_left64(uu____4, 1u32),
+                                    lib::intvector_intrinsics::vec256_shift_right64(uu____4, 63u32)
                                 )
                             );
                         krml::unroll_for!(
@@ -8069,7 +7815,7 @@ shake128_absorb_nblocks(
                   )
               }
         };
-        absorb_inner_256(168u32, b·, state)
+        crate::hash_sha3_simd256::absorb_inner_256(168u32, b·, state)
     }
 }
 
@@ -8181,62 +7927,34 @@ shake128_absorb_final(
               (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[0usize..]);
               (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[0usize..]);
               (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[0usize..]);
-              (&mut ws)[4usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b01[32usize..]);
-              (&mut ws)[5usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b11[32usize..]);
-              (&mut ws)[6usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b21[32usize..]);
-              (&mut ws)[7usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b31[32usize..]);
-              (&mut ws)[8usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b01[64usize..]);
-              (&mut ws)[9usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b11[64usize..]);
-              (&mut ws)[10usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b21[64usize..]);
-              (&mut ws)[11usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b31[64usize..]);
-              (&mut ws)[12usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b01[96usize..]);
-              (&mut ws)[13usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b11[96usize..]);
-              (&mut ws)[14usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b21[96usize..]);
-              (&mut ws)[15usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b31[96usize..]);
-              (&mut ws)[16usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b01[128usize..]);
-              (&mut ws)[17usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b11[128usize..]);
-              (&mut ws)[18usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b21[128usize..]);
-              (&mut ws)[19usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b31[128usize..]);
-              (&mut ws)[20usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b01[160usize..]);
-              (&mut ws)[21usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b11[160usize..]);
-              (&mut ws)[22usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b21[160usize..]);
-              (&mut ws)[23usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b31[160usize..]);
-              (&mut ws)[24usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b01[192usize..]);
-              (&mut ws)[25usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b11[192usize..]);
-              (&mut ws)[26usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b21[192usize..]);
-              (&mut ws)[27usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b31[192usize..]);
-              (&mut ws)[28usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b01[224usize..]);
-              (&mut ws)[29usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b11[224usize..]);
-              (&mut ws)[30usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b21[224usize..]);
-              (&mut ws)[31usize] =
-                  lib::intvector_intrinsics::vec256_load64_le(&b31[224usize..])
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -8503,7 +8221,7 @@ shake128_absorb_final(
               b32[167usize] = 0x80u8
           }
     };
-    absorb_inner_256(168u32, b, state)
+    crate::hash_sha3_simd256::absorb_inner_256(168u32, b, state)
 }
 
 /**
@@ -8834,14 +8552,8 @@ shake128_squeeze_nblocks(
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
                                 lib::intvector_intrinsics::vec256_or(
-                                    lib::intvector_intrinsics::vec256_shift_left64(
-                                        uu____4,
-                                        1u32
-                                    ),
-                                    lib::intvector_intrinsics::vec256_shift_right64(
-                                        uu____4,
-                                        63u32
-                                    )
+                                    lib::intvector_intrinsics::vec256_shift_left64(uu____4, 1u32),
+                                    lib::intvector_intrinsics::vec256_shift_right64(uu____4, 63u32)
                                 )
                             );
                         krml::unroll_for!(

@@ -58,7 +58,7 @@
         1u32,
         {
             let bj: (&[u8], &[u8]) = b.split_at(i.wrapping_mul(8u32) as usize);
-            let u: u64 = ::lowstar::endianness::load64_be(bj.1);
+            let u: u64 = lowstar::endianness::load64_be(bj.1);
             let r: u64 = u;
             let x: u64 = r;
             let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
@@ -88,7 +88,7 @@
 
 #[inline] pub(crate) fn load_felem_lt_prime_vartime(f: &mut [u64], b: &[u8]) -> bool
 {
-    load_felem(f, b);
+    crate::bignum_k256::load_felem(f, b);
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
     let f2: u64 = f[2usize];
@@ -128,10 +128,7 @@
         "i",
         0u32,
         1u32,
-        ::lowstar::endianness::store64_be(
-            &mut b[i.wrapping_mul(8u32) as usize..],
-            (&tmp)[i as usize]
-        )
+        lowstar::endianness::store64_be(&mut b[i.wrapping_mul(8u32) as usize..], (&tmp)[i as usize])
     )
 }
 
@@ -240,129 +237,114 @@
     let b3: u64 = f2[3usize];
     let b4: u64 = f2[4usize];
     let r: u64 = 0x1000003D10u64;
-    let d0: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(
-                ::fstar::uint128::add_mod(
-                    ::fstar::uint128::mul_wide(a0, b3),
-                    ::fstar::uint128::mul_wide(a1, b2)
+    let d0: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(
+                    fstar::uint128::mul_wide(a0, b3),
+                    fstar::uint128::mul_wide(a1, b2)
                 ),
-                ::fstar::uint128::mul_wide(a2, b1)
+                fstar::uint128::mul_wide(a2, b1)
             ),
-            ::fstar::uint128::mul_wide(a3, b0)
+            fstar::uint128::mul_wide(a3, b0)
         );
-    let c0: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(a4, b4);
-    let d1: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
+    let c0: fstar::uint128::uint128 = fstar::uint128::mul_wide(a4, b4);
+    let d1: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
             d0,
-            ::fstar::uint128::mul_wide(r, ::fstar::uint128::uint128_to_uint64(c0))
+            fstar::uint128::mul_wide(r, fstar::uint128::uint128_to_uint64(c0))
         );
-    let c1: u64 =
-        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(c0, 64u32));
-    let t3: u64 = ::fstar::uint128::uint128_to_uint64(d1) & 0xfffffffffffffu64;
-    let d2: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(d1, 52u32);
-    let d3: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(
-                ::fstar::uint128::add_mod(
-                    ::fstar::uint128::add_mod(
-                        ::fstar::uint128::add_mod(d2, ::fstar::uint128::mul_wide(a0, b4)),
-                        ::fstar::uint128::mul_wide(a1, b3)
+    let c1: u64 = fstar::uint128::uint128_to_uint64(fstar::uint128::shift_right(c0, 64u32));
+    let t3: u64 = fstar::uint128::uint128_to_uint64(d1) & 0xfffffffffffffu64;
+    let d2: fstar::uint128::uint128 = fstar::uint128::shift_right(d1, 52u32);
+    let d3: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(
+                    fstar::uint128::add_mod(
+                        fstar::uint128::add_mod(d2, fstar::uint128::mul_wide(a0, b4)),
+                        fstar::uint128::mul_wide(a1, b3)
                     ),
-                    ::fstar::uint128::mul_wide(a2, b2)
+                    fstar::uint128::mul_wide(a2, b2)
                 ),
-                ::fstar::uint128::mul_wide(a3, b1)
+                fstar::uint128::mul_wide(a3, b1)
             ),
-            ::fstar::uint128::mul_wide(a4, b0)
+            fstar::uint128::mul_wide(a4, b0)
         );
-    let d4: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            d3,
-            ::fstar::uint128::mul_wide(r.wrapping_shl(12u32), c1)
-        );
-    let t4: u64 = ::fstar::uint128::uint128_to_uint64(d4) & 0xfffffffffffffu64;
-    let d5: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(d4, 52u32);
+    let d4: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(d3, fstar::uint128::mul_wide(r.wrapping_shl(12u32), c1));
+    let t4: u64 = fstar::uint128::uint128_to_uint64(d4) & 0xfffffffffffffu64;
+    let d5: fstar::uint128::uint128 = fstar::uint128::shift_right(d4, 52u32);
     let tx: u64 = t4.wrapping_shr(48u32);
     let t4·: u64 = t4 & 0xffffffffffffu64;
-    let c2: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(a0, b0);
-    let d6: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(
-                ::fstar::uint128::add_mod(
-                    ::fstar::uint128::add_mod(d5, ::fstar::uint128::mul_wide(a1, b4)),
-                    ::fstar::uint128::mul_wide(a2, b3)
+    let c2: fstar::uint128::uint128 = fstar::uint128::mul_wide(a0, b0);
+    let d6: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(
+                    fstar::uint128::add_mod(d5, fstar::uint128::mul_wide(a1, b4)),
+                    fstar::uint128::mul_wide(a2, b3)
                 ),
-                ::fstar::uint128::mul_wide(a3, b2)
+                fstar::uint128::mul_wide(a3, b2)
             ),
-            ::fstar::uint128::mul_wide(a4, b1)
+            fstar::uint128::mul_wide(a4, b1)
         );
-    let u0: u64 = ::fstar::uint128::uint128_to_uint64(d6) & 0xfffffffffffffu64;
-    let d7: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(d6, 52u32);
+    let u0: u64 = fstar::uint128::uint128_to_uint64(d6) & 0xfffffffffffffu64;
+    let d7: fstar::uint128::uint128 = fstar::uint128::shift_right(d6, 52u32);
     let u0·: u64 = tx | u0.wrapping_shl(4u32);
-    let c3: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            c2,
-            ::fstar::uint128::mul_wide(u0·, r.wrapping_shr(4u32))
+    let c3: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(c2, fstar::uint128::mul_wide(u0·, r.wrapping_shr(4u32)));
+    let r0: u64 = fstar::uint128::uint128_to_uint64(c3) & 0xfffffffffffffu64;
+    let c4: fstar::uint128::uint128 = fstar::uint128::shift_right(c3, 52u32);
+    let c5: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(c4, fstar::uint128::mul_wide(a0, b1)),
+            fstar::uint128::mul_wide(a1, b0)
         );
-    let r0: u64 = ::fstar::uint128::uint128_to_uint64(c3) & 0xfffffffffffffu64;
-    let c4: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(c3, 52u32);
-    let c5: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(c4, ::fstar::uint128::mul_wide(a0, b1)),
-            ::fstar::uint128::mul_wide(a1, b0)
-        );
-    let d8: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(
-                ::fstar::uint128::add_mod(d7, ::fstar::uint128::mul_wide(a2, b4)),
-                ::fstar::uint128::mul_wide(a3, b3)
+    let d8: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(d7, fstar::uint128::mul_wide(a2, b4)),
+                fstar::uint128::mul_wide(a3, b3)
             ),
-            ::fstar::uint128::mul_wide(a4, b2)
+            fstar::uint128::mul_wide(a4, b2)
         );
-    let c6: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
+    let c6: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
             c5,
-            ::fstar::uint128::mul_wide(
-                ::fstar::uint128::uint128_to_uint64(d8) & 0xfffffffffffffu64,
-                r
-            )
+            fstar::uint128::mul_wide(fstar::uint128::uint128_to_uint64(d8) & 0xfffffffffffffu64, r)
         );
-    let d9: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(d8, 52u32);
-    let r1: u64 = ::fstar::uint128::uint128_to_uint64(c6) & 0xfffffffffffffu64;
-    let c7: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(c6, 52u32);
-    let c8: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(
-                ::fstar::uint128::add_mod(c7, ::fstar::uint128::mul_wide(a0, b2)),
-                ::fstar::uint128::mul_wide(a1, b1)
+    let d9: fstar::uint128::uint128 = fstar::uint128::shift_right(d8, 52u32);
+    let r1: u64 = fstar::uint128::uint128_to_uint64(c6) & 0xfffffffffffffu64;
+    let c7: fstar::uint128::uint128 = fstar::uint128::shift_right(c6, 52u32);
+    let c8: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(c7, fstar::uint128::mul_wide(a0, b2)),
+                fstar::uint128::mul_wide(a1, b1)
             ),
-            ::fstar::uint128::mul_wide(a2, b0)
+            fstar::uint128::mul_wide(a2, b0)
         );
-    let d10: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(d9, ::fstar::uint128::mul_wide(a3, b4)),
-            ::fstar::uint128::mul_wide(a4, b3)
+    let d10: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(d9, fstar::uint128::mul_wide(a3, b4)),
+            fstar::uint128::mul_wide(a4, b3)
         );
-    let c9: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
+    let c9: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
             c8,
-            ::fstar::uint128::mul_wide(r, ::fstar::uint128::uint128_to_uint64(d10))
+            fstar::uint128::mul_wide(r, fstar::uint128::uint128_to_uint64(d10))
         );
-    let d11: u64 =
-        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(d10, 64u32));
-    let r2: u64 = ::fstar::uint128::uint128_to_uint64(c9) & 0xfffffffffffffu64;
-    let c10: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(c9, 52u32);
-    let c11: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(
-                c10,
-                ::fstar::uint128::mul_wide(r.wrapping_shl(12u32), d11)
-            ),
-            ::fstar::uint128::uint64_to_uint128(t3)
+    let d11: u64 = fstar::uint128::uint128_to_uint64(fstar::uint128::shift_right(d10, 64u32));
+    let r2: u64 = fstar::uint128::uint128_to_uint64(c9) & 0xfffffffffffffu64;
+    let c10: fstar::uint128::uint128 = fstar::uint128::shift_right(c9, 52u32);
+    let c11: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(c10, fstar::uint128::mul_wide(r.wrapping_shl(12u32), d11)),
+            fstar::uint128::uint64_to_uint128(t3)
         );
-    let r3: u64 = ::fstar::uint128::uint128_to_uint64(c11) & 0xfffffffffffffu64;
-    let c12: u64 =
-        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(c11, 52u32));
+    let r3: u64 = fstar::uint128::uint128_to_uint64(c11) & 0xfffffffffffffu64;
+    let c12: u64 = fstar::uint128::uint128_to_uint64(fstar::uint128::shift_right(c11, 52u32));
     let r4: u64 = c12.wrapping_add(t4·);
     let f0: u64 = r0;
     let f11: u64 = r1;
@@ -384,101 +366,86 @@
     let a3: u64 = f[3usize];
     let a4: u64 = f[4usize];
     let r: u64 = 0x1000003D10u64;
-    let d0: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::mul_wide(a0.wrapping_mul(2u64), a3),
-            ::fstar::uint128::mul_wide(a1.wrapping_mul(2u64), a2)
+    let d0: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::mul_wide(a0.wrapping_mul(2u64), a3),
+            fstar::uint128::mul_wide(a1.wrapping_mul(2u64), a2)
         );
-    let c0: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(a4, a4);
-    let d1: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
+    let c0: fstar::uint128::uint128 = fstar::uint128::mul_wide(a4, a4);
+    let d1: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
             d0,
-            ::fstar::uint128::mul_wide(r, ::fstar::uint128::uint128_to_uint64(c0))
+            fstar::uint128::mul_wide(r, fstar::uint128::uint128_to_uint64(c0))
         );
-    let c1: u64 =
-        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(c0, 64u32));
-    let t3: u64 = ::fstar::uint128::uint128_to_uint64(d1) & 0xfffffffffffffu64;
-    let d2: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(d1, 52u32);
+    let c1: u64 = fstar::uint128::uint128_to_uint64(fstar::uint128::shift_right(c0, 64u32));
+    let t3: u64 = fstar::uint128::uint128_to_uint64(d1) & 0xfffffffffffffu64;
+    let d2: fstar::uint128::uint128 = fstar::uint128::shift_right(d1, 52u32);
     let a41: u64 = a4.wrapping_mul(2u64);
-    let d3: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(
-                ::fstar::uint128::add_mod(d2, ::fstar::uint128::mul_wide(a0, a41)),
-                ::fstar::uint128::mul_wide(a1.wrapping_mul(2u64), a3)
+    let d3: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(
+                fstar::uint128::add_mod(d2, fstar::uint128::mul_wide(a0, a41)),
+                fstar::uint128::mul_wide(a1.wrapping_mul(2u64), a3)
             ),
-            ::fstar::uint128::mul_wide(a2, a2)
+            fstar::uint128::mul_wide(a2, a2)
         );
-    let d4: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            d3,
-            ::fstar::uint128::mul_wide(r.wrapping_shl(12u32), c1)
-        );
-    let t4: u64 = ::fstar::uint128::uint128_to_uint64(d4) & 0xfffffffffffffu64;
-    let d5: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(d4, 52u32);
+    let d4: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(d3, fstar::uint128::mul_wide(r.wrapping_shl(12u32), c1));
+    let t4: u64 = fstar::uint128::uint128_to_uint64(d4) & 0xfffffffffffffu64;
+    let d5: fstar::uint128::uint128 = fstar::uint128::shift_right(d4, 52u32);
     let tx: u64 = t4.wrapping_shr(48u32);
     let t4·: u64 = t4 & 0xffffffffffffu64;
-    let c2: ::fstar::uint128::uint128 = ::fstar::uint128::mul_wide(a0, a0);
-    let d6: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(d5, ::fstar::uint128::mul_wide(a1, a41)),
-            ::fstar::uint128::mul_wide(a2.wrapping_mul(2u64), a3)
+    let c2: fstar::uint128::uint128 = fstar::uint128::mul_wide(a0, a0);
+    let d6: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(d5, fstar::uint128::mul_wide(a1, a41)),
+            fstar::uint128::mul_wide(a2.wrapping_mul(2u64), a3)
         );
-    let u0: u64 = ::fstar::uint128::uint128_to_uint64(d6) & 0xfffffffffffffu64;
-    let d7: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(d6, 52u32);
+    let u0: u64 = fstar::uint128::uint128_to_uint64(d6) & 0xfffffffffffffu64;
+    let d7: fstar::uint128::uint128 = fstar::uint128::shift_right(d6, 52u32);
     let u0·: u64 = tx | u0.wrapping_shl(4u32);
-    let c3: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            c2,
-            ::fstar::uint128::mul_wide(u0·, r.wrapping_shr(4u32))
-        );
-    let r0: u64 = ::fstar::uint128::uint128_to_uint64(c3) & 0xfffffffffffffu64;
-    let c4: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(c3, 52u32);
+    let c3: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(c2, fstar::uint128::mul_wide(u0·, r.wrapping_shr(4u32)));
+    let r0: u64 = fstar::uint128::uint128_to_uint64(c3) & 0xfffffffffffffu64;
+    let c4: fstar::uint128::uint128 = fstar::uint128::shift_right(c3, 52u32);
     let a01: u64 = a0.wrapping_mul(2u64);
-    let c5: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(c4, ::fstar::uint128::mul_wide(a01, a1));
-    let d8: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(d7, ::fstar::uint128::mul_wide(a2, a41)),
-            ::fstar::uint128::mul_wide(a3, a3)
+    let c5: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(c4, fstar::uint128::mul_wide(a01, a1));
+    let d8: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(d7, fstar::uint128::mul_wide(a2, a41)),
+            fstar::uint128::mul_wide(a3, a3)
         );
-    let c6: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
+    let c6: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
             c5,
-            ::fstar::uint128::mul_wide(
-                ::fstar::uint128::uint128_to_uint64(d8) & 0xfffffffffffffu64,
-                r
-            )
+            fstar::uint128::mul_wide(fstar::uint128::uint128_to_uint64(d8) & 0xfffffffffffffu64, r)
         );
-    let d9: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(d8, 52u32);
-    let r1: u64 = ::fstar::uint128::uint128_to_uint64(c6) & 0xfffffffffffffu64;
-    let c7: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(c6, 52u32);
-    let c8: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(c7, ::fstar::uint128::mul_wide(a01, a2)),
-            ::fstar::uint128::mul_wide(a1, a1)
+    let d9: fstar::uint128::uint128 = fstar::uint128::shift_right(d8, 52u32);
+    let r1: u64 = fstar::uint128::uint128_to_uint64(c6) & 0xfffffffffffffu64;
+    let c7: fstar::uint128::uint128 = fstar::uint128::shift_right(c6, 52u32);
+    let c8: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(c7, fstar::uint128::mul_wide(a01, a2)),
+            fstar::uint128::mul_wide(a1, a1)
         );
-    let d10: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(d9, ::fstar::uint128::mul_wide(a3, a41));
-    let c9: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
+    let d10: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(d9, fstar::uint128::mul_wide(a3, a41));
+    let c9: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
             c8,
-            ::fstar::uint128::mul_wide(r, ::fstar::uint128::uint128_to_uint64(d10))
+            fstar::uint128::mul_wide(r, fstar::uint128::uint128_to_uint64(d10))
         );
-    let d11: u64 =
-        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(d10, 64u32));
-    let r2: u64 = ::fstar::uint128::uint128_to_uint64(c9) & 0xfffffffffffffu64;
-    let c10: ::fstar::uint128::uint128 = ::fstar::uint128::shift_right(c9, 52u32);
-    let c11: ::fstar::uint128::uint128 =
-        ::fstar::uint128::add_mod(
-            ::fstar::uint128::add_mod(
-                c10,
-                ::fstar::uint128::mul_wide(r.wrapping_shl(12u32), d11)
-            ),
-            ::fstar::uint128::uint64_to_uint128(t3)
+    let d11: u64 = fstar::uint128::uint128_to_uint64(fstar::uint128::shift_right(d10, 64u32));
+    let r2: u64 = fstar::uint128::uint128_to_uint64(c9) & 0xfffffffffffffu64;
+    let c10: fstar::uint128::uint128 = fstar::uint128::shift_right(c9, 52u32);
+    let c11: fstar::uint128::uint128 =
+        fstar::uint128::add_mod(
+            fstar::uint128::add_mod(c10, fstar::uint128::mul_wide(r.wrapping_shl(12u32), d11)),
+            fstar::uint128::uint64_to_uint128(t3)
         );
-    let r3: u64 = ::fstar::uint128::uint128_to_uint64(c11) & 0xfffffffffffffu64;
-    let c12: u64 =
-        ::fstar::uint128::uint128_to_uint64(::fstar::uint128::shift_right(c11, 52u32));
+    let r3: u64 = fstar::uint128::uint128_to_uint64(c11) & 0xfffffffffffffu64;
+    let c12: u64 = fstar::uint128::uint128_to_uint64(fstar::uint128::shift_right(c11, 52u32));
     let r4: u64 = c12.wrapping_add(t4·);
     let f0: u64 = r0;
     let f1: u64 = r1;
@@ -565,11 +532,11 @@
     let r2: u64 = t20;
     let r3: u64 = t30;
     let r4: u64 = t410;
-    let m4: u64 = ::fstar::uint64::eq_mask(r4, 0xffffffffffffu64);
-    let m3: u64 = ::fstar::uint64::eq_mask(r3, 0xfffffffffffffu64);
-    let m2: u64 = ::fstar::uint64::eq_mask(r2, 0xfffffffffffffu64);
-    let m1: u64 = ::fstar::uint64::eq_mask(r1, 0xfffffffffffffu64);
-    let m0: u64 = ::fstar::uint64::gte_mask(r0, 0xffffefffffc2fu64);
+    let m4: u64 = fstar::uint64::eq_mask(r4, 0xffffffffffffu64);
+    let m3: u64 = fstar::uint64::eq_mask(r3, 0xfffffffffffffu64);
+    let m2: u64 = fstar::uint64::eq_mask(r2, 0xfffffffffffffu64);
+    let m1: u64 = fstar::uint64::eq_mask(r1, 0xfffffffffffffu64);
+    let m0: u64 = fstar::uint64::gte_mask(r0, 0xffffefffffc2fu64);
     let is_ge_p_m: u64 = m0 & m1 & m2 & m3 & m4;
     let m_to_one: u64 = is_ge_p_m & 1u64;
     let x10: u64 = m_to_one | x2;
@@ -631,7 +598,7 @@
         f[4usize] = f4;
         let mut f_copy: [u64; 5] = [0u64; 5usize];
         ((&mut f_copy)[0usize..5usize]).copy_from_slice(&f[0usize..5usize]);
-        fnormalize(f, &f_copy)
+        crate::bignum_k256::fnormalize(f, &f_copy)
     }
 }
 
@@ -641,7 +608,7 @@
     {
         let mut x_copy: [u64; 5] = [0u64; 5usize];
         ((&mut x_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-        fsqr(out, &x_copy)
+        crate::bignum_k256::fsqr(out, &x_copy)
     }
 }
 
@@ -652,7 +619,7 @@
     {
         let mut x_copy: [u64; 5] = [0u64; 5usize];
         ((&mut x_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-        fsqr(out, &x_copy)
+        crate::bignum_k256::fsqr(out, &x_copy)
     }
 }
 
@@ -662,81 +629,81 @@
     let mut x22: [u64; 5] = [0u64; 5usize];
     let mut x44: [u64; 5] = [0u64; 5usize];
     let mut x88: [u64; 5] = [0u64; 5usize];
-    fsquare_times(x2, f, 1u32);
+    crate::bignum_k256::fsquare_times(x2, f, 1u32);
     let mut f1_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&x2[0usize..5usize]);
-    fmul(x2, &f1_copy, f);
-    fsquare_times(&mut x3, x2, 1u32);
+    crate::bignum_k256::fmul(x2, &f1_copy, f);
+    crate::bignum_k256::fsquare_times(&mut x3, x2, 1u32);
     let mut f1_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&(&x3)[0usize..5usize]);
-    fmul(&mut x3, &f1_copy0, f);
-    fsquare_times(out, &x3, 3u32);
+    crate::bignum_k256::fmul(&mut x3, &f1_copy0, f);
+    crate::bignum_k256::fsquare_times(out, &x3, 3u32);
     let mut f1_copy1: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy1)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy1, &x3);
-    fsquare_times_in_place(out, 3u32);
+    crate::bignum_k256::fmul(out, &f1_copy1, &x3);
+    crate::bignum_k256::fsquare_times_in_place(out, 3u32);
     let mut f1_copy2: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy2)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy2, &x3);
-    fsquare_times_in_place(out, 2u32);
+    crate::bignum_k256::fmul(out, &f1_copy2, &x3);
+    crate::bignum_k256::fsquare_times_in_place(out, 2u32);
     let mut f1_copy3: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy3)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy3, x2);
-    fsquare_times(&mut x22, out, 11u32);
+    crate::bignum_k256::fmul(out, &f1_copy3, x2);
+    crate::bignum_k256::fsquare_times(&mut x22, out, 11u32);
     let mut f1_copy4: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy4)[0usize..5usize]).copy_from_slice(&(&x22)[0usize..5usize]);
-    fmul(&mut x22, &f1_copy4, out);
-    fsquare_times(&mut x44, &x22, 22u32);
+    crate::bignum_k256::fmul(&mut x22, &f1_copy4, out);
+    crate::bignum_k256::fsquare_times(&mut x44, &x22, 22u32);
     let mut f1_copy5: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy5)[0usize..5usize]).copy_from_slice(&(&x44)[0usize..5usize]);
-    fmul(&mut x44, &f1_copy5, &x22);
-    fsquare_times(&mut x88, &x44, 44u32);
+    crate::bignum_k256::fmul(&mut x44, &f1_copy5, &x22);
+    crate::bignum_k256::fsquare_times(&mut x88, &x44, 44u32);
     let mut f1_copy6: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy6)[0usize..5usize]).copy_from_slice(&(&x88)[0usize..5usize]);
-    fmul(&mut x88, &f1_copy6, &x44);
-    fsquare_times(out, &x88, 88u32);
+    crate::bignum_k256::fmul(&mut x88, &f1_copy6, &x44);
+    crate::bignum_k256::fsquare_times(out, &x88, 88u32);
     let mut f1_copy7: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy7)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy7, &x88);
-    fsquare_times_in_place(out, 44u32);
+    crate::bignum_k256::fmul(out, &f1_copy7, &x88);
+    crate::bignum_k256::fsquare_times_in_place(out, 44u32);
     let mut f1_copy8: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy8)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy8, &x44);
-    fsquare_times_in_place(out, 3u32);
+    crate::bignum_k256::fmul(out, &f1_copy8, &x44);
+    crate::bignum_k256::fsquare_times_in_place(out, 3u32);
     let mut f1_copy9: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy9)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy9, &x3);
-    fsquare_times_in_place(out, 23u32);
+    crate::bignum_k256::fmul(out, &f1_copy9, &x3);
+    crate::bignum_k256::fsquare_times_in_place(out, 23u32);
     let mut f1_copy10: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy10)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy10, &x22)
+    crate::bignum_k256::fmul(out, &f1_copy10, &x22)
 }
 
 #[inline] pub(crate) fn finv(out: &mut [u64], f: &[u64])
 {
     let mut x2: [u64; 5] = [0u64; 5usize];
-    fexp_223_23(out, &mut x2, f);
-    fsquare_times_in_place(out, 5u32);
+    crate::bignum_k256::fexp_223_23(out, &mut x2, f);
+    crate::bignum_k256::fsquare_times_in_place(out, 5u32);
     let mut f1_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy, f);
-    fsquare_times_in_place(out, 3u32);
+    crate::bignum_k256::fmul(out, &f1_copy, f);
+    crate::bignum_k256::fsquare_times_in_place(out, 3u32);
     let mut f1_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy0, &x2);
-    fsquare_times_in_place(out, 2u32);
+    crate::bignum_k256::fmul(out, &f1_copy0, &x2);
+    crate::bignum_k256::fsquare_times_in_place(out, 2u32);
     let mut f1_copy1: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy1)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy1, f)
+    crate::bignum_k256::fmul(out, &f1_copy1, f)
 }
 
 #[inline] pub(crate) fn fsqrt(out: &mut [u64], f: &[u64])
 {
     let mut x2: [u64; 5] = [0u64; 5usize];
-    fexp_223_23(out, &mut x2, f);
-    fsquare_times_in_place(out, 6u32);
+    crate::bignum_k256::fexp_223_23(out, &mut x2, f);
+    crate::bignum_k256::fsquare_times_in_place(out, 6u32);
     let mut f1_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    fmul(out, &f1_copy, &x2);
-    fsquare_times_in_place(out, 2u32)
+    crate::bignum_k256::fmul(out, &f1_copy, &x2);
+    crate::bignum_k256::fsquare_times_in_place(out, 2u32)
 }

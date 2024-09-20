@@ -422,27 +422,27 @@ pub(crate) fn poly1305_finish(tag: &mut [u8], key: &[u8], ctx: &mut [u64])
 pub struct state_t
 { pub block_state: Box<[u64]>, pub buf: Box<[u8]>, pub total_len: u64, pub p_key: Box<[u8]> }
 
-pub fn malloc(key: &[u8]) -> Box<[state_t]>
+pub fn malloc(key: &[u8]) -> Box<[crate::mac_poly1305::state_t]>
 {
     let buf: Box<[u8]> = vec![0u8; 16usize].into_boxed_slice();
     let mut r1: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
     let block_state: &mut [u64] = &mut r1;
-    poly1305_init(block_state, key);
+    crate::mac_poly1305::poly1305_init(block_state, key);
     let mut k·: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
     ((&mut k·)[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
     let k·0: &[u8] = &k·;
-    let s: state_t =
-        state_t
+    let s: crate::mac_poly1305::state_t =
+        crate::mac_poly1305::state_t
         { block_state: (*block_state).into(), buf, total_len: 0u32 as u64, p_key: (*k·0).into() };
-    let p: Box<[state_t]> = vec![s].into_boxed_slice();
+    let p: Box<[crate::mac_poly1305::state_t]> = vec![s].into_boxed_slice();
     p
 }
 
-pub fn reset(state: &mut [state_t], key: &[u8])
+pub fn reset(state: &mut [crate::mac_poly1305::state_t], key: &[u8])
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
     let k·: &mut [u8] = &mut (state[0usize]).p_key;
-    poly1305_init(block_state, key);
+    crate::mac_poly1305::poly1305_init(block_state, key);
     (k·[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
     let k·1: &[u8] = k·;
     let total_len: u64 = 0u32 as u64;
@@ -454,7 +454,7 @@ pub fn reset(state: &mut [state_t], key: &[u8])
 0 = success, 1 = max length exceeded
 */
 pub fn
-update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
+update(state: &mut [crate::mac_poly1305::state_t], chunk: &[u8], chunk_len: u32) ->
     crate::streaming_types::error_code
 {
     let block_state: &mut [u64] = &mut (state[0usize]).block_state;
@@ -494,7 +494,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { 16u32 }
                 else
                 { total_len1.wrapping_rem(16u32 as u64) as u32 };
-            if sz1 != 0u32 { poly1305_update(block_state, 16u32, buf) };
+            if sz1 != 0u32 { crate::mac_poly1305::poly1305_update(block_state, 16u32, buf) };
             let ite: u32 =
                 if (chunk_len as u64).wrapping_rem(16u32 as u64) == 0u64 && chunk_len as u64 > 0u64
                 { 16u32 }
@@ -505,7 +505,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            poly1305_update(block_state, data1_len, data2.0);
+            crate::mac_poly1305::poly1305_update(block_state, data1_len, data2.0);
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -541,7 +541,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
                 { 16u32 }
                 else
                 { total_len10.wrapping_rem(16u32 as u64) as u32 };
-            if sz10 != 0u32 { poly1305_update(block_state, 16u32, buf0) };
+            if sz10 != 0u32 { crate::mac_poly1305::poly1305_update(block_state, 16u32, buf0) };
             let ite: u32 =
                 if
                 (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(16u32 as u64) == 0u64
@@ -555,7 +555,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            poly1305_update(block_state, data1_len, data2.0);
+            crate::mac_poly1305::poly1305_update(block_state, data1_len, data2.0);
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -568,7 +568,7 @@ update(state: &mut [state_t], chunk: &[u8], chunk_len: u32) ->
     }
 }
 
-pub fn digest(state: &[state_t], output: &mut [u8])
+pub fn digest(state: &[crate::mac_poly1305::state_t], output: &mut [u8])
 {
     let block_state: &[u64] = &(state[0usize]).block_state;
     let buf_: &[u8] = &(state[0usize]).buf;
@@ -587,17 +587,17 @@ pub fn digest(state: &[state_t], output: &mut [u8])
     let ite: u32 =
         if r.wrapping_rem(16u32) == 0u32 && r > 0u32 { 16u32 } else { r.wrapping_rem(16u32) };
     let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
-    poly1305_update(tmp_block_state, 0u32, buf_last.0);
-    poly1305_update(tmp_block_state, r, buf_last.1);
+    crate::mac_poly1305::poly1305_update(tmp_block_state, 0u32, buf_last.0);
+    crate::mac_poly1305::poly1305_update(tmp_block_state, r, buf_last.1);
     let mut tmp: [u64; 25] = [0u64; 25usize];
     ((&mut tmp)[0usize..25usize]).copy_from_slice(&tmp_block_state[0usize..25usize]);
-    poly1305_finish(output, k·, &mut tmp)
+    crate::mac_poly1305::poly1305_finish(output, k·, &mut tmp)
 }
 
 pub fn mac(output: &mut [u8], input: &[u8], input_len: u32, key: &[u8])
 {
     let mut ctx: [u64; 25] = [0u64; 25usize];
-    poly1305_init(&mut ctx, key);
-    poly1305_update(&mut ctx, input_len, input);
-    poly1305_finish(output, key, &mut ctx)
+    crate::mac_poly1305::poly1305_init(&mut ctx, key);
+    crate::mac_poly1305::poly1305_update(&mut ctx, input_len, input);
+    crate::mac_poly1305::poly1305_finish(output, key, &mut ctx)
 }

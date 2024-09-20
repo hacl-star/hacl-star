@@ -134,12 +134,7 @@ pub(crate) fn shake128_4x(
 #[inline] pub(crate) fn matrix_to_lbytes(n1: u32, n2: u32, m: &[u16], res: &mut [u8])
 {
     for i in 0u32..n1.wrapping_mul(n2)
-    {
-        lowstar::endianness::store16_le(
-            &mut res[2u32.wrapping_mul(i) as usize..],
-            m[i as usize]
-        )
-    }
+    { lowstar::endianness::store16_le(&mut res[2u32.wrapping_mul(i) as usize..], m[i as usize]) }
 }
 
 #[inline] pub(crate) fn matrix_from_lbytes(n1: u32, n2: u32, b: &[u8], res: &mut [u16])
@@ -193,7 +188,7 @@ pub(crate) fn shake128_4x(
             &mut tmp_seed3.1[0usize..],
             4u32.wrapping_mul(i).wrapping_add(3u32) as u16
         );
-        shake128_4x(
+        crate::frodo_kem::shake128_4x(
             18u32,
             tmp_seed1.0,
             tmp_seed2.0,
@@ -236,7 +231,8 @@ pub(crate) fn shake128_4x(
 {
     match a
     {
-        crate::spec::frodo_gen_a::SHAKE128 => frodo_gen_matrix_shake_4x(n, seed, a_matrix),
+        crate::spec::frodo_gen_a::SHAKE128 =>
+          crate::frodo_kem::frodo_gen_matrix_shake_4x(n, seed, a_matrix),
         _ => panic!("Precondition of the function most likely violated")
     }
 }
@@ -272,7 +268,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
             for i1 in 0u32..bound
             {
                 let sample0: u16 = (&sample)[0usize];
-                let ti: u16 = (&cdf_table640)[i1 as usize];
+                let ti: u16 = (&crate::frodo_kem::cdf_table640)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
                 (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
@@ -303,7 +299,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
             for i1 in 0u32..bound
             {
                 let sample0: u16 = (&sample)[0usize];
-                let ti: u16 = (&cdf_table640)[i1 as usize];
+                let ti: u16 = (&crate::frodo_kem::cdf_table640)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
                 (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
@@ -334,7 +330,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
             for i1 in 0u32..bound
             {
                 let sample0: u16 = (&sample)[0usize];
-                let ti: u16 = (&cdf_table976)[i1 as usize];
+                let ti: u16 = (&crate::frodo_kem::cdf_table976)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
                 (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
@@ -365,7 +361,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
             for i1 in 0u32..bound
             {
                 let sample0: u16 = (&sample)[0usize];
-                let ti: u16 = (&cdf_table1344)[i1 as usize];
+                let ti: u16 = (&crate::frodo_kem::cdf_table1344)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
                 (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
@@ -377,9 +373,7 @@ pub(crate) const cdf_table1344: [u16; 7] =
 }
 
 pub(crate) fn randombytes_(len: u32, res: &mut [u8])
-{
-    lowstar::ignore::ignore::<bool>(lib::randombuffer_system::randombytes(res, len))
-}
+{ lowstar::ignore::ignore::<bool>(lib::randombuffer_system::randombytes(res, len)) }
 
 #[inline] pub(crate) fn frodo_pack(n1: u32, n2: u32, d: u32, a: &[u16], res: &mut [u8])
 {

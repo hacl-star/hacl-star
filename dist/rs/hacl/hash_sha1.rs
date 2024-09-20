@@ -9,7 +9,7 @@ const _h0: [u32; 5] =
     [0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32, 0xc3d2e1f0u32];
 
 pub(crate) fn init(s: &mut [u32])
-{ krml::unroll_for!(5, "i", 0u32, 1u32, s[i as usize] = (&_h0)[i as usize]) }
+{ krml::unroll_for!(5, "i", 0u32, 1u32, s[i as usize] = (&crate::hash_sha1::_h0)[i as usize]) }
 
 fn update(h: &mut [u32], l: &[u8])
 {
@@ -124,7 +124,7 @@ pub(crate) fn update_multi(s: &mut [u32], blocks: &[u8], n_blocks: u32)
     {
         let sz: u32 = 64u32;
         let block: (&[u8], &[u8]) = blocks.split_at(sz.wrapping_mul(i) as usize);
-        update(s, block.1)
+        crate::hash_sha1::update(s, block.1)
     }
 }
 
@@ -135,7 +135,7 @@ pub(crate) fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len:
     let blocks: (&[u8], &[u8]) = input.split_at(0usize);
     let rest_len: u32 = input_len.wrapping_sub(blocks_len);
     let rest: (&[u8], &[u8]) = blocks.1.split_at(blocks_len as usize);
-    update_multi(s, rest.0, blocks_n);
+    crate::hash_sha1::update_multi(s, rest.0, blocks_n);
     let total_input_len: u64 = prev_len.wrapping_add(input_len as u64);
     let pad_len: u32 =
         1u32.wrapping_add(
@@ -149,8 +149,8 @@ pub(crate) fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len:
     let tmp_rest: (&mut [u8], &mut [u8]) = tmp.1.split_at_mut(0usize);
     let tmp_pad: (&mut [u8], &mut [u8]) = tmp_rest.1.split_at_mut(rest_len as usize);
     (tmp_pad.0[0usize..rest_len as usize]).copy_from_slice(&rest.1[0usize..rest_len as usize]);
-    pad(total_input_len, tmp_pad.1);
-    update_multi(s, tmp.1, tmp_len.wrapping_div(64u32))
+    crate::hash_sha1::pad(total_input_len, tmp_pad.1);
+    crate::hash_sha1::update_multi(s, tmp.1, tmp_len.wrapping_div(64u32))
 }
 
 pub(crate) fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
@@ -172,9 +172,9 @@ pub(crate) fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
     let blocks0: &[u8] = rest.0;
     let rest_len0: u32 = rest_len;
     let rest0: &[u8] = rest.1;
-    update_multi(&mut s, blocks0, blocks_n0);
-    update_last(&mut s, blocks_len0 as u64, rest0, rest_len0);
-    finish(&s, output)
+    crate::hash_sha1::update_multi(&mut s, blocks0, blocks_n0);
+    crate::hash_sha1::update_last(&mut s, blocks_len0 as u64, rest0, rest_len0);
+    crate::hash_sha1::finish(&s, output)
 }
 
 pub type state_t = crate::streaming_types::state_32;
@@ -183,7 +183,7 @@ pub fn malloc() -> Box<[crate::streaming_types::state_32]>
 {
     let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     let mut block_state: Box<[u32]> = vec![0u32; 5usize].into_boxed_slice();
-    init(&mut block_state);
+    crate::hash_sha1::init(&mut block_state);
     let s: crate::streaming_types::state_32 =
         crate::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
     let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
@@ -193,7 +193,7 @@ pub fn malloc() -> Box<[crate::streaming_types::state_32]>
 pub fn reset(state: &mut [crate::streaming_types::state_32])
 {
     let block_state: &mut [u32] = &mut (state[0usize]).block_state;
-    init(block_state);
+    crate::hash_sha1::init(block_state);
     let total_len: u64 = 0u32 as u64;
     (state[0usize]).total_len = total_len
 }
@@ -239,7 +239,7 @@ update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len:
                 { 64u32 }
                 else
                 { total_len1.wrapping_rem(64u32 as u64) as u32 };
-            if sz1 != 0u32 { update_multi(block_state, buf, 1u32) };
+            if sz1 != 0u32 { crate::hash_sha1::update_multi(block_state, buf, 1u32) };
             let ite: u32 =
                 if (chunk_len as u64).wrapping_rem(64u32 as u64) == 0u64 && chunk_len as u64 > 0u64
                 { 64u32 }
@@ -250,7 +250,7 @@ update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len:
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            update_multi(block_state, data2.0, data1_len.wrapping_div(64u32));
+            crate::hash_sha1::update_multi(block_state, data2.0, data1_len.wrapping_div(64u32));
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -280,7 +280,7 @@ update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len:
                 { 64u32 }
                 else
                 { total_len10.wrapping_rem(64u32 as u64) as u32 };
-            if sz10 != 0u32 { update_multi(block_state, buf0, 1u32) };
+            if sz10 != 0u32 { crate::hash_sha1::update_multi(block_state, buf0, 1u32) };
             let ite: u32 =
                 if
                 (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(64u32 as u64) == 0u64
@@ -294,7 +294,7 @@ update0(state: &mut [crate::streaming_types::state_32], chunk: &[u8], chunk_len:
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
-            update_multi(block_state, data2.0, data1_len.wrapping_div(64u32));
+            crate::hash_sha1::update_multi(block_state, data2.0, data1_len.wrapping_div(64u32));
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
@@ -323,10 +323,10 @@ pub fn digest(state: &[crate::streaming_types::state_32], output: &mut [u8])
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
     let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
-    update_multi(&mut tmp_block_state, buf_last.0, 0u32);
+    crate::hash_sha1::update_multi(&mut tmp_block_state, buf_last.0, 0u32);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
-    update_last(&mut tmp_block_state, prev_len_last, buf_last.1, r);
-    finish(&tmp_block_state, output)
+    crate::hash_sha1::update_last(&mut tmp_block_state, prev_len_last, buf_last.1, r);
+    crate::hash_sha1::finish(&tmp_block_state, output)
 }
 
 pub fn copy(state: &[crate::streaming_types::state_32]) ->
@@ -346,4 +346,4 @@ pub fn copy(state: &[crate::streaming_types::state_32]) ->
 }
 
 pub fn hash(output: &mut [u8], input: &[u8], input_len: u32)
-{ hash_oneshot(output, input, input_len) }
+{ crate::hash_sha1::hash_oneshot(output, input, input_len) }
