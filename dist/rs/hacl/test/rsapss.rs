@@ -291,7 +291,7 @@ const test4_sgnt_expected: [u8; 256] = [
 
 #[test]
 pub fn test_rsapss() {
-  use crate::hacl::streaming_types::hash_alg::SHA2_256;
+  use crate::streaming_types::hash_alg::SHA2_256;
   // Test 1
   let mut sgnt = [0u8; test1_sgnt_expected.len()];
   let mod_bits = 1024u32;
@@ -301,13 +301,13 @@ pub fn test_rsapss() {
   let msg_len = test1_msg.len() as u32;
   let nb_len = (mod_bits - 1) / 8 + 1;
 
-  let mut pkey = crate::hacl::rsapss::new_rsapss_load_pkey(mod_bits, e_bits,
+  let mut pkey = crate::rsapss::new_rsapss_load_pkey(mod_bits, e_bits,
     &mut test1_n, &mut test1_e);
-  let mut skey = crate::hacl::rsapss::new_rsapss_load_skey(mod_bits, e_bits, d_bits,
+  let mut skey = crate::rsapss::new_rsapss_load_skey(mod_bits, e_bits, d_bits,
     &mut test1_n, &mut test1_e, &mut test1_d);
-  crate::hacl::rsapss::rsapss_sign(SHA2_256, mod_bits, e_bits, d_bits,
+  crate::rsapss::rsapss_sign(SHA2_256, mod_bits, e_bits, d_bits,
     &mut skey, salt_len, &mut test1_salt, msg_len, &mut test1_msg, &mut sgnt);
-  let res = crate::hacl::rsapss::rsapss_verify(SHA2_256, mod_bits, e_bits, &mut pkey,
+  let res = crate::rsapss::rsapss_verify(SHA2_256, mod_bits, e_bits, &mut pkey,
     salt_len, nb_len, &mut sgnt, msg_len, &mut test1_msg); 
   assert_eq!(sgnt, test1_sgnt_expected);
   assert!(res);
@@ -321,13 +321,13 @@ pub fn test_rsapss() {
   let msg_len = test2_msg.len() as u32;
   let nb_len = (mod_bits - 1) / 8 + 1;
 
-  let mut pkey = crate::hacl::rsapss::new_rsapss_load_pkey(mod_bits, e_bits,
+  let mut pkey = crate::rsapss::new_rsapss_load_pkey(mod_bits, e_bits,
     &mut test2_n, &mut test2_e);
-  let mut skey = crate::hacl::rsapss::new_rsapss_load_skey(mod_bits, e_bits, d_bits,
+  let mut skey = crate::rsapss::new_rsapss_load_skey(mod_bits, e_bits, d_bits,
     &mut test2_n, &mut test2_e, &mut test2_d);
-  crate::hacl::rsapss::rsapss_sign(SHA2_256, mod_bits, e_bits, d_bits,
+  crate::rsapss::rsapss_sign(SHA2_256, mod_bits, e_bits, d_bits,
     &mut skey, salt_len, &mut test2_salt, msg_len, &mut test2_msg, &mut sgnt);
-  let res = crate::hacl::rsapss::rsapss_verify(SHA2_256, mod_bits, e_bits, &mut pkey,
+  let res = crate::rsapss::rsapss_verify(SHA2_256, mod_bits, e_bits, &mut pkey,
     salt_len, nb_len, &mut sgnt, msg_len, &mut test2_msg); 
   assert_eq!(sgnt, test2_sgnt_expected);
   assert!(res);
@@ -341,13 +341,13 @@ pub fn test_rsapss() {
   let msg_len = test3_msg.len() as u32;
   let nb_len = (mod_bits - 1) / 8 + 1;
 
-  let mut pkey = crate::hacl::rsapss::new_rsapss_load_pkey(mod_bits, e_bits,
+  let mut pkey = crate::rsapss::new_rsapss_load_pkey(mod_bits, e_bits,
     &mut test3_n, &mut test3_e);
-  let mut skey = crate::hacl::rsapss::new_rsapss_load_skey(mod_bits, e_bits, d_bits,
+  let mut skey = crate::rsapss::new_rsapss_load_skey(mod_bits, e_bits, d_bits,
     &mut test3_n, &mut test3_e, &mut test3_d);
-  crate::hacl::rsapss::rsapss_sign(SHA2_256, mod_bits, e_bits, d_bits,
+  crate::rsapss::rsapss_sign(SHA2_256, mod_bits, e_bits, d_bits,
     &mut skey, salt_len, &mut test3_salt, msg_len, &mut test3_msg, &mut sgnt);
-  let res = crate::hacl::rsapss::rsapss_verify(SHA2_256, mod_bits, e_bits, &mut pkey,
+  let res = crate::rsapss::rsapss_verify(SHA2_256, mod_bits, e_bits, &mut pkey,
     salt_len, nb_len, &mut sgnt, msg_len, &mut test3_msg); 
   assert_eq!(sgnt, test3_sgnt_expected);
   assert!(res);
@@ -361,13 +361,13 @@ pub fn test_rsapss() {
   let msg_len = test4_msg.len() as u32;
   let nb_len = (mod_bits - 1) / 8 + 1;
 
-  let mut pkey = crate::hacl::rsapss::new_rsapss_load_pkey(mod_bits, e_bits,
+  let mut pkey = crate::rsapss::new_rsapss_load_pkey(mod_bits, e_bits,
     &mut test4_n, &mut test4_e);
-  let mut skey = crate::hacl::rsapss::new_rsapss_load_skey(mod_bits, e_bits, d_bits,
+  let mut skey = crate::rsapss::new_rsapss_load_skey(mod_bits, e_bits, d_bits,
     &mut test4_n, &mut test4_e, &mut test4_d);
-  crate::hacl::rsapss::rsapss_sign(SHA2_256, mod_bits, e_bits, d_bits,
+  crate::rsapss::rsapss_sign(SHA2_256, mod_bits, e_bits, d_bits,
     &mut skey, salt_len, &mut test4_salt, msg_len, &mut test4_msg, &mut sgnt);
-  let res = crate::hacl::rsapss::rsapss_verify(SHA2_256, mod_bits, e_bits, &mut pkey,
+  let res = crate::rsapss::rsapss_verify(SHA2_256, mod_bits, e_bits, &mut pkey,
     salt_len, nb_len, &mut sgnt, msg_len, &mut test4_msg); 
   assert_eq!(sgnt, test4_sgnt_expected);
   assert!(res);

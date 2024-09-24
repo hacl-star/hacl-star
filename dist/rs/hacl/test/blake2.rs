@@ -251,12 +251,12 @@ pub fn test_blake2() {
   // Test Blake2b
   // With key
   let mut comp = [0u8; expected2b1.len()];
-  crate::hacl::hash_blake2b::hash_with_key(&mut comp, expected2b1.len() as u32,
+  crate::hash_blake2b::hash_with_key(&mut comp, expected2b1.len() as u32,
     &mut input2b1, input2b1.len() as u32, &mut key2b1, key2b1.len() as u32);
   assert_eq!(comp, expected2b1);
 
   let mut comp = [0u8; expected2b2.len()];
-  crate::hacl::hash_blake2b::hash_with_key(&mut comp, expected2b2.len() as u32,
+  crate::hash_blake2b::hash_with_key(&mut comp, expected2b2.len() as u32,
     &mut input2b2, input2b2.len() as u32, &mut key2b2, key2b2.len() as u32);
   assert_eq!(comp, expected2b2);
 
@@ -264,65 +264,65 @@ pub fn test_blake2() {
   let mut empty_key: [u8; 0] = [];
 
   let mut comp = [0u8; expected2b1nk.len()];
-  crate::hacl::hash_blake2b::hash_with_key(&mut comp, expected2b1nk.len() as u32,
+  crate::hash_blake2b::hash_with_key(&mut comp, expected2b1nk.len() as u32,
     &mut input2b1, input2b1.len() as u32, &mut empty_key, 0u32);
   assert_eq!(comp, expected2b1nk);
 
   let mut comp = [0u8; expected2b2nk.len()];
-  crate::hacl::hash_blake2b::hash_with_key(&mut comp, expected2b2nk.len() as u32,
+  crate::hash_blake2b::hash_with_key(&mut comp, expected2b2nk.len() as u32,
     &mut input2b2, input2b2.len() as u32, &mut empty_key, 0u32);
   assert_eq!(comp, expected2b2nk);
 
   // Test Blake2s
   // With key
   let mut comp = [0u8; expected2s1.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s1.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s1.len() as u32,
     &mut input2s1, input2s1.len() as u32, &mut key2s1, key2s1.len() as u32);
   assert_eq!(comp, expected2s1);
 
   let mut comp = [0u8; expected2s2.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s2.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s2.len() as u32,
     &mut input2s2, input2s2.len() as u32, &mut key2s2, key2s2.len() as u32);
   assert_eq!(comp, expected2s2);
 
   let mut comp = [0u8; expected2s3.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s3.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s3.len() as u32,
     &mut input2s3, input2s3.len() as u32, &mut key2s3, key2s3.len() as u32);
   assert_eq!(comp, expected2s3);
 
   let mut comp = [0u8; expected2s4.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s4.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s4.len() as u32,
     &mut input2s4, input2s4.len() as u32, &mut key2s4, key2s4.len() as u32);
   assert_eq!(comp, expected2s4);
 
   let mut comp = [0u8; expected2s8.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s8.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s8.len() as u32,
     &mut input2s8, input2s8.len() as u32, &mut key2s8, key2s8.len() as u32);
   assert_eq!(comp, expected2s8);
 
   // No key
   let mut comp = [0u8; expected2s1nk.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s1nk.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s1nk.len() as u32,
     &mut input2s1, input2s1.len() as u32, &mut empty_key, 0u32);
   assert_eq!(comp, expected2s1nk);
   
   let mut comp = [0u8; expected2s2nk.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s2nk.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s2nk.len() as u32,
     &mut input2s2, input2s2.len() as u32, &mut empty_key, 0u32);
   assert_eq!(comp, expected2s2nk);
 
   let mut comp = [0u8; expected2s3nk.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s3nk.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s3nk.len() as u32,
     &mut input2s3, input2s3.len() as u32, &mut empty_key, 0u32);
   assert_eq!(comp, expected2s3nk);
 
   let mut comp = [0u8; expected2s4nk.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s4nk.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s4nk.len() as u32,
     &mut input2s4, input2s4.len() as u32, &mut empty_key, 0u32);
   assert_eq!(comp, expected2s4nk);
 
   let mut comp = [0u8; expected2s8nk.len()];
-  crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s8nk.len() as u32,
+  crate::hash_blake2s::hash_with_key(&mut comp, expected2s8nk.len() as u32,
     &mut input2s8, input2s8.len() as u32, &mut empty_key, 0u32);
   assert_eq!(comp, expected2s8nk);
 }

@@ -48,8 +48,8 @@ const expected2: [u8; 32] = [
 pub fn test_curve() {
   let mut res1 = [ 0u8; expected1.len() ];
   let mut res2 = [ 0u8; expected2.len() ];
-  crate::hacl::curve25519_51::scalarmult(&mut res1, &mut scalar1, &mut point1);
-  crate::hacl::curve25519_51::scalarmult(&mut res2, &mut scalar2, &mut point2);
+  crate::curve25519_51::scalarmult(&mut res1, &mut scalar1, &mut point1);
+  crate::curve25519_51::scalarmult(&mut res2, &mut scalar2, &mut point2);
   assert_eq!(res1, expected1);
   assert_eq!(res2, expected2);
 }

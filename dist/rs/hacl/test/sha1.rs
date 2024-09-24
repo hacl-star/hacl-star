@@ -23,21 +23,21 @@ const tag2_sha1: [u8; 20] = [
 #[test]
 pub fn test_sha1() {
   let mut tag1 = [0u8; 20];
-  let mut state1 = crate::hacl::hash_sha1::malloc();
-  crate::hacl::hash_sha1::update0(&mut state1, &mut input1, input1.len() as u32);
-  crate::hacl::hash_sha1::digest(&mut state1, &mut tag1);
+  let mut state1 = crate::hash_sha1::malloc();
+  crate::hash_sha1::update0(&mut state1, &mut input1, input1.len() as u32);
+  crate::hash_sha1::digest(&mut state1, &mut tag1);
   assert_eq!(tag1, tag1_sha1);
 
   let mut tag1 = [0u8; 20];
-  crate::hacl::hash_sha1::hash(&mut tag1, &mut input1, input1.len() as u32);
+  crate::hash_sha1::hash(&mut tag1, &mut input1, input1.len() as u32);
 
   let mut tag2 = [0u8; 20];
-  let mut state2 = crate::hacl::hash_sha1::malloc();
-  crate::hacl::hash_sha1::update0(&mut state2, &mut input2, input2.len() as u32);
-  crate::hacl::hash_sha1::digest(&mut state2, &mut tag2);
+  let mut state2 = crate::hash_sha1::malloc();
+  crate::hash_sha1::update0(&mut state2, &mut input2, input2.len() as u32);
+  crate::hash_sha1::digest(&mut state2, &mut tag2);
   assert_eq!(tag2, tag2_sha1);
 
   let mut tag2 = [0u8; 20];
-  crate::hacl::hash_sha1::hash(&mut tag2, &mut input2, input2.len() as u32);
+  crate::hash_sha1::hash(&mut tag2, &mut input2, input2.len() as u32);
 
 }

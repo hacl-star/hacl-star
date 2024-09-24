@@ -95,10 +95,10 @@ const tag3: [u8; 16] = [
 #[test]
 pub fn test_poly1305() {
   let mut tag = [ 0u8; 16];
-  crate::hacl::mac_poly1305::mac(&mut tag, &mut input1, input1.len() as u32, &mut key1);
+  crate::mac_poly1305::mac(&mut tag, &mut input1, input1.len() as u32, &mut key1);
   assert_eq!(tag, tag1); 
-  crate::hacl::mac_poly1305::mac(&mut tag, &mut input2, input2.len() as u32, &mut key2);
+  crate::mac_poly1305::mac(&mut tag, &mut input2, input2.len() as u32, &mut key2);
   assert_eq!(tag, tag2); 
-  crate::hacl::mac_poly1305::mac(&mut tag, &mut input3, input3.len() as u32, &mut key3);
+  crate::mac_poly1305::mac(&mut tag, &mut input3, input3.len() as u32, &mut key3);
   assert_eq!(tag, tag3); 
 }

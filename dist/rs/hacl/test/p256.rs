@@ -88,17 +88,17 @@ pub fn test_p256() {
   let mut sig = [ 0u8; 64 ];
   let mut pk = [ 0u8; 64 ];
 
-  let valid = crate::hacl::p256::dh_initiator(&mut pk, &mut private_key);
+  let valid = crate::p256::dh_initiator(&mut pk, &mut private_key);
   assert!(valid);
   assert_eq!(pk, public_key);
 
-  let flag = crate::hacl::p256::ecdsa_sign_p256_sha2(&mut sig, 128, &mut msg, &mut private_key, &mut nonce);
+  let flag = crate::p256::ecdsa_sign_p256_sha2(&mut sig, 128, &mut msg, &mut private_key, &mut nonce);
   assert!(flag);
   assert_eq!(sig, sgnt);
   
   
   let mut sg = sgnt;
   let mut sp = (&mut sg).split_at_mut(32usize);
-  let ver = crate::hacl::p256::ecdsa_verif_p256_sha2(128, &mut msg, &mut public_key, &mut sp.0, &mut sp.1);
+  let ver = crate::p256::ecdsa_verif_p256_sha2(128, &mut msg, &mut public_key, &mut sp.0, &mut sp.1);
   assert!(ver);
 }

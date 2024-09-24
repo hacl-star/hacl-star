@@ -44,7 +44,7 @@ const tag1: [u8; 16] = [ 0x1a, 0xe1, 0x0b, 0x59, 0x4f, 0x09, 0xe2, 0x6a, 0x7e, 0
 pub fn test_chachapoly() {
     let mut cipher = [ 0u8; input1.len() ];
     let mut tag = [ 0u8; tag1.len() ];
-    crate::hacl::aead_chacha20poly1305::encrypt(&mut cipher, &mut tag, &mut input1, input1.len() as u32,
+    crate::aead_chacha20poly1305::encrypt(&mut cipher, &mut tag, &mut input1, input1.len() as u32,
         &mut aad1, aad1.len() as u32, &mut key1, &mut nonce1);
     assert_eq!(cipher, cipher1);
     assert_eq!(tag, tag1);

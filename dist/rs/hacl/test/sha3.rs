@@ -78,58 +78,58 @@ const tag2_512: [u8; 64] = [
 
 #[test]
 pub fn test_sha3() {
-  use crate::hacl::streaming_types::hash_alg::{SHA3_224, SHA3_256, SHA3_384, SHA3_512};
+  use crate::streaming_types::hash_alg::{SHA3_224, SHA3_256, SHA3_384, SHA3_512};
 
   // SHA3-224
   let mut tag_224 = [0u8; 28];
-  let mut state_224 = crate::hacl::hash_sha3::malloc(SHA3_224);
-  crate::hacl::hash_sha3::update(&mut state_224, &mut input1, input1.len() as u32);
-  crate::hacl::hash_sha3::digest(&mut state_224, &mut tag_224);
+  let mut state_224 = crate::hash_sha3::malloc(SHA3_224);
+  crate::hash_sha3::update(&mut state_224, &mut input1, input1.len() as u32);
+  crate::hash_sha3::digest(&mut state_224, &mut tag_224);
   assert_eq!(tag_224, tag1_224);
 
   let mut tag_224 = [0u8; 28];
-  let mut state_224 = crate::hacl::hash_sha3::malloc(SHA3_224);
-  crate::hacl::hash_sha3::update(&mut state_224, &mut input2, input2.len() as u32);
-  crate::hacl::hash_sha3::digest(&mut state_224, &mut tag_224);
+  let mut state_224 = crate::hash_sha3::malloc(SHA3_224);
+  crate::hash_sha3::update(&mut state_224, &mut input2, input2.len() as u32);
+  crate::hash_sha3::digest(&mut state_224, &mut tag_224);
   assert_eq!(tag_224, tag2_224);
 
   // SHA3-256
   let mut tag_256 = [0u8; 32];
-  let mut state_256 = crate::hacl::hash_sha3::malloc(SHA3_256);
-  crate::hacl::hash_sha3::update(&mut state_256, &mut input1, input1.len() as u32);
-  crate::hacl::hash_sha3::digest(&mut state_256, &mut tag_256);
+  let mut state_256 = crate::hash_sha3::malloc(SHA3_256);
+  crate::hash_sha3::update(&mut state_256, &mut input1, input1.len() as u32);
+  crate::hash_sha3::digest(&mut state_256, &mut tag_256);
   assert_eq!(tag_256, tag1_256);
 
   let mut tag_256 = [0u8; 32];
-  let mut state_256 = crate::hacl::hash_sha3::malloc(SHA3_256);
-  crate::hacl::hash_sha3::update(&mut state_256, &mut input2, input2.len() as u32);
-  crate::hacl::hash_sha3::digest(&mut state_256, &mut tag_256);
+  let mut state_256 = crate::hash_sha3::malloc(SHA3_256);
+  crate::hash_sha3::update(&mut state_256, &mut input2, input2.len() as u32);
+  crate::hash_sha3::digest(&mut state_256, &mut tag_256);
   assert_eq!(tag_256, tag2_256);
   
   // SHA3-384
   let mut tag_384 = [0u8; 48];
-  let mut state_384 = crate::hacl::hash_sha3::malloc(SHA3_384);
-  crate::hacl::hash_sha3::update(&mut state_384, &mut input1, input1.len() as u32);
-  crate::hacl::hash_sha3::digest(&mut state_384, &mut tag_384);
+  let mut state_384 = crate::hash_sha3::malloc(SHA3_384);
+  crate::hash_sha3::update(&mut state_384, &mut input1, input1.len() as u32);
+  crate::hash_sha3::digest(&mut state_384, &mut tag_384);
   assert_eq!(tag_384, tag1_384);
 
   let mut tag_384 = [0u8; 48];
-  let mut state_384 = crate::hacl::hash_sha3::malloc(SHA3_384);
-  crate::hacl::hash_sha3::update(&mut state_384, &mut input2, input2.len() as u32);
-  crate::hacl::hash_sha3::digest(&mut state_384, &mut tag_384);
+  let mut state_384 = crate::hash_sha3::malloc(SHA3_384);
+  crate::hash_sha3::update(&mut state_384, &mut input2, input2.len() as u32);
+  crate::hash_sha3::digest(&mut state_384, &mut tag_384);
   assert_eq!(tag_384, tag2_384);
 
   // SHA3-512
   let mut tag_512 = [0u8; 64];
-  let mut state_512 = crate::hacl::hash_sha3::malloc(SHA3_512);
-  crate::hacl::hash_sha3::update(&mut state_512, &mut input1, input1.len() as u32);
-  crate::hacl::hash_sha3::digest(&mut state_512, &mut tag_512);
+  let mut state_512 = crate::hash_sha3::malloc(SHA3_512);
+  crate::hash_sha3::update(&mut state_512, &mut input1, input1.len() as u32);
+  crate::hash_sha3::digest(&mut state_512, &mut tag_512);
   assert_eq!(tag_512, tag1_512);
 
   let mut tag_512 = [0u8; 64];
-  let mut state_512 = crate::hacl::hash_sha3::malloc(SHA3_512);
-  crate::hacl::hash_sha3::update(&mut state_512, &mut input2, input2.len() as u32);
-  crate::hacl::hash_sha3::digest(&mut state_512, &mut tag_512);
+  let mut state_512 = crate::hash_sha3::malloc(SHA3_512);
+  crate::hash_sha3::update(&mut state_512, &mut input2, input2.len() as u32);
+  crate::hash_sha3::digest(&mut state_512, &mut tag_512);
   assert_eq!(tag_512, tag2_512);
 
 }

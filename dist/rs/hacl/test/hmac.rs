@@ -79,28 +79,28 @@ const res2_512: [u8; 64] = [
 pub fn test_hmac () {
   // Test 1
   let mut res_256 = [0u8; 32];
-  crate::hacl::hmac::compute_sha2_256(&mut res_256, &mut key1, key1.len() as u32, &mut data1, data1.len() as u32);
+  crate::hmac::compute_sha2_256(&mut res_256, &mut key1, key1.len() as u32, &mut data1, data1.len() as u32);
   assert_eq!(res_256, res1_256);
 
   let mut res_384 = [0u8; 48];
-  crate::hacl::hmac::compute_sha2_384(&mut res_384, &mut key1, key1.len() as u32, &mut data1, data1.len() as u32);
+  crate::hmac::compute_sha2_384(&mut res_384, &mut key1, key1.len() as u32, &mut data1, data1.len() as u32);
   assert_eq!(res_384, res1_384);
 
   let mut res_512 = [0u8; 64];
-  crate::hacl::hmac::compute_sha2_512(&mut res_512, &mut key1, key1.len() as u32, &mut data1, data1.len() as u32);
+  crate::hmac::compute_sha2_512(&mut res_512, &mut key1, key1.len() as u32, &mut data1, data1.len() as u32);
   assert_eq!(res_512, res1_512);
 
   // Test 2
   let mut res_256 = [0u8; 32];
-  crate::hacl::hmac::compute_sha2_256(&mut res_256, &mut key2, key2.len() as u32, &mut data2, data2.len() as u32);
+  crate::hmac::compute_sha2_256(&mut res_256, &mut key2, key2.len() as u32, &mut data2, data2.len() as u32);
   assert_eq!(res_256, res2_256);
 
   let mut res_384 = [0u8; 48];
-  crate::hacl::hmac::compute_sha2_384(&mut res_384, &mut key2, key2.len() as u32, &mut data2, data2.len() as u32);
+  crate::hmac::compute_sha2_384(&mut res_384, &mut key2, key2.len() as u32, &mut data2, data2.len() as u32);
   assert_eq!(res_384, res2_384);
 
   let mut res_512 = [0u8; 64];
-  crate::hacl::hmac::compute_sha2_512(&mut res_512, &mut key2, key2.len() as u32, &mut data2, data2.len() as u32);
+  crate::hmac::compute_sha2_512(&mut res_512, &mut key2, key2.len() as u32, &mut data2, data2.len() as u32);
   assert_eq!(res_512, res2_512);
 }
 

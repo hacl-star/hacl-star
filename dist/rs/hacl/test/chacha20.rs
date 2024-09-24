@@ -38,6 +38,6 @@ const nonce1: [u8; 12] = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00,
 pub fn test_chacha20() {
   let mut cipher = [ 0u8; input1.len() ];
   let ctr = 1u32;
-  crate::hacl::chacha20::chacha20_encrypt(input1.len() as u32, &mut cipher, &mut input1, &mut key1, &mut nonce1, ctr);
+  crate::chacha20::chacha20_encrypt(input1.len() as u32, &mut cipher, &mut input1, &mut key1, &mut nonce1, ctr);
   assert_eq!(cipher, cipher1);
 } 

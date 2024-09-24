@@ -32,8 +32,8 @@ const sig3: [u8; 64] = [
 #[test]
 pub fn test_ed25519() {
   let mut signature = [0u8; 64];
-  crate::hacl::ed25519::sign(&mut signature, &mut sk3, 2u32, &mut msg3);
-  let res = crate::hacl::ed25519::verify(&mut pk3, 2u32, &mut msg3, &mut sig3);
+  crate::ed25519::sign(&mut signature, &mut sk3, 2u32, &mut msg3);
+  let res = crate::ed25519::verify(&mut pk3, 2u32, &mut msg3, &mut sig3);
 
   assert_eq!(signature, sig3);
   assert!(res);

@@ -60,7 +60,7 @@ const exp4: [u8; 64] = [
 #[test]
 pub fn test_salsa20() {
   let mut comp = [0u8; 512];
-  crate::hacl::salsa20::salsa20_encrypt0(512, &mut comp, &mut input, &mut key, &mut nonce, 0u32);
+  crate::salsa20::salsa20_encrypt0(512, &mut comp, &mut input, &mut key, &mut nonce, 0u32);
   assert_eq!(comp[0..64], exp1);
   assert_eq!(comp[192..256], exp2);
   assert_eq!(comp[256..320], exp3);
