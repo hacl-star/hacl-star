@@ -62,9 +62,23 @@
           "dist/Makefile.tmpl"
           "dist/configure"
           "dist/package-mozilla.sh"
-          "dist/rs/Cargo.lock"
+          "Cargo.lock"
+          "Cargo.toml"
+          "dist/rs/bignum/Cargo.toml"
+          "dist/rs/fstar/Cargo.toml"
+          "dist/rs/fuzz/Cargo.toml"
+          "dist/rs/hacl/Cargo.toml"
+          "dist/rs/krml/Cargo.toml"
+          "dist/rs/lib/Cargo.toml"
+          "dist/rs/lowstar/Cargo.toml"
           "dist/rs/Cargo.toml"
-          "dist/rs/src/hacl.rs"
+          "dist/rs/Cargo.lock"
+          "dist/rs/bignum/lib.rs"
+          "dist/rs/fstar/lib.rs"
+          "dist/rs/hacl/lib.rs"
+          "dist/rs/krml/src/lib.rs"
+          "dist/rs/lib/lib.rs"
+          "dist/rs/lowstar/lib.rs"
         ]
         || lib.any (lib.flip lib.hasPrefix relPath) [
           # prefixes of paths to allow in the source
@@ -78,10 +92,12 @@
           "tools"
           "vale"
           "dist/rs/krml"
-          "dist/rs/src/fstar"
-          "dist/rs/src/lib"
-          "dist/rs/src/lowstar"
-          "dist/rs/src/test"
+          "dist/rs/fstar"
+          "dist/rs/lib"
+          "dist/rs/fuzz"
+          "dist/rs/lowstar"
+          "dist/rs/hacl/test"
+          "dist/rs/bignum/test"
         ];
     };
 
