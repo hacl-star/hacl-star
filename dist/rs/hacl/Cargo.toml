@@ -1,0 +1,17 @@
+[package]
+name = "hacl"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+krml = { path = "../krml" }
+lib = { path = "../lib" }
+fstar = { path = "../fstar" }
+lowstar = { path = "../lowstar" }
+bignum = { path = "../bignum" }
+
+[lib]
+name = "hacl"
+path = "lib.rs"

@@ -3,12 +3,41 @@
 version = 3
 
 [[package]]
-name = "hacl-rs"
+name = "bignum"
 version = "0.1.0"
 dependencies = [
+ "fstar",
  "krml",
+ "lib",
+ "lowstar",
+]
+
+[[package]]
+name = "fstar"
+version = "0.1.0"
+
+[[package]]
+name = "hacl"
+version = "0.1.0"
+dependencies = [
+ "bignum",
+ "fstar",
+ "krml",
+ "lib",
+ "lowstar",
 ]
 
 [[package]]
 name = "krml"
+version = "0.1.0"
+
+[[package]]
+name = "lib"
+version = "0.1.0"
+dependencies = [
+ "fstar",
+]
+
+[[package]]
+name = "lowstar"
 version = "0.1.0"
