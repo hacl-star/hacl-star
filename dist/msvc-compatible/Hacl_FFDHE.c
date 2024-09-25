@@ -202,7 +202,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
   {
     uint64_t beq = FStar_UInt64_eq_mask(b2[i], pk_n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(b2[i], pk_n[i]);
-    acc0 = (beq & acc0) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc0 = (beq & acc0) | (~beq & blt);
   }
   uint64_t res = acc0;
   uint64_t m0 = res;
@@ -211,7 +211,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
   {
     uint64_t beq = FStar_UInt64_eq_mask(pk_n[i], p_n1[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(pk_n[i], p_n1[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint64_t m1 = acc;
   return m0 & m1;
