@@ -82,6 +82,8 @@
 #    define KRML_NOINLINE __declspec(noinline)
 #  elif defined (__GNUC__)
 #    define KRML_NOINLINE __attribute__((noinline,unused))
+#  elif defined (__SUNPRO_C)
+#    define KRML_NOINLINE __attribute__((noinline))
 #  else
 #    define KRML_NOINLINE
 #    warning "The KRML_NOINLINE macro is not defined for this toolchain!"
@@ -94,6 +96,8 @@
 #  if defined(_MSC_VER)
 #    define KRML_MUSTINLINE inline __forceinline
 #  elif defined (__GNUC__)
+#    define KRML_MUSTINLINE inline __attribute__((always_inline))
+#  elif defined (__SUNPRO_C)
 #    define KRML_MUSTINLINE inline __attribute__((always_inline))
 #  else
 #    define KRML_MUSTINLINE inline
@@ -211,6 +215,8 @@ inline static int32_t krml_time(void) {
 #elif defined(__GNUC__)
 /* deprecated attribute is not defined in GCC < 4.5. */
 #  define KRML_DEPRECATED(x)
+#elif defined(__SUNPRO_C)
+#  define KRML_DEPRECATED(x) __attribute__((deprecated(x)))
 #elif defined(_MSC_VER)
 #  define KRML_DEPRECATED(x) __declspec(deprecated(x))
 #endif
