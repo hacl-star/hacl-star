@@ -832,7 +832,7 @@ uint32_t Hacl_Bignum_Montgomery_bn_check_modulus_u32(uint32_t len, uint32_t *n)
   {
     uint32_t beq = FStar_UInt32_eq_mask(one[i], n[i]);
     uint32_t blt = ~FStar_UInt32_gte_mask(one[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFU) | (~blt & 0U)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint32_t m1 = acc;
   return m0 & m1;
@@ -1023,7 +1023,7 @@ uint64_t Hacl_Bignum_Montgomery_bn_check_modulus_u64(uint32_t len, uint64_t *n)
   {
     uint64_t beq = FStar_UInt64_eq_mask(one[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(one[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint64_t m1 = acc;
   return m0 & m1;
@@ -1415,7 +1415,7 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u32(
   {
     uint32_t beq = FStar_UInt32_eq_mask(one[i], n[i]);
     uint32_t blt = ~FStar_UInt32_gte_mask(one[i], n[i]);
-    acc0 = (beq & acc0) | (~beq & ((blt & 0xFFFFFFFFU) | (~blt & 0U)));
+    acc0 = (beq & acc0) | (~beq & blt);
   }
   uint32_t m10 = acc0;
   uint32_t m00 = m0 & m10;
@@ -1442,7 +1442,7 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u32(
     {
       uint32_t beq = FStar_UInt32_eq_mask(b[i], b2[i]);
       uint32_t blt = ~FStar_UInt32_gte_mask(b[i], b2[i]);
-      acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFU) | (~blt & 0U)));
+      acc = (beq & acc) | (~beq & blt);
     }
     uint32_t res = acc;
     m1 = res;
@@ -1456,7 +1456,7 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u32(
   {
     uint32_t beq = FStar_UInt32_eq_mask(a[i], n[i]);
     uint32_t blt = ~FStar_UInt32_gte_mask(a[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFU) | (~blt & 0U)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint32_t m2 = acc;
   uint32_t m = m1 & m2;
@@ -1809,7 +1809,7 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64(
   {
     uint64_t beq = FStar_UInt64_eq_mask(one[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(one[i], n[i]);
-    acc0 = (beq & acc0) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc0 = (beq & acc0) | (~beq & blt);
   }
   uint64_t m10 = acc0;
   uint64_t m00 = m0 & m10;
@@ -1836,7 +1836,7 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64(
     {
       uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
       uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
-      acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+      acc = (beq & acc) | (~beq & blt);
     }
     uint64_t res = acc;
     m1 = res;
@@ -1850,7 +1850,7 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64(
   {
     uint64_t beq = FStar_UInt64_eq_mask(a[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(a[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL)));
+    acc = (beq & acc) | (~beq & blt);
   }
   uint64_t m2 = acc;
   uint64_t m = m1 & m2;

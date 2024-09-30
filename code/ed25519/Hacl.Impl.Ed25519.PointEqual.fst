@@ -41,13 +41,11 @@ let gte_q s =
   let open Lib.RawIntTypes in
   if u64_to_UInt64 s4 >^ 0x00000010000000uL then true
   else if u64_to_UInt64 s4 <^ 0x00000010000000uL then false
-  else (if u64_to_UInt64 s3 >^ 0x00000000000000uL then true
-  else if u64_to_UInt64 s2 >^ 0x000000000014deuL then true
+  else if u64_to_UInt64 s3 >^ 0x00000000000000uL || u64_to_UInt64 s2 >^ 0x000000000014deuL then true
   else if u64_to_UInt64 s2 <^ 0x000000000014deuL then false
   else if u64_to_UInt64 s1 >^ 0xf9dea2f79cd658uL then true
   else if u64_to_UInt64 s1 <^ 0xf9dea2f79cd658uL then false
-  else if u64_to_UInt64 s0 >=^ 0x12631a5cf5d3eduL then true
-  else false)
+  else u64_to_UInt64 s0 >=^ 0x12631a5cf5d3eduL
 
 let u51 = n:nat{n < 0x8000000000000}
 

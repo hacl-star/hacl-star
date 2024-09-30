@@ -218,6 +218,13 @@ let mask_select_lemma1 #t mask a b =
     assert (v t2 = v a);
     () end
 
+val mask_select_lemma2: #t:limb_t -> mask:limb t -> Lemma
+  (ensures  mask_select mask (ones t SEC) (zeros t SEC) == mask)
+
+let mask_select_lemma2 #t mask =
+  logand_ones mask;
+  logand_zeros (lognot mask);
+  logor_zeros mask
 
 val lseq_mask_select_lemma: #t:limb_t -> #len:size_nat -> a:lseq (limb t) len -> b:lseq (limb t) len -> mask:limb t -> Lemma
   (requires mask_values mask)

@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "529b9a58d61cc16b0ad45bb9cacd4d50"
+      "e97a1cfc81397b99d11f1c2bc2b99365"
     ],
     [
       "Hacl.Streaming.Keccak.coerce",
@@ -20,7 +20,7 @@
         "refinement_interpretation_Tm_refine_754b00004f4a881ff74d076ab276dfe1"
       ],
       0,
-      "05c2caf7e1efff09331d42793eae1554"
+      "99547de729eacc457b25cf199a2b3124"
     ],
     [
       "Hacl.Streaming.Keccak.update_multi_s",
@@ -44,7 +44,7 @@
         "typing_Spec.Hash.Definitions.is_keccak", "unit_typing"
       ],
       0,
-      "13ae0a3859e4916bfa00bc4abc3d892a"
+      "d0a83fb9d4f3fee71c06705f93222147"
     ],
     [
       "Hacl.Streaming.Keccak.update_multi_zero",
@@ -95,7 +95,7 @@
         "typing_Spec.Hash.Definitions.is_keccak"
       ],
       0,
-      "a243cb9dc68794bc92a8c67ed85391b3"
+      "1e792650af39817656b0f6211dde41b5"
     ],
     [
       "Hacl.Streaming.Keccak.update_multi_associative",
@@ -163,7 +163,7 @@
         "typing_Spec.Hash.Definitions.is_keccak"
       ],
       0,
-      "a980f2fe2df329eac5b531d0a5e7cf87"
+      "3e27d2370e4eb3565835ed3517710102"
     ],
     [
       "Hacl.Streaming.Keccak.stateful_keccak",
@@ -272,7 +272,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0ca4da9713dd5be428a5121f733ed7c2"
+      "788f6a41cb06271deb5aba7221c7b2c1"
     ],
     [
       "Hacl.Streaming.Keccak.is_shake_",
@@ -281,7 +281,7 @@
       0,
       [ "@query", "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq" ],
       0,
-      "2cc9434f58437343d3270e58e64f528b"
+      "4e8a8bde4ac8234bcf7f3c6776f1a0c4"
     ],
     [
       "Hacl.Streaming.Keccak.hacl_keccak",
@@ -291,7 +291,7 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Hacl.Streaming.Keccak_interpretation_Tm_ghost_arrow_61220778568decf34ab234bec970eae0",
+        "Hacl.Streaming.Keccak_interpretation_Tm_arrow_91d0f3384437b234a688183a5d280f57",
         "Prims_interpretation_Tm_arrow_2eaa01e78f73e9bab5d0955fc1a662da",
         "Spec.Agile.Hash_interpretation_Tm_arrow_4e2e94c6d0e7088c48a533e462cbb433",
         "Spec.Hash.Definitions_interpretation_Tm_arrow_1ee44066815e7222e39d901c8cfbad9e",
@@ -426,7 +426,7 @@
         "interpretation_Tm_abs_55ff43cb1d695968f2353819e5e7c07b",
         "interpretation_Tm_abs_5dd678814014f097b49801ed47bf5635",
         "interpretation_Tm_abs_7db19245573865e2013f96b9787edb72",
-        "interpretation_Tm_abs_d9514c0dd3a0de90c01c1930f8d9cbf9",
+        "interpretation_Tm_abs_e1299a607fd6646cb50c65ff6eb2f464",
         "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
         "inversion-interp", "kinding_Spec.Hash.Definitions.hash_alg@tok",
         "l_quant_interp_6ab9090a3f9e5c5e9b329d647f68337d",
@@ -512,7 +512,6 @@
         "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
         "refinement_interpretation_Tm_refine_b361ba8089a6e963921008d537e799a1",
         "refinement_interpretation_Tm_refine_b913a3f691ca99086652e0a655e72f17",
-        "refinement_interpretation_Tm_refine_c7753baa38cd99c4f00a675631dc1dde",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_cc4b8770757db395505f8610008f4394",
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947",
@@ -564,17 +563,16 @@
         "typing_Spec.Hash.Definitions.is_keccak",
         "typing_Spec.Hash.Definitions.is_shake",
         "typing_Spec.Hash.Definitions.less_than_max_input_length",
-        "typing_Spec.Hash.Definitions.word",
         "typing_Spec.Hash.Incremental.Definitions.hash_incremental",
         "typing_Tm_abs_3d77c1d80c0e9e736cdcf018f4780b14",
-        "typing_Tm_abs_d9514c0dd3a0de90c01c1930f8d9cbf9",
+        "typing_Tm_abs_e1299a607fd6646cb50c65ff6eb2f464",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok",
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok",
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok", "unit_inversion",
         "unit_typing"
       ],
       0,
-      "fe12e8f0fb2d25df2d61012a9a3d7d8d"
+      "943437de454e1de32dfef8a75f09dbcd"
     ],
     [
       "Hacl.Streaming.Keccak.state_t",
@@ -599,7 +597,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "effaee54919efea7d80e6236efb826f9"
+      "a1613123b68559aeeef0c0125dc0a1ec"
     ],
     [
       "Hacl.Streaming.Keccak.get_alg",
@@ -632,7 +630,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "b95852079db8d1c5fd9d0299930db9c4"
+      "73a844e82f078f38ebea84578c229563"
     ],
     [
       "Hacl.Streaming.Keccak.malloc",
@@ -665,7 +663,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "3e20f6f6cb7588220ee9dd44ed445ac4"
+      "a7eeaa83cf3976746c34bfe9cb405dd9"
     ],
     [
       "Hacl.Streaming.Keccak.free",
@@ -698,7 +696,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "2c08338ccab3dcf3a083d95b44ed6273"
+      "fe41e5866ae66b5683abb86a1ac6cfd4"
     ],
     [
       "Hacl.Streaming.Keccak.copy",
@@ -731,7 +729,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "1b30bfbea95e36857193a21148e342de"
+      "64dff313138517be41a13a96ec20d261"
     ],
     [
       "Hacl.Streaming.Keccak.reset",
@@ -764,7 +762,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "6ecdf7e88e75d6945cf7cb1bca7ba788"
+      "8ab14333cb907af5f951b94f1028261e"
     ],
     [
       "Hacl.Streaming.Keccak.update",
@@ -797,7 +795,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "17591f289307f0632922f95b669ace0e"
+      "25522106fb49653a60516a5404ec9dbd"
     ],
     [
       "Hacl.Streaming.Keccak.digest_",
@@ -830,7 +828,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "df0091fdf9769ace8f27a722b90668c4"
+      "06024f12b7f7f30d5018febd8bccb2ca"
     ],
     [
       "Hacl.Streaming.Keccak.digest",
@@ -913,7 +911,7 @@
         "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "0ced2bef88b13ca866d55309ed9d03a0"
+      "bc00d579bdbe6cdd442b4126439f6981"
     ],
     [
       "Hacl.Streaming.Keccak.digest",
@@ -1025,7 +1023,7 @@
         "typing_tok_Hacl.Streaming.Types.Success@tok"
       ],
       0,
-      "656f0d8f321c994caac10d227f81742e"
+      "16a8ef88fda01b29af96452b44304289"
     ],
     [
       "Hacl.Streaming.Keccak.digest",
@@ -1137,7 +1135,7 @@
         "typing_tok_Hacl.Streaming.Types.Success@tok"
       ],
       0,
-      "e39742db6127da659a70a32129da4611"
+      "fd811aece1212e1d3bfe204509396643"
     ],
     [
       "Hacl.Streaming.Keccak.squeeze",
@@ -1205,7 +1203,7 @@
         "typing_tok_Hacl.Streaming.Keccak.Success@tok"
       ],
       0,
-      "6d5c47c675e0e905a0ba265673a96802"
+      "ed8274279c1c785b57de1a839c7f1885"
     ],
     [
       "Hacl.Streaming.Keccak.squeeze",
@@ -1326,7 +1324,7 @@
         "typing_tok_Hacl.Streaming.Types.Success@tok"
       ],
       0,
-      "6a1e7c0fed4d7b2878827ae764880c96"
+      "6524ab45a7545aacc2c75fe87afad1fa"
     ],
     [
       "Hacl.Streaming.Keccak.squeeze",
@@ -1447,7 +1445,7 @@
         "typing_tok_Hacl.Streaming.Types.Success@tok"
       ],
       0,
-      "7b4822b6e2d0045d53746fc233b46ecf"
+      "dc6d3b92d183d122e5f82a3b78135015"
     ],
     [
       "Hacl.Streaming.Keccak.block_len",
@@ -1480,7 +1478,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "d25af046a8821f38f0b01800186d43b6"
+      "50fc6e1b0477e66b885acb988a59d8a4"
     ],
     [
       "Hacl.Streaming.Keccak.block_len",
@@ -1566,7 +1564,7 @@
         "typing_Spec.Hash.Definitions.is_keccak"
       ],
       0,
-      "46a8e6b4f8537095016de672dd969ecc"
+      "5677baff086ab12e1fc3b152e3c21f64"
     ],
     [
       "Hacl.Streaming.Keccak.block_len",
@@ -1652,7 +1650,7 @@
         "typing_Spec.Hash.Definitions.is_keccak"
       ],
       0,
-      "d0e2f66bc1584a8d44bd83648359db06"
+      "1d4edf9701388d8a9bb254c6601aad80"
     ],
     [
       "Hacl.Streaming.Keccak.hash_len",
@@ -1699,7 +1697,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "1752c451c607026d874859a00bcb5bdd"
+      "b22b84642491e20ba1b7eb50d3192063"
     ],
     [
       "Hacl.Streaming.Keccak.hash_len",
@@ -1720,7 +1718,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "1d844754d9602e746c5588815e6e6b0f"
+      "affa54fc55d280240a779a917f933cde"
     ],
     [
       "Hacl.Streaming.Keccak.hash_len",
@@ -1753,7 +1751,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "101d50cad8dc9cfb0bfc2422c42ea9a1"
+      "006b4333e567fae455bf2abaeec385ec"
     ],
     [
       "Hacl.Streaming.Keccak.is_shake",
@@ -1786,7 +1784,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "5243bc6809dd2dd5d7420ff85a52a83f"
+      "5c50ecf1aadc602152039364e3d99a5f"
     ],
     [
       "Hacl.Streaming.Keccak.is_shake",
@@ -1803,7 +1801,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "2fe2e5ce3cef936dfa7d7eb576e4d02b"
+      "d8a8c1f3c86455be571bc76209b644f7"
     ],
     [
       "Hacl.Streaming.Keccak.is_shake",
@@ -1836,7 +1834,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "60fe38ce17d57e323196d98bdff2944d"
+      "ab7c72d6f1ffe6c0cec9e615868a8cbd"
     ]
   ]
 ]

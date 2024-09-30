@@ -104,7 +104,7 @@ val squeeze_nblocks: #m:m_spec
       disjoint_multi b s)
     (ensures  fun h0 _ h1 ->
       modifies (loc s |+| loc_multi b) h0 h1 /\
-      (let s', b' = 
+      (let s', b' =
         V.squeeze_nblocks #m (v rateInBytes) (v outputByteLen) (as_seq h0 s, as_seq_multi h0 b) in
         as_seq h1 s == s' /\
         as_seq_multi h1 b == b'))

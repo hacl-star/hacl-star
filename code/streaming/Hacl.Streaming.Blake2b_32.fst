@@ -28,7 +28,7 @@ open FStar.HyperStack.ST
 
 inline_for_extraction noextract
 let blake2b_32 =
-  Common.blake2 Spec.Blake2B Core.M32 Blake2b32.init_with_params Blake2b32.update_multi
+  Common.blake2 Spec.Blake2B Core.M32 Blake2b32.inline_init_with_params Blake2b32.update_multi
          Blake2b32.update_last Blake2b32.finish
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code
@@ -348,7 +348,7 @@ digest length). If you used `malloc_with_params_and_key`, then the expected
 length is whatever you chose for the `digest_length` field of your parameters.
 For convenience, this function returns `digest_length`. When in doubt, callers
 can pass an array of size HACL_BLAKE2B_32_OUT_BYTES, then use the return value
-to see how many bytes were actually written. ")]
+to see how many bytes were actually written.")]
 val digest: (i: G.erased (Common.index Spec.Blake2B)) -> (
   let open F in
   let c = blake2b_32 in
@@ -404,6 +404,6 @@ let hash_with_key : Impl.blake2_st Spec.Blake2B Core.M32 =
 [@@ Comment "Write the BLAKE2b digest of message `input` using key `key` and
 parameters `params` into `output`. The `key` array must be of length
 `params.key_length`. The `output` array must be of length
-`params.digest_length`. "]
+`params.digest_length`."]
 let hash_with_key_and_params : Impl.blake2_with_params_st Spec.Blake2B Core.M32 =
   Impl.blake2_with_params #Spec.Blake2B #Core.M32 Blake2b32.init_with_params Blake2b32.update Blake2b32.finish

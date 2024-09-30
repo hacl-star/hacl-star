@@ -1,5 +1,5 @@
 /* Copyright (c) INRIA and Microsoft Corporation. All rights reserved.
-   Licensed under the Apache 2.0 License. */
+   Licensed under the Apache 2.0 and MIT Licenses. */
 
 #ifndef __KRML_TARGET_H
 #define __KRML_TARGET_H
@@ -73,7 +73,7 @@
 #  if defined(__GNUC__)
 #    define KRML_ATTRIBUTE_TARGET(x) __attribute__((target(x)))
 #  else
-#    define KRML_ATTRIBUTE_TARGET(x) 
+#    define KRML_ATTRIBUTE_TARGET(x)
 #  endif
 #endif
 

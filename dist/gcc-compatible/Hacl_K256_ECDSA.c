@@ -351,7 +351,7 @@ static inline uint64_t load_qelem_check(uint64_t *f, uint8_t *b)
     1U,
     uint64_t beq = FStar_UInt64_eq_mask(f[i], n[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(f[i], n[i]);
-    acc = (beq & acc) | (~beq & ((blt & 0xFFFFFFFFFFFFFFFFULL) | (~blt & 0ULL))););
+    acc = (beq & acc) | (~beq & blt););
   uint64_t is_lt_q = acc;
   return ~is_zero & is_lt_q;
 }
@@ -372,11 +372,7 @@ static inline bool load_qelem_vartime(uint64_t *f, uint8_t *b)
   uint64_t a2 = f[2U];
   uint64_t a3 = f[3U];
   bool is_lt_q_b;
-  if (a3 < 0xffffffffffffffffULL)
-  {
-    is_lt_q_b = true;
-  }
-  else if (a2 < 0xfffffffffffffffeULL)
+  if (a3 < 0xffffffffffffffffULL || a2 < 0xfffffffffffffffeULL)
   {
     is_lt_q_b = true;
   }
@@ -567,11 +563,7 @@ static inline bool is_qelem_le_q_halved_vartime(uint64_t *f)
   {
     return false;
   }
-  if (a2 < 0xffffffffffffffffULL)
-  {
-    return true;
-  }
-  if (a1 < 0x5d576e7357a4501dULL)
+  if (a2 < 0xffffffffffffffffULL || a1 < 0x5d576e7357a4501dULL)
   {
     return true;
   }

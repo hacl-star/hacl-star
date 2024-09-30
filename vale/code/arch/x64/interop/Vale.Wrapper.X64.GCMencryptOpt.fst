@@ -20,7 +20,7 @@ open Vale.Lib.BufferViewHelpers
 let wrap_slice (#a:Type0) (s:Seq.seq a) (i:int) : Seq.seq a =
   Seq.slice s 0 (if 0 <= i && i <= Seq.length s then i else 0)
 
-#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --split_queries no"
 
 let math_aux (n:nat) : Lemma (n * 1 == n) = ()
 
@@ -877,7 +877,7 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
     B.as_seq h b;
   }
 
-#set-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 800 --fuel 0 --ifuel 0"
 
 inline_for_extraction
 let gcm128_encrypt_opt_stdcall key iv plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b scratch_b =
@@ -993,7 +993,7 @@ let gcm128_encrypt_opt_stdcall key iv plain_b plain_len auth_b auth_len iv_b out
   lemma_slice_uv_extra auth_b auth_b' abytes_b h1;
   lemma_slice_uv_extra out_b out_b' inout_b h2;
 
-  assert (
+  assert_spinoff (
     let plain = seq_uint8_to_seq_nat8 (B.as_seq h1 plain_b) in
     let auth = seq_uint8_to_seq_nat8 (B.as_seq h1 auth_b) in
     let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (Ghost.reveal iv) plain auth in
