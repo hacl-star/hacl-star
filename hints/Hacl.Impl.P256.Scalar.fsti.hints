@@ -1,5 +1,5 @@
 [
-  "Èž\u000e\u000f@;W\u001e•FóÒ\u0002˜\u00047",
+  "¿\u0015Ø›'x\u0014§„\u0005ýÚÙ\u007fÏ\u0013",
   [
     [
       "Hacl.Impl.P256.Scalar.load_qelem_conditional",
@@ -7,19 +7,23 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "equation_Prims.pos",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.P256.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxInt_proj_0",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok", "equation_Lib.Buffer.as_seq",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.length", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.Sequence.length", "equation_LowStar.Buffer.buffer",
+        "equation_Prims.nat", "function_token_typing_Lib.IntTypes.uint8",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_cc6c554249a6b41f396782ffe283379a",
-        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__bytes"
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "typing_Lib.Buffer.length", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "49c812208aa3f1508b1c2bff84fc924c"
+      "af0d9671222249f4eb8d6c363e578063"
     ],
     [
       "Hacl.Impl.P256.Scalar.qmod_short",
@@ -34,7 +38,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f84a8085f3833e284e033bf1a94f0941"
+      "7432c0267dae186ee580905b9101350e"
     ],
     [
       "Hacl.Impl.P256.Scalar.qadd",
@@ -42,14 +46,30 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Spec.P256.PointOps.order",
-        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
-        "proj_equation_Spec.P256.PointOps.Mkcurve_params_order",
-        "refinement_interpretation_Tm_refine_2f50d6e818f46d2d98f6b6c178519724"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_11f9c44f4a1d751cea6c1567eeb3e4f9",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "59328b709d5b960a1084819ade7fd43a"
+      "52a7a6da665e27ffc623d471090b4547"
+    ],
+    [
+      "Hacl.Impl.P256.Scalar.from_qmont",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "ae87534a4c78294376c783deb6243ce3"
     ],
     [
       "Hacl.Impl.P256.Scalar.qmul",
@@ -57,20 +77,20 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.P256.PointOps.order",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Spec.P256.PointOps.qelem",
-        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
         "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "haseqTm_refine_68de04f7fb9adbe6bb0e976688345b6a",
+        "haseqTm_refine_1784cc7a038eaccf15977ed76dfcdb5e",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_a7edd325dcd15cb30ea815b00bc38f73",
-        "typing_Spec.P256.PointOps.order"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "cb3d78557aab9faeb4e1fd233ad54d56"
+      "20e77411fb066a9d527d5dae3f7b7fca"
     ],
     [
       "Hacl.Impl.P256.Scalar.qsqr",
@@ -78,20 +98,20 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.P256.PointOps.order",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Spec.P256.PointOps.qelem",
-        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
         "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "haseqTm_refine_68de04f7fb9adbe6bb0e976688345b6a",
+        "haseqTm_refine_1784cc7a038eaccf15977ed76dfcdb5e",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_a7edd325dcd15cb30ea815b00bc38f73",
-        "typing_Spec.P256.PointOps.order"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "9c6032c5325d863446ff6d90c03df921"
+      "e2f90e310bd5d1bab77ac54b48b957c9"
     ]
   ]
 ]

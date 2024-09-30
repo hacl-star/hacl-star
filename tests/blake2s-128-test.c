@@ -9,7 +9,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "Hacl_Hash_Blake2s_128.h"
+#include "Hacl_Hash_Blake2s_Simd128.h"
 
 #include "test_helpers.h"
 
@@ -36,7 +36,7 @@ print_test2s(int in_len,
   uint8_t comp[exp_len];
   memset(comp, 0, exp_len * sizeof comp[0]);
 
-  Hacl_Blake2s_128_blake2s(exp_len, comp, in_len, in, key_len, key);
+  Hacl_Hash_Blake2s_Simd128_hash_with_key(comp, exp_len, in, in_len, key, key_len);
   printf("testing blake2s vec-128:\n");
   bool ok = print_result(exp_len, comp, exp);
 
@@ -48,7 +48,7 @@ main()
 {
   EverCrypt_AutoConfig2_init();
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors2s) / sizeof(blake2_test_vector); ++i) {
+  for (size_t i = 0; i < sizeof(vectors2s) / sizeof(blake2_test_vector); ++i) {
     ok &= print_test2s(vectors2s[i].input_len,
                        vectors2s[i].input,
                        vectors2s[i].key_len,
@@ -64,12 +64,12 @@ main()
   memset(plain, 'P', SIZE);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2s_128_blake2s(32, plain, SIZE, plain, 0, NULL);
+    Hacl_Hash_Blake2s_Simd128_hash_with_key(plain, 32, plain, SIZE, NULL, 0);
   }
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2s_128_blake2s(32, plain, SIZE, plain, 0, NULL);
+    Hacl_Hash_Blake2s_Simd128_hash_with_key(plain, 32, plain, SIZE, NULL, 0);
   }
   b = cpucycles_end();
   t2 = clock();

@@ -94,12 +94,14 @@ let ecdsa_verify_avoid_finv p r =
   QA.store_qelem r_bytes r;
   load_felem r_fe r_bytes;
   let h1 = ST.get () in
+  assert (modifies (loc r_fe) h0 h1);
   //assert (inv_fully_reduced h1 r_fe);
   //assert (as_nat h1 r_fe == qas_nat h1 r);
 
   let h2 = ST.get () in
   fnormalize tmp_x x;
   let h3 = ST.get () in
+  assert (modifies (loc tmp_x) h2 h3);
   BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h2 x);
   //assert (inv_fully_reduced h3 tmp_x);
   //assert (inv_lazy_reduced2 h3 z);
@@ -120,6 +122,9 @@ let ecdsa_verify_avoid_finv p r =
        //assert (is_rqz_x == (S.fmul (feval h5 tmp) (feval h5 z) = as_nat h5 tmp_x));
      else false end
     else true in
+
+  let h4 = ST.get () in
+  assert (modifies (loc tmp_q) h3 h4);
 
   pop_frame ();
   KL.ecdsa_verify_avoid_finv (point_eval h0 p) (QA.qas_nat h0 r);

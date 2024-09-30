@@ -23,9 +23,9 @@ FILES=" \
   Hacl_Bignum25519_51 \
   Hacl_Bignum_Base \
   Hacl_Chacha20 \
-  Hacl_Chacha20Poly1305_128 \
-  Hacl_Chacha20Poly1305_256 \
-  Hacl_Chacha20Poly1305_32 \
+  Hacl_AEAD Chacha20Poly1305_Simd128 \
+  Hacl_AEAD_Chacha20Poly1305_Simd256 \
+  Hacl_AEAD_Chacha20Poly1305 \
   Hacl_Chacha20_Vec128 \
   Hacl_Chacha20_Vec256 \
   Hacl_Curve25519_51 \
@@ -37,9 +37,9 @@ FILES=" \
   Hacl_IntTypes_Intrinsics_128 \
   Hacl_Krmllib \
   Hacl_Lib \
-  Hacl_Poly1305_128 \
-  Hacl_Poly1305_256 \
-  Hacl_Poly1305_32 \
+  Hacl_MAC_Poly1305_Simd128 \
+  Hacl_MAC_Poly1305_Simd256 \
+  Hacl_MAC_Poly1305 \
   Hacl_P256 \
   Hacl_P256_PrecompTable \
   Hacl_RSAPSS \

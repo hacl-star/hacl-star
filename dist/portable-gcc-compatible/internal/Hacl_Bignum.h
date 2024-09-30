@@ -172,19 +172,6 @@ Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32(
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32 */
 
-/* SNIPPET_START: Hacl_Bignum_Montgomery_bn_mont_reduction_u32 */
-
-void
-Hacl_Bignum_Montgomery_bn_mont_reduction_u32(
-  uint32_t len,
-  uint32_t *n,
-  uint32_t nInv,
-  uint32_t *c,
-  uint32_t *res
-);
-
-/* SNIPPET_END: Hacl_Bignum_Montgomery_bn_mont_reduction_u32 */
-
 /* SNIPPET_START: Hacl_Bignum_Montgomery_bn_to_mont_u32 */
 
 void
@@ -257,19 +244,6 @@ Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64 */
 
-/* SNIPPET_START: Hacl_Bignum_Montgomery_bn_mont_reduction_u64 */
-
-void
-Hacl_Bignum_Montgomery_bn_mont_reduction_u64(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t nInv,
-  uint64_t *c,
-  uint64_t *res
-);
-
-/* SNIPPET_END: Hacl_Bignum_Montgomery_bn_mont_reduction_u64 */
-
 /* SNIPPET_START: Hacl_Bignum_Montgomery_bn_to_mont_u64 */
 
 void
@@ -323,6 +297,32 @@ Hacl_Bignum_Montgomery_bn_mont_sqr_u64(
 );
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_mont_sqr_u64 */
+
+/* SNIPPET_START: Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32 */
+
+void
+Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32(
+  uint32_t len,
+  uint32_t *n,
+  uint32_t nInv,
+  uint32_t *c,
+  uint32_t *res
+);
+
+/* SNIPPET_END: Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32 */
+
+/* SNIPPET_START: Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64 */
+
+void
+Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t nInv,
+  uint64_t *c,
+  uint64_t *res
+);
+
+/* SNIPPET_END: Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64 */
 
 /* SNIPPET_START: Hacl_Bignum_Exponentiation_bn_check_mod_exp_u32 */
 

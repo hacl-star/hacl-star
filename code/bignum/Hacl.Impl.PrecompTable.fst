@@ -228,7 +228,9 @@ val precomp_table_inv_lemma_j:
   (ensures
     precomp_table_inv len ctx_len k a table_len table2 j)
 
+#push-options "--z3rlimit 75"
 let precomp_table_inv_lemma_j #a_t len ctx_len k a table_len table1 table2 i j =
+  assert (j < v table_len);
   assert (precomp_table_inv len ctx_len k a table_len table1 j);
   let bj1 = spec_table_sub_len (v len) (v table_len) table1 j in
   let bj2 = spec_table_sub_len (v len) (v table_len) table2 j in
@@ -255,7 +257,7 @@ let precomp_table_inv_lemma_j #a_t len ctx_len k a table_len table1 table2 i j =
   Classical.forall_intro aux;
   LSeq.eq_intro bj1 bj2;
   assert (precomp_table_inv len ctx_len k a table_len table2 j)
-
+#pop-options
 
 inline_for_extraction noextract
 val precomp_table_inv_lemma:

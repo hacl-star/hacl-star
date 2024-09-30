@@ -11,7 +11,7 @@
 
 #include "test_helpers.h"
 
-#include "Hacl_Chacha20Poly1305_128.h"
+#include "Hacl_AEAD_Chacha20Poly1305_Simd128.h"
 
 #include "EverCrypt_AutoConfig2.h"
 
@@ -44,15 +44,15 @@ print_test(int in_len,
   bool ok = true;
   int res = 0;
 
-  Hacl_Chacha20Poly1305_128_aead_encrypt(
-    key, nonce, aad_len, aad, in_len, in, ciphertext, mac);
+  Hacl_AEAD_Chacha20Poly1305_Simd128_encrypt(
+    ciphertext, mac, in, in_len, aad, aad_len, key, nonce);
   printf("Chacha20Poly1305 (128-bit) Result (chacha20):\n");
   ok = print_result(in_len, ciphertext, exp_cipher);
   printf("(poly1305):\n");
   ok = ok && print_result(16, mac, exp_mac);
 
-  res = Hacl_Chacha20Poly1305_128_aead_decrypt(
-    key, nonce, aad_len, aad, in_len, plaintext, exp_cipher, exp_mac);
+  res = Hacl_AEAD_Chacha20Poly1305_Simd128_decrypt(
+    plaintext, exp_cipher, in_len, aad, aad_len, key, nonce, exp_mac);
   if (res != 0)
     printf("AEAD Decrypt (Chacha20/Poly1305) failed \n.");
   ok = ok && (res == 0);
@@ -67,7 +67,7 @@ main()
   EverCrypt_AutoConfig2_init();
 
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors) / sizeof(chacha20poly1305_test_vector);
+  for (size_t i = 0; i < sizeof(vectors) / sizeof(chacha20poly1305_test_vector);
        ++i) {
     ok &= print_test(vectors[i].input_len,
                      vectors[i].input,
@@ -94,15 +94,15 @@ main()
   memset(plain, 'P', SIZE);
   memset(aead_key, 'K', 32);
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Chacha20Poly1305_128_aead_encrypt(
-      aead_key, aead_nonce, aad_len, aead_aad, SIZE, plain, cipher, tag);
+    Hacl_AEAD_Chacha20Poly1305_Simd128_encrypt(
+      cipher, tag, plain, SIZE, aead_aad, aad_len, aead_key, aead_nonce);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Chacha20Poly1305_128_aead_encrypt(
-      aead_key, aead_nonce, aad_len, aead_aad, SIZE, plain, cipher, tag);
+    Hacl_AEAD_Chacha20Poly1305_Simd128_encrypt(
+      cipher, tag, plain, SIZE, aead_aad, aad_len, aead_key, aead_nonce);
     res ^= tag[0] ^ tag[15];
   }
   b = cpucycles_end();
@@ -112,8 +112,8 @@ main()
 
   int res1 = 0;
   for (int j = 0; j < ROUNDS; j++) {
-    res1 = Hacl_Chacha20Poly1305_128_aead_decrypt(
-      aead_key, aead_nonce, aad_len, aead_aad, SIZE, plain, cipher, tag);
+    res1 = Hacl_AEAD_Chacha20Poly1305_Simd128_decrypt(
+      plain, cipher, SIZE, aead_aad, aad_len, aead_key, aead_nonce, tag);
     res1 ^= res1;
   }
 
@@ -121,8 +121,8 @@ main()
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Chacha20Poly1305_128_aead_decrypt(
-      aead_key, aead_nonce, aad_len, aead_aad, SIZE, plain, cipher, tag);
+    Hacl_AEAD_Chacha20Poly1305_Simd128_decrypt(
+      plain, cipher, SIZE, aead_aad, aad_len, aead_key, aead_nonce, tag);
     res1 ^= res1;
   }
   b = cpucycles_end();

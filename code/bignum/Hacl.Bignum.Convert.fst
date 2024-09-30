@@ -200,6 +200,7 @@ let mk_bn_to_bytes_be #t is_known_len len b res =
       LowStar.Ignore.ignore tmp;
       bn_to_bytes_be_ bnLen b res end
     else begin
+      HyperStack.ST.break_vc ();
       bn_to_bytes_be_ bnLen b tmp;
       copy res (sub tmp (tmpLen -! len) len) end end
   else begin

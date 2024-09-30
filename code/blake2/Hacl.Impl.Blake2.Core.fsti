@@ -54,6 +54,63 @@ val row_v_lemma: #a:Spec.alg -> #m:m_spec -> h0:mem -> h1:mem -> r1:row_p a m ->
 	[SMTPat (row_v h0 r1); SMTPat (row_v h1 r2)]
 
 noextract inline_for_extraction
+let salt_len (a:Spec.alg) : size_t =
+  match a with
+  | Spec.Blake2S -> 8ul
+  | Spec.Blake2B -> 16ul
+
+noextract inline_for_extraction
+let personal_len (a:Spec.alg) : size_t =
+  match a with
+  | Spec.Blake2S -> 8ul
+  | Spec.Blake2B -> 16ul
+
+noeq
+inline_for_extraction // projectors
+type blake2_params (a:Spec.alg) = {
+  digest_length: digest_length: UInt8.t { 1 <= UInt8.v digest_length /\ UInt8.v digest_length <= Spec.max_output a };
+  key_length: key_length: UInt8.t { UInt8.v key_length <= Spec.max_key a };
+  fanout: uint8;
+  depth: uint8;
+  leaf_length: uint32;
+  node_offset: Spec.node_offset_t a;
+  node_depth: uint8;
+  inner_length: uint8;
+  salt: lbuffer uint8 (salt_len a);
+  personal: lbuffer uint8 (personal_len a);
+}
+
+let blake2_params_inv (#a: Spec.alg) (h: mem) (p: blake2_params a): GTot prop =
+  live h p.salt /\ live h p.personal /\ LowStar.Buffer.loc_disjoint (loc_addr_of_buffer p.salt) (loc_addr_of_buffer p.personal)
+
+let blake2_params_loc (#a: Spec.alg) (p: blake2_params a) =
+  loc_addr_of_buffer p.salt `union` loc_addr_of_buffer p.personal
+
+let blake2_params_v (#a: Spec.alg) (h: mem) (p: blake2_params a): GTot (Spec.blake2_params a) =
+  Spec.Mkblake2_params
+    p.digest_length
+    p.key_length
+    p.fanout
+    p.depth
+    p.leaf_length
+    p.node_offset
+    p.node_depth
+    p.inner_length
+    (as_seq h p.salt)
+    (as_seq h p.personal)
+
+inline_for_extraction noextract
+val alloca_default_params: a: Spec.alg -> StackInline (blake2_params a)
+  (requires (fun _ -> True))
+  (ensures (fun h0 s h1 ->
+    blake2_params_inv h1 s /\
+    blake2_params_v h1 s == Spec.blake2_default_params a /\
+    LowStar.Buffer.(modifies loc_none h0 h1) /\
+    LowStar.Buffer.fresh_loc (blake2_params_loc s) h0 h1 /\
+    LowStar.Buffer.(loc_includes (loc_region_only true (FStar.HyperStack.get_tip h1))
+        (blake2_params_loc s))))
+
+noextract inline_for_extraction
 unfold let state_p (a:Spec.alg) (m:m_spec) =
   lbuffer (element_t a m) (4ul *. row_len a m)
 
@@ -220,7 +277,6 @@ val alloc_state: a:Spec.alg -> m:m_spec ->
 	  (requires (fun h -> True))
 	  (ensures (fun h0 r h1 -> stack_allocated r h0 h1 (Lib.Sequence.create (4 * v (row_len a m)) (zero_element a m)) /\
 				live h1 r))
-
 
 
 noextract inline_for_extraction

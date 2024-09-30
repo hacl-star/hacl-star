@@ -37,6 +37,24 @@ extern "C" {
 
 #include "../Hacl_Hash_SHA3.h"
 
+/* SNIPPET_START: Hacl_Hash_SHA3_keccak_rotc */
+
+extern const uint32_t Hacl_Hash_SHA3_keccak_rotc[24U];
+
+/* SNIPPET_END: Hacl_Hash_SHA3_keccak_rotc */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_keccak_piln */
+
+extern const uint32_t Hacl_Hash_SHA3_keccak_piln[24U];
+
+/* SNIPPET_END: Hacl_Hash_SHA3_keccak_piln */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_keccak_rndc */
+
+extern const uint64_t Hacl_Hash_SHA3_keccak_rndc[24U];
+
+/* SNIPPET_END: Hacl_Hash_SHA3_keccak_rndc */
+
 /* SNIPPET_START: Hacl_Hash_SHA3_update_multi_sha3 */
 
 void
@@ -60,18 +78,6 @@ Hacl_Hash_SHA3_update_last_sha3(
 );
 
 /* SNIPPET_END: Hacl_Hash_SHA3_update_last_sha3 */
-
-/* SNIPPET_START: Hacl_Impl_SHA3_state_permute */
-
-void Hacl_Impl_SHA3_state_permute(uint64_t *s);
-
-/* SNIPPET_END: Hacl_Impl_SHA3_state_permute */
-
-/* SNIPPET_START: Hacl_Impl_SHA3_loadState */
-
-void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
-
-/* SNIPPET_END: Hacl_Impl_SHA3_loadState */
 
 #if defined(__cplusplus)
 }

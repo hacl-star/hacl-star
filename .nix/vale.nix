@@ -1,18 +1,24 @@
-{ dotnetPackages, fetchFromGitHub, fetchNuGet, fsharp, mono, scons, stdenv }:
-
-let
+{
+  dotnetPackages,
+  fetchFromGitHub,
+  fetchNuGet,
+  fsharp,
+  mono,
+  scons,
+  stdenv,
+}: let
   FsLexYacc = fetchNuGet {
     pname = "FsLexYacc";
     version = "6.1.0";
     sha256 = "1v5myn62zqs431i046gscqw2v0c969fc7pdplx7z9cnpy0p2s4rv";
-    outputFiles = [ "build/*" ];
+    outputFiles = ["build/*"];
   };
 
   FsLexYaccRuntime = fetchNuGet {
     pname = "FsLexYacc.Runtime";
     version = "6.1.0";
     sha256 = "18vrx4lxsn4hkfishg4abv0d4q21dsph0bm4mdq5z8afaypp5cr7";
-    outputFiles = [ "lib/net40/*" ];
+    outputFiles = ["lib/net40/*"];
   };
 
   vale = stdenv.mkDerivation rec {
@@ -36,7 +42,7 @@ let
       cp -r ${FsLexYaccRuntime}/lib/dotnet/FsLexYacc.Runtime/* tools/FsLexYacc/FsLexYacc.Runtime.6.1.0/lib/net40/
     '';
 
-    buildInputs = [ FsLexYacc fsharp mono scons ];
+    buildInputs = [FsLexYacc fsharp mono scons];
 
     enableParallelBuilding = true;
 
@@ -63,4 +69,5 @@ let
       }
     '';
   };
-in vale
+in
+  vale

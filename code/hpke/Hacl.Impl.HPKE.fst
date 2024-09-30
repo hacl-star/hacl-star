@@ -805,7 +805,8 @@ val decap:
        | _ -> False)
      )
 
-#push-options "--z3rlimit 300 --z3refresh --ifuel 1"
+#push-options "--z3rlimit 150 --ifuel 1 --split_queries no"
+#restart-solver
 
 [@ Meta.Attribute.inline_ ]
 let decap #cs o_shared enc skR =
@@ -823,16 +824,28 @@ let decap #cs o_shared enc skR =
     let h1 = ST.get () in
 
     if res2 = 0ul then (
+      HyperStack.ST.break_vc ();
       let h_m = ST.get () in
       assert (as_seq h_m enc `Seq.equal` as_seq h0 enc);
       copy (sub kemcontext 0ul (nsize_public_dh cs)) enc;
 
       serialize_public_key #cs pkRm pkR;
 
+      HyperStack.ST.break_vc ();
+
       let h2 = ST.get () in
       assert (as_seq h2 kemcontext `Seq.equal` (as_seq h0 enc `Seq.append` S.serialize_public_key cs (as_seq h1 pkR)));
 
       let dhm = prepare_dh #cs dh in
+
+      HyperStack.ST.break_vc ();
+
+      assert
+        (Spec.Hash.Definitions.hash_length (S.kem_hash_of_cs cs)
+         + (v (nsize_two_public_dh cs)) + 28 + SHa.block_length (S.kem_hash_of_cs cs) <= max_size_t)
+      by begin
+        Tactics.V2.compute()
+      end;
 
       extract_and_expand #cs o_shared dhm (nsize_two_public_dh cs) kemcontext;
       pop_frame ();

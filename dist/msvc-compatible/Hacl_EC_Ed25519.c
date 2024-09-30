@@ -43,11 +43,11 @@ Write the additive identity in `f`.
 */
 void Hacl_EC_Ed25519_mk_felem_zero(uint64_t *b)
 {
-  b[0U] = (uint64_t)0U;
-  b[1U] = (uint64_t)0U;
-  b[2U] = (uint64_t)0U;
-  b[3U] = (uint64_t)0U;
-  b[4U] = (uint64_t)0U;
+  b[0U] = 0ULL;
+  b[1U] = 0ULL;
+  b[2U] = 0ULL;
+  b[3U] = 0ULL;
+  b[4U] = 0ULL;
 }
 
 /**
@@ -57,11 +57,11 @@ Write the multiplicative identity in `f`.
 */
 void Hacl_EC_Ed25519_mk_felem_one(uint64_t *b)
 {
-  b[0U] = (uint64_t)1U;
-  b[1U] = (uint64_t)0U;
-  b[2U] = (uint64_t)0U;
-  b[3U] = (uint64_t)0U;
-  b[4U] = (uint64_t)0U;
+  b[0U] = 1ULL;
+  b[1U] = 0ULL;
+  b[2U] = 0ULL;
+  b[3U] = 0ULL;
+  b[4U] = 0ULL;
 }
 
 /**
@@ -106,8 +106,8 @@ Write `a * b mod p` in `out`.
 void Hacl_EC_Ed25519_felem_mul(uint64_t *a, uint64_t *b, uint64_t *out)
 {
   FStar_UInt128_uint128 tmp[10U];
-  for (uint32_t _i = 0U; _i < (uint32_t)10U; ++_i)
-    tmp[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
+  for (uint32_t _i = 0U; _i < 10U; ++_i)
+    tmp[_i] = FStar_UInt128_uint64_to_uint128(0ULL);
   Hacl_Impl_Curve25519_Field51_fmul(out, a, b, tmp);
 }
 
@@ -123,8 +123,8 @@ Write `a * a mod p` in `out`.
 void Hacl_EC_Ed25519_felem_sqr(uint64_t *a, uint64_t *out)
 {
   FStar_UInt128_uint128 tmp[5U];
-  for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    tmp[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
+  for (uint32_t _i = 0U; _i < 5U; ++_i)
+    tmp[_i] = FStar_UInt128_uint64_to_uint128(0ULL);
   Hacl_Impl_Curve25519_Field51_fsqr(out, a, tmp);
 }
 
@@ -205,29 +205,29 @@ Write the base point (generator) in `p`.
 void Hacl_EC_Ed25519_mk_base_point(uint64_t *p)
 {
   uint64_t *gx = p;
-  uint64_t *gy = p + (uint32_t)5U;
-  uint64_t *gz = p + (uint32_t)10U;
-  uint64_t *gt = p + (uint32_t)15U;
-  gx[0U] = (uint64_t)0x00062d608f25d51aU;
-  gx[1U] = (uint64_t)0x000412a4b4f6592aU;
-  gx[2U] = (uint64_t)0x00075b7171a4b31dU;
-  gx[3U] = (uint64_t)0x0001ff60527118feU;
-  gx[4U] = (uint64_t)0x000216936d3cd6e5U;
-  gy[0U] = (uint64_t)0x0006666666666658U;
-  gy[1U] = (uint64_t)0x0004ccccccccccccU;
-  gy[2U] = (uint64_t)0x0001999999999999U;
-  gy[3U] = (uint64_t)0x0003333333333333U;
-  gy[4U] = (uint64_t)0x0006666666666666U;
-  gz[0U] = (uint64_t)1U;
-  gz[1U] = (uint64_t)0U;
-  gz[2U] = (uint64_t)0U;
-  gz[3U] = (uint64_t)0U;
-  gz[4U] = (uint64_t)0U;
-  gt[0U] = (uint64_t)0x00068ab3a5b7dda3U;
-  gt[1U] = (uint64_t)0x00000eea2a5eadbbU;
-  gt[2U] = (uint64_t)0x0002af8df483c27eU;
-  gt[3U] = (uint64_t)0x000332b375274732U;
-  gt[4U] = (uint64_t)0x00067875f0fd78b7U;
+  uint64_t *gy = p + 5U;
+  uint64_t *gz = p + 10U;
+  uint64_t *gt = p + 15U;
+  gx[0U] = 0x00062d608f25d51aULL;
+  gx[1U] = 0x000412a4b4f6592aULL;
+  gx[2U] = 0x00075b7171a4b31dULL;
+  gx[3U] = 0x0001ff60527118feULL;
+  gx[4U] = 0x000216936d3cd6e5ULL;
+  gy[0U] = 0x0006666666666658ULL;
+  gy[1U] = 0x0004ccccccccccccULL;
+  gy[2U] = 0x0001999999999999ULL;
+  gy[3U] = 0x0003333333333333ULL;
+  gy[4U] = 0x0006666666666666ULL;
+  gz[0U] = 1ULL;
+  gz[1U] = 0ULL;
+  gz[2U] = 0ULL;
+  gz[3U] = 0ULL;
+  gz[4U] = 0ULL;
+  gt[0U] = 0x00068ab3a5b7dda3ULL;
+  gt[1U] = 0x00000eea2a5eadbbULL;
+  gt[2U] = 0x0002af8df483c27eULL;
+  gt[3U] = 0x000332b375274732ULL;
+  gt[4U] = 0x00067875f0fd78b7ULL;
 }
 
 /**

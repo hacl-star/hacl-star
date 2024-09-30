@@ -102,7 +102,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "d6b891ac03e83dd9867cae9c3e14ac1b"
+      "c6ac0c93c987d0942ba685e31ba4cd63"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.lemma_equality1",
@@ -119,7 +119,7 @@
         "refinement_interpretation_Tm_refine_a62b3c06e1a0d7fc333ce8199c4c9c1e"
       ],
       0,
-      "743a05fb3ec623129994eb33e02875c4"
+      "b3aa6f1fc3474d242e64b766ecdb9b55"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.eq",
@@ -218,7 +218,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "11747cdd6c43d0f032f899973cd74c8e"
+      "979b3efe910a7a137f1e6fc5e27dd269"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal_1",
@@ -329,7 +329,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "2260a2d05c32af64863a0bf826848fce"
+      "02a51f3569ce4008a9a594121988d1d9"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal_2",
@@ -345,7 +345,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "05580c317625e5aed0e6ae906f6ae42a"
+      "a0ab26d65af9e42ac8d7958950eaabae"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal_2",
@@ -459,7 +459,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "6cd75dc08ff9c8545a53e2253d4e4691"
+      "9df0e07c124e1fd38620f42431d8c248"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal",
@@ -523,14 +523,17 @@
         "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Spec.Curve25519.elem",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Prims.squash", "equation_Spec.Curve25519.elem",
         "equation_Spec.Curve25519.op_Star_Percent",
         "equation_Spec.Ed25519.PointOps.point_equal",
+        "equation_Spec.Ed25519.uu___2",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64",
         "function_token_typing_Prims.int",
+        "function_token_typing_Spec.Ed25519.uu___2",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing",
         "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
@@ -581,12 +584,11 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
-        "primitive_Prims.op_disEquality",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Negation",
+        "primitive_Prims.op_Subtraction", "primitive_Prims.op_disEquality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__1",
@@ -596,6 +598,7 @@
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
         "refinement_interpretation_Tm_refine_1cc6c9f8558dddb337b6c1187115cd6a",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
@@ -643,7 +646,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "dcbe0d4f882e93e605a99ebc640840ec"
+      "5de8b5d312a043070cb5c1a3047e85ae"
     ]
   ]
 ]

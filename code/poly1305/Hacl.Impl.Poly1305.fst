@@ -101,6 +101,7 @@ val precomp_inv_zeros: #s:field_spec -> precomp_b:lbuffer (limb s) (precomplen s
   (requires as_seq h precomp_b == Lib.Sequence.create (v (precomplen s)) (limb_zero s))
   (ensures  F32xN.load_precompute_r_post #(width s) h precomp_b)
 
+#push-options "--z3rlimit 250"
 let precomp_inv_zeros #s precomp_b h =
   let r_b = gsub precomp_b 0ul (nlimb s) in
   let rn_b = gsub precomp_b (2ul *! nlimb s) (nlimb s) in
@@ -117,7 +118,7 @@ let precomp_inv_zeros #s precomp_b h =
   LSeq.eq_intro (feval h rn_b5) (LSeq.create (width s) 0);
   assert (F32xN.as_tup5 #(width s) h rn_b5 == F32xN.precomp_r5 (F32xN.as_tup5 h rn_b));
   assert (feval h rn_b == Vec.compute_rw (feval h r_b).[0])
-
+#pop-options
 
 let ctx_inv_zeros #s ctx h =
   // ctx = [acc_b; r_b; r_b5; rn_b; rn_b5]
@@ -605,10 +606,10 @@ let poly1305_finish #s tag key ctx =
 
 noextract
 [@ Meta.Attribute.specialize ]
-let poly1305_mac #s tag len text key =
+let poly1305_mac #s output input input_len key =
   push_frame ();
   let ctx = create (nlimb s +! precomplen s) (limb_zero s) in
   poly1305_init #s ctx key;
-  poly1305_update #s ctx len text;
-  poly1305_finish #s tag key ctx;
+  poly1305_update #s ctx input_len input;
+  poly1305_finish #s output key ctx;
   pop_frame ()

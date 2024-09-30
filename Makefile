@@ -345,7 +345,7 @@ endif
 	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
 	    --print_implicits --print_universes --print_effect_args --print_full_names \
 	    --print_bound_var_types --ugly --admit_smt_queries true \
-	    --hint_file hints/$(notdir $*).hints \
+	    --hint_dir hints/ \
 	    $(notdir $*) > $@ \
 	  ,[DUMP] $(notdir $(patsubst %.fst,%,$*)),$(call to-obj-dir,$@))
 
@@ -413,7 +413,7 @@ hints:
 %.checked: | hints
 	$(call run-with-log,\
 	  $(FSTAR) $(FSTAR_FLAGS) \
-	    --hint_file hints/$(notdir $*).hints \
+	    --hint_dir hints \
 	    $< \
 	    && \
 	    touch -c $@ \
@@ -461,13 +461,15 @@ min-test-unstaged: $(filter-out \
 obj/Meta_Interface.ml: CODEGEN = Plugin
 obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
 
-obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
+# If fstar.exe was changed in the slightest, this object
+# must be recompiled
+obj/Meta_Interface.cmxs: obj/Meta_Interface.ml $(FSTAR_EXE)
 	$(OCAMLSHARED) $< -o $@
 
 obj/Test_Lowstarize.ml: CODEGEN = Plugin
 obj/Test_Lowstarize.ml: obj/Test.Lowstarize.fst.checked
 
-obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml
+obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml $(FSTAR_EXE)
 	$(OCAMLSHARED) $< -o $@
 
 # IMPORTANT NOTE: we cannot let F* compile the cmxs for several reasons.
@@ -511,22 +513,34 @@ dist/vale:
 	mkdir -p $@
 
 dist/vale/%-x86_64-mingw.S: obj/vale-%.exe | dist/vale
-	$< GCC Win > $@
+	$(call run-with-log,\
+	  $< GCC Win > $@ \
+	  ,[VALE-CODEGEN-GCC-WIN] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-x86_64-msvc.asm: obj/vale-%.exe | dist/vale
-	$< MASM Win > $@
+	$(call run-with-log,\
+	  $< MASM Win > $@ \
+	  ,[VALE-CODEGEN-MASM-WIN] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-x86_64-linux.S: obj/vale-%.exe | dist/vale
-	$< GCC Linux > $@
+	$(call run-with-log,\
+	  $< GCC Linux > $@ \
+	  ,[VALE-CODEGEN-GCC-LINUX] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
-	$< GCC MacOS > $@
+	$(call run-with-log,\
+	  $< GCC MacOS > $@ \
+	  ,[VALE-CODEGEN-GCC-MACOS] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
-	$< > $@
+	$(call run-with-log,\
+	  $< > $@ \
+	  ,[VALE-CODEGEN-INLINE] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-ppc64le.S: obj/vale-%-ppc64le.exe | dist/vale
-	$< > $@
+	$(call run-with-log,\
+	  $< > $@ \
+	  ,[VALE-CODEGEN-PPC] $(notdir $*),$(call to-obj-dir,$@))
 
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
@@ -540,7 +554,9 @@ obj/inline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Inline25519.ml
 obj/inline-vale-testInline.exe: vale/code/test/TestInlineMain.ml
 
 obj/vale_testInline.h: obj/inline-vale-testInline.exe
-	$< > $@
+	$(call run-with-log,\
+	  $< > $@ \
+	  ,[VALE-CODEGEN-INLINE] $(notdir $*),$(call to-obj-dir, $@))
 
 obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
 	cp $< $@
@@ -652,9 +668,10 @@ REQUIRED_FLAGS	= \
   -add-include 'Hacl_Frodo64.c:"lib_memzero0.h"' \
   -add-include 'Hacl_Frodo640.c:"lib_memzero0.h"' \
   -add-include 'Hacl_Frodo976.c:"lib_memzero0.h"' \
-  -add-include 'Hacl_Hash_Blake2.c:"lib_memzero0.h"' \
-  -add-include 'Hacl_Hash_Blake2b_256.c:"lib_memzero0.h"' \
-  -add-include 'Hacl_Hash_Blake2s_128.c:"lib_memzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2b.c:"lib_memzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2s.c:"lib_memzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2b_Simd256.c:"lib_memzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2s_Simd128.c:"lib_memzero0.h"' \
   $(BASE_FLAGS)
 
 TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
@@ -669,19 +686,21 @@ TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 INTRINSIC_FLAGS = \
   -add-include 'Hacl_P256.c:"lib_intrinsics.h"' \
   \
-  -add-include 'Hacl_Chacha20Poly1305_128.c:"libintvector.h"' \
+  -add-include 'Hacl_AEAD_Chacha20Poly1305_Simd128.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec128.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec128.c:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_Blake2s_128:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
+  -add-include 'Hacl_Hash_Blake2s_Simd128:"libintvector.h"' \
+  -add-include 'Hacl_MAC_Poly1305_Simd128:"libintvector.h"' \
   \
-  -add-include 'Hacl_Chacha20Poly1305_256.c:"libintvector.h"' \
+  -add-include 'Hacl_AEAD_Chacha20Poly1305_Simd256.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec256.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_Blake2b_256:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_256:"libintvector.h"'
+  -add-include 'Hacl_Hash_Blake2b_Simd256:"libintvector.h"' \
+  -add-include 'Hacl_MAC_Poly1305_Simd256:"libintvector.h"' \
+  \
+  -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
@@ -719,7 +738,9 @@ LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 
 BUNDLE_FLAGS	=\
   $(BLAKE2_BUNDLE) \
+  $(HMAC_BUNDLE) \
   $(SHA3_BUNDLE) \
+  $(SHA3_SIMD256_BUNDLE) \
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
   $(SHA2MB_BUNDLE) \
@@ -808,7 +829,7 @@ dist/wasm/Makefile.basic: CHACHA20_BUNDLE += \
 dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
   -bundle Hacl.Chacha20Poly1305_128,Hacl.Chacha20Poly1305_256
 dist/wasm/Makefile.basic: POLY_BUNDLE = \
-  -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
+  -bundle 'Hacl.Streaming.Poly1305_32=Hacl.Poly1305_32,Hacl.Impl.Poly1305.Field32xN_32'[rename=Hacl_MAC_Poly1305,rename-prefix] \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 
@@ -884,14 +905,15 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
-	  -no-prefix $(subst _,.,$*) \
+	  -no-prefix $(subst Hacl_Test_,Hacl.Test.,$*) \
           -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
 	  -add-include '"internal/Hacl_Hash_SHA2.h"' \
 	  -static-header Hacl.Impl.SHA2.Generic \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
 	  -add-include '"libintvector.h"' \
-	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
+	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^) \
+	  -add-include '"clients/krmlrenamings.h"'
 
 dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"krml/internal/compat.h"'
 
@@ -997,9 +1019,11 @@ test-ml-%: dist/test/ml/%.exe
 # against HACL*-extracted-to-ML
 
 obj/libhaclml.cmxa: $(filter-out $(HACL_HOME)/obj/Meta_Interface.cmx,$(ALL_CMX_FILES))
-	# JP: doesn't work because a PPX is prepended for some reason
-	#ocamlfind mklib -o haclml -package fstar.lib -g -I $(HACL_HOME)/obj $(addprefix $(HACL_HOME)/obj/*.,cmo cmx ml o)
-	ocamlfind opt -a -o $@ -package fstar.lib -g -I $(HACL_HOME)/obj $^
+# JP: doesn't work because a PPX is prepended for some reason
+# ocamlfind mklib -o haclml -package fstar.lib -g -I $(HACL_HOME)/obj $(addprefix $(HACL_HOME)/obj/*.,cmo cmx ml o)
+	$(call run-with-log,\
+	  OCAMLFIND_IGNORE_DUPS_IN="`ocamlc -where`/compiler-libs" ocamlfind opt -a -o $@ -package fstar.lib -g -I $(HACL_HOME)/obj $^ \
+	  ,[OCAMLOPT-CMXA] libhaclml,$(call to-obj-dir,$@))
 
 
 ########

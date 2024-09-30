@@ -16,7 +16,7 @@
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947"
       ],
       0,
-      "d7291b5f4cbbec126c0d0c874939f20b"
+      "61158d5c62800c9e41d520b29980573b"
     ],
     [
       "Hacl.Bignum.Comparison.bn_is_odd",
@@ -92,7 +92,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "ab2b22bdae51b1482b11dd9caf844bdd"
+      "a580a5aa7422c70f89aeb61bb3258e07"
     ],
     [
       "Hacl.Bignum.Comparison.bn_eq_mask",
@@ -118,7 +118,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "09a6e579407d993f563a98cf256bd1e4"
+      "b8afefe960ba478aec429d1651f55e97"
     ],
     [
       "Hacl.Bignum.Comparison.bn_eq_mask",
@@ -176,8 +176,9 @@
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint32",
         "function_token_typing_Prims.int",
@@ -222,7 +223,6 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Negation",
@@ -281,7 +281,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "90064c358faa21711ae1756a635fb2c0"
+      "301edd9e6e7ffb221bbeb265f9facbf9"
     ],
     [
       "Hacl.Bignum.Comparison.bn_is_zero_mask",
@@ -298,7 +298,7 @@
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947"
       ],
       0,
-      "628b2de53a381cc95550436df2945a7e"
+      "0cbca29e679456a00744cda3b047c3ff"
     ],
     [
       "Hacl.Bignum.Comparison.bn_is_zero_mask",
@@ -436,7 +436,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "946f5fde8e4bd2240202801f6e5e25c6"
+      "5bb112f72502647cfdd9b2921896913e"
     ],
     [
       "Hacl.Bignum.Comparison.bn_lt_mask",
@@ -462,7 +462,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "2887f4367c118784d76efaf06d723219"
+      "29b238a8148592ebe00b996793227282"
     ],
     [
       "Hacl.Bignum.Comparison.bn_lt_mask",
@@ -527,8 +527,9 @@
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Hacl.Spec.Bignum.Comparison.bn_lt_mask_f",
         "function_token_typing_Prims.int",
@@ -578,7 +579,6 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
@@ -640,7 +640,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "27e894a24f257ac5bda7e9cf6d3bc5b5"
+      "0e7f8f76f95db6f80fddb2bcb0246eda"
     ],
     [
       "Hacl.Bignum.Comparison.bn_lt_pow2_mask",
@@ -663,7 +663,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f87458ff5e744d09cae2bb8c06517184"
+      "1b9d70964abab877f173eecd8dc46a3f"
     ],
     [
       "Hacl.Bignum.Comparison.bn_lt_pow2_mask",
@@ -809,7 +809,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c36bda1eb44d54502115ab1dea1d7299"
+      "d989ec209b45f36fb163384b77836b14"
     ],
     [
       "Hacl.Bignum.Comparison.bn_gt_pow2_mask",
@@ -832,7 +832,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "84e1ded487360ab052404cd4371e8ade"
+      "e153203c77e878180ce48bb3d2c2ab74"
     ],
     [
       "Hacl.Bignum.Comparison.bn_gt_pow2_mask",
@@ -978,7 +978,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b98ac91014aeed2ba7d383f5a9c772fd"
+      "7ee640b69aba9ad7c8516235bf8bf7c0"
     ]
   ]
 ]

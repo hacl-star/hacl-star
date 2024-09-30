@@ -44,7 +44,7 @@ $(OUTPUT_DIR)/Vale.%.checked: FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 # Producing .checked and .krml.
 %.checked:
-	$(FSTAR) $(FSTAR_FLAGS) $< --hint_file $(HACL_HOME)/hints/$(notdir $*).hints && \
+	$(FSTAR) $(FSTAR_FLAGS) $< --hint_dir $(HACL_HOME)/hints/ && \
 	  touch -c $@
 
 %.krml:

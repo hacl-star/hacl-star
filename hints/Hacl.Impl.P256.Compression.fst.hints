@@ -34,7 +34,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "8c7e752e60f9f4ae7d21c15b5fd8be96"
+      "4e6cb19b3d3e31b721fe3d6e1c3b9810"
     ],
     [
       "Hacl.Impl.P256.Compression.uncompressed_to_raw",
@@ -118,7 +118,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "3e72df0597863a6963226c9c57f6e5f9"
+      "65b0ba3e53db6fdcfcd93555dad81018"
     ],
     [
       "Hacl.Impl.P256.Compression.compressed_to_raw",
@@ -153,7 +153,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "07956022c743048be591c26a038ad749"
+      "5ccc59a2d6efd0fd935b70c38b8772c7"
     ],
     [
       "Hacl.Impl.P256.Compression.compressed_to_raw",
@@ -215,8 +215,10 @@
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Lib.Sequence.to_seq", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.P256.PointOps.aff_point",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.aff_point",
         "equation_Spec.P256.PointOps.aff_point_decompress",
         "equation_Spec.P256.PointOps.prime",
         "equation_Spec.P256.pk_compressed_to_raw",
@@ -281,7 +283,6 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
@@ -365,7 +366,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "84ac6f9bbff5870b1fd07b06e4641a1a"
+      "10a40dfa1e5195c140e8f2be82703d78"
     ],
     [
       "Hacl.Impl.P256.Compression.raw_to_uncompressed",
@@ -398,7 +399,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "048069f7bedfd54fca0a03a8d9c00ded"
+      "74d98a10579e72c518da9f31bd13ea6f"
     ],
     [
       "Hacl.Impl.P256.Compression.raw_to_uncompressed",
@@ -514,7 +515,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8322223eb346a7d046ec78fba2508cbe"
+      "cf184c1a9f0518cb697f7e89b56b353a"
     ],
     [
       "Hacl.Impl.P256.Compression.raw_to_compressed_get_pk0",
@@ -569,8 +570,9 @@
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
         "equation_Lib.Sequence.length", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64",
         "function_token_typing_Lib.IntTypes.uint8",
@@ -620,7 +622,6 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
@@ -659,8 +660,8 @@
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
         "typing_Lib.Buffer.loc", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.cast", "typing_Lib.IntTypes.op_At_Percent_Dot",
-        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.IntTypes.cast", "typing_Lib.IntTypes.v",
+        "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
         "typing_LowStar.Monotonic.Buffer.frameOf",
@@ -674,7 +675,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "849e9c49cd140d73a5a78d87c2ee9e52"
+      "6cc165915d9e1586a1aa6fb08be86be4"
     ],
     [
       "Hacl.Impl.P256.Compression.raw_to_compressed",
@@ -707,7 +708,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "d7cd97a8a1bade0331e0afd5152c7e99"
+      "2ca9bfe2b574f904be55ce9a35f76f67"
     ],
     [
       "Hacl.Impl.P256.Compression.raw_to_compressed",
@@ -828,7 +829,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0a01d011f7102f6b9ad55f25c8f36062"
+      "45f1ff97be70797b55fdef9a525129e4"
     ]
   ]
 ]
