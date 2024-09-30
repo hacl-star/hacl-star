@@ -77,7 +77,7 @@ val qmont_inv_lemma: {| c:S.curve_params |} -> k:S.qelem ->
   Lemma (S.qinv (from_qmont k) == to_qmont (S.qinv k))
 
 
-#push-options "--lax" // for some reason, not verifying on command-line
+#push-options "--admit_smt_queries true" // for some reason, not verifying on command-line
 val qmont_inv_mul_lemma: {| c:S.curve_params |} -> s:S.qelem #c -> sinv:S.qelem #c -> b:S.qelem #c -> Lemma
   (requires from_qmont #c sinv == S.qinv #c (from_qmont s)) // post-condition of qinv
   (ensures  S.qinv s * b % S.order == from_qmont (sinv * from_qmont b))

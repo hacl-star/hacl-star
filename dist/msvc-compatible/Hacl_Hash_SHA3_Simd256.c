@@ -5992,12 +5992,12 @@ void Hacl_Hash_SHA3_Simd256_state_free(Lib_IntVector_Intrinsics_vec256 *s)
 Absorb number of blocks of 4 input buffers and write the output states
 
   This function is intended to receive a quadruple hash state and 4 input buffers.
-  It prcoesses an inputs of multiple of 168-bytes (SHAKE128 block size),
+  It processes an inputs of multiple of 168-bytes (SHAKE128 block size),
   any additional bytes of final partial block for each buffer are ignored.
 
   The argument `state` (IN/OUT) points to quadruple hash state,
   i.e., Lib_IntVector_Intrinsics_vec256[25]
-  The arguments `input0/input1/input2/input3` (IN) point to `inputByteLen` bytes 
+  The arguments `input0/input1/input2/input3` (IN) point to `inputByteLen` bytes
   of valid memory for each buffer, i.e., uint8_t[inputByteLen]
 */
 void
@@ -6038,15 +6038,15 @@ Hacl_Hash_SHA3_Simd256_shake128_absorb_nblocks(
 Absorb a final partial blocks of 4 input buffers and write the output states
 
   This function is intended to receive a quadruple hash state and 4 input buffers.
-  It prcoesses a sequence of bytes at end of each input buffer that is less 
+  It processes a sequence of bytes at end of each input buffer that is less
   than 168-bytes (SHAKE128 block size),
   any bytes of full blocks at start of input buffers are ignored.
 
   The argument `state` (IN/OUT) points to quadruple hash state,
   i.e., Lib_IntVector_Intrinsics_vec256[25]
-  The arguments `input0/input1/input2/input3` (IN) point to `inputByteLen` bytes 
+  The arguments `input0/input1/input2/input3` (IN) point to `inputByteLen` bytes
   of valid memory for each buffer, i.e., uint8_t[inputByteLen]
-  
+
   Note: Full size of input buffers must be passed to `inputByteLen` including
   the number of full-block bytes at start of each input buffer that are ignored
 */
@@ -6378,7 +6378,7 @@ Squeeze a quadruple hash state to 4 output buffers
 
   The argument `state` (IN) points to quadruple hash state,
   i.e., Lib_IntVector_Intrinsics_vec256[25]
-  The arguments `output0/output1/output2/output3` (OUT) point to `outputByteLen` bytes 
+  The arguments `output0/output1/output2/output3` (OUT) point to `outputByteLen` bytes
   of valid memory for each buffer, i.e., uint8_t[inputByteLen]
 */
 void

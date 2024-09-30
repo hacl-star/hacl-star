@@ -332,8 +332,7 @@ let rsapss_verify_bn #t ke modBits eBits pkey m_def s =
         (SE.bn_mod_exp_vartime_precompr2 (v nLen) (as_seq h0 n) (as_seq h0 r2)
         (as_seq h1 s) (v eBits) (as_seq h0 e));
 
-      if bn_lt_pow2 modBits m_def then true
-      else false end
+      bn_lt_pow2 modBits m_def end
     else false in
   res
 

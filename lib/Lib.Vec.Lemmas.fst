@@ -483,6 +483,11 @@ let lemma_map_blocks_multi_vec_equiv_pre_k #a w blocksize n hi_f f f_v i b_v pre
       Seq.index (f_v i b_v) k;
     } in
 
+  let acc_v : map_blocks_a a blocksize hi_f (w * i) =
+    assert (n <= hi_f);
+    assert_spinoff ((w * blocksize) * i == blocksize * (w * i));
+    acc_v
+  in
   calc (==) {
     map_blocks_multi_acc blocksize (w * i) hi_f w b_v f acc_v;
     (==) { map_blocks_multi_acc_is_map_blocks_multi blocksize (w * i) hi_f w b_v f acc_v }

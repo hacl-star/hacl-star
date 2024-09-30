@@ -10,9 +10,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_correspondence_Vale.Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
-        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Vale.Poly1305.Equiv_interpretation_Tm_arrow_750b542a74c0f6cef7bc9c9174882097",
-        "Vale.Poly1305.Spec_s_interpretation_Tm_arrow_6c528cb178c0356159679935f3a11594",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
         "bool_inversion", "bool_typing",
         "constructor_distinct_FStar.Integers.Signed",
@@ -72,9 +71,10 @@
         "equation_LowStar.Monotonic.Buffer.get",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.abs",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Prims.op_Equals_Equals_Equals", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "equation_Spec.Poly1305.key", "equation_Spec.Poly1305.size_block",
+        "equation_Prims.op_Equals_Equals_Equals", "equation_Prims.pos",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "equation_Spec.Poly1305.key",
+        "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key", "equation_Spec.Poly1305.tag",
         "equation_Vale.Def.Words_s.nat128", "equation_Vale.Def.Words_s.natN",
         "equation_Vale.Poly1305.Equiv.block_fun",
@@ -91,7 +91,6 @@
         "function_token_typing_LowStar.Buffer.trivial_preorder",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
-        "function_token_typing_Vale.Poly1305.Equiv.block_fun",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing",
         "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
@@ -192,6 +191,7 @@
         "refinement_interpretation_Tm_refine_72530680bea79807d75cb9d6e7632258",
         "refinement_interpretation_Tm_refine_74aa80f4c50166f8648891d3bbaf345c",
         "refinement_interpretation_Tm_refine_74d1ae07763cf2ce5f26906c9df0d2cc",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7f16c7b57ef8bef37e694fdc293f58a5",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
@@ -256,8 +256,8 @@
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
-        "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Spec.AES.gf8",
-        "typing_Spec.AES.irred",
+        "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Prims.pow2",
+        "typing_Spec.AES.gf8", "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Poly1305.poly1305_mac",
         "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
@@ -270,7 +270,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "3c40d415c4a3b3c1175b5e48b08eeb85"
+      "e6120fb40fe3211084b8afe3d6de9ef0"
     ],
     [
       "EverCrypt.Poly1305.poly1305_vale",
@@ -329,7 +329,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "31b3d22d6e661bad7231413e7e749e35"
+      "c5f1ca73c09ca5191f03267c6c98f349"
     ],
     [
       "EverCrypt.Poly1305.poly1305_vale",
@@ -338,7 +338,7 @@
       0,
       [ "@query" ],
       0,
-      "cd6e0aeb581d22f8613989b5f5953d96"
+      "a0aa84c8bc677beeb5ed7479f73e073d"
     ],
     [
       "EverCrypt.Poly1305.mac",
@@ -359,7 +359,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "c1544b2cca4fac17f591ffc2c1c5b6f8"
+      "2493cfc8f3167e24634c7dfec9ca3af8"
     ],
     [
       "EverCrypt.Poly1305.mac",
@@ -441,7 +441,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "0444aea45075d77209a8f7d02f5765e8"
+      "56c5ce23b2f4fb9ecea34f76321dd34e"
     ],
     [
       "EverCrypt.Poly1305.mac",
@@ -523,7 +523,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "58391c374b00a5695c619b99e2828a7f"
+      "545e1071872fb8360b15162851c23ef6"
     ]
   ]
 ]

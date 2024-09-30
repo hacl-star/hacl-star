@@ -613,6 +613,7 @@ val update_sub_get_block_lemma_k:
     Seq.index (SeqLemmas.get_block_s #a #blocksize_v blocksize plain_v j) k ==
     Seq.index (SeqLemmas.get_block_s #a #len blocksize b_v j) k)
 
+#restart-solver
 let update_sub_get_block_lemma_k #a w blocksize zero len b_v j k =
   let blocksize_v = w * blocksize in
   let plain = create blocksize_v zero in

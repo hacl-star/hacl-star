@@ -243,8 +243,6 @@ let pss_verify a saltLen msgLen msg emBits em =
   let em_0 = if msBits >. 0ul then em.(0ul) &. (u8 0xff <<. msBits) else u8 0 in
   let em_last = em.(emLen -! 1ul) in
 
-  if (emLen <. saltLen +! hash_len a +! 2ul) then false
-  else begin
-    if not (FStar.UInt8.(Lib.RawIntTypes.u8_to_UInt8 em_last =^ 0xbcuy) &&
+  if (emLen <. saltLen +! hash_len a +! 2ul) || not (FStar.UInt8.(Lib.RawIntTypes.u8_to_UInt8 em_last =^ 0xbcuy) &&
       FStar.UInt8.(Lib.RawIntTypes.u8_to_UInt8 em_0 =^ 0uy)) then false
-    else pss_verify_ a saltLen msgLen msg emBits em end
+  else pss_verify_ a saltLen msgLen msg emBits em

@@ -94,7 +94,7 @@ let state_spec_v (#m:m_spec) (s:state_spec m) : lseq (lseq uint64 25) (lanes m) 
 noextract
 let _C_v (#m:m_spec) (_C:lseq (element_t m) 5) : lseq (lseq uint64 5) (lanes m) =
   createi #(lseq uint64 5) (lanes m) (fun i ->
-    create5 (vec_v _C.[0]).[i] (vec_v _C.[1]).[i] 
+    create5 (vec_v _C.[0]).[i] (vec_v _C.[1]).[i]
             (vec_v _C.[2]).[i] (vec_v _C.[3]).[i] (vec_v _C.[4]).[i])
 
 unfold
@@ -192,7 +192,7 @@ let state_chi_inner_equivalence0 (m:m_spec) (st_old:state_spec m) (y:index) (st:
          Lib.LoopCombinators.unfold_repeati 5 (state_chi_inner0 m st_old y) st 4;
          assert (repeati 5 (state_chi_inner0 m st_old y) st ==
                  state_chi_inner0 m st_old y 4 (state_chi_inner0 m st_old y 3 (state_chi_inner0 m st_old y 2 (state_chi_inner0 m st_old y 1 (state_chi_inner0 m st_old y 0 st)))));
-         
+
          ()
 
 let state_chi_inner_equivalence1 (m:m_spec) (st_old:state_spec m) (y:index) (st_new:state_spec m) :
@@ -304,7 +304,7 @@ noextract
 let transpose_ws1 (#m:m_spec{m == M32}) (ws:ws_spec m) : ws_spec m = ws
 
 noextract
-let transpose_ws4_0 (#m:m_spec{m == M256}) (ws:ws_spec m) 
+let transpose_ws4_0 (#m:m_spec{m == M256}) (ws:ws_spec m)
   : vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4 &
     vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4
   =
@@ -315,7 +315,7 @@ let transpose_ws4_0 (#m:m_spec{m == M256}) (ws:ws_spec m)
   (ws0,ws1,ws2,ws3,ws4,ws5,ws6,ws7)
 
 noextract
-let transpose_ws4_1 (#m:m_spec{m == M256}) (ws:ws_spec m) 
+let transpose_ws4_1 (#m:m_spec{m == M256}) (ws:ws_spec m)
   : vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4 &
     vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4
   =
@@ -326,7 +326,7 @@ let transpose_ws4_1 (#m:m_spec{m == M256}) (ws:ws_spec m)
   (ws8,ws9,ws10,ws11,ws12,ws13,ws14,ws15)
 
 noextract
-let transpose_ws4_2 (#m:m_spec{m == M256}) (ws:ws_spec m) 
+let transpose_ws4_2 (#m:m_spec{m == M256}) (ws:ws_spec m)
   : vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4 &
     vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4
   =
@@ -337,7 +337,7 @@ let transpose_ws4_2 (#m:m_spec{m == M256}) (ws:ws_spec m)
   (ws16,ws17,ws18,ws19,ws20,ws21,ws22,ws23)
 
 noextract
-let transpose_ws4_3 (#m:m_spec{m == M256}) (ws:ws_spec m) 
+let transpose_ws4_3 (#m:m_spec{m == M256}) (ws:ws_spec m)
   : vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4 &
     vec_t U64 4 & vec_t U64 4 & vec_t U64 4 & vec_t U64 4
   =
@@ -373,7 +373,7 @@ let loadState_inner (m:m_spec) (ws:ws_spec m) (j:size_nat{j < 25}) (s:state_spec
 let loadState
   (#m:m_spec)
   (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
-  (b:multiblock_spec m{forall l. l < lanes m ==> 
+  (b:multiblock_spec m{forall l. l < lanes m ==>
     (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)})
   (s:state_spec m) :
   Tot (state_spec m) =
@@ -463,9 +463,9 @@ let load_last_block1 (#m:m_spec{m == M32})
                      (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                      (rem:size_nat{rem < rateInBytes})
                      (delimitedSuffix:byte_t)
-                     (b:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                     (b:multiseq (lanes m) 256{forall l. l < lanes m ==>
                         (forall i. (i >= rem /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)}) :
-                     b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                     b':multiseq (lanes m) 256{forall l. l < lanes m ==>
                        (forall i. (i >= (rem + 1) /\ i < 256) ==> Seq.index b'.(|l|) i == u8 0)} =
   let b = b.(|0|) in
   ntup1 (load_last_blocks rateInBytes rem delimitedSuffix b)
@@ -475,9 +475,9 @@ let load_last_block4 (#m:m_spec{m == M256})
                      (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                      (rem:size_nat{rem < rateInBytes})
                      (delimitedSuffix:byte_t)
-                     (b:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                     (b:multiseq (lanes m) 256{forall l. l < lanes m ==>
                         (forall i. (i >= rem /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)}) :
-                     b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                     b':multiseq (lanes m) 256{forall l. l < lanes m ==>
                        (forall i. (i >= (rem + 1) /\ i < 256) ==> Seq.index b'.(|l|) i == u8 0)} =
   let l0 = load_last_blocks rateInBytes rem delimitedSuffix b.(|0|) in
   let l1 = load_last_blocks rateInBytes rem delimitedSuffix b.(|1|) in
@@ -490,9 +490,9 @@ let load_last_block (#m:m_spec)
                     (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                     (rem:size_nat{rem < rateInBytes})
                     (delimitedSuffix:byte_t)
-                    (b:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                    (b:multiseq (lanes m) 256{forall l. l < lanes m ==>
                        (forall i. (i >= rem /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)}) :
-                    b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                    b':multiseq (lanes m) 256{forall l. l < lanes m ==>
                       (forall i. (i >= (rem + 1) /\ i < 256) ==> Seq.index b'.(|l|) i == u8 0)} =
   match m with
   | M32 -> load_last_block1 #m rateInBytes rem delimitedSuffix b
@@ -503,7 +503,7 @@ val absorb_last:
   -> delimitedSuffix:byte_t
   -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
   -> rem:size_nat{rem < rateInBytes}
-  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==>
        (forall i. (i >= rem /\ i < 256) ==> Seq.index input.(|l|) i == u8 0)}
   -> s:state_spec m ->
   Tot (state_spec m)
@@ -520,7 +520,7 @@ let absorb_last #m delimitedSuffix rateInBytes rem input s =
 let absorb_inner
   (#m:m_spec)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
-  (b:multiblock_spec m{forall l. l < lanes m ==> 
+  (b:multiblock_spec m{forall l. l < lanes m ==>
      (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)})
   (s:state_spec m) :
   Tot (state_spec m) =
@@ -533,7 +533,7 @@ let get_multiblock_spec (#m:m_spec)
                         (inputByteLen:nat)
                         (b:multiseq (lanes m) inputByteLen)
                         (i:nat{i < inputByteLen / rateInBytes})
-                        : b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                        : b':multiseq (lanes m) 256{forall l. l < lanes m ==>
                             (forall j. (j >= rateInBytes /\ j < 256) ==> Seq.index b'.(|l|) j == u8 0)} =
 
     assert (i * rateInBytes < inputByteLen);
@@ -547,7 +547,7 @@ let get_multiblock_spec (#m:m_spec)
       Seq.index b'.(|l|) j == u8 0) =
       eq_intro (slice #uint8 #256 b'.(|l|) rateInBytes 256)
         (create (256 - rateInBytes) (u8 0));
-      assert (forall j. (j >= 0 /\ j < (256 - rateInBytes)) ==> 
+      assert (forall j. (j >= 0 /\ j < (256 - rateInBytes)) ==>
         Seq.index (slice #uint8 #256 b'.(|l|) rateInBytes 256) j ==
           Seq.index b'.(|l|) (rateInBytes + j));
       assert (forall j. (j >= rateInBytes /\ j < 256) ==> (j - rateInBytes >= 0)) in
@@ -556,11 +556,11 @@ let get_multiblock_spec (#m:m_spec)
     b'
 
 noextract
-let get_multilast_spec (#m:m_spec) 
+let get_multilast_spec (#m:m_spec)
                         (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                         (inputByteLen:nat)
                         (b:multiseq (lanes m) inputByteLen)
-                        : b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                        : b':multiseq (lanes m) 256{forall l. l < lanes m ==>
                             (forall i. (i >= (inputByteLen % rateInBytes) /\ i < 256) ==> Seq.index b'.(|l|) i == u8 0)} =
     let rem = inputByteLen % rateInBytes in
     let b' = Lib.NTuple.createi #(Seq.lseq uint8 256) (lanes m)
@@ -570,7 +570,7 @@ let get_multilast_spec (#m:m_spec)
       Seq.index b'.(|l|) j == u8 0) =
       eq_intro (slice #uint8 #256 b'.(|l|) rem 256)
         (create (256 - rem) (u8 0));
-      assert (forall j. (j >= 0 /\ j < (256 - rem)) ==> 
+      assert (forall j. (j >= 0 /\ j < (256 - rem)) ==>
         Seq.index (slice #uint8 #256 b'.(|l|) rem 256) j ==
           Seq.index b'.(|l|) (rem + j));
       assert (forall j. (j >= rem /\ j < 256) ==> (j - rem >= 0)) in
@@ -639,7 +639,7 @@ let update_b1 (#m:m_spec{m == M32})
   assert ((i + 1) * rateInBytes <= outputByteLen);
   assert (i * rateInBytes + rateInBytes <= outputByteLen);
   let l = tup1 b in
-  let l = update_sub #uint8 #outputByteLen 
+  let l = update_sub #uint8 #outputByteLen
     l (i * rateInBytes) rateInBytes (sub block 0 rateInBytes) in
   ntup1 l
 
@@ -656,13 +656,13 @@ let update_b4 (#m:m_spec{m == M256})
   assert ((i + 1) * rateInBytes <= outputByteLen);
   assert (i * rateInBytes + rateInBytes <= outputByteLen);
   let (l0,(l1,(l2,l3))) = tup4 b in
-  let l0 = update_sub #uint8 #outputByteLen 
+  let l0 = update_sub #uint8 #outputByteLen
     l0 (i * rateInBytes) rateInBytes (sub block 0 rateInBytes) in
-  let l1 = update_sub #uint8 #outputByteLen 
+  let l1 = update_sub #uint8 #outputByteLen
     l1 (i * rateInBytes) rateInBytes (sub block 256 rateInBytes) in
-  let l2 = update_sub #uint8 #outputByteLen 
+  let l2 = update_sub #uint8 #outputByteLen
     l2 (i * rateInBytes) rateInBytes (sub block 512 rateInBytes) in
-  let l3 = update_sub #uint8 #outputByteLen 
+  let l3 = update_sub #uint8 #outputByteLen
     l3 (i * rateInBytes) rateInBytes (sub block 768 rateInBytes) in
   ntup4 (l0, (l1, (l2, l3)))
 
@@ -687,7 +687,7 @@ let update_b_last1 (#m:m_spec{m == M32})
               (b:multiseq (lanes m) outputByteLen):
               multiseq (lanes m) outputByteLen =
   let l = tup1 b in
-  let l = update_sub #uint8 #outputByteLen 
+  let l = update_sub #uint8 #outputByteLen
     l (outputByteLen - outRem) outRem (sub block 0 outRem) in
   ntup1 l
 
@@ -700,13 +700,13 @@ let update_b_last4 (#m:m_spec{m == M256})
               (b:multiseq (lanes m) outputByteLen):
               multiseq (lanes m) outputByteLen =
   let (l0,(l1,(l2,l3))) = tup4 b in
-  let l0 = update_sub #uint8 #outputByteLen 
+  let l0 = update_sub #uint8 #outputByteLen
     l0 (outputByteLen - outRem) outRem (sub block 0 outRem) in
-  let l1 = update_sub #uint8 #outputByteLen 
+  let l1 = update_sub #uint8 #outputByteLen
     l1 (outputByteLen - outRem) outRem (sub block 256 outRem) in
-  let l2 = update_sub #uint8 #outputByteLen 
+  let l2 = update_sub #uint8 #outputByteLen
     l2 (outputByteLen - outRem) outRem (sub block 512 outRem) in
-  let l3 = update_sub #uint8 #outputByteLen 
+  let l3 = update_sub #uint8 #outputByteLen
     l3 (outputByteLen - outRem) outRem (sub block 768 outRem) in
   ntup4 (l0, (l1, (l2, l3)))
 
@@ -735,7 +735,7 @@ let squeeze_inner
   let s = state_permute m s in
   s, b
 
-val squeeze_s: 
+val squeeze_s:
   m:m_spec -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200} ->
   outputByteLen:size_nat -> i:size_nat{i <= outputByteLen / rateInBytes} -> Type0
 let squeeze_s m rateInBytes outputByteLen i = (state_spec m) & (multiseq (lanes m) outputByteLen)
