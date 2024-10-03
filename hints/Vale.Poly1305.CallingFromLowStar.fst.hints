@@ -54,7 +54,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "df0f8b90f9333f52e2cdff4cdd5698e6"
+      "59ddde81f7eb7b89139863c1d52c8c4d"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_hash_init",
@@ -209,7 +209,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "77142529ade3e1a4abdd26eb8fa74cfa"
+      "c1d0896b4db93c9a1a9aaa5d1132e66c"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_block",
@@ -348,7 +348,7 @@
         "typing_Vale.Wrapper.X64.Poly.uint64_to_nat_seq"
       ],
       0,
-      "bf32d5656015abe70a975fa78447b530"
+      "c5d62ff4e56e706408760f4875c7cc68"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_block_extra",
@@ -356,10 +356,8 @@
       1,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "bool_typing",
-        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt8",
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "bool_typing", "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt8",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equation_FStar.Monotonic.HyperHeap.hmap",
         "equation_FStar.Monotonic.HyperStack.is_tip",
@@ -370,7 +368,8 @@
         "equation_Lib.ByteSequence.nat_from_bytes_le",
         "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Lib.Sequence.to_seq", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.Sequence.slice", "equation_Lib.Sequence.to_seq",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
@@ -380,13 +379,11 @@
         "equation_Vale.Interop.Views.up_view64",
         "equation_Vale.Poly1305.Equiv.block_fun",
         "equation_Vale.Poly1305.Util.readable_words",
-        "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "int_typing", "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.Seq.Properties.slice_slice",
-        "lemma_FStar.UInt.pow2_values",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
@@ -412,13 +409,12 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_e5df7b46d8b4d6787f7fc44dbc0015e5",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits",
         "typing_FStar.UInt32.v", "typing_FStar.UInt8.t",
-        "typing_Lib.Sequence.slice",
+        "typing_Lib.Sequence.length", "typing_Lib.Sequence.slice",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.length",
@@ -426,7 +422,7 @@
         "typing_Vale.Arch.BufferFriend.to_bytes"
       ],
       0,
-      "1ddf1dca358132230df9ce6bdc88dfb0"
+      "fd29e9ccc6d89b3949eaba05a08004e5"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.post_call_poly1305_blocks",
@@ -443,7 +439,7 @@
         "refinement_interpretation_Tm_refine_9f4aaffc1223a97741ac7189fda1345e"
       ],
       0,
-      "204ef133740f6a2edf9a218a56ab0517"
+      "f72fe1596f94d963b57ab86f5b8e2471"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305_blocks",
@@ -534,7 +530,7 @@
         "typing_Vale.Poly1305.Spec_s.modp", "well-founded-ordering-on-nat"
       ],
       0,
-      "2ad4883fd3946d4a9fd7394728c4ac61"
+      "1cf606b9cb2fb7fe20058022769c264a"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305_blocks",
@@ -563,7 +559,7 @@
         "typing_Vale.Arch.BufferFriend.of_bytes"
       ],
       0,
-      "d25ad727d415cdf3942d689639d9aef5"
+      "075c3e561e2a164c90c03c489aec9d03"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305_all",
@@ -629,7 +625,7 @@
         "typing_Vale.Poly1305.Spec_s.modp"
       ],
       0,
-      "4317f3ee489d5db04f4a34d27e0baed8"
+      "ceb6cabbba6f51bd8f4e755d48f43b60"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305",
@@ -727,7 +723,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "4099e3112ad437199ebf16b0a331cc35"
+      "ba58b2c4db60711d2d7a335f47d7bb0d"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305",
@@ -881,7 +877,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "b82a3c36923fc4e2590c7c470c375ae8"
+      "217824a527bc87b95a88798ea9428d63"
     ]
   ]
 ]
