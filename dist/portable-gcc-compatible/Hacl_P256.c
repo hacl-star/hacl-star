@@ -25,8 +25,8 @@
 
 #include "Hacl_P256.h"
 
+#include "internal/Hacl_P256_PrecompTable.h"
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Impl_PCurves_PrecompTable_P256.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "lib_intrinsics.h"
 
@@ -1201,29 +1201,29 @@ static inline void point_mul_g(uint64_t *res, uint64_t *scalar)
     KRML_MAYBE_FOR4(i0, 0U, 4U, 1U, point_double(res, res););
     uint32_t k = 64U - 4U * i - 4U;
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r4, k, 4U);
-    Hacl_Impl_PCurves_PrecompTable_P256_precomp_get_consttime(NULL,
-      Hacl_Impl_PCurves_PrecompTable_P256_p256_g_pow2_192_table_w4,
+    Hacl_P256_PrecompTable_precomp_get_consttime(NULL,
+      Hacl_P256_PrecompTable_p256_g_pow2_192_table_w4,
       bits_l,
       tmp);
     point_add(res, tmp, res);
     uint32_t k0 = 64U - 4U * i - 4U;
     uint64_t bits_l0 = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r3, k0, 4U);
-    Hacl_Impl_PCurves_PrecompTable_P256_precomp_get_consttime(NULL,
-      Hacl_Impl_PCurves_PrecompTable_P256_p256_g_pow2_128_table_w4,
+    Hacl_P256_PrecompTable_precomp_get_consttime(NULL,
+      Hacl_P256_PrecompTable_p256_g_pow2_128_table_w4,
       bits_l0,
       tmp);
     point_add(res, tmp, res);
     uint32_t k1 = 64U - 4U * i - 4U;
     uint64_t bits_l1 = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r2, k1, 4U);
-    Hacl_Impl_PCurves_PrecompTable_P256_precomp_get_consttime(NULL,
-      Hacl_Impl_PCurves_PrecompTable_P256_p256_g_pow2_64_table_w4,
+    Hacl_P256_PrecompTable_precomp_get_consttime(NULL,
+      Hacl_P256_PrecompTable_p256_g_pow2_64_table_w4,
       bits_l1,
       tmp);
     point_add(res, tmp, res);
     uint32_t k2 = 64U - 4U * i - 4U;
     uint64_t bits_l2 = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r1, k2, 4U);
-    Hacl_Impl_PCurves_PrecompTable_P256_precomp_get_consttime(NULL,
-      Hacl_Impl_PCurves_PrecompTable_P256_p256_basepoint_table_w4,
+    Hacl_P256_PrecompTable_precomp_get_consttime(NULL,
+      Hacl_P256_PrecompTable_p256_basepoint_table_w4,
       bits_l2,
       tmp);
     point_add(res, tmp, res););
@@ -1267,9 +1267,7 @@ point_mul_double_g(uint64_t *res, uint64_t *scalar1, uint64_t *scalar2, uint64_t
   uint32_t i0 = 255U;
   uint64_t bits_c = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar1, i0, 5U);
   uint32_t bits_l32 = (uint32_t)bits_c;
-  const
-  uint64_t
-  *a_bits_l = Hacl_Impl_PCurves_PrecompTable_P256_p256_basepoint_table_w5 + bits_l32 * 12U;
+  const uint64_t *a_bits_l = Hacl_P256_PrecompTable_p256_basepoint_table_w5 + bits_l32 * 12U;
   memcpy(res, (uint64_t *)a_bits_l, 12U * sizeof (uint64_t));
   uint32_t i1 = 255U;
   uint64_t bits_c0 = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar2, i1, 5U);
@@ -1290,9 +1288,7 @@ point_mul_double_g(uint64_t *res, uint64_t *scalar1, uint64_t *scalar2, uint64_t
     uint32_t k0 = 255U - 5U * i - 5U;
     uint64_t bits_l0 = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar1, k0, 5U);
     uint32_t bits_l322 = (uint32_t)bits_l0;
-    const
-    uint64_t
-    *a_bits_l2 = Hacl_Impl_PCurves_PrecompTable_P256_p256_basepoint_table_w5 + bits_l322 * 12U;
+    const uint64_t *a_bits_l2 = Hacl_P256_PrecompTable_p256_basepoint_table_w5 + bits_l322 * 12U;
     memcpy(tmp1, (uint64_t *)a_bits_l2, 12U * sizeof (uint64_t));
     point_add(res, tmp1, res);
   }

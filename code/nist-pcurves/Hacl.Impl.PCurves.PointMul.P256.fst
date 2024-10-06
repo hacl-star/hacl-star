@@ -28,7 +28,7 @@ open Hacl.Impl.PCurves.Field.P256
 open Hacl.Impl.PCurves.Finv.P256
 open Hacl.Impl.PCurves.Qinv.P256
 open Hacl.Impl.PCurves.Group.P256
-open Hacl.Impl.PCurves.PrecompTable.P256
+open Hacl.P256.PrecompTable
 open Hacl.Impl.PCurves.PointMul
 
 [@CInline]

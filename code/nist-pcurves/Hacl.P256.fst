@@ -28,7 +28,7 @@ open Hacl.Impl.PCurves.Scalar.P256
 open Hacl.Impl.PCurves.Finv.P256
 open Hacl.Impl.PCurves.Qinv.P256
 open Hacl.Impl.PCurves.Group.P256
-open Hacl.Impl.PCurves.PrecompTable.P256
+open Hacl.P256.PrecompTable
 open Hacl.Impl.PCurves.PointMul.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
