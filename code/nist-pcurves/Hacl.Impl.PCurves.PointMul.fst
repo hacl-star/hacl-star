@@ -51,10 +51,10 @@ let table_inv_w5 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f
 let point_mul_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} res scalar p =
   let h0 = ST.get () in
   SE.exp_fw_lemma S.mk_pcurve_concrete_ops
-    (from_mont_point (as_point_nat h0 p)) cp.bits (as_nat h0 scalar) (v cp.bn_limbs);
+    (from_mont_point (as_point_nat h0 p)) cp.bits (as_nat h0 scalar) 4;
   assert (v (3ul *. cp.bn_limbs) == 3 * v cp.bn_limbs);
-  admit();
-  BE.lexp_fw_consttime (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops (cp.bn_limbs) (null uint64) p cp.bn_limbs (size cp.bits) scalar res
+  BE.lexp_fw_consttime (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops 4ul (null uint64) p cp.bn_limbs (size cp.bits) scalar res
+
 
 [@(strict_on_arguments [0;1;2;3;4;5;6])]
 inline_for_extraction noextract
