@@ -24,11 +24,11 @@ let is_fodd (x:nat) : bool = x % 2 = 1
 inline_for_extraction
 class curve_params = {
   bits: pos;
-  bytes: x:pos{bits <= 8 * x /\ 3 * 16 * x < pow2 32}; 
+  bytes: x:pos{bits <= 8 * x /\ 16 * x < pow2 32}; 
   size_bytes: x:size_t{v x == bytes};
     // length restriction to allow for serializing affine and projective points
-  prime: x:pos{x > 3 /\ x < pow2 bits /\ is_fodd x};
-  order: x:pos{x > 1 /\ x < pow2 bits /\ is_fodd x /\ prime < 2 * x};
+  prime: x:pos{x > 3 /\ x < pow2 bits /\ is_fodd x /\ 2 * x > pow2 bits};
+  order: x:pos{x > 1 /\ x < pow2 bits /\ is_fodd x /\ 2 * x > pow2 bits};
   basepoint_x: x:nat{x < prime};
   basepoint_y: x:nat{x < prime};
   a_coeff: x:nat{x < prime};

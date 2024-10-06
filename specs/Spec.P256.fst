@@ -15,15 +15,19 @@ inline_for_extraction noextract
 let p256_bytes : (x:nat{8 * x >= p256_bits}) = 32
 
 inline_for_extraction noextract
-let p256_prime: (a:pos{a = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff /\ a < pow2 256}) =
+let p256_prime: (a:pos{a = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff /\ a < pow2 256 /\ 2 * a > pow2 256}) =
   let p = pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 in
   assert_norm (0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff = p);
-  assert_norm (p < pow2 256); p
+  assert_norm (p < pow2 256); 
+  assert_norm (2 * p > pow2 256); 
+  p
 
 inline_for_extraction noextract
-let p256_order: (a:pos{a < pow2 256}) =
+let p256_order: (a:pos{a < pow2 256 /\ 2 * a > pow2 256}) =
   let o = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551 in
-  assert_norm (o < pow2 256); o
+  assert_norm (o < pow2 256); 
+  assert_norm (2 * o > pow2 256); 
+  o
 
 inline_for_extraction noextract
 let p256_a_coeff : (x:pos{x < p256_prime}) = (-3) % p256_prime
