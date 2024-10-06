@@ -62,7 +62,7 @@ inline_for_extraction noextract
 let qmod_short_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
   res:felem -> x:felem -> Stack unit
   (requires fun h ->
-    live h x /\ live h res /\ eq_or_disjoint x res)
+    live h x /\ live h res /\ eq_or_disjoint x res /\ as_nat h x < 2 * cp.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == as_nat h0 x % S.order)
 

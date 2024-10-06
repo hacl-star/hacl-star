@@ -57,7 +57,6 @@ let ecp256dh_r_ {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| fi
 let ecp256dh_r {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| o:order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| point_mul_ops |} shared_secret their_pubkey private_key =
   push_frame ();
   let open FStar.Mul in
-  assume (4 * cp.bytes < max_size_t);
   let tmp = create (4ul *. size cp.bytes) (u64 0) in
   let sk = sub tmp 0ul cp.bn_limbs in
   let pk = sub tmp cp.bn_limbs (3ul *. cp.bn_limbs) in

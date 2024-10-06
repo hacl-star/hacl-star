@@ -67,20 +67,10 @@ let load_qelem_conditional_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_c
 ///  Field Arithmetic
 
 val qmod_short_lemma {| cp:S.curve_params |} {| bn_ops |} {| CC.curve_constants |}:
-  a:nat{a < pow2 (64 * v S.bn_limbs)} ->
+  a:nat{a < 2 * cp.order} ->
   Lemma (let r = if a >= S.order then a - S.order else a in r = a % S.order)
 
-let qmod_short_lemma {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} a =
-  let r = if a >= S.order then a - S.order else a in
-  if a >= S.order then begin
-    Math.Lemmas.lemma_mod_sub a S.order 1;
-    Math.Lemmas.pow2_le_compat (64 * v S.bn_limbs) cp.bits;
-//    assume (pow2 cp.bits - S.order < S.order);
-    assume (pow2 (64 * v S.bn_limbs) - S.order < S.order);
-    Math.Lemmas.small_mod r S.order end
-  else
-   Math.Lemmas.small_mod r S.order
-
+let qmod_short_lemma {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} a = ()
 
 
 let qmod_short_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res x =
