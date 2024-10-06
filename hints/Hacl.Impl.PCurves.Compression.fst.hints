@@ -1,5 +1,5 @@
 [
-  "AdﬂjÕÑ\u0011\u0000Ò\u0016d∂®ç≥Ì",
+  "Zå÷ﬂ\u0005ŸÏlÔö1\u001fÇøwñ",
   [
     [
       "Hacl.Impl.PCurves.Compression.uncompressed_to_raw",
@@ -51,13 +51,13 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_4e3bbd8eec0c3ef82902d2336c68c242",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
@@ -71,7 +71,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e0555aa3ff233a162ad725ebc4a5304c"
+      "674f52777938fcd22f947b60db8c13ab"
     ],
     [
       "Hacl.Impl.PCurves.Compression.uncompressed_to_raw",
@@ -92,6 +92,7 @@
         "disc_equation_Lib.IntTypes.U128", "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_FStar.Monotonic.HyperHeap.hmap",
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
@@ -130,6 +131,7 @@
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_disEquality",
         "proj_equation_FStar.Pervasives.Native.Some_v",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bits",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
@@ -140,6 +142,7 @@
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_11888fecf812f197898447624c24e106",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
         "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
@@ -150,7 +153,6 @@
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_b9bf9d0f857340a8d758087374a41c06",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_f5560f0b74a68fe1e66fb0f9c692d437",
@@ -172,7 +174,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "953292273a030df455ea70354f4a6262"
+      "9cfec3b094932a69836cf288df4a39bd"
     ],
     [
       "Hacl.Impl.PCurves.Compression.uncompressed_to_raw",
@@ -275,7 +277,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8aaba52ff5fb9d806715443fbbc2bf6f"
+      "53deae778a215ca6477fbff1fe82693a"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -283,70 +285,11 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "bool_typing",
-        "constructor_distinct_Lib.Buffer.MUT",
-        "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "disc_equation_Lib.IntTypes.U128", "equality_tok_Lib.Buffer.MUT@tok",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_tip",
-        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
-        "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.op_At_Percent_Dot",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
-        "equation_Prims.pos",
-        "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.IntTypes.v_mk_int",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
-        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
-        "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
-        "typing_FStar.UInt32.v", "typing_Lib.Buffer.length",
-        "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.len",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
-        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "6584519da147f9daa4570367aa2f6ee9"
+      "29aa68bccbe6cde899dd5a63a6d04948"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -354,22 +297,14 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U128",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Prims.pos",
-        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "5acbda9b44ea9f2dc807f4eea90a8cc5"
+      "c19c5745af15c9b69bde0381213400e4"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -383,7 +318,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "80bffbc7cc726134cad9ad000d7c0fd6"
+      "12dd4d8671453dc302d4072b6c26db5f"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -392,10 +327,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "84c647ef4e9c6f71a8ceeba26402df35"
+      "83a0d9dcbe6883a46fa8fcd3705065fa"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -407,10 +342,10 @@
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "b036816abb61359a28598fc4cb3d4def"
+      "bf3edd2610db15bfdf1485d003ee35b2"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -418,16 +353,11 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "primitive_Prims.op_Multiply",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "0bd7b4f883052b564b2ee8b7ec4c412b"
+      "bf420b4ae1e82fc6792729954494027c"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -435,16 +365,14 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "c7f50a62f2abbf0ae3954328c703c360"
+      "56ab374e66f3b19e1fd3208fd43c03fb"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -452,11 +380,16 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
       ],
       0,
-      "72e6001268c68c02e97e421addf02e61"
+      "3a898ce3afd35ca8f61632886db68ef1"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -464,14 +397,16 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
       ],
       0,
-      "a626b3880e7321d43c4fe53e0d15eca7"
+      "e68f86a98e1f7a0a35afb9852c3e4eb0"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -479,71 +414,60 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.Buffer.MUT@tok",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_tip",
-        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
-        "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.op_At_Percent_Dot",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Prims.nat", "equation_Prims.pos",
-        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
-        "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.IntTypes.v_mk_int",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bits",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
-        "refinement_interpretation_Tm_refine_1ea9085e446f044484420ae19cf13f26",
-        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "refinement_interpretation_Tm_refine_451c411c2fb13e518d4205a348c6e3b7",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
-        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_f01c6f6a484ced872e60df1d76ae4a76",
-        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
-        "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
-        "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.uint_to_t",
-        "typing_Lib.IntTypes.v",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bits",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "b163859497f9931496c3da4712ec0d01"
+      "148668922421e94b54a4ea1e63762752"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
       11,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "4ae5bc4aca96e887b756cc10ee72885e"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      12,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_451c411c2fb13e518d4205a348c6e3b7",
+        "refinement_interpretation_Tm_refine_d6f26093f538763c84ae18a96f87d1fb"
+      ],
+      0,
+      "88347b36c79c6c636a64fcf7102a8c15"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      13,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
+      ],
+      0,
+      "dba0734d4f42c4459360831476a07e82"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      14,
       0,
       0,
       [
@@ -553,23 +477,23 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "f22d1a5b98767161fd85f23155d05681"
+      "8bf2d479fa4fdada2a8d2f05749d0006"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      12,
+      15,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "ae77ba0dcb34021c1467086f3f8034f6"
+      "41644d19d47cf553e46455dd843bd326"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      13,
+      16,
       0,
       0,
       [
@@ -577,14 +501,14 @@
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "11b43da192def552151a64511632a7f3"
+      "d785c551ab32a923f391827c513997f3"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      14,
+      17,
       0,
       0,
       [
@@ -598,28 +522,11 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "92906a74b0b398635d818803e172e995"
+      "2d0ab5f42a62a00e4b16b2ef596bf9e4"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      15,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "primitive_Prims.op_Multiply",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
-      ],
-      0,
-      "83d2d4b29c4b97e5d0addcfed3f09c36"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      16,
+      18,
       0,
       0,
       [
@@ -629,34 +536,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "ea05ed24bda117d33bd803c0519ccb1b"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      17,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
-      ],
-      0,
-      "2bd7c12d4447c63938e72f4df94301bf"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      18,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
-      ],
-      0,
-      "2e94f9f19325ca8093101b577abd6ebf"
+      "6a60d46fac9bdf7a5412cc09d689e1e2"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -665,14 +545,41 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_9d4d230d3adf9cc91f0f3153b03e1768"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "267437143a2344f333269df25af96cba"
+      "67638f5e5e07535a74f8256a282ac8eb"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
       20,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "4471bdba808d843af0776b3861b7a4b2"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      21,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_9d4d230d3adf9cc91f0f3153b03e1768"
+      ],
+      0,
+      "61be06d6bb98d0a886f708e5b85842e9"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      22,
       0,
       0,
       [
@@ -685,37 +592,7 @@
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "c03eceb97fd9828507a9e1d85bc61d87"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      21,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
-      ],
-      0,
-      "6fc01fa90560b165cf47ef5df014559a"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      22,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
-      ],
-      0,
-      "e28746fd4b1facb2069688276477f911"
+      "7dd53dec60d9f0ae2a367bfe9acd370b"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -723,12 +600,17 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
         "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
       ],
       0,
-      "00dc5c4246ff5f63340f1f128fe4fd20"
+      "93b53a2459cebd8a66e04da456fe2c0f"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -778,7 +660,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5cc04a64aed1a8c2d91a7409d17930bb"
+      "31164dbf558cd19199fb8e216e597609"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -786,11 +668,12 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def",
-        "refinement_interpretation_Tm_refine_94fc20633fa1cc1e294b3349bf5c8c99"
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "93c4f5cb11d3446d3ccc909869ac06d7"
+      "b22fb9a07504496346d7062f38eb3b04"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -799,14 +682,39 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_bd67c511b9bb8835f9a2aa2b65a4b954"
+        "refinement_interpretation_Tm_refine_451c411c2fb13e518d4205a348c6e3b7",
+        "refinement_interpretation_Tm_refine_c9fd6c50bc2dff16728c74f8f9731336"
       ],
       0,
-      "7a97a0394ec24ccd39bedde69a5d232d"
+      "efb669b1d6953bc42145b8c3b5d82f11"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
       27,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "refinement_interpretation_Tm_refine_c9fd6c50bc2dff16728c74f8f9731336"
+      ],
+      0,
+      "81b1e2b0a3bec7b173c6e7eb0c38b689"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      28,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_bd67c511b9bb8835f9a2aa2b65a4b954"
+      ],
+      0,
+      "47f63be41258161852e316741db3c490"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      29,
       0,
       0,
       [
@@ -818,11 +726,11 @@
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a"
       ],
       0,
-      "231d4303bc946040f8e11a88a369ce78"
+      "befe2f40c3843d05f4f6292630e19e75"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      28,
+      30,
       0,
       0,
       [
@@ -836,34 +744,7 @@
         "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051"
       ],
       0,
-      "499331416a75d0d69225db49ab6655a0"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      29,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
-      ],
-      0,
-      "e6aa34673dacb245792b46663ba5d9c2"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      30,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
-      ],
-      0,
-      "a89195baca72f498c98137b0614921a7"
+      "36cc5efc77e31db4093a660913aeacaf"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -871,14 +752,11 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "52dc3669e0b07cc8ba8e97245daff8dc"
+      "f1652bcbd5ffcc412c13018f885e9626"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -890,10 +768,10 @@
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "a89195baca72f498c98137b0614921a7"
+      "591c49d34e98d4129b10ab73b589f00e"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -902,10 +780,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "b71d40780a8734fff0cb0d52a1618b20"
+      "f1652bcbd5ffcc412c13018f885e9626"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -913,12 +791,14 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "93af14b589deefec8951ad06ce8fc48e"
+      "591c49d34e98d4129b10ab73b589f00e"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -995,11 +875,102 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "25f389dfa98a5fa75059cd9e446de6a9"
+      "09234fddecd10952940e780bc4b93196"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
       36,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+      ],
+      0,
+      "212b722c352430c6633c83ab500fe3b5"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      37,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "bool_inversion", "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Impl.PCurves.Bignum.felem",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.length", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.op_At_Percent_Dot",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint64",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Lib.IntTypes.uint64", "int_typing",
+        "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.add_mod_lemma",
+        "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bits",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_1ea9085e446f044484420ae19cf13f26",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
+        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.UInt32.uint_to_t", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bits",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "513569a11deb71d71882dad4c31fc8b1"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      38,
       0,
       0,
       [
@@ -1020,19 +991,19 @@
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
-        "refinement_interpretation_Tm_refine_2e3e894ae610fb41803d9dfe0e697e4d",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
         "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "12c76266b04955c6fb1b749f80fb0a9d"
+      "c060fd1950dd9ce7c10023764b31ce00"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      37,
+      39,
       0,
       0,
       [
@@ -1062,11 +1033,11 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "0888bd98a5ce8d51a902ee82ed06f36a"
+      "84eba39ab894cc6478779ceb224e2982"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      38,
+      40,
       0,
       0,
       [
@@ -1079,75 +1050,7 @@
         "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8"
       ],
       0,
-      "31e312b4bb11d2bc4b7b3508b39d6747"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      39,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8"
-      ],
-      0,
-      "9151d556918f75ee1a54e408f1a86a74"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      40,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
-        "constructor_distinct_Lib.Buffer.MUT",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.Buffer.MUT@tok",
-        "equation_FStar.HyperStack.ST.inline_stack_inv",
-        "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_tip",
-        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
-        "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_Hacl.Impl.PCurves.Bignum.felem",
-        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.stack_allocated",
-        "equation_Lib.IntTypes.uint64", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.loc_not_in",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Lib.IntTypes.uint64",
-        "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
-        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
-        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
-        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
-        "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
-        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
-        "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
-        "typing_FStar.Set.singleton", "typing_Lib.Buffer.loc",
-        "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.as_addr",
-        "typing_LowStar.Monotonic.Buffer.loc_addresses",
-        "typing_tok_Lib.Buffer.MUT@tok"
-      ],
-      0,
-      "bec252ad99f610096d348e9613f680e7"
+      "ff5f592f6367cdd8becbeb12acce1d3f"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1213,11 +1116,133 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "7ca97010acb061e16dd6c2891358adbf"
+      "dad499038f8b5e480abdc427cafc0476"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
       42,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_FStar.HyperStack.ST.inline_stack_inv",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_Hacl.Impl.PCurves.Bignum.felem",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.loc",
+        "equation_Lib.Buffer.stack_allocated",
+        "equation_Lib.IntTypes.uint64", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Lib.IntTypes.uint64",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
+        "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
+        "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
+        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.Set.singleton", "typing_Lib.Buffer.loc",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.as_addr",
+        "typing_LowStar.Monotonic.Buffer.loc_addresses",
+        "typing_tok_Lib.Buffer.MUT@tok"
+      ],
+      0,
+      "a93fdb47ff842d5c26d929d801a6fb41"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      43,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_FStar.HyperStack.ST.inline_stack_inv",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.fresh_frame",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_Hacl.Impl.PCurves.Bignum.felem",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.stack_allocated",
+        "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.uint8",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Lib.IntTypes.uint64",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
+        "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
+        "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
+        "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
+        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.Set.singleton", "typing_Lib.Buffer.loc",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
+        "typing_LowStar.Monotonic.Buffer.as_addr",
+        "typing_LowStar.Monotonic.Buffer.frameOf",
+        "typing_LowStar.Monotonic.Buffer.loc_addresses",
+        "typing_LowStar.Monotonic.Buffer.loc_none",
+        "typing_tok_Lib.Buffer.MUT@tok"
+      ],
+      0,
+      "166abe4aa8be4e3ede9984ebfdbd19e9"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      44,
       0,
       0,
       [
@@ -1260,10 +1285,10 @@
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
-        "refinement_interpretation_Tm_refine_2e3e894ae610fb41803d9dfe0e697e4d",
         "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
         "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
@@ -1279,11 +1304,11 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "470f842d1f739811f0b89d7db59c6e5e"
+      "0ccdff90b406d7576537e8fde8e3e006"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      43,
+      45,
       0,
       0,
       [
@@ -1293,32 +1318,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "e50d6530ac61228bc035a8110f8720d5"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      44,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
-      ],
-      0,
-      "051755e0c42b0d6c1514b7a188863d9a"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      45,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
-      ],
-      0,
-      "8fc0185669c1666e47ed6e8021da3dab"
+      "e36c3b7f5a7f0a44bee97aa88a0ff9a9"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1327,10 +1327,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "0c7afd36cf3f31637cea19c66a483b86"
+      "002335440f45cc39c8c4d20acb87ad04"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1343,7 +1343,7 @@
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "c70c352cc0996f918ae8ca769c0435a1"
+      "e8f3ecd60dd9e65654145c56d61afbd4"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1447,11 +1447,106 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a33d2c0738c47b5866dcd631b3dc2b10"
+      "a635f1ce98f6f454c5930c1bdf0978da"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
       49,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+      ],
+      0,
+      "f88d83ea61946504f21609eb77affcb9"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      50,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "bool_typing",
+        "constructor_distinct_FStar.Pervasives.Native.None",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "disc_equation_Lib.IntTypes.U128",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.inline_stack_inv",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.fresh_frame",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.op_At_Percent_Dot",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.aff_point_decompress",
+        "equation_Spec.PCurves.PointOps.is_fodd",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.mul_mod_lemma",
+        "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
+        "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
+        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
+        "refinement_interpretation_Tm_refine_4e3bbd8eec0c3ef82902d2336c68c242",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
+        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
+        "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
+        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.UInt32.uint_to_t", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.IntTypes.v",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
+        "typing_Spec.PCurves.PointOps.prime",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "8da3254d1ec11f2cdbb807298c6a60e4"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      51,
       0,
       0,
       [
@@ -1473,24 +1568,24 @@
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
-        "refinement_interpretation_Tm_refine_2e3e894ae610fb41803d9dfe0e697e4d",
         "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
         "refinement_interpretation_Tm_refine_66c6c28f0f23a37488e2ffcad165784e",
         "refinement_interpretation_Tm_refine_7e86f8eacba37cea734281899965ca92",
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
         "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "44af3d91b1cc211df848b3a748d013ae"
+      "e944535afcfede77b2891a81ceb3542c"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      50,
+      52,
       0,
       0,
       [
@@ -1512,11 +1607,11 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "31d4407acdc62ebb6ffef6a837e0a160"
+      "1772ce65328a5cda37e484fd25ae2805"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      51,
+      53,
       0,
       0,
       [
@@ -1538,7 +1633,7 @@
         "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.v", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.pos",
+        "equation_LowStar.Buffer.trivial_preorder",
         "equation_Spec.PCurves.PointOps.is_fodd",
         "equation_Spec.PCurves.PointOps.prime",
         "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
@@ -1547,38 +1642,33 @@
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_199a8a7d28aa1bc6cb2d2e0ee6a6b94c",
         "refinement_interpretation_Tm_refine_1d9370a85e1e114d671d24e9553e1f4b",
-        "refinement_interpretation_Tm_refine_2e3e894ae610fb41803d9dfe0e697e4d",
+        "refinement_interpretation_Tm_refine_246bf1321b01babf2288058369bfe8d2",
         "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
-        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
         "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
         "typing_FStar.UInt32.uint_to_t", "typing_Lib.Buffer.loc",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
         "typing_Spec.PCurves.PointOps.prime", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "e029473920b1db9b6dd04f4292e670d9"
+      "98823e9dad6a426e35f6e149cdac3ff0"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      52,
+      54,
       0,
       0,
       [
@@ -1591,11 +1681,11 @@
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "f9ac452ce57036a2e50628a4634925bc"
+      "9ca9f04dbdd6ed46c9cedd0f1add1f0f"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      53,
+      55,
       0,
       0,
       [
@@ -1603,25 +1693,25 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "e65e3ae16cd4061c34daae86099f76ac"
+      "08625f36b0e77c5e4efbad8a94b50571"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      54,
+      56,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
       ],
       0,
-      "d331881f46399b22e374d3eda4ba2672"
+      "6ddd1304d0d9ee48d887e6e213262f12"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      55,
+      57,
       0,
       0,
       [
@@ -1630,11 +1720,11 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6ac84ebdb0cea498ff612cd0b4e9fc80"
+      "fb15311b00ce8d5a6de5913deb6f03b5"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      56,
+      58,
       0,
       0,
       [
@@ -1686,10 +1776,10 @@
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
-        "refinement_interpretation_Tm_refine_2e3e894ae610fb41803d9dfe0e697e4d",
         "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12",
         "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
         "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
         "refinement_interpretation_Tm_refine_66c6c28f0f23a37488e2ffcad165784e",
         "refinement_interpretation_Tm_refine_7e86f8eacba37cea734281899965ca92",
@@ -1697,8 +1787,8 @@
         "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_d2b7ef4fefe72a8a7928c9ab7f09c2e5",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
         "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
-        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
         "typing_FStar.Monotonic.HyperHeap.rid",
@@ -1714,11 +1804,11 @@
         "typing_Spec.PCurves.PointOps.prime", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "bf0004fef3abdbbc220ef89af83abd99"
+      "01dd215739203cc4d50933c809a86f3f"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      57,
+      59,
       0,
       0,
       [
@@ -1728,32 +1818,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "d519d01d67ac599eb8812aa771c00f0f"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      58,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
-      ],
-      0,
-      "1dd7df91f74e163ad948fb7e916f01e8"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      59,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
-      ],
-      0,
-      "003a2b378e88bd995053bca50fb20e77"
+      "7ee43fc7fa88feab4fd36cb9715bd924"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1762,10 +1827,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "40b55a3be3a1c28112e0b9a8ea2d37ae"
+      "0f95026343871f38716b6704d84d3629"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1778,7 +1843,7 @@
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "8dc87df5870bdccde1b063ad07ab1597"
+      "1b2c6a9f9da84dc7b2d681ee8c94d945"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1787,10 +1852,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "535be4a92b42e4f47215eafea2214c24"
+      "6ed042721c9cfd0136b0a5b58d791f52"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1803,7 +1868,7 @@
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "f4eada1550503da02ad3c0ec93ef8e9b"
+      "451fe19819808f10649bf9c70459a809"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1879,7 +1944,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a4d3f57e423905897d95bef2abcb0286"
+      "ae3af87a093bd6bebe137dc815ce6688"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1888,10 +1953,11 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "134f75d293e687478e652113f1b23bba"
+      "81ed95029928242e55b962f16c1c0307"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -1899,15 +1965,104 @@
       0,
       0,
       [
-        "@query", "b2t_def", "primitive_Prims.op_LessThan",
-        "projection_inverse_BoxBool_proj_0"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "bool_typing",
+        "constructor_distinct_FStar.Pervasives.Native.None",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "disc_equation_Lib.IntTypes.U128",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.fresh_frame",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.op_At_Percent_Dot",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.aff_point_decompress",
+        "equation_Spec.PCurves.PointOps.is_fodd",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.mul_mod_lemma",
+        "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_1a6eeffb8867d81e6a09e9c639f9e64a",
+        "refinement_interpretation_Tm_refine_1d9370a85e1e114d671d24e9553e1f4b",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
+        "refinement_interpretation_Tm_refine_4e3bbd8eec0c3ef82902d2336c68c242",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
+        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
+        "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_cbc9c9ed17ad925990e73233b3bc3d64",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
+        "typing_Spec.PCurves.PointOps.prime",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4206b58e4e5b1d38832620fd7fb4523a"
+      "d0709ffda6c7958eec1a0fd2aa585601"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
       67,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "a9abeb9110587d39a3daf6a1c54611a1"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      68,
+      0,
+      0,
+      [
+        "@query", "b2t_def", "primitive_Prims.op_LessThan",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "cc434a5b7972aa206c8b547b5c63d2bf"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      69,
       0,
       0,
       [
@@ -1938,112 +2093,49 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_075dde893e632df39bb692526e53162b",
-        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
+        "refinement_interpretation_Tm_refine_246bf1321b01babf2288058369bfe8d2",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
         "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
         "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
-        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
         "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
         "typing_Spec.PCurves.PointOps.prime",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "49d94b470f2be50bcbc7ea28e7dd1865"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      68,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
-      ],
-      0,
-      "1502206c113fa4cf14294f59e8d9b6d0"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      69,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "bool_typing",
-        "constructor_distinct_FStar.Pervasives.Native.None",
-        "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "disc_equation_Lib.IntTypes.U128",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.fresh_frame",
-        "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.op_At_Percent_Dot",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.PCurves.PointOps.aff_point",
-        "equation_Spec.PCurves.PointOps.aff_point_decompress",
-        "equation_Spec.PCurves.PointOps.is_fodd",
-        "equation_Spec.PCurves.PointOps.prime",
-        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
-        "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Prims.__cache_version_number__", "int_typing",
-        "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
-        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.mul_mod_lemma",
-        "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
-        "refinement_interpretation_Tm_refine_1d9370a85e1e114d671d24e9553e1f4b",
-        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
-        "refinement_interpretation_Tm_refine_4e3bbd8eec0c3ef82902d2336c68c242",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
-        "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
-        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "refinement_interpretation_Tm_refine_cbc9c9ed17ad925990e73233b3bc3d64",
-        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
-        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
-        "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
-        "typing_Spec.PCurves.PointOps.prime",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
-      ],
-      0,
-      "085101f7ae5da242620dd0171193679b"
+      "5b8d6e570cb7a30fa605218c4f82c64e"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
       70,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "fe11353d4891b45bd9e51ffa17d3295c"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      71,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+      ],
+      0,
+      "6ece5c799d156a1c7f10d22cf052520a"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      72,
       0,
       0,
       [
@@ -2053,67 +2145,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "c1c58bae3fc69a6e7ff398baea6c38a4"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      71,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
-      ],
-      0,
-      "c7dfa56e1e5d5b6359f6fff9ae6fff4a"
-    ],
-    [
-      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      72,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "constructor_distinct_FStar.Pervasives.Native.None",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.ByteSequence.nat_to_bytes_be",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.length",
-        "equation_Prims.nat", "equation_Spec.PCurves.PointOps.aff_point",
-        "equation_Spec.PCurves.PointOps.aff_point_decompress",
-        "equation_Spec.PCurves.PointOps.is_fodd",
-        "equation_Spec.PCurves.PointOps.prime",
-        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
-        "function_token_typing_Prims.__cache_version_number__",
-        "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_075dde893e632df39bb692526e53162b",
-        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
-        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
-        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
-        "typing_Spec.PCurves.PointOps.prime",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
-      ],
-      0,
-      "a212f53fd1ebd652a05933ebf808849d"
+      "24ce985f0f43cb04b32a60d82b8ed25e"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -2122,10 +2154,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "08582fdccfde4db7ec40bb7204abf465"
+      "d3ba50fcaefba31685c2f0824ad3158c"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -2138,7 +2170,7 @@
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "35f45f0c38812b2cb492952f9a1f5355"
+      "8f33a92a7d87a23037e2b707a886546f"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -2147,10 +2179,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "259d2a80e40a420b2dda9398a72fb689"
+      "1fabc27a89ff0b513f4eb949cfdf1a63"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -2163,7 +2195,7 @@
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "6eee2251ab253c76d15a4cada64eeb78"
+      "f97bd19c97710cc9238d79e05e790f76"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
@@ -2172,15 +2204,40 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_0334395454af9534c76d381c46264129",
-        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "737fa6ab5630c1b94d0ab116a801a207"
+      "4281f309c4c35785520956ed8d1c5315"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
       78,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+      ],
+      0,
+      "60fd6698987c225543a58630acc33266"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      79,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_0334395454af9534c76d381c46264129",
+        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a"
+      ],
+      0,
+      "614058fe16f7e9651f159ac08bb5061f"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      80,
       0,
       0,
       [
@@ -2202,11 +2259,11 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "1c4d1c82e76af2105c6eddce9c4692ff"
+      "d751f01c81e478e99234c8a30000a0d2"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      79,
+      81,
       0,
       0,
       [
@@ -2235,23 +2292,25 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "f47acfe023ec700063b9fc6ebe03c239"
+      "22d2a5ba742357e29d7bcb72fb0d5648"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      80,
+      82,
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_3ef9aaba031eada50271684900c61907"
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_3ef9aaba031eada50271684900c61907",
+        "refinement_interpretation_Tm_refine_4959447c8f5f06e6821edeb2964feffb"
       ],
       0,
-      "89ab81a713481d6391b396f7062fd018"
+      "7287afd2f19a7f8094b2bf8c124027cf"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      81,
+      83,
       0,
       0,
       [
@@ -2302,8 +2361,8 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0334395454af9534c76d381c46264129",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
         "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
-        "refinement_interpretation_Tm_refine_2e3e894ae610fb41803d9dfe0e697e4d",
         "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12",
         "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
         "refinement_interpretation_Tm_refine_3ef9aaba031eada50271684900c61907",
@@ -2315,9 +2374,9 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
         "refinement_interpretation_Tm_refine_cbc9c9ed17ad925990e73233b3bc3d64",
         "refinement_interpretation_Tm_refine_d2b7ef4fefe72a8a7928c9ab7f09c2e5",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
         "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
@@ -2335,11 +2394,11 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "2cd87f3f8e273d9d45575855005b3764"
+      "c8c46041057e3bf1016e119ff8e7bb5a"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      82,
+      84,
       0,
       0,
       [
@@ -2349,11 +2408,11 @@
         "refinement_interpretation_Tm_refine_4959447c8f5f06e6821edeb2964feffb"
       ],
       0,
-      "d89598ca9e2a4b8d747fcaafb7b819b7"
+      "f32338a1ee8b57d43564c6f230a96369"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      83,
+      85,
       0,
       0,
       [
@@ -2367,44 +2426,23 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "f232e73f9608dad9befb5c318b8e4f77"
+      "9a59eb45be4ed615f017d408e4fcf1b8"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      84,
+      86,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.Buffer.MUT",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.Buffer.MUT@tok",
-        "equation_Hacl.Impl.PCurves.Bignum.felem",
-        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.live", "equation_Lib.IntTypes.uint64",
-        "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "function_token_typing_Lib.IntTypes.uint64",
-        "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
-        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
-        "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12",
-        "refinement_interpretation_Tm_refine_3ef9aaba031eada50271684900c61907",
-        "refinement_interpretation_Tm_refine_4959447c8f5f06e6821edeb2964feffb",
-        "refinement_interpretation_Tm_refine_66c6c28f0f23a37488e2ffcad165784e",
-        "refinement_interpretation_Tm_refine_7e86f8eacba37cea734281899965ca92",
-        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
-        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
-        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_d2b7ef4fefe72a8a7928c9ab7f09c2e5",
-        "typing_LowStar.Buffer.trivial_preorder"
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "60a208137b3f1855d98750a09a803996"
+      "d7e9f4b70c2df6809bf06fe08ca67066"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      85,
+      87,
       0,
       0,
       [
@@ -2425,15 +2463,791 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "bd26c42b99c3a18d6fdb1d0cb307910a"
+      "c708a1735819d7f77778d38765b28953"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      86,
+      88,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_Lib.IntTypes.U128",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "e669ba940b069e1ef37acbc950358ea3"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      89,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "6a260657aaa2927c63e50965d6513b13"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      90,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "f8446b5c5714761df692f5b62b3de73e"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      91,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.uint8",
+        "equation_Prims.nat", "function_token_typing_Lib.IntTypes.uint8",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0334395454af9534c76d381c46264129",
+        "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
+      ],
+      0,
+      "e228a01293508d267b29832fe70d29fd"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      92,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.buffer_t",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.v",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
+      ],
+      0,
+      "6aecf07bdbc8dcd39121c32cf480decc"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      93,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_Lib.IntTypes.U128",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "18b463cc4136537a7d4c8494083bd2a3"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      94,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "06bc78b056f6171739c26a8837b46596"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      95,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+      ],
+      0,
+      "9b2b67d43b43fc98f70d31aca7c38d27"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      96,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "93cbc4b2b5c65783c0f0661bbf332a72"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      97,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+      ],
+      0,
+      "9577ee238894c31d39d2f08b2a0c6c54"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      98,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "f88c195dd6e488e5470cb67f98c8a87f"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      99,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+      ],
+      0,
+      "027ed97b032bc9e9a41aaf3b09a2f031"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      100,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "698e6e4080c07e78e336b43bafb86934"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      101,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "ec7534aa13f1245052bc06ec1a4d8c4d"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      102,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_9ad3fdffaaf922927d9ad167baf5a1c6"
+      ],
+      0,
+      "06ef753dfa4fc0ad18e053fd426c4288"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      103,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "constructor_distinct_FStar.Pervasives.Native.None",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Prims.nat", "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.aff_point_decompress",
+        "equation_Spec.PCurves.PointOps.is_fodd",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
+        "function_token_typing_Prims.__cache_version_number__",
+        "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_246bf1321b01babf2288058369bfe8d2",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
+        "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
+        "refinement_interpretation_Tm_refine_bccd0f2ba7f635c186c2bfa9527eceae",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
+        "typing_Spec.PCurves.PointOps.prime",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "9b02c1ff736e0d5e8d87875b4bcf045b"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      104,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
+      ],
+      0,
+      "6538cc229ad1ccbd9ce667c1ef38f609"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      105,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
+        "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
+        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
+        "typing_Spec.PCurves.PointOps.prime"
+      ],
+      0,
+      "92209f50821a8939ebfac4666ac98e2c"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      106,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equation_Lib.ByteSequence.nat_to_bytes_be",
+        "equation_Lib.Sequence.length",
+        "refinement_interpretation_Tm_refine_075dde893e632df39bb692526e53162b"
+      ],
+      0,
+      "98e9542b8b35503ed776172e977a575f"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      107,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "bool_typing",
+        "constructor_distinct_FStar.Pervasives.Native.None",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "disc_equation_Lib.IntTypes.U128", "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.inline_stack_inv",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.fresh_frame",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.op_At_Percent_Dot",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.aff_point_decompress",
+        "equation_Spec.PCurves.PointOps.is_fodd",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing",
+        "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.mul_mod_lemma",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Negation",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bits",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0334395454af9534c76d381c46264129",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_0ea90d3646a1736148ebd7550c3dd6f7",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
+        "refinement_interpretation_Tm_refine_329949d7bc0e90948146a288ce237160",
+        "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
+        "refinement_interpretation_Tm_refine_3c3f976e238a0c3e9c7a61f4f57ceb1a",
+        "refinement_interpretation_Tm_refine_41754aac2745e6b01b11fe607046cd34",
+        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
+        "refinement_interpretation_Tm_refine_4e3bbd8eec0c3ef82902d2336c68c242",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
+        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
+        "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
+        "refinement_interpretation_Tm_refine_66c6c28f0f23a37488e2ffcad165784e",
+        "refinement_interpretation_Tm_refine_68ee6d2c8678eb431259a3d4f412550b",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
+        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_d2b7ef4fefe72a8a7928c9ab7f09c2e5",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f154663a5da0be16ddde4bf647858d22",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
+        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
+        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.UInt32.uint_to_t", "typing_Lib.IntTypes.unsigned",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bits",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
+        "typing_Spec.PCurves.PointOps.prime",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "b246b757da841f867e0ccba18c457d91"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      108,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "bool_typing",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.inline_stack_inv",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.fresh_frame",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Impl.PCurves.Bignum.felem",
+        "equation_Hacl.Spec.Bignum.Definitions.bn_v",
+        "equation_Hacl.Spec.Bignum.Definitions.lbignum",
+        "equation_Hacl.Spec.Bignum.Definitions.limb",
+        "equation_Hacl.Spec.Bignum.Definitions.limb_t",
+        "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
+        "equation_Lib.Buffer.modifies1",
+        "equation_Lib.Buffer.stack_allocated",
+        "equation_Lib.ByteSequence.nat_to_bytes_be",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.uint64",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.PCurves.PointOps.is_fodd",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Lib.IntTypes.uint64",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
+        "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Seq.Base.lemma_index_app1",
+        "lemma_FStar.Seq.Base.lemma_index_app2",
+        "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.UInt32.vu_inv",
+        "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
+        "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
+        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
+        "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0334395454af9534c76d381c46264129",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0b72b617030921a422a8020811c2f320",
+        "refinement_interpretation_Tm_refine_0ea90d3646a1736148ebd7550c3dd6f7",
+        "refinement_interpretation_Tm_refine_11888fecf812f197898447624c24e106",
+        "refinement_interpretation_Tm_refine_1c5f471a3f41423205ddef9e3cf0bffc",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
+        "refinement_interpretation_Tm_refine_329949d7bc0e90948146a288ce237160",
+        "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
+        "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
+        "refinement_interpretation_Tm_refine_3c3f976e238a0c3e9c7a61f4f57ceb1a",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
+        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
+        "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
+        "refinement_interpretation_Tm_refine_66c6c28f0f23a37488e2ffcad165784e",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_71560dd6f0442f88b0b5d112e01e347c",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7dce91870d25d66284bb7f168a1d253c",
+        "refinement_interpretation_Tm_refine_7e86f8eacba37cea734281899965ca92",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
+        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_a5cf199b3ceef2a5e8a6beaec56eb932",
+        "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
+        "refinement_interpretation_Tm_refine_b07f0506bf90c62084aaf15d9b71f237",
+        "refinement_interpretation_Tm_refine_b9bf9d0f857340a8d758087374a41c06",
+        "refinement_interpretation_Tm_refine_c11da8e8f0f9c9cde0eb7f130251c352",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_cba6b842d58bf4db7c0543f54899ab35",
+        "refinement_interpretation_Tm_refine_ccbef96ee6e044a9cf0b4353c2d1f06e",
+        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
+        "refinement_interpretation_Tm_refine_d2b7ef4fefe72a8a7928c9ab7f09c2e5",
+        "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
+        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_dee0f34b44c44e6d512c6db0858b92ef",
+        "refinement_interpretation_Tm_refine_e6540b31f29493f394eb70fe0855ee40",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f154663a5da0be16ddde4bf647858d22",
+        "refinement_interpretation_Tm_refine_f1f3a6a6d3da045b35e7ba130c8b362a",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
+        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
+        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.Set.singleton", "typing_FStar.UInt.fits",
+        "typing_Hacl.Spec.Bignum.Definitions.bn_v",
+        "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.length",
+        "typing_Lib.Buffer.loc", "typing_Lib.ByteSequence.nat_to_bytes_be",
+        "typing_Lib.Sequence.index", "typing_Lib.Sequence.sub",
+        "typing_Lib.Sequence.to_seq", "typing_Lib.Sequence.update_sub",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
+        "typing_LowStar.Monotonic.Buffer.as_addr",
+        "typing_LowStar.Monotonic.Buffer.frameOf",
+        "typing_LowStar.Monotonic.Buffer.loc_addresses",
+        "typing_LowStar.Monotonic.Buffer.loc_none",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
+        "typing_Spec.PCurves.PointOps.prime",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U64@tok"
+      ],
+      0,
+      "014147327104c34460b69f185dde841a"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      109,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
+        "bool_inversion", "bool_typing",
+        "constructor_distinct_FStar.Pervasives.Native.None",
+        "constructor_distinct_FStar.Pervasives.Native.Some",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Tm_unit",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "disc_equation_Lib.IntTypes.U128", "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.inline_stack_inv",
+        "equation_FStar.Monotonic.Heap.equal_dom",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.fresh_frame",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.Monotonic.HyperStack.pop",
+        "equation_FStar.Monotonic.HyperStack.poppable",
+        "equation_FStar.Monotonic.HyperStack.popped",
+        "equation_FStar.Monotonic.HyperStack.remove_elt",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Impl.PCurves.Bignum.felem",
+        "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
+        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.gsub",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
+        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
+        "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies1",
+        "equation_Lib.Buffer.op_Bar_Plus_Bar",
+        "equation_Lib.Buffer.stack_allocated", "equation_Lib.Buffer.union",
+        "equation_Lib.ByteSequence.nat_to_bytes_be",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.op_At_Percent_Dot",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Lib.Sequence.to_seq", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.aff_point_decompress",
+        "equation_Spec.PCurves.PointOps.bytes",
+        "equation_Spec.PCurves.PointOps.is_fodd",
+        "equation_Spec.PCurves.PointOps.prime",
+        "equation_Spec.PCurves.pk_compressed_to_raw",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Lib.IntTypes.uint64",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
+        "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_intro",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Map.lemma_InDomRestrict",
+        "lemma_FStar.Map.lemma_InDomUpd2",
+        "lemma_FStar.Map.lemma_SelRestrict", "lemma_FStar.Map.lemma_SelUpd2",
+        "lemma_FStar.Monotonic.HyperHeap.lemma_includes_refl",
+        "lemma_FStar.Monotonic.HyperStack.lemma_mk_mem__projectors",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Set.lemma_equal_elim",
+        "lemma_FStar.Set.lemma_equal_intro",
+        "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
+        "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
+        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
+        "lemma_Lib.IntTypes.add_mod_lemma",
+        "lemma_Lib.IntTypes.mul_mod_lemma", "lemma_Lib.Sequence.eq_elim",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
+        "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_l_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
+        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
+        "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
+        "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
+        "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
+        "lemma_LowStar.Monotonic.Buffer.popped_modifies",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Negation",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_FStar.Pervasives.Native.Some_v",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bits",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Some_a",
+        "projection_inverse_FStar.Pervasives.Native.Some_v",
+        "refinement_interpretation_Tm_refine_0334395454af9534c76d381c46264129",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_0ea90d3646a1736148ebd7550c3dd6f7",
+        "refinement_interpretation_Tm_refine_11888fecf812f197898447624c24e106",
+        "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
+        "refinement_interpretation_Tm_refine_199a8a7d28aa1bc6cb2d2e0ee6a6b94c",
+        "refinement_interpretation_Tm_refine_1c5f471a3f41423205ddef9e3cf0bffc",
+        "refinement_interpretation_Tm_refine_1ea9085e446f044484420ae19cf13f26",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
+        "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12",
+        "refinement_interpretation_Tm_refine_329949d7bc0e90948146a288ce237160",
+        "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
+        "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
+        "refinement_interpretation_Tm_refine_3c3f976e238a0c3e9c7a61f4f57ceb1a",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
+        "refinement_interpretation_Tm_refine_4e3bbd8eec0c3ef82902d2336c68c242",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
+        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
+        "refinement_interpretation_Tm_refine_6164d9b106667485d32a033534b8978a",
+        "refinement_interpretation_Tm_refine_66c6c28f0f23a37488e2ffcad165784e",
+        "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
+        "refinement_interpretation_Tm_refine_6ee5d3c703824e63c46633f211509f2d",
+        "refinement_interpretation_Tm_refine_71560dd6f0442f88b0b5d112e01e347c",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e86f8eacba37cea734281899965ca92",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
+        "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_a5cf199b3ceef2a5e8a6beaec56eb932",
+        "refinement_interpretation_Tm_refine_b07f0506bf90c62084aaf15d9b71f237",
+        "refinement_interpretation_Tm_refine_b9bf9d0f857340a8d758087374a41c06",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_d2b7ef4fefe72a8a7928c9ab7f09c2e5",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_e6540b31f29493f394eb70fe0855ee40",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f154663a5da0be16ddde4bf647858d22",
+        "refinement_interpretation_Tm_refine_f329878e92bb1efc120000057d7014bb",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
+        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
+        "typing_FStar.Map.restrict", "typing_FStar.Monotonic.Heap.emp",
+        "typing_FStar.Monotonic.HyperHeap.mod_set",
+        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.root",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_rid_ctr",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.Monotonic.HyperStack.remove_elt",
+        "typing_FStar.Set.complement", "typing_FStar.Set.mem",
+        "typing_FStar.Set.singleton", "typing_FStar.UInt32.uint_to_t",
+        "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.length",
+        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.Sequence.sub",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
+        "typing_LowStar.Monotonic.Buffer.as_addr",
+        "typing_LowStar.Monotonic.Buffer.frameOf",
+        "typing_LowStar.Monotonic.Buffer.loc_addresses",
+        "typing_LowStar.Monotonic.Buffer.loc_none",
+        "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
+        "typing_LowStar.Monotonic.Buffer.loc_regions",
+        "typing_LowStar.Monotonic.Buffer.loc_union",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bits",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
+        "typing_Spec.PCurves.PointOps.prime",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion"
+      ],
+      0,
+      "b0faffc894af1d80a06a6f6d7a143d1d"
+    ],
+    [
+      "Hacl.Impl.PCurves.Compression.compressed_to_raw",
+      110,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
         "bool_inversion", "bool_typing",
         "constructor_distinct_FStar.Pervasives.Native.None",
@@ -2442,7 +3256,7 @@
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Tm_unit",
+        "disc_equation_FStar.Pervasives.Native.None",
         "disc_equation_FStar.Pervasives.Native.Some",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
@@ -2465,17 +3279,23 @@
         "equation_Hacl.Impl.PCurves.Bignum.felem",
         "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
         "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies",
+        "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
         "equation_Lib.Buffer.op_Bar_Plus_Bar",
         "equation_Lib.Buffer.stack_allocated", "equation_Lib.Buffer.union",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Lib.Sequence.lseq", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.op_At_Percent_Dot",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint64",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.aff_point_decompress",
+        "equation_Spec.PCurves.PointOps.bytes",
         "equation_Spec.PCurves.pk_compressed_to_raw",
         "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
         "function_token_typing_FStar.Monotonic.Heap.heap",
@@ -2483,7 +3303,7 @@
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
-        "int_typing",
+        "int_typing", "kinding_FStar.Pervasives.Native.tuple2@tok",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_intro",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
@@ -2493,11 +3313,13 @@
         "lemma_FStar.Map.lemma_SelRestrict", "lemma_FStar.Map.lemma_SelUpd2",
         "lemma_FStar.Monotonic.HyperHeap.lemma_includes_refl",
         "lemma_FStar.Monotonic.HyperStack.lemma_mk_mem__projectors",
+        "lemma_FStar.Pervasives.invertOption",
         "lemma_FStar.Set.lemma_equal_elim",
         "lemma_FStar.Set.lemma_equal_intro",
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
-        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
+        "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.IntTypes.v_mk_int",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
@@ -2520,34 +3342,38 @@
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Negation",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0dee8cb03258a67c2f7ec66427696212",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
+        "refinement_interpretation_Tm_refine_199a8a7d28aa1bc6cb2d2e0ee6a6b94c",
+        "refinement_interpretation_Tm_refine_1ea9085e446f044484420ae19cf13f26",
         "refinement_interpretation_Tm_refine_23f9063d3e87f2b5054d7acd1328e097",
-        "refinement_interpretation_Tm_refine_2e3e894ae610fb41803d9dfe0e697e4d",
+        "refinement_interpretation_Tm_refine_246bf1321b01babf2288058369bfe8d2",
         "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12",
         "refinement_interpretation_Tm_refine_32998c95ebf5e6d30ac9fca7dbd730d8",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_573e26649290a7538deb66771159fd6a",
         "refinement_interpretation_Tm_refine_66c6c28f0f23a37488e2ffcad165784e",
         "refinement_interpretation_Tm_refine_690e4da6116d8e852f6a8692e3c5fa22",
         "refinement_interpretation_Tm_refine_6ee5d3c703824e63c46633f211509f2d",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7e86f8eacba37cea734281899965ca92",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9090a03e743f688031add98447a95f5a",
         "refinement_interpretation_Tm_refine_9a2933ed0a6c4a0db2ff83cb885c9ec7",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_d57659f2621b0cce70d3efa15e037bda",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -2561,39 +3387,43 @@
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.Monotonic.HyperStack.remove_elt",
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
-        "typing_FStar.Set.singleton", "typing_Lib.Buffer.loc",
+        "typing_FStar.Set.singleton", "typing_FStar.UInt32.uint_to_t",
+        "typing_FStar.UInt32.v", "typing_Lib.Buffer.as_seq",
+        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
         "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.unsigned",
         "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_addr",
         "typing_LowStar.Monotonic.Buffer.frameOf",
+        "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_addresses",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union",
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
+        "typing_Spec.PCurves.PointOps.aff_point_decompress",
+        "typing_Spec.PCurves.PointOps.felem",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion"
       ],
       0,
-      "520a436866f6da01055ff69f75e6bbd3"
+      "2fee9423a0da782cefc8bfc702bf84ef"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      87,
+      111,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "2962f4916ca6513346dab63612464821"
+      "99f325ef42a8d4a0d8e369b8861cb510"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      88,
+      112,
       0,
       0,
       [
@@ -2601,14 +3431,14 @@
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "df7b1bb89e541e81b65e6067f1142cc7"
+      "d5d475823d28dbdf75b97a4b39ba271d"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      89,
+      113,
       0,
       0,
       [
@@ -2618,23 +3448,23 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "6687cdaeb94f03b7b530d14d8aac918f"
+      "fc50dc1f2152b6dc58c13828d991f449"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      90,
+      114,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "579f2519f474148f7d50f15565618c7d"
+      "36ab68a57629d8a3aa7e2494a2ee15df"
     ],
     [
       "Hacl.Impl.PCurves.Compression.compressed_to_raw",
-      91,
+      115,
       0,
       0,
       [
@@ -2642,10 +3472,10 @@
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_52783da87e320d016bd3e38f244739be"
+        "refinement_interpretation_Tm_refine_11fd9c6d545f1a5f755438ed2c11bb5b"
       ],
       0,
-      "6a82594f2795720a6032d92decf0962b"
+      "d51a293c017381a66ade7c3ad1628925"
     ],
     [
       "Hacl.Impl.PCurves.Compression.raw_to_uncompressed",
@@ -2694,12 +3524,12 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
         "refinement_interpretation_Tm_refine_4e3bbd8eec0c3ef82902d2336c68c242",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
@@ -2713,7 +3543,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c24b30cd228f8c68702fd7086403fd24"
+      "0da219505a50b093854b1a458dd78185"
     ],
     [
       "Hacl.Impl.PCurves.Compression.raw_to_uncompressed",
@@ -2767,8 +3597,8 @@
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
         "lemma_Lib.Buffer.as_seq_gsub", "lemma_Lib.IntTypes.add_mod_lemma",
-        "lemma_Lib.IntTypes.mul_mod_lemma", "lemma_Lib.IntTypes.v_injective",
-        "lemma_Lib.Sequence.eq_elim",
+        "lemma_Lib.IntTypes.mul_mod_lemma", "lemma_Lib.IntTypes.pow2_3",
+        "lemma_Lib.IntTypes.v_injective", "lemma_Lib.Sequence.eq_elim",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
@@ -2781,12 +3611,14 @@
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bits",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0b72b617030921a422a8020811c2f320",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
         "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
@@ -2807,7 +3639,6 @@
         "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
         "refinement_interpretation_Tm_refine_b9bf9d0f857340a8d758087374a41c06",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_ccbef96ee6e044a9cf0b4353c2d1f06e",
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
@@ -2835,12 +3666,13 @@
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.len",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bits",
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7d7149ef94b7bee23bb0260f925d574e"
+      "8fa4c60925f87dbf4ad54d3c6d4b669f"
     ],
     [
       "Hacl.Impl.PCurves.Compression.raw_to_uncompressed",
@@ -2968,7 +3800,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d65b2d45c76777910175b601989b2cab"
+      "ae697d88e862a0b9bdc1d59d04433c65"
     ],
     [
       "Hacl.Impl.PCurves.Compression.raw_to_compressed_get_pk0",
@@ -2981,7 +3813,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "4535e4674f9f21e962952e5dfce60a6f"
+      "bbd859a600af580816e9c2d5d8c7345b"
     ],
     [
       "Hacl.Impl.PCurves.Compression.raw_to_compressed_get_pk0",
@@ -3137,7 +3969,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6ad66d82005d97c3ad6adc27da453755"
+      "09491766933b8213b462490832b9aed0"
     ],
     [
       "Hacl.Impl.PCurves.Compression.raw_to_compressed_get_pk0",
@@ -3293,7 +4125,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9af4192ec1c267dba54089bfbe811179"
+      "f89c542c67ab781ffd3d23d8478c62ba"
     ],
     [
       "Hacl.Impl.PCurves.Compression.raw_to_compressed",
@@ -3329,39 +4161,44 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Prims.pos",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.InvSqrt.curve_inv_sqrt",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "int_typing", "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
+        "lemma_Lib.IntTypes.add_mod_lemma",
         "lemma_Lib.IntTypes.mul_mod_lemma", "lemma_Lib.IntTypes.v_mk_int",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bits",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_4e3bbd8eec0c3ef82902d2336c68c242",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
         "typing_FStar.UInt32.v", "typing_Lib.Buffer.length",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bits",
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1c86f2fab43e5e7c33c278e5172ea0e7"
+      "b6984cbe3bb6fbeaf81fce7700a4df06"
     ],
     [
       "Hacl.Impl.PCurves.Compression.raw_to_compressed",
@@ -3414,14 +4251,12 @@
         "lemma_FStar.Seq.Base.lemma_index_create",
         "lemma_FStar.Seq.Base.lemma_index_slice",
         "lemma_FStar.Seq.Base.lemma_len_slice",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
-        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.Buffer.as_seq_gsub",
+        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
         "lemma_Lib.IntTypes.add_mod_lemma",
         "lemma_Lib.IntTypes.mul_mod_lemma", "lemma_Lib.IntTypes.v_injective",
         "lemma_Lib.IntTypes.v_mk_int", "lemma_Lib.Sequence.eq_elim",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
-        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
@@ -3437,7 +4272,6 @@
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bits",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -3445,6 +4279,8 @@
         "refinement_interpretation_Tm_refine_0b72b617030921a422a8020811c2f320",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_11888fecf812f197898447624c24e106",
+        "refinement_interpretation_Tm_refine_1d9370a85e1e114d671d24e9553e1f4b",
+        "refinement_interpretation_Tm_refine_2372f5857749d6afb5265e025ae5b9e7",
         "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
@@ -3463,14 +4299,12 @@
         "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
         "refinement_interpretation_Tm_refine_b9bf9d0f857340a8d758087374a41c06",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_ccbef96ee6e044a9cf0b4353c2d1f06e",
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_dee0f34b44c44e6d512c6db0858b92ef",
-        "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_f329878e92bb1efc120000057d7014bb",
         "refinement_interpretation_Tm_refine_fb77d4109290540100357b20e0a78486",
@@ -3494,14 +4328,13 @@
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_none",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bits",
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d02b720250b48725cf2328f85766351e"
+      "d1ecf545d76d421a3158f6f91d2da7ae"
     ],
     [
       "Hacl.Impl.PCurves.Compression.raw_to_compressed",
@@ -3638,7 +4471,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "14cd6eefa075b480dd6225e7096e13d8"
+      "7e2167198a9e087da9505b28ae3ae0cf"
     ]
   ]
 ]

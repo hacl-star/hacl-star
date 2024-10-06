@@ -30,6 +30,7 @@ unfold
 let refl {| cp:S.curve_params |} (p:LSeq.lseq uint64 (3*v cp.bn_limbs){point_inv_seq p}) : GTot S.aff_point =
   S.to_aff_point (from_mont_point (as_point_nat_seq p))
 
+#push-options "--z3rlimit 50"
 [@(strict_on_arguments [0])]
 inline_for_extraction noextract
 let mk_to_pcurve_comm_monoid {| cp:S.curve_params |} : BE.to_comm_monoid U64 (3ul *. cp.bn_limbs) 0ul = {
@@ -39,7 +40,7 @@ let mk_to_pcurve_comm_monoid {| cp:S.curve_params |} : BE.to_comm_monoid U64 (3u
   BE.linv = point_inv_seq;
   BE.refl = refl;
 }
-
+#pop-options
 
 inline_for_extraction noextract
 let point_add_t {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} = BE.lmul_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_pcurve_comm_monoid

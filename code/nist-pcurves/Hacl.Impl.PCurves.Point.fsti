@@ -67,14 +67,14 @@ let aff_point_y_as_nat {| cp:S.curve_params |} (h:mem) (p:aff_point) : GTot nat 
 inline_for_extraction noextract
 let aff_getx {| cp:S.curve_params |} (p:aff_point) : Stack felem
   (requires fun h -> live h p)
-  (ensures fun h0 f h1 -> f == gsub p 0ul cp.bn_limbs /\ h0 == h1)
+  (ensures fun h0 f h1 -> v cp.bn_limbs <= 2 * v cp.bn_limbs /\ f == gsub p 0ul cp.bn_limbs /\ h0 == h1)
   = sub p 0ul cp.bn_limbs
 
 [@(strict_on_arguments [0])]
 inline_for_extraction noextract
 let aff_gety {| cp:S.curve_params |} (p:aff_point) : Stack felem
   (requires fun h -> live h p)
-  (ensures fun h0 f h1 -> f == gsub p cp.bn_limbs cp.bn_limbs /\ h0 == h1)
+  (ensures fun h0 f h1 -> v cp.bn_limbs <= 2 * v cp.bn_limbs /\ f == gsub p cp.bn_limbs cp.bn_limbs /\ h0 == h1)
   = sub p cp.bn_limbs cp.bn_limbs
 
 
@@ -142,6 +142,7 @@ inline_for_extraction noextract
 let getz {| cp:S.curve_params |} (p:point) : Stack felem
   (requires fun h -> live h p)
   (ensures fun h0 f h1 -> v (2ul *. cp.bn_limbs) == 2 * v cp.bn_limbs /\
+   	       	       v (3ul *. cp.bn_limbs) == 3 * v cp.bn_limbs /\
                        f == gsub p (2ul *. cp.bn_limbs) (cp.bn_limbs) /\ h0 == h1)
   = assert (v (2ul *. cp.bn_limbs) == 2 * v cp.bn_limbs);
     sub p (2ul *. cp.bn_limbs) (cp.bn_limbs)

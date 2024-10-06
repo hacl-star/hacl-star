@@ -32,6 +32,7 @@ val compressed_to_raw {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |}
   pk_raw:lbuffer uint8 (2ul *. size cp.bytes) -> Stack bool
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
+    (v (1ul +. size cp.bytes) == cp.bytes + 1) /\
     (b <==> Some? (S.pk_compressed_to_raw (as_seq h0 pk))) /\
     (b ==> (as_seq h1 pk_raw == Some?.v (S.pk_compressed_to_raw (as_seq h0 pk)))))
 

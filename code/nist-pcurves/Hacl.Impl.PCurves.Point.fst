@@ -1,4 +1,3 @@
-
 module Hacl.Impl.PCurves.Point
 
 open FStar.Mul
@@ -218,7 +217,7 @@ let is_xy_valid_vartime {| cp:S.curve_params |} {| bn_ops |} {| curve_constants 
   logand_lemma lessX lessY;
   Hacl.Bignum.Base.unsafe_bool_of_limb res
 
-
+#push-options "--z3rlimit 100"
 let aff_point_load_vartime {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |}  p b =
   let p_x = sub b 0ul (size cp.bytes) in
   let p_y = sub b (size cp.bytes) (size cp.bytes) in
@@ -230,6 +229,7 @@ let aff_point_load_vartime {| cp:S.curve_params |} {| bn_ops |} {| curve_constan
   let is_xy_valid = is_xy_valid_vartime p in
   if not is_xy_valid then false
   else is_on_curve_vartime p
+#pop-options
 
 let load_point_vartime {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} p b =
   push_frame ();

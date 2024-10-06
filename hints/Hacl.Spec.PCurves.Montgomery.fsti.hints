@@ -1,5 +1,5 @@
 [
-  "#‹d?\u001eïÀ\u001d\u0012)ˆ∫\u0003≈\u007f\u000f",
+  "\u0016ÅQ9\u0017\u0019ãáS¡sﬁ};hu",
   [
     [
       "Hacl.Spec.PCurves.Montgomery.mont_cancel_lemma_gen",
@@ -11,7 +11,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "09dfc8d05a686eef81128cf6ca2222cc"
+      "82aa96cb1c6509dd5f42b617662df2e4"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.fmont_R",
@@ -19,23 +19,14 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.v",
-        "equation_Prims.pos",
-        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
-        "primitive_Prims.op_Multiply",
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
+        "refinement_interpretation_Tm_refine_246bf1321b01babf2288058369bfe8d2",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs"
       ],
       0,
-      "b56a2120457f6d01ccd2b953a5e42c32"
+      "8505cad9ee55b4cd5330cd0a6f8e89aa"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.mul_fmont_R_and_R_inv_is_one",
@@ -44,7 +35,7 @@
       0,
       [ "@query" ],
       0,
-      "19880acb70048aeac332da85cbd904db"
+      "29cad184fe8a6397bc4fbc184af43f7c"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.from_mont",
@@ -55,11 +46,11 @@
         "@MaxIFuel_assumption", "@query",
         "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
         "typing_Spec.PCurves.PointOps.prime"
       ],
       0,
-      "174df1b5ffb9f5046af055354f72aca6"
+      "6ddf5f78ac6e2403d88134e98d7c2d63"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.to_mont",
@@ -70,11 +61,11 @@
         "@MaxIFuel_assumption", "@query",
         "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
         "typing_Spec.PCurves.PointOps.prime"
       ],
       0,
-      "e56c5349b4b1c952e4ee89afc6a90237"
+      "f7e32616cbff5d1f443c3553b2022552"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.bn_mont_reduction_lemma",
@@ -90,25 +81,19 @@
         "equation_Hacl.Spec.Bignum.Definitions.limb",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Prims.pos", "equation_Spec.PCurves.PointOps.bn_limbs",
+        "equation_Spec.PCurves.PointOps.bn_limbs",
         "equation_Spec.PCurves.PointOps.prime",
         "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
         "int_inversion", "int_typing", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_246bf1321b01babf2288058369bfe8d2",
+        "refinement_interpretation_Tm_refine_5711fdc0b8fa3fc17f77078bfb221224",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bits",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
         "typing_Spec.PCurves.PointOps.bn_limbs",
         "typing_Spec.PCurves.PointOps.prime"
       ],
       0,
-      "45e92ec1219be179e48338d286779aa3"
+      "1619d79521d082a75e8331cb8f12bd45"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.fmont_mul_lemma",
@@ -127,7 +112,7 @@
         "refinement_interpretation_Tm_refine_b874d0788e624a14cb6228d4e93a4964"
       ],
       0,
-      "d959c7fcfdbdf8b694830c8f6845becc"
+      "b397feb8b4870867c91ab55e73f56aac"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.fmont_add_lemma",
@@ -146,7 +131,7 @@
         "refinement_interpretation_Tm_refine_b874d0788e624a14cb6228d4e93a4964"
       ],
       0,
-      "905a61d95d3b98fb25b7a092a87f0915"
+      "f7605a632226cd0010c79cf345e5a5a6"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.fmont_sub_lemma",
@@ -165,7 +150,7 @@
         "refinement_interpretation_Tm_refine_b874d0788e624a14cb6228d4e93a4964"
       ],
       0,
-      "dd7e37ec35f565e43e00bf9f04a8caf4"
+      "f3da15e4983d0e16d0ca74b331f56afb"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.qmont_R",
@@ -173,23 +158,14 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.v",
-        "equation_Prims.pos",
-        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
-        "primitive_Prims.op_Multiply",
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bn_limbs",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes"
+        "refinement_interpretation_Tm_refine_246bf1321b01babf2288058369bfe8d2",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs"
       ],
       0,
-      "5e784f32976b890ccd15fcb32bf38b65"
+      "508e653999b42e98abf191a11f2e3e00"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.mul_qmont_R_and_R_inv_is_one",
@@ -198,7 +174,7 @@
       0,
       [ "@query" ],
       0,
-      "e3cccdc941f30c5523d89752111ecb56"
+      "8b93d05c1f1865c434bdae198280d94c"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.from_qmont",
@@ -212,11 +188,11 @@
         "primitive_Prims.op_Modulus",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_order",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_a6f238f706f95900a0a40e799726faa7",
+        "refinement_interpretation_Tm_refine_7447187a5690efebad1922d54687d189",
         "typing_Spec.PCurves.PointOps.order"
       ],
       0,
-      "b9362f2c45d47a4a528c36d15dbf9d91"
+      "b0c3828beaac7106cac444141fd3fe90"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.to_qmont",
@@ -230,11 +206,11 @@
         "primitive_Prims.op_Modulus",
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_order",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_a6f238f706f95900a0a40e799726faa7",
+        "refinement_interpretation_Tm_refine_7447187a5690efebad1922d54687d189",
         "typing_Spec.PCurves.PointOps.order"
       ],
       0,
-      "cc9b1e2e1a47998a1fadc25d1fc38a33"
+      "9d4c96766b921db0ecac4d816b58b3cc"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.bn_qmont_reduction_lemma",
@@ -250,25 +226,19 @@
         "equation_Hacl.Spec.Bignum.Definitions.limb",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Prims.pos", "equation_Spec.PCurves.PointOps.bn_limbs",
+        "equation_Spec.PCurves.PointOps.bn_limbs",
         "equation_Spec.PCurves.PointOps.order",
         "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
         "int_inversion", "int_typing", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
-        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_bytes",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_445d203459df64ea102233994ef5c892",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_a6f238f706f95900a0a40e799726faa7",
-        "refinement_interpretation_Tm_refine_c17d8d4e98f92935eedc622a47a75b9a",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_246bf1321b01babf2288058369bfe8d2",
+        "refinement_interpretation_Tm_refine_7447187a5690efebad1922d54687d189",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bits",
-        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bytes",
         "typing_Spec.PCurves.PointOps.bn_limbs",
         "typing_Spec.PCurves.PointOps.order"
       ],
       0,
-      "9476fc5629d57928fbc94717bdd3dafa"
+      "6c3ec6ab7a3410ff336d9ef156e200d9"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.qmont_add_lemma",
@@ -287,11 +257,11 @@
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_order",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_a6f238f706f95900a0a40e799726faa7",
+        "refinement_interpretation_Tm_refine_7447187a5690efebad1922d54687d189",
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__order"
       ],
       0,
-      "f220c5000d28b6e615d3ccf64c784676"
+      "167f3f04a7f96eadf10575bf5f6cd24a"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.qmont_mul_lemma",
@@ -310,11 +280,11 @@
         "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_order",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_a6f238f706f95900a0a40e799726faa7",
+        "refinement_interpretation_Tm_refine_7447187a5690efebad1922d54687d189",
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__order"
       ],
       0,
-      "bb504eff6de18c13bb5ec3951f288bf4"
+      "d5c66079f8179ab9992c5019477a3263"
     ],
     [
       "Hacl.Spec.PCurves.Montgomery.lemma_ecdsa_sign_s",
@@ -345,7 +315,7 @@
         "typing_Spec.PCurves.PointOps.order"
       ],
       0,
-      "132a092f64792e5340cbb99905025f96"
+      "b3c025255d7cfbefaaa9986b5c57a860"
     ]
   ]
 ]

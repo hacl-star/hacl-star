@@ -35,7 +35,7 @@ class curve_params = {
   b_coeff: x:nat{x < prime};
   mont_mu: x:uint64{(1 + prime * v x) % pow2 64 == 0};
   mont_q_mu: x:uint64{(1 + order * v x) % pow2 64 == 0};
-  bn_limbs: x:size_t{v x == (bytes + 7) / 8 /\ v x * 8 >= bytes /\
+  bn_limbs: x:size_t{v x > 0 /\ v x == (bytes + 7) / 8 /\ v x * 8 >= bytes /\
                      1536 * v x <= max_size_t (* for precomp table *)}
   // also add co-factor?
 }

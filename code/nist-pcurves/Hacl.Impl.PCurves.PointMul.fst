@@ -92,6 +92,7 @@ let point_mul_g_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants 
   [@inline_let] let bBits = 64ul in
   [@inline_let] let bLen = 1ul in
 
+  admit();
   let h0 = ST.get () in
   recall_contents pt.basepoint_w4.table_w4 pt.basepoint_w4.table_lseq_w4;
   let h1 = ST.get () in
@@ -130,8 +131,7 @@ let point_mul_g_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants 
     (to_const pt.g_pow2_64_w4.table_w4)
     (to_const pt.g_pow2_128_w4.table_w4)
     (to_const pt.g_pow2_192_w4.table_w4)
-    out;
- admit()
+    out
 
 noextract
 val lemma_exp_four_fw_local {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: b:BD.lbignum U64 4{BD.bn_v b < S.order} ->
