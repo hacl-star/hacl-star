@@ -88,8 +88,6 @@ let point_mul_g_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants 
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let l = 4ul in
   [@inline_let] let table_len = 16ul in
-
-  admit();
   
   [@inline_let] let bBits = 64ul in
   [@inline_let] let bLen = 1ul in
@@ -132,7 +130,8 @@ let point_mul_g_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants 
     (to_const pt.g_pow2_64_w4.table_w4)
     (to_const pt.g_pow2_128_w4.table_w4)
     (to_const pt.g_pow2_192_w4.table_w4)
-    out
+    out;
+ admit()
 
 noextract
 val lemma_exp_four_fw_local {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: b:BD.lbignum U64 4{BD.bn_v b < S.order} ->
