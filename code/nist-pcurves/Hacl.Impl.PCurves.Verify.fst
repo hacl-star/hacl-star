@@ -180,11 +180,6 @@ val ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| bn_ops |} {| curve_cons
 
 let ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} m_q public_key signature_r signature_s =
   push_frame ();
-  assert (v (3ul *. cp.bn_limbs) == 3 * v cp.bn_limbs);
-  assert (v (4ul *. cp.bn_limbs) == 4 * v cp.bn_limbs);
-  assert (v (5ul *. cp.bn_limbs) == 5 * v cp.bn_limbs);
-  assert (v (6ul *. cp.bn_limbs) == 6 * v cp.bn_limbs);
-  assert (v (7ul *. cp.bn_limbs) == 7 * v cp.bn_limbs);
   let tmp = create (7ul *. cp.bn_limbs) (u64 0) in
   let pk  = sub tmp 0ul (3ul *. cp.bn_limbs) in
   let r_q = sub tmp (3ul *. cp.bn_limbs) cp.bn_limbs in

@@ -38,7 +38,7 @@ val point_double_1 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {|
     fmont_as_nat h1 t2 == t2_s /\ fmont_as_nat h1 t3 == t3_s /\
     fmont_as_nat h1 t4 == t4_s))
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 150"
 let point_double_1 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} t0 t1 t2 t3 t4 p =
   let x, y, z = getx p, gety p, getz p in
   f.fsqr t0 x;

@@ -20,7 +20,7 @@ let is_fodd (x:nat) : bool = x % 2 = 1
 
 (* We only consider a limb size of 64-bits. 
    On 32-bit platforms, 64-bit arithmetic is simulated by compiler. *)
-   
+
 inline_for_extraction
 class curve_params = {
   bits: pos;
@@ -35,8 +35,16 @@ class curve_params = {
   b_coeff: x:nat{x < prime};
   mont_mu: x:uint64{(1 + prime * v x) % pow2 64 == 0};
   mont_q_mu: x:uint64{(1 + order * v x) % pow2 64 == 0};
-  bn_limbs: x:size_t{v x > 0 /\ v x == (bytes + 7) / 8 /\ v x * 8 >= bytes /\
-                     1536 * v x <= max_size_t (* for precomp table *)}
+  bn_limbs: x:size_t{v x == (bytes + 7) / 8 /\
+  	    	     v x * 8 >= bytes /\
+		     v x > 0 /\
+		     v (2ul *. x) == 2 * v x /\
+		     v (3ul *. x) == 3 * v x /\
+		     v (4ul *. x) == 4 * v x /\
+		     v (5ul *. x) == 5 * v x /\
+		     v (6ul *. x) == 6 * v x /\
+		     v (7ul *. x) == 7 * v x /\
+		     1536 * v x <= max_size_t (* for precomp table *)};
   // also add co-factor?
 }
 

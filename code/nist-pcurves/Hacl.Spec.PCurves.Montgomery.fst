@@ -255,6 +255,7 @@ let fmont_sub_lemma a b =
 ///  Montgomery arithmetic for a scalar field
 
 let qmont_R_inv #c =
+  assert (v S.bn_limbs > 0);
   let d, _ = SBML.eea_pow2_odd (64 * v S.bn_limbs) S.order in
   d % S.order
 

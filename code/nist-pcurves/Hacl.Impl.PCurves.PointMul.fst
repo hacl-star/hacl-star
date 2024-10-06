@@ -25,7 +25,7 @@ module SL = Spec.PCurves.Lemmas
 
 module PP = Hacl.Impl.PCurves.PrecompTable
 
-#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+#set-options "--z3rlimit 90 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let table_inv_w4 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *. cp.bn_limbs) 16ul =
