@@ -76,7 +76,7 @@ make sure you pick the right publications.
 
 ```
 @inproceedings{zinzindohoue2017hacl,
-  title={HACL*: A verified modern cryptographic library},
+  title={{HACL*}: A verified modern cryptographic library},
   author={Zinzindohou{\'e}, Jean-Karim and Bhargavan, Karthikeyan and Protzenko, Jonathan and Beurdouche, Benjamin},
   booktitle={Proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security},
   pages={1789--1806},
