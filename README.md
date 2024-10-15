@@ -101,7 +101,7 @@ make sure you pick the right publications.
 
 ```
 @inproceedings{protzenko2019formally,
-  title={Formally verified cryptographic web applications in webassembly},
+  title={Formally verified cryptographic web applications in {WebAssembly}},
   author={Protzenko, Jonathan and Beurdouche, Benjamin and Merigoux, Denis and Bhargavan, Karthikeyan},
   booktitle={2019 IEEE Symposium on Security and Privacy (SP)},
   pages={1256--1274},
