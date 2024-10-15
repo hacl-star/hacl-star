@@ -64,7 +64,7 @@ make sure you pick the right publications.
 
 ```
 @inproceedings{polubelova2020haclxn,
-  title={Haclxn: Verified generic SIMD crypto (for all your favourite platforms)},
+  title={{HACLxN}: Verified generic {SIMD} crypto (for all your favourite platforms)},
   author={Polubelova, Marina and Bhargavan, Karthikeyan and Protzenko, Jonathan and Beurdouche, Benjamin and Fromherz, Aymeric and Kulatova, Natalia and Zanella-B{\'e}guelin, Santiago},
   booktitle={Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security},
   pages={899--918},
