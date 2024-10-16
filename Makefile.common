@@ -21,25 +21,15 @@ ifndef KRML_HOME
 KRML_HOME 	:= $(HACL_HOME)/../karamel
 endif
 
-ifndef FSTAR_HOME
-  FSTAR_EXE=$(shell which fstar.exe)
-  ifeq ($(FSTAR_EXE),)
-    # F* not found in PATH, assuming an Everest source tree
-    FSTAR_HOME := $(HACL_HOME)/../FStar
-  else
-    # F* found in PATH, assuming directory name ends with /bin
-    FSTAR_HOME := $(dir $(FSTAR_EXE))/..
-  endif
-endif
-
-FSTAR_EXE := $(FSTAR_HOME)/bin/fstar.exe
+include locate_fstar.mk
 
 # Check that the relevant homes and executables at least exist.
 mustexist =						\
   $(if $(wildcard $(value $(strip $1))),,		\
     $(error $1 ($(value $(strip $1))) does not exist))
 
-$(call mustexist, FSTAR_HOME)
+# $(call mustexist, FSTAR_HOME)
+# ^ No longer needed, we just need the .exe
 $(call mustexist, FSTAR_EXE)
 $(call mustexist, KRML_HOME)
 
@@ -67,7 +57,6 @@ sanitize_path=$(call maybe_cygpath,$(realpath $(1)))
 
 HACL_HOME := $(call sanitize_path,$(HACL_HOME))
 KRML_HOME := $(call sanitize_path,$(KRML_HOME))
-FSTAR_HOME := $(call sanitize_path,$(FSTAR_HOME))
 FSTAR_ULIB := $(call sanitize_path,$(FSTAR_ULIB))
 VALE_HOME := $(call sanitize_path,$(VALE_HOME))
 
