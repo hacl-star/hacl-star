@@ -252,8 +252,22 @@ val bn_mod_ctx:
 
 let bn_mod_ctx #t len bn_mod_slow_precomp k a res =
   let open LowStar.BufferOps in
-  let k1 = !*k in
-  bn_mod_slow_precomp k1.MA.n k1.MA.mu k1.MA.r2 a res
+  // HACL-RS: we cannot have an intermediary value that dereferences k because k
+  // once compiled to Rust does not have the Copy trait (it contains a pointer).
+  // The uu__ is a hack that indicates to krml that the dereference can be
+  // immediately inlined at its use-site below.
+  // Of course, our lives would be easier if we could simply write `let n =
+  // (!*k).n` but sadly, that's not a thing.
+  // In some rare cases, krml can figure out that uu__ can be inlined at *every*
+  // use-site, but that's not the case here for some reason, so we need one
+  // definition of uu__ per use.
+  let uu__ = !*k in
+  let n = uu__.n in
+  let uu__ = !*k in
+  let mu = uu__.mu in
+  let uu__ = !*k in
+  let r2 = uu__.r2 in
+  bn_mod_slow_precomp n mu r2 a res
 
 
 inline_for_extraction noextract
@@ -288,8 +302,14 @@ val mk_bn_mod_exp_ctx:
 
 let mk_bn_mod_exp_ctx #t len bn_mod_exp_precomp k a bBits b res =
   let open LowStar.BufferOps in
-  let k1 = !*k in
-  bn_mod_exp_precomp k1.MA.n k1.MA.mu k1.MA.r2 a bBits b res
+  // See long comment in SafeAPI.fst
+  let uu__ = !*k in
+  let n = uu__.n in
+  let uu__ = !*k in
+  let mu = uu__.mu in
+  let uu__ = !*k in
+  let r2 = uu__.r2 in
+  bn_mod_exp_precomp n mu r2 a bBits b res
 
 
 inline_for_extraction noextract
@@ -320,5 +340,11 @@ val mk_bn_mod_inv_prime_ctx:
 
 let mk_bn_mod_inv_prime_ctx #t len bn_mod_inv_precomp k a res =
   let open LowStar.BufferOps in
-  let k1 = !*k in
-  bn_mod_inv_precomp k1.MA.n k1.MA.mu k1.MA.r2 a res
+  // See long comment in SafeAPI.fst
+  let uu__ = !*k in
+  let n = uu__.n in
+  let uu__ = !*k in
+  let mu = uu__.mu in
+  let uu__ = !*k in
+  let r2 = uu__.r2 in
+  bn_mod_inv_precomp n mu r2 a res
