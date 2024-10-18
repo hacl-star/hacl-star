@@ -114,7 +114,7 @@ let t_proof (#a:Type0) (c:va_code) (mods:mods_t) (wp:quickProc_wp a) : Type =
     (ensures va_t_ensure c mods s0 k)
 
 // Code that returns a ghost value of type a
-[@va_qattr]
+[@@va_qattr; erasable]
 noeq type quickCode (a:Type0) : va_code -> Type =
 | QProc:
     c:va_code ->

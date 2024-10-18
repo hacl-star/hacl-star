@@ -2,6 +2,7 @@ module Vale.PPC64LE.QuickCodes
 // Optimized weakest precondition generation for 'quick' procedures
 open FStar.Mul
 open FStar.Range
+open FStar.Ghost { erased }
 open Vale.Def.Prop_s
 open Vale.Arch.HeapImpl
 open Vale.PPC64LE.Machine_s
@@ -11,22 +12,25 @@ open Vale.PPC64LE.State
 open Vale.PPC64LE.Decls
 open Vale.PPC64LE.QuickCode
 
+let erange = erased range
+
 unfold let code = va_code
 unfold let codes = va_codes
 unfold let fuel = va_fuel
 unfold let eval = eval_code
 
 [@@va_qattr; "opaque_to_smt"]
-let labeled_wrap (r:range) (msg:string) (p:Type0) : GTot Type0 = labeled r msg p
+noextract
+let labeled_wrap (r:erange) (msg:string) (p:Type0) : GTot Type0 = labeled r msg p
 
 // REVIEW: when used inside a function definition, 'labeled' can show up in an SMT query
 // as an uninterpreted function.  Make a wrapper around labeled that is interpreted:
 [@@va_qattr; "opaque_to_smt"]
-let label (r:range) (msg:string) (p:Type0) : Ghost Type (requires True) (ensures fun q -> q <==> p) =
+let label (r:erange) (msg:string) (p:Type0) : Ghost Type (requires True) (ensures fun q -> q <==> p) =
   assert_norm (labeled_wrap r msg p <==> p);
   labeled_wrap r msg p
 
-val lemma_label_bool (r:range) (msg:string) (b:bool) : Lemma
+val lemma_label_bool (r:erange) (msg:string) (b:bool) : Lemma
   (requires label r msg b)
   (ensures b)
   [SMTPat (label r msg b)]
@@ -35,48 +39,49 @@ val lemma_label_bool (r:range) (msg:string) (b:bool) : Lemma
 let precedes_wrap (#a:Type) (x y:a) : GTot Type0 = precedes x y
 
 [@@va_qattr]
-let rec mods_contains1 (allowed:mods_t) (found:mod_t) : bool =
+let rec mods_contains1 (allowed:mods_t) (found:mod_t) : GTot bool =
   match allowed with
   | [] -> mod_eq Mod_None found
   | h::t -> mod_eq h found || mods_contains1 t found
 
 [@@va_qattr]
-let rec mods_contains (allowed:mods_t) (found:mods_t) : bool =
+let rec mods_contains (allowed:mods_t) (found:mods_t) : GTot bool =
   match found with
   | [] -> true
   | h::t -> mods_contains1 allowed h && mods_contains allowed t
 
 [@@va_qattr]
-let if_code (b:bool) (c1:code) (c2:code) : code = if b then c1 else c2
+let if_code (b:bool) (c1:code) (c2:code) : GTot code = if b then c1 else c2
 
 open FStar.Monotonic.Pure
 
+[@@erasable]
 noeq type quickCodes (a:Type0) : codes -> Type =
 | QEmpty: a -> quickCodes a []
-| QSeq: #b:Type -> #c:code -> #cs:codes -> r:range -> msg:string ->
+| QSeq: #b:Type -> #c:code -> #cs:codes -> r:erange -> msg:string ->
     quickCode b c -> quickCodes a cs -> quickCodes a (c::cs)
-| QBind: #b:Type -> #c:code -> #cs:codes -> r:range -> msg:string ->
+| QBind: #b:Type -> #c:code -> #cs:codes -> r:erange -> msg:string ->
     quickCode b c -> (va_state -> b -> GTot (quickCodes a cs)) -> quickCodes a (c::cs)
 | QGetState: #cs:codes -> (va_state -> GTot (quickCodes a cs)) -> quickCodes a ((Block [])::cs)
-| QPURE: #cs:codes -> r:range -> msg:string -> pre:((unit -> GTot Type0) -> GTot Type0){is_monotonic pre} ->
+| QPURE: #cs:codes -> r:erange -> msg:string -> pre:((unit -> GTot Type0) -> GTot Type0){is_monotonic pre} ->
     (unit -> PURE unit (as_pure_wp pre)) -> quickCodes a cs -> quickCodes a cs
-//| QBindPURE: #cs:codes -> b:Type -> r:range -> msg:string -> pre:((b -> GTot Type0) -> GTot Type0) ->
+//| QBindPURE: #cs:codes -> b:Type -> r:erange -> msg:string -> pre:((b -> GTot Type0) -> GTot Type0) ->
 //    (unit -> PURE b pre) -> (va_state -> b -> GTot (quickCodes a cs)) -> quickCodes a ((Block [])::cs)
-| QLemma: #cs:codes -> r:range -> msg:string -> pre:Type0 -> post:(squash pre -> Type0) ->
+| QLemma: #cs:codes -> r:erange -> msg:string -> pre:Type0 -> post:(squash pre -> Type0) ->
     (unit -> Lemma (requires pre) (ensures post ())) -> quickCodes a cs -> quickCodes a cs
-| QGhost: #cs:codes -> b:Type -> r:range -> msg:string -> pre:Type0 -> post:(b -> Type0) ->
+| QGhost: #cs:codes -> b:Type -> r:erange -> msg:string -> pre:Type0 -> post:(b -> Type0) ->
     (unit -> Ghost b (requires pre) (ensures post)) -> (b -> GTot (quickCodes a cs)) -> quickCodes a ((Block [])::cs)
-| QAssertBy: #cs:codes -> r:range -> msg:string -> p:Type0 ->
+| QAssertBy: #cs:codes -> r:erange -> msg:string -> p:Type0 ->
     quickCodes unit [] -> quickCodes a cs -> quickCodes a cs
 
-[@@va_qattr] unfold let va_QBind (#a:Type0) (#b:Type) (#c:code) (#cs:codes) (r:range) (msg:string) (qc:quickCode b c) (qcs:va_state -> b -> GTot (quickCodes a cs)) : quickCodes a (c::cs) = QBind r msg qc qcs
+[@@va_qattr] unfold let va_QBind (#a:Type0) (#b:Type) (#c:code) (#cs:codes) (r:erange) (msg:string) (qc:quickCode b c) (qcs:va_state -> b -> GTot (quickCodes a cs)) : quickCodes a (c::cs) = QBind r msg qc qcs
 [@@va_qattr] unfold let va_QEmpty (#a:Type0) (v:a) : quickCodes a [] = QEmpty v
-[@@va_qattr] unfold let va_QLemma (#a:Type0) (#cs:codes) (r:range) (msg:string) (pre:Type0) (post:(squash pre -> Type0)) (l:unit -> Lemma (requires pre) (ensures post ())) (qcs:quickCodes a cs) : quickCodes a cs = QLemma r msg pre post l qcs
-[@@va_qattr] unfold let va_QSeq (#a:Type0) (#b:Type) (#c:code) (#cs:codes) (r:range) (msg:string) (qc:quickCode b c) (qcs:quickCodes a cs) : quickCodes a (c::cs) = QSeq r msg qc qcs
+[@@va_qattr] unfold let va_QLemma (#a:Type0) (#cs:codes) (r:erange) (msg:string) (pre:Type0) (post:(squash pre -> Type0)) (l:unit -> Lemma (requires pre) (ensures post ())) (qcs:quickCodes a cs) : quickCodes a cs = QLemma r msg pre post l qcs
+[@@va_qattr] unfold let va_QSeq (#a:Type0) (#b:Type) (#c:code) (#cs:codes) (r:erange) (msg:string) (qc:quickCode b c) (qcs:quickCodes a cs) : quickCodes a (c::cs) = QSeq r msg qc qcs
 
 [@@va_qattr]
 let va_qPURE
-    (#cs:codes) (#pre:((unit -> GTot Type0) -> GTot Type0){is_monotonic pre}) (#a:Type0) (r:range) (msg:string)
+    (#cs:codes) (#pre:((unit -> GTot Type0) -> GTot Type0){is_monotonic pre}) (#a:Type0) (r:erange) (msg:string)
     ($l:unit -> PURE unit (intro_pure_wp_monotonicity pre; pre)) (qcs:quickCodes a cs)
   : quickCodes a cs =
   QPURE r msg pre l qcs
@@ -85,7 +90,7 @@ let va_qPURE
   (need to provide pre explicitly; as a result, no need to put $ on l)
 [@@va_qattr]
 let va_qBindPURE
-    (#a #b:Type0) (#cs:codes) (pre:(b -> GTot Type0) -> GTot Type0) (r:range) (msg:string)
+    (#a #b:Type0) (#cs:codes) (pre:(b -> GTot Type0) -> GTot Type0) (r:erange) (msg:string)
     (l:unit -> PURE b pre) (qcs:va_state -> b -> GTot (quickCodes a cs))
   : quickCodes a ((Block [])::cs) =
   QBindPURE b r msg pre l qcs
@@ -101,7 +106,7 @@ let wp_Bind_t (a:Type0) = va_state -> a -> Type0
 let k_AssertBy (p:Type0) (_:va_state) () = p
 
 [@@va_qattr]
-let va_range1 = mk_range "" 0 0 0 0
+let va_range1 : erange = mk_range "" 0 0 0 0
 
 val empty_list_is_small (#a:Type) (x:list a) : Lemma
   ([] #a == x \/ [] #a << x)
@@ -203,6 +208,7 @@ val qInlineIf_proof (#a:Type) (#c1:code) (#c2:code) (b:bool) (qc1:quickCode a c1
 let va_qInlineIf (#a:Type) (#c1:code) (#c2:code) (mods:mods_t) (b:bool) (qc1:quickCode a c1) (qc2:quickCode a c2) : quickCode a (if_code b c1 c2) =
   QProc (if_code b c1 c2) mods (wp_InlineIf b qc1 qc2 mods) (qInlineIf_proof b qc1 qc2 mods)
 
+[@@erasable]
 noeq type cmp =
 | Cmp_eq : o1:cmp_opr -> o2:cmp_opr -> cmp
 | Cmp_ne : o1:cmp_opr -> o2:cmp_opr -> cmp
@@ -212,7 +218,7 @@ noeq type cmp =
 | Cmp_gt : o1:cmp_opr -> o2:cmp_opr -> cmp
 
 [@@va_qattr]
-let cmp_to_ocmp (c:cmp) : ocmp =
+let cmp_to_ocmp (c:cmp) : GTot ocmp =
   match c with
   | Cmp_eq o1 o2 -> va_cmp_eq o1 o2
   | Cmp_ne o1 o2 -> va_cmp_ne o1 o2
@@ -311,14 +317,14 @@ let tAssertLemma (p:Type0) = unit -> Lemma (requires p) (ensures p)
 val qAssertLemma (p:Type0) : tAssertLemma p
 
 [@@va_qattr]
-let va_qAssert (#a:Type) (#cs:codes) (r:range) (msg:string) (e:Type0) (qcs:quickCodes a cs) : quickCodes a cs =
+let va_qAssert (#a:Type) (#cs:codes) (r:erange) (msg:string) (e:Type0) (qcs:quickCodes a cs) : quickCodes a cs =
   QLemma r msg e (fun () -> e) (qAssertLemma e) qcs
 
 let tAssumeLemma (p:Type0) = unit -> Lemma (requires True) (ensures p)
 val qAssumeLemma (p:Type0) : tAssumeLemma p
 
 [@@va_qattr]
-let va_qAssume (#a:Type) (#cs:codes) (r:range) (msg:string) (e:Type0) (qcs:quickCodes a cs) : quickCodes a cs =
+let va_qAssume (#a:Type) (#cs:codes) (r:erange) (msg:string) (e:Type0) (qcs:quickCodes a cs) : quickCodes a cs =
   QLemma r msg True (fun () -> e) (qAssumeLemma e) qcs
 
 let tAssertSquashLemma (p:Type0) = unit -> Ghost (squash p) (requires p) (ensures fun () -> p)
@@ -326,7 +332,7 @@ val qAssertSquashLemma (p:Type0) : tAssertSquashLemma p
 
 [@@va_qattr]
 let va_qAssertSquash
-    (#a:Type) (#cs:codes) (r:range) (msg:string) (e:Type0) (qcs:squash e -> GTot (quickCodes a cs))
+    (#a:Type) (#cs:codes) (r:erange) (msg:string) (e:Type0) (qcs:squash e -> GTot (quickCodes a cs))
   : quickCodes a ((Block [])::cs) =
   QGhost (squash e) r msg e (fun () -> e) (qAssertSquashLemma e) qcs
 
@@ -334,12 +340,12 @@ let va_qAssertSquash
 //  unit -> Lemma (requires t_require s0 /\ wp [] qcs mods (fun _ _ -> p) s0) (ensures p)
 //val qAssertByLemma (#a:Type) (p:Type0) (qcs:quickCodes a []) (mods:mods_t) (s0:state) : tAssertByLemma p qcs mods s0
 //
-//[@@va_qattr]
-//let va_qAssertBy (#a:Type) (#cs:codes) (mods:mods_t) (r:range) (msg:string) (p:Type0) (qcsBy:quickCodes unit []) (s0:state) (qcsTail:quickCodes a cs) : quickCodes a cs =
+//[@va_qattr]
+//let va_qAssertBy (#a:Type) (#cs:codes) (mods:mods_t) (r:erange) (msg:string) (p:Type0) (qcsBy:quickCodes unit []) (s0:state) (qcsTail:quickCodes a cs) : quickCodes a cs =
 //  QLemma r msg (t_require s0 /\ wp [] qcsBy mods (fun _ _ -> p) s0) (fun () -> p) (qAssertByLemma p qcsBy mods s0) qcsTail
 
 [@@va_qattr]
-let va_qAssertBy (#a:Type) (#cs:codes) (r:range) (msg:string) (p:Type0) (qcsBy:quickCodes unit []) (qcsTail:quickCodes a cs) : quickCodes a cs =
+let va_qAssertBy (#a:Type) (#cs:codes) (r:erange) (msg:string) (p:Type0) (qcsBy:quickCodes unit []) (qcsTail:quickCodes a cs) : quickCodes a cs =
   QAssertBy r msg p qcsBy qcsTail
 
 ///// Code
@@ -410,7 +416,7 @@ unfold let wp_sound_code_post (#a:Type0) (#c:code) (qc:quickCode a c) (s0:va_sta
   state_inv sN /\
   k s0 sN gN
 
-unfold let normal_steps : list string =
+unfold let normal_steps : erased (list string) =
   [
     `%Mkstate?.ok;
     `%Mkstate?.regs;
