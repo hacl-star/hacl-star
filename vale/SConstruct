@@ -1019,7 +1019,7 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
     x_cmx = ml_out_file(x_ml, '.cmx')
     x_obj = ml_out_file(x_ml, '.o')
     cmx = ocaml_env.Command([x_cmx, x_obj], x_ml,
-      f'ocamlfind ocamlopt -c -package fstar.lib -o {x_cmx} {x_ml} -I obj/ml_out {ignore_warnings_str}')
+      f'{fstar_exe} --ocamlopt -c -o {x_cmx} {x_ml} -I obj/ml_out {ignore_warnings_str}')
     cmxs.append(cmx[0])
     objs.append(x_obj)
     Depends(main_exe, cmx[0])
@@ -1038,7 +1038,7 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   add_cmx(main_ml)
   cmxs_string = " ".join([str(cmx) for cmx in cmxs])
   ocaml_env.Command(main_exe, cmxs + objs,
-    f'ocamlfind ocamlopt -linkpkg -package fstar.lib {cmxs_string} -o {main_exe}')
+    f'{fstar_exe} --ocamlopt {cmxs_string} -o {main_exe}')
   # Run executable to generate assembly files:
   output_target_base = 'obj/' + output_base_name
   def generate_asm(suffix, assembler, os):
