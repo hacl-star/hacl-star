@@ -16,12 +16,12 @@ unfold let codes = va_codes
 unfold let fuel = va_fuel
 unfold let eval = eval_code
 
-[@va_qattr "opaque_to_smt"]
+[@@va_qattr; "opaque_to_smt"]
 let labeled_wrap (r:range) (msg:string) (p:Type0) : GTot Type0 = labeled r msg p
 
 // REVIEW: when used inside a function definition, 'labeled' can show up in an SMT query
 // as an uninterpreted function.  Make a wrapper around labeled that is interpreted:
-[@va_qattr "opaque_to_smt"]
+[@@va_qattr; "opaque_to_smt"]
 let label (r:range) (msg:string) (p:Type0) : Ghost Type (requires True) (ensures fun q -> q <==> p) =
   assert_norm (labeled_wrap r msg p <==> p);
   labeled_wrap r msg p
@@ -34,19 +34,19 @@ val lemma_label_bool (r:range) (msg:string) (b:bool) : Lemma
 // wrap "precedes" and LexCons to avoid issues with label (precedes ...)
 let precedes_wrap (#a:Type) (x y:a) : GTot Type0 = precedes x y
 
-[@va_qattr]
+[@@va_qattr]
 let rec mods_contains1 (allowed:mods_t) (found:mod_t) : bool =
   match allowed with
   | [] -> mod_eq Mod_None found
   | h::t -> mod_eq h found || mods_contains1 t found
 
-[@va_qattr]
+[@@va_qattr]
 let rec mods_contains (allowed:mods_t) (found:mods_t) : bool =
   match found with
   | [] -> true
   | h::t -> mods_contains1 allowed h && mods_contains allowed t
 
-[@va_qattr]
+[@@va_qattr]
 let if_code (b:bool) (c1:code) (c2:code) : code = if b then c1 else c2
 
 open FStar.Monotonic.Pure
@@ -69,12 +69,12 @@ noeq type quickCodes (a:Type0) : codes -> Type =
 | QAssertBy: #cs:codes -> r:range -> msg:string -> p:Type0 ->
     quickCodes unit [] -> quickCodes a cs -> quickCodes a cs
 
-[@va_qattr] unfold let va_QBind (#a:Type0) (#b:Type) (#c:code) (#cs:codes) (r:range) (msg:string) (qc:quickCode b c) (qcs:va_state -> b -> GTot (quickCodes a cs)) : quickCodes a (c::cs) = QBind r msg qc qcs
-[@va_qattr] unfold let va_QEmpty (#a:Type0) (v:a) : quickCodes a [] = QEmpty v
-[@va_qattr] unfold let va_QLemma (#a:Type0) (#cs:codes) (r:range) (msg:string) (pre:Type0) (post:(squash pre -> Type0)) (l:unit -> Lemma (requires pre) (ensures post ())) (qcs:quickCodes a cs) : quickCodes a cs = QLemma r msg pre post l qcs
-[@va_qattr] unfold let va_QSeq (#a:Type0) (#b:Type) (#c:code) (#cs:codes) (r:range) (msg:string) (qc:quickCode b c) (qcs:quickCodes a cs) : quickCodes a (c::cs) = QSeq r msg qc qcs
+[@@va_qattr] unfold let va_QBind (#a:Type0) (#b:Type) (#c:code) (#cs:codes) (r:range) (msg:string) (qc:quickCode b c) (qcs:va_state -> b -> GTot (quickCodes a cs)) : quickCodes a (c::cs) = QBind r msg qc qcs
+[@@va_qattr] unfold let va_QEmpty (#a:Type0) (v:a) : quickCodes a [] = QEmpty v
+[@@va_qattr] unfold let va_QLemma (#a:Type0) (#cs:codes) (r:range) (msg:string) (pre:Type0) (post:(squash pre -> Type0)) (l:unit -> Lemma (requires pre) (ensures post ())) (qcs:quickCodes a cs) : quickCodes a cs = QLemma r msg pre post l qcs
+[@@va_qattr] unfold let va_QSeq (#a:Type0) (#b:Type) (#c:code) (#cs:codes) (r:range) (msg:string) (qc:quickCode b c) (qcs:quickCodes a cs) : quickCodes a (c::cs) = QSeq r msg qc qcs
 
-[@va_qattr]
+[@@va_qattr]
 let va_qPURE
     (#cs:codes) (#pre:((unit -> GTot Type0) -> GTot Type0){is_monotonic pre}) (#a:Type0) (r:range) (msg:string)
     ($l:unit -> PURE unit (intro_pure_wp_monotonicity pre; pre)) (qcs:quickCodes a cs)
@@ -83,7 +83,7 @@ let va_qPURE
 
 (* REVIEW: this might be useful, but inference of pre doesn't work as well as for va_qPURE
   (need to provide pre explicitly; as a result, no need to put $ on l)
-[@va_qattr]
+[@@va_qattr]
 let va_qBindPURE
     (#a #b:Type0) (#cs:codes) (pre:(b -> GTot Type0) -> GTot Type0) (r:range) (msg:string)
     (l:unit -> PURE b pre) (qcs:va_state -> b -> GTot (quickCodes a cs))
@@ -91,7 +91,7 @@ let va_qBindPURE
   QBindPURE b r msg pre l qcs
 *)
 
-[@va_qattr]
+[@@va_qattr]
 let wp_proc (#a:Type0) (c:code) (qc:quickCode a c) (s0:va_state) (k:va_state -> a -> Type0) : Type0 =
   match qc with
   | QProc _ _ wp _ -> wp s0 k
@@ -100,14 +100,14 @@ let wp_Seq_t (a:Type0) = va_state -> a -> Type0
 let wp_Bind_t (a:Type0) = va_state -> a -> Type0
 let k_AssertBy (p:Type0) (_:va_state) () = p
 
-[@va_qattr]
+[@@va_qattr]
 let va_range1 = mk_range "" 0 0 0 0
 
 val empty_list_is_small (#a:Type) (x:list a) : Lemma
   ([] #a == x \/ [] #a << x)
 
 #push-options "--z3rlimit 20"
-[@va_qattr]
+[@@va_qattr]
 let rec wp (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (k:va_state -> a -> Type0) (s0:va_state) :
   Tot Type0 (decreases %[cs; 0; qcs])
   =
@@ -169,7 +169,7 @@ val wp_sound (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (k:va_sta
 
 unfold let block = va_Block
 
-[@va_qattr]
+[@@va_qattr]
 let wp_block (#a:Type) (#cs:codes) (qcs:va_state -> GTot (quickCodes a cs)) (mods:mods_t) (s0:va_state) (k:va_state -> a -> Type0) : Type0 =
   wp cs (qcs s0) mods k s0
 
@@ -180,13 +180,13 @@ val qblock_proof (#a:Type) (#cs:codes) (qcs:va_state -> GTot (quickCodes a cs)) 
     eval_code (block cs) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ state_inv sM /\ k sM g
   )
 
-[@"opaque_to_smt" va_qattr]
+[@@"opaque_to_smt"; va_qattr]
 let qblock (#a:Type) (#cs:codes) (mods:mods_t) (qcs:va_state -> GTot (quickCodes a cs)) : quickCode a (block cs) =
   QProc (block cs) mods (wp_block qcs mods) (qblock_proof qcs mods)
 
 ///// If, InlineIf
 
-[@va_qattr]
+[@@va_qattr]
 let wp_InlineIf (#a:Type) (#c1:code) (#c2:code) (b:bool) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:va_state) (k:va_state -> a -> Type0) : Type0 =
   // REVIEW: this duplicates k
   (    b ==> mods_contains mods qc1.mods /\ QProc?.wp qc1 s0 k) /\
@@ -199,7 +199,7 @@ val qInlineIf_proof (#a:Type) (#c1:code) (#c2:code) (b:bool) (qc1:quickCode a c1
     eval_code (if_code b c1 c2) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ state_inv sM /\ k sM g
   )
 
-[@"opaque_to_smt" va_qattr]
+[@@"opaque_to_smt"; va_qattr]
 let va_qInlineIf (#a:Type) (#c1:code) (#c2:code) (mods:mods_t) (b:bool) (qc1:quickCode a c1) (qc2:quickCode a c2) : quickCode a (if_code b c1 c2) =
   QProc (if_code b c1 c2) mods (wp_InlineIf b qc1 qc2 mods) (qInlineIf_proof b qc1 qc2 mods)
 
@@ -211,7 +211,7 @@ noeq type cmp =
 | Cmp_lt : o1:cmp_opr -> o2:cmp_opr -> cmp
 | Cmp_gt : o1:cmp_opr -> o2:cmp_opr -> cmp
 
-[@va_qattr]
+[@@va_qattr]
 let cmp_to_ocmp (c:cmp) : ocmp =
   match c with
   | Cmp_eq o1 o2 -> va_cmp_eq o1 o2
@@ -221,7 +221,7 @@ let cmp_to_ocmp (c:cmp) : ocmp =
   | Cmp_lt o1 o2 -> va_cmp_lt o1 o2
   | Cmp_gt o1 o2 -> va_cmp_gt o1 o2
 
-[@va_qattr]
+[@@va_qattr]
 let valid_cmp (c:cmp) (s:va_state) : Type0 =
   match c with
   | Cmp_eq o1 _ -> valid_first_cmp_opr o1
@@ -231,7 +231,7 @@ let valid_cmp (c:cmp) (s:va_state) : Type0 =
   | Cmp_lt o1 _ -> valid_first_cmp_opr o1
   | Cmp_gt o1 _ -> valid_first_cmp_opr o1
 
-[@va_qattr]
+[@@va_qattr]
 let eval_cmp (s:va_state) (c:cmp) : GTot bool =
   match c with
   | Cmp_eq o1 o2 -> va_eval_cmp_opr s o1 =  va_eval_cmp_opr s o2
@@ -241,7 +241,7 @@ let eval_cmp (s:va_state) (c:cmp) : GTot bool =
   | Cmp_lt o1 o2 -> va_eval_cmp_opr s o1 <  va_eval_cmp_opr s o2
   | Cmp_gt o1 o2 -> va_eval_cmp_opr s o1 >  va_eval_cmp_opr s o2
 
-[@va_qattr]
+[@@va_qattr]
 let wp_If (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:va_state) (k:va_state -> a -> Type0) : Type0 =
   // REVIEW: this duplicates k
   valid_cmp b s0 /\ mods_contains1 mods Mod_cr0 /\
@@ -256,20 +256,20 @@ val qIf_proof (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:
     eval_code (IfElse (cmp_to_ocmp b) c1 c2) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ state_inv sM /\ k sM g
   )
 
-[@"opaque_to_smt" va_qattr]
+[@@"opaque_to_smt"; va_qattr]
 let va_qIf (#a:Type) (#c1:code) (#c2:code) (mods:mods_t) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) : quickCode a (IfElse (cmp_to_ocmp b) c1 c2) =
   QProc (IfElse (cmp_to_ocmp b) c1 c2) mods (wp_If b qc1 qc2 mods) (qIf_proof b qc1 qc2 mods)
 
 ///// While
 
-[@va_qattr]
+[@@va_qattr]
 let wp_While_inv
     (#a #d:Type) (#c:code) (qc:a -> quickCode a c) (mods:mods_t) (inv:va_state -> a -> Type0)
     (dec:va_state -> a -> d) (s1:va_state) (g1:a) (s2:va_state) (g2:a)
     : Type0 =
   s2.ok /\ inv s2 g2 /\ mods_contains mods (qc g2).mods /\ dec s2 g2 << dec s1 g1
 
-[@va_qattr]
+[@@va_qattr]
 let wp_While_body
     (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:va_state -> a -> Type0)
     (dec:va_state -> a -> d) (g1:a) (s1:va_state) (k:va_state -> a -> Type0)
@@ -279,7 +279,7 @@ let wp_While_body
     (     eval_cmp s1 b  ==> mods_contains mods (qc g1).mods /\ QProc?.wp (qc g1) s1' (wp_While_inv qc mods inv dec s1 g1)) /\
     (not (eval_cmp s1 b) ==> k s1' g1))
 
-[@va_qattr]
+[@@va_qattr]
 let wp_While
     (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:va_state -> a -> Type0)
     (dec:va_state -> a -> d) (g0:a) (s0:va_state) (k:va_state -> a -> Type0)
@@ -297,7 +297,7 @@ val qWhile_proof
     eval_code (While (cmp_to_ocmp b) c) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ state_inv sM /\ k sM g
   )
 
-[@"opaque_to_smt" va_qattr]
+[@@"opaque_to_smt"; va_qattr]
 let va_qWhile
     (#a #d:Type) (#c:code) (mods:mods_t) (b:cmp) (qc:a -> quickCode a c) (inv:va_state -> a -> Type0)
     (dec:va_state -> a -> d) (g0:a)
@@ -310,21 +310,21 @@ let va_qWhile
 let tAssertLemma (p:Type0) = unit -> Lemma (requires p) (ensures p)
 val qAssertLemma (p:Type0) : tAssertLemma p
 
-[@va_qattr]
+[@@va_qattr]
 let va_qAssert (#a:Type) (#cs:codes) (r:range) (msg:string) (e:Type0) (qcs:quickCodes a cs) : quickCodes a cs =
   QLemma r msg e (fun () -> e) (qAssertLemma e) qcs
 
 let tAssumeLemma (p:Type0) = unit -> Lemma (requires True) (ensures p)
 val qAssumeLemma (p:Type0) : tAssumeLemma p
 
-[@va_qattr]
+[@@va_qattr]
 let va_qAssume (#a:Type) (#cs:codes) (r:range) (msg:string) (e:Type0) (qcs:quickCodes a cs) : quickCodes a cs =
   QLemma r msg True (fun () -> e) (qAssumeLemma e) qcs
 
 let tAssertSquashLemma (p:Type0) = unit -> Ghost (squash p) (requires p) (ensures fun () -> p)
 val qAssertSquashLemma (p:Type0) : tAssertSquashLemma p
 
-[@va_qattr]
+[@@va_qattr]
 let va_qAssertSquash
     (#a:Type) (#cs:codes) (r:range) (msg:string) (e:Type0) (qcs:squash e -> GTot (quickCodes a cs))
   : quickCodes a ((Block [])::cs) =
@@ -334,11 +334,11 @@ let va_qAssertSquash
 //  unit -> Lemma (requires t_require s0 /\ wp [] qcs mods (fun _ _ -> p) s0) (ensures p)
 //val qAssertByLemma (#a:Type) (p:Type0) (qcs:quickCodes a []) (mods:mods_t) (s0:state) : tAssertByLemma p qcs mods s0
 //
-//[@va_qattr]
+//[@@va_qattr]
 //let va_qAssertBy (#a:Type) (#cs:codes) (mods:mods_t) (r:range) (msg:string) (p:Type0) (qcsBy:quickCodes unit []) (s0:state) (qcsTail:quickCodes a cs) : quickCodes a cs =
 //  QLemma r msg (t_require s0 /\ wp [] qcsBy mods (fun _ _ -> p) s0) (fun () -> p) (qAssertByLemma p qcsBy mods s0) qcsTail
 
-[@va_qattr]
+[@@va_qattr]
 let va_qAssertBy (#a:Type) (#cs:codes) (r:range) (msg:string) (p:Type0) (qcsBy:quickCodes unit []) (qcsTail:quickCodes a cs) : quickCodes a cs =
   QAssertBy r msg p qcsBy qcsTail
 
@@ -349,7 +349,7 @@ val wp_sound_code (#a:Type0) (c:code) (qc:quickCode a c) (k:va_state -> a -> Typ
   (requires t_require s0 /\ QProc?.wp qc s0 k)
   (ensures fun (sN, fN, gN) -> eval_code c s0 fN sN /\ update_state_mods qc.mods sN s0 == sN /\ state_inv sN /\ k sN gN)
 
-[@va_qattr]
+[@@va_qattr]
 let state_match (s0:va_state) (s1:va_state) : Type0 =
   s0.ok == s1.ok /\
   Regs.equal s0.regs s1.regs /\
@@ -364,7 +364,7 @@ val lemma_state_match (s0:va_state) (s1:va_state) : Lemma
   (requires state_match s0 s1)
   (ensures state_eq s0 s1)
 
-[@va_qattr]
+[@@va_qattr]
 let va_state_match (s0:va_state) (s1:va_state) : Pure Type0
   (requires True)
   (ensures fun b -> b ==> state_eq s0 s1)
@@ -372,7 +372,7 @@ let va_state_match (s0:va_state) (s1:va_state) : Pure Type0
   FStar.Classical.move_requires (lemma_state_match s0) s1;
   state_match s0 s1
 
-[@va_qattr]
+[@@va_qattr]
 unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:va_state) (k:(s0':va_state{s0 == s0'}) -> va_state -> a -> Type0) : Type0 =
   forall
       (ok:bool)
