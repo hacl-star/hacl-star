@@ -188,6 +188,9 @@ else ifeq ($(shell uname -s),FreeBSD)
     SED := sed -i ''
     TIME := /usr/bin/time
 else
+  ifeq ($(shell which time),)
+    $(error 'time' not found, try apt-get install time)
+  endif
   SED := sed -i
   TIME := $(shell which time) -q -f '%E'
 endif
