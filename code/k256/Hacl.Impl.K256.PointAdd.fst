@@ -46,7 +46,7 @@ let point_add_xy_pairs x1 y1 x2 y2 xx yy tmp xy_pairs =
   let h1 = ST.get () in
   assert (felem_fits5 (as_felem5 h1 xy_pairs) (2,2,2,2,4));
   assert (felem_fits5 (as_felem5 h1 tmp) (2,2,2,2,4));
-  fmul xy_pairs xy_pairs tmp;
+  fmul_a xy_pairs xy_pairs tmp;
   let h2 = ST.get () in
   assert (felem_fits5 (as_felem5 h2 xy_pairs) (1,1,1,1,2));
   BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h2 xx) (as_felem5 h2 yy);
@@ -54,7 +54,7 @@ let point_add_xy_pairs x1 y1 x2 y2 xx yy tmp xy_pairs =
   let h3 = ST.get () in
   assert (felem_fits5 (as_felem5 h3 tmp) (2,2,2,2,4));
 
-  fsub xy_pairs xy_pairs tmp (u64 4);
+  fsub_sa1 xy_pairs xy_pairs tmp (u64 4);
   let h4 = ST.get () in
   BL.fsub5_lemma (1,1,1,1,2) (2,2,2,2,4) (as_felem5 h3 xy_pairs) (as_felem5 h3 tmp) (u64 4);
   assert (felem_fits5 (as_felem5 h4 xy_pairs) (9,9,9,9,10))
@@ -80,15 +80,15 @@ val ab_plus_cd (a b c d tmp:felem) : Stack unit
 
 let ab_plus_cd a b c d tmp =
   fmul tmp a b;
-  fmul c c d;
+  fmul_a c c d;
   let h1 = ST.get () in
   assert (inv_lazy_reduced2 h1 tmp);
   assert (inv_lazy_reduced2 h1 c);
   BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h1 tmp) (as_felem5 h1 c);
-  fadd c tmp c;
+  fadd_sa2 c tmp c;
   let h2 = ST.get () in
   assert (felem_fits5 (as_felem5 h2 c) (2,2,2,2,4));
-  fnormalize_weak c c;
+  fnormalize_weak_sa c c;
   BL.normalize_weak5_lemma (2,2,2,2,4) (as_felem5 h2 c)
 
 
@@ -112,15 +112,15 @@ val ab_minus_cd (a b c d tmp:felem) : Stack unit
 
 let ab_minus_cd a b c d tmp =
   fmul tmp a b;
-  fmul c c d;
+  fmul_a c c d;
   let h1 = ST.get () in
   assert (inv_lazy_reduced2 h1 tmp);
   assert (inv_lazy_reduced2 h1 c);
   BL.fsub5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h1 tmp) (as_felem5 h1 c) (u64 2);
-  fsub c tmp c (u64 2);
+  fsub_sa2 c tmp c (u64 2);
   let h2 = ST.get () in
   assert (felem_fits5 (as_felem5 h2 c) (5,5,5,5,6));
-  fnormalize_weak c c;
+  fnormalize_weak_sa c c;
   BL.normalize_weak5_lemma (5,5,5,5,6) (as_felem5 h2 c)
 
 
@@ -238,4 +238,21 @@ let point_add out p q =
   push_frame ();
   let tmp = create (9ul *! nlimb) (u64 0) in
   point_add_no_alloc out p q tmp;
+  pop_frame ()
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val point_add_sa (out p q:point) : Stack unit
+  (requires fun h ->
+    live h out /\ live h p /\ live h q /\
+    eq_or_disjoint out p /\ eq_or_disjoint out q /\ eq_or_disjoint p q /\
+    point_inv h p /\ point_inv h q)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ point_inv h1 out /\
+    point_eval h1 out == S.point_add (point_eval h0 p) (point_eval h0 q))
+
+let point_add_sa out p q =
+  push_frame ();
+  let p_copy = create (size 15) (u64 0) in
+  copy p_copy p;
+  point_add out p_copy q;
   pop_frame ()
