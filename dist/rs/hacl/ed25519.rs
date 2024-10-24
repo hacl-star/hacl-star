@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 #[inline] fn fsum(out: &mut [u64], a: &[u64], b: &[u64])
 { crate::bignum25519_51::fadd(out, a, b) }

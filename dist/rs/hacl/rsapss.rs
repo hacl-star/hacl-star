@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 #[inline] fn hash_len(a: crate::streaming_types::hash_alg) -> u32
 {
@@ -544,7 +543,7 @@ new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
         else
         { false };
     if ! ite
-    { (*&[]).into() }
+    { [].into() }
     else
     {
         let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
@@ -576,7 +575,7 @@ new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
             let m1: u64 = crate::rsapss::check_exponent_u64(eBits, e.1);
             let m: u64 = m0 & m1;
             let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
-            if b { (*pkey2).into() } else { (*&[]).into() }
+            if b { (*pkey2).into() } else { [].into() }
         }
     }
 }
@@ -621,7 +620,7 @@ new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8],
         else
         { false };
     if ! ite0
-    { (*&[]).into() }
+    { [].into() }
     else
     {
         let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
@@ -663,7 +662,7 @@ new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8],
             bignum::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
             let m10: u64 = crate::rsapss::check_exponent_u64(dBits, d.1);
             let b0: bool = b && m10 == 0xFFFFFFFFFFFFFFFFu64;
-            if b0 { (*skey2).into() } else { (*&[]).into() }
+            if b0 { (*skey2).into() } else { [].into() }
         }
     }
 }

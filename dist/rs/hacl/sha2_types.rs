@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 pub struct uint8_2p <'a> { pub fst: &'a mut [u8], pub snd: &'a mut [u8] }
 

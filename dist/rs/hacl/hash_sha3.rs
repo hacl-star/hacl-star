@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 pub(crate) const keccak_rotc: [u32; 24] =
     [1u32, 3u32, 6u32, 10u32, 15u32, 21u32, 28u32, 36u32, 45u32, 55u32, 2u32, 14u32, 27u32, 41u32,
@@ -242,7 +241,8 @@ fn update_multi_sha3(
         (bl0[0usize..crate::hash_sha3::block_len(a) as usize]).copy_from_slice(
             &uu____0.1[0usize..crate::hash_sha3::block_len(a) as usize]
         );
-        lowstar::ignore::ignore::<u32>(crate::hash_sha3::block_len(a));
+        let unused: u32 = crate::hash_sha3::block_len(a);
+        lowstar::ignore::ignore::<u32>(unused);
         crate::hash_sha3::absorb_inner_32(b·, s)
     }
 }

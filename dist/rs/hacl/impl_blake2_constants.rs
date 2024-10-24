@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 pub(crate) const sigmaTable: [u32; 160] =
     [0u32, 1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 8u32, 9u32, 10u32, 11u32, 12u32, 13u32, 14u32,

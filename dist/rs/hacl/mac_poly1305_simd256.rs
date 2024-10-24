@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 pub(crate) fn load_acc4(acc: &mut [lib::intvector_intrinsics::vec256], b: &[u8])
 {

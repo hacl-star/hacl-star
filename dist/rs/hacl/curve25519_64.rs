@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 #[inline] fn add_scalar(out: &mut [u64], f1: &[u64], f2: u64)
 {

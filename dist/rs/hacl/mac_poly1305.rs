@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 pub(crate) fn poly1305_init(ctx: &mut [u64], key: &[u8])
 {

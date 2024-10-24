@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 #[inline] fn sha224_init8(hash: &mut [lib::intvector_intrinsics::vec256])
 {

@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 pub(crate) fn shake128_4x(
     input_len: u32,
@@ -373,7 +372,10 @@ pub(crate) const cdf_table1344: [u16; 7] =
 }
 
 pub(crate) fn randombytes_(len: u32, res: &mut [u8])
-{ lowstar::ignore::ignore::<bool>(lib::randombuffer_system::randombytes(res, len)) }
+{
+    let b: bool = lib::randombuffer_system::randombytes(res, len);
+    lowstar::ignore::ignore::<bool>(b)
+}
 
 #[inline] pub(crate) fn frodo_pack(n1: u32, n2: u32, d: u32, a: &[u16], res: &mut [u8])
 {

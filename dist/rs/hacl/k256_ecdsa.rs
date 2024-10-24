@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 #[inline] fn bn_add_sa(aLen: u32, bLen: u32, b: &[u64], res: &mut [u64]) -> u64
 {
@@ -589,21 +588,21 @@ fn sqr4(a: &[u64], res: &mut [u64])
     let mut p: [u64; 5] = [0u64; 5usize];
     let a0: (&[u64], &[u64]) = a.split_at(0usize);
     let a1: (&[u64], &[u64]) = a0.1.split_at(4usize);
-    lowstar::ignore::ignore::<u64>(
-        crate::k256_ecdsa::mul_pow2_256_minus_q_add(4u32, 7u32, t01.1, a1.1, a1.0, &mut m)
-    );
+    let c0: u64 =
+        crate::k256_ecdsa::mul_pow2_256_minus_q_add(4u32, 7u32, t01.1, a1.1, a1.0, &mut m);
+    lowstar::ignore::ignore::<u64>(c0);
     let m0: (&[u64], &[u64]) = m.split_at(0usize);
     let m1: (&[u64], &[u64]) = m0.1.split_at(4usize);
-    lowstar::ignore::ignore::<u64>(
-        crate::k256_ecdsa::mul_pow2_256_minus_q_add(3u32, 5u32, t01.1, m1.1, m1.0, &mut p)
-    );
+    let c1: u64 =
+        crate::k256_ecdsa::mul_pow2_256_minus_q_add(3u32, 5u32, t01.1, m1.1, m1.0, &mut p);
+    lowstar::ignore::ignore::<u64>(c1);
     let p0: (&[u64], &[u64]) = p.split_at(0usize);
     let p1: (&[u64], &[u64]) = p0.1.split_at(4usize);
     let c2: u64 =
         crate::k256_ecdsa::mul_pow2_256_minus_q_add(1u32, 4u32, t01.1, p1.1, p1.0, &mut r);
-    let c0: u64 = c2;
-    let c1: u64 = crate::k256_ecdsa::add4(&r, &tmp, out);
-    let mask: u64 = 0u64.wrapping_sub(c0.wrapping_add(c1));
+    let c00: u64 = c2;
+    let c10: u64 = crate::k256_ecdsa::add4(&r, &tmp, out);
+    let mask: u64 = 0u64.wrapping_sub(c00.wrapping_add(c10));
     krml::unroll_for!(
         4,
         "i",

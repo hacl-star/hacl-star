@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 /**
 Write `a + b mod 2^256` in `res`.
@@ -1396,7 +1395,7 @@ new_bn_from_bytes_be(len: u32, b: &[u8]) ->
     Box<[u64]>
 {
     if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32) > 536870911u32
-    { (*&[]).into() }
+    { [].into() }
     else
     {
         let mut res: Box<[u64]> =
@@ -1446,7 +1445,7 @@ new_bn_from_bytes_le(len: u32, b: &[u8]) ->
     Box<[u64]>
 {
     if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32) > 536870911u32
-    { (*&[]).into() }
+    { [].into() }
     else
     {
         let mut res: Box<[u64]> =

@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 fn secretbox_init(xkeys: &mut [u8], k: &[u8], n: &[u8])
 {

@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 #[inline] fn ffdhe_len(a: crate::spec::ffdhe_alg) -> u32
 {
@@ -73,46 +72,48 @@
             1u64,
             &mut (&mut p_n1)[0usize..]
         );
-    if 1u32 < nLen
-    {
-        let a1: (&[u64], &[u64]) = p_n.split_at(1usize);
-        let res1: (&mut [u64], &mut [u64]) = p_n1.split_at_mut(1usize);
-        let mut c: [u64; 1] = [c0; 1usize];
-        for i in 0u32..nLen.wrapping_sub(1u32).wrapping_div(4u32)
+    let c: u64 =
+        if 1u32 < nLen
         {
-            let t1: u64 = a1.1[4u32.wrapping_mul(i) as usize];
-            let res_i: (&mut [u64], &mut [u64]) =
-                res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
-            (&mut c)[0usize] =
-                lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1);
-            let t10: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
-            let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
-            (&mut c)[0usize] =
-                lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t10, 0u64, res_i0.1);
-            let t11: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
-            let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
-            (&mut c)[0usize] =
-                lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t11, 0u64, res_i1.1);
-            let t12: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
-            let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
-            (&mut c)[0usize] =
-                lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, 0u64, res_i2.1)
-        };
-        for
-        i
-        in
-        nLen.wrapping_sub(1u32).wrapping_div(4u32).wrapping_mul(4u32)..nLen.wrapping_sub(1u32)
-        {
-            let t1: u64 = a1.1[i as usize];
-            let res_i: (&mut [u64], &mut [u64]) = res1.1.split_at_mut(i as usize);
-            (&mut c)[0usize] =
-                lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1)
-        };
-        let c1: u64 = (&c)[0usize];
-        lowstar::ignore::ignore::<u64>(c1)
-    }
-    else
-    { lowstar::ignore::ignore::<u64>(c0) };
+            let a1: (&[u64], &[u64]) = p_n.split_at(1usize);
+            let res1: (&mut [u64], &mut [u64]) = p_n1.split_at_mut(1usize);
+            let mut c: [u64; 1] = [c0; 1usize];
+            for i in 0u32..nLen.wrapping_sub(1u32).wrapping_div(4u32)
+            {
+                let t1: u64 = a1.1[4u32.wrapping_mul(i) as usize];
+                let res_i: (&mut [u64], &mut [u64]) =
+                    res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
+                (&mut c)[0usize] =
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1);
+                let t10: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
+                let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
+                (&mut c)[0usize] =
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t10, 0u64, res_i0.1);
+                let t11: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
+                let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
+                (&mut c)[0usize] =
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t11, 0u64, res_i1.1);
+                let t12: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
+                let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
+                (&mut c)[0usize] =
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, 0u64, res_i2.1)
+            };
+            for
+            i
+            in
+            nLen.wrapping_sub(1u32).wrapping_div(4u32).wrapping_mul(4u32)..nLen.wrapping_sub(1u32)
+            {
+                let t1: u64 = a1.1[i as usize];
+                let res_i: (&mut [u64], &mut [u64]) = res1.1.split_at_mut(i as usize);
+                (&mut c)[0usize] =
+                    lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1)
+            };
+            let c1: u64 = (&c)[0usize];
+            c1
+        }
+        else
+        { c0 };
+    lowstar::ignore::ignore::<u64>(c);
     let mut b2: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     let i: u32 = 0u32;
     let j: u32 = 0u32;

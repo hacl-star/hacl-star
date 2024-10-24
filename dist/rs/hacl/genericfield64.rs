@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 pub type pbn_mont_ctx_u64 <'a> = &'a [bignum::bignum::bn_mont_ctx_u64];
 

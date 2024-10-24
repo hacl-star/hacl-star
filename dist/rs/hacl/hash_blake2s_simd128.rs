@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 #[inline] fn update_block(
     wv: &mut [lib::intvector_intrinsics::vec128],
@@ -948,9 +947,8 @@ reset_with_key_and_params(
     k: &[u8]
 )
 {
-    lowstar::ignore::ignore::<crate::hash_blake2b::index>(
-        crate::hash_blake2s_simd128::index_of_state(s)
-    );
+    let i1: crate::hash_blake2b::index = crate::hash_blake2s_simd128::index_of_state(s);
+    lowstar::ignore::ignore::<crate::hash_blake2b::index>(i1);
     crate::hash_blake2s_simd128::reset_raw(
         s,
         crate::hash_blake2b::params_and_key { fst: p, snd: k }

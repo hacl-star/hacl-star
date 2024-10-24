@@ -3,7 +3,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
-#![allow(const_item_mutation)]
 
 /**
 Write the HMAC-BLAKE2b MAC of a message (`data`) by using a key (`key`) into `dst`.
