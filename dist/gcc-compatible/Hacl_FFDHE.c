@@ -140,8 +140,8 @@ static inline void ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a, uint64_t *p_r2_n)
   uint32_t len = ffdhe_len(a);
   for (uint32_t i = 0U; i < len; i++)
   {
-    uint8_t *os = p_s;
     uint8_t x = p[i];
+    uint8_t *os = p_s;
     os[i] = x;
   }
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(ffdhe_len(a), p_s, p_n);
@@ -279,8 +279,8 @@ Hacl_FFDHE_ffdhe_secret_to_public_precomp(
   memset(g_n, 0U, nLen * sizeof (uint64_t));
   uint8_t g = 0U;
   {
-    uint8_t *os = &g;
     uint8_t x = Hacl_Impl_FFDHE_Constants_ffdhe_g2[0U];
+    uint8_t *os = &g;
     os[0U] = x;
   }
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(1U, &g, g_n);

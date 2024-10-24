@@ -62,8 +62,8 @@ secretbox_detached(uint32_t mlen, uint8_t *c, uint8_t *tag, uint8_t *k, uint8_t 
   memcpy(block0, m0, mlen0 * sizeof (uint8_t));
   for (uint32_t i = 0U; i < 32U; i++)
   {
-    uint8_t *os = block0;
     uint8_t x = (uint32_t)block0[i] ^ (uint32_t)ekey0[i];
+    uint8_t *os = block0;
     os[i] = x;
   }
   uint8_t *c0 = c;
@@ -117,8 +117,8 @@ secretbox_open_detached(
     memcpy(block0, c0, mlen0 * sizeof (uint8_t));
     for (uint32_t i = 0U; i < 32U; i++)
     {
-      uint8_t *os = block0;
       uint8_t x = (uint32_t)block0[i] ^ (uint32_t)ekey0[i];
+      uint8_t *os = block0;
       os[i] = x;
     }
     uint8_t *m0 = m;

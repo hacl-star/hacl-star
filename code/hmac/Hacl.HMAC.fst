@@ -134,6 +134,32 @@ val part2:
       B.as_seq h1 dst `Seq.equal`
         Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
+inline_for_extraction noextract
+val part2_in_place:
+  a: fixed_len_alg ->
+  m : D.m_spec a ->
+  init: D.init_st (|a, m|) ->
+  update_multi: D.update_multi_st (|a, m|) ->
+  update_last: D.update_last_st (|a, m|) ->
+  finish: D.finish_st (|a, m|) ->
+  s: D.state (|a, m|) ->
+  key: B.buffer uint8 { B.length key = block_length a } ->
+  data: B.buffer uint8 ->
+  len: UInt32.t { B.length data = v len } ->
+  Stack unit
+    (requires fun h0 ->
+      B.disjoint s key /\
+      B.disjoint s data /\
+      MB.(all_live h0 [ buf s; buf key; buf data ]) /\
+      D.as_seq h0 s == Spec.Agile.Hash.init a
+    )
+    (ensures fun h0 _ h1 ->
+      key_and_data_fits a;
+      B.(modifies (loc_union (loc_buffer s) (loc_buffer key)) h0 h1) /\
+      S.slice (B.as_seq h1 key) 0 (hash_length a) `Seq.equal`
+        Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
+
+
 // TODO: move
 (* We can't directly introduce uint128 literals *)
 inline_for_extraction noextract
@@ -348,6 +374,43 @@ let part2 a m init update_multi update_last finish s dst key data len =
     hash a key_data_v0;
   }
 
+#push-options "--z3rlimit 400"
+inline_for_extraction noextract
+let part2_in_place a m init update_multi update_last finish s key data len =
+  (**) key_and_data_fits a;
+  (**) let h0 = ST.get () in
+  (**) let key_v0 : Ghost.erased _ = B.as_seq h0 key in
+  (**) let data_v0 : Ghost.erased _ = B.as_seq h0 data in
+  (**) let key_data_v0 : Ghost.erased _ = Seq.append key_v0 data_v0 in
+  (**) let h1 = ST.get () in
+  (**) assert(B.(modifies (loc_buffer s) h0 h1));
+  (**) let init_v : Ghost.erased (init_t a) = Spec.Agile.Hash.init a in
+  (**) assert (D.as_seq h1 s == Ghost.reveal init_v);
+  if len = 0ul then (
+    part2_update_empty a m init update_multi update_last s key data len
+  ) else (
+    part2_update_nonempty a m init update_multi update_last s key data len
+    );
+
+  (**) let h3 = ST.get () in
+  let dst = B.sub key 0ul (D.hash_len a) in
+  (**) B.(modifies_trans
+      (loc_union (loc_buffer s) (loc_buffer dst)) h0 h1 (loc_union (loc_buffer s) (loc_buffer dst)) h3);
+  finish s dst;
+  (**) let h4 = ST.get () in
+  (**) B.(modifies_trans
+      (loc_union (loc_buffer s) (loc_buffer dst)) h0 h3 (loc_union (loc_buffer s) (loc_buffer dst)) h4);
+  (**) assert (B.as_seq h4 dst == hash_incremental a key_data_v0 ());
+  calc (Seq.equal) {
+    B.as_seq h4 dst;
+  (Seq.equal) { }
+    hash_incremental a key_data_v0 ();
+  (Seq.equal) { hash_is_hash_incremental' a key_data_v0 () }
+    hash' a key_data_v0 ();
+  (Seq.equal) { }
+    hash a key_data_v0;
+  }
+#pop-options
 
 /// This implementation is optimized. First, it reuses an existing hash state
 /// ``s`` rather than allocating a new one. Second, it writes out the result of
@@ -379,8 +442,7 @@ val part1:
         Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
 let part1 a m init update_multi update_last finish s key data len =
-  let dst = B.sub key 0ul (D.hash_len a) in
-  part2 a m init update_multi update_last finish s dst key data len
+  part2_in_place a m init update_multi update_last finish s key data len
 
 let block_len_positive (a: hash_alg): Lemma (D.block_len a `FStar.UInt32.gt` 0ul) = ()
 let hash_lt_block (a: fixed_len_alg): Lemma (hash_length a < block_length a) = ()

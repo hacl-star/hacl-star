@@ -121,69 +121,91 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2
   uint64_t *x1 = q;
   uint64_t *x2 = nq;
   uint64_t *z2 = nq + 4U;
-  uint64_t *z3 = nq_p1 + 4U;
-  uint64_t *a = tmp1;
-  uint64_t *b = tmp1 + 4U;
-  uint64_t *ab = tmp1;
   uint64_t *dc = tmp1 + 8U;
+  uint64_t *ab = tmp1;
+  uint64_t *a = ab;
+  uint64_t *b = ab + 4U;
   fadd0(a, x2, z2);
   fsub0(b, x2, z2);
+  uint64_t *ab1 = tmp1;
   uint64_t *x3 = nq_p1;
   uint64_t *z31 = nq_p1 + 4U;
   uint64_t *d0 = dc;
   uint64_t *c0 = dc + 4U;
   fadd0(c0, x3, z31);
   fsub0(d0, x3, z31);
-  fmul20(dc, dc, ab, tmp2);
-  fadd0(x3, d0, c0);
-  fsub0(z31, d0, c0);
-  uint64_t *a1 = tmp1;
-  uint64_t *b1 = tmp1 + 4U;
-  uint64_t *d = tmp1 + 8U;
-  uint64_t *c = tmp1 + 12U;
-  uint64_t *ab1 = tmp1;
+  uint64_t f1_copy0[8U] = { 0U };
+  memcpy(f1_copy0, dc, 8U * sizeof (uint64_t));
+  fmul20(dc, f1_copy0, ab1, tmp2);
+  uint64_t *d1 = dc;
+  uint64_t *c1 = dc + 4U;
+  fadd0(x3, d1, c1);
+  fsub0(z31, d1, c1);
+  uint64_t *ab2 = tmp1;
   uint64_t *dc1 = tmp1 + 8U;
-  fsqr20(dc1, ab1, tmp2);
-  fsqr20(nq_p1, nq_p1, tmp2);
+  fsqr20(dc1, ab2, tmp2);
+  uint64_t f1_copy1[8U] = { 0U };
+  memcpy(f1_copy1, nq_p1, 8U * sizeof (uint64_t));
+  fsqr20(nq_p1, f1_copy1, tmp2);
+  uint64_t *a1 = ab2;
+  uint64_t *b1 = ab2 + 4U;
+  uint64_t *d = dc1;
+  uint64_t *c = dc1 + 4U;
   a1[0U] = c[0U];
   a1[1U] = c[1U];
   a1[2U] = c[2U];
   a1[3U] = c[3U];
-  fsub0(c, d, c);
+  uint64_t f2_copy[4U] = { 0U };
+  memcpy(f2_copy, c, 4U * sizeof (uint64_t));
+  fsub0(c, d, f2_copy);
   fmul_scalar0(b1, c, 121665ULL);
-  fadd0(b1, b1, d);
-  fmul20(nq, dc1, ab1, tmp2);
-  fmul0(z3, z3, x1, tmp2);
+  uint64_t f1_copy2[4U] = { 0U };
+  memcpy(f1_copy2, b1, 4U * sizeof (uint64_t));
+  fadd0(b1, f1_copy2, d);
+  uint64_t *ab3 = tmp1;
+  uint64_t *dc2 = tmp1 + 8U;
+  fmul20(nq, dc2, ab3, tmp2);
+  uint64_t *z310 = nq_p1 + 4U;
+  uint64_t f1_copy[4U] = { 0U };
+  memcpy(f1_copy, z310, 4U * sizeof (uint64_t));
+  fmul0(z310, f1_copy, x1, tmp2);
 }
 
 static void point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
 {
   uint64_t *x2 = nq;
   uint64_t *z2 = nq + 4U;
-  uint64_t *a = tmp1;
-  uint64_t *b = tmp1 + 4U;
-  uint64_t *d = tmp1 + 8U;
-  uint64_t *c = tmp1 + 12U;
   uint64_t *ab = tmp1;
   uint64_t *dc = tmp1 + 8U;
+  uint64_t *a = ab;
+  uint64_t *b = ab + 4U;
   fadd0(a, x2, z2);
   fsub0(b, x2, z2);
   fsqr20(dc, ab, tmp2);
-  a[0U] = c[0U];
-  a[1U] = c[1U];
-  a[2U] = c[2U];
-  a[3U] = c[3U];
-  fsub0(c, d, c);
-  fmul_scalar0(b, c, 121665ULL);
-  fadd0(b, b, d);
-  fmul20(nq, dc, ab, tmp2);
+  uint64_t *d = dc;
+  uint64_t *c = dc + 4U;
+  uint64_t *a1 = ab;
+  uint64_t *b1 = ab + 4U;
+  a1[0U] = c[0U];
+  a1[1U] = c[1U];
+  a1[2U] = c[2U];
+  a1[3U] = c[3U];
+  uint64_t f2_copy[4U] = { 0U };
+  memcpy(f2_copy, c, 4U * sizeof (uint64_t));
+  fsub0(c, d, f2_copy);
+  fmul_scalar0(b1, c, 121665ULL);
+  uint64_t f1_copy[4U] = { 0U };
+  memcpy(f1_copy, b1, 4U * sizeof (uint64_t));
+  fadd0(b1, f1_copy, d);
+  uint64_t *ab1 = tmp1;
+  uint64_t *dc1 = tmp1 + 8U;
+  fmul20(nq, dc1, ab1, tmp2);
 }
 
 static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
 {
   uint64_t tmp2[16U] = { 0U };
   uint64_t p01_tmp1_swap[33U] = { 0U };
-  uint64_t *p0 = p01_tmp1_swap;
   uint64_t *p01 = p01_tmp1_swap;
   uint64_t *p03 = p01;
   uint64_t *p11 = p01 + 8U;
@@ -198,34 +220,39 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
   z0[1U] = 0ULL;
   z0[2U] = 0ULL;
   z0[3U] = 0ULL;
-  uint64_t *p01_tmp1 = p01_tmp1_swap;
-  uint64_t *p01_tmp11 = p01_tmp1_swap;
-  uint64_t *nq1 = p01_tmp1_swap;
-  uint64_t *nq_p11 = p01_tmp1_swap + 8U;
   uint64_t *swap = p01_tmp1_swap + 32U;
-  cswap20(1ULL, nq1, nq_p11);
+  uint64_t *p01_tmp1 = p01_tmp1_swap;
+  uint64_t *nq0 = p01_tmp1;
+  uint64_t *nq_p1 = p01_tmp1 + 8U;
+  cswap20(1ULL, nq0, nq_p1);
+  uint64_t *p01_tmp11 = p01_tmp1_swap;
   point_add_and_double(init, p01_tmp11, tmp2);
   swap[0U] = 1ULL;
   for (uint32_t i = 0U; i < 251U; i++)
   {
     uint64_t *p01_tmp12 = p01_tmp1_swap;
     uint64_t *swap1 = p01_tmp1_swap + 32U;
-    uint64_t *nq2 = p01_tmp12;
-    uint64_t *nq_p12 = p01_tmp12 + 8U;
+    uint64_t *nq1 = p01_tmp12;
+    uint64_t *nq_p11 = p01_tmp12 + 8U;
     uint64_t bit = (uint64_t)((uint32_t)key[(253U - i) / 8U] >> (253U - i) % 8U & 1U);
     uint64_t sw = swap1[0U] ^ bit;
-    cswap20(sw, nq2, nq_p12);
+    cswap20(sw, nq1, nq_p11);
     point_add_and_double(init, p01_tmp12, tmp2);
     swap1[0U] = bit;
   }
   uint64_t sw = swap[0U];
+  uint64_t *p01_tmp12 = p01_tmp1_swap;
+  uint64_t *nq1 = p01_tmp12;
+  uint64_t *nq_p11 = p01_tmp12 + 8U;
   cswap20(sw, nq1, nq_p11);
-  uint64_t *nq10 = p01_tmp1;
-  uint64_t *tmp1 = p01_tmp1 + 16U;
-  point_double(nq10, tmp1, tmp2);
-  point_double(nq10, tmp1, tmp2);
-  point_double(nq10, tmp1, tmp2);
-  memcpy(out, p0, 8U * sizeof (uint64_t));
+  uint64_t *p01_tmp10 = p01_tmp1_swap;
+  uint64_t *nq = p01_tmp10;
+  uint64_t *tmp1 = p01_tmp10 + 16U;
+  point_double(nq, tmp1, tmp2);
+  point_double(nq, tmp1, tmp2);
+  point_double(nq, tmp1, tmp2);
+  uint64_t *p010 = p01_tmp1_swap;
+  memcpy(out, p010, 8U * sizeof (uint64_t));
 }
 
 static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n)
@@ -233,7 +260,9 @@ static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n)
   fsqr0(o, inp, tmp);
   for (uint32_t i = 0U; i < n - 1U; i++)
   {
-    fsqr0(o, o, tmp);
+    uint64_t f1_copy[4U] = { 0U };
+    memcpy(f1_copy, o, 4U * sizeof (uint64_t));
+    fsqr0(o, f1_copy, tmp);
   }
 }
 
@@ -247,32 +276,59 @@ static void finv(uint64_t *o, uint64_t *i, uint64_t *tmp)
   fsquare_times(a1, i, tmp10, 1U);
   fsquare_times(t010, a1, tmp10, 2U);
   fmul0(b1, t010, i, tmp);
-  fmul0(a1, b1, a1, tmp);
-  fsquare_times(t010, a1, tmp10, 1U);
-  fmul0(b1, t010, b1, tmp);
-  fsquare_times(t010, b1, tmp10, 5U);
-  fmul0(b1, t010, b1, tmp);
+  uint64_t f2_copy[4U] = { 0U };
+  memcpy(f2_copy, a1, 4U * sizeof (uint64_t));
+  fmul0(a1, b1, f2_copy, tmp);
+  uint64_t *tmp11 = tmp;
+  fsquare_times(t010, a1, tmp11, 1U);
+  uint64_t f2_copy0[4U] = { 0U };
+  memcpy(f2_copy0, b1, 4U * sizeof (uint64_t));
+  fmul0(b1, t010, f2_copy0, tmp);
+  uint64_t *tmp12 = tmp;
+  fsquare_times(t010, b1, tmp12, 5U);
+  uint64_t f2_copy1[4U] = { 0U };
+  memcpy(f2_copy1, b1, 4U * sizeof (uint64_t));
+  fmul0(b1, t010, f2_copy1, tmp);
   uint64_t *b10 = t1 + 4U;
   uint64_t *c10 = t1 + 8U;
   uint64_t *t011 = t1 + 12U;
-  uint64_t *tmp11 = tmp;
-  fsquare_times(t011, b10, tmp11, 10U);
+  uint64_t *tmp13 = tmp;
+  fsquare_times(t011, b10, tmp13, 10U);
   fmul0(c10, t011, b10, tmp);
-  fsquare_times(t011, c10, tmp11, 20U);
-  fmul0(t011, t011, c10, tmp);
-  fsquare_times(t011, t011, tmp11, 10U);
-  fmul0(b10, t011, b10, tmp);
-  fsquare_times(t011, b10, tmp11, 50U);
+  uint64_t *tmp110 = tmp;
+  fsquare_times(t011, c10, tmp110, 20U);
+  uint64_t f1_copy[4U] = { 0U };
+  memcpy(f1_copy, t011, 4U * sizeof (uint64_t));
+  fmul0(t011, f1_copy, c10, tmp);
+  uint64_t *tmp120 = tmp;
+  uint64_t i_copy0[4U] = { 0U };
+  memcpy(i_copy0, t011, 4U * sizeof (uint64_t));
+  fsquare_times(t011, i_copy0, tmp120, 10U);
+  uint64_t f2_copy2[4U] = { 0U };
+  memcpy(f2_copy2, b10, 4U * sizeof (uint64_t));
+  fmul0(b10, t011, f2_copy2, tmp);
+  uint64_t *tmp130 = tmp;
+  fsquare_times(t011, b10, tmp130, 50U);
   fmul0(c10, t011, b10, tmp);
   uint64_t *b11 = t1 + 4U;
   uint64_t *c1 = t1 + 8U;
   uint64_t *t01 = t1 + 12U;
   uint64_t *tmp1 = tmp;
   fsquare_times(t01, c1, tmp1, 100U);
-  fmul0(t01, t01, c1, tmp);
-  fsquare_times(t01, t01, tmp1, 50U);
-  fmul0(t01, t01, b11, tmp);
-  fsquare_times(t01, t01, tmp1, 5U);
+  uint64_t f1_copy0[4U] = { 0U };
+  memcpy(f1_copy0, t01, 4U * sizeof (uint64_t));
+  fmul0(t01, f1_copy0, c1, tmp);
+  uint64_t *tmp111 = tmp;
+  uint64_t i_copy1[4U] = { 0U };
+  memcpy(i_copy1, t01, 4U * sizeof (uint64_t));
+  fsquare_times(t01, i_copy1, tmp111, 50U);
+  uint64_t f1_copy1[4U] = { 0U };
+  memcpy(f1_copy1, t01, 4U * sizeof (uint64_t));
+  fmul0(t01, f1_copy1, b11, tmp);
+  uint64_t *tmp121 = tmp;
+  uint64_t i_copy[4U] = { 0U };
+  memcpy(i_copy, t01, 4U * sizeof (uint64_t));
+  fsquare_times(t01, i_copy, tmp121, 5U);
   uint64_t *a = t1;
   uint64_t *t0 = t1 + 12U;
   fmul0(o, t0, a, tmp);
@@ -319,7 +375,9 @@ static void encode_point(uint8_t *o, uint64_t *i)
   uint64_t u64s[4U] = { 0U };
   uint64_t tmp_w[16U] = { 0U };
   finv(tmp, z, tmp_w);
-  fmul0(tmp, tmp, x, tmp_w);
+  uint64_t f1_copy[4U] = { 0U };
+  memcpy(f1_copy, tmp, 4U * sizeof (uint64_t));
+  fmul0(tmp, f1_copy, x, tmp_w);
   store_felem(u64s, tmp);
   KRML_MAYBE_FOR4(i0, 0U, 4U, 1U, store64_le(o + i0 * 8U, u64s[i0]););
 }
@@ -334,16 +392,17 @@ Compute the scalar multiple of a point.
 void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint64_t init[8U] = { 0U };
+  uint64_t init_copy[8U] = { 0U };
   uint64_t tmp[4U] = { 0U };
   KRML_MAYBE_FOR4(i,
     0U,
     4U,
     1U,
-    uint64_t *os = tmp;
     uint8_t *bj = pub + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = tmp;
     os[i] = x;);
   uint64_t tmp3 = tmp[3U];
   tmp[3U] = tmp3 & 0x7fffffffffffffffULL;
@@ -357,7 +416,8 @@ void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
   x[1U] = tmp[1U];
   x[2U] = tmp[2U];
   x[3U] = tmp[3U];
-  montgomery_ladder(init, priv, init);
+  memcpy(init_copy, init, 8U * sizeof (uint64_t));
+  montgomery_ladder(init, priv, init_copy);
   encode_point(out, init);
 }
 
@@ -374,8 +434,8 @@ void Hacl_Curve25519_64_secret_to_public(uint8_t *pub, uint8_t *priv)
   uint8_t basepoint[32U] = { 0U };
   for (uint32_t i = 0U; i < 32U; i++)
   {
-    uint8_t *os = basepoint;
     uint8_t x = g25519[i];
+    uint8_t *os = basepoint;
     os[i] = x;
   }
   Hacl_Curve25519_64_scalarmult(pub, priv, basepoint);

@@ -445,6 +445,7 @@ Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(16U, sizeof (uint8_t));
   uint64_t *r1 = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
   uint64_t *block_state = r1;
+  Hacl_MAC_Poly1305_poly1305_init(block_state, key);
   uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
   memcpy(k_, key, 32U * sizeof (uint8_t));
   uint8_t *k_0 = k_;
@@ -453,22 +454,18 @@ Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
   Hacl_MAC_Poly1305_state_t
   *p = (Hacl_MAC_Poly1305_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_MAC_Poly1305_state_t));
   p[0U] = s;
-  Hacl_MAC_Poly1305_poly1305_init(block_state, key);
   return p;
 }
 
 void Hacl_MAC_Poly1305_reset(Hacl_MAC_Poly1305_state_t *state, uint8_t *key)
 {
-  Hacl_MAC_Poly1305_state_t scrut = *state;
-  uint8_t *k_ = scrut.p_key;
-  uint8_t *buf = scrut.buf;
-  uint64_t *block_state = scrut.block_state;
+  uint64_t *block_state = (*state).block_state;
+  uint8_t *k_ = (*state).p_key;
   Hacl_MAC_Poly1305_poly1305_init(block_state, key);
   memcpy(k_, key, 32U * sizeof (uint8_t));
   uint8_t *k_1 = k_;
-  Hacl_MAC_Poly1305_state_t
-  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_1 };
-  state[0U] = tmp;
+  state->total_len = (uint64_t)0U;
+  state->p_key = k_1;
 }
 
 /**
@@ -477,8 +474,8 @@ void Hacl_MAC_Poly1305_reset(Hacl_MAC_Poly1305_state_t *state, uint8_t *key)
 Hacl_Streaming_Types_error_code
 Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint32_t chunk_len)
 {
-  Hacl_MAC_Poly1305_state_t s = *state;
-  uint64_t total_len = s.total_len;
+  uint64_t *block_state = (*state).block_state;
+  uint64_t total_len = (*state).total_len;
   if ((uint64_t)chunk_len > 0xffffffffULL - total_len)
   {
     return Hacl_Streaming_Types_MaximumLengthExceeded;
@@ -494,11 +491,9 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
   }
   if (chunk_len <= 16U - sz)
   {
-    Hacl_MAC_Poly1305_state_t s1 = *state;
-    uint64_t *block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
-    uint8_t *k_1 = s1.p_key;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
+    uint8_t *k_1 = (*state).p_key;
     uint32_t sz1;
     if (total_len1 % (uint64_t)16U == 0ULL && total_len1 > 0ULL)
     {
@@ -511,24 +506,14 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-    *state
-    =
-      (
-        (Hacl_MAC_Poly1305_state_t){
-          .block_state = block_state1,
-          .buf = buf,
-          .total_len = total_len2,
-          .p_key = k_1
-        }
-      );
+    state->total_len = total_len2;
+    state->p_key = k_1;
   }
   else if (sz == 0U)
   {
-    Hacl_MAC_Poly1305_state_t s1 = *state;
-    uint64_t *block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
-    uint8_t *k_1 = s1.p_key;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
+    uint8_t *k_1 = (*state).p_key;
     uint32_t sz1;
     if (total_len1 % (uint64_t)16U == 0ULL && total_len1 > 0ULL)
     {
@@ -540,7 +525,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     }
     if (!(sz1 == 0U))
     {
-      poly1305_update(block_state1, 16U, buf);
+      poly1305_update(block_state, 16U, buf);
     }
     uint32_t ite;
     if ((uint64_t)chunk_len % (uint64_t)16U == 0ULL && (uint64_t)chunk_len > 0ULL)
@@ -556,30 +541,20 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    poly1305_update(block_state1, data1_len, data1);
+    poly1305_update(block_state, data1_len, data1);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
-      (
-        (Hacl_MAC_Poly1305_state_t){
-          .block_state = block_state1,
-          .buf = buf,
-          .total_len = total_len1 + (uint64_t)chunk_len,
-          .p_key = k_1
-        }
-      );
+    state->total_len = total_len1 + (uint64_t)chunk_len;
+    state->p_key = k_1;
   }
   else
   {
     uint32_t diff = 16U - sz;
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
-    Hacl_MAC_Poly1305_state_t s1 = *state;
-    uint64_t *block_state10 = s1.block_state;
-    uint8_t *buf0 = s1.buf;
-    uint64_t total_len10 = s1.total_len;
-    uint8_t *k_1 = s1.p_key;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len10 = (*state).total_len;
+    uint8_t *k_1 = (*state).p_key;
     uint32_t sz10;
     if (total_len10 % (uint64_t)16U == 0ULL && total_len10 > 0ULL)
     {
@@ -589,24 +564,14 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     {
       sz10 = (uint32_t)(total_len10 % (uint64_t)16U);
     }
-    uint8_t *buf2 = buf0 + sz10;
+    uint8_t *buf2 = buf + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *state
-    =
-      (
-        (Hacl_MAC_Poly1305_state_t){
-          .block_state = block_state10,
-          .buf = buf0,
-          .total_len = total_len2,
-          .p_key = k_1
-        }
-      );
-    Hacl_MAC_Poly1305_state_t s10 = *state;
-    uint64_t *block_state1 = s10.block_state;
-    uint8_t *buf = s10.buf;
-    uint64_t total_len1 = s10.total_len;
-    uint8_t *k_10 = s10.p_key;
+    state->total_len = total_len2;
+    state->p_key = k_1;
+    uint8_t *buf0 = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
+    uint8_t *k_10 = (*state).p_key;
     uint32_t sz1;
     if (total_len1 % (uint64_t)16U == 0ULL && total_len1 > 0ULL)
     {
@@ -618,7 +583,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     }
     if (!(sz1 == 0U))
     {
-      poly1305_update(block_state1, 16U, buf);
+      poly1305_update(block_state, 16U, buf0);
     }
     uint32_t ite;
     if
@@ -635,30 +600,21 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    poly1305_update(block_state1, data1_len, data1);
-    uint8_t *dst = buf;
+    poly1305_update(block_state, data1_len, data1);
+    uint8_t *dst = buf0;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
-      (
-        (Hacl_MAC_Poly1305_state_t){
-          .block_state = block_state1,
-          .buf = buf,
-          .total_len = total_len1 + (uint64_t)(chunk_len - diff),
-          .p_key = k_10
-        }
-      );
+    state->total_len = total_len1 + (uint64_t)(chunk_len - diff);
+    state->p_key = k_10;
   }
   return Hacl_Streaming_Types_Success;
 }
 
 void Hacl_MAC_Poly1305_digest(Hacl_MAC_Poly1305_state_t *state, uint8_t *output)
 {
-  Hacl_MAC_Poly1305_state_t scrut = *state;
-  uint64_t *block_state = scrut.block_state;
-  uint8_t *buf_ = scrut.buf;
-  uint64_t total_len = scrut.total_len;
-  uint8_t *k_ = scrut.p_key;
+  uint64_t *block_state = (*state).block_state;
+  uint8_t *buf_ = (*state).buf;
+  uint64_t total_len = (*state).total_len;
+  uint8_t *k_ = (*state).p_key;
   uint32_t r;
   if (total_len % (uint64_t)16U == 0ULL && total_len > 0ULL)
   {
@@ -672,6 +628,7 @@ void Hacl_MAC_Poly1305_digest(Hacl_MAC_Poly1305_state_t *state, uint8_t *output)
   uint64_t r1[25U] = { 0U };
   uint64_t *tmp_block_state = r1;
   memcpy(tmp_block_state, block_state, 25U * sizeof (uint64_t));
+  uint8_t *buf_multi = buf_1;
   uint32_t ite;
   if (r % 16U == 0U && r > 0U)
   {
@@ -682,7 +639,6 @@ void Hacl_MAC_Poly1305_digest(Hacl_MAC_Poly1305_state_t *state, uint8_t *output)
     ite = r % 16U;
   }
   uint8_t *buf_last = buf_1 + r - ite;
-  uint8_t *buf_multi = buf_1;
   poly1305_update(tmp_block_state, 0U, buf_multi);
   poly1305_update(tmp_block_state, r, buf_last);
   uint64_t tmp[25U] = { 0U };
