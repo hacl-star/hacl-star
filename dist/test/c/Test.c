@@ -9236,14 +9236,19 @@ static void print_sep(void)
 static void test_all(void)
 {
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  bool no_avx2 = !EverCrypt_AutoConfig2_has_avx2();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx);
+  bool no_avx20 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi2 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi2);
+  bool no_adx0 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx0);
+  bool no_aesni0 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni0);
+  bool no_shaext0 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext0);
   bool ite0;
-  if (no_avx2 || false || false || false || false)
+  if (no_avx20 || false || false || false || false)
   {
     ite0 = false;
   }
@@ -9268,14 +9273,19 @@ static void test_all(void)
     C_String_print(" SKIP because not in static config\n");
   }
   EverCrypt_AutoConfig2_init();
-  bool no_avx = !EverCrypt_AutoConfig2_has_avx();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx0 = !EverCrypt_AutoConfig2_has_avx();
+  bool no_avx21 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx21);
+  bool no_bmi20 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi20);
+  bool no_adx1 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx1);
+  bool no_aesni1 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni1);
+  bool no_shaext1 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext1);
   bool ite1;
-  if (no_avx || false || false || false || false || false)
+  if (no_avx0 || false || false || false || false || false)
   {
     ite1 = false;
   }
@@ -9300,12 +9310,18 @@ static void test_all(void)
     C_String_print(" SKIP because not in static config\n");
   }
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx1 = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx1);
+  bool no_avx22 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx22);
+  bool no_bmi21 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi21);
+  bool no_adx2 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx2);
+  bool no_aesni2 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni2);
+  bool no_shaext2 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext2);
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
@@ -9322,12 +9338,18 @@ static void test_all(void)
     C_String_print(" SKIP because not in static config\n");
   }
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx3 = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx3);
+  bool no_avx23 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx23);
+  bool no_bmi22 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi22);
+  bool no_adx3 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx3);
+  bool no_aesni3 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni3);
+  bool no_shaext3 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext3);
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
@@ -9345,14 +9367,18 @@ static void test_all(void)
   }
   print_sep();
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  bool no_bmi2 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_avx4 = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx4);
+  bool no_avx24 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx24);
+  bool no_bmi23 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx = !EverCrypt_AutoConfig2_has_adx();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_aesni = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni);
+  bool no_shaext4 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext4);
   bool ite2;
-  if (no_bmi2 || no_adx || false || false)
+  if (no_bmi23 || no_adx || false || false)
   {
     ite2 = false;
   }
@@ -9378,12 +9404,18 @@ static void test_all(void)
     C_String_print(" SKIP because not in static config\n");
   }
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx5 = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx5);
+  bool no_avx25 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx25);
+  bool no_bmi24 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi24);
+  bool no_adx4 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx4);
+  bool no_aesni4 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni4);
+  bool no_shaext5 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext5);
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
@@ -9401,14 +9433,18 @@ static void test_all(void)
   }
   print_sep();
   EverCrypt_AutoConfig2_init();
-  bool no_avx0 = !EverCrypt_AutoConfig2_has_avx();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  bool no_aesni = !EverCrypt_AutoConfig2_has_aesni();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx6 = !EverCrypt_AutoConfig2_has_avx();
+  bool no_avx2 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx2);
+  bool no_bmi25 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi25);
+  bool no_adx5 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx5);
+  bool no_aesni5 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext);
   bool ite3;
-  if (no_avx0 || false || false || false || no_aesni || false)
+  if (no_avx6 || false || false || false || no_aesni5 || false)
   {
     ite3 = false;
   }
@@ -9443,12 +9479,18 @@ static void test_all(void)
   }
   print_sep();
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx7 = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx7);
+  bool no_avx26 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx26);
+  bool no_bmi26 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi26);
+  bool no_adx6 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx6);
+  bool no_aesni6 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni6);
+  bool no_shaext6 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext6);
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
@@ -9468,12 +9510,18 @@ static void test_all(void)
   }
   print_sep();
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx8 = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx8);
+  bool no_avx27 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx27);
+  bool no_bmi27 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi27);
+  bool no_adx7 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx7);
+  bool no_aesni7 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni7);
+  bool no_shaext7 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext7);
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
@@ -9496,14 +9544,19 @@ static void test_all(void)
     C_String_print(" SKIP because not in static config\n");
   }
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  bool no_shaext = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx9 = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx9);
+  bool no_avx28 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx28);
+  bool no_bmi28 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi28);
+  bool no_adx8 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx8);
+  bool no_aesni8 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni8);
+  bool no_shaext8 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite;
-  if (no_shaext)
+  if (no_shaext8)
   {
     ite = false;
   }
@@ -9537,12 +9590,18 @@ static void test_all(void)
     C_String_print(" SKIP because not in static config\n");
   }
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx10 = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx10);
+  bool no_avx29 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx29);
+  bool no_bmi29 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi29);
+  bool no_adx9 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx9);
+  bool no_aesni9 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni9);
+  bool no_shaext9 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext9);
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
@@ -9568,12 +9627,18 @@ static void test_all(void)
   test_hmac_drbg(hmac_drbg_vectors_low);
   print_sep();
   EverCrypt_AutoConfig2_init();
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_avx2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_bmi2());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_adx());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_aesni());
-  KRML_HOST_IGNORE(!EverCrypt_AutoConfig2_has_shaext());
+  bool no_avx11 = !EverCrypt_AutoConfig2_has_avx();
+  KRML_MAYBE_UNUSED_VAR(no_avx11);
+  bool no_avx210 = !EverCrypt_AutoConfig2_has_avx2();
+  KRML_MAYBE_UNUSED_VAR(no_avx210);
+  bool no_bmi210 = !EverCrypt_AutoConfig2_has_bmi2();
+  KRML_MAYBE_UNUSED_VAR(no_bmi210);
+  bool no_adx10 = !EverCrypt_AutoConfig2_has_adx();
+  KRML_MAYBE_UNUSED_VAR(no_adx10);
+  bool no_aesni10 = !EverCrypt_AutoConfig2_has_aesni();
+  KRML_MAYBE_UNUSED_VAR(no_aesni10);
+  bool no_shaext10 = !EverCrypt_AutoConfig2_has_shaext();
+  KRML_MAYBE_UNUSED_VAR(no_shaext10);
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
