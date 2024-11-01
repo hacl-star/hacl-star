@@ -79,25 +79,63 @@ EXPORTS
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
   Hacl_Hash_Definitions_hash_len
+  Hacl_Hash_MD5_init
+  Hacl_Hash_MD5_finish
+  Hacl_Hash_MD5_update_multi
+  Hacl_Hash_MD5_update_last
+  Hacl_Hash_MD5_hash_oneshot
+  Hacl_Hash_MD5_malloc
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Hash_MD5_reset
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Hash_MD5_update
+  Hacl_Hash_MD5_digest
+  Hacl_Hash_MD5_free
+  Hacl_Hash_MD5_copy
+  Hacl_Hash_MD5_hash
   Hacl_Hash_SHA1_init
   Hacl_Hash_SHA1_finish
   Hacl_Hash_SHA1_update_multi
   Hacl_Hash_SHA1_update_last
   Hacl_Hash_SHA1_hash_oneshot
   Hacl_Hash_SHA1_malloc
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
   Hacl_Hash_SHA1_reset
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
   Hacl_Hash_SHA1_update
   Hacl_Hash_SHA1_digest
   Hacl_Hash_SHA1_free
   Hacl_Hash_SHA1_copy
   Hacl_Hash_SHA1_hash
+  Hacl_Hash_SHA3_update_multi_sha3
+  Hacl_Hash_SHA3_update_last_sha3
+  Hacl_Hash_SHA3_get_alg
+  Hacl_Hash_SHA3_malloc
+  Hacl_Hash_SHA3_free
+  Hacl_Hash_SHA3_copy
+  Hacl_Hash_SHA3_reset
+  Hacl_Hash_SHA3_update
+  Hacl_Hash_SHA3_digest
+  Hacl_Hash_SHA3_squeeze
+  Hacl_Hash_SHA3_block_len
+  Hacl_Hash_SHA3_hash_len
+  Hacl_Hash_SHA3_is_shake
+  Hacl_Hash_SHA3_absorb_inner_32
+  Hacl_Hash_SHA3_shake128
+  Hacl_Hash_SHA3_shake256
+  Hacl_Hash_SHA3_sha3_224
+  Hacl_Hash_SHA3_sha3_256
+  Hacl_Hash_SHA3_sha3_384
+  Hacl_Hash_SHA3_sha3_512
+  Hacl_Hash_SHA3_state_malloc
+  Hacl_Hash_SHA3_state_free
+  Hacl_Hash_SHA3_shake128_absorb_nblocks
+  Hacl_Hash_SHA3_shake128_absorb_final
+  Hacl_Hash_SHA3_shake128_squeeze_nblocks
   Hacl_Hash_SHA2_sha256_init
   Hacl_Hash_SHA2_sha256_update_nblocks
   Hacl_Hash_SHA2_sha256_update_last
   Hacl_Hash_SHA2_sha256_finish
   Hacl_Hash_SHA2_sha224_init
+  Hacl_Hash_SHA2_sha224_update_nblocks
   Hacl_Hash_SHA2_sha224_update_last
   Hacl_Hash_SHA2_sha224_finish
   Hacl_Hash_SHA2_sha512_init
@@ -134,39 +172,20 @@ EXPORTS
   Hacl_Hash_SHA2_digest_384
   Hacl_Hash_SHA2_free_384
   Hacl_Hash_SHA2_hash_384
+  Hacl_HMAC_compute_md5
   Hacl_HMAC_compute_sha1
+  Hacl_HMAC_compute_sha2_224
   Hacl_HMAC_compute_sha2_256
   Hacl_HMAC_compute_sha2_384
   Hacl_HMAC_compute_sha2_512
+  Hacl_HMAC_compute_sha3_224
+  Hacl_HMAC_compute_sha3_256
+  Hacl_HMAC_compute_sha3_384
+  Hacl_HMAC_compute_sha3_512
   Hacl_HMAC_compute_blake2s_32
   Hacl_HMAC_compute_blake2b_32
   Hacl_HMAC_Blake2s_128_compute_blake2s_128
   Hacl_HMAC_Blake2b_256_compute_blake2b_256
-  Hacl_Hash_SHA3_update_multi_sha3
-  Hacl_Hash_SHA3_update_last_sha3
-  Hacl_Hash_SHA3_get_alg
-  Hacl_Hash_SHA3_malloc
-  Hacl_Hash_SHA3_free
-  Hacl_Hash_SHA3_copy
-  Hacl_Hash_SHA3_reset
-  Hacl_Hash_SHA3_update
-  Hacl_Hash_SHA3_digest
-  Hacl_Hash_SHA3_squeeze
-  Hacl_Hash_SHA3_block_len
-  Hacl_Hash_SHA3_hash_len
-  Hacl_Hash_SHA3_is_shake
-  Hacl_Hash_SHA3_absorb_inner_32
-  Hacl_Hash_SHA3_shake128
-  Hacl_Hash_SHA3_shake256
-  Hacl_Hash_SHA3_sha3_224
-  Hacl_Hash_SHA3_sha3_256
-  Hacl_Hash_SHA3_sha3_384
-  Hacl_Hash_SHA3_sha3_512
-  Hacl_Hash_SHA3_state_malloc
-  Hacl_Hash_SHA3_state_free
-  Hacl_Hash_SHA3_shake128_absorb_nblocks
-  Hacl_Hash_SHA3_shake128_absorb_final
-  Hacl_Hash_SHA3_shake128_squeeze_nblocks
   Hacl_Hash_SHA3_Simd256_absorb_inner_256
   Hacl_Hash_SHA3_Simd256_shake128
   Hacl_Hash_SHA3_Simd256_shake256
@@ -179,18 +198,6 @@ EXPORTS
   Hacl_Hash_SHA3_Simd256_shake128_absorb_nblocks
   Hacl_Hash_SHA3_Simd256_shake128_absorb_final
   Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks
-  Hacl_Hash_MD5_init
-  Hacl_Hash_MD5_finish
-  Hacl_Hash_MD5_update_multi
-  Hacl_Hash_MD5_update_last
-  Hacl_Hash_MD5_hash_oneshot
-  Hacl_Hash_MD5_malloc
-  Hacl_Hash_MD5_reset
-  Hacl_Hash_MD5_update
-  Hacl_Hash_MD5_digest
-  Hacl_Hash_MD5_free
-  Hacl_Hash_MD5_copy
-  Hacl_Hash_MD5_hash
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -703,11 +710,11 @@ EXPORTS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase
   Hacl_HPKE_Curve51_CP32_SHA256_openBase
+  EverCrypt_Poly1305_mac
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
-  EverCrypt_Poly1305_mac
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA512_sealBase
