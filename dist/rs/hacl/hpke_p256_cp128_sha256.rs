@@ -4,13 +4,13 @@
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
 
-pub fn setupBaseS(
-    o_pkE: &mut [u8],
-    o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s,
-    skE: &[u8],
-    pkR: &[u8],
+pub fn setupBaseS <'a>(
+    o_pkE: &'a mut [u8],
+    o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s <'a>,
+    skE: &'a [u8],
+    pkR: &'a [u8],
     infolen: u32,
-    info: &[u8]
+    info: &'a [u8]
 ) ->
     u32
 {
@@ -265,12 +265,12 @@ pub fn setupBaseS(
     { res0 }
 }
 
-pub fn setupBaseR(
-    o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s,
-    enc: &[u8],
-    skR: &[u8],
+pub fn setupBaseR <'a>(
+    o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s <'a>,
+    enc: &'a [u8],
+    skR: &'a [u8],
     infolen: u32,
-    info: &[u8]
+    info: &'a [u8]
 ) ->
     u32
 {
@@ -550,13 +550,18 @@ pub fn sealBase(
 ) ->
     u32
 {
-    let ctx_key: [u8; 32] = [0u8; 32usize];
-    let ctx_nonce: [u8; 12] = [0u8; 12usize];
-    let ctx_seq: [u64; 1] = [0u64; 1usize];
-    let ctx_exporter: [u8; 32] = [0u8; 32usize];
+    let mut ctx_key: [u8; 32] = [0u8; 32usize];
+    let mut ctx_nonce: [u8; 12] = [0u8; 12usize];
+    let mut ctx_seq: [u64; 1] = [0u64; 1usize];
+    let mut ctx_exporter: [u8; 32] = [0u8; 32usize];
     let o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s =
         crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s
-        { ctx_key: &ctx_key, ctx_nonce: &ctx_nonce, ctx_seq: &ctx_seq, ctx_exporter: &ctx_exporter };
+        {
+            ctx_key: &mut ctx_key,
+            ctx_nonce: &mut ctx_nonce,
+            ctx_seq: &mut ctx_seq,
+            ctx_exporter: &mut ctx_exporter
+        };
     let res: u32 =
         crate::hpke_p256_cp128_sha256::setupBaseS(o_enc, o_ctx, skE, pkR, infolen, info);
     if res == 0u32
@@ -618,13 +623,18 @@ pub fn openBase(
 ) ->
     u32
 {
-    let ctx_key: [u8; 32] = [0u8; 32usize];
-    let ctx_nonce: [u8; 12] = [0u8; 12usize];
-    let ctx_seq: [u64; 1] = [0u64; 1usize];
-    let ctx_exporter: [u8; 32] = [0u8; 32usize];
+    let mut ctx_key: [u8; 32] = [0u8; 32usize];
+    let mut ctx_nonce: [u8; 12] = [0u8; 12usize];
+    let mut ctx_seq: [u64; 1] = [0u64; 1usize];
+    let mut ctx_exporter: [u8; 32] = [0u8; 32usize];
     let o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s =
         crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s
-        { ctx_key: &ctx_key, ctx_nonce: &ctx_nonce, ctx_seq: &ctx_seq, ctx_exporter: &ctx_exporter };
+        {
+            ctx_key: &mut ctx_key,
+            ctx_nonce: &mut ctx_nonce,
+            ctx_seq: &mut ctx_seq,
+            ctx_exporter: &mut ctx_exporter
+        };
     let res: u32 = crate::hpke_p256_cp128_sha256::setupBaseR(o_ctx, pkE, skR, infolen, info);
     if res == 0u32
     {

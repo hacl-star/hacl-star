@@ -32,6 +32,10 @@ pub enum error_code
     MaximumLengthExceeded
 }
 
-pub struct state_32 { pub block_state: Box<[u32]>, pub buf: Box<[u8]>, pub total_len: u64 }
+#[derive(PartialEq, Clone)]
+pub struct state_32
+{ pub block_state: Box<[u32]>, pub buf: Box<[u8]>, pub total_len: u64 }
 
-pub struct state_64 { pub block_state: Box<[u64]>, pub buf: Box<[u8]>, pub total_len: u64 }
+#[derive(PartialEq, Clone)]
+pub struct state_64
+{ pub block_state: Box<[u64]>, pub buf: Box<[u8]>, pub total_len: u64 }

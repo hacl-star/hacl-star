@@ -418,6 +418,7 @@ pub(crate) fn poly1305_finish(tag: &mut [u8], key: &[u8], ctx: &mut [u64])
     lowstar::endianness::store64_le(&mut tag[8usize..], f312)
 }
 
+#[derive(PartialEq, Clone)]
 pub struct state_t
 { pub block_state: Box<[u64]>, pub buf: Box<[u8]>, pub total_len: u64, pub p_key: Box<[u8]> }
 

@@ -665,8 +665,11 @@ fn update_last_sha3(
     }
 }
 
-pub struct hash_buf { pub fst: crate::streaming_types::hash_alg, pub snd: Box<[u64]> }
+#[derive(PartialEq, Clone)]
+pub struct hash_buf
+{ pub fst: crate::streaming_types::hash_alg, pub snd: Box<[u64]> }
 
+#[derive(PartialEq, Clone)]
 pub struct state_t
 { pub block_state: crate::hash_sha3::hash_buf, pub buf: Box<[u8]>, pub total_len: u64 }
 

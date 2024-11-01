@@ -4,10 +4,11 @@
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
 
+#[derive(PartialEq)]
 pub struct context_s <'a>
 {
-    pub ctx_key: &'a [u8],
-    pub ctx_nonce: &'a [u8],
+    pub ctx_key: &'a mut [u8],
+    pub ctx_nonce: &'a mut [u8],
     pub ctx_seq: &'a mut [u64],
-    pub ctx_exporter: &'a [u8]
+    pub ctx_exporter: &'a mut [u8]
 }

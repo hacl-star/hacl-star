@@ -23,9 +23,9 @@
     )
 }
 
-#[inline] fn sha224_update8(
-    b: crate::sha2_types::uint8_8p,
-    hash: &mut [lib::intvector_intrinsics::vec256]
+#[inline] fn sha224_update8 <'a>(
+    b: crate::sha2_types::uint8_8p <'a>,
+    hash: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let mut hash_old: [lib::intvector_intrinsics::vec256; 8] =
@@ -37,19 +37,19 @@
     {
         crate::sha2_types::uint8_8p
         {
-            fst: ref b0,
+            fst: b0,
             snd:
             crate::sha2_types::uint8_7p
             {
-                fst: ref b1,
+                fst: b1,
                 snd:
                 crate::sha2_types::uint8_6p
                 {
-                    fst: ref b2,
+                    fst: b2,
                     snd:
                     crate::sha2_types::uint8_5p
                     {
-                        fst: ref b3,
+                        fst: b3,
                         snd:
                         crate::sha2_types::uint8_4p
                         {
@@ -453,10 +453,10 @@
     )
 }
 
-#[inline] fn sha224_update_nblocks8(
+#[inline] fn sha224_update_nblocks8 <'a>(
     len: u32,
-    b: crate::sha2_types::uint8_8p,
-    st: &mut [lib::intvector_intrinsics::vec256]
+    mut b: crate::sha2_types::uint8_8p <'a>,
+    st: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let blocks: u32 = len.wrapping_div(64u32);
@@ -467,29 +467,30 @@
             {
                 crate::sha2_types::uint8_8p
                 {
-                    fst: ref b0,
+                    fst: b0,
                     snd:
                     crate::sha2_types::uint8_7p
                     {
-                        fst: ref b1,
+                        fst: b1,
                         snd:
                         crate::sha2_types::uint8_6p
                         {
-                            fst: ref b2,
+                            fst: b2,
                             snd:
                             crate::sha2_types::uint8_5p
                             {
-                                fst: ref b3,
+                                fst: b3,
                                 snd:
                                 crate::sha2_types::uint8_4p
                                 {
-                                    fst: ref b4,
+                                    fst: ref mut b4,
                                     snd:
                                     crate::sha2_types::uint8_3p
                                     {
-                                        fst: ref b5,
+                                        fst: ref mut b5,
                                         snd:
-                                        crate::sha2_types::uint8_2p { fst: ref b6, snd: ref b7 }
+                                        crate::sha2_types::uint8_2p
+                                        { fst: ref mut b6, snd: ref mut b7 }
                                     }
                                 }
                             }
@@ -502,10 +503,14 @@
                       let bl1: (&[u8], &[u8]) = b1.split_at(i.wrapping_mul(64u32) as usize);
                       let bl2: (&[u8], &[u8]) = b2.split_at(i.wrapping_mul(64u32) as usize);
                       let bl3: (&[u8], &[u8]) = b3.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl4: (&[u8], &[u8]) = b4.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl5: (&[u8], &[u8]) = b5.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl6: (&[u8], &[u8]) = b6.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl7: (&[u8], &[u8]) = b7.split_at(i.wrapping_mul(64u32) as usize);
+                      let bl4: (&mut [u8], &mut [u8]) =
+                          b4.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl5: (&mut [u8], &mut [u8]) =
+                          b5.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl6: (&mut [u8], &mut [u8]) =
+                          b6.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl7: (&mut [u8], &mut [u8]) =
+                          b7.split_at_mut(i.wrapping_mul(64u32) as usize);
                       crate::sha2_types::uint8_8p
                       {
                           fst: bl0.1,
@@ -543,11 +548,11 @@
     }
 }
 
-#[inline] fn sha224_update_last8(
+#[inline] fn sha224_update_last8 <'a>(
     totlen: u64,
     len: u32,
-    b: crate::sha2_types::uint8_8p,
-    hash: &mut [lib::intvector_intrinsics::vec256]
+    b: crate::sha2_types::uint8_8p <'a>,
+    hash: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let blocks: u32 = if len.wrapping_add(8u32).wrapping_add(1u32) <= 64u32 { 1u32 } else { 2u32 };
@@ -561,19 +566,19 @@
         {
             crate::sha2_types::uint8_8p
             {
-                fst: ref b0,
+                fst: b0,
                 snd:
                 crate::sha2_types::uint8_7p
                 {
-                    fst: ref b1,
+                    fst: b1,
                     snd:
                     crate::sha2_types::uint8_6p
                     {
-                        fst: ref b2,
+                        fst: b2,
                         snd:
                         crate::sha2_types::uint8_5p
                         {
-                            fst: ref b3,
+                            fst: b3,
                             snd:
                             crate::sha2_types::uint8_4p
                             {
@@ -640,37 +645,37 @@
                   (last5.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last013: (&[u8], &[u8]) = last5.0.split_at(0usize);
-                  let last113: (&[u8], &[u8]) = last013.1.split_at(64usize);
-                  let l40: &[u8] = last113.0;
-                  let l41: &[u8] = last113.1;
+                  let last013: (&mut [u8], &mut [u8]) = last5.0.split_at_mut(0usize);
+                  let last113: (&mut [u8], &mut [u8]) = last013.1.split_at_mut(64usize);
+                  let l40: &mut [u8] = last113.0;
+                  let l41: &mut [u8] = last113.1;
                   (last6.0[0usize..len as usize]).copy_from_slice(&b5[0usize..len as usize]);
                   last6.0[len as usize] = 0x80u8;
                   (last6.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last014: (&[u8], &[u8]) = last6.0.split_at(0usize);
-                  let last114: (&[u8], &[u8]) = last014.1.split_at(64usize);
-                  let l50: &[u8] = last114.0;
-                  let l51: &[u8] = last114.1;
+                  let last014: (&mut [u8], &mut [u8]) = last6.0.split_at_mut(0usize);
+                  let last114: (&mut [u8], &mut [u8]) = last014.1.split_at_mut(64usize);
+                  let l50: &mut [u8] = last114.0;
+                  let l51: &mut [u8] = last114.1;
                   (last7.0[0usize..len as usize]).copy_from_slice(&b6[0usize..len as usize]);
                   last7.0[len as usize] = 0x80u8;
                   (last7.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last015: (&[u8], &[u8]) = last7.0.split_at(0usize);
-                  let last115: (&[u8], &[u8]) = last015.1.split_at(64usize);
-                  let l60: &[u8] = last115.0;
-                  let l61: &[u8] = last115.1;
+                  let last015: (&mut [u8], &mut [u8]) = last7.0.split_at_mut(0usize);
+                  let last115: (&mut [u8], &mut [u8]) = last015.1.split_at_mut(64usize);
+                  let l60: &mut [u8] = last115.0;
+                  let l61: &mut [u8] = last115.1;
                   (last7.1[0usize..len as usize]).copy_from_slice(&b7[0usize..len as usize]);
                   last7.1[len as usize] = 0x80u8;
                   (last7.1[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last016: (&[u8], &[u8]) = last7.1.split_at(0usize);
-                  let last116: (&[u8], &[u8]) = last016.1.split_at(64usize);
-                  let l70: &[u8] = last116.0;
-                  let l71: &[u8] = last116.1;
+                  let last016: (&mut [u8], &mut [u8]) = last7.1.split_at_mut(0usize);
+                  let last116: (&mut [u8], &mut [u8]) = last016.1.split_at_mut(64usize);
+                  let l70: &mut [u8] = last116.0;
+                  let l71: &mut [u8] = last116.1;
                   let mb0: crate::sha2_types::uint8_8p =
                       crate::sha2_types::uint8_8p
                       {
@@ -738,15 +743,15 @@
                   crate::sha2_types::uint8_2x8p { fst: mb0, snd: mb1 }
               }
         };
-    let last0: &crate::sha2_types::uint8_8p = &scrut.fst;
-    let last1: &crate::sha2_types::uint8_8p = &scrut.snd;
-    crate::sha2_vec256::sha224_update8(*last0, hash);
-    if blocks > 1u32 { crate::sha2_vec256::sha224_update8(*last1, hash) }
+    let last0: crate::sha2_types::uint8_8p = scrut.fst;
+    let last1: crate::sha2_types::uint8_8p = scrut.snd;
+    crate::sha2_vec256::sha224_update8(last0, hash);
+    if blocks > 1u32 { crate::sha2_vec256::sha224_update8(last1, hash) }
 }
 
-#[inline] fn sha224_finish8(
-    st: &mut [lib::intvector_intrinsics::vec256],
-    mut h: crate::sha2_types::uint8_8p
+#[inline] fn sha224_finish8 <'a>(
+    st: &'a mut [lib::intvector_intrinsics::vec256],
+    mut h: crate::sha2_types::uint8_8p <'a>
 )
 {
     let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -912,26 +917,26 @@
 }
 
 pub fn sha224_8(
-    dst0: &[u8],
-    dst1: &[u8],
-    dst2: &[u8],
-    dst3: &[u8],
-    dst4: &[u8],
-    dst5: &[u8],
-    dst6: &[u8],
-    dst7: &[u8],
+    dst0: &mut [u8],
+    dst1: &mut [u8],
+    dst2: &mut [u8],
+    dst3: &mut [u8],
+    dst4: &mut [u8],
+    dst5: &mut [u8],
+    dst6: &mut [u8],
+    dst7: &mut [u8],
     input_len: u32,
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
-    input4: &[u8],
-    input5: &[u8],
-    input6: &[u8],
-    input7: &[u8]
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
+    input4: &mut [u8],
+    input5: &mut [u8],
+    input6: &mut [u8],
+    input7: &mut [u8]
 )
 {
-    let ib: crate::sha2_types::uint8_8p =
+    let mut ib: crate::sha2_types::uint8_8p =
         crate::sha2_types::uint8_8p
         {
             fst: input0,
@@ -1002,28 +1007,29 @@ pub fn sha224_8(
         {
             crate::sha2_types::uint8_8p
             {
-                fst: ref b0,
+                fst: ref mut b0,
                 snd:
                 crate::sha2_types::uint8_7p
                 {
-                    fst: ref b1,
+                    fst: ref mut b1,
                     snd:
                     crate::sha2_types::uint8_6p
                     {
-                        fst: ref b2,
+                        fst: ref mut b2,
                         snd:
                         crate::sha2_types::uint8_5p
                         {
-                            fst: ref b3,
+                            fst: ref mut b3,
                             snd:
                             crate::sha2_types::uint8_4p
                             {
-                                fst: ref b4,
+                                fst: ref mut b4,
                                 snd:
                                 crate::sha2_types::uint8_3p
                                 {
-                                    fst: ref b5,
-                                    snd: crate::sha2_types::uint8_2p { fst: ref b6, snd: ref b7 }
+                                    fst: ref mut b5,
+                                    snd:
+                                    crate::sha2_types::uint8_2p { fst: ref mut b6, snd: ref mut b7 }
                                 }
                             }
                         }
@@ -1032,14 +1038,22 @@ pub fn sha224_8(
             }
             =>
               {
-                  let bl0: (&[u8], &[u8]) = b0.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl1: (&[u8], &[u8]) = b1.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl2: (&[u8], &[u8]) = b2.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl3: (&[u8], &[u8]) = b3.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl4: (&[u8], &[u8]) = b4.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl5: (&[u8], &[u8]) = b5.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl6: (&[u8], &[u8]) = b6.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl7: (&[u8], &[u8]) = b7.split_at(input_len.wrapping_sub(rem1) as usize);
+                  let bl0: (&mut [u8], &mut [u8]) =
+                      b0.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl1: (&mut [u8], &mut [u8]) =
+                      b1.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl2: (&mut [u8], &mut [u8]) =
+                      b2.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl3: (&mut [u8], &mut [u8]) =
+                      b3.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl4: (&mut [u8], &mut [u8]) =
+                      b4.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl5: (&mut [u8], &mut [u8]) =
+                      b5.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl6: (&mut [u8], &mut [u8]) =
+                      b6.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl7: (&mut [u8], &mut [u8]) =
+                      b7.split_at_mut(input_len.wrapping_sub(rem1) as usize);
                   crate::sha2_types::uint8_8p
                   {
                       fst: bl0.1,
@@ -1096,9 +1110,9 @@ pub fn sha224_8(
     )
 }
 
-#[inline] fn sha256_update8(
-    b: crate::sha2_types::uint8_8p,
-    hash: &mut [lib::intvector_intrinsics::vec256]
+#[inline] fn sha256_update8 <'a>(
+    b: crate::sha2_types::uint8_8p <'a>,
+    hash: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let mut hash_old: [lib::intvector_intrinsics::vec256; 8] =
@@ -1526,10 +1540,10 @@ pub fn sha224_8(
     )
 }
 
-#[inline] fn sha256_update_nblocks8(
+#[inline] fn sha256_update_nblocks8 <'a>(
     len: u32,
-    b: crate::sha2_types::uint8_8p,
-    st: &mut [lib::intvector_intrinsics::vec256]
+    mut b: crate::sha2_types::uint8_8p <'a>,
+    st: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let blocks: u32 = len.wrapping_div(64u32);
@@ -1540,29 +1554,30 @@ pub fn sha224_8(
             {
                 crate::sha2_types::uint8_8p
                 {
-                    fst: ref b0,
+                    fst: ref mut b0,
                     snd:
                     crate::sha2_types::uint8_7p
                     {
-                        fst: ref b1,
+                        fst: ref mut b1,
                         snd:
                         crate::sha2_types::uint8_6p
                         {
-                            fst: ref b2,
+                            fst: ref mut b2,
                             snd:
                             crate::sha2_types::uint8_5p
                             {
-                                fst: ref b3,
+                                fst: ref mut b3,
                                 snd:
                                 crate::sha2_types::uint8_4p
                                 {
-                                    fst: ref b4,
+                                    fst: ref mut b4,
                                     snd:
                                     crate::sha2_types::uint8_3p
                                     {
-                                        fst: ref b5,
+                                        fst: ref mut b5,
                                         snd:
-                                        crate::sha2_types::uint8_2p { fst: ref b6, snd: ref b7 }
+                                        crate::sha2_types::uint8_2p
+                                        { fst: ref mut b6, snd: ref mut b7 }
                                     }
                                 }
                             }
@@ -1571,14 +1586,22 @@ pub fn sha224_8(
                 }
                 =>
                   {
-                      let bl0: (&[u8], &[u8]) = b0.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl1: (&[u8], &[u8]) = b1.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl2: (&[u8], &[u8]) = b2.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl3: (&[u8], &[u8]) = b3.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl4: (&[u8], &[u8]) = b4.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl5: (&[u8], &[u8]) = b5.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl6: (&[u8], &[u8]) = b6.split_at(i.wrapping_mul(64u32) as usize);
-                      let bl7: (&[u8], &[u8]) = b7.split_at(i.wrapping_mul(64u32) as usize);
+                      let bl0: (&mut [u8], &mut [u8]) =
+                          b0.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl1: (&mut [u8], &mut [u8]) =
+                          b1.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl2: (&mut [u8], &mut [u8]) =
+                          b2.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl3: (&mut [u8], &mut [u8]) =
+                          b3.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl4: (&mut [u8], &mut [u8]) =
+                          b4.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl5: (&mut [u8], &mut [u8]) =
+                          b5.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl6: (&mut [u8], &mut [u8]) =
+                          b6.split_at_mut(i.wrapping_mul(64u32) as usize);
+                      let bl7: (&mut [u8], &mut [u8]) =
+                          b7.split_at_mut(i.wrapping_mul(64u32) as usize);
                       crate::sha2_types::uint8_8p
                       {
                           fst: bl0.1,
@@ -1616,11 +1639,11 @@ pub fn sha224_8(
     }
 }
 
-#[inline] fn sha256_update_last8(
+#[inline] fn sha256_update_last8 <'a>(
     totlen: u64,
     len: u32,
-    b: crate::sha2_types::uint8_8p,
-    hash: &mut [lib::intvector_intrinsics::vec256]
+    b: crate::sha2_types::uint8_8p <'a>,
+    hash: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let blocks: u32 = if len.wrapping_add(8u32).wrapping_add(1u32) <= 64u32 { 1u32 } else { 2u32 };
@@ -1677,73 +1700,73 @@ pub fn sha224_8(
                   (last1.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last01: (&[u8], &[u8]) = last1.0.split_at(0usize);
-                  let last11: (&[u8], &[u8]) = last01.1.split_at(64usize);
-                  let l00: &[u8] = last11.0;
-                  let l01: &[u8] = last11.1;
+                  let last01: (&mut [u8], &mut [u8]) = last1.0.split_at_mut(0usize);
+                  let last11: (&mut [u8], &mut [u8]) = last01.1.split_at_mut(64usize);
+                  let l00: &mut [u8] = last11.0;
+                  let l01: &mut [u8] = last11.1;
                   (last2.0[0usize..len as usize]).copy_from_slice(&b1[0usize..len as usize]);
                   last2.0[len as usize] = 0x80u8;
                   (last2.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last010: (&[u8], &[u8]) = last2.0.split_at(0usize);
-                  let last110: (&[u8], &[u8]) = last010.1.split_at(64usize);
-                  let l10: &[u8] = last110.0;
-                  let l11: &[u8] = last110.1;
+                  let last010: (&mut [u8], &mut [u8]) = last2.0.split_at_mut(0usize);
+                  let last110: (&mut [u8], &mut [u8]) = last010.1.split_at_mut(64usize);
+                  let l10: &mut [u8] = last110.0;
+                  let l11: &mut [u8] = last110.1;
                   (last3.0[0usize..len as usize]).copy_from_slice(&b2[0usize..len as usize]);
                   last3.0[len as usize] = 0x80u8;
                   (last3.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last011: (&[u8], &[u8]) = last3.0.split_at(0usize);
-                  let last111: (&[u8], &[u8]) = last011.1.split_at(64usize);
-                  let l20: &[u8] = last111.0;
-                  let l21: &[u8] = last111.1;
+                  let last011: (&mut [u8], &mut [u8]) = last3.0.split_at_mut(0usize);
+                  let last111: (&mut [u8], &mut [u8]) = last011.1.split_at_mut(64usize);
+                  let l20: &mut [u8] = last111.0;
+                  let l21: &mut [u8] = last111.1;
                   (last4.0[0usize..len as usize]).copy_from_slice(&b3[0usize..len as usize]);
                   last4.0[len as usize] = 0x80u8;
                   (last4.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last012: (&[u8], &[u8]) = last4.0.split_at(0usize);
-                  let last112: (&[u8], &[u8]) = last012.1.split_at(64usize);
-                  let l30: &[u8] = last112.0;
-                  let l31: &[u8] = last112.1;
+                  let last012: (&mut [u8], &mut [u8]) = last4.0.split_at_mut(0usize);
+                  let last112: (&mut [u8], &mut [u8]) = last012.1.split_at_mut(64usize);
+                  let l30: &mut [u8] = last112.0;
+                  let l31: &mut [u8] = last112.1;
                   (last5.0[0usize..len as usize]).copy_from_slice(&b4[0usize..len as usize]);
                   last5.0[len as usize] = 0x80u8;
                   (last5.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last013: (&[u8], &[u8]) = last5.0.split_at(0usize);
-                  let last113: (&[u8], &[u8]) = last013.1.split_at(64usize);
-                  let l40: &[u8] = last113.0;
-                  let l41: &[u8] = last113.1;
+                  let last013: (&mut [u8], &mut [u8]) = last5.0.split_at_mut(0usize);
+                  let last113: (&mut [u8], &mut [u8]) = last013.1.split_at_mut(64usize);
+                  let l40: &mut [u8] = last113.0;
+                  let l41: &mut [u8] = last113.1;
                   (last6.0[0usize..len as usize]).copy_from_slice(&b5[0usize..len as usize]);
                   last6.0[len as usize] = 0x80u8;
                   (last6.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last014: (&[u8], &[u8]) = last6.0.split_at(0usize);
-                  let last114: (&[u8], &[u8]) = last014.1.split_at(64usize);
-                  let l50: &[u8] = last114.0;
-                  let l51: &[u8] = last114.1;
+                  let last014: (&mut [u8], &mut [u8]) = last6.0.split_at_mut(0usize);
+                  let last114: (&mut [u8], &mut [u8]) = last014.1.split_at_mut(64usize);
+                  let l50: &mut [u8] = last114.0;
+                  let l51: &mut [u8] = last114.1;
                   (last7.0[0usize..len as usize]).copy_from_slice(&b6[0usize..len as usize]);
                   last7.0[len as usize] = 0x80u8;
                   (last7.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last015: (&[u8], &[u8]) = last7.0.split_at(0usize);
-                  let last115: (&[u8], &[u8]) = last015.1.split_at(64usize);
-                  let l60: &[u8] = last115.0;
-                  let l61: &[u8] = last115.1;
+                  let last015: (&mut [u8], &mut [u8]) = last7.0.split_at_mut(0usize);
+                  let last115: (&mut [u8], &mut [u8]) = last015.1.split_at_mut(64usize);
+                  let l60: &mut [u8] = last115.0;
+                  let l61: &mut [u8] = last115.1;
                   (last7.1[0usize..len as usize]).copy_from_slice(&b7[0usize..len as usize]);
                   last7.1[len as usize] = 0x80u8;
                   (last7.1[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
                   );
-                  let last016: (&[u8], &[u8]) = last7.1.split_at(0usize);
-                  let last116: (&[u8], &[u8]) = last016.1.split_at(64usize);
-                  let l70: &[u8] = last116.0;
-                  let l71: &[u8] = last116.1;
+                  let last016: (&mut [u8], &mut [u8]) = last7.1.split_at_mut(0usize);
+                  let last116: (&mut [u8], &mut [u8]) = last016.1.split_at_mut(64usize);
+                  let l70: &mut [u8] = last116.0;
+                  let l71: &mut [u8] = last116.1;
                   let mb0: crate::sha2_types::uint8_8p =
                       crate::sha2_types::uint8_8p
                       {
@@ -1811,15 +1834,15 @@ pub fn sha224_8(
                   crate::sha2_types::uint8_2x8p { fst: mb0, snd: mb1 }
               }
         };
-    let last0: &crate::sha2_types::uint8_8p = &scrut.fst;
-    let last1: &crate::sha2_types::uint8_8p = &scrut.snd;
-    crate::sha2_vec256::sha256_update8(*last0, hash);
-    if blocks > 1u32 { crate::sha2_vec256::sha256_update8(*last1, hash) }
+    let last0: crate::sha2_types::uint8_8p = scrut.fst;
+    let last1: crate::sha2_types::uint8_8p = scrut.snd;
+    crate::sha2_vec256::sha256_update8(last0, hash);
+    if blocks > 1u32 { crate::sha2_vec256::sha256_update8(last1, hash) }
 }
 
-#[inline] fn sha256_finish8(
-    st: &mut [lib::intvector_intrinsics::vec256],
-    mut h: crate::sha2_types::uint8_8p
+#[inline] fn sha256_finish8 <'a>(
+    st: &'a mut [lib::intvector_intrinsics::vec256],
+    mut h: crate::sha2_types::uint8_8p <'a>
 )
 {
     let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -1985,26 +2008,26 @@ pub fn sha224_8(
 }
 
 pub fn sha256_8(
-    dst0: &[u8],
-    dst1: &[u8],
-    dst2: &[u8],
-    dst3: &[u8],
-    dst4: &[u8],
-    dst5: &[u8],
-    dst6: &[u8],
-    dst7: &[u8],
+    dst0: &mut [u8],
+    dst1: &mut [u8],
+    dst2: &mut [u8],
+    dst3: &mut [u8],
+    dst4: &mut [u8],
+    dst5: &mut [u8],
+    dst6: &mut [u8],
+    dst7: &mut [u8],
     input_len: u32,
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
-    input4: &[u8],
-    input5: &[u8],
-    input6: &[u8],
-    input7: &[u8]
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
+    input4: &mut [u8],
+    input5: &mut [u8],
+    input6: &mut [u8],
+    input7: &mut [u8]
 )
 {
-    let ib: crate::sha2_types::uint8_8p =
+    let mut ib: crate::sha2_types::uint8_8p =
         crate::sha2_types::uint8_8p
         {
             fst: input0,
@@ -2075,28 +2098,29 @@ pub fn sha256_8(
         {
             crate::sha2_types::uint8_8p
             {
-                fst: ref b0,
+                fst: ref mut b0,
                 snd:
                 crate::sha2_types::uint8_7p
                 {
-                    fst: ref b1,
+                    fst: ref mut b1,
                     snd:
                     crate::sha2_types::uint8_6p
                     {
-                        fst: ref b2,
+                        fst: ref mut b2,
                         snd:
                         crate::sha2_types::uint8_5p
                         {
-                            fst: ref b3,
+                            fst: ref mut b3,
                             snd:
                             crate::sha2_types::uint8_4p
                             {
-                                fst: ref b4,
+                                fst: ref mut b4,
                                 snd:
                                 crate::sha2_types::uint8_3p
                                 {
-                                    fst: ref b5,
-                                    snd: crate::sha2_types::uint8_2p { fst: ref b6, snd: ref b7 }
+                                    fst: ref mut b5,
+                                    snd:
+                                    crate::sha2_types::uint8_2p { fst: ref mut b6, snd: ref mut b7 }
                                 }
                             }
                         }
@@ -2105,14 +2129,22 @@ pub fn sha256_8(
             }
             =>
               {
-                  let bl0: (&[u8], &[u8]) = b0.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl1: (&[u8], &[u8]) = b1.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl2: (&[u8], &[u8]) = b2.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl3: (&[u8], &[u8]) = b3.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl4: (&[u8], &[u8]) = b4.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl5: (&[u8], &[u8]) = b5.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl6: (&[u8], &[u8]) = b6.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl7: (&[u8], &[u8]) = b7.split_at(input_len.wrapping_sub(rem1) as usize);
+                  let bl0: (&mut [u8], &mut [u8]) =
+                      b0.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl1: (&mut [u8], &mut [u8]) =
+                      b1.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl2: (&mut [u8], &mut [u8]) =
+                      b2.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl3: (&mut [u8], &mut [u8]) =
+                      b3.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl4: (&mut [u8], &mut [u8]) =
+                      b4.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl5: (&mut [u8], &mut [u8]) =
+                      b5.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl6: (&mut [u8], &mut [u8]) =
+                      b6.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl7: (&mut [u8], &mut [u8]) =
+                      b7.split_at_mut(input_len.wrapping_sub(rem1) as usize);
                   crate::sha2_types::uint8_8p
                   {
                       fst: bl0.1,
@@ -2169,9 +2201,9 @@ pub fn sha256_8(
     )
 }
 
-#[inline] fn sha384_update4(
-    b: crate::sha2_types::uint8_4p,
-    hash: &mut [lib::intvector_intrinsics::vec256]
+#[inline] fn sha384_update4 <'a>(
+    b: crate::sha2_types::uint8_4p <'a>,
+    hash: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let mut hash_old: [lib::intvector_intrinsics::vec256; 8] =
@@ -2480,10 +2512,10 @@ pub fn sha256_8(
     )
 }
 
-#[inline] fn sha384_update_nblocks4(
+#[inline] fn sha384_update_nblocks4 <'a>(
     len: u32,
-    b: crate::sha2_types::uint8_4p,
-    st: &mut [lib::intvector_intrinsics::vec256]
+    mut b: crate::sha2_types::uint8_4p <'a>,
+    st: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let blocks: u32 = len.wrapping_div(128u32);
@@ -2494,17 +2526,24 @@ pub fn sha256_8(
             {
                 crate::sha2_types::uint8_4p
                 {
-                    fst: ref b0,
+                    fst: ref mut b0,
                     snd:
                     crate::sha2_types::uint8_3p
-                    { fst: ref b1, snd: crate::sha2_types::uint8_2p { fst: ref b2, snd: ref b3 } }
+                    {
+                        fst: ref mut b1,
+                        snd: crate::sha2_types::uint8_2p { fst: ref mut b2, snd: ref mut b3 }
+                    }
                 }
                 =>
                   {
-                      let bl0: (&[u8], &[u8]) = b0.split_at(i.wrapping_mul(128u32) as usize);
-                      let bl1: (&[u8], &[u8]) = b1.split_at(i.wrapping_mul(128u32) as usize);
-                      let bl2: (&[u8], &[u8]) = b2.split_at(i.wrapping_mul(128u32) as usize);
-                      let bl3: (&[u8], &[u8]) = b3.split_at(i.wrapping_mul(128u32) as usize);
+                      let bl0: (&mut [u8], &mut [u8]) =
+                          b0.split_at_mut(i.wrapping_mul(128u32) as usize);
+                      let bl1: (&mut [u8], &mut [u8]) =
+                          b1.split_at_mut(i.wrapping_mul(128u32) as usize);
+                      let bl2: (&mut [u8], &mut [u8]) =
+                          b2.split_at_mut(i.wrapping_mul(128u32) as usize);
+                      let bl3: (&mut [u8], &mut [u8]) =
+                          b3.split_at_mut(i.wrapping_mul(128u32) as usize);
                       crate::sha2_types::uint8_4p
                       {
                           fst: bl0.1,
@@ -2521,11 +2560,11 @@ pub fn sha256_8(
     }
 }
 
-#[inline] fn sha384_update_last4(
+#[inline] fn sha384_update_last4 <'a>(
     totlen: fstar::uint128::uint128,
     len: u32,
-    b: crate::sha2_types::uint8_4p,
-    hash: &mut [lib::intvector_intrinsics::vec256]
+    b: crate::sha2_types::uint8_4p <'a>,
+    hash: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let blocks: u32 =
@@ -2556,37 +2595,37 @@ pub fn sha256_8(
                   (last1.0[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize
                   +
                   16usize]).copy_from_slice(&(&totlen_buf)[0usize..16usize]);
-                  let last01: (&[u8], &[u8]) = last1.0.split_at(0usize);
-                  let last11: (&[u8], &[u8]) = last01.1.split_at(128usize);
-                  let l00: &[u8] = last11.0;
-                  let l01: &[u8] = last11.1;
+                  let last01: (&mut [u8], &mut [u8]) = last1.0.split_at_mut(0usize);
+                  let last11: (&mut [u8], &mut [u8]) = last01.1.split_at_mut(128usize);
+                  let l00: &mut [u8] = last11.0;
+                  let l01: &mut [u8] = last11.1;
                   (last2.0[0usize..len as usize]).copy_from_slice(&b1[0usize..len as usize]);
                   last2.0[len as usize] = 0x80u8;
                   (last2.0[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize
                   +
                   16usize]).copy_from_slice(&(&totlen_buf)[0usize..16usize]);
-                  let last010: (&[u8], &[u8]) = last2.0.split_at(0usize);
-                  let last110: (&[u8], &[u8]) = last010.1.split_at(128usize);
-                  let l10: &[u8] = last110.0;
-                  let l11: &[u8] = last110.1;
+                  let last010: (&mut [u8], &mut [u8]) = last2.0.split_at_mut(0usize);
+                  let last110: (&mut [u8], &mut [u8]) = last010.1.split_at_mut(128usize);
+                  let l10: &mut [u8] = last110.0;
+                  let l11: &mut [u8] = last110.1;
                   (last3.0[0usize..len as usize]).copy_from_slice(&b2[0usize..len as usize]);
                   last3.0[len as usize] = 0x80u8;
                   (last3.0[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize
                   +
                   16usize]).copy_from_slice(&(&totlen_buf)[0usize..16usize]);
-                  let last011: (&[u8], &[u8]) = last3.0.split_at(0usize);
-                  let last111: (&[u8], &[u8]) = last011.1.split_at(128usize);
-                  let l20: &[u8] = last111.0;
-                  let l21: &[u8] = last111.1;
+                  let last011: (&mut [u8], &mut [u8]) = last3.0.split_at_mut(0usize);
+                  let last111: (&mut [u8], &mut [u8]) = last011.1.split_at_mut(128usize);
+                  let l20: &mut [u8] = last111.0;
+                  let l21: &mut [u8] = last111.1;
                   (last3.1[0usize..len as usize]).copy_from_slice(&b3[0usize..len as usize]);
                   last3.1[len as usize] = 0x80u8;
                   (last3.1[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize
                   +
                   16usize]).copy_from_slice(&(&totlen_buf)[0usize..16usize]);
-                  let last012: (&[u8], &[u8]) = last3.1.split_at(0usize);
-                  let last112: (&[u8], &[u8]) = last012.1.split_at(128usize);
-                  let l30: &[u8] = last112.0;
-                  let l31: &[u8] = last112.1;
+                  let last012: (&mut [u8], &mut [u8]) = last3.1.split_at_mut(0usize);
+                  let last112: (&mut [u8], &mut [u8]) = last012.1.split_at_mut(128usize);
+                  let l30: &mut [u8] = last112.0;
+                  let l31: &mut [u8] = last112.1;
                   let mb0: crate::sha2_types::uint8_4p =
                       crate::sha2_types::uint8_4p
                       {
@@ -2606,15 +2645,15 @@ pub fn sha256_8(
                   crate::sha2_types::uint8_2x4p { fst: mb0, snd: mb1 }
               }
         };
-    let last0: &crate::sha2_types::uint8_4p = &scrut.fst;
-    let last1: &crate::sha2_types::uint8_4p = &scrut.snd;
-    crate::sha2_vec256::sha384_update4(*last0, hash);
-    if blocks > 1u32 { crate::sha2_vec256::sha384_update4(*last1, hash) }
+    let last0: crate::sha2_types::uint8_4p = scrut.fst;
+    let last1: crate::sha2_types::uint8_4p = scrut.snd;
+    crate::sha2_vec256::sha384_update4(last0, hash);
+    if blocks > 1u32 { crate::sha2_vec256::sha384_update4(last1, hash) }
 }
 
-#[inline] fn sha384_finish4(
-    st: &mut [lib::intvector_intrinsics::vec256],
-    mut h: crate::sha2_types::uint8_4p
+#[inline] fn sha384_finish4 <'a>(
+    st: &'a mut [lib::intvector_intrinsics::vec256],
+    mut h: crate::sha2_types::uint8_4p <'a>
 )
 {
     let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -2707,18 +2746,18 @@ pub fn sha256_8(
 }
 
 pub fn sha384_4(
-    dst0: &[u8],
-    dst1: &[u8],
-    dst2: &[u8],
-    dst3: &[u8],
+    dst0: &mut [u8],
+    dst1: &mut [u8],
+    dst2: &mut [u8],
+    dst3: &mut [u8],
     input_len: u32,
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8]
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8]
 )
 {
-    let ib: crate::sha2_types::uint8_4p =
+    let mut ib: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: input0,
@@ -2746,17 +2785,24 @@ pub fn sha384_4(
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref b0,
+                fst: ref mut b0,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: ref b1, snd: crate::sha2_types::uint8_2p { fst: ref b2, snd: ref b3 } }
+                {
+                    fst: ref mut b1,
+                    snd: crate::sha2_types::uint8_2p { fst: ref mut b2, snd: ref mut b3 }
+                }
             }
             =>
               {
-                  let bl0: (&[u8], &[u8]) = b0.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl1: (&[u8], &[u8]) = b1.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl2: (&[u8], &[u8]) = b2.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl3: (&[u8], &[u8]) = b3.split_at(input_len.wrapping_sub(rem1) as usize);
+                  let bl0: (&mut [u8], &mut [u8]) =
+                      b0.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl1: (&mut [u8], &mut [u8]) =
+                      b1.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl2: (&mut [u8], &mut [u8]) =
+                      b2.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl3: (&mut [u8], &mut [u8]) =
+                      b3.split_at_mut(input_len.wrapping_sub(rem1) as usize);
                   crate::sha2_types::uint8_4p
                   {
                       fst: bl0.1,
@@ -2789,9 +2835,9 @@ pub fn sha384_4(
     )
 }
 
-#[inline] fn sha512_update4(
-    b: crate::sha2_types::uint8_4p,
-    hash: &mut [lib::intvector_intrinsics::vec256]
+#[inline] fn sha512_update4 <'a>(
+    b: crate::sha2_types::uint8_4p <'a>,
+    hash: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let mut hash_old: [lib::intvector_intrinsics::vec256; 8] =
@@ -3100,10 +3146,10 @@ pub fn sha384_4(
     )
 }
 
-#[inline] fn sha512_update_nblocks4(
+#[inline] fn sha512_update_nblocks4 <'a>(
     len: u32,
-    b: crate::sha2_types::uint8_4p,
-    st: &mut [lib::intvector_intrinsics::vec256]
+    mut b: crate::sha2_types::uint8_4p <'a>,
+    st: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let blocks: u32 = len.wrapping_div(128u32);
@@ -3114,17 +3160,24 @@ pub fn sha384_4(
             {
                 crate::sha2_types::uint8_4p
                 {
-                    fst: ref b0,
+                    fst: ref mut b0,
                     snd:
                     crate::sha2_types::uint8_3p
-                    { fst: ref b1, snd: crate::sha2_types::uint8_2p { fst: ref b2, snd: ref b3 } }
+                    {
+                        fst: ref mut b1,
+                        snd: crate::sha2_types::uint8_2p { fst: ref mut b2, snd: ref mut b3 }
+                    }
                 }
                 =>
                   {
-                      let bl0: (&[u8], &[u8]) = b0.split_at(i.wrapping_mul(128u32) as usize);
-                      let bl1: (&[u8], &[u8]) = b1.split_at(i.wrapping_mul(128u32) as usize);
-                      let bl2: (&[u8], &[u8]) = b2.split_at(i.wrapping_mul(128u32) as usize);
-                      let bl3: (&[u8], &[u8]) = b3.split_at(i.wrapping_mul(128u32) as usize);
+                      let bl0: (&mut [u8], &mut [u8]) =
+                          b0.split_at_mut(i.wrapping_mul(128u32) as usize);
+                      let bl1: (&mut [u8], &mut [u8]) =
+                          b1.split_at_mut(i.wrapping_mul(128u32) as usize);
+                      let bl2: (&mut [u8], &mut [u8]) =
+                          b2.split_at_mut(i.wrapping_mul(128u32) as usize);
+                      let bl3: (&mut [u8], &mut [u8]) =
+                          b3.split_at_mut(i.wrapping_mul(128u32) as usize);
                       crate::sha2_types::uint8_4p
                       {
                           fst: bl0.1,
@@ -3141,11 +3194,11 @@ pub fn sha384_4(
     }
 }
 
-#[inline] fn sha512_update_last4(
+#[inline] fn sha512_update_last4 <'a>(
     totlen: fstar::uint128::uint128,
     len: u32,
-    b: crate::sha2_types::uint8_4p,
-    hash: &mut [lib::intvector_intrinsics::vec256]
+    b: crate::sha2_types::uint8_4p <'a>,
+    hash: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     let blocks: u32 =
@@ -3176,37 +3229,37 @@ pub fn sha384_4(
                   (last1.0[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize
                   +
                   16usize]).copy_from_slice(&(&totlen_buf)[0usize..16usize]);
-                  let last01: (&[u8], &[u8]) = last1.0.split_at(0usize);
-                  let last11: (&[u8], &[u8]) = last01.1.split_at(128usize);
-                  let l00: &[u8] = last11.0;
-                  let l01: &[u8] = last11.1;
+                  let last01: (&mut [u8], &mut [u8]) = last1.0.split_at_mut(0usize);
+                  let last11: (&mut [u8], &mut [u8]) = last01.1.split_at_mut(128usize);
+                  let l00: &mut [u8] = last11.0;
+                  let l01: &mut [u8] = last11.1;
                   (last2.0[0usize..len as usize]).copy_from_slice(&b1[0usize..len as usize]);
                   last2.0[len as usize] = 0x80u8;
                   (last2.0[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize
                   +
                   16usize]).copy_from_slice(&(&totlen_buf)[0usize..16usize]);
-                  let last010: (&[u8], &[u8]) = last2.0.split_at(0usize);
-                  let last110: (&[u8], &[u8]) = last010.1.split_at(128usize);
-                  let l10: &[u8] = last110.0;
-                  let l11: &[u8] = last110.1;
+                  let last010: (&mut [u8], &mut [u8]) = last2.0.split_at_mut(0usize);
+                  let last110: (&mut [u8], &mut [u8]) = last010.1.split_at_mut(128usize);
+                  let l10: &mut [u8] = last110.0;
+                  let l11: &mut [u8] = last110.1;
                   (last3.0[0usize..len as usize]).copy_from_slice(&b2[0usize..len as usize]);
                   last3.0[len as usize] = 0x80u8;
                   (last3.0[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize
                   +
                   16usize]).copy_from_slice(&(&totlen_buf)[0usize..16usize]);
-                  let last011: (&[u8], &[u8]) = last3.0.split_at(0usize);
-                  let last111: (&[u8], &[u8]) = last011.1.split_at(128usize);
-                  let l20: &[u8] = last111.0;
-                  let l21: &[u8] = last111.1;
+                  let last011: (&mut [u8], &mut [u8]) = last3.0.split_at_mut(0usize);
+                  let last111: (&mut [u8], &mut [u8]) = last011.1.split_at_mut(128usize);
+                  let l20: &mut [u8] = last111.0;
+                  let l21: &mut [u8] = last111.1;
                   (last3.1[0usize..len as usize]).copy_from_slice(&b3[0usize..len as usize]);
                   last3.1[len as usize] = 0x80u8;
                   (last3.1[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize
                   +
                   16usize]).copy_from_slice(&(&totlen_buf)[0usize..16usize]);
-                  let last012: (&[u8], &[u8]) = last3.1.split_at(0usize);
-                  let last112: (&[u8], &[u8]) = last012.1.split_at(128usize);
-                  let l30: &[u8] = last112.0;
-                  let l31: &[u8] = last112.1;
+                  let last012: (&mut [u8], &mut [u8]) = last3.1.split_at_mut(0usize);
+                  let last112: (&mut [u8], &mut [u8]) = last012.1.split_at_mut(128usize);
+                  let l30: &mut [u8] = last112.0;
+                  let l31: &mut [u8] = last112.1;
                   let mb0: crate::sha2_types::uint8_4p =
                       crate::sha2_types::uint8_4p
                       {
@@ -3226,15 +3279,15 @@ pub fn sha384_4(
                   crate::sha2_types::uint8_2x4p { fst: mb0, snd: mb1 }
               }
         };
-    let last0: &crate::sha2_types::uint8_4p = &scrut.fst;
-    let last1: &crate::sha2_types::uint8_4p = &scrut.snd;
-    crate::sha2_vec256::sha512_update4(*last0, hash);
-    if blocks > 1u32 { crate::sha2_vec256::sha512_update4(*last1, hash) }
+    let last0: crate::sha2_types::uint8_4p = scrut.fst;
+    let last1: crate::sha2_types::uint8_4p = scrut.snd;
+    crate::sha2_vec256::sha512_update4(last0, hash);
+    if blocks > 1u32 { crate::sha2_vec256::sha512_update4(last1, hash) }
 }
 
-#[inline] fn sha512_finish4(
-    st: &mut [lib::intvector_intrinsics::vec256],
-    mut h: crate::sha2_types::uint8_4p
+#[inline] fn sha512_finish4 <'a>(
+    st: &'a mut [lib::intvector_intrinsics::vec256],
+    mut h: crate::sha2_types::uint8_4p <'a>
 )
 {
     let mut hbuf: [u8; 256] = [0u8; 256usize];
@@ -3327,18 +3380,18 @@ pub fn sha384_4(
 }
 
 pub fn sha512_4(
-    dst0: &[u8],
-    dst1: &[u8],
-    dst2: &[u8],
-    dst3: &[u8],
+    dst0: &mut [u8],
+    dst1: &mut [u8],
+    dst2: &mut [u8],
+    dst3: &mut [u8],
     input_len: u32,
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8]
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8]
 )
 {
-    let ib: crate::sha2_types::uint8_4p =
+    let mut ib: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: input0,
@@ -3366,17 +3419,24 @@ pub fn sha512_4(
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref b0,
+                fst: ref mut b0,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: ref b1, snd: crate::sha2_types::uint8_2p { fst: ref b2, snd: ref b3 } }
+                {
+                    fst: ref mut b1,
+                    snd: crate::sha2_types::uint8_2p { fst: ref mut b2, snd: ref mut b3 }
+                }
             }
             =>
               {
-                  let bl0: (&[u8], &[u8]) = b0.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl1: (&[u8], &[u8]) = b1.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl2: (&[u8], &[u8]) = b2.split_at(input_len.wrapping_sub(rem1) as usize);
-                  let bl3: (&[u8], &[u8]) = b3.split_at(input_len.wrapping_sub(rem1) as usize);
+                  let bl0: (&mut [u8], &mut [u8]) =
+                      b0.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl1: (&mut [u8], &mut [u8]) =
+                      b1.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl2: (&mut [u8], &mut [u8]) =
+                      b2.split_at_mut(input_len.wrapping_sub(rem1) as usize);
+                  let bl3: (&mut [u8], &mut [u8]) =
+                      b3.split_at_mut(input_len.wrapping_sub(rem1) as usize);
                   crate::sha2_types::uint8_4p
                   {
                       fst: bl0.1,

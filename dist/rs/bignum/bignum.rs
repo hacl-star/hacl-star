@@ -2385,6 +2385,10 @@ pub(crate) fn bn_mod_exp_consttime_u64(
     crate::bignum::bn_mod_exp_consttime_precomp_u64(len, n, mu, &r2, a, bBits, b, res)
 }
 
-pub struct bn_mont_ctx_u32 { pub len: u32, pub n: Box<[u32]>, pub mu: u32, pub r2: Box<[u32]> }
+#[derive(PartialEq, Clone)]
+pub struct bn_mont_ctx_u32
+{ pub len: u32, pub n: Box<[u32]>, pub mu: u32, pub r2: Box<[u32]> }
 
-pub struct bn_mont_ctx_u64 { pub len: u32, pub n: Box<[u64]>, pub mu: u64, pub r2: Box<[u64]> }
+#[derive(PartialEq, Clone)]
+pub struct bn_mont_ctx_u64
+{ pub len: u32, pub n: Box<[u64]>, pub mu: u64, pub r2: Box<[u64]> }

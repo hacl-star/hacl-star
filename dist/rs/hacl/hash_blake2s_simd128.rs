@@ -636,6 +636,7 @@ pub const salt_bytes: u32 = 8u32;
 
 pub const personal_bytes: u32 = 8u32;
 
+#[derive(PartialEq, Clone)]
 pub struct block_state_t
 {
     pub fst: u8,
@@ -645,6 +646,7 @@ pub struct block_state_t
     pub f4: Box<[lib::intvector_intrinsics::vec128]>
 }
 
+#[derive(PartialEq, Clone)]
 pub struct state_t
 {
     pub block_state: crate::hash_blake2s_simd128::block_state_t,
@@ -652,7 +654,10 @@ pub struct state_t
     pub total_len: u64
 }
 
-fn malloc_raw(kk: crate::hash_blake2b::index, key: crate::hash_blake2b::params_and_key) ->
+fn malloc_raw <'a>(
+    kk: crate::hash_blake2b::index,
+    key: crate::hash_blake2b::params_and_key <'a>
+) ->
     Box<[crate::hash_blake2s_simd128::state_t]>
 {
     let mut buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
@@ -683,7 +688,7 @@ fn malloc_raw(kk: crate::hash_blake2b::index, key: crate::hash_blake2b::params_a
                   );
                   ((&mut buf)[0usize..kk2 as usize]).copy_from_slice(&k·[0usize..kk2 as usize])
               };
-              let pv: &crate::hash_blake2b::blake2_params = &p[0usize];
+              let pv: crate::hash_blake2b::blake2_params = p[0usize];
               let mut tmp: [u32; 8] = [0u32; 8usize];
               let
               r0:
@@ -797,9 +802,9 @@ fn index_of_state(s: &[crate::hash_blake2s_simd128::state_t]) -> crate::hash_bla
     }
 }
 
-fn reset_raw(
-    state: &mut [crate::hash_blake2s_simd128::state_t],
-    key: crate::hash_blake2b::params_and_key
+fn reset_raw <'a>(
+    state: &'a mut [crate::hash_blake2s_simd128::state_t],
+    key: crate::hash_blake2b::params_and_key <'a>
 )
 {
     let block_state: &mut crate::hash_blake2s_simd128::block_state_t =
@@ -831,7 +836,7 @@ fn reset_raw(
                   );
                   (buf[0usize..kk2 as usize]).copy_from_slice(&k·1[0usize..kk2 as usize])
               };
-              let pv: &crate::hash_blake2b::blake2_params = &p[0usize];
+              let pv: crate::hash_blake2b::blake2_params = p[0usize];
               let mut tmp: [u32; 8] = [0u32; 8usize];
               let
               r0:
@@ -1365,12 +1370,13 @@ parameters `params` into `output`. The `key` array must be of length
 `params.digest_length`.
 */
 pub fn
-hash_with_key_and_params(
-    output: &mut [u8],
-    input: &[u8],
+hash_with_key_and_params
+<'a>(
+    output: &'a mut [u8],
+    input: &'a [u8],
     input_len: u32,
-    params: crate::hash_blake2b::blake2_params,
-    key: &[u8]
+    params: crate::hash_blake2b::blake2_params <'a>,
+    key: &'a [u8]
 )
 {
     let mut b: [lib::intvector_intrinsics::vec128; 4] =

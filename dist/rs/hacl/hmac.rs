@@ -4,7 +4,9 @@
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
 
-pub(crate) struct __uint32_t_uint32_t { pub fst: u32, pub snd: u32 }
+#[derive(PartialEq, Clone, Copy)]
+pub(crate) struct __uint32_t_uint32_t
+{ pub fst: u32, pub snd: u32 }
 
 /**
 Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.
