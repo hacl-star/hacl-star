@@ -37,7 +37,7 @@
 Write the HMAC-MD5 MAC of a message (`data`) by using a key (`key`) into `dst`.
 
 The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
-`dst` must point to 20 bytes of memory.
+`dst` must point to 16 bytes of memory.
 */
 void
 Hacl_HMAC_compute_md5(
@@ -265,7 +265,7 @@ Hacl_HMAC_compute_sha1(
 Write the HMAC-SHA-2-224 MAC of a message (`data`) by using a key (`key`) into `dst`.
 
 The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
-`dst` must point to 32 bytes of memory.
+`dst` must point to 28 bytes of memory.
 */
 void
 Hacl_HMAC_compute_sha2_224(
@@ -792,8 +792,8 @@ Hacl_HMAC_compute_sha2_512(
 /**
 Write the HMAC-SHA-3-224 MAC of a message (`data`) by using a key (`key`) into `dst`.
 
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
-`dst` must point to 32 bytes of memory.
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 144 bytes.
+`dst` must point to 28 bytes of memory.
 */
 void
 Hacl_HMAC_compute_sha3_224(
@@ -922,7 +922,7 @@ Hacl_HMAC_compute_sha3_224(
 /**
 Write the HMAC-SHA-3-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
 
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 136 bytes.
 `dst` must point to 32 bytes of memory.
 */
 void
@@ -1052,7 +1052,7 @@ Hacl_HMAC_compute_sha3_256(
 /**
 Write the HMAC-SHA-3-384 MAC of a message (`data`) by using a key (`key`) into `dst`.
 
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 104 bytes.
 `dst` must point to 48 bytes of memory.
 */
 void
@@ -1182,7 +1182,7 @@ Hacl_HMAC_compute_sha3_384(
 /**
 Write the HMAC-SHA-3-512 MAC of a message (`data`) by using a key (`key`) into `dst`.
 
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 72 bytes.
 `dst` must point to 64 bytes of memory.
 */
 void
