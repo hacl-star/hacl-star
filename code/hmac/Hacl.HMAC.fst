@@ -429,10 +429,21 @@ let mk_compute i hash alloca init update_multi update_last finish dst key key_le
   (**)                     loc_buffer opad `loc_union` loc_buffer s) h1 h2);
   (**) LowStar.Monotonic.Buffer.modifies_fresh_frame_popped h0 h1 (B.loc_buffer dst) h6 h7
 
+let compute_md5: compute_st MD5 =
+  let open Hacl.Hash.MD5 in
+  mk_compute (D.mk_impl MD5 ()) hash_oneshot alloca init
+             update_multi update_last finish
+
 let compute_sha1: compute_st SHA1 =
   let open Hacl.Hash.SHA1 in
   mk_compute (D.mk_impl SHA1 ()) hash_oneshot alloca init
              update_multi update_last finish
+
+let compute_sha2_224: compute_st SHA2_224 =
+  let open Hacl.Streaming.SHA2 in
+  let open Hacl.Hash.SHA2 in
+  mk_compute (D.mk_impl SHA2_224 ()) hash_224 alloca_224 init_224
+             update_multi_224 update_last_224 finish_224
 
 let compute_sha2_256: compute_st SHA2_256 =
   let open Hacl.Streaming.SHA2 in
@@ -451,6 +462,34 @@ let compute_sha2_512: compute_st SHA2_512 =
   let open Hacl.Hash.SHA2 in
   mk_compute (D.mk_impl SHA2_512 ()) hash_512 alloca_512 init_512
              update_multi_512 update_last_512 finish_512
+
+inline_for_extraction noextract
+let alloca_keccak (i: D.fixed_len_impl { is_keccak (dfst i) }): D.alloca_st i = fun () ->
+  B.alloca (Lib.IntTypes.u64 0) 25ul
+
+let compute_sha3_224: compute_st SHA3_224 =
+  let open Hacl.Hash.SHA3.Scalar in
+  let open Hacl.Hash.SHA3 in
+  mk_compute (D.mk_impl SHA3_224 ()) sha3_224 (alloca_keccak (| SHA3_224, () |)) (init SHA3_224)
+             (update_multi SHA3_224) (update_last SHA3_224) (finish SHA3_224)
+
+let compute_sha3_256: compute_st SHA3_256 =
+  let open Hacl.Hash.SHA3.Scalar in
+  let open Hacl.Hash.SHA3 in
+  mk_compute (D.mk_impl SHA3_256 ()) sha3_256 (alloca_keccak (| SHA3_256, () |)) (init SHA3_256)
+             (update_multi SHA3_256) (update_last SHA3_256) (finish SHA3_256)
+
+let compute_sha3_384: compute_st SHA3_384 =
+  let open Hacl.Hash.SHA3.Scalar in
+  let open Hacl.Hash.SHA3 in
+  mk_compute (D.mk_impl SHA3_384 ()) sha3_384 (alloca_keccak (| SHA3_384, () |)) (init SHA3_384)
+             (update_multi SHA3_384) (update_last SHA3_384) (finish SHA3_384)
+
+let compute_sha3_512: compute_st SHA3_512 =
+  let open Hacl.Hash.SHA3.Scalar in
+  let open Hacl.Hash.SHA3 in
+  mk_compute (D.mk_impl SHA3_512 ()) sha3_512 (alloca_keccak (| SHA3_512, () |)) (init SHA3_512)
+             (update_multi SHA3_512) (update_last SHA3_512) (finish SHA3_512)
 
 let compute_blake2s_32: compute_st Blake2S =
   let open Hacl.Hash.Blake2s_32 in
