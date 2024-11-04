@@ -81,10 +81,8 @@ EverCrypt_HMAC_compute_sha1(
   uint32_t data_len
 )
 {
-  uint32_t l = 64U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[64U];
+  memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 64U)
@@ -105,19 +103,17 @@ EverCrypt_HMAC_compute_sha1(
   {
     Hacl_Hash_SHA1_hash_oneshot(nkey, key, key_len);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[64U];
+  memset(ipad, 0x36U, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[64U];
+  memset(opad, 0x5cU, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -189,10 +185,8 @@ EverCrypt_HMAC_compute_sha2_256(
   uint32_t data_len
 )
 {
-  uint32_t l = 64U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[64U];
+  memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 64U)
@@ -213,19 +207,17 @@ EverCrypt_HMAC_compute_sha2_256(
   {
     EverCrypt_HMAC_hash_256(nkey, key, key_len);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[64U];
+  memset(ipad, 0x36U, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[64U];
+  memset(opad, 0x5cU, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -311,10 +303,8 @@ EverCrypt_HMAC_compute_sha2_384(
   uint32_t data_len
 )
 {
-  uint32_t l = 128U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[128U];
+  memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 128U)
@@ -335,19 +325,17 @@ EverCrypt_HMAC_compute_sha2_384(
   {
     Hacl_Hash_SHA2_hash_384(nkey, key, key_len);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[128U];
+  memset(ipad, 0x36U, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[128U];
+  memset(opad, 0x5cU, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -441,10 +429,8 @@ EverCrypt_HMAC_compute_sha2_512(
   uint32_t data_len
 )
 {
-  uint32_t l = 128U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[128U];
+  memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 128U)
@@ -465,19 +451,17 @@ EverCrypt_HMAC_compute_sha2_512(
   {
     Hacl_Hash_SHA2_hash_512(nkey, key, key_len);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[128U];
+  memset(ipad, 0x36U, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[128U];
+  memset(opad, 0x5cU, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -571,10 +555,8 @@ EverCrypt_HMAC_compute_blake2s(
   uint32_t data_len
 )
 {
-  uint32_t l = 64U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[64U];
+  memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 64U)
@@ -595,19 +577,17 @@ EverCrypt_HMAC_compute_blake2s(
   {
     Hacl_Hash_Blake2s_hash_with_key(nkey, 32U, key, key_len, NULL, 0U);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[64U];
+  memset(ipad, 0x36U, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[64U];
+  memset(opad, 0x5cU, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -710,10 +690,8 @@ EverCrypt_HMAC_compute_blake2b(
   uint32_t data_len
 )
 {
-  uint32_t l = 128U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[128U];
+  memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 128U)
@@ -734,19 +712,17 @@ EverCrypt_HMAC_compute_blake2b(
   {
     Hacl_Hash_Blake2b_hash_with_key(nkey, 64U, key, key_len, NULL, 0U);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[128U];
+  memset(ipad, 0x36U, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[128U];
+  memset(opad, 0x5cU, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
