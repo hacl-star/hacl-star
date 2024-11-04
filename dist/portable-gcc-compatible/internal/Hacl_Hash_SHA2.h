@@ -167,6 +167,12 @@ void Hacl_Hash_SHA2_sha224_init(uint32_t *hash);
 
 /* SNIPPET_END: Hacl_Hash_SHA2_sha224_init */
 
+/* SNIPPET_START: Hacl_Hash_SHA2_sha224_update_nblocks */
+
+void Hacl_Hash_SHA2_sha224_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st);
+
+/* SNIPPET_END: Hacl_Hash_SHA2_sha224_update_nblocks */
+
 /* SNIPPET_START: Hacl_Hash_SHA2_sha224_update_last */
 
 void
