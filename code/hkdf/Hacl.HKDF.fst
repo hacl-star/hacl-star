@@ -108,9 +108,11 @@ let mk_expand a hmac okm prk prklen info infolen len =
   in
   let h0 = ST.get () in
   B.fill_blocks h0 tlen n output a_spec refl footprint spec (fun i ->
-    let text0: B.lbuffer uint8 (infolen +! 1ul) = B.sub text tlen (infolen +! 1ul) in
     let ctr = B.sub text (tlen +! infolen) 1ul in
     ctr.(0ul) <- Lib.IntTypes.cast U8 PUB (i +! 1ul);
+    // HACL-RS
+    LowStar.Ignore.ignore text;
+    let text0: B.lbuffer uint8 (infolen +! 1ul) = B.sub text tlen (infolen +! 1ul) in
     let h1 = ST.get() in
     if i = 0ul then
       begin
@@ -153,11 +155,13 @@ let mk_expand a hmac okm prk prklen info infolen len =
 
   let h1 = ST.get () in
   if n *! tlen <. len then begin
-    let text0: B.lbuffer uint8 (infolen +! 1ul) = B.sub text tlen (infolen +! 1ul) in
     let ctr = B.sub text (tlen +! infolen) 1ul in
+    ctr.(0ul) <- Lib.IntTypes.cast U8 PUB (n +! 1ul);
+    // HACL-RS
+    LowStar.Ignore.ignore text;
+    let text0: B.lbuffer uint8 (infolen +! 1ul) = B.sub text tlen (infolen +! 1ul) in
 
     begin
-    ctr.(0ul) <- Lib.IntTypes.cast U8 PUB (n +! 1ul);
     let h2 = ST.get() in
     if n = 0ul then
       begin
