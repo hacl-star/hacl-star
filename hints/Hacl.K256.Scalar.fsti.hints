@@ -1,5 +1,5 @@
 [
-  "Ö-!\nÈ)ÈvôÊÈ¯ºn÷Å",
+  "jÜYð‡Q½B5ž´\u001dçxö\u0012",
   [
     [
       "Hacl.K256.Scalar.qas_nat",
@@ -12,7 +12,7 @@
         "equation_Hacl.Spec.Bignum.Definitions.limb"
       ],
       0,
-      "e2823e993b58571a312d04d827f1aada"
+      "3916af631dbf80e2b3b52af8bfd49c19"
     ],
     [
       "Hacl.K256.Scalar.qeval",
@@ -24,7 +24,7 @@
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "86ea2a6554fcfaab66f49d3f60c066ce"
+      "b7e121b467771fe548cdcb9ea4b6306c"
     ],
     [
       "Hacl.K256.Scalar.make_u64_4",
@@ -43,7 +43,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6155dbb040245ef1fa3338a21ecee4a6"
+      "92ece3784e7bc77c80eb49911af17be3"
     ],
     [
       "Hacl.K256.Scalar.create_qelem",
@@ -87,7 +87,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e8ebb19b31e833cf6ad4e8dd87a37745"
+      "ea2f05b432562df289488ca6e6b63ed9"
     ],
     [
       "Hacl.K256.Scalar.create_one",
@@ -112,7 +112,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "59de23611590049db7df4915126412a5"
+      "65141f882e2b3d8a665be31471fc1ad8"
     ],
     [
       "Hacl.K256.Scalar.is_qelem_eq_vartime",
@@ -126,7 +126,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "dedb75b2b9ee14446c1a426cf6443ac6"
+      "e181ea9cd71ed9f39fed8b41f6c2e502"
     ],
     [
       "Hacl.K256.Scalar.load_qelem_check",
@@ -150,7 +150,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a123875f35460b67ab5833ac43e3eee4"
+      "2bbdc720831f2631b8d05f6fac825391"
     ],
     [
       "Hacl.K256.Scalar.load_qelem_conditional",
@@ -174,7 +174,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "7f6d2b470cc00f15e94d698f766654a9"
+      "fd2b4066a05283defab86cdb0879790b"
     ],
     [
       "Hacl.K256.Scalar.load_qelem_vartime",
@@ -198,7 +198,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "1958d7f70662334201035ab8a1904b6f"
+      "397f2a0d851ccddf01dcbc5c0278f7c1"
     ],
     [
       "Hacl.K256.Scalar.load_qelem_modq",
@@ -207,7 +207,7 @@
       0,
       [ "@query" ],
       0,
-      "58cd7be6367b0519346d729813551149"
+      "821c3b4692ca1340b739051baf94a97a"
     ],
     [
       "Hacl.K256.Scalar.store_qelem",
@@ -235,7 +235,7 @@
         "typing_Spec.K256.PointOps.q", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "14a9dc7c159af3e1c804cb3a49f0fa76"
+      "160161f8b40120519c2ce274bcc27f43"
     ],
     [
       "Hacl.K256.Scalar.qadd",
@@ -249,7 +249,35 @@
         "refinement_interpretation_Tm_refine_22918c9de72a9f5beb39148c40e179dc"
       ],
       0,
-      "6ee44927f8df37e39dc9553c01957522"
+      "28442f23a8fa75e742575af2d49f496a"
+    ],
+    [
+      "Hacl.K256.Scalar.qadd_sa1",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.K256.Scalar.qe_lt_q", "primitive_Prims.op_LessThan",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_22918c9de72a9f5beb39148c40e179dc"
+      ],
+      0,
+      "c72b449c35062bc1d36a1e07f1ae76b9"
+    ],
+    [
+      "Hacl.K256.Scalar.qadd_sa2",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.K256.Scalar.qe_lt_q", "primitive_Prims.op_LessThan",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_22918c9de72a9f5beb39148c40e179dc"
+      ],
+      0,
+      "4478f5b34b2a3b144bce56503b919f7e"
     ],
     [
       "Hacl.K256.Scalar.qmul",
@@ -263,7 +291,35 @@
         "refinement_interpretation_Tm_refine_22918c9de72a9f5beb39148c40e179dc"
       ],
       0,
-      "4e48549c81071ed04fa528d55c5d51be"
+      "36801a0ee791f757b99ca6e3a8ce8036"
+    ],
+    [
+      "Hacl.K256.Scalar.qmul_sa1",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.K256.Scalar.qe_lt_q", "primitive_Prims.op_LessThan",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_22918c9de72a9f5beb39148c40e179dc"
+      ],
+      0,
+      "1902732eb8a014fc51ca2d850662b90b"
+    ],
+    [
+      "Hacl.K256.Scalar.qmul_sa2",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.K256.Scalar.qe_lt_q", "primitive_Prims.op_LessThan",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_22918c9de72a9f5beb39148c40e179dc"
+      ],
+      0,
+      "e18b117748135347bcd2f2f1374f699d"
     ],
     [
       "Hacl.K256.Scalar.qsqr",
@@ -277,7 +333,21 @@
         "refinement_interpretation_Tm_refine_dd47a5766e9f244216dfa1f19cf452eb"
       ],
       0,
-      "48209cc4bc38cf45ee04e59bcf60e3bd"
+      "fd526a67e32893e715a8707a21301668"
+    ],
+    [
+      "Hacl.K256.Scalar.qsqr_sa",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.K256.Scalar.qe_lt_q", "primitive_Prims.op_LessThan",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_dd47a5766e9f244216dfa1f19cf452eb"
+      ],
+      0,
+      "a33b3c7fe375f0aab8230ed47d3bcdb6"
     ],
     [
       "Hacl.K256.Scalar.qnegate_conditional_vartime",
@@ -286,7 +356,7 @@
       0,
       [ "@query" ],
       0,
-      "05eb62f2f46753fea8949fbefd94f58c"
+      "a364a687ad775e05fdfcb63406f5027b"
     ]
   ]
 ]

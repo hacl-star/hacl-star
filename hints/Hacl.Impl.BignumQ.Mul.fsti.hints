@@ -1,5 +1,5 @@
 [
-  "½•^—i h\r\rÊ4ˆöÜ[¸",
+  "õ9ûEÙ÷à¡Û'Þûàî\u000f\u001f",
   [
     [
       "Hacl.Impl.BignumQ.Mul.as_nat",
@@ -56,7 +56,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "87e924eb3b5e561ac42ff03acdb0affa"
+      "bf3ecf8a9fdc50bfd106104c4f3fb48b"
     ],
     [
       "Hacl.Impl.BignumQ.Mul.wide_as_nat",
@@ -113,7 +113,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a7929de47ad0e25b8fb254f9aff9c383"
+      "e504adc8e64d0635ecac357175fccaa7"
     ],
     [
       "Hacl.Impl.BignumQ.Mul.qelem_fits",
@@ -170,7 +170,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "b8261316d9cfd1b8859539fbbc957758"
+      "f0e7ad16ce7553fd445a0f921f3b950e"
     ],
     [
       "Hacl.Impl.BignumQ.Mul.qelem_wide_fits",
@@ -227,7 +227,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "0fc85f65cde53ba1eb8dcd7fcab8119e"
+      "df9aaf940d5c650c5c76f58c75ec92fa"
     ],
     [
       "Hacl.Impl.BignumQ.Mul.barrett_reduction",
@@ -283,7 +283,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "131ed7e461e61b1a66a46481a1bb7954"
+      "ab8331e10f05c3b1b008ad903713eddb"
     ],
     [
       "Hacl.Impl.BignumQ.Mul.mul_modq",
@@ -335,7 +335,25 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "026cd0a90c899e0dc69d0de008ff8df5"
+      "8d0c8221ed971f2c840388e18fb69128"
+    ],
+    [
+      "Hacl.Impl.BignumQ.Mul.mul_modq_sa",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.Ed25519.q", "int_typing",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "278db2f6e1665743f54d75ee72b3e1a7"
     ],
     [
       "Hacl.Impl.BignumQ.Mul.add_modq",
@@ -387,7 +405,22 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "19c5e60a4a76138e8f41613a12bab14c"
+      "ab7494a50dc46616135f113af298939f"
+    ],
+    [
+      "Hacl.Impl.BignumQ.Mul.add_modq_sa",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Impl.BignumQ.Mul.as_nat", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5d3ac41f4bdd4729b18b8bd04533c855",
+        "typing_Hacl.Impl.BignumQ.Mul.as_nat"
+      ],
+      0,
+      "b578235f3a9a72a1394c15eb63c53c68"
     ]
   ]
 ]

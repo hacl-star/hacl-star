@@ -1336,7 +1336,7 @@ pub(crate) fn point_add(out: &mut [u64], p: &[u64], q: &[u64])
     crate::bignum_k256::fmul(rx.1, &beta, &f2_copy)
 }
 
-struct __bool_bool { pub fst: bool, pub snd: bool }
+#[derive(PartialEq, Clone, Copy)] struct __bool_bool { pub fst: bool, pub snd: bool }
 
 #[inline] fn ecmult_endo_split(
     r1: &mut [u64],
@@ -1903,7 +1903,9 @@ pub(crate) fn point_mul(out: &mut [u64], scalar: &[u64], q: &[u64])
     b1 && b2 && b3 && b4
 }
 
-struct __bool_bool_bool_bool { pub fst: bool, pub snd: bool, pub thd: bool, pub f3: bool }
+#[derive(PartialEq, Clone, Copy)]
+struct __bool_bool_bool_bool
+{ pub fst: bool, pub snd: bool, pub thd: bool, pub f3: bool }
 
 #[inline] fn point_mul_g_double_split_lambda_vartime(
     out: &mut [u64],

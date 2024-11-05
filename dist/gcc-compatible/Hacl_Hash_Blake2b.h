@@ -71,19 +71,13 @@ Hacl_Hash_Blake2b_index;
 
 #define HACL_HASH_BLAKE2B_PERSONAL_BYTES (16U)
 
-typedef struct K____uint64_t___uint64_t__s
-{
-  uint64_t *fst;
-  uint64_t *snd;
-}
-K____uint64_t___uint64_t_;
-
 typedef struct Hacl_Hash_Blake2b_block_state_t_s
 {
   uint8_t fst;
   uint8_t snd;
   bool thd;
-  K____uint64_t___uint64_t_ f3;
+  uint64_t *f3;
+  uint64_t *f4;
 }
 Hacl_Hash_Blake2b_block_state_t;
 

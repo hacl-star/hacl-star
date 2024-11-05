@@ -4,10 +4,10 @@
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
 
-pub fn absorb_inner_256(
+pub fn absorb_inner_256 <'a>(
     rateInBytes: u32,
-    b: crate::sha2_types::uint8_4p,
-    s: &mut [lib::intvector_intrinsics::vec256]
+    b: crate::sha2_types::uint8_4p <'a>,
+    s: &'a mut [lib::intvector_intrinsics::vec256]
 )
 {
     lowstar::ignore::ignore::<u32>(rateInBytes);
@@ -474,15 +474,15 @@ pub fn absorb_inner_256(
 }
 
 pub fn shake128(
-    output0: &[u8],
-    output1: &[u8],
-    output2: &[u8],
-    output3: &[u8],
+    output0: &mut [u8],
+    output1: &mut [u8],
+    output2: &mut [u8],
+    output3: &mut [u8],
     outputByteLen: u32,
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
     inputByteLen: u32
 )
 {
@@ -507,17 +507,17 @@ pub fn shake128(
     let rateInBytes1: u32 = 168u32;
     for i in 0u32..inputByteLen.wrapping_div(rateInBytes1)
     {
-        let b0: [u8; 256] = [0u8; 256usize];
-        let b1: [u8; 256] = [0u8; 256usize];
-        let b2: [u8; 256] = [0u8; 256usize];
-        let b3: [u8; 256] = [0u8; 256usize];
+        let mut b0: [u8; 256] = [0u8; 256usize];
+        let mut b1: [u8; 256] = [0u8; 256usize];
+        let mut b2: [u8; 256] = [0u8; 256usize];
+        let mut b3: [u8; 256] = [0u8; 256usize];
         let mut b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
-                fst: &b0,
+                fst: &mut b0,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+                { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
             };
         match ib
         {
@@ -568,17 +568,17 @@ pub fn shake128(
         };
         crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
-    let b0: [u8; 256] = [0u8; 256usize];
-    let b1: [u8; 256] = [0u8; 256usize];
-    let b2: [u8; 256] = [0u8; 256usize];
-    let b3: [u8; 256] = [0u8; 256usize];
+    let mut b0: [u8; 256] = [0u8; 256usize];
+    let mut b1: [u8; 256] = [0u8; 256usize];
+    let mut b2: [u8; 256] = [0u8; 256usize];
+    let mut b3: [u8; 256] = [0u8; 256usize];
     let mut b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b0,
+            fst: &mut b0,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+            { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
         };
     let rem: u32 = inputByteLen.wrapping_rem(rateInBytes1);
     match ib
@@ -919,17 +919,17 @@ pub fn shake128(
         (&mut s)[i as usize] =
             lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
     );
-    let b00: [u8; 256] = [0u8; 256usize];
-    let b10: [u8; 256] = [0u8; 256usize];
-    let b20: [u8; 256] = [0u8; 256usize];
-    let b30: [u8; 256] = [0u8; 256usize];
+    let mut b00: [u8; 256] = [0u8; 256usize];
+    let mut b10: [u8; 256] = [0u8; 256usize];
+    let mut b20: [u8; 256] = [0u8; 256usize];
+    let mut b30: [u8; 256] = [0u8; 256usize];
     let mut b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b00,
+            fst: &mut b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b10, snd: crate::sha2_types::uint8_2p { fst: &b20, snd: &b30 } }
+            { fst: &mut b10, snd: crate::sha2_types::uint8_2p { fst: &mut b20, snd: &mut b30 } }
         };
     match b
     {
@@ -1689,15 +1689,15 @@ pub fn shake128(
 }
 
 pub fn shake256(
-    output0: &[u8],
-    output1: &[u8],
-    output2: &[u8],
-    output3: &[u8],
+    output0: &mut [u8],
+    output1: &mut [u8],
+    output2: &mut [u8],
+    output3: &mut [u8],
     outputByteLen: u32,
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
     inputByteLen: u32
 )
 {
@@ -1722,17 +1722,17 @@ pub fn shake256(
     let rateInBytes1: u32 = 136u32;
     for i in 0u32..inputByteLen.wrapping_div(rateInBytes1)
     {
-        let b0: [u8; 256] = [0u8; 256usize];
-        let b1: [u8; 256] = [0u8; 256usize];
-        let b2: [u8; 256] = [0u8; 256usize];
-        let b3: [u8; 256] = [0u8; 256usize];
+        let mut b0: [u8; 256] = [0u8; 256usize];
+        let mut b1: [u8; 256] = [0u8; 256usize];
+        let mut b2: [u8; 256] = [0u8; 256usize];
+        let mut b3: [u8; 256] = [0u8; 256usize];
         let mut b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
-                fst: &b0,
+                fst: &mut b0,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+                { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
             };
         match ib
         {
@@ -1783,17 +1783,17 @@ pub fn shake256(
         };
         crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
-    let b0: [u8; 256] = [0u8; 256usize];
-    let b1: [u8; 256] = [0u8; 256usize];
-    let b2: [u8; 256] = [0u8; 256usize];
-    let b3: [u8; 256] = [0u8; 256usize];
+    let mut b0: [u8; 256] = [0u8; 256usize];
+    let mut b1: [u8; 256] = [0u8; 256usize];
+    let mut b2: [u8; 256] = [0u8; 256usize];
+    let mut b3: [u8; 256] = [0u8; 256usize];
     let mut b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b0,
+            fst: &mut b0,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+            { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
         };
     let rem: u32 = inputByteLen.wrapping_rem(rateInBytes1);
     match ib
@@ -2134,17 +2134,17 @@ pub fn shake256(
         (&mut s)[i as usize] =
             lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
     );
-    let b00: [u8; 256] = [0u8; 256usize];
-    let b10: [u8; 256] = [0u8; 256usize];
-    let b20: [u8; 256] = [0u8; 256usize];
-    let b30: [u8; 256] = [0u8; 256usize];
+    let mut b00: [u8; 256] = [0u8; 256usize];
+    let mut b10: [u8; 256] = [0u8; 256usize];
+    let mut b20: [u8; 256] = [0u8; 256usize];
+    let mut b30: [u8; 256] = [0u8; 256usize];
     let mut b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b00,
+            fst: &mut b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b10, snd: crate::sha2_types::uint8_2p { fst: &b20, snd: &b30 } }
+            { fst: &mut b10, snd: crate::sha2_types::uint8_2p { fst: &mut b20, snd: &mut b30 } }
         };
     match b
     {
@@ -2904,14 +2904,14 @@ pub fn shake256(
 }
 
 pub fn sha3_224(
-    output0: &[u8],
-    output1: &[u8],
-    output2: &[u8],
-    output3: &[u8],
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
+    output0: &mut [u8],
+    output1: &mut [u8],
+    output2: &mut [u8],
+    output3: &mut [u8],
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
     inputByteLen: u32
 )
 {
@@ -2936,17 +2936,17 @@ pub fn sha3_224(
     let rateInBytes1: u32 = 144u32;
     for i in 0u32..inputByteLen.wrapping_div(rateInBytes1)
     {
-        let b0: [u8; 256] = [0u8; 256usize];
-        let b1: [u8; 256] = [0u8; 256usize];
-        let b2: [u8; 256] = [0u8; 256usize];
-        let b3: [u8; 256] = [0u8; 256usize];
+        let mut b0: [u8; 256] = [0u8; 256usize];
+        let mut b1: [u8; 256] = [0u8; 256usize];
+        let mut b2: [u8; 256] = [0u8; 256usize];
+        let mut b3: [u8; 256] = [0u8; 256usize];
         let mut b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
-                fst: &b0,
+                fst: &mut b0,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+                { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
             };
         match ib
         {
@@ -2997,17 +2997,17 @@ pub fn sha3_224(
         };
         crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
-    let b0: [u8; 256] = [0u8; 256usize];
-    let b1: [u8; 256] = [0u8; 256usize];
-    let b2: [u8; 256] = [0u8; 256usize];
-    let b3: [u8; 256] = [0u8; 256usize];
+    let mut b0: [u8; 256] = [0u8; 256usize];
+    let mut b1: [u8; 256] = [0u8; 256usize];
+    let mut b2: [u8; 256] = [0u8; 256usize];
+    let mut b3: [u8; 256] = [0u8; 256usize];
     let mut b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b0,
+            fst: &mut b0,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+            { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
         };
     let rem: u32 = inputByteLen.wrapping_rem(rateInBytes1);
     match ib
@@ -3348,17 +3348,17 @@ pub fn sha3_224(
         (&mut s)[i as usize] =
             lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
     );
-    let b00: [u8; 256] = [0u8; 256usize];
-    let b10: [u8; 256] = [0u8; 256usize];
-    let b20: [u8; 256] = [0u8; 256usize];
-    let b30: [u8; 256] = [0u8; 256usize];
+    let mut b00: [u8; 256] = [0u8; 256usize];
+    let mut b10: [u8; 256] = [0u8; 256usize];
+    let mut b20: [u8; 256] = [0u8; 256usize];
+    let mut b30: [u8; 256] = [0u8; 256usize];
     let mut b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b00,
+            fst: &mut b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b10, snd: crate::sha2_types::uint8_2p { fst: &b20, snd: &b30 } }
+            { fst: &mut b10, snd: crate::sha2_types::uint8_2p { fst: &mut b20, snd: &mut b30 } }
         };
     match b
     {
@@ -4110,14 +4110,14 @@ pub fn sha3_224(
 }
 
 pub fn sha3_256(
-    output0: &[u8],
-    output1: &[u8],
-    output2: &[u8],
-    output3: &[u8],
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
+    output0: &mut [u8],
+    output1: &mut [u8],
+    output2: &mut [u8],
+    output3: &mut [u8],
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
     inputByteLen: u32
 )
 {
@@ -4142,17 +4142,17 @@ pub fn sha3_256(
     let rateInBytes1: u32 = 136u32;
     for i in 0u32..inputByteLen.wrapping_div(rateInBytes1)
     {
-        let b0: [u8; 256] = [0u8; 256usize];
-        let b1: [u8; 256] = [0u8; 256usize];
-        let b2: [u8; 256] = [0u8; 256usize];
-        let b3: [u8; 256] = [0u8; 256usize];
+        let mut b0: [u8; 256] = [0u8; 256usize];
+        let mut b1: [u8; 256] = [0u8; 256usize];
+        let mut b2: [u8; 256] = [0u8; 256usize];
+        let mut b3: [u8; 256] = [0u8; 256usize];
         let mut b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
-                fst: &b0,
+                fst: &mut b0,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+                { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
             };
         match ib
         {
@@ -4203,17 +4203,17 @@ pub fn sha3_256(
         };
         crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
-    let b0: [u8; 256] = [0u8; 256usize];
-    let b1: [u8; 256] = [0u8; 256usize];
-    let b2: [u8; 256] = [0u8; 256usize];
-    let b3: [u8; 256] = [0u8; 256usize];
+    let mut b0: [u8; 256] = [0u8; 256usize];
+    let mut b1: [u8; 256] = [0u8; 256usize];
+    let mut b2: [u8; 256] = [0u8; 256usize];
+    let mut b3: [u8; 256] = [0u8; 256usize];
     let mut b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b0,
+            fst: &mut b0,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+            { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
         };
     let rem: u32 = inputByteLen.wrapping_rem(rateInBytes1);
     match ib
@@ -4554,17 +4554,17 @@ pub fn sha3_256(
         (&mut s)[i as usize] =
             lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
     );
-    let b00: [u8; 256] = [0u8; 256usize];
-    let b10: [u8; 256] = [0u8; 256usize];
-    let b20: [u8; 256] = [0u8; 256usize];
-    let b30: [u8; 256] = [0u8; 256usize];
+    let mut b00: [u8; 256] = [0u8; 256usize];
+    let mut b10: [u8; 256] = [0u8; 256usize];
+    let mut b20: [u8; 256] = [0u8; 256usize];
+    let mut b30: [u8; 256] = [0u8; 256usize];
     let mut b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b00,
+            fst: &mut b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b10, snd: crate::sha2_types::uint8_2p { fst: &b20, snd: &b30 } }
+            { fst: &mut b10, snd: crate::sha2_types::uint8_2p { fst: &mut b20, snd: &mut b30 } }
         };
     match b
     {
@@ -5316,14 +5316,14 @@ pub fn sha3_256(
 }
 
 pub fn sha3_384(
-    output0: &[u8],
-    output1: &[u8],
-    output2: &[u8],
-    output3: &[u8],
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
+    output0: &mut [u8],
+    output1: &mut [u8],
+    output2: &mut [u8],
+    output3: &mut [u8],
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
     inputByteLen: u32
 )
 {
@@ -5348,17 +5348,17 @@ pub fn sha3_384(
     let rateInBytes1: u32 = 104u32;
     for i in 0u32..inputByteLen.wrapping_div(rateInBytes1)
     {
-        let b0: [u8; 256] = [0u8; 256usize];
-        let b1: [u8; 256] = [0u8; 256usize];
-        let b2: [u8; 256] = [0u8; 256usize];
-        let b3: [u8; 256] = [0u8; 256usize];
+        let mut b0: [u8; 256] = [0u8; 256usize];
+        let mut b1: [u8; 256] = [0u8; 256usize];
+        let mut b2: [u8; 256] = [0u8; 256usize];
+        let mut b3: [u8; 256] = [0u8; 256usize];
         let mut b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
-                fst: &b0,
+                fst: &mut b0,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+                { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
             };
         match ib
         {
@@ -5409,17 +5409,17 @@ pub fn sha3_384(
         };
         crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
-    let b0: [u8; 256] = [0u8; 256usize];
-    let b1: [u8; 256] = [0u8; 256usize];
-    let b2: [u8; 256] = [0u8; 256usize];
-    let b3: [u8; 256] = [0u8; 256usize];
+    let mut b0: [u8; 256] = [0u8; 256usize];
+    let mut b1: [u8; 256] = [0u8; 256usize];
+    let mut b2: [u8; 256] = [0u8; 256usize];
+    let mut b3: [u8; 256] = [0u8; 256usize];
     let mut b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b0,
+            fst: &mut b0,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+            { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
         };
     let rem: u32 = inputByteLen.wrapping_rem(rateInBytes1);
     match ib
@@ -5760,17 +5760,17 @@ pub fn sha3_384(
         (&mut s)[i as usize] =
             lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
     );
-    let b00: [u8; 256] = [0u8; 256usize];
-    let b10: [u8; 256] = [0u8; 256usize];
-    let b20: [u8; 256] = [0u8; 256usize];
-    let b30: [u8; 256] = [0u8; 256usize];
+    let mut b00: [u8; 256] = [0u8; 256usize];
+    let mut b10: [u8; 256] = [0u8; 256usize];
+    let mut b20: [u8; 256] = [0u8; 256usize];
+    let mut b30: [u8; 256] = [0u8; 256usize];
     let mut b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b00,
+            fst: &mut b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b10, snd: crate::sha2_types::uint8_2p { fst: &b20, snd: &b30 } }
+            { fst: &mut b10, snd: crate::sha2_types::uint8_2p { fst: &mut b20, snd: &mut b30 } }
         };
     match b
     {
@@ -6522,14 +6522,14 @@ pub fn sha3_384(
 }
 
 pub fn sha3_512(
-    output0: &[u8],
-    output1: &[u8],
-    output2: &[u8],
-    output3: &[u8],
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
+    output0: &mut [u8],
+    output1: &mut [u8],
+    output2: &mut [u8],
+    output3: &mut [u8],
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
     inputByteLen: u32
 )
 {
@@ -6554,17 +6554,17 @@ pub fn sha3_512(
     let rateInBytes1: u32 = 72u32;
     for i in 0u32..inputByteLen.wrapping_div(rateInBytes1)
     {
-        let b0: [u8; 256] = [0u8; 256usize];
-        let b1: [u8; 256] = [0u8; 256usize];
-        let b2: [u8; 256] = [0u8; 256usize];
-        let b3: [u8; 256] = [0u8; 256usize];
+        let mut b0: [u8; 256] = [0u8; 256usize];
+        let mut b1: [u8; 256] = [0u8; 256usize];
+        let mut b2: [u8; 256] = [0u8; 256usize];
+        let mut b3: [u8; 256] = [0u8; 256usize];
         let mut b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
-                fst: &b0,
+                fst: &mut b0,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+                { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
             };
         match ib
         {
@@ -6615,17 +6615,17 @@ pub fn sha3_512(
         };
         crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b·, &mut s)
     };
-    let b0: [u8; 256] = [0u8; 256usize];
-    let b1: [u8; 256] = [0u8; 256usize];
-    let b2: [u8; 256] = [0u8; 256usize];
-    let b3: [u8; 256] = [0u8; 256usize];
+    let mut b0: [u8; 256] = [0u8; 256usize];
+    let mut b1: [u8; 256] = [0u8; 256usize];
+    let mut b2: [u8; 256] = [0u8; 256usize];
+    let mut b3: [u8; 256] = [0u8; 256usize];
     let mut b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b0,
+            fst: &mut b0,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+            { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
         };
     let rem: u32 = inputByteLen.wrapping_rem(rateInBytes1);
     match ib
@@ -6966,17 +6966,17 @@ pub fn sha3_512(
         (&mut s)[i as usize] =
             lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
     );
-    let b00: [u8; 256] = [0u8; 256usize];
-    let b10: [u8; 256] = [0u8; 256usize];
-    let b20: [u8; 256] = [0u8; 256usize];
-    let b30: [u8; 256] = [0u8; 256usize];
+    let mut b00: [u8; 256] = [0u8; 256usize];
+    let mut b10: [u8; 256] = [0u8; 256usize];
+    let mut b20: [u8; 256] = [0u8; 256usize];
+    let mut b30: [u8; 256] = [0u8; 256usize];
     let mut b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b00,
+            fst: &mut b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b10, snd: crate::sha2_types::uint8_2p { fst: &b20, snd: &b30 } }
+            { fst: &mut b10, snd: crate::sha2_types::uint8_2p { fst: &mut b20, snd: &mut b30 } }
         };
     match b
     {
@@ -7770,17 +7770,17 @@ shake128_absorb_nblocks(
 {
     for i in 0u32..inputByteLen.wrapping_div(168u32)
     {
-        let b0: [u8; 256] = [0u8; 256usize];
-        let b1: [u8; 256] = [0u8; 256usize];
-        let b2: [u8; 256] = [0u8; 256usize];
-        let b3: [u8; 256] = [0u8; 256usize];
+        let mut b0: [u8; 256] = [0u8; 256usize];
+        let mut b1: [u8; 256] = [0u8; 256usize];
+        let mut b2: [u8; 256] = [0u8; 256usize];
+        let mut b3: [u8; 256] = [0u8; 256usize];
         let mut b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
-                fst: &b0,
+                fst: &mut b0,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+                { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
             };
         let b00: &[u8] = input0;
         let b10: &[u8] = input1;
@@ -7844,17 +7844,17 @@ shake128_absorb_final(
     inputByteLen: u32
 )
 {
-    let b0: [u8; 256] = [0u8; 256usize];
-    let b1: [u8; 256] = [0u8; 256usize];
-    let b2: [u8; 256] = [0u8; 256usize];
-    let b3: [u8; 256] = [0u8; 256usize];
+    let mut b0: [u8; 256] = [0u8; 256usize];
+    let mut b1: [u8; 256] = [0u8; 256usize];
+    let mut b2: [u8; 256] = [0u8; 256usize];
+    let mut b3: [u8; 256] = [0u8; 256usize];
     let mut b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b0,
+            fst: &mut b0,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b1, snd: crate::sha2_types::uint8_2p { fst: &b2, snd: &b3 } }
+            { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
         };
     let rem: u32 = inputByteLen.wrapping_rem(168u32);
     let b00: &[u8] = input0;
@@ -8188,17 +8188,17 @@ shake128_absorb_final(
         state[i as usize] =
             lib::intvector_intrinsics::vec256_xor(state[i as usize], (&ws)[i as usize])
     );
-    let b01: [u8; 256] = [0u8; 256usize];
-    let b11: [u8; 256] = [0u8; 256usize];
-    let b21: [u8; 256] = [0u8; 256usize];
-    let b31: [u8; 256] = [0u8; 256usize];
+    let mut b01: [u8; 256] = [0u8; 256usize];
+    let mut b11: [u8; 256] = [0u8; 256usize];
+    let mut b21: [u8; 256] = [0u8; 256usize];
+    let mut b31: [u8; 256] = [0u8; 256usize];
     let mut b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
-            fst: &b01,
+            fst: &mut b01,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: &b11, snd: crate::sha2_types::uint8_2p { fst: &b21, snd: &b31 } }
+            { fst: &mut b11, snd: crate::sha2_types::uint8_2p { fst: &mut b21, snd: &mut b31 } }
         };
     match b
     {

@@ -51,12 +51,14 @@ Hacl_HKDF_expand_sha2_256(
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + 1U);
   uint8_t text[tlen + infolen + 1U];
   memset(text, 0U, (tlen + infolen + 1U) * sizeof (uint8_t));
-  uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
   memcpy(text + tlen, info, infolen * sizeof (uint8_t));
+  KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
+  uint8_t tag[tlen];
+  memset(tag, 0U, tlen * sizeof (uint8_t));
   for (uint32_t i = 0U; i < n; i++)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(i + 1U);
     if (i == 0U)
     {
@@ -64,12 +66,15 @@ Hacl_HKDF_expand_sha2_256(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     memcpy(output + i * tlen, tag, tlen * sizeof (uint8_t));
   }
   if (n * tlen < len)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(n + 1U);
     if (n == 0U)
     {
@@ -77,10 +82,12 @@ Hacl_HKDF_expand_sha2_256(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     uint8_t *block = okm + n * tlen;
     memcpy(block, tag, (len - n * tlen) * sizeof (uint8_t));
+    return;
   }
 }
 
@@ -131,12 +138,14 @@ Hacl_HKDF_expand_sha2_384(
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + 1U);
   uint8_t text[tlen + infolen + 1U];
   memset(text, 0U, (tlen + infolen + 1U) * sizeof (uint8_t));
-  uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
   memcpy(text + tlen, info, infolen * sizeof (uint8_t));
+  KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
+  uint8_t tag[tlen];
+  memset(tag, 0U, tlen * sizeof (uint8_t));
   for (uint32_t i = 0U; i < n; i++)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(i + 1U);
     if (i == 0U)
     {
@@ -144,12 +153,15 @@ Hacl_HKDF_expand_sha2_384(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_sha2_384(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     memcpy(output + i * tlen, tag, tlen * sizeof (uint8_t));
   }
   if (n * tlen < len)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(n + 1U);
     if (n == 0U)
     {
@@ -157,10 +169,12 @@ Hacl_HKDF_expand_sha2_384(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_sha2_384(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     uint8_t *block = okm + n * tlen;
     memcpy(block, tag, (len - n * tlen) * sizeof (uint8_t));
+    return;
   }
 }
 
@@ -211,12 +225,14 @@ Hacl_HKDF_expand_sha2_512(
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + 1U);
   uint8_t text[tlen + infolen + 1U];
   memset(text, 0U, (tlen + infolen + 1U) * sizeof (uint8_t));
-  uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
   memcpy(text + tlen, info, infolen * sizeof (uint8_t));
+  KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
+  uint8_t tag[tlen];
+  memset(tag, 0U, tlen * sizeof (uint8_t));
   for (uint32_t i = 0U; i < n; i++)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(i + 1U);
     if (i == 0U)
     {
@@ -224,12 +240,15 @@ Hacl_HKDF_expand_sha2_512(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     memcpy(output + i * tlen, tag, tlen * sizeof (uint8_t));
   }
   if (n * tlen < len)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(n + 1U);
     if (n == 0U)
     {
@@ -237,10 +256,12 @@ Hacl_HKDF_expand_sha2_512(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     uint8_t *block = okm + n * tlen;
     memcpy(block, tag, (len - n * tlen) * sizeof (uint8_t));
+    return;
   }
 }
 
@@ -291,12 +312,14 @@ Hacl_HKDF_expand_blake2s_32(
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + 1U);
   uint8_t text[tlen + infolen + 1U];
   memset(text, 0U, (tlen + infolen + 1U) * sizeof (uint8_t));
-  uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
   memcpy(text + tlen, info, infolen * sizeof (uint8_t));
+  KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
+  uint8_t tag[tlen];
+  memset(tag, 0U, tlen * sizeof (uint8_t));
   for (uint32_t i = 0U; i < n; i++)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(i + 1U);
     if (i == 0U)
     {
@@ -304,12 +327,15 @@ Hacl_HKDF_expand_blake2s_32(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_blake2s_32(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     memcpy(output + i * tlen, tag, tlen * sizeof (uint8_t));
   }
   if (n * tlen < len)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(n + 1U);
     if (n == 0U)
     {
@@ -317,10 +343,12 @@ Hacl_HKDF_expand_blake2s_32(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_blake2s_32(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     uint8_t *block = okm + n * tlen;
     memcpy(block, tag, (len - n * tlen) * sizeof (uint8_t));
+    return;
   }
 }
 
@@ -371,12 +399,14 @@ Hacl_HKDF_expand_blake2b_32(
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + 1U);
   uint8_t text[tlen + infolen + 1U];
   memset(text, 0U, (tlen + infolen + 1U) * sizeof (uint8_t));
-  uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
   memcpy(text + tlen, info, infolen * sizeof (uint8_t));
+  KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
+  uint8_t tag[tlen];
+  memset(tag, 0U, tlen * sizeof (uint8_t));
   for (uint32_t i = 0U; i < n; i++)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(i + 1U);
     if (i == 0U)
     {
@@ -384,12 +414,15 @@ Hacl_HKDF_expand_blake2b_32(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_blake2b_32(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     memcpy(output + i * tlen, tag, tlen * sizeof (uint8_t));
   }
   if (n * tlen < len)
   {
+    uint8_t *text0 = text + tlen;
+    uint8_t *ctr = text + tlen + infolen;
     ctr[0U] = (uint8_t)(n + 1U);
     if (n == 0U)
     {
@@ -397,10 +430,12 @@ Hacl_HKDF_expand_blake2b_32(
     }
     else
     {
+      memcpy(text, tag, tlen * sizeof (uint8_t));
       Hacl_HMAC_compute_blake2b_32(tag, prk, prklen, text, tlen + infolen + 1U);
     }
     uint8_t *block = okm + n * tlen;
     memcpy(block, tag, (len - n * tlen) * sizeof (uint8_t));
+    return;
   }
 }
 

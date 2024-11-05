@@ -2219,6 +2219,7 @@ pub(crate) fn poly1305_finish(
     lowstar::endianness::store64_le(&mut tag[8usize..], f312)
 }
 
+#[derive(PartialEq, Clone)]
 pub struct state_t
 {
     pub block_state: Box<[lib::intvector_intrinsics::vec256]>,

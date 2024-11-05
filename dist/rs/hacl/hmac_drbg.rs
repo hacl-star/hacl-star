@@ -35,7 +35,9 @@ min_length(a: crate::streaming_types::hash_alg) ->
     }
 }
 
-pub struct state { pub k: Box<[u8]>, pub v: Box<[u8]>, pub reseed_counter: Box<[u32]> }
+#[derive(PartialEq, Clone)]
+pub struct state
+{ pub k: Box<[u8]>, pub v: Box<[u8]>, pub reseed_counter: Box<[u32]> }
 
 pub fn uu___is_State(a: crate::streaming_types::hash_alg, projectee: crate::hmac_drbg::state) ->
     bool
