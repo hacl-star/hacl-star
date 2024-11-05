@@ -127,23 +127,28 @@ const expected_okm3: [u8; 42] = [
 
 #[test]
 pub fn test_hkdf () {
-  // Test 1
-  let mut prk = [0u8; 32];
-  let mut okm = [0u8; 42];
+  let mut prk1 = [0u8; 32];
+  let mut okm1 = [0u8; 42];
 
-  crate::hkdf::extract_sha2_256(&mut prk, &salt1, 13, &ikm1, 22);
-  assert_eq!(prk, expected_prk1);
-  crate::hkdf::expand_sha2_256(&mut okm, &prk, 32, &info1, 10, len1);
-  assert_eq!(okm, expected_okm1);
+  crate::hkdf::extract_sha2_256(&mut prk1, &salt1, 13, &ikm1, 22);
+  assert_eq!(prk1, expected_prk1);
+  crate::hkdf::expand_sha2_256(&mut okm1, &prk1, 32, &info1, 10, len1);
+  assert_eq!(okm1, expected_okm1);
 
-  crate::hkdf::extract_sha2_256(&mut prk, &salt2, 80, &ikm2, 80);
-  assert_eq!(prk, expected_prk1);
-  crate::hkdf::expand_sha2_256(&mut okm, &prk, 32, &info2, 10, len2);
-  assert_eq!(okm, expected_okm1);
+  let mut prk2 = [0u8; 32];
+  let mut okm2 = [0u8; 82];
 
-  crate::hkdf::extract_sha2_256(&mut prk, &salt3, 0, &ikm3, 22);
-  assert_eq!(prk, expected_prk1);
-  crate::hkdf::expand_sha2_256(&mut okm, &prk, 32, &info3, 0, len3);
-  assert_eq!(okm, expected_okm1);
+  crate::hkdf::extract_sha2_256(&mut prk2, &salt2, 80, &ikm2, 80);
+  assert_eq!(prk2, expected_prk2);
+  crate::hkdf::expand_sha2_256(&mut okm2, &prk2, 32, &info2, 80, len2);
+  assert_eq!(okm2, expected_okm2);
+
+  let mut prk3 = [0u8; 32];
+  let mut okm3 = [0u8; 42];
+
+  crate::hkdf::extract_sha2_256(&mut prk3, &salt3, 0, &ikm3, 22);
+  assert_eq!(prk3, expected_prk3);
+  crate::hkdf::expand_sha2_256(&mut okm3, &prk3, 32, &info3, 0, len3);
+  assert_eq!(okm3, expected_okm3);
 }
 
