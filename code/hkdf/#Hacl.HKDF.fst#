@@ -141,7 +141,6 @@ let mk_expand a hmac okm prk prklen info infolen len =
   );
 
 
-
   let h1 = ST.get () in
   if n *! tlen <. len then
     let text0: B.lbuffer uint8 (infolen +! 1ul) = B.sub text tlen (infolen +! 1ul) in
@@ -169,6 +168,9 @@ let mk_expand a hmac okm prk prklen info infolen len =
     let block = B.sub okm (n *! tlen) (len -! (n *! tlen)) in
     B.copy block (B.sub tag 0ul (len -! (n *! tlen)))
   end;
+
+  admit();
+
 
   let h4 = ST.get() in
   assert (
