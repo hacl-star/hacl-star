@@ -158,6 +158,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
   uint64_t p_n1[nLen];
   memset(p_n1, 0U, nLen * sizeof (uint64_t));
   uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(0ULL, p_n[0U], 1ULL, p_n1);
+  uint64_t c1;
   if (1U < nLen)
   {
     uint64_t *a1 = p_n + 1U;
@@ -184,13 +185,14 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
       uint64_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, 0ULL, res_i);
     }
-    uint64_t c1 = c;
-    KRML_MAYBE_UNUSED_VAR(c1);
+    uint64_t c10 = c;
+    c1 = c10;
   }
   else
   {
-    KRML_MAYBE_UNUSED_VAR(c0);
+    c1 = c0;
   }
+  KRML_MAYBE_UNUSED_VAR(c1);
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t b2[nLen];
   memset(b2, 0U, nLen * sizeof (uint64_t));

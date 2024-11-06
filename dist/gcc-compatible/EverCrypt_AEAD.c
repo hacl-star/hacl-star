@@ -538,26 +538,27 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
   KRML_MAYBE_UNUSED_VAR(cipher);
   KRML_MAYBE_UNUSED_VAR(tag);
   #if HACL_CAN_COMPILE_VALE
-  uint8_t ek[480U] = { 0U };
-  uint8_t *keys_b0 = ek;
-  uint8_t *hkeys_b0 = ek + 176U;
+  uint8_t ek0[480U] = { 0U };
+  uint8_t *keys_b0 = ek0;
+  uint8_t *hkeys_b0 = ek0 + 176U;
   aes128_key_expansion(k, keys_b0);
   aes128_keyhash_init(keys_b0, hkeys_b0);
-  EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek };
+  EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek0 };
   EverCrypt_AEAD_state_s *s = &p;
+  EverCrypt_Error_error_code r;
   if (s == NULL)
   {
-    KRML_HOST_IGNORE(EverCrypt_Error_InvalidKey);
+    r = EverCrypt_Error_InvalidKey;
   }
   else if (iv_len == 0U)
   {
-    KRML_HOST_IGNORE(EverCrypt_Error_InvalidIVLength);
+    r = EverCrypt_Error_InvalidIVLength;
   }
   else
   {
-    uint8_t *ek0 = (*s).ek;
-    uint8_t *scratch_b = ek0 + 304U;
-    uint8_t *ek1 = ek0;
+    uint8_t *ek = (*s).ek;
+    uint8_t *scratch_b = ek + 304U;
+    uint8_t *ek1 = ek;
     uint8_t *keys_b = ek1;
     uint8_t *hkeys_b = ek1 + 176U;
     uint8_t tmp_iv[16U] = { 0U };
@@ -637,8 +638,9 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
     memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
       inout_b,
       (uint32_t)(uint64_t)plain_len % 16U * sizeof (uint8_t));
-    KRML_HOST_IGNORE(EverCrypt_Error_Success);
+    r = EverCrypt_Error_Success;
   }
+  KRML_MAYBE_UNUSED_VAR(r);
   return EverCrypt_Error_Success;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
@@ -680,26 +682,27 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
   KRML_MAYBE_UNUSED_VAR(cipher);
   KRML_MAYBE_UNUSED_VAR(tag);
   #if HACL_CAN_COMPILE_VALE
-  uint8_t ek[544U] = { 0U };
-  uint8_t *keys_b0 = ek;
-  uint8_t *hkeys_b0 = ek + 240U;
+  uint8_t ek0[544U] = { 0U };
+  uint8_t *keys_b0 = ek0;
+  uint8_t *hkeys_b0 = ek0 + 240U;
   aes256_key_expansion(k, keys_b0);
   aes256_keyhash_init(keys_b0, hkeys_b0);
-  EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek };
+  EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek0 };
   EverCrypt_AEAD_state_s *s = &p;
+  EverCrypt_Error_error_code r;
   if (s == NULL)
   {
-    KRML_HOST_IGNORE(EverCrypt_Error_InvalidKey);
+    r = EverCrypt_Error_InvalidKey;
   }
   else if (iv_len == 0U)
   {
-    KRML_HOST_IGNORE(EverCrypt_Error_InvalidIVLength);
+    r = EverCrypt_Error_InvalidIVLength;
   }
   else
   {
-    uint8_t *ek0 = (*s).ek;
-    uint8_t *scratch_b = ek0 + 368U;
-    uint8_t *ek1 = ek0;
+    uint8_t *ek = (*s).ek;
+    uint8_t *scratch_b = ek + 368U;
+    uint8_t *ek1 = ek;
     uint8_t *keys_b = ek1;
     uint8_t *hkeys_b = ek1 + 240U;
     uint8_t tmp_iv[16U] = { 0U };
@@ -779,8 +782,9 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
     memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
       inout_b,
       (uint32_t)(uint64_t)plain_len % 16U * sizeof (uint8_t));
-    KRML_HOST_IGNORE(EverCrypt_Error_Success);
+    r = EverCrypt_Error_Success;
   }
+  KRML_MAYBE_UNUSED_VAR(r);
   return EverCrypt_Error_Success;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
@@ -821,26 +825,27 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
-    uint8_t ek[480U] = { 0U };
-    uint8_t *keys_b0 = ek;
-    uint8_t *hkeys_b0 = ek + 176U;
+    uint8_t ek0[480U] = { 0U };
+    uint8_t *keys_b0 = ek0;
+    uint8_t *hkeys_b0 = ek0 + 176U;
     aes128_key_expansion(k, keys_b0);
     aes128_keyhash_init(keys_b0, hkeys_b0);
-    EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek };
+    EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek0 };
     EverCrypt_AEAD_state_s *s = &p;
+    EverCrypt_Error_error_code r;
     if (s == NULL)
     {
-      KRML_HOST_IGNORE(EverCrypt_Error_InvalidKey);
+      r = EverCrypt_Error_InvalidKey;
     }
     else if (iv_len == 0U)
     {
-      KRML_HOST_IGNORE(EverCrypt_Error_InvalidIVLength);
+      r = EverCrypt_Error_InvalidIVLength;
     }
     else
     {
-      uint8_t *ek0 = (*s).ek;
-      uint8_t *scratch_b = ek0 + 304U;
-      uint8_t *ek1 = ek0;
+      uint8_t *ek = (*s).ek;
+      uint8_t *scratch_b = ek + 304U;
+      uint8_t *ek1 = ek;
       uint8_t *keys_b = ek1;
       uint8_t *hkeys_b = ek1 + 176U;
       uint8_t tmp_iv[16U] = { 0U };
@@ -920,8 +925,9 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
       memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
         inout_b,
         (uint32_t)(uint64_t)plain_len % 16U * sizeof (uint8_t));
-      KRML_HOST_IGNORE(EverCrypt_Error_Success);
+      r = EverCrypt_Error_Success;
     }
+    KRML_MAYBE_UNUSED_VAR(r);
     return EverCrypt_Error_Success;
   }
   return EverCrypt_Error_UnsupportedAlgorithm;
@@ -960,26 +966,27 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
-    uint8_t ek[544U] = { 0U };
-    uint8_t *keys_b0 = ek;
-    uint8_t *hkeys_b0 = ek + 240U;
+    uint8_t ek0[544U] = { 0U };
+    uint8_t *keys_b0 = ek0;
+    uint8_t *hkeys_b0 = ek0 + 240U;
     aes256_key_expansion(k, keys_b0);
     aes256_keyhash_init(keys_b0, hkeys_b0);
-    EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek };
+    EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek0 };
     EverCrypt_AEAD_state_s *s = &p;
+    EverCrypt_Error_error_code r;
     if (s == NULL)
     {
-      KRML_HOST_IGNORE(EverCrypt_Error_InvalidKey);
+      r = EverCrypt_Error_InvalidKey;
     }
     else if (iv_len == 0U)
     {
-      KRML_HOST_IGNORE(EverCrypt_Error_InvalidIVLength);
+      r = EverCrypt_Error_InvalidIVLength;
     }
     else
     {
-      uint8_t *ek0 = (*s).ek;
-      uint8_t *scratch_b = ek0 + 368U;
-      uint8_t *ek1 = ek0;
+      uint8_t *ek = (*s).ek;
+      uint8_t *scratch_b = ek + 368U;
+      uint8_t *ek1 = ek;
       uint8_t *keys_b = ek1;
       uint8_t *hkeys_b = ek1 + 240U;
       uint8_t tmp_iv[16U] = { 0U };
@@ -1059,8 +1066,9 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
       memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
         inout_b,
         (uint32_t)(uint64_t)plain_len % 16U * sizeof (uint8_t));
-      KRML_HOST_IGNORE(EverCrypt_Error_Success);
+      r = EverCrypt_Error_Success;
     }
+    KRML_MAYBE_UNUSED_VAR(r);
     return EverCrypt_Error_Success;
   }
   return EverCrypt_Error_UnsupportedAlgorithm;

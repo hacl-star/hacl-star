@@ -1328,7 +1328,8 @@ void EverCrypt_Hash_Incremental_reset(EverCrypt_Hash_Incremental_state_t *state)
   Spec_Hash_Definitions_hash_alg i = alg_of_state(block_state);
   KRML_MAYBE_UNUSED_VAR(i);
   init(block_state);
-  state->total_len = (uint64_t)0U;
+  uint64_t total_len = (uint64_t)0U;
+  state->total_len = total_len;
 }
 
 /**

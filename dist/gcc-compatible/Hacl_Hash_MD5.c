@@ -1180,7 +1180,8 @@ void Hacl_Hash_MD5_reset(Hacl_Streaming_MD_state_32 *state)
 {
   uint32_t *block_state = (*state).block_state;
   Hacl_Hash_MD5_init(block_state);
-  state->total_len = (uint64_t)0U;
+  uint64_t total_len = (uint64_t)0U;
+  state->total_len = total_len;
 }
 
 /**

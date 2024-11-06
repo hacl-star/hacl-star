@@ -29,29 +29,33 @@ expand_blake2b_256(
     let output: (&mut [u8], &mut [u8]) = okm.split_at_mut(0usize);
     let mut text: Box<[u8]> =
         vec![0u8; tlen.wrapping_add(infolen).wrapping_add(1u32) as usize].into_boxed_slice();
-    let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
-    let tag: (&mut [u8], &mut [u8]) = text0.1.split_at_mut(0usize - tlen as usize);
-    let ctr: (&mut [u8], &mut [u8]) = tag.1.split_at_mut(tlen.wrapping_add(infolen) as usize);
     ((&mut (&mut text)[tlen as usize..])[0usize..infolen as usize]).copy_from_slice(
         &info[0usize..infolen as usize]
     );
+    let mut tag: Box<[u8]> = vec![0u8; tlen as usize].into_boxed_slice();
     for i in 0u32..n
     {
+        let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
+        lowstar::ignore::ignore::<&[u8]>(&text);
+        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
         if i == 0u32
         {
             crate::hmac_blake2b_256::compute_blake2b_256(
-                ctr.0,
+                &mut tag,
                 prk,
                 prklen,
-                tag.0,
+                text0.1,
                 infolen.wrapping_add(1u32)
             )
         }
         else
         {
+            ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
+                &(&tag)[0usize..tlen as usize]
+            );
             crate::hmac_blake2b_256::compute_blake2b_256(
-                ctr.0,
+                &mut tag,
                 prk,
                 prklen,
                 &text,
@@ -59,26 +63,32 @@ expand_blake2b_256(
             )
         };
         ((&mut output.1[i.wrapping_mul(tlen) as usize..])[0usize..tlen as usize]).copy_from_slice(
-            &ctr.0[0usize..tlen as usize]
+            &(&tag)[0usize..tlen as usize]
         )
     };
     if n.wrapping_mul(tlen) < len
     {
+        let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
+        lowstar::ignore::ignore::<&[u8]>(&text);
+        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
         if n == 0u32
         {
             crate::hmac_blake2b_256::compute_blake2b_256(
-                ctr.0,
+                &mut tag,
                 prk,
                 prklen,
-                tag.0,
+                text0.1,
                 infolen.wrapping_add(1u32)
             )
         }
         else
         {
+            ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
+                &(&tag)[0usize..tlen as usize]
+            );
             crate::hmac_blake2b_256::compute_blake2b_256(
-                ctr.0,
+                &mut tag,
                 prk,
                 prklen,
                 &text,
@@ -87,7 +97,7 @@ expand_blake2b_256(
         };
         let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
-            &(&ctr.0[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
+            &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
     }
 }

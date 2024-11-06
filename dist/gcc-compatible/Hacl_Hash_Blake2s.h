@@ -48,19 +48,13 @@ extern "C" {
 
 #define HACL_HASH_BLAKE2S_PERSONAL_BYTES (8U)
 
-typedef struct K____uint32_t___uint32_t__s
-{
-  uint32_t *fst;
-  uint32_t *snd;
-}
-K____uint32_t___uint32_t_;
-
 typedef struct Hacl_Hash_Blake2s_block_state_t_s
 {
   uint8_t fst;
   uint8_t snd;
   bool thd;
-  K____uint32_t___uint32_t_ f3;
+  uint32_t *f3;
+  uint32_t *f4;
 }
 Hacl_Hash_Blake2s_block_state_t;
 

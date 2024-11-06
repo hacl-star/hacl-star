@@ -43,11 +43,11 @@ update_block(
     0U,
     16U,
     1U,
-    uint64_t *os = m_w;
     uint8_t *bj = d + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = m_w;
     os[i] = x;);
   uint64_t mask[4U] = { 0U };
   uint64_t wv_14;
@@ -78,8 +78,8 @@ update_block(
     0U,
     4U,
     1U,
-    uint64_t *os = wv3;
     uint64_t x = wv3[i] ^ mask[i];
+    uint64_t *os = wv3;
     os[i] = x;);
   KRML_MAYBE_FOR12(i0,
     0U,
@@ -139,131 +139,127 @@ update_block(
     uint64_t *y = m_st + 4U;
     uint64_t *z = m_st + 8U;
     uint64_t *w = m_st + 12U;
-    uint32_t a = 0U;
-    uint32_t b0 = 1U;
-    uint32_t c0 = 2U;
-    uint32_t d10 = 3U;
-    uint64_t *wv_a0 = wv + a * 4U;
-    uint64_t *wv_b0 = wv + b0 * 4U;
+    uint64_t *wv_a = wv;
+    uint64_t *wv_b0 = wv + 4U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
+      uint64_t x1 = wv_a[i] + wv_b0[i];
+      uint64_t *os = wv_a;
+      os[i] = x1;);
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint64_t x1 = wv_a[i] + x[i];
+      uint64_t *os = wv_a;
+      os[i] = x1;);
+    uint64_t *wv_a0 = wv + 12U;
+    uint64_t *wv_b1 = wv;
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint64_t x1 = wv_a0[i] ^ wv_b1[i];
       uint64_t *os = wv_a0;
-      uint64_t x1 = wv_a0[i] + wv_b0[i];
       os[i] = x1;);
+    uint64_t *r10 = wv_a0;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a0;
-      uint64_t x1 = wv_a0[i] + x[i];
-      os[i] = x1;);
-    uint64_t *wv_a1 = wv + d10 * 4U;
-    uint64_t *wv_b1 = wv + a * 4U;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint64_t *os = wv_a1;
-      uint64_t x1 = wv_a1[i] ^ wv_b1[i];
-      os[i] = x1;);
-    uint64_t *r10 = wv_a1;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint64_t *os = r10;
       uint64_t x1 = r10[i];
       uint64_t x10 = x1 >> 32U | x1 << 32U;
+      uint64_t *os = r10;
       os[i] = x10;);
-    uint64_t *wv_a2 = wv + c0 * 4U;
-    uint64_t *wv_b2 = wv + d10 * 4U;
+    uint64_t *wv_a1 = wv + 8U;
+    uint64_t *wv_b2 = wv + 12U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
+      uint64_t x1 = wv_a1[i] + wv_b2[i];
+      uint64_t *os = wv_a1;
+      os[i] = x1;);
+    uint64_t *wv_a2 = wv + 4U;
+    uint64_t *wv_b3 = wv + 8U;
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint64_t x1 = wv_a2[i] ^ wv_b3[i];
       uint64_t *os = wv_a2;
-      uint64_t x1 = wv_a2[i] + wv_b2[i];
       os[i] = x1;);
-    uint64_t *wv_a3 = wv + b0 * 4U;
-    uint64_t *wv_b3 = wv + c0 * 4U;
+    uint64_t *r12 = wv_a2;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a3;
-      uint64_t x1 = wv_a3[i] ^ wv_b3[i];
-      os[i] = x1;);
-    uint64_t *r12 = wv_a3;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint64_t *os = r12;
       uint64_t x1 = r12[i];
       uint64_t x10 = x1 >> 24U | x1 << 40U;
+      uint64_t *os = r12;
       os[i] = x10;);
-    uint64_t *wv_a4 = wv + a * 4U;
-    uint64_t *wv_b4 = wv + b0 * 4U;
+    uint64_t *wv_a3 = wv;
+    uint64_t *wv_b4 = wv + 4U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
+      uint64_t x1 = wv_a3[i] + wv_b4[i];
+      uint64_t *os = wv_a3;
+      os[i] = x1;);
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint64_t x1 = wv_a3[i] + y[i];
+      uint64_t *os = wv_a3;
+      os[i] = x1;);
+    uint64_t *wv_a4 = wv + 12U;
+    uint64_t *wv_b5 = wv;
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint64_t x1 = wv_a4[i] ^ wv_b5[i];
       uint64_t *os = wv_a4;
-      uint64_t x1 = wv_a4[i] + wv_b4[i];
       os[i] = x1;);
+    uint64_t *r13 = wv_a4;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a4;
-      uint64_t x1 = wv_a4[i] + y[i];
-      os[i] = x1;);
-    uint64_t *wv_a5 = wv + d10 * 4U;
-    uint64_t *wv_b5 = wv + a * 4U;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint64_t *os = wv_a5;
-      uint64_t x1 = wv_a5[i] ^ wv_b5[i];
-      os[i] = x1;);
-    uint64_t *r13 = wv_a5;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint64_t *os = r13;
       uint64_t x1 = r13[i];
       uint64_t x10 = x1 >> 16U | x1 << 48U;
+      uint64_t *os = r13;
       os[i] = x10;);
-    uint64_t *wv_a6 = wv + c0 * 4U;
-    uint64_t *wv_b6 = wv + d10 * 4U;
+    uint64_t *wv_a5 = wv + 8U;
+    uint64_t *wv_b6 = wv + 12U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
+      uint64_t x1 = wv_a5[i] + wv_b6[i];
+      uint64_t *os = wv_a5;
+      os[i] = x1;);
+    uint64_t *wv_a6 = wv + 4U;
+    uint64_t *wv_b7 = wv + 8U;
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint64_t x1 = wv_a6[i] ^ wv_b7[i];
       uint64_t *os = wv_a6;
-      uint64_t x1 = wv_a6[i] + wv_b6[i];
       os[i] = x1;);
-    uint64_t *wv_a7 = wv + b0 * 4U;
-    uint64_t *wv_b7 = wv + c0 * 4U;
+    uint64_t *r14 = wv_a6;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a7;
-      uint64_t x1 = wv_a7[i] ^ wv_b7[i];
-      os[i] = x1;);
-    uint64_t *r14 = wv_a7;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint64_t *os = r14;
       uint64_t x1 = r14[i];
       uint64_t x10 = x1 >> 63U | x1 << 1U;
+      uint64_t *os = r14;
       os[i] = x10;);
     uint64_t *r15 = wv + 4U;
     uint64_t *r21 = wv + 8U;
@@ -295,131 +291,127 @@ update_block(
     r112[1U] = x12;
     r112[2U] = x22;
     r112[3U] = x32;
-    uint32_t a0 = 0U;
-    uint32_t b = 1U;
-    uint32_t c = 2U;
-    uint32_t d1 = 3U;
-    uint64_t *wv_a = wv + a0 * 4U;
-    uint64_t *wv_b8 = wv + b * 4U;
+    uint64_t *wv_a7 = wv;
+    uint64_t *wv_b8 = wv + 4U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a;
-      uint64_t x1 = wv_a[i] + wv_b8[i];
+      uint64_t x1 = wv_a7[i] + wv_b8[i];
+      uint64_t *os = wv_a7;
       os[i] = x1;);
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a;
-      uint64_t x1 = wv_a[i] + z[i];
+      uint64_t x1 = wv_a7[i] + z[i];
+      uint64_t *os = wv_a7;
       os[i] = x1;);
-    uint64_t *wv_a8 = wv + d1 * 4U;
-    uint64_t *wv_b9 = wv + a0 * 4U;
+    uint64_t *wv_a8 = wv + 12U;
+    uint64_t *wv_b9 = wv;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a8;
       uint64_t x1 = wv_a8[i] ^ wv_b9[i];
+      uint64_t *os = wv_a8;
       os[i] = x1;);
     uint64_t *r16 = wv_a8;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = r16;
       uint64_t x1 = r16[i];
       uint64_t x13 = x1 >> 32U | x1 << 32U;
+      uint64_t *os = r16;
       os[i] = x13;);
-    uint64_t *wv_a9 = wv + c * 4U;
-    uint64_t *wv_b10 = wv + d1 * 4U;
+    uint64_t *wv_a9 = wv + 8U;
+    uint64_t *wv_b10 = wv + 12U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a9;
       uint64_t x1 = wv_a9[i] + wv_b10[i];
+      uint64_t *os = wv_a9;
       os[i] = x1;);
-    uint64_t *wv_a10 = wv + b * 4U;
-    uint64_t *wv_b11 = wv + c * 4U;
+    uint64_t *wv_a10 = wv + 4U;
+    uint64_t *wv_b11 = wv + 8U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a10;
       uint64_t x1 = wv_a10[i] ^ wv_b11[i];
+      uint64_t *os = wv_a10;
       os[i] = x1;);
     uint64_t *r17 = wv_a10;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = r17;
       uint64_t x1 = r17[i];
       uint64_t x13 = x1 >> 24U | x1 << 40U;
+      uint64_t *os = r17;
       os[i] = x13;);
-    uint64_t *wv_a11 = wv + a0 * 4U;
-    uint64_t *wv_b12 = wv + b * 4U;
+    uint64_t *wv_a11 = wv;
+    uint64_t *wv_b12 = wv + 4U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a11;
       uint64_t x1 = wv_a11[i] + wv_b12[i];
-      os[i] = x1;);
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
       uint64_t *os = wv_a11;
-      uint64_t x1 = wv_a11[i] + w[i];
       os[i] = x1;);
-    uint64_t *wv_a12 = wv + d1 * 4U;
-    uint64_t *wv_b13 = wv + a0 * 4U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a12;
+      uint64_t x1 = wv_a11[i] + w[i];
+      uint64_t *os = wv_a11;
+      os[i] = x1;);
+    uint64_t *wv_a12 = wv + 12U;
+    uint64_t *wv_b13 = wv;
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
       uint64_t x1 = wv_a12[i] ^ wv_b13[i];
+      uint64_t *os = wv_a12;
       os[i] = x1;);
     uint64_t *r18 = wv_a12;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = r18;
       uint64_t x1 = r18[i];
       uint64_t x13 = x1 >> 16U | x1 << 48U;
+      uint64_t *os = r18;
       os[i] = x13;);
-    uint64_t *wv_a13 = wv + c * 4U;
-    uint64_t *wv_b14 = wv + d1 * 4U;
+    uint64_t *wv_a13 = wv + 8U;
+    uint64_t *wv_b14 = wv + 12U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a13;
       uint64_t x1 = wv_a13[i] + wv_b14[i];
+      uint64_t *os = wv_a13;
       os[i] = x1;);
-    uint64_t *wv_a14 = wv + b * 4U;
-    uint64_t *wv_b = wv + c * 4U;
+    uint64_t *wv_a14 = wv + 4U;
+    uint64_t *wv_b = wv + 8U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = wv_a14;
       uint64_t x1 = wv_a14[i] ^ wv_b[i];
+      uint64_t *os = wv_a14;
       os[i] = x1;);
     uint64_t *r19 = wv_a14;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint64_t *os = r19;
       uint64_t x1 = r19[i];
       uint64_t x13 = x1 >> 63U | x1 << 1U;
+      uint64_t *os = r19;
       os[i] = x13;);
     uint64_t *r113 = wv + 4U;
     uint64_t *r2 = wv + 8U;
@@ -461,29 +453,29 @@ update_block(
     0U,
     4U,
     1U,
-    uint64_t *os = s0;
     uint64_t x = s0[i] ^ r0[i];
-    os[i] = x;);
-  KRML_MAYBE_FOR4(i,
-    0U,
-    4U,
-    1U,
     uint64_t *os = s0;
+    os[i] = x;);
+  KRML_MAYBE_FOR4(i,
+    0U,
+    4U,
+    1U,
     uint64_t x = s0[i] ^ r2[i];
+    uint64_t *os = s0;
     os[i] = x;);
   KRML_MAYBE_FOR4(i,
     0U,
     4U,
     1U,
-    uint64_t *os = s1;
     uint64_t x = s1[i] ^ r1[i];
+    uint64_t *os = s1;
     os[i] = x;);
   KRML_MAYBE_FOR4(i,
     0U,
     4U,
     1U,
-    uint64_t *os = s1;
     uint64_t x = s1[i] ^ r3[i];
+    uint64_t *os = s1;
     os[i] = x;);
 }
 
@@ -520,25 +512,27 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
   r3[3U] = iv7;
   uint8_t kk1 = (uint8_t)kk;
   uint8_t nn1 = (uint8_t)nn;
+  uint64_t *uu____0 = tmp + 4U;
   KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
-    uint64_t *os = tmp + 4U;
     uint8_t *bj = p.salt + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = uu____0;
     os[i] = x;);
+  uint64_t *uu____1 = tmp + 6U;
   KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
-    uint64_t *os = tmp + 6U;
     uint8_t *bj = p.personal + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = uu____1;
     os[i] = x;);
   tmp[0U] =
     (uint64_t)nn1
@@ -692,6 +686,7 @@ void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
   uint64_t *row1 = hash + 4U;
   KRML_MAYBE_FOR4(i, 0U, 4U, 1U, store64_le(first + i * 8U, row0[i]););
   KRML_MAYBE_FOR4(i, 0U, 4U, 1U, store64_le(second + i * 8U, row1[i]););
+  KRML_MAYBE_UNUSED_VAR(b);
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
   Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
@@ -705,42 +700,23 @@ static Hacl_Hash_Blake2b_state_t
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   Hacl_Hash_Blake2b_block_state_t
   block_state =
-    {
-      .fst = kk.key_length,
-      .snd = kk.digest_length,
-      .thd = kk.last_node,
-      .f3 = { .fst = wv, .snd = b }
-    };
-  uint8_t kk10 = kk.key_length;
-  uint32_t ite;
-  if (kk10 != 0U)
-  {
-    ite = 128U;
-  }
-  else
-  {
-    ite = 0U;
-  }
-  Hacl_Hash_Blake2b_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
-  Hacl_Hash_Blake2b_state_t
-  *p = (Hacl_Hash_Blake2b_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2b_state_t));
-  p[0U] = s;
-  Hacl_Hash_Blake2b_blake2_params *p1 = key.fst;
-  uint8_t kk1 = p1->key_length;
-  uint8_t nn = p1->digest_length;
+    { .fst = kk.key_length, .snd = kk.digest_length, .thd = kk.last_node, .f3 = wv, .f4 = b };
+  Hacl_Hash_Blake2b_blake2_params *p = key.fst;
+  uint8_t kk1 = p->key_length;
+  uint8_t nn = p->digest_length;
   bool last_node = block_state.thd;
-  Hacl_Hash_Blake2b_index i = { .key_length = kk1, .digest_length = nn, .last_node = last_node };
-  uint64_t *h = block_state.f3.snd;
-  uint32_t kk20 = (uint32_t)i.key_length;
-  uint8_t *k_1 = key.snd;
+  Hacl_Hash_Blake2b_index
+  i0 = { .key_length = kk1, .digest_length = nn, .last_node = last_node };
+  uint64_t *h = block_state.f4;
+  uint32_t kk20 = (uint32_t)i0.key_length;
+  uint8_t *k_ = key.snd;
   if (!(kk20 == 0U))
   {
     uint8_t *sub_b = buf + kk20;
     memset(sub_b, 0U, (128U - kk20) * sizeof (uint8_t));
-    memcpy(buf, k_1, kk20 * sizeof (uint8_t));
+    memcpy(buf, k_, kk20 * sizeof (uint8_t));
   }
-  Hacl_Hash_Blake2b_blake2_params pv = p1[0U];
+  Hacl_Hash_Blake2b_blake2_params pv = p[0U];
   uint64_t tmp[8U] = { 0U };
   uint64_t *r0 = h;
   uint64_t *r1 = h + 4U;
@@ -764,26 +740,28 @@ static Hacl_Hash_Blake2b_state_t
   r3[3U] = iv7;
   uint8_t kk2 = pv.key_length;
   uint8_t nn1 = pv.digest_length;
-  KRML_MAYBE_FOR2(i0,
+  uint64_t *uu____0 = tmp + 4U;
+  KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
-    uint64_t *os = tmp + 4U;
-    uint8_t *bj = pv.salt + i0 * 8U;
+    uint8_t *bj = pv.salt + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r4 = u;
     uint64_t x = r4;
-    os[i0] = x;);
-  KRML_MAYBE_FOR2(i0,
+    uint64_t *os = uu____0;
+    os[i] = x;);
+  uint64_t *uu____1 = tmp + 6U;
+  KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
-    uint64_t *os = tmp + 6U;
-    uint8_t *bj = pv.personal + i0 * 8U;
+    uint8_t *bj = pv.personal + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r4 = u;
     uint64_t x = r4;
-    os[i0] = x;);
+    uint64_t *os = uu____1;
+    os[i] = x;);
   tmp[0U] =
     (uint64_t)nn1
     ^
@@ -817,7 +795,22 @@ static Hacl_Hash_Blake2b_state_t
   r1[1U] = iv5_;
   r1[2U] = iv6_;
   r1[3U] = iv7_;
-  return p;
+  uint8_t kk10 = kk.key_length;
+  uint32_t ite;
+  if (kk10 != 0U)
+  {
+    ite = 128U;
+  }
+  else
+  {
+    ite = 0U;
+  }
+  Hacl_Hash_Blake2b_state_t
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
+  Hacl_Hash_Blake2b_state_t
+  *p0 = (Hacl_Hash_Blake2b_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2b_state_t));
+  p0[0U] = s;
+  return p0;
 }
 
 /**
@@ -899,22 +892,20 @@ static Hacl_Hash_Blake2b_index index_of_state(Hacl_Hash_Blake2b_state_t *s)
 
 static void reset_raw(Hacl_Hash_Blake2b_state_t *state, Hacl_Hash_Blake2b_params_and_key key)
 {
-  Hacl_Hash_Blake2b_state_t scrut = *state;
-  uint8_t *buf = scrut.buf;
-  Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
+  Hacl_Hash_Blake2b_block_state_t block_state = (*state).block_state;
+  uint8_t *buf = (*state).buf;
   bool last_node0 = block_state.thd;
   uint8_t nn0 = block_state.snd;
   uint8_t kk10 = block_state.fst;
   Hacl_Hash_Blake2b_index
-  i = { .key_length = kk10, .digest_length = nn0, .last_node = last_node0 };
-  KRML_MAYBE_UNUSED_VAR(i);
+  i0 = { .key_length = kk10, .digest_length = nn0, .last_node = last_node0 };
   Hacl_Hash_Blake2b_blake2_params *p = key.fst;
   uint8_t kk1 = p->key_length;
   uint8_t nn = p->digest_length;
   bool last_node = block_state.thd;
   Hacl_Hash_Blake2b_index
   i1 = { .key_length = kk1, .digest_length = nn, .last_node = last_node };
-  uint64_t *h = block_state.f3.snd;
+  uint64_t *h = block_state.f4;
   uint32_t kk20 = (uint32_t)i1.key_length;
   uint8_t *k_1 = key.snd;
   if (!(kk20 == 0U))
@@ -947,26 +938,28 @@ static void reset_raw(Hacl_Hash_Blake2b_state_t *state, Hacl_Hash_Blake2b_params
   r3[3U] = iv7;
   uint8_t kk2 = pv.key_length;
   uint8_t nn1 = pv.digest_length;
-  KRML_MAYBE_FOR2(i0,
+  uint64_t *uu____0 = tmp + 4U;
+  KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
-    uint64_t *os = tmp + 4U;
-    uint8_t *bj = pv.salt + i0 * 8U;
+    uint8_t *bj = pv.salt + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[i0] = x;);
-  KRML_MAYBE_FOR2(i0,
+    uint64_t *os = uu____0;
+    os[i] = x;);
+  uint64_t *uu____1 = tmp + 6U;
+  KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
-    uint64_t *os = tmp + 6U;
-    uint8_t *bj = pv.personal + i0 * 8U;
+    uint8_t *bj = pv.personal + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[i0] = x;);
+    uint64_t *os = uu____1;
+    os[i] = x;);
   tmp[0U] =
     (uint64_t)nn1
     ^
@@ -1000,7 +993,7 @@ static void reset_raw(Hacl_Hash_Blake2b_state_t *state, Hacl_Hash_Blake2b_params
   r1[1U] = iv5_;
   r1[2U] = iv6_;
   r1[3U] = iv7_;
-  uint8_t kk11 = i.key_length;
+  uint8_t kk11 = i0.key_length;
   uint32_t ite;
   if (kk11 != 0U)
   {
@@ -1010,9 +1003,8 @@ static void reset_raw(Hacl_Hash_Blake2b_state_t *state, Hacl_Hash_Blake2b_params
   {
     ite = 0U;
   }
-  Hacl_Hash_Blake2b_state_t
-  tmp8 = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
-  state[0U] = tmp8;
+  uint64_t total_len = (uint64_t)ite;
+  state->total_len = total_len;
 }
 
 /**
@@ -1029,7 +1021,8 @@ Hacl_Hash_Blake2b_reset_with_key_and_params(
   uint8_t *k
 )
 {
-  index_of_state(s);
+  Hacl_Hash_Blake2b_index i1 = index_of_state(s);
+  KRML_MAYBE_UNUSED_VAR(i1);
   reset_raw(s, ((Hacl_Hash_Blake2b_params_and_key){ .fst = p, .snd = k }));
 }
 
@@ -1075,8 +1068,8 @@ void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *s)
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint32_t chunk_len)
 {
-  Hacl_Hash_Blake2b_state_t s = *state;
-  uint64_t total_len = s.total_len;
+  Hacl_Hash_Blake2b_block_state_t block_state = (*state).block_state;
+  uint64_t total_len = (*state).total_len;
   if ((uint64_t)chunk_len > 0xffffffffffffffffULL - total_len)
   {
     return Hacl_Streaming_Types_MaximumLengthExceeded;
@@ -1092,10 +1085,8 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
   }
   if (chunk_len <= 128U - sz)
   {
-    Hacl_Hash_Blake2b_state_t s1 = *state;
-    Hacl_Hash_Blake2b_block_state_t block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
     uint32_t sz1;
     if (total_len1 % (uint64_t)128U == 0ULL && total_len1 > 0ULL)
     {
@@ -1108,22 +1099,12 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-    *state
-    =
-      (
-        (Hacl_Hash_Blake2b_state_t){
-          .block_state = block_state1,
-          .buf = buf,
-          .total_len = total_len2
-        }
-      );
+    state->total_len = total_len2;
   }
   else if (sz == 0U)
   {
-    Hacl_Hash_Blake2b_state_t s1 = *state;
-    Hacl_Hash_Blake2b_block_state_t block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
     uint32_t sz1;
     if (total_len1 % (uint64_t)128U == 0ULL && total_len1 > 0ULL)
     {
@@ -1136,9 +1117,8 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      K____uint64_t___uint64_t_ acc = block_state1.f3;
-      uint64_t *wv = acc.fst;
-      uint64_t *hash = acc.snd;
+      uint64_t *hash = block_state.f4;
+      uint64_t *wv = block_state.f3;
       uint32_t nb = 1U;
       Hacl_Hash_Blake2b_update_multi(128U,
         wv,
@@ -1161,9 +1141,8 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    K____uint64_t___uint64_t_ acc = block_state1.f3;
-    uint64_t *wv = acc.fst;
-    uint64_t *hash = acc.snd;
+    uint64_t *hash = block_state.f4;
+    uint64_t *wv = block_state.f3;
     uint32_t nb = data1_len / 128U;
     Hacl_Hash_Blake2b_update_multi(data1_len,
       wv,
@@ -1173,25 +1152,15 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
       nb);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
-      (
-        (Hacl_Hash_Blake2b_state_t){
-          .block_state = block_state1,
-          .buf = buf,
-          .total_len = total_len1 + (uint64_t)chunk_len
-        }
-      );
+    state->total_len = total_len1 + (uint64_t)chunk_len;
   }
   else
   {
     uint32_t diff = 128U - sz;
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
-    Hacl_Hash_Blake2b_state_t s1 = *state;
-    Hacl_Hash_Blake2b_block_state_t block_state10 = s1.block_state;
-    uint8_t *buf0 = s1.buf;
-    uint64_t total_len10 = s1.total_len;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len10 = (*state).total_len;
     uint32_t sz10;
     if (total_len10 % (uint64_t)128U == 0ULL && total_len10 > 0ULL)
     {
@@ -1201,22 +1170,12 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     {
       sz10 = (uint32_t)(total_len10 % (uint64_t)128U);
     }
-    uint8_t *buf2 = buf0 + sz10;
+    uint8_t *buf2 = buf + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *state
-    =
-      (
-        (Hacl_Hash_Blake2b_state_t){
-          .block_state = block_state10,
-          .buf = buf0,
-          .total_len = total_len2
-        }
-      );
-    Hacl_Hash_Blake2b_state_t s10 = *state;
-    Hacl_Hash_Blake2b_block_state_t block_state1 = s10.block_state;
-    uint8_t *buf = s10.buf;
-    uint64_t total_len1 = s10.total_len;
+    state->total_len = total_len2;
+    uint8_t *buf0 = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
     uint32_t sz1;
     if (total_len1 % (uint64_t)128U == 0ULL && total_len1 > 0ULL)
     {
@@ -1229,15 +1188,14 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      K____uint64_t___uint64_t_ acc = block_state1.f3;
-      uint64_t *wv = acc.fst;
-      uint64_t *hash = acc.snd;
+      uint64_t *hash = block_state.f4;
+      uint64_t *wv = block_state.f3;
       uint32_t nb = 1U;
       Hacl_Hash_Blake2b_update_multi(128U,
         wv,
         hash,
         FStar_UInt128_uint64_to_uint128(prevlen),
-        buf,
+        buf0,
         nb);
     }
     uint32_t ite;
@@ -1255,9 +1213,8 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    K____uint64_t___uint64_t_ acc = block_state1.f3;
-    uint64_t *wv = acc.fst;
-    uint64_t *hash = acc.snd;
+    uint64_t *hash = block_state.f4;
+    uint64_t *wv = block_state.f3;
     uint32_t nb = data1_len / 128U;
     Hacl_Hash_Blake2b_update_multi(data1_len,
       wv,
@@ -1265,17 +1222,9 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
       FStar_UInt128_uint64_to_uint128(total_len1),
       data1,
       nb);
-    uint8_t *dst = buf;
+    uint8_t *dst = buf0;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
-      (
-        (Hacl_Hash_Blake2b_state_t){
-          .block_state = block_state1,
-          .buf = buf,
-          .total_len = total_len1 + (uint64_t)(chunk_len - diff)
-        }
-      );
+    state->total_len = total_len1 + (uint64_t)(chunk_len - diff);
   }
   return Hacl_Streaming_Types_Success;
 }
@@ -1299,10 +1248,9 @@ uint8_t Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *s, uint8_t *dst)
   uint8_t kk0 = block_state0.fst;
   Hacl_Hash_Blake2b_index
   i1 = { .key_length = kk0, .digest_length = nn0, .last_node = last_node0 };
-  Hacl_Hash_Blake2b_state_t scrut = *s;
-  Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
-  uint8_t *buf_ = scrut.buf;
-  uint64_t total_len = scrut.total_len;
+  Hacl_Hash_Blake2b_block_state_t block_state = (*s).block_state;
+  uint8_t *buf_ = (*s).buf;
+  uint64_t total_len = (*s).total_len;
   uint32_t r;
   if (total_len % (uint64_t)128U == 0ULL && total_len > 0ULL)
   {
@@ -1317,16 +1265,12 @@ uint8_t Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *s, uint8_t *dst)
   uint64_t b[16U] = { 0U };
   Hacl_Hash_Blake2b_block_state_t
   tmp_block_state =
-    {
-      .fst = i1.key_length,
-      .snd = i1.digest_length,
-      .thd = i1.last_node,
-      .f3 = { .fst = wv0, .snd = b }
-    };
-  uint64_t *src_b = block_state.f3.snd;
-  uint64_t *dst_b = tmp_block_state.f3.snd;
+    { .fst = i1.key_length, .snd = i1.digest_length, .thd = i1.last_node, .f3 = wv0, .f4 = b };
+  uint64_t *src_b = block_state.f4;
+  uint64_t *dst_b = tmp_block_state.f4;
   memcpy(dst_b, src_b, 16U * sizeof (uint64_t));
   uint64_t prev_len = total_len - (uint64_t)r;
+  uint8_t *buf_multi = buf_1;
   uint32_t ite;
   if (r % 128U == 0U && r > 0U)
   {
@@ -1337,10 +1281,8 @@ uint8_t Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *s, uint8_t *dst)
     ite = r % 128U;
   }
   uint8_t *buf_last = buf_1 + r - ite;
-  uint8_t *buf_multi = buf_1;
-  K____uint64_t___uint64_t_ acc0 = tmp_block_state.f3;
-  uint64_t *wv1 = acc0.fst;
-  uint64_t *hash0 = acc0.snd;
+  uint64_t *hash0 = tmp_block_state.f4;
+  uint64_t *wv1 = tmp_block_state.f3;
   uint32_t nb = 0U;
   Hacl_Hash_Blake2b_update_multi(0U,
     wv1,
@@ -1349,10 +1291,9 @@ uint8_t Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *s, uint8_t *dst)
     buf_multi,
     nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
-  K____uint64_t___uint64_t_ acc = tmp_block_state.f3;
+  uint64_t *hash = tmp_block_state.f4;
+  uint64_t *wv = tmp_block_state.f3;
   bool last_node1 = tmp_block_state.thd;
-  uint64_t *wv = acc.fst;
-  uint64_t *hash = acc.snd;
   Hacl_Hash_Blake2b_update_last(r,
     wv,
     hash,
@@ -1361,7 +1302,7 @@ uint8_t Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *s, uint8_t *dst)
     r,
     buf_last);
   uint8_t nn1 = tmp_block_state.snd;
-  Hacl_Hash_Blake2b_finish((uint32_t)nn1, dst, tmp_block_state.f3.snd);
+  Hacl_Hash_Blake2b_finish((uint32_t)nn1, dst, tmp_block_state.f4);
   Hacl_Hash_Blake2b_block_state_t block_state1 = (*s).block_state;
   bool last_node = block_state1.thd;
   uint8_t nn = block_state1.snd;
@@ -1388,8 +1329,8 @@ void Hacl_Hash_Blake2b_free(Hacl_Hash_Blake2b_state_t *state)
   Hacl_Hash_Blake2b_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
-  uint64_t *b = block_state.f3.snd;
-  uint64_t *wv = block_state.f3.fst;
+  uint64_t *b = block_state.f4;
+  uint64_t *wv = block_state.f3;
   KRML_HOST_FREE(wv);
   KRML_HOST_FREE(b);
   KRML_HOST_FREE(buf);
@@ -1401,10 +1342,9 @@ void Hacl_Hash_Blake2b_free(Hacl_Hash_Blake2b_state_t *state)
 */
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *state)
 {
-  Hacl_Hash_Blake2b_state_t scrut = *state;
-  Hacl_Hash_Blake2b_block_state_t block_state0 = scrut.block_state;
-  uint8_t *buf0 = scrut.buf;
-  uint64_t total_len0 = scrut.total_len;
+  Hacl_Hash_Blake2b_block_state_t block_state0 = (*state).block_state;
+  uint8_t *buf0 = (*state).buf;
+  uint64_t total_len0 = (*state).total_len;
   bool last_node = block_state0.thd;
   uint8_t nn = block_state0.snd;
   uint8_t kk1 = block_state0.fst;
@@ -1415,14 +1355,9 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *sta
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   Hacl_Hash_Blake2b_block_state_t
   block_state =
-    {
-      .fst = i.key_length,
-      .snd = i.digest_length,
-      .thd = i.last_node,
-      .f3 = { .fst = wv, .snd = b }
-    };
-  uint64_t *src_b = block_state0.f3.snd;
-  uint64_t *dst_b = block_state.f3.snd;
+    { .fst = i.key_length, .snd = i.digest_length, .thd = i.last_node, .f3 = wv, .f4 = b };
+  uint64_t *src_b = block_state0.f4;
+  uint64_t *dst_b = block_state.f4;
   memcpy(dst_b, src_b, 16U * sizeof (uint64_t));
   Hacl_Hash_Blake2b_state_t
   s = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
@@ -1501,25 +1436,27 @@ Hacl_Hash_Blake2b_hash_with_key_and_params(
   r3[3U] = iv7;
   uint8_t kk = params.key_length;
   uint8_t nn = params.digest_length;
+  uint64_t *uu____0 = tmp + 4U;
   KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
-    uint64_t *os = tmp + 4U;
     uint8_t *bj = params.salt + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = uu____0;
     os[i] = x;);
+  uint64_t *uu____1 = tmp + 6U;
   KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
-    uint64_t *os = tmp + 6U;
     uint8_t *bj = params.personal + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = uu____1;
     os[i] = x;);
   tmp[0U] =
     (uint64_t)nn

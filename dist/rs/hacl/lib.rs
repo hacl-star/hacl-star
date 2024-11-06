@@ -42,7 +42,7 @@ pub mod rsapss;
 pub mod impl_ffdhe_constants;
 pub mod ffdhe;
 // pub mod frodo640; // TODO: needs frodo_kem, above
-// pub mod hkdf; // TODO: needs hmac, above
+pub mod hkdf;
 // pub mod hpke_curve51_cp128_sha512;
 // pub mod genericfield32; // TODO: in-place APIs
 // pub mod sha2_vec256;
@@ -80,6 +80,7 @@ pub mod test {
    pub mod ecdhp256;
    pub mod ed25519;
    pub mod hmac;
+   pub mod hkdf;
    pub mod ffdhe;
    pub mod p256;
    pub mod poly1305;

@@ -49,19 +49,13 @@ extern "C" {
 
 #define HACL_HASH_BLAKE2S_SIMD128_PERSONAL_BYTES (8U)
 
-typedef struct K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128__s
-{
-  Lib_IntVector_Intrinsics_vec128 *fst;
-  Lib_IntVector_Intrinsics_vec128 *snd;
-}
-K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_;
-
 typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
 {
   uint8_t fst;
   uint8_t snd;
   bool thd;
-  K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_ f3;
+  Lib_IntVector_Intrinsics_vec128 *f3;
+  Lib_IntVector_Intrinsics_vec128 *f4;
 }
 Hacl_Hash_Blake2s_Simd128_block_state_t;
 
