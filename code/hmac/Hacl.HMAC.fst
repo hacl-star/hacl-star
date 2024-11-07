@@ -394,7 +394,7 @@ let mk_compute i hash alloca init update_multi update_last finish dst key key_le
   (**) let h0 = ST.get() in
   push_frame ();
   (**) let h1 = ST.get () in
-  let l = D.block_len a in
+  [@inline_let] let l = D.block_len a in
   let key_block = B.alloca (u8 0x00) l in
   mk_wrap_key a hash key_block key key_len;
   (**) let h2 = ST.get () in
