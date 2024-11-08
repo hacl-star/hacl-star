@@ -664,10 +664,8 @@ The key can be any length and will be hashed if it is longer and padded if it is
 static void
 compute_sha1(uint8_t *dst, uint8_t *key, uint32_t key_len, uint8_t *data, uint32_t data_len)
 {
-  uint32_t l = 64U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t key_block[l];
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[64U];
+  memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 64U)
@@ -688,19 +686,17 @@ compute_sha1(uint8_t *dst, uint8_t *key, uint32_t key_len, uint8_t *data, uint32
   {
     hash_oneshot(nkey, key, key_len);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t ipad[l];
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[64U];
+  memset(ipad, 0x36U, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t opad[l];
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[64U];
+  memset(opad, 0x5cU, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -778,10 +774,8 @@ compute_sha2_256(
   uint32_t data_len
 )
 {
-  uint32_t l = 64U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t key_block[l];
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[64U];
+  memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 64U)
@@ -802,19 +796,17 @@ compute_sha2_256(
   {
     hash_256(nkey, key, key_len);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t ipad[l];
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[64U];
+  memset(ipad, 0x36U, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t opad[l];
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[64U];
+  memset(opad, 0x5cU, 64U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 64U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -905,10 +897,8 @@ compute_sha2_384(
   uint32_t data_len
 )
 {
-  uint32_t l = 128U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t key_block[l];
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[128U];
+  memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 128U)
@@ -929,19 +919,17 @@ compute_sha2_384(
   {
     hash_384(nkey, key, key_len);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t ipad[l];
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[128U];
+  memset(ipad, 0x36U, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t opad[l];
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[128U];
+  memset(opad, 0x5cU, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -1040,10 +1028,8 @@ compute_sha2_512(
   uint32_t data_len
 )
 {
-  uint32_t l = 128U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t key_block[l];
-  memset(key_block, 0U, l * sizeof (uint8_t));
+  uint8_t key_block[128U];
+  memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
   if (key_len <= 128U)
@@ -1064,19 +1050,17 @@ compute_sha2_512(
   {
     hash_512(nkey, key, key_len);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t ipad[l];
-  memset(ipad, 0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t ipad[128U];
+  memset(ipad, 0x36U, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
     ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t opad[l];
-  memset(opad, 0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = 0U; i < l; i++)
+  uint8_t opad[128U];
+  memset(opad, 0x5cU, 128U * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < 128U; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
