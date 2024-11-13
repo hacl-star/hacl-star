@@ -568,12 +568,14 @@ static inline void modq(uint64_t *out, uint64_t *a)
   uint64_t *t01 = tmp;
   uint64_t m[7U] = { 0U };
   uint64_t p[5U] = { 0U };
-  mul_pow2_256_minus_q_add(4U, 7U, t01, a + 4U, a, m);
-  mul_pow2_256_minus_q_add(3U, 5U, t01, m + 4U, m, p);
+  uint64_t c0 = mul_pow2_256_minus_q_add(4U, 7U, t01, a + 4U, a, m);
+  KRML_MAYBE_UNUSED_VAR(c0);
+  uint64_t c10 = mul_pow2_256_minus_q_add(3U, 5U, t01, m + 4U, m, p);
+  KRML_MAYBE_UNUSED_VAR(c10);
   uint64_t c2 = mul_pow2_256_minus_q_add(1U, 4U, t01, p + 4U, p, r);
-  uint64_t c0 = c2;
+  uint64_t c00 = c2;
   uint64_t c1 = add4(r, tmp, out);
-  uint64_t mask = 0ULL - (c0 + c1);
+  uint64_t mask = 0ULL - (c00 + c1);
   KRML_MAYBE_FOR4(i,
     0U,
     4U,

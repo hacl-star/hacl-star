@@ -31,8 +31,6 @@ extern uint32_t Hacl_Impl_SHA3_Vec_keccak_piln[24];
 
 extern uint64_t Hacl_Impl_SHA3_Vec_keccak_rndc[24];
 
-extern void C_String_print(Prims_string uu___);
-
 static void absorb_inner_32(uint8_t *b, uint64_t *s)
 {
   uint64_t ws[32U] = { 0U };
@@ -1135,6 +1133,8 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   }
   memcpy(rb + 64U - remOut, hbuf, remOut * sizeof (uint8_t));
 }
+
+extern void C_String_print(Prims_string uu___);
 
 extern bool
 Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);

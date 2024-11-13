@@ -35,10 +35,31 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA3.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_Blake2s.h"
 #include "Hacl_Hash_Blake2b.h"
+
+/* SNIPPET_START: Hacl_HMAC_compute_md5 */
+
+/**
+Write the HMAC-MD5 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
+`dst` must point to 16 bytes of memory.
+*/
+void
+Hacl_HMAC_compute_md5(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+/* SNIPPET_END: Hacl_HMAC_compute_md5 */
 
 /* SNIPPET_START: Hacl_HMAC_compute_sha1 */
 
@@ -58,6 +79,25 @@ Hacl_HMAC_compute_sha1(
 );
 
 /* SNIPPET_END: Hacl_HMAC_compute_sha1 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha2_224 */
+
+/**
+Write the HMAC-SHA-2-224 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+`dst` must point to 28 bytes of memory.
+*/
+void
+Hacl_HMAC_compute_sha2_224(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+/* SNIPPET_END: Hacl_HMAC_compute_sha2_224 */
 
 /* SNIPPET_START: Hacl_HMAC_compute_sha2_256 */
 
@@ -115,6 +155,82 @@ Hacl_HMAC_compute_sha2_512(
 );
 
 /* SNIPPET_END: Hacl_HMAC_compute_sha2_512 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha3_224 */
+
+/**
+Write the HMAC-SHA-3-224 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 144 bytes.
+`dst` must point to 28 bytes of memory.
+*/
+void
+Hacl_HMAC_compute_sha3_224(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+/* SNIPPET_END: Hacl_HMAC_compute_sha3_224 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha3_256 */
+
+/**
+Write the HMAC-SHA-3-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 136 bytes.
+`dst` must point to 32 bytes of memory.
+*/
+void
+Hacl_HMAC_compute_sha3_256(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+/* SNIPPET_END: Hacl_HMAC_compute_sha3_256 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha3_384 */
+
+/**
+Write the HMAC-SHA-3-384 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 104 bytes.
+`dst` must point to 48 bytes of memory.
+*/
+void
+Hacl_HMAC_compute_sha3_384(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+/* SNIPPET_END: Hacl_HMAC_compute_sha3_384 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha3_512 */
+
+/**
+Write the HMAC-SHA-3-512 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 72 bytes.
+`dst` must point to 64 bytes of memory.
+*/
+void
+Hacl_HMAC_compute_sha3_512(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+/* SNIPPET_END: Hacl_HMAC_compute_sha3_512 */
 
 /* SNIPPET_START: Hacl_HMAC_compute_blake2s_32 */
 

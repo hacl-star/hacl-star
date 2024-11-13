@@ -23,19 +23,19 @@ type mod_t =
 unfold let mods_t = list mod_t
 unfold let va_mods_t = mods_t
 
-[@va_qattr] unfold let va_Mod_None = Mod_None
-[@va_qattr] unfold let va_Mod_ok = Mod_ok
-[@va_qattr] unfold let va_Mod_reg (r:reg) = Mod_reg r
-[@va_qattr] unfold let va_Mod_vec (v:vec) = Mod_vec v
-[@va_qattr] unfold let va_Mod_cr0 = Mod_cr0
-[@va_qattr] unfold let va_Mod_xer = Mod_xer
-[@va_qattr] unfold let va_Mod_mem = Mod_mem
-[@va_qattr] unfold let va_Mod_mem_layout = Mod_mem_layout
-[@va_qattr] unfold let va_Mod_mem_heaplet (n:heaplet_id) = Mod_mem_heaplet n
-[@va_qattr] unfold let va_Mod_stack = Mod_stack
-[@va_qattr] unfold let va_Mod_stackTaint = Mod_stackTaint
+[@@va_qattr] unfold let va_Mod_None = Mod_None
+[@@va_qattr] unfold let va_Mod_ok = Mod_ok
+[@@va_qattr] unfold let va_Mod_reg (r:reg) = Mod_reg r
+[@@va_qattr] unfold let va_Mod_vec (v:vec) = Mod_vec v
+[@@va_qattr] unfold let va_Mod_cr0 = Mod_cr0
+[@@va_qattr] unfold let va_Mod_xer = Mod_xer
+[@@va_qattr] unfold let va_Mod_mem = Mod_mem
+[@@va_qattr] unfold let va_Mod_mem_layout = Mod_mem_layout
+[@@va_qattr] unfold let va_Mod_mem_heaplet (n:heaplet_id) = Mod_mem_heaplet n
+[@@va_qattr] unfold let va_Mod_stack = Mod_stack
+[@@va_qattr] unfold let va_Mod_stackTaint = Mod_stackTaint
 
-[@va_qattr "opaque_to_smt"]
+[@@va_qattr; "opaque_to_smt"]
 let mod_eq (x y:mod_t) : Pure bool (requires True) (ensures fun b -> b == (x = y)) =
   match x with
   | Mod_None -> (match y with Mod_None -> true | _ -> false)
@@ -50,7 +50,7 @@ let mod_eq (x y:mod_t) : Pure bool (requires True) (ensures fun b -> b == (x = y
   | Mod_stack -> (match y with Mod_stack -> true | _ -> false)
   | Mod_stackTaint -> (match y with Mod_stackTaint -> true | _ -> false)
 
-[@va_qattr]
+[@@va_qattr]
 let update_state_mod (m:mod_t) (sM sK:state) : state =
   match m with
   | Mod_None -> sK
@@ -65,13 +65,13 @@ let update_state_mod (m:mod_t) (sM sK:state) : state =
   | Mod_stack -> va_update_stack sM sK
   | Mod_stackTaint -> va_update_stackTaint sM sK
 
-[@va_qattr]
+[@@va_qattr]
 let rec update_state_mods (mods:mods_t) (sM sK:state) : state =
   match mods with
   | [] -> sK
   | m::mods -> update_state_mod m sM (update_state_mods mods sM sK)
 
-[@va_qattr]
+[@@va_qattr]
 unfold let update_state_mods_norm (mods:mods_t) (sM sK:state) : state =
   norm [iota; zeta; delta_attr [`%qmodattr]; delta_only [`%update_state_mods; `%update_state_mod]] (update_state_mods mods sM sK)
 
@@ -79,16 +79,16 @@ let va_lemma_norm_mods (mods:mods_t) (sM sK:state) : Lemma
   (ensures update_state_mods mods sM sK == update_state_mods_norm mods sM sK)
   = ()
 
-[@va_qattr qmodattr]
+[@@va_qattr; qmodattr]
 let va_mod_reg_opr (r:reg_opr) : mod_t =
   Mod_reg r
-[@va_qattr qmodattr]
+[@@va_qattr; qmodattr]
 let va_mod_vec_opr (r:vec_opr) : mod_t =
   Mod_vec r
 
-[@va_qattr qmodattr] let va_mod_reg (r:reg) : mod_t = Mod_reg r
-[@va_qattr qmodattr] let va_mod_vec (x:vec) : mod_t = Mod_vec x
-[@va_qattr qmodattr] let va_mod_heaplet (h:heaplet_id) : mod_t = Mod_mem_heaplet h
+[@@va_qattr; qmodattr] let va_mod_reg (r:reg) : mod_t = Mod_reg r
+[@@va_qattr; qmodattr] let va_mod_vec (x:vec) : mod_t = Mod_vec x
+[@@va_qattr; qmodattr] let va_mod_heaplet (h:heaplet_id) : mod_t = Mod_mem_heaplet h
 
 let quickProc_wp (a:Type0) : Type u#1 = (s0:state) -> (wp_continue:state -> a -> Type0) -> Type0
 
@@ -116,7 +116,7 @@ let t_proof (#a:Type0) (c:va_code) (mods:mods_t) (wp:quickProc_wp a) : Type =
     (ensures va_t_ensure c mods s0 k)
 
 // Code that returns a ghost value of type a
-[@va_qattr]
+[@@va_qattr; erasable]
 noeq type quickCode (a:Type0) : va_code -> Type =
 | QProc:
     c:va_code ->
@@ -125,8 +125,8 @@ noeq type quickCode (a:Type0) : va_code -> Type =
     proof:t_proof c mods wp ->
     quickCode a c
 
-[@va_qattr]
+[@@va_qattr]
 unfold let va_quickCode = quickCode
 
-[@va_qattr]
+[@@va_qattr]
 unfold let va_QProc = QProc
