@@ -1783,7 +1783,8 @@ void Hacl_MAC_Poly1305_Simd256_reset(Hacl_MAC_Poly1305_Simd256_state_t *state, u
   Hacl_MAC_Poly1305_Simd256_poly1305_init(block_state, key);
   memcpy(k_, key, 32U * sizeof (uint8_t));
   uint8_t *k_1 = k_;
-  state->total_len = (uint64_t)0U;
+  uint64_t total_len = (uint64_t)0U;
+  state->total_len = total_len;
   state->p_key = k_1;
 }
 

@@ -487,7 +487,8 @@ void Hacl_Hash_SHA2_reset_256(Hacl_Streaming_MD_state_32 *state)
 {
   uint32_t *block_state = (*state).block_state;
   Hacl_Hash_SHA2_sha256_init(block_state);
-  state->total_len = (uint64_t)0U;
+  uint64_t total_len = (uint64_t)0U;
+  state->total_len = total_len;
 }
 
 static inline Hacl_Streaming_Types_error_code
@@ -728,7 +729,8 @@ void Hacl_Hash_SHA2_reset_224(Hacl_Streaming_MD_state_32 *state)
 {
   uint32_t *block_state = (*state).block_state;
   Hacl_Hash_SHA2_sha224_init(block_state);
-  state->total_len = (uint64_t)0U;
+  uint64_t total_len = (uint64_t)0U;
+  state->total_len = total_len;
 }
 
 Hacl_Streaming_Types_error_code
@@ -844,7 +846,8 @@ void Hacl_Hash_SHA2_reset_512(Hacl_Streaming_MD_state_64 *state)
 {
   uint64_t *block_state = (*state).block_state;
   Hacl_Hash_SHA2_sha512_init(block_state);
-  state->total_len = (uint64_t)0U;
+  uint64_t total_len = (uint64_t)0U;
+  state->total_len = total_len;
 }
 
 static inline Hacl_Streaming_Types_error_code
@@ -1089,7 +1092,8 @@ void Hacl_Hash_SHA2_reset_384(Hacl_Streaming_MD_state_64 *state)
 {
   uint64_t *block_state = (*state).block_state;
   Hacl_Hash_SHA2_sha384_init(block_state);
-  state->total_len = (uint64_t)0U;
+  uint64_t total_len = (uint64_t)0U;
+  state->total_len = total_len;
 }
 
 Hacl_Streaming_Types_error_code
