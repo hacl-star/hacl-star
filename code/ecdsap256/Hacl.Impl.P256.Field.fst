@@ -98,13 +98,7 @@ let fadd_sa2 res x y =
   pop_frame()
 
 
-let fdouble out x =
-  (* HACL-RS: Add copy instead of fadd out x x *)
-  push_frame ();
-  let x_copy = create (size 4) (u64 0) in
-  copy x_copy x;
-  fadd out x_copy x;
-  pop_frame ()
+let fdouble out x = fadd out x x
 
 let fdouble_sa out x =
   push_frame ();
