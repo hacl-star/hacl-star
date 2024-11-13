@@ -1,5 +1,5 @@
 [
-  "®ó¾\u0004äí“X‹tE2‰\u001dUš",
+  "é\\)olÚGšÖo0;\u0013\u0019å¨",
   [
     [
       "Hacl.Impl.P256.Bignum.felem",
@@ -262,6 +262,36 @@
       "64fd9b3e75a3c4e002d2ce174b8a7137"
     ],
     [
+      "Hacl.Impl.P256.Bignum.bn_sub4_sa1",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "aacbe0979edc6448d2b30518d1f42b62"
+    ],
+    [
+      "Hacl.Impl.P256.Bignum.bn_sub4_sa2",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "20ee26c8e697ebcfdbb8be1fa2b80866"
+    ],
+    [
       "Hacl.Impl.P256.Bignum.bn_sub_mod4",
       1,
       0,
@@ -302,7 +332,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "b8d990f95bac0d55b48334e75cb34f21"
+      "962ea4cb403e14241bec8caaeeb2f0cd"
     ],
     [
       "Hacl.Impl.P256.Bignum.bn_mul4",
@@ -317,7 +347,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "71688bb392810f951d68c1fd40961f5b"
+      "26160b2212fcae3b69b83b679cd39687"
     ],
     [
       "Hacl.Impl.P256.Bignum.bn_sqr4",
@@ -332,7 +362,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "b0e2e6e81994770343ba9569e622601b"
+      "ff137097047aacf70ce0f999ab7e8278"
     ],
     [
       "Hacl.Impl.P256.Bignum.bn_to_bytes_be4",
@@ -350,7 +380,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "18aa5f5d144b626cd02441f1784c100f"
+      "f0e026fea2678f333b60aa8eebfd508c"
     ],
     [
       "Hacl.Impl.P256.Bignum.bn2_to_bytes_be4",
@@ -368,7 +398,7 @@
         "refinement_interpretation_Tm_refine_c097e3ce5c47db31d906c5ee170e6f55"
       ],
       0,
-      "69f100bfec888bf6d95039ce82e81fe7"
+      "8f2f00acfbb5490b3d06335a156235b9"
     ]
   ]
 ]
