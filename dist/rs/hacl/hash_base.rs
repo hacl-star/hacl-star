@@ -74,4 +74,4 @@ pub fn hash_len(a: crate::streaming_types::hash_alg) -> u32
     }
 }
 
-pub type hash_t <'a> = &'a [u8];
+pub type hash_t <'a> = &'a mut [u8];

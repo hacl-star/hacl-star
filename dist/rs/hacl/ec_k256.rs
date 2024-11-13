@@ -35,7 +35,7 @@ Write `a + b mod p` in `out`.
   • `a`, `b`, and `out` are either pairwise disjoint or equal
 */
 pub fn
-felem_add(a: &[u64], b: &[u64], out: &mut [u64])
+felem_add(a: &mut [u64], b: &mut [u64], out: &mut [u64])
 {
     crate::bignum_k256::fadd(out, a, b);
     crate::bignum_k256::fnormalize_weak(out, out)
@@ -51,7 +51,7 @@ Write `a - b mod p` in `out`.
   • `a`, `b`, and `out` are either pairwise disjoint or equal
 */
 pub fn
-felem_sub(a: &[u64], b: &[u64], out: &mut [u64])
+felem_sub(a: &mut [u64], b: &mut [u64], out: &mut [u64])
 {
     crate::bignum_k256::fsub(out, a, b, 2u64);
     crate::bignum_k256::fnormalize_weak(out, out)
@@ -67,7 +67,7 @@ Write `a * b mod p` in `out`.
   • `a`, `b`, and `out` are either pairwise disjoint or equal
 */
 pub fn
-felem_mul(a: &[u64], b: &[u64], out: &mut [u64])
+felem_mul(a: &mut [u64], b: &mut [u64], out: &mut [u64])
 { crate::bignum_k256::fmul(out, a, b) }
 
 /**
@@ -80,7 +80,7 @@ Write `a * a mod p` in `out`.
   • `a` and `out` are either disjoint or equal
 */
 pub fn
-felem_sqr(a: &[u64], out: &mut [u64])
+felem_sqr(a: &mut [u64], out: &mut [u64])
 { crate::bignum_k256::fsqr(out, a) }
 
 /**
@@ -95,7 +95,7 @@ Write `a ^ (p - 2) mod p` in `out`.
   • `a` and `out` are disjoint
 */
 pub fn
-felem_inv(a: &[u64], out: &mut [u64])
+felem_inv(a: &mut [u64], out: &mut [u64])
 { crate::bignum_k256::finv(out, a) }
 
 /**
@@ -109,7 +109,7 @@ Load a bid-endian field element from memory.
   • `b` and `out` are disjoint
 */
 pub fn
-felem_load(b: &[u8], out: &mut [u64])
+felem_load(b: &mut [u8], out: &mut [u64])
 { crate::bignum_k256::load_felem(out, b) }
 
 /**
@@ -123,11 +123,11 @@ Serialize a field element into big-endian memory.
   • `a` and `out` are disjoint
 */
 pub fn
-felem_store(a: &[u64], out: &mut [u8])
+felem_store(a: &mut [u64], out: &mut [u8])
 {
     let mut tmp: [u64; 5] = [0u64; 5usize];
     crate::bignum_k256::fnormalize(&mut tmp, a);
-    crate::bignum_k256::store_felem(out, &tmp)
+    crate::bignum_k256::store_felem(out, &mut tmp)
 }
 
 /**
@@ -174,7 +174,7 @@ Write `-p` in `out` (point negation).
   • `p` and `out` are either disjoint or equal
 */
 pub fn
-point_negate(p: &[u64], out: &mut [u64])
+point_negate(p: &mut [u64], out: &mut [u64])
 { crate::k256_ecdsa::point_negate(out, p) }
 
 /**
@@ -187,7 +187,7 @@ Write `p + q` in `out` (point addition).
   • `p`, `q`, and `out` are either pairwise disjoint or equal
 */
 pub fn
-point_add(p: &[u64], q: &[u64], out: &mut [u64])
+point_add(p: &mut [u64], q: &mut [u64], out: &mut [u64])
 { crate::k256_ecdsa::point_add(out, p, q) }
 
 /**
@@ -200,7 +200,7 @@ Write `p + p` in `out` (point doubling).
   • `p` and `out` are either disjoint or equal
 */
 pub fn
-point_double(p: &[u64], out: &mut [u64])
+point_double(p: &mut [u64], out: &mut [u64])
 { crate::k256_ecdsa::point_double(out, p) }
 
 /**
@@ -217,7 +217,7 @@ Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
   • `scalar`, `p`, and `out` are pairwise disjoint
 */
 pub fn
-point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
+point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64])
 {
     let mut scalar_q: [u64; 4] = [0u64; 4usize];
     krml::unroll_for!(
@@ -228,14 +228,15 @@ point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
         {
             let u: u64 =
                 lowstar::endianness::load64_be(
-                    &scalar[4u32.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
+                    &mut
+                    scalar[4u32.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
                 );
             let x: u64 = u;
             let os: (&mut [u64], &mut [u64]) = scalar_q.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
-    crate::k256_ecdsa::point_mul(out, &scalar_q, p)
+    crate::k256_ecdsa::point_mul(out, &mut scalar_q, p)
 }
 
 /**
@@ -252,7 +253,7 @@ Convert a point from projective coordinates to its raw form.
   • `p` and `out` are disjoint.
 */
 pub fn
-point_store(p: &[u64], out: &mut [u8])
+point_store(p: &mut [u64], out: &mut [u8])
 { crate::k256_ecdsa::point_store(out, p) }
 
 /**
@@ -267,17 +268,17 @@ Convert a point to projective coordinates from its raw form.
   • `b` and `out` are disjoint.
 */
 pub fn
-point_load(b: &[u8], out: &mut [u64])
+point_load(b: &mut [u8], out: &mut [u64])
 {
     let mut p_aff: [u64; 10] = [0u64; 10usize];
     let px: (&mut [u64], &mut [u64]) = p_aff.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
-    let pxb: (&[u8], &[u8]) = b.split_at(0usize);
-    let pyb: (&[u8], &[u8]) = pxb.1.split_at(32usize);
+    let pxb: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
+    let pyb: (&mut [u8], &mut [u8]) = pxb.1.split_at_mut(32usize);
     crate::bignum_k256::load_felem(py.0, pyb.0);
     crate::bignum_k256::load_felem(py.1, pyb.1);
-    let x: (&[u64], &[u64]) = py.0.split_at(0usize);
-    let y: (&[u64], &[u64]) = py.1.split_at(0usize);
+    let x: (&mut [u64], &mut [u64]) = py.0.split_at_mut(0usize);
+    let y: (&mut [u64], &mut [u64]) = py.1.split_at_mut(0usize);
     let x1: (&mut [u64], &mut [u64]) = out.split_at_mut(0usize);
     let y1: (&mut [u64], &mut [u64]) = x1.1.split_at_mut(5usize);
     let z1: (&mut [u64], &mut [u64]) = y1.1.split_at_mut(5usize);
@@ -301,7 +302,7 @@ Check whether a point is valid.
   This function is NOT constant-time.
 */
 pub fn
-is_point_valid(b: &[u8]) ->
+is_point_valid(b: &mut [u8]) ->
     bool
 {
     let mut p: [u64; 10] = [0u64; 10usize];

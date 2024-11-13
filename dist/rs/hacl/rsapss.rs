@@ -28,7 +28,7 @@
     a: crate::streaming_types::hash_alg,
     mHash: &mut [u8],
     msgLen: u32,
-    msg: &[u8]
+    msg: &mut [u8]
 )
 {
     match a
@@ -43,7 +43,7 @@
 #[inline] fn mgf_hash(
     a: crate::streaming_types::hash_alg,
     len: u32,
-    mgfseed: &[u8],
+    mgfseed: &mut [u8],
     maskLen: u32,
     res: &mut [u8]
 )
@@ -63,12 +63,14 @@
         c.1[1usize] = i.wrapping_shr(16u32) as u8;
         c.1[2usize] = i.wrapping_shr(8u32) as u8;
         c.1[3usize] = i as u8;
-        crate::rsapss::hash(a, acc_i.1, len.wrapping_add(4u32), &mgfseed_counter)
+        crate::rsapss::hash(a, acc_i.1, len.wrapping_add(4u32), &mut mgfseed_counter)
     };
-    (res[0usize..maskLen as usize]).copy_from_slice(&(&(&acc)[0usize..])[0usize..maskLen as usize])
+    (res[0usize..maskLen as usize]).copy_from_slice(
+        &(&mut (&mut acc)[0usize..])[0usize..maskLen as usize]
+    )
 }
 
-#[inline] fn check_num_bits_u64(bs: u32, b: &[u64]) -> u64
+#[inline] fn check_num_bits_u64(bs: u32, b: &mut [u64]) -> u64
 {
     let bLen: u32 = bs.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
     if bs == 64u32.wrapping_mul(bLen)
@@ -78,20 +80,20 @@
         let mut b2: Box<[u64]> = vec![0u64; bLen as usize].into_boxed_slice();
         let i: u32 = bs.wrapping_div(64u32);
         let j: u32 = bs.wrapping_rem(64u32);
-        (&mut b2)[i as usize] = (&b2)[i as usize] | 1u64.wrapping_shl(j);
+        (&mut b2)[i as usize] |= 1u64.wrapping_shl(j);
         let mut acc: [u64; 1] = [0u64; 1usize];
         for i0 in 0u32..bLen
         {
-            let beq: u64 = fstar::uint64::eq_mask(b[i0 as usize], (&b2)[i0 as usize]);
-            let blt: u64 = ! fstar::uint64::gte_mask(b[i0 as usize], (&b2)[i0 as usize]);
-            (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
+            let beq: u64 = fstar::uint64::eq_mask(b[i0 as usize], (&mut b2)[i0 as usize]);
+            let blt: u64 = ! fstar::uint64::gte_mask(b[i0 as usize], (&mut b2)[i0 as usize]);
+            (&mut acc)[0usize] = beq & (&mut acc)[0usize] | ! beq & blt
         };
-        let res: u64 = (&acc)[0usize];
+        let res: u64 = (&mut acc)[0usize];
         res
     }
 }
 
-#[inline] fn check_modulus_u64(modBits: u32, n: &[u64]) -> u64
+#[inline] fn check_modulus_u64(modBits: u32, n: &mut [u64]) -> u64
 {
     let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
     let bits0: u64 = n[0usize] & 1u64;
@@ -99,31 +101,31 @@
     let mut b2: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     let i: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32);
     let j: u32 = modBits.wrapping_sub(1u32).wrapping_rem(64u32);
-    (&mut b2)[i as usize] = (&b2)[i as usize] | 1u64.wrapping_shl(j);
+    (&mut b2)[i as usize] |= 1u64.wrapping_shl(j);
     let mut acc: [u64; 1] = [0u64; 1usize];
     for i0 in 0u32..nLen
     {
-        let beq: u64 = fstar::uint64::eq_mask((&b2)[i0 as usize], n[i0 as usize]);
-        let blt: u64 = ! fstar::uint64::gte_mask((&b2)[i0 as usize], n[i0 as usize]);
-        (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
+        let beq: u64 = fstar::uint64::eq_mask((&mut b2)[i0 as usize], n[i0 as usize]);
+        let blt: u64 = ! fstar::uint64::gte_mask((&mut b2)[i0 as usize], n[i0 as usize]);
+        (&mut acc)[0usize] = beq & (&mut acc)[0usize] | ! beq & blt
     };
-    let res: u64 = (&acc)[0usize];
+    let res: u64 = (&mut acc)[0usize];
     let m1: u64 = res;
     let m2: u64 = crate::rsapss::check_num_bits_u64(modBits, n);
     m0 & (m1 & m2)
 }
 
-#[inline] fn check_exponent_u64(eBits: u32, e: &[u64]) -> u64
+#[inline] fn check_exponent_u64(eBits: u32, e: &mut [u64]) -> u64
 {
     let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-    let bn_zero: Box<[u64]> = vec![0u64; eLen as usize].into_boxed_slice();
+    let mut bn_zero: Box<[u64]> = vec![0u64; eLen as usize].into_boxed_slice();
     let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
     for i in 0u32..eLen
     {
-        let uu____0: u64 = fstar::uint64::eq_mask(e[i as usize], (&bn_zero)[i as usize]);
-        (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
+        let uu____0: u64 = fstar::uint64::eq_mask(e[i as usize], (&mut bn_zero)[i as usize]);
+        (&mut mask)[0usize] = uu____0 & (&mut mask)[0usize]
     };
-    let mask1: u64 = (&mask)[0usize];
+    let mask1: u64 = (&mut mask)[0usize];
     let res: u64 = mask1;
     let m0: u64 = res;
     let m1: u64 = crate::rsapss::check_num_bits_u64(eBits, e);
@@ -133,9 +135,9 @@
 #[inline] fn pss_encode(
     a: crate::streaming_types::hash_alg,
     saltLen: u32,
-    salt: &[u8],
+    salt: &mut [u8],
     msgLen: u32,
-    msg: &[u8],
+    msg: &mut [u8],
     emBits: u32,
     em: &mut [u8]
 )
@@ -148,7 +150,7 @@
     ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
     +
     saltLen as usize]).copy_from_slice(&salt[0usize..saltLen as usize]);
-    crate::rsapss::hash(a, &mut m1Hash, m1Len, &m1);
+    crate::rsapss::hash(a, &mut m1Hash, m1Len, &mut m1);
     let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let dbLen: u32 = emLen.wrapping_sub(hLen).wrapping_sub(1u32);
     let mut db: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
@@ -160,19 +162,18 @@
     +
     saltLen as usize]).copy_from_slice(&salt[0usize..saltLen as usize]);
     let mut dbMask: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
-    crate::rsapss::mgf_hash(a, hLen, &m1Hash, dbLen, &mut dbMask);
+    crate::rsapss::mgf_hash(a, hLen, &mut m1Hash, dbLen, &mut dbMask);
     for i in 0u32..dbLen
     {
-        let x: u8 = (&db)[i as usize] ^ (&dbMask)[i as usize];
+        let x: u8 = (&mut db)[i as usize] ^ (&mut dbMask)[i as usize];
         let os: (&mut [u8], &mut [u8]) = db.split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let msBits: u32 = emBits.wrapping_rem(8u32);
-    if msBits > 0u32
-    { (&mut db)[0usize] = (&db)[0usize] & 0xffu8.wrapping_shr(8u32.wrapping_sub(msBits)) };
-    (em[0usize..dbLen as usize]).copy_from_slice(&(&db)[0usize..dbLen as usize]);
+    if msBits > 0u32 { (&mut db)[0usize] &= 0xffu8.wrapping_shr(8u32.wrapping_sub(msBits)) };
+    (em[0usize..dbLen as usize]).copy_from_slice(&(&mut db)[0usize..dbLen as usize]);
     (em[dbLen as usize..dbLen as usize + hLen as usize]).copy_from_slice(
-        &(&m1Hash)[0usize..hLen as usize]
+        &(&mut m1Hash)[0usize..hLen as usize]
     );
     em[emLen.wrapping_sub(1u32) as usize] = 0xbcu8
 }
@@ -181,9 +182,9 @@
     a: crate::streaming_types::hash_alg,
     saltLen: u32,
     msgLen: u32,
-    msg: &[u8],
+    msg: &mut [u8],
     emBits: u32,
-    em: &[u8]
+    em: &mut [u8]
 ) ->
     bool
 {
@@ -202,34 +203,31 @@
         let hLen: u32 = crate::rsapss::hash_len(a);
         let mut m1Hash0: Box<[u8]> = vec![0u8; hLen as usize].into_boxed_slice();
         let dbLen: u32 = emLen1.wrapping_sub(hLen).wrapping_sub(1u32);
-        let maskedDB: (&[u8], &[u8]) = em.split_at(0usize);
-        let m1Hash: (&[u8], &[u8]) = maskedDB.1.split_at(dbLen as usize);
+        let maskedDB: (&mut [u8], &mut [u8]) = em.split_at_mut(0usize);
+        let m1Hash: (&mut [u8], &mut [u8]) = maskedDB.1.split_at_mut(dbLen as usize);
         let mut dbMask: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
         crate::rsapss::mgf_hash(a, hLen, m1Hash.1, dbLen, &mut dbMask);
         for i in 0u32..dbLen
         {
-            let x: u8 = (&dbMask)[i as usize] ^ m1Hash.0[i as usize];
+            let x: u8 = (&mut dbMask)[i as usize] ^ m1Hash.0[i as usize];
             let os: (&mut [u8], &mut [u8]) = dbMask.split_at_mut(0usize);
             os.1[i as usize] = x
         };
         let msBits1: u32 = emBits.wrapping_rem(8u32);
         if msBits1 > 0u32
-        {
-            (&mut dbMask)[0usize] =
-                (&dbMask)[0usize] & 0xffu8.wrapping_shr(8u32.wrapping_sub(msBits1))
-        };
+        { (&mut dbMask)[0usize] &= 0xffu8.wrapping_shr(8u32.wrapping_sub(msBits1)) };
         let padLen: u32 = emLen1.wrapping_sub(saltLen).wrapping_sub(hLen).wrapping_sub(1u32);
         let mut pad2: Box<[u8]> = vec![0u8; padLen as usize].into_boxed_slice();
         (&mut pad2)[padLen.wrapping_sub(1u32) as usize] = 0x01u8;
-        let pad: (&[u8], &[u8]) = dbMask.split_at(0usize);
-        let salt: (&[u8], &[u8]) = pad.1.split_at(padLen as usize);
+        let pad: (&mut [u8], &mut [u8]) = dbMask.split_at_mut(0usize);
+        let salt: (&mut [u8], &mut [u8]) = pad.1.split_at_mut(padLen as usize);
         let mut res: [u8; 1] = [255u8; 1usize];
         for i in 0u32..padLen
         {
-            let uu____0: u8 = fstar::uint8::eq_mask(salt.0[i as usize], (&pad2)[i as usize]);
-            (&mut res)[0usize] = uu____0 & (&res)[0usize]
+            let uu____0: u8 = fstar::uint8::eq_mask(salt.0[i as usize], (&mut pad2)[i as usize]);
+            (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
         };
-        let z: u8 = (&res)[0usize];
+        let z: u8 = (&mut res)[0usize];
         if z != 255u8
         { false }
         else
@@ -240,21 +238,27 @@
             ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
             +
             saltLen as usize]).copy_from_slice(&salt.1[0usize..saltLen as usize]);
-            crate::rsapss::hash(a, &mut m1Hash0, m1Len, &m1);
+            crate::rsapss::hash(a, &mut m1Hash0, m1Len, &mut m1);
             let mut res0: [u8; 1] = [255u8; 1usize];
             for i in 0u32..hLen
             {
                 let uu____1: u8 =
-                    fstar::uint8::eq_mask((&m1Hash0)[i as usize], m1Hash.1[i as usize]);
-                (&mut res0)[0usize] = uu____1 & (&res0)[0usize]
+                    fstar::uint8::eq_mask((&mut m1Hash0)[i as usize], m1Hash.1[i as usize]);
+                (&mut res0)[0usize] = uu____1 & (&mut res0)[0usize]
             };
-            let z0: u8 = (&res0)[0usize];
+            let z0: u8 = (&mut res0)[0usize];
             z0 == 255u8
         }
     }
 }
 
-#[inline] fn load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8], pkey: &mut [u64]) ->
+#[inline] fn load_pkey(
+    modBits: u32,
+    eBits: u32,
+    nb: &mut [u8],
+    eb: &mut [u8],
+    pkey: &mut [u64]
+) ->
     bool
 {
     let nbLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
@@ -282,9 +286,9 @@
     modBits: u32,
     eBits: u32,
     dBits: u32,
-    nb: &[u8],
-    eb: &[u8],
-    db: &[u8],
+    nb: &mut [u8],
+    eb: &mut [u8],
+    db: &mut [u8],
     skey: &mut [u64]
 ) ->
     bool
@@ -326,11 +330,11 @@ rsapss_sign(
     modBits: u32,
     eBits: u32,
     dBits: u32,
-    skey: &[u64],
+    skey: &mut [u64],
     saltLen: u32,
-    salt: &[u8],
+    salt: &mut [u8],
     msgLen: u32,
-    msg: &[u8],
+    msg: &mut [u8],
     sgnt: &mut [u8]
 ) ->
     bool
@@ -350,19 +354,19 @@ rsapss_sign(
         let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
         crate::rsapss::pss_encode(a, saltLen, salt, msgLen, msg, emBits, &mut em);
-        bignum::bignum_base::bn_from_bytes_be_uint64(emLen, &em, &mut (&mut m)[0usize..]);
+        bignum::bignum_base::bn_from_bytes_be_uint64(emLen, &mut em, &mut (&mut m)[0usize..]);
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut s: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
         let mut m·: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-        let n: (&[u64], &[u64]) = skey.split_at(0usize);
-        let r2: (&[u64], &[u64]) = n.1.split_at(nLen2 as usize);
-        let e: (&[u64], &[u64]) =
-            r2.1.split_at(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
-        let d: (&[u64], &[u64]) =
-            e.1.split_at(
+        let n: (&mut [u64], &mut [u64]) = skey.split_at_mut(0usize);
+        let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
+        let e: (&mut [u64], &mut [u64]) =
+            r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
+        let d: (&mut [u64], &mut [u64]) =
+            e.1.split_at_mut(
                 nLen2.wrapping_add(nLen2).wrapping_add(eLen) as usize
                 -
                 nLen2.wrapping_add(nLen2) as usize
@@ -373,7 +377,7 @@ rsapss_sign(
             r2.0,
             mu,
             e.0,
-            &m,
+            &mut m,
             dBits,
             d.1,
             &mut s
@@ -384,7 +388,7 @@ rsapss_sign(
             r2.0,
             mu0,
             e.0,
-            &s,
+            &mut s,
             eBits,
             d.0,
             &mut m·
@@ -392,20 +396,20 @@ rsapss_sign(
         let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
         for i in 0u32..nLen2
         {
-            let uu____0: u64 = fstar::uint64::eq_mask((&m)[i as usize], (&m·)[i as usize]);
-            (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
+            let uu____0: u64 = fstar::uint64::eq_mask((&mut m)[i as usize], (&mut m·)[i as usize]);
+            (&mut mask)[0usize] = uu____0 & (&mut mask)[0usize]
         };
-        let mask1: u64 = (&mask)[0usize];
+        let mask1: u64 = (&mut mask)[0usize];
         let eq_m: u64 = mask1;
         for i in 0u32..nLen2
         {
-            let x: u64 = (&s)[i as usize];
+            let x: u64 = (&mut s)[i as usize];
             let x0: u64 = eq_m & x;
             let os: (&mut [u64], &mut [u64]) = s.split_at_mut(0usize);
             os.1[i as usize] = x0
         };
         let eq_b: bool = eq_m == 0xFFFFFFFFFFFFFFFFu64;
-        bignum::bignum_base::bn_to_bytes_be_uint64(k, &s, sgnt);
+        bignum::bignum_base::bn_to_bytes_be_uint64(k, &mut s, sgnt);
         let eq_b0: bool = eq_b;
         eq_b0
     }
@@ -436,12 +440,12 @@ rsapss_verify(
     a: crate::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
-    pkey: &[u64],
+    pkey: &mut [u64],
     saltLen: u32,
     sgntLen: u32,
-    sgnt: &[u8],
+    sgnt: &mut [u8],
     msgLen: u32,
-    msg: &[u8]
+    msg: &mut [u8]
 ) ->
     bool
 {
@@ -459,18 +463,18 @@ rsapss_verify(
         let mut s: Box<[u64]> = vec![0u64; nLen1 as usize].into_boxed_slice();
         bignum::bignum_base::bn_from_bytes_be_uint64(k, sgnt, &mut s);
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-        let n: (&[u64], &[u64]) = pkey.split_at(0usize);
-        let r2: (&[u64], &[u64]) = n.1.split_at(nLen2 as usize);
-        let e: (&[u64], &[u64]) =
-            r2.1.split_at(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
+        let n: (&mut [u64], &mut [u64]) = pkey.split_at_mut(0usize);
+        let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
+        let e: (&mut [u64], &mut [u64]) =
+            r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
         let mut acc: [u64; 1] = [0u64; 1usize];
         for i in 0u32..nLen2
         {
-            let beq: u64 = fstar::uint64::eq_mask((&s)[i as usize], r2.0[i as usize]);
-            let blt: u64 = ! fstar::uint64::gte_mask((&s)[i as usize], r2.0[i as usize]);
-            (&mut acc)[0usize] = beq & (&acc)[0usize] | ! beq & blt
+            let beq: u64 = fstar::uint64::eq_mask((&mut s)[i as usize], r2.0[i as usize]);
+            let blt: u64 = ! fstar::uint64::gte_mask((&mut s)[i as usize], r2.0[i as usize]);
+            (&mut acc)[0usize] = beq & (&mut acc)[0usize] | ! beq & blt
         };
-        let mask: u64 = (&acc)[0usize];
+        let mask: u64 = (&mut acc)[0usize];
         let res: bool =
             if mask == 0xFFFFFFFFFFFFFFFFu64
             {
@@ -480,7 +484,7 @@ rsapss_verify(
                     r2.0,
                     mu,
                     e.0,
-                    &s,
+                    &mut s,
                     eBits,
                     e.1,
                     &mut m
@@ -491,7 +495,7 @@ rsapss_verify(
                 {
                     let i: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32);
                     let j: u32 = modBits.wrapping_sub(1u32).wrapping_rem(64u32);
-                    let tmp: u64 = (&m)[i as usize];
+                    let tmp: u64 = (&mut m)[i as usize];
                     let get_bit: u64 = tmp.wrapping_shr(j) & 1u64;
                     get_bit == 0u64
                 }
@@ -505,9 +509,9 @@ rsapss_verify(
             let emBits: u32 = modBits.wrapping_sub(1u32);
             let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
             let mut em: Box<[u8]> = vec![0u8; emLen as usize].into_boxed_slice();
-            let m1: (&[u64], &[u64]) = m.split_at(0usize);
+            let m1: (&mut [u64], &mut [u64]) = m.split_at_mut(0usize);
             bignum::bignum_base::bn_to_bytes_be_uint64(emLen, m1.1, &mut em);
-            let res0: bool = crate::rsapss::pss_verify(a, saltLen, msgLen, msg, emBits, &em);
+            let res0: bool = crate::rsapss::pss_verify(a, saltLen, msgLen, msg, emBits, &mut em);
             res0
         }
         else
@@ -528,7 +532,7 @@ Load a public key from key parts.
 @return Returns an allocated public key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
 */
 pub fn
-new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
+new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &mut [u8], eb: &mut [u8]) ->
     Box<[u64]>
 {
     let ite: bool =
@@ -593,7 +597,14 @@ Load a secret key from key parts.
 @return Returns an allocated secret key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
 */
 pub fn
-new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8], db: &[u8]) ->
+new_rsapss_load_skey(
+    modBits: u32,
+    eBits: u32,
+    dBits: u32,
+    nb: &mut [u8],
+    eb: &mut [u8],
+    db: &mut [u8]
+) ->
     Box<[u64]>
 {
     let ite: bool =
@@ -694,13 +705,13 @@ rsapss_skey_sign(
     modBits: u32,
     eBits: u32,
     dBits: u32,
-    nb: &[u8],
-    eb: &[u8],
-    db: &[u8],
+    nb: &mut [u8],
+    eb: &mut [u8],
+    db: &mut [u8],
     saltLen: u32,
-    salt: &[u8],
+    salt: &mut [u8],
     msgLen: u32,
-    msg: &[u8],
+    msg: &mut [u8],
     sgnt: &mut [u8]
 ) ->
     bool
@@ -720,7 +731,7 @@ rsapss_skey_sign(
             modBits,
             eBits,
             dBits,
-            &skey,
+            &mut skey,
             saltLen,
             salt,
             msgLen,
@@ -756,13 +767,13 @@ rsapss_pkey_verify(
     a: crate::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
-    nb: &[u8],
-    eb: &[u8],
+    nb: &mut [u8],
+    eb: &mut [u8],
     saltLen: u32,
     sgntLen: u32,
-    sgnt: &[u8],
+    sgnt: &mut [u8],
     msgLen: u32,
-    msg: &[u8]
+    msg: &mut [u8]
 ) ->
     bool
 {
@@ -775,7 +786,19 @@ rsapss_pkey_verify(
             usize].into_boxed_slice();
     let b: bool = crate::rsapss::load_pkey(modBits, eBits, nb, eb, &mut pkey);
     if b
-    { crate::rsapss::rsapss_verify(a, modBits, eBits, &pkey, saltLen, sgntLen, sgnt, msgLen, msg) }
+    {
+        crate::rsapss::rsapss_verify(
+            a,
+            modBits,
+            eBits,
+            &mut pkey,
+            saltLen,
+            sgntLen,
+            sgnt,
+            msgLen,
+            msg
+        )
+    }
     else
     { false }
 }
@@ -788,7 +811,7 @@ pub fn
 mgf_hash0(
     a: crate::streaming_types::hash_alg,
     len: u32,
-    mgfseed: &[u8],
+    mgfseed: &mut [u8],
     maskLen: u32,
     res: &mut [u8]
 )

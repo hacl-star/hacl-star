@@ -6,10 +6,10 @@
 
 pub(crate) fn shake128_4x(
     input_len: u32,
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
     output_len: u32,
     output0: &mut [u8],
     output1: &mut [u8],
@@ -38,7 +38,7 @@ pub(crate) fn shake128_4x(
     }
 }
 
-#[inline] pub(crate) fn matrix_add(n1: u32, n2: u32, a: &mut [u16], b: &[u16])
+#[inline] pub(crate) fn matrix_add(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16])
 {
     for i in 0u32..n1
     {
@@ -52,7 +52,7 @@ pub(crate) fn shake128_4x(
     }
 }
 
-#[inline] pub(crate) fn matrix_sub(n1: u32, n2: u32, a: &[u16], b: &mut [u16])
+#[inline] pub(crate) fn matrix_sub(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16])
 {
     for i in 0u32..n1
     {
@@ -70,8 +70,8 @@ pub(crate) fn shake128_4x(
     n1: u32,
     n2: u32,
     n3: u32,
-    a: &[u16],
-    b: &[u16],
+    a: &mut [u16],
+    b: &mut [u16],
     c: &mut [u16]
 )
 {
@@ -84,10 +84,10 @@ pub(crate) fn shake128_4x(
             {
                 let aij: u16 = a[i.wrapping_mul(n2).wrapping_add(i1) as usize];
                 let bjk: u16 = b[i1.wrapping_mul(n3).wrapping_add(i0) as usize];
-                let res0: u16 = (&res)[0usize];
+                let res0: u16 = (&mut res)[0usize];
                 (&mut res)[0usize] = res0.wrapping_add(aij.wrapping_mul(bjk))
             };
-            c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = (&res)[0usize]
+            c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = (&mut res)[0usize]
         }
     }
 }
@@ -96,8 +96,8 @@ pub(crate) fn shake128_4x(
     n1: u32,
     n2: u32,
     n3: u32,
-    a: &[u16],
-    b: &[u16],
+    a: &mut [u16],
+    b: &mut [u16],
     c: &mut [u16]
 )
 {
@@ -110,44 +110,44 @@ pub(crate) fn shake128_4x(
             {
                 let aij: u16 = a[i.wrapping_mul(n2).wrapping_add(i1) as usize];
                 let bjk: u16 = b[i0.wrapping_mul(n2).wrapping_add(i1) as usize];
-                let res0: u16 = (&res)[0usize];
+                let res0: u16 = (&mut res)[0usize];
                 (&mut res)[0usize] = res0.wrapping_add(aij.wrapping_mul(bjk))
             };
-            c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = (&res)[0usize]
+            c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = (&mut res)[0usize]
         }
     }
 }
 
-#[inline] pub(crate) fn matrix_eq(n1: u32, n2: u32, a: &[u16], b: &[u16]) -> u16
+#[inline] pub(crate) fn matrix_eq(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> u16
 {
     let mut res: [u16; 1] = [0xFFFFu16; 1usize];
     for i in 0u32..n1.wrapping_mul(n2)
     {
         let uu____0: u16 = fstar::uint16::eq_mask(a[i as usize], b[i as usize]);
-        (&mut res)[0usize] = uu____0 & (&res)[0usize]
+        (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
     };
-    let r: u16 = (&res)[0usize];
+    let r: u16 = (&mut res)[0usize];
     r
 }
 
-#[inline] pub(crate) fn matrix_to_lbytes(n1: u32, n2: u32, m: &[u16], res: &mut [u8])
+#[inline] pub(crate) fn matrix_to_lbytes(n1: u32, n2: u32, m: &mut [u16], res: &mut [u8])
 {
     for i in 0u32..n1.wrapping_mul(n2)
     { lowstar::endianness::store16_le(&mut res[2u32.wrapping_mul(i) as usize..], m[i as usize]) }
 }
 
-#[inline] pub(crate) fn matrix_from_lbytes(n1: u32, n2: u32, b: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn matrix_from_lbytes(n1: u32, n2: u32, b: &mut [u8], res: &mut [u16])
 {
     for i in 0u32..n1.wrapping_mul(n2)
     {
-        let u: u16 = lowstar::endianness::load16_le(&b[2u32.wrapping_mul(i) as usize..]);
+        let u: u16 = lowstar::endianness::load16_le(&mut b[2u32.wrapping_mul(i) as usize..]);
         let x: u16 = u;
         let os: (&mut [u16], &mut [u16]) = res.split_at_mut(0usize);
         os.1[i as usize] = x
     }
 }
 
-#[inline] pub(crate) fn frodo_gen_matrix_shake_4x(n: u32, seed: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_gen_matrix_shake_4x(n: u32, seed: &mut [u8], res: &mut [u16])
 {
     let mut r: Box<[u8]> = vec![0u8; 8u32.wrapping_mul(n) as usize].into_boxed_slice();
     let mut tmp_seed: [u8; 72] = [0u8; 72usize];
@@ -201,10 +201,10 @@ pub(crate) fn shake128_4x(
         );
         for i0 in 0u32..n
         {
-            let resij0: (&[u8], &[u8]) = r1.0.split_at(i0.wrapping_mul(2u32) as usize);
-            let resij1: (&[u8], &[u8]) = r2.0.split_at(i0.wrapping_mul(2u32) as usize);
-            let resij2: (&[u8], &[u8]) = r3.0.split_at(i0.wrapping_mul(2u32) as usize);
-            let resij3: (&[u8], &[u8]) = r3.1.split_at(i0.wrapping_mul(2u32) as usize);
+            let resij0: (&mut [u8], &mut [u8]) = r1.0.split_at_mut(i0.wrapping_mul(2u32) as usize);
+            let resij1: (&mut [u8], &mut [u8]) = r2.0.split_at_mut(i0.wrapping_mul(2u32) as usize);
+            let resij2: (&mut [u8], &mut [u8]) = r3.0.split_at_mut(i0.wrapping_mul(2u32) as usize);
+            let resij3: (&mut [u8], &mut [u8]) = r3.1.split_at_mut(i0.wrapping_mul(2u32) as usize);
             let u: u16 = lowstar::endianness::load16_le(resij0.1);
             res[4u32.wrapping_mul(i).wrapping_add(0u32).wrapping_mul(n).wrapping_add(i0) as usize] =
                 u;
@@ -224,7 +224,7 @@ pub(crate) fn shake128_4x(
 #[inline] pub(crate) fn frodo_gen_matrix(
     a: crate::spec::frodo_gen_a,
     n: u32,
-    seed: &[u8],
+    seed: &mut [u8],
     a_matrix: &mut [u16]
 )
 {
@@ -247,7 +247,7 @@ pub(crate) const cdf_table976: [u16; 11] =
 pub(crate) const cdf_table1344: [u16; 7] =
     [9142u16, 23462u16, 30338u16, 32361u16, 32725u16, 32765u16, 32767u16];
 
-#[inline] pub(crate) fn frodo_sample_matrix64(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_sample_matrix64(n1: u32, n2: u32, r: &mut [u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
         &vec![0u16; n1.wrapping_mul(n2) as usize].into_boxed_slice()
@@ -256,8 +256,8 @@ pub(crate) const cdf_table1344: [u16; 7] =
     {
         for i0 in 0u32..n2
         {
-            let resij: (&[u8], &[u8]) =
-                r.split_at(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
+            let resij: (&mut [u8], &mut [u8]) =
+                r.split_at_mut(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
             let u: u16 = lowstar::endianness::load16_le(resij.1);
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
@@ -266,19 +266,19 @@ pub(crate) const cdf_table1344: [u16; 7] =
             let bound: u32 = 12u32;
             for i1 in 0u32..bound
             {
-                let sample0: u16 = (&sample)[0usize];
-                let ti: u16 = (&crate::frodo_kem::cdf_table640)[i1 as usize];
+                let sample0: u16 = (&mut sample)[0usize];
+                let ti: u16 = (&mut crate::frodo_kem::cdf_table640)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
                 (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
-            let sample0: u16 = (&sample)[0usize];
+            let sample0: u16 = (&mut sample)[0usize];
             res[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
                 ((! sign).wrapping_add(1u16) ^ sample0).wrapping_add(sign)
         }
     }
 }
 
-#[inline] pub(crate) fn frodo_sample_matrix640(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_sample_matrix640(n1: u32, n2: u32, r: &mut [u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
         &vec![0u16; n1.wrapping_mul(n2) as usize].into_boxed_slice()
@@ -287,8 +287,8 @@ pub(crate) const cdf_table1344: [u16; 7] =
     {
         for i0 in 0u32..n2
         {
-            let resij: (&[u8], &[u8]) =
-                r.split_at(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
+            let resij: (&mut [u8], &mut [u8]) =
+                r.split_at_mut(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
             let u: u16 = lowstar::endianness::load16_le(resij.1);
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
@@ -297,19 +297,19 @@ pub(crate) const cdf_table1344: [u16; 7] =
             let bound: u32 = 12u32;
             for i1 in 0u32..bound
             {
-                let sample0: u16 = (&sample)[0usize];
-                let ti: u16 = (&crate::frodo_kem::cdf_table640)[i1 as usize];
+                let sample0: u16 = (&mut sample)[0usize];
+                let ti: u16 = (&mut crate::frodo_kem::cdf_table640)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
                 (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
-            let sample0: u16 = (&sample)[0usize];
+            let sample0: u16 = (&mut sample)[0usize];
             res[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
                 ((! sign).wrapping_add(1u16) ^ sample0).wrapping_add(sign)
         }
     }
 }
 
-#[inline] pub(crate) fn frodo_sample_matrix976(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_sample_matrix976(n1: u32, n2: u32, r: &mut [u8], res: &mut [u16])
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
         &vec![0u16; n1.wrapping_mul(n2) as usize].into_boxed_slice()
@@ -318,8 +318,8 @@ pub(crate) const cdf_table1344: [u16; 7] =
     {
         for i0 in 0u32..n2
         {
-            let resij: (&[u8], &[u8]) =
-                r.split_at(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
+            let resij: (&mut [u8], &mut [u8]) =
+                r.split_at_mut(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
             let u: u16 = lowstar::endianness::load16_le(resij.1);
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
@@ -328,19 +328,24 @@ pub(crate) const cdf_table1344: [u16; 7] =
             let bound: u32 = 10u32;
             for i1 in 0u32..bound
             {
-                let sample0: u16 = (&sample)[0usize];
-                let ti: u16 = (&crate::frodo_kem::cdf_table976)[i1 as usize];
+                let sample0: u16 = (&mut sample)[0usize];
+                let ti: u16 = (&mut crate::frodo_kem::cdf_table976)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
                 (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
-            let sample0: u16 = (&sample)[0usize];
+            let sample0: u16 = (&mut sample)[0usize];
             res[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
                 ((! sign).wrapping_add(1u16) ^ sample0).wrapping_add(sign)
         }
     }
 }
 
-#[inline] pub(crate) fn frodo_sample_matrix1344(n1: u32, n2: u32, r: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_sample_matrix1344(
+    n1: u32,
+    n2: u32,
+    r: &mut [u8],
+    res: &mut [u16]
+)
 {
     (res[0usize..n1.wrapping_mul(n2) as usize]).copy_from_slice(
         &vec![0u16; n1.wrapping_mul(n2) as usize].into_boxed_slice()
@@ -349,8 +354,8 @@ pub(crate) const cdf_table1344: [u16; 7] =
     {
         for i0 in 0u32..n2
         {
-            let resij: (&[u8], &[u8]) =
-                r.split_at(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
+            let resij: (&mut [u8], &mut [u8]) =
+                r.split_at_mut(2u32.wrapping_mul(n2.wrapping_mul(i).wrapping_add(i0)) as usize);
             let u: u16 = lowstar::endianness::load16_le(resij.1);
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
@@ -359,12 +364,12 @@ pub(crate) const cdf_table1344: [u16; 7] =
             let bound: u32 = 6u32;
             for i1 in 0u32..bound
             {
-                let sample0: u16 = (&sample)[0usize];
-                let ti: u16 = (&crate::frodo_kem::cdf_table1344)[i1 as usize];
+                let sample0: u16 = (&mut sample)[0usize];
+                let ti: u16 = (&mut crate::frodo_kem::cdf_table1344)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
                 (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
-            let sample0: u16 = (&sample)[0usize];
+            let sample0: u16 = (&mut sample)[0usize];
             res[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
                 ((! sign).wrapping_add(1u16) ^ sample0).wrapping_add(sign)
         }
@@ -377,12 +382,12 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
     lowstar::ignore::ignore::<bool>(b)
 }
 
-#[inline] pub(crate) fn frodo_pack(n1: u32, n2: u32, d: u32, a: &[u16], res: &mut [u8])
+#[inline] pub(crate) fn frodo_pack(n1: u32, n2: u32, d: u32, a: &mut [u16], res: &mut [u8])
 {
     let n: u32 = n1.wrapping_mul(n2).wrapping_div(8u32);
     for i in 0u32..n
     {
-        let a1: (&[u16], &[u16]) = a.split_at(8u32.wrapping_mul(i) as usize);
+        let a1: (&mut [u16], &mut [u16]) = a.split_at_mut(8u32.wrapping_mul(i) as usize);
         let r: (&mut [u8], &mut [u8]) = res.split_at_mut(d.wrapping_mul(i) as usize);
         let maskd: u16 = (1u32.wrapping_shl(d) as u16).wrapping_sub(1u16);
         let mut v16: [u8; 16] = [0u8; 16usize];
@@ -442,24 +447,24 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
                 )
             );
         lowstar::endianness::store128_be(&mut v16, templong);
-        let src: (&[u8], &[u8]) = v16.split_at(16u32.wrapping_sub(d) as usize);
+        let src: (&mut [u8], &mut [u8]) = v16.split_at_mut(16u32.wrapping_sub(d) as usize);
         (r.1[0usize..d as usize]).copy_from_slice(&src.1[0usize..d as usize])
     }
 }
 
-#[inline] pub(crate) fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16])
 {
     let n: u32 = n1.wrapping_mul(n2).wrapping_div(8u32);
     for i in 0u32..n
     {
-        let b1: (&[u8], &[u8]) = b.split_at(d.wrapping_mul(i) as usize);
+        let b1: (&mut [u8], &mut [u8]) = b.split_at_mut(d.wrapping_mul(i) as usize);
         let r: (&mut [u16], &mut [u16]) = res.split_at_mut(8u32.wrapping_mul(i) as usize);
         let maskd: u16 = (1u32.wrapping_shl(d) as u16).wrapping_sub(1u16);
         let mut src: [u8; 16] = [0u8; 16usize];
         ((&mut src)[16u32.wrapping_sub(d) as usize..16u32.wrapping_sub(d) as usize + d as usize]).copy_from_slice(
             &b1.1[0usize..d as usize]
         );
-        let u: fstar::uint128::uint128 = lowstar::endianness::load128_be(&src);
+        let u: fstar::uint128::uint128 = lowstar::endianness::load128_be(&mut src);
         let templong: fstar::uint128::uint128 = u;
         r.1[0usize] =
             fstar::uint128::uint128_to_uint64(
@@ -528,14 +533,20 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
     }
 }
 
-#[inline] pub(crate) fn frodo_key_encode(logq: u32, b: u32, n: u32, a: &[u8], res: &mut [u16])
+#[inline] pub(crate) fn frodo_key_encode(
+    logq: u32,
+    b: u32,
+    n: u32,
+    a: &mut [u8],
+    res: &mut [u16]
+)
 {
     for i in 0u32..n
     {
         let mut v8: [u8; 8] = [0u8; 8usize];
-        let chunk: (&[u8], &[u8]) = a.split_at(i.wrapping_mul(b) as usize);
+        let chunk: (&mut [u8], &mut [u8]) = a.split_at_mut(i.wrapping_mul(b) as usize);
         ((&mut v8)[0usize..b as usize]).copy_from_slice(&chunk.1[0usize..b as usize]);
-        let u: u64 = lowstar::endianness::load64_le(&v8);
+        let u: u64 = lowstar::endianness::load64_le(&mut v8);
         let x: u64 = u;
         let x0: u64 = x;
         krml::unroll_for!(
@@ -553,7 +564,13 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
     }
 }
 
-#[inline] pub(crate) fn frodo_key_decode(logq: u32, b: u32, n: u32, a: &[u16], res: &mut [u8])
+#[inline] pub(crate) fn frodo_key_decode(
+    logq: u32,
+    b: u32,
+    n: u32,
+    a: &mut [u16],
+    res: &mut [u8]
+)
 {
     for i in 0u32..n
     {
@@ -569,18 +586,16 @@ pub(crate) fn randombytes_(len: u32, res: &mut [u8])
                     aik.wrapping_add(1u16.wrapping_shl(logq.wrapping_sub(b).wrapping_sub(1u32))).wrapping_shr(
                         logq.wrapping_sub(b)
                     );
-                (&mut templong)[0usize] =
-                    (&templong)[0usize]
-                    |
+                (&mut templong)[0usize] |=
                     ((res1 & 1u16.wrapping_shl(b).wrapping_sub(1u16)) as u64).wrapping_shl(
                         b.wrapping_mul(i0)
                     )
             }
         );
-        let templong0: u64 = (&templong)[0usize];
+        let templong0: u64 = (&mut templong)[0usize];
         let mut v8: [u8; 8] = [0u8; 8usize];
         lowstar::endianness::store64_le(&mut v8, templong0);
-        let tmp: (&[u8], &[u8]) = v8.split_at(0usize);
+        let tmp: (&mut [u8], &mut [u8]) = v8.split_at_mut(0usize);
         (res[i.wrapping_mul(b) as usize..i.wrapping_mul(b) as usize + b as usize]).copy_from_slice(
             &tmp.1[0usize..b as usize]
         )

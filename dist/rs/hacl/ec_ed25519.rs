@@ -44,7 +44,7 @@ Write `a + b mod p` in `out`.
   • `a`, `b`, and `out` are either pairwise disjoint or equal
 */
 pub fn
-felem_add(a: &[u64], b: &[u64], out: &mut [u64])
+felem_add(a: &mut [u64], b: &mut [u64], out: &mut [u64])
 {
     crate::bignum25519_51::fadd(out, a, b);
     crate::ed25519::reduce_513(out)
@@ -60,7 +60,7 @@ Write `a - b mod p` in `out`.
   • `a`, `b`, and `out` are either pairwise disjoint or equal
 */
 pub fn
-felem_sub(a: &[u64], b: &[u64], out: &mut [u64])
+felem_sub(a: &mut [u64], b: &mut [u64], out: &mut [u64])
 {
     crate::bignum25519_51::fsub(out, a, b);
     crate::ed25519::reduce_513(out)
@@ -76,10 +76,11 @@ Write `a * b mod p` in `out`.
   • `a`, `b`, and `out` are either pairwise disjoint or equal
 */
 pub fn
-felem_mul(a: &[u64], b: &[u64], out: &mut [u64])
+felem_mul(a: &mut [u64], b: &mut [u64], out: &mut [u64])
 {
-    let tmp: [fstar::uint128::uint128; 10] = [fstar::uint128::uint64_to_uint128(0u64); 10usize];
-    crate::bignum25519_51::fmul(out, a, b, &tmp)
+    let mut tmp: [fstar::uint128::uint128; 10] =
+        [fstar::uint128::uint64_to_uint128(0u64); 10usize];
+    crate::bignum25519_51::fmul(out, a, b, &mut tmp)
 }
 
 /**
@@ -92,10 +93,10 @@ Write `a * a mod p` in `out`.
   • `a` and `out` are either disjoint or equal
 */
 pub fn
-felem_sqr(a: &[u64], out: &mut [u64])
+felem_sqr(a: &mut [u64], out: &mut [u64])
 {
-    let tmp: [fstar::uint128::uint128; 5] = [fstar::uint128::uint64_to_uint128(0u64); 5usize];
-    crate::bignum25519_51::fsqr(out, a, &tmp)
+    let mut tmp: [fstar::uint128::uint128; 5] = [fstar::uint128::uint64_to_uint128(0u64); 5usize];
+    crate::bignum25519_51::fsqr(out, a, &mut tmp)
 }
 
 /**
@@ -110,7 +111,7 @@ Write `a ^ (p - 2) mod p` in `out`.
   • `a` and `out` are disjoint
 */
 pub fn
-felem_inv(a: &[u64], out: &mut [u64])
+felem_inv(a: &mut [u64], out: &mut [u64])
 {
     crate::ed25519::inverse(out, a);
     crate::ed25519::reduce_513(out)
@@ -129,7 +130,7 @@ Load a little-endian field element from memory.
   NOTE that the function also performs the reduction modulo 2^255.
 */
 pub fn
-felem_load(b: &[u8], out: &mut [u64])
+felem_load(b: &mut [u8], out: &mut [u64])
 { crate::ed25519::load_51(out, b) }
 
 /**
@@ -143,7 +144,7 @@ Serialize a field element into little-endian memory.
   • `a` and `out` are disjoint
 */
 pub fn
-felem_store(a: &[u64], out: &mut [u8])
+felem_store(a: &mut [u64], out: &mut [u8])
 { crate::ed25519::store_51(out, a) }
 
 /**
@@ -199,7 +200,7 @@ Write `-p` in `out` (point negation).
   • `p` and `out` are disjoint
 */
 pub fn
-point_negate(p: &[u64], out: &mut [u64])
+point_negate(p: &mut [u64], out: &mut [u64])
 { crate::ed25519::point_negate(p, out) }
 
 /**
@@ -212,7 +213,7 @@ Write `p + q` in `out` (point addition).
   • `p`, `q`, and `out` are either pairwise disjoint or equal
 */
 pub fn
-point_add(p: &[u64], q: &[u64], out: &mut [u64])
+point_add(p: &mut [u64], q: &mut [u64], out: &mut [u64])
 { crate::ed25519::point_add(out, p, q) }
 
 /**
@@ -225,7 +226,7 @@ Write `p + p` in `out` (point doubling).
   • `p` and `out` are either pairwise disjoint or equal
 */
 pub fn
-point_double(p: &[u64], out: &mut [u64])
+point_double(p: &mut [u64], out: &mut [u64])
 { crate::ed25519::point_double(out, p) }
 
 /**
@@ -242,7 +243,7 @@ Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
   • `scalar`, `p`, and `out` are pairwise disjoint
 */
 pub fn
-point_mul(scalar: &[u8], p: &[u64], out: &mut [u64])
+point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64])
 { crate::ed25519::point_mul(out, scalar, p) }
 
 /**
@@ -257,7 +258,7 @@ Checks whether `p` is equal to `q` (point equality).
   • `p` and `q` are either disjoint or equal
 */
 pub fn
-point_eq(p: &[u64], q: &[u64]) ->
+point_eq(p: &mut [u64], q: &mut [u64]) ->
     bool
 { crate::ed25519::point_equal(p, q) }
 
@@ -275,7 +276,7 @@ Compress a point in extended homogeneous coordinates to its compressed form.
   • `p` and `out` are disjoint
 */
 pub fn
-point_compress(p: &[u64], out: &mut [u8])
+point_compress(p: &mut [u64], out: &mut [u8])
 { crate::ed25519::point_compress(out, p) }
 
 /**
@@ -292,6 +293,6 @@ Decompress a point in extended homogeneous coordinates from its compressed form.
   • `s` and `out` are disjoint
 */
 pub fn
-point_decompress(s: &[u8], out: &mut [u64]) ->
+point_decompress(s: &mut [u8], out: &mut [u64]) ->
     bool
 { crate::ed25519::point_decompress(out, s) }

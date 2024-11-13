@@ -7,10 +7,10 @@
 pub fn setupBaseS <'a>(
     o_pkE: &'a mut [u8],
     o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s <'a>,
-    skE: &'a [u8],
-    pkR: &'a [u8],
+    skE: &'a mut [u8],
+    pkR: &'a mut [u8],
     infolen: u32,
-    info: &'a [u8]
+    info: &'a mut [u8]
 ) ->
     u32
 {
@@ -25,7 +25,7 @@ pub fn setupBaseS <'a>(
             let mut o_dh: [u8; 64] = [0u8; 64usize];
             let mut tmp: [u8; 64] = [0u8; 64usize];
             let res0: bool = crate::p256::ecp256dh_r(&mut tmp, pkR, skE);
-            ((&mut o_dh)[0usize..64usize]).copy_from_slice(&(&tmp)[0usize..64usize]);
+            ((&mut o_dh)[0usize..64usize]).copy_from_slice(&(&mut tmp)[0usize..64usize]);
             let res2: u32 = if res0 { 0u32 } else { 1u32 };
             if res2 == 0u32
             {
@@ -37,7 +37,7 @@ pub fn setupBaseS <'a>(
                 let o_pkR: (&mut [u8], &mut [u8]) = o_pkRm.1.split_at_mut(1usize);
                 (o_pkR.1[0usize..64usize]).copy_from_slice(&pkR[0usize..64usize]);
                 o_pkRm.1[0usize] = 4u8;
-                let o_dhm: (&[u8], &[u8]) = o_dh.split_at(0usize);
+                let o_dhm: (&mut [u8], &mut [u8]) = o_dh.split_at_mut(0usize);
                 let mut o_eae_prk: [u8; 32] = [0u8; 32usize];
                 let mut suite_id_kem: [u8; 5] = [0u8; 5usize];
                 let uu____0: (&mut [u8], &mut [u8]) = suite_id_kem.split_at_mut(0usize);
@@ -47,8 +47,8 @@ pub fn setupBaseS <'a>(
                 let uu____1: (&mut [u8], &mut [u8]) = uu____0.1.split_at_mut(3usize);
                 uu____1.1[0usize] = 0u8;
                 uu____1.1[1usize] = 16u8;
-                let empty: (&[u8], &[u8]) = uu____1.0.split_at(0usize);
-                let label_eae_prk: [u8; 7] =
+                let empty: (&mut [u8], &mut [u8]) = uu____1.0.split_at_mut(0usize);
+                let mut label_eae_prk: [u8; 7] =
                     [0x65u8, 0x61u8, 0x65u8, 0x5fu8, 0x70u8, 0x72u8, 0x6bu8];
                 let len: u32 = 51u32;
                 let mut tmp0: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
@@ -61,16 +61,16 @@ pub fn setupBaseS <'a>(
                 uu____2.1[5usize] = 0x76u8;
                 uu____2.1[6usize] = 0x31u8;
                 ((&mut (&mut tmp0)[7usize..])[0usize..5usize]).copy_from_slice(
-                    &(&suite_id_kem)[0usize..5usize]
+                    &(&mut suite_id_kem)[0usize..5usize]
                 );
                 ((&mut (&mut tmp0)[12usize..])[0usize..7usize]).copy_from_slice(
-                    &(&label_eae_prk)[0usize..7usize]
+                    &(&mut label_eae_prk)[0usize..7usize]
                 );
                 ((&mut (&mut tmp0)[19usize..])[0usize..32usize]).copy_from_slice(
                     &o_dhm.1[0usize..32usize]
                 );
-                crate::hkdf::extract_sha2_256(&mut o_eae_prk, empty.1, 0u32, &tmp0, len);
-                let label_shared_secret: [u8; 13] =
+                crate::hkdf::extract_sha2_256(&mut o_eae_prk, empty.1, 0u32, &mut tmp0, len);
+                let mut label_shared_secret: [u8; 13] =
                     [0x73u8, 0x68u8, 0x61u8, 0x72u8, 0x65u8, 0x64u8, 0x5fu8, 0x73u8, 0x65u8, 0x63u8,
                         0x72u8, 0x65u8, 0x74u8];
                 let len0: u32 = 157u32;
@@ -85,15 +85,22 @@ pub fn setupBaseS <'a>(
                 uu____3.1[5usize] = 0x76u8;
                 uu____3.1[6usize] = 0x31u8;
                 ((&mut (&mut tmp1)[9usize..])[0usize..5usize]).copy_from_slice(
-                    &(&suite_id_kem)[0usize..5usize]
+                    &(&mut suite_id_kem)[0usize..5usize]
                 );
                 ((&mut (&mut tmp1)[14usize..])[0usize..13usize]).copy_from_slice(
-                    &(&label_shared_secret)[0usize..13usize]
+                    &(&mut label_shared_secret)[0usize..13usize]
                 );
                 ((&mut (&mut tmp1)[27usize..])[0usize..130usize]).copy_from_slice(
-                    &(&o_kemcontext)[0usize..130usize]
+                    &(&mut o_kemcontext)[0usize..130usize]
                 );
-                crate::hkdf::expand_sha2_256(&mut o_shared, &o_eae_prk, 32u32, &tmp1, len0, 32u32);
+                crate::hkdf::expand_sha2_256(
+                    &mut o_shared,
+                    &mut o_eae_prk,
+                    32u32,
+                    &mut tmp1,
+                    len0,
+                    32u32
+                );
                 0u32
             }
             else
@@ -120,10 +127,10 @@ pub fn setupBaseS <'a>(
         let uu____7: (&mut [u8], &mut [u8]) = uu____6.1.split_at_mut(2usize);
         uu____7.1[0usize] = 0u8;
         uu____7.1[1usize] = 3u8;
-        let label_psk_id_hash: [u8; 11] =
+        let mut label_psk_id_hash: [u8; 11] =
             [0x70u8, 0x73u8, 0x6bu8, 0x5fu8, 0x69u8, 0x64u8, 0x5fu8, 0x68u8, 0x61u8, 0x73u8, 0x68u8];
         let mut o_psk_id_hash: [u8; 32] = [0u8; 32usize];
-        let empty: (&[u8], &[u8]) = uu____5.0.split_at(0usize);
+        let empty: (&mut [u8], &mut [u8]) = uu____5.0.split_at_mut(0usize);
         let len: u32 = 28u32;
         let mut tmp: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
         let uu____8: (&mut [u8], &mut [u8]) = tmp.split_at_mut(0usize);
@@ -135,14 +142,14 @@ pub fn setupBaseS <'a>(
         uu____8.1[5usize] = 0x76u8;
         uu____8.1[6usize] = 0x31u8;
         ((&mut (&mut tmp)[7usize..])[0usize..10usize]).copy_from_slice(
-            &(&suite_id)[0usize..10usize]
+            &(&mut suite_id)[0usize..10usize]
         );
         ((&mut (&mut tmp)[17usize..])[0usize..11usize]).copy_from_slice(
-            &(&label_psk_id_hash)[0usize..11usize]
+            &(&mut label_psk_id_hash)[0usize..11usize]
         );
         ((&mut (&mut tmp)[28usize..])[0usize..0usize]).copy_from_slice(&empty.1[0usize..0usize]);
-        crate::hkdf::extract_sha2_256(&mut o_psk_id_hash, empty.1, 0u32, &tmp, len);
-        let label_info_hash: [u8; 9] =
+        crate::hkdf::extract_sha2_256(&mut o_psk_id_hash, empty.1, 0u32, &mut tmp, len);
+        let mut label_info_hash: [u8; 9] =
             [0x69u8, 0x6eu8, 0x66u8, 0x6fu8, 0x5fu8, 0x68u8, 0x61u8, 0x73u8, 0x68u8];
         let mut o_info_hash: [u8; 32] = [0u8; 32usize];
         let len0: u32 = 26u32.wrapping_add(infolen);
@@ -156,23 +163,23 @@ pub fn setupBaseS <'a>(
         uu____9.1[5usize] = 0x76u8;
         uu____9.1[6usize] = 0x31u8;
         ((&mut (&mut tmp0)[7usize..])[0usize..10usize]).copy_from_slice(
-            &(&suite_id)[0usize..10usize]
+            &(&mut suite_id)[0usize..10usize]
         );
         ((&mut (&mut tmp0)[17usize..])[0usize..9usize]).copy_from_slice(
-            &(&label_info_hash)[0usize..9usize]
+            &(&mut label_info_hash)[0usize..9usize]
         );
         ((&mut (&mut tmp0)[26usize..])[0usize..infolen as usize]).copy_from_slice(
             &info[0usize..infolen as usize]
         );
-        crate::hkdf::extract_sha2_256(&mut o_info_hash, empty.1, 0u32, &tmp0, len0);
+        crate::hkdf::extract_sha2_256(&mut o_info_hash, empty.1, 0u32, &mut tmp0, len0);
         (&mut (&mut o_context)[0usize..])[0usize] = 0u8;
         ((&mut (&mut o_context)[1usize..])[0usize..32usize]).copy_from_slice(
-            &(&o_psk_id_hash)[0usize..32usize]
+            &(&mut o_psk_id_hash)[0usize..32usize]
         );
         ((&mut (&mut o_context)[33usize..])[0usize..32usize]).copy_from_slice(
-            &(&o_info_hash)[0usize..32usize]
+            &(&mut o_info_hash)[0usize..32usize]
         );
-        let label_secret: [u8; 6] = [0x73u8, 0x65u8, 0x63u8, 0x72u8, 0x65u8, 0x74u8];
+        let mut label_secret: [u8; 6] = [0x73u8, 0x65u8, 0x63u8, 0x72u8, 0x65u8, 0x74u8];
         let len1: u32 = 23u32;
         let mut tmp1: Box<[u8]> = vec![0u8; len1 as usize].into_boxed_slice();
         let uu____10: (&mut [u8], &mut [u8]) = tmp1.split_at_mut(0usize);
@@ -184,14 +191,14 @@ pub fn setupBaseS <'a>(
         uu____10.1[5usize] = 0x76u8;
         uu____10.1[6usize] = 0x31u8;
         ((&mut (&mut tmp1)[7usize..])[0usize..10usize]).copy_from_slice(
-            &(&suite_id)[0usize..10usize]
+            &(&mut suite_id)[0usize..10usize]
         );
         ((&mut (&mut tmp1)[17usize..])[0usize..6usize]).copy_from_slice(
-            &(&label_secret)[0usize..6usize]
+            &(&mut label_secret)[0usize..6usize]
         );
         ((&mut (&mut tmp1)[23usize..])[0usize..0usize]).copy_from_slice(&empty.1[0usize..0usize]);
-        crate::hkdf::extract_sha2_256(&mut o_secret, &o_shared, 32u32, &tmp1, len1);
-        let label_exp: [u8; 3] = [0x65u8, 0x78u8, 0x70u8];
+        crate::hkdf::extract_sha2_256(&mut o_secret, &mut o_shared, 32u32, &mut tmp1, len1);
+        let mut label_exp: [u8; 3] = [0x65u8, 0x78u8, 0x70u8];
         let len2: u32 = 87u32;
         let mut tmp2: Box<[u8]> = vec![0u8; len2 as usize].into_boxed_slice();
         lowstar::endianness::store16_be(&mut (&mut tmp2)[0usize..], 32u32 as u16);
@@ -204,16 +211,23 @@ pub fn setupBaseS <'a>(
         uu____11.1[5usize] = 0x76u8;
         uu____11.1[6usize] = 0x31u8;
         ((&mut (&mut tmp2)[9usize..])[0usize..10usize]).copy_from_slice(
-            &(&suite_id)[0usize..10usize]
+            &(&mut suite_id)[0usize..10usize]
         );
         ((&mut (&mut tmp2)[19usize..])[0usize..3usize]).copy_from_slice(
-            &(&label_exp)[0usize..3usize]
+            &(&mut label_exp)[0usize..3usize]
         );
         ((&mut (&mut tmp2)[22usize..])[0usize..65usize]).copy_from_slice(
-            &(&o_context)[0usize..65usize]
+            &(&mut o_context)[0usize..65usize]
         );
-        crate::hkdf::expand_sha2_256(o_ctx.ctx_exporter, &o_secret, 32u32, &tmp2, len2, 32u32);
-        let label_key: [u8; 3] = [0x6bu8, 0x65u8, 0x79u8];
+        crate::hkdf::expand_sha2_256(
+            o_ctx.ctx_exporter,
+            &mut o_secret,
+            32u32,
+            &mut tmp2,
+            len2,
+            32u32
+        );
+        let mut label_key: [u8; 3] = [0x6bu8, 0x65u8, 0x79u8];
         let len3: u32 = 87u32;
         let mut tmp3: Box<[u8]> = vec![0u8; len3 as usize].into_boxed_slice();
         lowstar::endianness::store16_be(&mut (&mut tmp3)[0usize..], 32u32 as u16);
@@ -226,16 +240,16 @@ pub fn setupBaseS <'a>(
         uu____12.1[5usize] = 0x76u8;
         uu____12.1[6usize] = 0x31u8;
         ((&mut (&mut tmp3)[9usize..])[0usize..10usize]).copy_from_slice(
-            &(&suite_id)[0usize..10usize]
+            &(&mut suite_id)[0usize..10usize]
         );
         ((&mut (&mut tmp3)[19usize..])[0usize..3usize]).copy_from_slice(
-            &(&label_key)[0usize..3usize]
+            &(&mut label_key)[0usize..3usize]
         );
         ((&mut (&mut tmp3)[22usize..])[0usize..65usize]).copy_from_slice(
-            &(&o_context)[0usize..65usize]
+            &(&mut o_context)[0usize..65usize]
         );
-        crate::hkdf::expand_sha2_256(o_ctx.ctx_key, &o_secret, 32u32, &tmp3, len3, 32u32);
-        let label_base_nonce: [u8; 10] =
+        crate::hkdf::expand_sha2_256(o_ctx.ctx_key, &mut o_secret, 32u32, &mut tmp3, len3, 32u32);
+        let mut label_base_nonce: [u8; 10] =
             [0x62u8, 0x61u8, 0x73u8, 0x65u8, 0x5fu8, 0x6eu8, 0x6fu8, 0x6eu8, 0x63u8, 0x65u8];
         let len4: u32 = 94u32;
         let mut tmp4: Box<[u8]> = vec![0u8; len4 as usize].into_boxed_slice();
@@ -249,15 +263,15 @@ pub fn setupBaseS <'a>(
         uu____13.1[5usize] = 0x76u8;
         uu____13.1[6usize] = 0x31u8;
         ((&mut (&mut tmp4)[9usize..])[0usize..10usize]).copy_from_slice(
-            &(&suite_id)[0usize..10usize]
+            &(&mut suite_id)[0usize..10usize]
         );
         ((&mut (&mut tmp4)[19usize..])[0usize..10usize]).copy_from_slice(
-            &(&label_base_nonce)[0usize..10usize]
+            &(&mut label_base_nonce)[0usize..10usize]
         );
         ((&mut (&mut tmp4)[29usize..])[0usize..65usize]).copy_from_slice(
-            &(&o_context)[0usize..65usize]
+            &(&mut o_context)[0usize..65usize]
         );
-        crate::hkdf::expand_sha2_256(o_ctx.ctx_nonce, &o_secret, 32u32, &tmp4, len4, 12u32);
+        crate::hkdf::expand_sha2_256(o_ctx.ctx_nonce, &mut o_secret, 32u32, &mut tmp4, len4, 12u32);
         o_ctx.ctx_seq[0usize] = 0u64;
         res0
     }
@@ -267,10 +281,10 @@ pub fn setupBaseS <'a>(
 
 pub fn setupBaseR <'a>(
     o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s <'a>,
-    enc: &'a [u8],
-    skR: &'a [u8],
+    enc: &'a mut [u8],
+    skR: &'a mut [u8],
     infolen: u32,
-    info: &'a [u8]
+    info: &'a mut [u8]
 ) ->
     u32
 {
@@ -280,11 +294,11 @@ pub fn setupBaseR <'a>(
     if res1 == 0u32
     {
         let mut shared: [u8; 32] = [0u8; 32usize];
-        let pkE: (&[u8], &[u8]) = enc.split_at(1usize);
+        let pkE: (&mut [u8], &mut [u8]) = enc.split_at_mut(1usize);
         let mut dh: [u8; 64] = [0u8; 64usize];
         let mut tmp: [u8; 64] = [0u8; 64usize];
         let res0: bool = crate::p256::ecp256dh_r(&mut tmp, pkE.1, skR);
-        ((&mut dh)[0usize..64usize]).copy_from_slice(&(&tmp)[0usize..64usize]);
+        ((&mut dh)[0usize..64usize]).copy_from_slice(&(&mut tmp)[0usize..64usize]);
         let res11: u32 = if res0 { 0u32 } else { 1u32 };
         let res2: u32 =
             if res11 == 0u32
@@ -300,7 +314,7 @@ pub fn setupBaseR <'a>(
                         &enc[0usize..65usize]
                     );
                     pkRm.1[0usize] = 4u8;
-                    let dhm: (&[u8], &[u8]) = dh.split_at(0usize);
+                    let dhm: (&mut [u8], &mut [u8]) = dh.split_at_mut(0usize);
                     let mut o_eae_prk: [u8; 32] = [0u8; 32usize];
                     let mut suite_id_kem: [u8; 5] = [0u8; 5usize];
                     let uu____0: (&mut [u8], &mut [u8]) = suite_id_kem.split_at_mut(0usize);
@@ -310,8 +324,8 @@ pub fn setupBaseR <'a>(
                     let uu____1: (&mut [u8], &mut [u8]) = uu____0.1.split_at_mut(3usize);
                     uu____1.1[0usize] = 0u8;
                     uu____1.1[1usize] = 16u8;
-                    let empty: (&[u8], &[u8]) = uu____1.0.split_at(0usize);
-                    let label_eae_prk: [u8; 7] =
+                    let empty: (&mut [u8], &mut [u8]) = uu____1.0.split_at_mut(0usize);
+                    let mut label_eae_prk: [u8; 7] =
                         [0x65u8, 0x61u8, 0x65u8, 0x5fu8, 0x70u8, 0x72u8, 0x6bu8];
                     let len: u32 = 51u32;
                     let mut tmp0: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
@@ -324,16 +338,16 @@ pub fn setupBaseR <'a>(
                     uu____2.1[5usize] = 0x76u8;
                     uu____2.1[6usize] = 0x31u8;
                     ((&mut (&mut tmp0)[7usize..])[0usize..5usize]).copy_from_slice(
-                        &(&suite_id_kem)[0usize..5usize]
+                        &(&mut suite_id_kem)[0usize..5usize]
                     );
                     ((&mut (&mut tmp0)[12usize..])[0usize..7usize]).copy_from_slice(
-                        &(&label_eae_prk)[0usize..7usize]
+                        &(&mut label_eae_prk)[0usize..7usize]
                     );
                     ((&mut (&mut tmp0)[19usize..])[0usize..32usize]).copy_from_slice(
                         &dhm.1[0usize..32usize]
                     );
-                    crate::hkdf::extract_sha2_256(&mut o_eae_prk, empty.1, 0u32, &tmp0, len);
-                    let label_shared_secret: [u8; 13] =
+                    crate::hkdf::extract_sha2_256(&mut o_eae_prk, empty.1, 0u32, &mut tmp0, len);
+                    let mut label_shared_secret: [u8; 13] =
                         [0x73u8, 0x68u8, 0x61u8, 0x72u8, 0x65u8, 0x64u8, 0x5fu8, 0x73u8, 0x65u8,
                             0x63u8, 0x72u8, 0x65u8, 0x74u8];
                     let len0: u32 = 157u32;
@@ -348,15 +362,22 @@ pub fn setupBaseR <'a>(
                     uu____3.1[5usize] = 0x76u8;
                     uu____3.1[6usize] = 0x31u8;
                     ((&mut (&mut tmp1)[9usize..])[0usize..5usize]).copy_from_slice(
-                        &(&suite_id_kem)[0usize..5usize]
+                        &(&mut suite_id_kem)[0usize..5usize]
                     );
                     ((&mut (&mut tmp1)[14usize..])[0usize..13usize]).copy_from_slice(
-                        &(&label_shared_secret)[0usize..13usize]
+                        &(&mut label_shared_secret)[0usize..13usize]
                     );
                     ((&mut (&mut tmp1)[27usize..])[0usize..130usize]).copy_from_slice(
-                        &(&kemcontext)[0usize..130usize]
+                        &(&mut kemcontext)[0usize..130usize]
                     );
-                    crate::hkdf::expand_sha2_256(&mut shared, &o_eae_prk, 32u32, &tmp1, len0, 32u32);
+                    crate::hkdf::expand_sha2_256(
+                        &mut shared,
+                        &mut o_eae_prk,
+                        32u32,
+                        &mut tmp1,
+                        len0,
+                        32u32
+                    );
                     0u32
                 }
                 else
@@ -383,11 +404,11 @@ pub fn setupBaseR <'a>(
             let uu____7: (&mut [u8], &mut [u8]) = uu____6.1.split_at_mut(2usize);
             uu____7.1[0usize] = 0u8;
             uu____7.1[1usize] = 3u8;
-            let label_psk_id_hash: [u8; 11] =
+            let mut label_psk_id_hash: [u8; 11] =
                 [0x70u8, 0x73u8, 0x6bu8, 0x5fu8, 0x69u8, 0x64u8, 0x5fu8, 0x68u8, 0x61u8, 0x73u8,
                     0x68u8];
             let mut o_psk_id_hash: [u8; 32] = [0u8; 32usize];
-            let empty: (&[u8], &[u8]) = uu____5.0.split_at(0usize);
+            let empty: (&mut [u8], &mut [u8]) = uu____5.0.split_at_mut(0usize);
             let len: u32 = 28u32;
             let mut tmp0: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
             let uu____8: (&mut [u8], &mut [u8]) = tmp0.split_at_mut(0usize);
@@ -399,16 +420,16 @@ pub fn setupBaseR <'a>(
             uu____8.1[5usize] = 0x76u8;
             uu____8.1[6usize] = 0x31u8;
             ((&mut (&mut tmp0)[7usize..])[0usize..10usize]).copy_from_slice(
-                &(&suite_id)[0usize..10usize]
+                &(&mut suite_id)[0usize..10usize]
             );
             ((&mut (&mut tmp0)[17usize..])[0usize..11usize]).copy_from_slice(
-                &(&label_psk_id_hash)[0usize..11usize]
+                &(&mut label_psk_id_hash)[0usize..11usize]
             );
             ((&mut (&mut tmp0)[28usize..])[0usize..0usize]).copy_from_slice(
                 &empty.1[0usize..0usize]
             );
-            crate::hkdf::extract_sha2_256(&mut o_psk_id_hash, empty.1, 0u32, &tmp0, len);
-            let label_info_hash: [u8; 9] =
+            crate::hkdf::extract_sha2_256(&mut o_psk_id_hash, empty.1, 0u32, &mut tmp0, len);
+            let mut label_info_hash: [u8; 9] =
                 [0x69u8, 0x6eu8, 0x66u8, 0x6fu8, 0x5fu8, 0x68u8, 0x61u8, 0x73u8, 0x68u8];
             let mut o_info_hash: [u8; 32] = [0u8; 32usize];
             let len0: u32 = 26u32.wrapping_add(infolen);
@@ -422,23 +443,23 @@ pub fn setupBaseR <'a>(
             uu____9.1[5usize] = 0x76u8;
             uu____9.1[6usize] = 0x31u8;
             ((&mut (&mut tmp1)[7usize..])[0usize..10usize]).copy_from_slice(
-                &(&suite_id)[0usize..10usize]
+                &(&mut suite_id)[0usize..10usize]
             );
             ((&mut (&mut tmp1)[17usize..])[0usize..9usize]).copy_from_slice(
-                &(&label_info_hash)[0usize..9usize]
+                &(&mut label_info_hash)[0usize..9usize]
             );
             ((&mut (&mut tmp1)[26usize..])[0usize..infolen as usize]).copy_from_slice(
                 &info[0usize..infolen as usize]
             );
-            crate::hkdf::extract_sha2_256(&mut o_info_hash, empty.1, 0u32, &tmp1, len0);
+            crate::hkdf::extract_sha2_256(&mut o_info_hash, empty.1, 0u32, &mut tmp1, len0);
             (&mut (&mut o_context)[0usize..])[0usize] = 0u8;
             ((&mut (&mut o_context)[1usize..])[0usize..32usize]).copy_from_slice(
-                &(&o_psk_id_hash)[0usize..32usize]
+                &(&mut o_psk_id_hash)[0usize..32usize]
             );
             ((&mut (&mut o_context)[33usize..])[0usize..32usize]).copy_from_slice(
-                &(&o_info_hash)[0usize..32usize]
+                &(&mut o_info_hash)[0usize..32usize]
             );
-            let label_secret: [u8; 6] = [0x73u8, 0x65u8, 0x63u8, 0x72u8, 0x65u8, 0x74u8];
+            let mut label_secret: [u8; 6] = [0x73u8, 0x65u8, 0x63u8, 0x72u8, 0x65u8, 0x74u8];
             let len1: u32 = 23u32;
             let mut tmp2: Box<[u8]> = vec![0u8; len1 as usize].into_boxed_slice();
             let uu____10: (&mut [u8], &mut [u8]) = tmp2.split_at_mut(0usize);
@@ -450,16 +471,16 @@ pub fn setupBaseR <'a>(
             uu____10.1[5usize] = 0x76u8;
             uu____10.1[6usize] = 0x31u8;
             ((&mut (&mut tmp2)[7usize..])[0usize..10usize]).copy_from_slice(
-                &(&suite_id)[0usize..10usize]
+                &(&mut suite_id)[0usize..10usize]
             );
             ((&mut (&mut tmp2)[17usize..])[0usize..6usize]).copy_from_slice(
-                &(&label_secret)[0usize..6usize]
+                &(&mut label_secret)[0usize..6usize]
             );
             ((&mut (&mut tmp2)[23usize..])[0usize..0usize]).copy_from_slice(
                 &empty.1[0usize..0usize]
             );
-            crate::hkdf::extract_sha2_256(&mut o_secret, &shared, 32u32, &tmp2, len1);
-            let label_exp: [u8; 3] = [0x65u8, 0x78u8, 0x70u8];
+            crate::hkdf::extract_sha2_256(&mut o_secret, &mut shared, 32u32, &mut tmp2, len1);
+            let mut label_exp: [u8; 3] = [0x65u8, 0x78u8, 0x70u8];
             let len2: u32 = 87u32;
             let mut tmp3: Box<[u8]> = vec![0u8; len2 as usize].into_boxed_slice();
             lowstar::endianness::store16_be(&mut (&mut tmp3)[0usize..], 32u32 as u16);
@@ -472,16 +493,23 @@ pub fn setupBaseR <'a>(
             uu____11.1[5usize] = 0x76u8;
             uu____11.1[6usize] = 0x31u8;
             ((&mut (&mut tmp3)[9usize..])[0usize..10usize]).copy_from_slice(
-                &(&suite_id)[0usize..10usize]
+                &(&mut suite_id)[0usize..10usize]
             );
             ((&mut (&mut tmp3)[19usize..])[0usize..3usize]).copy_from_slice(
-                &(&label_exp)[0usize..3usize]
+                &(&mut label_exp)[0usize..3usize]
             );
             ((&mut (&mut tmp3)[22usize..])[0usize..65usize]).copy_from_slice(
-                &(&o_context)[0usize..65usize]
+                &(&mut o_context)[0usize..65usize]
             );
-            crate::hkdf::expand_sha2_256(o_ctx.ctx_exporter, &o_secret, 32u32, &tmp3, len2, 32u32);
-            let label_key: [u8; 3] = [0x6bu8, 0x65u8, 0x79u8];
+            crate::hkdf::expand_sha2_256(
+                o_ctx.ctx_exporter,
+                &mut o_secret,
+                32u32,
+                &mut tmp3,
+                len2,
+                32u32
+            );
+            let mut label_key: [u8; 3] = [0x6bu8, 0x65u8, 0x79u8];
             let len3: u32 = 87u32;
             let mut tmp4: Box<[u8]> = vec![0u8; len3 as usize].into_boxed_slice();
             lowstar::endianness::store16_be(&mut (&mut tmp4)[0usize..], 32u32 as u16);
@@ -494,16 +522,23 @@ pub fn setupBaseR <'a>(
             uu____12.1[5usize] = 0x76u8;
             uu____12.1[6usize] = 0x31u8;
             ((&mut (&mut tmp4)[9usize..])[0usize..10usize]).copy_from_slice(
-                &(&suite_id)[0usize..10usize]
+                &(&mut suite_id)[0usize..10usize]
             );
             ((&mut (&mut tmp4)[19usize..])[0usize..3usize]).copy_from_slice(
-                &(&label_key)[0usize..3usize]
+                &(&mut label_key)[0usize..3usize]
             );
             ((&mut (&mut tmp4)[22usize..])[0usize..65usize]).copy_from_slice(
-                &(&o_context)[0usize..65usize]
+                &(&mut o_context)[0usize..65usize]
             );
-            crate::hkdf::expand_sha2_256(o_ctx.ctx_key, &o_secret, 32u32, &tmp4, len3, 32u32);
-            let label_base_nonce: [u8; 10] =
+            crate::hkdf::expand_sha2_256(
+                o_ctx.ctx_key,
+                &mut o_secret,
+                32u32,
+                &mut tmp4,
+                len3,
+                32u32
+            );
+            let mut label_base_nonce: [u8; 10] =
                 [0x62u8, 0x61u8, 0x73u8, 0x65u8, 0x5fu8, 0x6eu8, 0x6fu8, 0x6eu8, 0x63u8, 0x65u8];
             let len4: u32 = 94u32;
             let mut tmp5: Box<[u8]> = vec![0u8; len4 as usize].into_boxed_slice();
@@ -517,15 +552,22 @@ pub fn setupBaseR <'a>(
             uu____13.1[5usize] = 0x76u8;
             uu____13.1[6usize] = 0x31u8;
             ((&mut (&mut tmp5)[9usize..])[0usize..10usize]).copy_from_slice(
-                &(&suite_id)[0usize..10usize]
+                &(&mut suite_id)[0usize..10usize]
             );
             ((&mut (&mut tmp5)[19usize..])[0usize..10usize]).copy_from_slice(
-                &(&label_base_nonce)[0usize..10usize]
+                &(&mut label_base_nonce)[0usize..10usize]
             );
             ((&mut (&mut tmp5)[29usize..])[0usize..65usize]).copy_from_slice(
-                &(&o_context)[0usize..65usize]
+                &(&mut o_context)[0usize..65usize]
             );
-            crate::hkdf::expand_sha2_256(o_ctx.ctx_nonce, &o_secret, 32u32, &tmp5, len4, 12u32);
+            crate::hkdf::expand_sha2_256(
+                o_ctx.ctx_nonce,
+                &mut o_secret,
+                32u32,
+                &mut tmp5,
+                len4,
+                12u32
+            );
             o_ctx.ctx_seq[0usize] = 0u64;
             0u32
         }
@@ -537,14 +579,14 @@ pub fn setupBaseR <'a>(
 }
 
 pub fn sealBase(
-    skE: &[u8],
-    pkR: &[u8],
+    skE: &mut [u8],
+    pkR: &mut [u8],
     infolen: u32,
-    info: &[u8],
+    info: &mut [u8],
     aadlen: u32,
-    aad: &[u8],
+    aad: &mut [u8],
     plainlen: u32,
-    plain: &[u8],
+    plain: &mut [u8],
     o_enc: &mut [u8],
     o_ct: &mut [u8]
 ) ->
@@ -576,7 +618,7 @@ pub fn sealBase(
             0u32,
             1u32,
             {
-                let xi: u8 = (&enc)[i as usize];
+                let xi: u8 = (&mut enc)[i as usize];
                 let yi: u8 = o_ctx.ctx_nonce[i as usize];
                 (&mut nonce)[i as usize] = xi ^ yi
             }
@@ -591,7 +633,7 @@ pub fn sealBase(
             aad,
             aadlen,
             o_ctx.ctx_key,
-            &nonce
+            &mut nonce
         );
         let s1: u64 = o_ctx.ctx_seq[0usize];
         let res1: u32 =
@@ -611,14 +653,14 @@ pub fn sealBase(
 }
 
 pub fn openBase(
-    pkE: &[u8],
-    skR: &[u8],
+    pkE: &mut [u8],
+    skR: &mut [u8],
     infolen: u32,
-    info: &[u8],
+    info: &mut [u8],
     aadlen: u32,
-    aad: &[u8],
+    aad: &mut [u8],
     ctlen: u32,
-    ct: &[u8],
+    ct: &mut [u8],
     o_pt: &mut [u8]
 ) ->
     u32
@@ -648,13 +690,13 @@ pub fn openBase(
             0u32,
             1u32,
             {
-                let xi: u8 = (&enc)[i as usize];
+                let xi: u8 = (&mut enc)[i as usize];
                 let yi: u8 = o_ctx.ctx_nonce[i as usize];
                 (&mut nonce)[i as usize] = xi ^ yi
             }
         );
-        let cipher: (&[u8], &[u8]) = ct.split_at(0usize);
-        let tag: (&[u8], &[u8]) = cipher.1.split_at(ctlen.wrapping_sub(16u32) as usize);
+        let cipher: (&mut [u8], &mut [u8]) = ct.split_at_mut(0usize);
+        let tag: (&mut [u8], &mut [u8]) = cipher.1.split_at_mut(ctlen.wrapping_sub(16u32) as usize);
         let res1: u32 =
             crate::aead_chacha20poly1305_simd256::decrypt(
                 o_pt,
@@ -663,7 +705,7 @@ pub fn openBase(
                 aad,
                 aadlen,
                 o_ctx.ctx_key,
-                &nonce,
+                &mut nonce,
                 tag.1
             );
         if res1 == 0u32

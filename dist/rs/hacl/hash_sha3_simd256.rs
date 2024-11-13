@@ -17,51 +17,51 @@ pub fn absorb_inner_256 <'a>(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b0,
+            fst: b0,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b1, snd: crate::sha2_types::uint8_2p { fst: ref b2, snd: ref b3 } }
+            { fst: b1, snd: crate::sha2_types::uint8_2p { fst: b2, snd: b3 } }
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b0[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b1[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b2[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b3[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b0[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b1[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b2[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b3[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b0[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b1[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b2[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b3[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b0[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b1[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b2[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b3[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b0[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b1[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b2[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b3[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b0[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b1[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b2[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b3[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b0[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b1[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b2[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b3[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b0[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b1[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b2[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b3[224usize..])
           }
     };
-    let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
-    let v1: lib::intvector_intrinsics::vec256 = (&ws)[1usize];
-    let v2: lib::intvector_intrinsics::vec256 = (&ws)[2usize];
-    let v3: lib::intvector_intrinsics::vec256 = (&ws)[3usize];
+    let v0: lib::intvector_intrinsics::vec256 = (&mut ws)[0usize];
+    let v1: lib::intvector_intrinsics::vec256 = (&mut ws)[1usize];
+    let v2: lib::intvector_intrinsics::vec256 = (&mut ws)[2usize];
+    let v3: lib::intvector_intrinsics::vec256 = (&mut ws)[3usize];
     let v0·: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v0, v1);
     let v1·: lib::intvector_intrinsics::vec256 =
@@ -82,10 +82,10 @@ pub fn absorb_inner_256 <'a>(
     let ws1: lib::intvector_intrinsics::vec256 = v2··;
     let ws2: lib::intvector_intrinsics::vec256 = v1··;
     let ws3: lib::intvector_intrinsics::vec256 = v3··;
-    let v00: lib::intvector_intrinsics::vec256 = (&ws)[4usize];
-    let v10: lib::intvector_intrinsics::vec256 = (&ws)[5usize];
-    let v20: lib::intvector_intrinsics::vec256 = (&ws)[6usize];
-    let v30: lib::intvector_intrinsics::vec256 = (&ws)[7usize];
+    let v00: lib::intvector_intrinsics::vec256 = (&mut ws)[4usize];
+    let v10: lib::intvector_intrinsics::vec256 = (&mut ws)[5usize];
+    let v20: lib::intvector_intrinsics::vec256 = (&mut ws)[6usize];
+    let v30: lib::intvector_intrinsics::vec256 = (&mut ws)[7usize];
     let v0·0: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v00, v10);
     let v1·0: lib::intvector_intrinsics::vec256 =
@@ -106,10 +106,10 @@ pub fn absorb_inner_256 <'a>(
     let ws5: lib::intvector_intrinsics::vec256 = v2··0;
     let ws6: lib::intvector_intrinsics::vec256 = v1··0;
     let ws7: lib::intvector_intrinsics::vec256 = v3··0;
-    let v01: lib::intvector_intrinsics::vec256 = (&ws)[8usize];
-    let v11: lib::intvector_intrinsics::vec256 = (&ws)[9usize];
-    let v21: lib::intvector_intrinsics::vec256 = (&ws)[10usize];
-    let v31: lib::intvector_intrinsics::vec256 = (&ws)[11usize];
+    let v01: lib::intvector_intrinsics::vec256 = (&mut ws)[8usize];
+    let v11: lib::intvector_intrinsics::vec256 = (&mut ws)[9usize];
+    let v21: lib::intvector_intrinsics::vec256 = (&mut ws)[10usize];
+    let v31: lib::intvector_intrinsics::vec256 = (&mut ws)[11usize];
     let v0·1: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v01, v11);
     let v1·1: lib::intvector_intrinsics::vec256 =
@@ -130,10 +130,10 @@ pub fn absorb_inner_256 <'a>(
     let ws9: lib::intvector_intrinsics::vec256 = v2··1;
     let ws10: lib::intvector_intrinsics::vec256 = v1··1;
     let ws11: lib::intvector_intrinsics::vec256 = v3··1;
-    let v02: lib::intvector_intrinsics::vec256 = (&ws)[12usize];
-    let v12: lib::intvector_intrinsics::vec256 = (&ws)[13usize];
-    let v22: lib::intvector_intrinsics::vec256 = (&ws)[14usize];
-    let v32: lib::intvector_intrinsics::vec256 = (&ws)[15usize];
+    let v02: lib::intvector_intrinsics::vec256 = (&mut ws)[12usize];
+    let v12: lib::intvector_intrinsics::vec256 = (&mut ws)[13usize];
+    let v22: lib::intvector_intrinsics::vec256 = (&mut ws)[14usize];
+    let v32: lib::intvector_intrinsics::vec256 = (&mut ws)[15usize];
     let v0·2: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v02, v12);
     let v1·2: lib::intvector_intrinsics::vec256 =
@@ -154,10 +154,10 @@ pub fn absorb_inner_256 <'a>(
     let ws13: lib::intvector_intrinsics::vec256 = v2··2;
     let ws14: lib::intvector_intrinsics::vec256 = v1··2;
     let ws15: lib::intvector_intrinsics::vec256 = v3··2;
-    let v03: lib::intvector_intrinsics::vec256 = (&ws)[16usize];
-    let v13: lib::intvector_intrinsics::vec256 = (&ws)[17usize];
-    let v23: lib::intvector_intrinsics::vec256 = (&ws)[18usize];
-    let v33: lib::intvector_intrinsics::vec256 = (&ws)[19usize];
+    let v03: lib::intvector_intrinsics::vec256 = (&mut ws)[16usize];
+    let v13: lib::intvector_intrinsics::vec256 = (&mut ws)[17usize];
+    let v23: lib::intvector_intrinsics::vec256 = (&mut ws)[18usize];
+    let v33: lib::intvector_intrinsics::vec256 = (&mut ws)[19usize];
     let v0·3: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v03, v13);
     let v1·3: lib::intvector_intrinsics::vec256 =
@@ -178,10 +178,10 @@ pub fn absorb_inner_256 <'a>(
     let ws17: lib::intvector_intrinsics::vec256 = v2··3;
     let ws18: lib::intvector_intrinsics::vec256 = v1··3;
     let ws19: lib::intvector_intrinsics::vec256 = v3··3;
-    let v04: lib::intvector_intrinsics::vec256 = (&ws)[20usize];
-    let v14: lib::intvector_intrinsics::vec256 = (&ws)[21usize];
-    let v24: lib::intvector_intrinsics::vec256 = (&ws)[22usize];
-    let v34: lib::intvector_intrinsics::vec256 = (&ws)[23usize];
+    let v04: lib::intvector_intrinsics::vec256 = (&mut ws)[20usize];
+    let v14: lib::intvector_intrinsics::vec256 = (&mut ws)[21usize];
+    let v24: lib::intvector_intrinsics::vec256 = (&mut ws)[22usize];
+    let v34: lib::intvector_intrinsics::vec256 = (&mut ws)[23usize];
     let v0·4: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v04, v14);
     let v1·4: lib::intvector_intrinsics::vec256 =
@@ -202,10 +202,10 @@ pub fn absorb_inner_256 <'a>(
     let ws21: lib::intvector_intrinsics::vec256 = v2··4;
     let ws22: lib::intvector_intrinsics::vec256 = v1··4;
     let ws23: lib::intvector_intrinsics::vec256 = v3··4;
-    let v05: lib::intvector_intrinsics::vec256 = (&ws)[24usize];
-    let v15: lib::intvector_intrinsics::vec256 = (&ws)[25usize];
-    let v25: lib::intvector_intrinsics::vec256 = (&ws)[26usize];
-    let v35: lib::intvector_intrinsics::vec256 = (&ws)[27usize];
+    let v05: lib::intvector_intrinsics::vec256 = (&mut ws)[24usize];
+    let v15: lib::intvector_intrinsics::vec256 = (&mut ws)[25usize];
+    let v25: lib::intvector_intrinsics::vec256 = (&mut ws)[26usize];
+    let v35: lib::intvector_intrinsics::vec256 = (&mut ws)[27usize];
     let v0·5: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v05, v15);
     let v1·5: lib::intvector_intrinsics::vec256 =
@@ -226,10 +226,10 @@ pub fn absorb_inner_256 <'a>(
     let ws25: lib::intvector_intrinsics::vec256 = v2··5;
     let ws26: lib::intvector_intrinsics::vec256 = v1··5;
     let ws27: lib::intvector_intrinsics::vec256 = v3··5;
-    let v06: lib::intvector_intrinsics::vec256 = (&ws)[28usize];
-    let v16: lib::intvector_intrinsics::vec256 = (&ws)[29usize];
-    let v26: lib::intvector_intrinsics::vec256 = (&ws)[30usize];
-    let v36: lib::intvector_intrinsics::vec256 = (&ws)[31usize];
+    let v06: lib::intvector_intrinsics::vec256 = (&mut ws)[28usize];
+    let v16: lib::intvector_intrinsics::vec256 = (&mut ws)[29usize];
+    let v26: lib::intvector_intrinsics::vec256 = (&mut ws)[30usize];
+    let v36: lib::intvector_intrinsics::vec256 = (&mut ws)[31usize];
     let v0·6: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v06, v16);
     let v1·6: lib::intvector_intrinsics::vec256 =
@@ -287,7 +287,7 @@ pub fn absorb_inner_256 <'a>(
         "i",
         0u32,
         1u32,
-        s[i as usize] = lib::intvector_intrinsics::vec256_xor(s[i as usize], (&ws)[i as usize])
+        s[i as usize] = lib::intvector_intrinsics::vec256_xor(s[i as usize], (&mut ws)[i as usize])
     );
     krml::unroll_for!(
         24,
@@ -332,9 +332,9 @@ pub fn absorb_inner_256 <'a>(
                 1u32,
                 {
                     let uu____3: lib::intvector_intrinsics::vec256 =
-                        (&_C)[i0.wrapping_add(4u32).wrapping_rem(5u32) as usize];
+                        (&mut _C)[i0.wrapping_add(4u32).wrapping_rem(5u32) as usize];
                     let uu____4: lib::intvector_intrinsics::vec256 =
-                        (&_C)[i0.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                        (&mut _C)[i0.wrapping_add(1u32).wrapping_rem(5u32) as usize];
                     let _D: lib::intvector_intrinsics::vec256 =
                         lib::intvector_intrinsics::vec256_xor(
                             uu____3,
@@ -364,10 +364,10 @@ pub fn absorb_inner_256 <'a>(
                 0u32,
                 1u32,
                 {
-                    let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i0 as usize];
-                    let r: u32 = (&crate::hash_sha3::keccak_rotc)[i0 as usize];
+                    let _Y: u32 = (&mut crate::hash_sha3::keccak_piln)[i0 as usize];
+                    let r: u32 = (&mut crate::hash_sha3::keccak_rotc)[i0 as usize];
                     let temp: lib::intvector_intrinsics::vec256 = s[_Y as usize];
-                    let uu____5: lib::intvector_intrinsics::vec256 = (&current)[0usize];
+                    let uu____5: lib::intvector_intrinsics::vec256 = (&mut current)[0usize];
                     s[_Y as usize] =
                         lib::intvector_intrinsics::vec256_or(
                             lib::intvector_intrinsics::vec256_shift_left64(uu____5, r),
@@ -462,7 +462,7 @@ pub fn absorb_inner_256 <'a>(
                     s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
                 }
             );
-            let c: u64 = (&crate::hash_sha3::keccak_rndc)[i as usize];
+            let c: u64 = (&mut crate::hash_sha3::keccak_rndc)[i as usize];
             let uu____16: lib::intvector_intrinsics::vec256 = s[0usize];
             s[0usize] =
                 lib::intvector_intrinsics::vec256_xor(
@@ -494,7 +494,7 @@ pub fn shake128(
             crate::sha2_types::uint8_3p
             { fst: input1, snd: crate::sha2_types::uint8_2p { fst: input2, snd: input3 } }
         };
-    let mut rb: crate::sha2_types::uint8_4p =
+    let rb: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: output0,
@@ -511,7 +511,7 @@ pub fn shake128(
         let mut b1: [u8; 256] = [0u8; 256usize];
         let mut b2: [u8; 256] = [0u8; 256usize];
         let mut b3: [u8; 256] = [0u8; 256usize];
-        let mut b·: crate::sha2_types::uint8_4p =
+        let b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
                 fst: &mut b0,
@@ -523,43 +523,40 @@ pub fn shake128(
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref b00,
+                fst: b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+                { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
             }
             =>
               match b·
               {
                   crate::sha2_types::uint8_4p
                   {
-                      fst: ref mut bl0,
+                      fst: bl0,
                       snd:
                       crate::sha2_types::uint8_3p
-                      {
-                          fst: ref mut bl1,
-                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                      }
+                      { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
                   }
                   =>
                     {
                         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -572,7 +569,7 @@ pub fn shake128(
     let mut b1: [u8; 256] = [0u8; 256usize];
     let mut b2: [u8; 256] = [0u8; 256usize];
     let mut b3: [u8; 256] = [0u8; 256usize];
-    let mut b·: crate::sha2_types::uint8_4p =
+    let b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b0,
@@ -585,37 +582,34 @@ pub fn shake128(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           match b·
           {
               crate::sha2_types::uint8_4p
               {
-                  fst: ref mut bl0,
+                  fst: bl0,
                   snd:
                   crate::sha2_types::uint8_3p
-                  {
-                      fst: ref mut bl1,
-                      snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                  }
+                  { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
               }
               =>
                 {
                     (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -624,13 +618,10 @@ pub fn shake128(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b10,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b20, snd: ref mut b30 }
-            }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
@@ -646,51 +637,51 @@ pub fn shake128(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[224usize..])
           }
     };
-    let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
-    let v1: lib::intvector_intrinsics::vec256 = (&ws)[1usize];
-    let v2: lib::intvector_intrinsics::vec256 = (&ws)[2usize];
-    let v3: lib::intvector_intrinsics::vec256 = (&ws)[3usize];
+    let v0: lib::intvector_intrinsics::vec256 = (&mut ws)[0usize];
+    let v1: lib::intvector_intrinsics::vec256 = (&mut ws)[1usize];
+    let v2: lib::intvector_intrinsics::vec256 = (&mut ws)[2usize];
+    let v3: lib::intvector_intrinsics::vec256 = (&mut ws)[3usize];
     let v0·: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v0, v1);
     let v1·: lib::intvector_intrinsics::vec256 =
@@ -711,10 +702,10 @@ pub fn shake128(
     let ws1: lib::intvector_intrinsics::vec256 = v2··;
     let ws2: lib::intvector_intrinsics::vec256 = v1··;
     let ws3: lib::intvector_intrinsics::vec256 = v3··;
-    let v00: lib::intvector_intrinsics::vec256 = (&ws)[4usize];
-    let v10: lib::intvector_intrinsics::vec256 = (&ws)[5usize];
-    let v20: lib::intvector_intrinsics::vec256 = (&ws)[6usize];
-    let v30: lib::intvector_intrinsics::vec256 = (&ws)[7usize];
+    let v00: lib::intvector_intrinsics::vec256 = (&mut ws)[4usize];
+    let v10: lib::intvector_intrinsics::vec256 = (&mut ws)[5usize];
+    let v20: lib::intvector_intrinsics::vec256 = (&mut ws)[6usize];
+    let v30: lib::intvector_intrinsics::vec256 = (&mut ws)[7usize];
     let v0·0: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v00, v10);
     let v1·0: lib::intvector_intrinsics::vec256 =
@@ -735,10 +726,10 @@ pub fn shake128(
     let ws5: lib::intvector_intrinsics::vec256 = v2··0;
     let ws6: lib::intvector_intrinsics::vec256 = v1··0;
     let ws7: lib::intvector_intrinsics::vec256 = v3··0;
-    let v01: lib::intvector_intrinsics::vec256 = (&ws)[8usize];
-    let v11: lib::intvector_intrinsics::vec256 = (&ws)[9usize];
-    let v21: lib::intvector_intrinsics::vec256 = (&ws)[10usize];
-    let v31: lib::intvector_intrinsics::vec256 = (&ws)[11usize];
+    let v01: lib::intvector_intrinsics::vec256 = (&mut ws)[8usize];
+    let v11: lib::intvector_intrinsics::vec256 = (&mut ws)[9usize];
+    let v21: lib::intvector_intrinsics::vec256 = (&mut ws)[10usize];
+    let v31: lib::intvector_intrinsics::vec256 = (&mut ws)[11usize];
     let v0·1: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v01, v11);
     let v1·1: lib::intvector_intrinsics::vec256 =
@@ -759,10 +750,10 @@ pub fn shake128(
     let ws9: lib::intvector_intrinsics::vec256 = v2··1;
     let ws10: lib::intvector_intrinsics::vec256 = v1··1;
     let ws11: lib::intvector_intrinsics::vec256 = v3··1;
-    let v02: lib::intvector_intrinsics::vec256 = (&ws)[12usize];
-    let v12: lib::intvector_intrinsics::vec256 = (&ws)[13usize];
-    let v22: lib::intvector_intrinsics::vec256 = (&ws)[14usize];
-    let v32: lib::intvector_intrinsics::vec256 = (&ws)[15usize];
+    let v02: lib::intvector_intrinsics::vec256 = (&mut ws)[12usize];
+    let v12: lib::intvector_intrinsics::vec256 = (&mut ws)[13usize];
+    let v22: lib::intvector_intrinsics::vec256 = (&mut ws)[14usize];
+    let v32: lib::intvector_intrinsics::vec256 = (&mut ws)[15usize];
     let v0·2: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v02, v12);
     let v1·2: lib::intvector_intrinsics::vec256 =
@@ -783,10 +774,10 @@ pub fn shake128(
     let ws13: lib::intvector_intrinsics::vec256 = v2··2;
     let ws14: lib::intvector_intrinsics::vec256 = v1··2;
     let ws15: lib::intvector_intrinsics::vec256 = v3··2;
-    let v03: lib::intvector_intrinsics::vec256 = (&ws)[16usize];
-    let v13: lib::intvector_intrinsics::vec256 = (&ws)[17usize];
-    let v23: lib::intvector_intrinsics::vec256 = (&ws)[18usize];
-    let v33: lib::intvector_intrinsics::vec256 = (&ws)[19usize];
+    let v03: lib::intvector_intrinsics::vec256 = (&mut ws)[16usize];
+    let v13: lib::intvector_intrinsics::vec256 = (&mut ws)[17usize];
+    let v23: lib::intvector_intrinsics::vec256 = (&mut ws)[18usize];
+    let v33: lib::intvector_intrinsics::vec256 = (&mut ws)[19usize];
     let v0·3: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v03, v13);
     let v1·3: lib::intvector_intrinsics::vec256 =
@@ -807,10 +798,10 @@ pub fn shake128(
     let ws17: lib::intvector_intrinsics::vec256 = v2··3;
     let ws18: lib::intvector_intrinsics::vec256 = v1··3;
     let ws19: lib::intvector_intrinsics::vec256 = v3··3;
-    let v04: lib::intvector_intrinsics::vec256 = (&ws)[20usize];
-    let v14: lib::intvector_intrinsics::vec256 = (&ws)[21usize];
-    let v24: lib::intvector_intrinsics::vec256 = (&ws)[22usize];
-    let v34: lib::intvector_intrinsics::vec256 = (&ws)[23usize];
+    let v04: lib::intvector_intrinsics::vec256 = (&mut ws)[20usize];
+    let v14: lib::intvector_intrinsics::vec256 = (&mut ws)[21usize];
+    let v24: lib::intvector_intrinsics::vec256 = (&mut ws)[22usize];
+    let v34: lib::intvector_intrinsics::vec256 = (&mut ws)[23usize];
     let v0·4: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v04, v14);
     let v1·4: lib::intvector_intrinsics::vec256 =
@@ -831,10 +822,10 @@ pub fn shake128(
     let ws21: lib::intvector_intrinsics::vec256 = v2··4;
     let ws22: lib::intvector_intrinsics::vec256 = v1··4;
     let ws23: lib::intvector_intrinsics::vec256 = v3··4;
-    let v05: lib::intvector_intrinsics::vec256 = (&ws)[24usize];
-    let v15: lib::intvector_intrinsics::vec256 = (&ws)[25usize];
-    let v25: lib::intvector_intrinsics::vec256 = (&ws)[26usize];
-    let v35: lib::intvector_intrinsics::vec256 = (&ws)[27usize];
+    let v05: lib::intvector_intrinsics::vec256 = (&mut ws)[24usize];
+    let v15: lib::intvector_intrinsics::vec256 = (&mut ws)[25usize];
+    let v25: lib::intvector_intrinsics::vec256 = (&mut ws)[26usize];
+    let v35: lib::intvector_intrinsics::vec256 = (&mut ws)[27usize];
     let v0·5: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v05, v15);
     let v1·5: lib::intvector_intrinsics::vec256 =
@@ -855,10 +846,10 @@ pub fn shake128(
     let ws25: lib::intvector_intrinsics::vec256 = v2··5;
     let ws26: lib::intvector_intrinsics::vec256 = v1··5;
     let ws27: lib::intvector_intrinsics::vec256 = v3··5;
-    let v06: lib::intvector_intrinsics::vec256 = (&ws)[28usize];
-    let v16: lib::intvector_intrinsics::vec256 = (&ws)[29usize];
-    let v26: lib::intvector_intrinsics::vec256 = (&ws)[30usize];
-    let v36: lib::intvector_intrinsics::vec256 = (&ws)[31usize];
+    let v06: lib::intvector_intrinsics::vec256 = (&mut ws)[28usize];
+    let v16: lib::intvector_intrinsics::vec256 = (&mut ws)[29usize];
+    let v26: lib::intvector_intrinsics::vec256 = (&mut ws)[30usize];
+    let v36: lib::intvector_intrinsics::vec256 = (&mut ws)[31usize];
     let v0·6: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v06, v16);
     let v1·6: lib::intvector_intrinsics::vec256 =
@@ -917,13 +908,13 @@ pub fn shake128(
         0u32,
         1u32,
         (&mut s)[i as usize] =
-            lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
+            lib::intvector_intrinsics::vec256_xor((&mut s)[i as usize], (&mut ws)[i as usize])
     );
     let mut b00: [u8; 256] = [0u8; 256usize];
     let mut b10: [u8; 256] = [0u8; 256usize];
     let mut b20: [u8; 256] = [0u8; 256usize];
     let mut b30: [u8; 256] = [0u8; 256usize];
-    let mut b: crate::sha2_types::uint8_4p =
+    let b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b00,
@@ -935,13 +926,10 @@ pub fn shake128(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
@@ -957,11 +945,11 @@ pub fn shake128(
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
         let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
             [lib::intvector_intrinsics::vec256_zero; 32usize];
-        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-        let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-        let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-        let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-        let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+        let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+        let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+        let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+        let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
         let v0·7: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
         let v1·7: lib::intvector_intrinsics::vec256 =
@@ -982,10 +970,10 @@ pub fn shake128(
         let ws110: lib::intvector_intrinsics::vec256 = v2··7;
         let ws210: lib::intvector_intrinsics::vec256 = v1··7;
         let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-        let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-        let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-        let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-        let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+        let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+        let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+        let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+        let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
         let v0·8: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
         let v1·8: lib::intvector_intrinsics::vec256 =
@@ -1006,10 +994,10 @@ pub fn shake128(
         let ws50: lib::intvector_intrinsics::vec256 = v2··8;
         let ws60: lib::intvector_intrinsics::vec256 = v1··8;
         let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-        let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-        let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-        let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-        let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+        let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+        let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+        let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+        let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
         let v0·9: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
         let v1·9: lib::intvector_intrinsics::vec256 =
@@ -1030,10 +1018,10 @@ pub fn shake128(
         let ws90: lib::intvector_intrinsics::vec256 = v2··9;
         let ws100: lib::intvector_intrinsics::vec256 = v1··9;
         let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-        let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-        let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-        let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-        let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+        let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+        let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+        let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+        let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
         let v0·10: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
         let v1·10: lib::intvector_intrinsics::vec256 =
@@ -1054,10 +1042,10 @@ pub fn shake128(
         let ws130: lib::intvector_intrinsics::vec256 = v2··10;
         let ws140: lib::intvector_intrinsics::vec256 = v1··10;
         let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-        let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-        let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-        let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-        let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+        let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+        let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+        let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+        let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
         let v0·11: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
         let v1·11: lib::intvector_intrinsics::vec256 =
@@ -1078,10 +1066,10 @@ pub fn shake128(
         let ws170: lib::intvector_intrinsics::vec256 = v2··11;
         let ws180: lib::intvector_intrinsics::vec256 = v1··11;
         let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-        let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-        let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-        let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-        let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+        let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+        let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+        let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+        let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
         let v0·12: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
         let v1·12: lib::intvector_intrinsics::vec256 =
@@ -1102,10 +1090,10 @@ pub fn shake128(
         let ws211: lib::intvector_intrinsics::vec256 = v2··12;
         let ws220: lib::intvector_intrinsics::vec256 = v1··12;
         let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-        let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-        let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-        let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-        let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+        let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+        let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+        let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+        let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
         let v0·13: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
         let v1·13: lib::intvector_intrinsics::vec256 =
@@ -1126,10 +1114,10 @@ pub fn shake128(
         let ws250: lib::intvector_intrinsics::vec256 = v2··13;
         let ws260: lib::intvector_intrinsics::vec256 = v1··13;
         let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-        let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-        let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-        let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-        let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+        let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+        let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+        let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+        let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
         let v0·14: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
         let v1·14: lib::intvector_intrinsics::vec256 =
@@ -1189,42 +1177,39 @@ pub fn shake128(
             1u32,
             lib::intvector_intrinsics::vec256_store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(32u32) as usize..],
-                (&ws32)[i0 as usize]
+                (&mut ws32)[i0 as usize]
             )
         );
         match rb
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref mut b01,
+                fst: b01,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref mut b11,
-                    snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-                }
+                { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
             }
             =>
               {
                   (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[768usize..])[0usize..rateInBytes1 as usize]
                   )
               }
         };
@@ -1243,11 +1228,11 @@ pub fn shake128(
                     1u32,
                     {
                         let uu____0: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(0u32) as usize];
+                            (&mut s)[i1.wrapping_add(0u32) as usize];
                         let uu____1: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(5u32) as usize];
+                            (&mut s)[i1.wrapping_add(5u32) as usize];
                         let uu____2: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(10u32) as usize];
+                            (&mut s)[i1.wrapping_add(10u32) as usize];
                         (&mut _C)[i1 as usize] =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____0,
@@ -1256,8 +1241,8 @@ pub fn shake128(
                                     lib::intvector_intrinsics::vec256_xor(
                                         uu____2,
                                         lib::intvector_intrinsics::vec256_xor(
-                                            (&s)[i1.wrapping_add(15u32) as usize],
-                                            (&s)[i1.wrapping_add(20u32) as usize]
+                                            (&mut s)[i1.wrapping_add(15u32) as usize],
+                                            (&mut s)[i1.wrapping_add(20u32) as usize]
                                         )
                                     )
                                 )
@@ -1271,9 +1256,9 @@ pub fn shake128(
                     1u32,
                     {
                         let uu____3: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
                         let uu____4: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
                         let _D: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
@@ -1289,13 +1274,13 @@ pub fn shake128(
                             1u32,
                             (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] =
                                 lib::intvector_intrinsics::vec256_xor(
-                                    (&s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
+                                    (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
                                     _D
                                 )
                         )
                     }
                 );
-                let x: lib::intvector_intrinsics::vec256 = (&s)[1usize];
+                let x: lib::intvector_intrinsics::vec256 = (&mut s)[1usize];
                 let mut current: [lib::intvector_intrinsics::vec256; 1] = [x; 1usize];
                 krml::unroll_for!(
                     24,
@@ -1303,10 +1288,10 @@ pub fn shake128(
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
-                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
-                        let temp: lib::intvector_intrinsics::vec256 = (&s)[_Y as usize];
-                        let uu____5: lib::intvector_intrinsics::vec256 = (&current)[0usize];
+                        let _Y: u32 = (&mut crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&mut crate::hash_sha3::keccak_rotc)[i1 as usize];
+                        let temp: lib::intvector_intrinsics::vec256 = (&mut s)[_Y as usize];
+                        let uu____5: lib::intvector_intrinsics::vec256 = (&mut current)[0usize];
                         (&mut s)[_Y as usize] =
                             lib::intvector_intrinsics::vec256_or(
                                 lib::intvector_intrinsics::vec256_shift_left64(uu____5, r),
@@ -1325,73 +1310,73 @@ pub fn shake128(
                     1u32,
                     {
                         let uu____6: lib::intvector_intrinsics::vec256 =
-                            (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____7: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v015: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____6,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____7,
-                                    (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____8: lib::intvector_intrinsics::vec256 =
-                            (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____9: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v115: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____8,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____9,
-                                    (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____10: lib::intvector_intrinsics::vec256 =
-                            (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____11: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v215: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____10,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____11,
-                                    (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____12: lib::intvector_intrinsics::vec256 =
-                            (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____13: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v315: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____12,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____13,
-                                    (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____14: lib::intvector_intrinsics::vec256 =
-                            (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____15: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v4: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____14,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____15,
-                                    (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v015;
@@ -1401,8 +1386,8 @@ pub fn shake128(
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
-                let uu____16: lib::intvector_intrinsics::vec256 = (&s)[0usize];
+                let c: u64 = (&mut crate::hash_sha3::keccak_rndc)[i0 as usize];
+                let uu____16: lib::intvector_intrinsics::vec256 = (&mut s)[0usize];
                 (&mut s)[0usize] =
                     lib::intvector_intrinsics::vec256_xor(
                         uu____16,
@@ -1415,11 +1400,11 @@ pub fn shake128(
     let mut hbuf: [u8; 1024] = [0u8; 1024usize];
     let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
         [lib::intvector_intrinsics::vec256_zero; 32usize];
-    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-    let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-    let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-    let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-    let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+    let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+    let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+    let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+    let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
     let v0·7: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
     let v1·7: lib::intvector_intrinsics::vec256 =
@@ -1440,10 +1425,10 @@ pub fn shake128(
     let ws110: lib::intvector_intrinsics::vec256 = v2··7;
     let ws210: lib::intvector_intrinsics::vec256 = v1··7;
     let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-    let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-    let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-    let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-    let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+    let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+    let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+    let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+    let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
     let v0·8: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
     let v1·8: lib::intvector_intrinsics::vec256 =
@@ -1464,10 +1449,10 @@ pub fn shake128(
     let ws50: lib::intvector_intrinsics::vec256 = v2··8;
     let ws60: lib::intvector_intrinsics::vec256 = v1··8;
     let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-    let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-    let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-    let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-    let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+    let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+    let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+    let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+    let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
     let v0·9: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
     let v1·9: lib::intvector_intrinsics::vec256 =
@@ -1488,10 +1473,10 @@ pub fn shake128(
     let ws90: lib::intvector_intrinsics::vec256 = v2··9;
     let ws100: lib::intvector_intrinsics::vec256 = v1··9;
     let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-    let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-    let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-    let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-    let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+    let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+    let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+    let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+    let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
     let v0·10: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
     let v1·10: lib::intvector_intrinsics::vec256 =
@@ -1512,10 +1497,10 @@ pub fn shake128(
     let ws130: lib::intvector_intrinsics::vec256 = v2··10;
     let ws140: lib::intvector_intrinsics::vec256 = v1··10;
     let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-    let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-    let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-    let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-    let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+    let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+    let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+    let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+    let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
     let v0·11: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
     let v1·11: lib::intvector_intrinsics::vec256 =
@@ -1536,10 +1521,10 @@ pub fn shake128(
     let ws170: lib::intvector_intrinsics::vec256 = v2··11;
     let ws180: lib::intvector_intrinsics::vec256 = v1··11;
     let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-    let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-    let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-    let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-    let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+    let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+    let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+    let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+    let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
     let v0·12: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
     let v1·12: lib::intvector_intrinsics::vec256 =
@@ -1560,10 +1545,10 @@ pub fn shake128(
     let ws211: lib::intvector_intrinsics::vec256 = v2··12;
     let ws220: lib::intvector_intrinsics::vec256 = v1··12;
     let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-    let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-    let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-    let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-    let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+    let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+    let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+    let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+    let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
     let v0·13: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
     let v1·13: lib::intvector_intrinsics::vec256 =
@@ -1584,10 +1569,10 @@ pub fn shake128(
     let ws250: lib::intvector_intrinsics::vec256 = v2··13;
     let ws260: lib::intvector_intrinsics::vec256 = v1··13;
     let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-    let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-    let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-    let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-    let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+    let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+    let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+    let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+    let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
     let v0·14: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
     let v1·14: lib::intvector_intrinsics::vec256 =
@@ -1647,20 +1632,17 @@ pub fn shake128(
         1u32,
         lib::intvector_intrinsics::vec256_store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
-            (&ws32)[i as usize]
+            (&mut ws32)[i as usize]
         )
     );
     match rb
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
@@ -1668,22 +1650,30 @@ pub fn shake128(
               as
               usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[0usize..])[0usize..remOut as usize]
+              );
               (b11[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
               as
               usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[256usize..])[0usize..remOut as usize]
+              );
               (b21[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
               as
               usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[512usize..])[0usize..remOut as usize]
+              );
               (b31[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
               as
               usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[768usize..])[0usize..remOut as usize]
+              )
           }
     }
 }
@@ -1709,7 +1699,7 @@ pub fn shake256(
             crate::sha2_types::uint8_3p
             { fst: input1, snd: crate::sha2_types::uint8_2p { fst: input2, snd: input3 } }
         };
-    let mut rb: crate::sha2_types::uint8_4p =
+    let rb: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: output0,
@@ -1726,7 +1716,7 @@ pub fn shake256(
         let mut b1: [u8; 256] = [0u8; 256usize];
         let mut b2: [u8; 256] = [0u8; 256usize];
         let mut b3: [u8; 256] = [0u8; 256usize];
-        let mut b·: crate::sha2_types::uint8_4p =
+        let b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
                 fst: &mut b0,
@@ -1738,43 +1728,40 @@ pub fn shake256(
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref b00,
+                fst: b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+                { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
             }
             =>
               match b·
               {
                   crate::sha2_types::uint8_4p
                   {
-                      fst: ref mut bl0,
+                      fst: bl0,
                       snd:
                       crate::sha2_types::uint8_3p
-                      {
-                          fst: ref mut bl1,
-                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                      }
+                      { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
                   }
                   =>
                     {
                         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -1787,7 +1774,7 @@ pub fn shake256(
     let mut b1: [u8; 256] = [0u8; 256usize];
     let mut b2: [u8; 256] = [0u8; 256usize];
     let mut b3: [u8; 256] = [0u8; 256usize];
-    let mut b·: crate::sha2_types::uint8_4p =
+    let b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b0,
@@ -1800,37 +1787,34 @@ pub fn shake256(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           match b·
           {
               crate::sha2_types::uint8_4p
               {
-                  fst: ref mut bl0,
+                  fst: bl0,
                   snd:
                   crate::sha2_types::uint8_3p
-                  {
-                      fst: ref mut bl1,
-                      snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                  }
+                  { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
               }
               =>
                 {
                     (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -1839,13 +1823,10 @@ pub fn shake256(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b10,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b20, snd: ref mut b30 }
-            }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
@@ -1861,51 +1842,51 @@ pub fn shake256(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[224usize..])
           }
     };
-    let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
-    let v1: lib::intvector_intrinsics::vec256 = (&ws)[1usize];
-    let v2: lib::intvector_intrinsics::vec256 = (&ws)[2usize];
-    let v3: lib::intvector_intrinsics::vec256 = (&ws)[3usize];
+    let v0: lib::intvector_intrinsics::vec256 = (&mut ws)[0usize];
+    let v1: lib::intvector_intrinsics::vec256 = (&mut ws)[1usize];
+    let v2: lib::intvector_intrinsics::vec256 = (&mut ws)[2usize];
+    let v3: lib::intvector_intrinsics::vec256 = (&mut ws)[3usize];
     let v0·: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v0, v1);
     let v1·: lib::intvector_intrinsics::vec256 =
@@ -1926,10 +1907,10 @@ pub fn shake256(
     let ws1: lib::intvector_intrinsics::vec256 = v2··;
     let ws2: lib::intvector_intrinsics::vec256 = v1··;
     let ws3: lib::intvector_intrinsics::vec256 = v3··;
-    let v00: lib::intvector_intrinsics::vec256 = (&ws)[4usize];
-    let v10: lib::intvector_intrinsics::vec256 = (&ws)[5usize];
-    let v20: lib::intvector_intrinsics::vec256 = (&ws)[6usize];
-    let v30: lib::intvector_intrinsics::vec256 = (&ws)[7usize];
+    let v00: lib::intvector_intrinsics::vec256 = (&mut ws)[4usize];
+    let v10: lib::intvector_intrinsics::vec256 = (&mut ws)[5usize];
+    let v20: lib::intvector_intrinsics::vec256 = (&mut ws)[6usize];
+    let v30: lib::intvector_intrinsics::vec256 = (&mut ws)[7usize];
     let v0·0: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v00, v10);
     let v1·0: lib::intvector_intrinsics::vec256 =
@@ -1950,10 +1931,10 @@ pub fn shake256(
     let ws5: lib::intvector_intrinsics::vec256 = v2··0;
     let ws6: lib::intvector_intrinsics::vec256 = v1··0;
     let ws7: lib::intvector_intrinsics::vec256 = v3··0;
-    let v01: lib::intvector_intrinsics::vec256 = (&ws)[8usize];
-    let v11: lib::intvector_intrinsics::vec256 = (&ws)[9usize];
-    let v21: lib::intvector_intrinsics::vec256 = (&ws)[10usize];
-    let v31: lib::intvector_intrinsics::vec256 = (&ws)[11usize];
+    let v01: lib::intvector_intrinsics::vec256 = (&mut ws)[8usize];
+    let v11: lib::intvector_intrinsics::vec256 = (&mut ws)[9usize];
+    let v21: lib::intvector_intrinsics::vec256 = (&mut ws)[10usize];
+    let v31: lib::intvector_intrinsics::vec256 = (&mut ws)[11usize];
     let v0·1: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v01, v11);
     let v1·1: lib::intvector_intrinsics::vec256 =
@@ -1974,10 +1955,10 @@ pub fn shake256(
     let ws9: lib::intvector_intrinsics::vec256 = v2··1;
     let ws10: lib::intvector_intrinsics::vec256 = v1··1;
     let ws11: lib::intvector_intrinsics::vec256 = v3··1;
-    let v02: lib::intvector_intrinsics::vec256 = (&ws)[12usize];
-    let v12: lib::intvector_intrinsics::vec256 = (&ws)[13usize];
-    let v22: lib::intvector_intrinsics::vec256 = (&ws)[14usize];
-    let v32: lib::intvector_intrinsics::vec256 = (&ws)[15usize];
+    let v02: lib::intvector_intrinsics::vec256 = (&mut ws)[12usize];
+    let v12: lib::intvector_intrinsics::vec256 = (&mut ws)[13usize];
+    let v22: lib::intvector_intrinsics::vec256 = (&mut ws)[14usize];
+    let v32: lib::intvector_intrinsics::vec256 = (&mut ws)[15usize];
     let v0·2: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v02, v12);
     let v1·2: lib::intvector_intrinsics::vec256 =
@@ -1998,10 +1979,10 @@ pub fn shake256(
     let ws13: lib::intvector_intrinsics::vec256 = v2··2;
     let ws14: lib::intvector_intrinsics::vec256 = v1··2;
     let ws15: lib::intvector_intrinsics::vec256 = v3··2;
-    let v03: lib::intvector_intrinsics::vec256 = (&ws)[16usize];
-    let v13: lib::intvector_intrinsics::vec256 = (&ws)[17usize];
-    let v23: lib::intvector_intrinsics::vec256 = (&ws)[18usize];
-    let v33: lib::intvector_intrinsics::vec256 = (&ws)[19usize];
+    let v03: lib::intvector_intrinsics::vec256 = (&mut ws)[16usize];
+    let v13: lib::intvector_intrinsics::vec256 = (&mut ws)[17usize];
+    let v23: lib::intvector_intrinsics::vec256 = (&mut ws)[18usize];
+    let v33: lib::intvector_intrinsics::vec256 = (&mut ws)[19usize];
     let v0·3: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v03, v13);
     let v1·3: lib::intvector_intrinsics::vec256 =
@@ -2022,10 +2003,10 @@ pub fn shake256(
     let ws17: lib::intvector_intrinsics::vec256 = v2··3;
     let ws18: lib::intvector_intrinsics::vec256 = v1··3;
     let ws19: lib::intvector_intrinsics::vec256 = v3··3;
-    let v04: lib::intvector_intrinsics::vec256 = (&ws)[20usize];
-    let v14: lib::intvector_intrinsics::vec256 = (&ws)[21usize];
-    let v24: lib::intvector_intrinsics::vec256 = (&ws)[22usize];
-    let v34: lib::intvector_intrinsics::vec256 = (&ws)[23usize];
+    let v04: lib::intvector_intrinsics::vec256 = (&mut ws)[20usize];
+    let v14: lib::intvector_intrinsics::vec256 = (&mut ws)[21usize];
+    let v24: lib::intvector_intrinsics::vec256 = (&mut ws)[22usize];
+    let v34: lib::intvector_intrinsics::vec256 = (&mut ws)[23usize];
     let v0·4: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v04, v14);
     let v1·4: lib::intvector_intrinsics::vec256 =
@@ -2046,10 +2027,10 @@ pub fn shake256(
     let ws21: lib::intvector_intrinsics::vec256 = v2··4;
     let ws22: lib::intvector_intrinsics::vec256 = v1··4;
     let ws23: lib::intvector_intrinsics::vec256 = v3··4;
-    let v05: lib::intvector_intrinsics::vec256 = (&ws)[24usize];
-    let v15: lib::intvector_intrinsics::vec256 = (&ws)[25usize];
-    let v25: lib::intvector_intrinsics::vec256 = (&ws)[26usize];
-    let v35: lib::intvector_intrinsics::vec256 = (&ws)[27usize];
+    let v05: lib::intvector_intrinsics::vec256 = (&mut ws)[24usize];
+    let v15: lib::intvector_intrinsics::vec256 = (&mut ws)[25usize];
+    let v25: lib::intvector_intrinsics::vec256 = (&mut ws)[26usize];
+    let v35: lib::intvector_intrinsics::vec256 = (&mut ws)[27usize];
     let v0·5: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v05, v15);
     let v1·5: lib::intvector_intrinsics::vec256 =
@@ -2070,10 +2051,10 @@ pub fn shake256(
     let ws25: lib::intvector_intrinsics::vec256 = v2··5;
     let ws26: lib::intvector_intrinsics::vec256 = v1··5;
     let ws27: lib::intvector_intrinsics::vec256 = v3··5;
-    let v06: lib::intvector_intrinsics::vec256 = (&ws)[28usize];
-    let v16: lib::intvector_intrinsics::vec256 = (&ws)[29usize];
-    let v26: lib::intvector_intrinsics::vec256 = (&ws)[30usize];
-    let v36: lib::intvector_intrinsics::vec256 = (&ws)[31usize];
+    let v06: lib::intvector_intrinsics::vec256 = (&mut ws)[28usize];
+    let v16: lib::intvector_intrinsics::vec256 = (&mut ws)[29usize];
+    let v26: lib::intvector_intrinsics::vec256 = (&mut ws)[30usize];
+    let v36: lib::intvector_intrinsics::vec256 = (&mut ws)[31usize];
     let v0·6: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v06, v16);
     let v1·6: lib::intvector_intrinsics::vec256 =
@@ -2132,13 +2113,13 @@ pub fn shake256(
         0u32,
         1u32,
         (&mut s)[i as usize] =
-            lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
+            lib::intvector_intrinsics::vec256_xor((&mut s)[i as usize], (&mut ws)[i as usize])
     );
     let mut b00: [u8; 256] = [0u8; 256usize];
     let mut b10: [u8; 256] = [0u8; 256usize];
     let mut b20: [u8; 256] = [0u8; 256usize];
     let mut b30: [u8; 256] = [0u8; 256usize];
-    let mut b: crate::sha2_types::uint8_4p =
+    let b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b00,
@@ -2150,13 +2131,10 @@ pub fn shake256(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
@@ -2172,11 +2150,11 @@ pub fn shake256(
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
         let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
             [lib::intvector_intrinsics::vec256_zero; 32usize];
-        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-        let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-        let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-        let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-        let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+        let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+        let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+        let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+        let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
         let v0·7: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
         let v1·7: lib::intvector_intrinsics::vec256 =
@@ -2197,10 +2175,10 @@ pub fn shake256(
         let ws110: lib::intvector_intrinsics::vec256 = v2··7;
         let ws210: lib::intvector_intrinsics::vec256 = v1··7;
         let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-        let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-        let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-        let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-        let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+        let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+        let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+        let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+        let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
         let v0·8: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
         let v1·8: lib::intvector_intrinsics::vec256 =
@@ -2221,10 +2199,10 @@ pub fn shake256(
         let ws50: lib::intvector_intrinsics::vec256 = v2··8;
         let ws60: lib::intvector_intrinsics::vec256 = v1··8;
         let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-        let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-        let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-        let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-        let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+        let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+        let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+        let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+        let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
         let v0·9: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
         let v1·9: lib::intvector_intrinsics::vec256 =
@@ -2245,10 +2223,10 @@ pub fn shake256(
         let ws90: lib::intvector_intrinsics::vec256 = v2··9;
         let ws100: lib::intvector_intrinsics::vec256 = v1··9;
         let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-        let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-        let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-        let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-        let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+        let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+        let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+        let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+        let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
         let v0·10: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
         let v1·10: lib::intvector_intrinsics::vec256 =
@@ -2269,10 +2247,10 @@ pub fn shake256(
         let ws130: lib::intvector_intrinsics::vec256 = v2··10;
         let ws140: lib::intvector_intrinsics::vec256 = v1··10;
         let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-        let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-        let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-        let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-        let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+        let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+        let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+        let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+        let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
         let v0·11: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
         let v1·11: lib::intvector_intrinsics::vec256 =
@@ -2293,10 +2271,10 @@ pub fn shake256(
         let ws170: lib::intvector_intrinsics::vec256 = v2··11;
         let ws180: lib::intvector_intrinsics::vec256 = v1··11;
         let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-        let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-        let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-        let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-        let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+        let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+        let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+        let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+        let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
         let v0·12: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
         let v1·12: lib::intvector_intrinsics::vec256 =
@@ -2317,10 +2295,10 @@ pub fn shake256(
         let ws211: lib::intvector_intrinsics::vec256 = v2··12;
         let ws220: lib::intvector_intrinsics::vec256 = v1··12;
         let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-        let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-        let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-        let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-        let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+        let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+        let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+        let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+        let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
         let v0·13: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
         let v1·13: lib::intvector_intrinsics::vec256 =
@@ -2341,10 +2319,10 @@ pub fn shake256(
         let ws250: lib::intvector_intrinsics::vec256 = v2··13;
         let ws260: lib::intvector_intrinsics::vec256 = v1··13;
         let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-        let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-        let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-        let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-        let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+        let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+        let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+        let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+        let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
         let v0·14: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
         let v1·14: lib::intvector_intrinsics::vec256 =
@@ -2404,42 +2382,39 @@ pub fn shake256(
             1u32,
             lib::intvector_intrinsics::vec256_store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(32u32) as usize..],
-                (&ws32)[i0 as usize]
+                (&mut ws32)[i0 as usize]
             )
         );
         match rb
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref mut b01,
+                fst: b01,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref mut b11,
-                    snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-                }
+                { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
             }
             =>
               {
                   (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[768usize..])[0usize..rateInBytes1 as usize]
                   )
               }
         };
@@ -2458,11 +2433,11 @@ pub fn shake256(
                     1u32,
                     {
                         let uu____0: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(0u32) as usize];
+                            (&mut s)[i1.wrapping_add(0u32) as usize];
                         let uu____1: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(5u32) as usize];
+                            (&mut s)[i1.wrapping_add(5u32) as usize];
                         let uu____2: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(10u32) as usize];
+                            (&mut s)[i1.wrapping_add(10u32) as usize];
                         (&mut _C)[i1 as usize] =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____0,
@@ -2471,8 +2446,8 @@ pub fn shake256(
                                     lib::intvector_intrinsics::vec256_xor(
                                         uu____2,
                                         lib::intvector_intrinsics::vec256_xor(
-                                            (&s)[i1.wrapping_add(15u32) as usize],
-                                            (&s)[i1.wrapping_add(20u32) as usize]
+                                            (&mut s)[i1.wrapping_add(15u32) as usize],
+                                            (&mut s)[i1.wrapping_add(20u32) as usize]
                                         )
                                     )
                                 )
@@ -2486,9 +2461,9 @@ pub fn shake256(
                     1u32,
                     {
                         let uu____3: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
                         let uu____4: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
                         let _D: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
@@ -2504,13 +2479,13 @@ pub fn shake256(
                             1u32,
                             (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] =
                                 lib::intvector_intrinsics::vec256_xor(
-                                    (&s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
+                                    (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
                                     _D
                                 )
                         )
                     }
                 );
-                let x: lib::intvector_intrinsics::vec256 = (&s)[1usize];
+                let x: lib::intvector_intrinsics::vec256 = (&mut s)[1usize];
                 let mut current: [lib::intvector_intrinsics::vec256; 1] = [x; 1usize];
                 krml::unroll_for!(
                     24,
@@ -2518,10 +2493,10 @@ pub fn shake256(
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
-                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
-                        let temp: lib::intvector_intrinsics::vec256 = (&s)[_Y as usize];
-                        let uu____5: lib::intvector_intrinsics::vec256 = (&current)[0usize];
+                        let _Y: u32 = (&mut crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&mut crate::hash_sha3::keccak_rotc)[i1 as usize];
+                        let temp: lib::intvector_intrinsics::vec256 = (&mut s)[_Y as usize];
+                        let uu____5: lib::intvector_intrinsics::vec256 = (&mut current)[0usize];
                         (&mut s)[_Y as usize] =
                             lib::intvector_intrinsics::vec256_or(
                                 lib::intvector_intrinsics::vec256_shift_left64(uu____5, r),
@@ -2540,73 +2515,73 @@ pub fn shake256(
                     1u32,
                     {
                         let uu____6: lib::intvector_intrinsics::vec256 =
-                            (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____7: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v015: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____6,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____7,
-                                    (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____8: lib::intvector_intrinsics::vec256 =
-                            (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____9: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v115: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____8,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____9,
-                                    (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____10: lib::intvector_intrinsics::vec256 =
-                            (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____11: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v215: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____10,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____11,
-                                    (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____12: lib::intvector_intrinsics::vec256 =
-                            (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____13: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v315: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____12,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____13,
-                                    (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____14: lib::intvector_intrinsics::vec256 =
-                            (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____15: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v4: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____14,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____15,
-                                    (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v015;
@@ -2616,8 +2591,8 @@ pub fn shake256(
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
-                let uu____16: lib::intvector_intrinsics::vec256 = (&s)[0usize];
+                let c: u64 = (&mut crate::hash_sha3::keccak_rndc)[i0 as usize];
+                let uu____16: lib::intvector_intrinsics::vec256 = (&mut s)[0usize];
                 (&mut s)[0usize] =
                     lib::intvector_intrinsics::vec256_xor(
                         uu____16,
@@ -2630,11 +2605,11 @@ pub fn shake256(
     let mut hbuf: [u8; 1024] = [0u8; 1024usize];
     let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
         [lib::intvector_intrinsics::vec256_zero; 32usize];
-    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-    let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-    let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-    let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-    let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+    let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+    let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+    let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+    let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
     let v0·7: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
     let v1·7: lib::intvector_intrinsics::vec256 =
@@ -2655,10 +2630,10 @@ pub fn shake256(
     let ws110: lib::intvector_intrinsics::vec256 = v2··7;
     let ws210: lib::intvector_intrinsics::vec256 = v1··7;
     let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-    let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-    let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-    let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-    let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+    let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+    let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+    let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+    let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
     let v0·8: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
     let v1·8: lib::intvector_intrinsics::vec256 =
@@ -2679,10 +2654,10 @@ pub fn shake256(
     let ws50: lib::intvector_intrinsics::vec256 = v2··8;
     let ws60: lib::intvector_intrinsics::vec256 = v1··8;
     let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-    let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-    let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-    let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-    let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+    let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+    let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+    let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+    let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
     let v0·9: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
     let v1·9: lib::intvector_intrinsics::vec256 =
@@ -2703,10 +2678,10 @@ pub fn shake256(
     let ws90: lib::intvector_intrinsics::vec256 = v2··9;
     let ws100: lib::intvector_intrinsics::vec256 = v1··9;
     let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-    let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-    let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-    let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-    let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+    let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+    let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+    let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+    let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
     let v0·10: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
     let v1·10: lib::intvector_intrinsics::vec256 =
@@ -2727,10 +2702,10 @@ pub fn shake256(
     let ws130: lib::intvector_intrinsics::vec256 = v2··10;
     let ws140: lib::intvector_intrinsics::vec256 = v1··10;
     let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-    let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-    let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-    let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-    let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+    let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+    let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+    let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+    let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
     let v0·11: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
     let v1·11: lib::intvector_intrinsics::vec256 =
@@ -2751,10 +2726,10 @@ pub fn shake256(
     let ws170: lib::intvector_intrinsics::vec256 = v2··11;
     let ws180: lib::intvector_intrinsics::vec256 = v1··11;
     let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-    let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-    let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-    let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-    let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+    let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+    let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+    let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+    let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
     let v0·12: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
     let v1·12: lib::intvector_intrinsics::vec256 =
@@ -2775,10 +2750,10 @@ pub fn shake256(
     let ws211: lib::intvector_intrinsics::vec256 = v2··12;
     let ws220: lib::intvector_intrinsics::vec256 = v1··12;
     let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-    let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-    let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-    let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-    let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+    let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+    let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+    let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+    let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
     let v0·13: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
     let v1·13: lib::intvector_intrinsics::vec256 =
@@ -2799,10 +2774,10 @@ pub fn shake256(
     let ws250: lib::intvector_intrinsics::vec256 = v2··13;
     let ws260: lib::intvector_intrinsics::vec256 = v1··13;
     let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-    let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-    let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-    let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-    let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+    let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+    let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+    let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+    let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
     let v0·14: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
     let v1·14: lib::intvector_intrinsics::vec256 =
@@ -2862,20 +2837,17 @@ pub fn shake256(
         1u32,
         lib::intvector_intrinsics::vec256_store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
-            (&ws32)[i as usize]
+            (&mut ws32)[i as usize]
         )
     );
     match rb
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
@@ -2883,22 +2855,30 @@ pub fn shake256(
               as
               usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[0usize..])[0usize..remOut as usize]
+              );
               (b11[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
               as
               usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[256usize..])[0usize..remOut as usize]
+              );
               (b21[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
               as
               usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[512usize..])[0usize..remOut as usize]
+              );
               (b31[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
               as
               usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[768usize..])[0usize..remOut as usize]
+              )
           }
     }
 }
@@ -2923,7 +2903,7 @@ pub fn sha3_224(
             crate::sha2_types::uint8_3p
             { fst: input1, snd: crate::sha2_types::uint8_2p { fst: input2, snd: input3 } }
         };
-    let mut rb: crate::sha2_types::uint8_4p =
+    let rb: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: output0,
@@ -2940,7 +2920,7 @@ pub fn sha3_224(
         let mut b1: [u8; 256] = [0u8; 256usize];
         let mut b2: [u8; 256] = [0u8; 256usize];
         let mut b3: [u8; 256] = [0u8; 256usize];
-        let mut b·: crate::sha2_types::uint8_4p =
+        let b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
                 fst: &mut b0,
@@ -2952,43 +2932,40 @@ pub fn sha3_224(
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref b00,
+                fst: b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+                { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
             }
             =>
               match b·
               {
                   crate::sha2_types::uint8_4p
                   {
-                      fst: ref mut bl0,
+                      fst: bl0,
                       snd:
                       crate::sha2_types::uint8_3p
-                      {
-                          fst: ref mut bl1,
-                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                      }
+                      { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
                   }
                   =>
                     {
                         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -3001,7 +2978,7 @@ pub fn sha3_224(
     let mut b1: [u8; 256] = [0u8; 256usize];
     let mut b2: [u8; 256] = [0u8; 256usize];
     let mut b3: [u8; 256] = [0u8; 256usize];
-    let mut b·: crate::sha2_types::uint8_4p =
+    let b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b0,
@@ -3014,37 +2991,34 @@ pub fn sha3_224(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           match b·
           {
               crate::sha2_types::uint8_4p
               {
-                  fst: ref mut bl0,
+                  fst: bl0,
                   snd:
                   crate::sha2_types::uint8_3p
-                  {
-                      fst: ref mut bl1,
-                      snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                  }
+                  { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
               }
               =>
                 {
                     (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -3053,13 +3027,10 @@ pub fn sha3_224(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b10,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b20, snd: ref mut b30 }
-            }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
@@ -3075,51 +3046,51 @@ pub fn sha3_224(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[224usize..])
           }
     };
-    let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
-    let v1: lib::intvector_intrinsics::vec256 = (&ws)[1usize];
-    let v2: lib::intvector_intrinsics::vec256 = (&ws)[2usize];
-    let v3: lib::intvector_intrinsics::vec256 = (&ws)[3usize];
+    let v0: lib::intvector_intrinsics::vec256 = (&mut ws)[0usize];
+    let v1: lib::intvector_intrinsics::vec256 = (&mut ws)[1usize];
+    let v2: lib::intvector_intrinsics::vec256 = (&mut ws)[2usize];
+    let v3: lib::intvector_intrinsics::vec256 = (&mut ws)[3usize];
     let v0·: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v0, v1);
     let v1·: lib::intvector_intrinsics::vec256 =
@@ -3140,10 +3111,10 @@ pub fn sha3_224(
     let ws1: lib::intvector_intrinsics::vec256 = v2··;
     let ws2: lib::intvector_intrinsics::vec256 = v1··;
     let ws3: lib::intvector_intrinsics::vec256 = v3··;
-    let v00: lib::intvector_intrinsics::vec256 = (&ws)[4usize];
-    let v10: lib::intvector_intrinsics::vec256 = (&ws)[5usize];
-    let v20: lib::intvector_intrinsics::vec256 = (&ws)[6usize];
-    let v30: lib::intvector_intrinsics::vec256 = (&ws)[7usize];
+    let v00: lib::intvector_intrinsics::vec256 = (&mut ws)[4usize];
+    let v10: lib::intvector_intrinsics::vec256 = (&mut ws)[5usize];
+    let v20: lib::intvector_intrinsics::vec256 = (&mut ws)[6usize];
+    let v30: lib::intvector_intrinsics::vec256 = (&mut ws)[7usize];
     let v0·0: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v00, v10);
     let v1·0: lib::intvector_intrinsics::vec256 =
@@ -3164,10 +3135,10 @@ pub fn sha3_224(
     let ws5: lib::intvector_intrinsics::vec256 = v2··0;
     let ws6: lib::intvector_intrinsics::vec256 = v1··0;
     let ws7: lib::intvector_intrinsics::vec256 = v3··0;
-    let v01: lib::intvector_intrinsics::vec256 = (&ws)[8usize];
-    let v11: lib::intvector_intrinsics::vec256 = (&ws)[9usize];
-    let v21: lib::intvector_intrinsics::vec256 = (&ws)[10usize];
-    let v31: lib::intvector_intrinsics::vec256 = (&ws)[11usize];
+    let v01: lib::intvector_intrinsics::vec256 = (&mut ws)[8usize];
+    let v11: lib::intvector_intrinsics::vec256 = (&mut ws)[9usize];
+    let v21: lib::intvector_intrinsics::vec256 = (&mut ws)[10usize];
+    let v31: lib::intvector_intrinsics::vec256 = (&mut ws)[11usize];
     let v0·1: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v01, v11);
     let v1·1: lib::intvector_intrinsics::vec256 =
@@ -3188,10 +3159,10 @@ pub fn sha3_224(
     let ws9: lib::intvector_intrinsics::vec256 = v2··1;
     let ws10: lib::intvector_intrinsics::vec256 = v1··1;
     let ws11: lib::intvector_intrinsics::vec256 = v3··1;
-    let v02: lib::intvector_intrinsics::vec256 = (&ws)[12usize];
-    let v12: lib::intvector_intrinsics::vec256 = (&ws)[13usize];
-    let v22: lib::intvector_intrinsics::vec256 = (&ws)[14usize];
-    let v32: lib::intvector_intrinsics::vec256 = (&ws)[15usize];
+    let v02: lib::intvector_intrinsics::vec256 = (&mut ws)[12usize];
+    let v12: lib::intvector_intrinsics::vec256 = (&mut ws)[13usize];
+    let v22: lib::intvector_intrinsics::vec256 = (&mut ws)[14usize];
+    let v32: lib::intvector_intrinsics::vec256 = (&mut ws)[15usize];
     let v0·2: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v02, v12);
     let v1·2: lib::intvector_intrinsics::vec256 =
@@ -3212,10 +3183,10 @@ pub fn sha3_224(
     let ws13: lib::intvector_intrinsics::vec256 = v2··2;
     let ws14: lib::intvector_intrinsics::vec256 = v1··2;
     let ws15: lib::intvector_intrinsics::vec256 = v3··2;
-    let v03: lib::intvector_intrinsics::vec256 = (&ws)[16usize];
-    let v13: lib::intvector_intrinsics::vec256 = (&ws)[17usize];
-    let v23: lib::intvector_intrinsics::vec256 = (&ws)[18usize];
-    let v33: lib::intvector_intrinsics::vec256 = (&ws)[19usize];
+    let v03: lib::intvector_intrinsics::vec256 = (&mut ws)[16usize];
+    let v13: lib::intvector_intrinsics::vec256 = (&mut ws)[17usize];
+    let v23: lib::intvector_intrinsics::vec256 = (&mut ws)[18usize];
+    let v33: lib::intvector_intrinsics::vec256 = (&mut ws)[19usize];
     let v0·3: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v03, v13);
     let v1·3: lib::intvector_intrinsics::vec256 =
@@ -3236,10 +3207,10 @@ pub fn sha3_224(
     let ws17: lib::intvector_intrinsics::vec256 = v2··3;
     let ws18: lib::intvector_intrinsics::vec256 = v1··3;
     let ws19: lib::intvector_intrinsics::vec256 = v3··3;
-    let v04: lib::intvector_intrinsics::vec256 = (&ws)[20usize];
-    let v14: lib::intvector_intrinsics::vec256 = (&ws)[21usize];
-    let v24: lib::intvector_intrinsics::vec256 = (&ws)[22usize];
-    let v34: lib::intvector_intrinsics::vec256 = (&ws)[23usize];
+    let v04: lib::intvector_intrinsics::vec256 = (&mut ws)[20usize];
+    let v14: lib::intvector_intrinsics::vec256 = (&mut ws)[21usize];
+    let v24: lib::intvector_intrinsics::vec256 = (&mut ws)[22usize];
+    let v34: lib::intvector_intrinsics::vec256 = (&mut ws)[23usize];
     let v0·4: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v04, v14);
     let v1·4: lib::intvector_intrinsics::vec256 =
@@ -3260,10 +3231,10 @@ pub fn sha3_224(
     let ws21: lib::intvector_intrinsics::vec256 = v2··4;
     let ws22: lib::intvector_intrinsics::vec256 = v1··4;
     let ws23: lib::intvector_intrinsics::vec256 = v3··4;
-    let v05: lib::intvector_intrinsics::vec256 = (&ws)[24usize];
-    let v15: lib::intvector_intrinsics::vec256 = (&ws)[25usize];
-    let v25: lib::intvector_intrinsics::vec256 = (&ws)[26usize];
-    let v35: lib::intvector_intrinsics::vec256 = (&ws)[27usize];
+    let v05: lib::intvector_intrinsics::vec256 = (&mut ws)[24usize];
+    let v15: lib::intvector_intrinsics::vec256 = (&mut ws)[25usize];
+    let v25: lib::intvector_intrinsics::vec256 = (&mut ws)[26usize];
+    let v35: lib::intvector_intrinsics::vec256 = (&mut ws)[27usize];
     let v0·5: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v05, v15);
     let v1·5: lib::intvector_intrinsics::vec256 =
@@ -3284,10 +3255,10 @@ pub fn sha3_224(
     let ws25: lib::intvector_intrinsics::vec256 = v2··5;
     let ws26: lib::intvector_intrinsics::vec256 = v1··5;
     let ws27: lib::intvector_intrinsics::vec256 = v3··5;
-    let v06: lib::intvector_intrinsics::vec256 = (&ws)[28usize];
-    let v16: lib::intvector_intrinsics::vec256 = (&ws)[29usize];
-    let v26: lib::intvector_intrinsics::vec256 = (&ws)[30usize];
-    let v36: lib::intvector_intrinsics::vec256 = (&ws)[31usize];
+    let v06: lib::intvector_intrinsics::vec256 = (&mut ws)[28usize];
+    let v16: lib::intvector_intrinsics::vec256 = (&mut ws)[29usize];
+    let v26: lib::intvector_intrinsics::vec256 = (&mut ws)[30usize];
+    let v36: lib::intvector_intrinsics::vec256 = (&mut ws)[31usize];
     let v0·6: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v06, v16);
     let v1·6: lib::intvector_intrinsics::vec256 =
@@ -3346,13 +3317,13 @@ pub fn sha3_224(
         0u32,
         1u32,
         (&mut s)[i as usize] =
-            lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
+            lib::intvector_intrinsics::vec256_xor((&mut s)[i as usize], (&mut ws)[i as usize])
     );
     let mut b00: [u8; 256] = [0u8; 256usize];
     let mut b10: [u8; 256] = [0u8; 256usize];
     let mut b20: [u8; 256] = [0u8; 256usize];
     let mut b30: [u8; 256] = [0u8; 256usize];
-    let mut b: crate::sha2_types::uint8_4p =
+    let b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b00,
@@ -3364,13 +3335,10 @@ pub fn sha3_224(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
@@ -3386,11 +3354,11 @@ pub fn sha3_224(
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
         let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
             [lib::intvector_intrinsics::vec256_zero; 32usize];
-        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-        let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-        let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-        let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-        let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+        let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+        let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+        let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+        let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
         let v0·7: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
         let v1·7: lib::intvector_intrinsics::vec256 =
@@ -3411,10 +3379,10 @@ pub fn sha3_224(
         let ws110: lib::intvector_intrinsics::vec256 = v2··7;
         let ws210: lib::intvector_intrinsics::vec256 = v1··7;
         let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-        let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-        let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-        let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-        let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+        let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+        let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+        let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+        let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
         let v0·8: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
         let v1·8: lib::intvector_intrinsics::vec256 =
@@ -3435,10 +3403,10 @@ pub fn sha3_224(
         let ws50: lib::intvector_intrinsics::vec256 = v2··8;
         let ws60: lib::intvector_intrinsics::vec256 = v1··8;
         let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-        let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-        let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-        let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-        let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+        let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+        let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+        let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+        let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
         let v0·9: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
         let v1·9: lib::intvector_intrinsics::vec256 =
@@ -3459,10 +3427,10 @@ pub fn sha3_224(
         let ws90: lib::intvector_intrinsics::vec256 = v2··9;
         let ws100: lib::intvector_intrinsics::vec256 = v1··9;
         let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-        let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-        let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-        let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-        let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+        let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+        let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+        let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+        let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
         let v0·10: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
         let v1·10: lib::intvector_intrinsics::vec256 =
@@ -3483,10 +3451,10 @@ pub fn sha3_224(
         let ws130: lib::intvector_intrinsics::vec256 = v2··10;
         let ws140: lib::intvector_intrinsics::vec256 = v1··10;
         let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-        let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-        let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-        let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-        let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+        let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+        let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+        let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+        let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
         let v0·11: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
         let v1·11: lib::intvector_intrinsics::vec256 =
@@ -3507,10 +3475,10 @@ pub fn sha3_224(
         let ws170: lib::intvector_intrinsics::vec256 = v2··11;
         let ws180: lib::intvector_intrinsics::vec256 = v1··11;
         let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-        let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-        let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-        let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-        let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+        let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+        let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+        let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+        let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
         let v0·12: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
         let v1·12: lib::intvector_intrinsics::vec256 =
@@ -3531,10 +3499,10 @@ pub fn sha3_224(
         let ws211: lib::intvector_intrinsics::vec256 = v2··12;
         let ws220: lib::intvector_intrinsics::vec256 = v1··12;
         let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-        let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-        let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-        let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-        let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+        let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+        let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+        let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+        let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
         let v0·13: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
         let v1·13: lib::intvector_intrinsics::vec256 =
@@ -3555,10 +3523,10 @@ pub fn sha3_224(
         let ws250: lib::intvector_intrinsics::vec256 = v2··13;
         let ws260: lib::intvector_intrinsics::vec256 = v1··13;
         let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-        let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-        let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-        let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-        let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+        let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+        let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+        let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+        let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
         let v0·14: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
         let v1·14: lib::intvector_intrinsics::vec256 =
@@ -3618,42 +3586,39 @@ pub fn sha3_224(
             1u32,
             lib::intvector_intrinsics::vec256_store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(32u32) as usize..],
-                (&ws32)[i0 as usize]
+                (&mut ws32)[i0 as usize]
             )
         );
         match rb
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref mut b01,
+                fst: b01,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref mut b11,
-                    snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-                }
+                { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
             }
             =>
               {
                   (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[768usize..])[0usize..rateInBytes1 as usize]
                   )
               }
         };
@@ -3672,11 +3637,11 @@ pub fn sha3_224(
                     1u32,
                     {
                         let uu____0: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(0u32) as usize];
+                            (&mut s)[i1.wrapping_add(0u32) as usize];
                         let uu____1: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(5u32) as usize];
+                            (&mut s)[i1.wrapping_add(5u32) as usize];
                         let uu____2: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(10u32) as usize];
+                            (&mut s)[i1.wrapping_add(10u32) as usize];
                         (&mut _C)[i1 as usize] =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____0,
@@ -3685,8 +3650,8 @@ pub fn sha3_224(
                                     lib::intvector_intrinsics::vec256_xor(
                                         uu____2,
                                         lib::intvector_intrinsics::vec256_xor(
-                                            (&s)[i1.wrapping_add(15u32) as usize],
-                                            (&s)[i1.wrapping_add(20u32) as usize]
+                                            (&mut s)[i1.wrapping_add(15u32) as usize],
+                                            (&mut s)[i1.wrapping_add(20u32) as usize]
                                         )
                                     )
                                 )
@@ -3700,9 +3665,9 @@ pub fn sha3_224(
                     1u32,
                     {
                         let uu____3: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
                         let uu____4: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
                         let _D: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
@@ -3718,13 +3683,13 @@ pub fn sha3_224(
                             1u32,
                             (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] =
                                 lib::intvector_intrinsics::vec256_xor(
-                                    (&s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
+                                    (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
                                     _D
                                 )
                         )
                     }
                 );
-                let x: lib::intvector_intrinsics::vec256 = (&s)[1usize];
+                let x: lib::intvector_intrinsics::vec256 = (&mut s)[1usize];
                 let mut current: [lib::intvector_intrinsics::vec256; 1] = [x; 1usize];
                 krml::unroll_for!(
                     24,
@@ -3732,10 +3697,10 @@ pub fn sha3_224(
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
-                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
-                        let temp: lib::intvector_intrinsics::vec256 = (&s)[_Y as usize];
-                        let uu____5: lib::intvector_intrinsics::vec256 = (&current)[0usize];
+                        let _Y: u32 = (&mut crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&mut crate::hash_sha3::keccak_rotc)[i1 as usize];
+                        let temp: lib::intvector_intrinsics::vec256 = (&mut s)[_Y as usize];
+                        let uu____5: lib::intvector_intrinsics::vec256 = (&mut current)[0usize];
                         (&mut s)[_Y as usize] =
                             lib::intvector_intrinsics::vec256_or(
                                 lib::intvector_intrinsics::vec256_shift_left64(uu____5, r),
@@ -3754,73 +3719,73 @@ pub fn sha3_224(
                     1u32,
                     {
                         let uu____6: lib::intvector_intrinsics::vec256 =
-                            (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____7: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v015: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____6,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____7,
-                                    (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____8: lib::intvector_intrinsics::vec256 =
-                            (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____9: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v115: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____8,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____9,
-                                    (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____10: lib::intvector_intrinsics::vec256 =
-                            (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____11: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v215: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____10,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____11,
-                                    (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____12: lib::intvector_intrinsics::vec256 =
-                            (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____13: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v315: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____12,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____13,
-                                    (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____14: lib::intvector_intrinsics::vec256 =
-                            (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____15: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v4: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____14,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____15,
-                                    (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v015;
@@ -3830,8 +3795,8 @@ pub fn sha3_224(
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
-                let uu____16: lib::intvector_intrinsics::vec256 = (&s)[0usize];
+                let c: u64 = (&mut crate::hash_sha3::keccak_rndc)[i0 as usize];
+                let uu____16: lib::intvector_intrinsics::vec256 = (&mut s)[0usize];
                 (&mut s)[0usize] =
                     lib::intvector_intrinsics::vec256_xor(
                         uu____16,
@@ -3844,11 +3809,11 @@ pub fn sha3_224(
     let mut hbuf: [u8; 1024] = [0u8; 1024usize];
     let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
         [lib::intvector_intrinsics::vec256_zero; 32usize];
-    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-    let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-    let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-    let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-    let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+    let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+    let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+    let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+    let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
     let v0·7: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
     let v1·7: lib::intvector_intrinsics::vec256 =
@@ -3869,10 +3834,10 @@ pub fn sha3_224(
     let ws110: lib::intvector_intrinsics::vec256 = v2··7;
     let ws210: lib::intvector_intrinsics::vec256 = v1··7;
     let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-    let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-    let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-    let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-    let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+    let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+    let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+    let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+    let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
     let v0·8: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
     let v1·8: lib::intvector_intrinsics::vec256 =
@@ -3893,10 +3858,10 @@ pub fn sha3_224(
     let ws50: lib::intvector_intrinsics::vec256 = v2··8;
     let ws60: lib::intvector_intrinsics::vec256 = v1··8;
     let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-    let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-    let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-    let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-    let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+    let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+    let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+    let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+    let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
     let v0·9: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
     let v1·9: lib::intvector_intrinsics::vec256 =
@@ -3917,10 +3882,10 @@ pub fn sha3_224(
     let ws90: lib::intvector_intrinsics::vec256 = v2··9;
     let ws100: lib::intvector_intrinsics::vec256 = v1··9;
     let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-    let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-    let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-    let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-    let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+    let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+    let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+    let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+    let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
     let v0·10: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
     let v1·10: lib::intvector_intrinsics::vec256 =
@@ -3941,10 +3906,10 @@ pub fn sha3_224(
     let ws130: lib::intvector_intrinsics::vec256 = v2··10;
     let ws140: lib::intvector_intrinsics::vec256 = v1··10;
     let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-    let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-    let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-    let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-    let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+    let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+    let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+    let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+    let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
     let v0·11: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
     let v1·11: lib::intvector_intrinsics::vec256 =
@@ -3965,10 +3930,10 @@ pub fn sha3_224(
     let ws170: lib::intvector_intrinsics::vec256 = v2··11;
     let ws180: lib::intvector_intrinsics::vec256 = v1··11;
     let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-    let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-    let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-    let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-    let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+    let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+    let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+    let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+    let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
     let v0·12: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
     let v1·12: lib::intvector_intrinsics::vec256 =
@@ -3989,10 +3954,10 @@ pub fn sha3_224(
     let ws211: lib::intvector_intrinsics::vec256 = v2··12;
     let ws220: lib::intvector_intrinsics::vec256 = v1··12;
     let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-    let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-    let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-    let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-    let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+    let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+    let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+    let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+    let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
     let v0·13: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
     let v1·13: lib::intvector_intrinsics::vec256 =
@@ -4013,10 +3978,10 @@ pub fn sha3_224(
     let ws250: lib::intvector_intrinsics::vec256 = v2··13;
     let ws260: lib::intvector_intrinsics::vec256 = v1··13;
     let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-    let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-    let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-    let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-    let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+    let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+    let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+    let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+    let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
     let v0·14: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
     let v1·14: lib::intvector_intrinsics::vec256 =
@@ -4076,35 +4041,40 @@ pub fn sha3_224(
         1u32,
         lib::intvector_intrinsics::vec256_store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
-            (&ws32)[i as usize]
+            (&mut ws32)[i as usize]
         )
     );
     match rb
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
               (b01[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[0usize..])[0usize..remOut as usize]
+              );
               (b11[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[256usize..])[0usize..remOut as usize]
+              );
               (b21[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[512usize..])[0usize..remOut as usize]
+              );
               (b31[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[768usize..])[0usize..remOut as usize]
+              )
           }
     }
 }
@@ -4129,7 +4099,7 @@ pub fn sha3_256(
             crate::sha2_types::uint8_3p
             { fst: input1, snd: crate::sha2_types::uint8_2p { fst: input2, snd: input3 } }
         };
-    let mut rb: crate::sha2_types::uint8_4p =
+    let rb: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: output0,
@@ -4146,7 +4116,7 @@ pub fn sha3_256(
         let mut b1: [u8; 256] = [0u8; 256usize];
         let mut b2: [u8; 256] = [0u8; 256usize];
         let mut b3: [u8; 256] = [0u8; 256usize];
-        let mut b·: crate::sha2_types::uint8_4p =
+        let b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
                 fst: &mut b0,
@@ -4158,43 +4128,40 @@ pub fn sha3_256(
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref b00,
+                fst: b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+                { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
             }
             =>
               match b·
               {
                   crate::sha2_types::uint8_4p
                   {
-                      fst: ref mut bl0,
+                      fst: bl0,
                       snd:
                       crate::sha2_types::uint8_3p
-                      {
-                          fst: ref mut bl1,
-                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                      }
+                      { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
                   }
                   =>
                     {
                         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -4207,7 +4174,7 @@ pub fn sha3_256(
     let mut b1: [u8; 256] = [0u8; 256usize];
     let mut b2: [u8; 256] = [0u8; 256usize];
     let mut b3: [u8; 256] = [0u8; 256usize];
-    let mut b·: crate::sha2_types::uint8_4p =
+    let b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b0,
@@ -4220,37 +4187,34 @@ pub fn sha3_256(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           match b·
           {
               crate::sha2_types::uint8_4p
               {
-                  fst: ref mut bl0,
+                  fst: bl0,
                   snd:
                   crate::sha2_types::uint8_3p
-                  {
-                      fst: ref mut bl1,
-                      snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                  }
+                  { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
               }
               =>
                 {
                     (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -4259,13 +4223,10 @@ pub fn sha3_256(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b10,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b20, snd: ref mut b30 }
-            }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
@@ -4281,51 +4242,51 @@ pub fn sha3_256(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[224usize..])
           }
     };
-    let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
-    let v1: lib::intvector_intrinsics::vec256 = (&ws)[1usize];
-    let v2: lib::intvector_intrinsics::vec256 = (&ws)[2usize];
-    let v3: lib::intvector_intrinsics::vec256 = (&ws)[3usize];
+    let v0: lib::intvector_intrinsics::vec256 = (&mut ws)[0usize];
+    let v1: lib::intvector_intrinsics::vec256 = (&mut ws)[1usize];
+    let v2: lib::intvector_intrinsics::vec256 = (&mut ws)[2usize];
+    let v3: lib::intvector_intrinsics::vec256 = (&mut ws)[3usize];
     let v0·: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v0, v1);
     let v1·: lib::intvector_intrinsics::vec256 =
@@ -4346,10 +4307,10 @@ pub fn sha3_256(
     let ws1: lib::intvector_intrinsics::vec256 = v2··;
     let ws2: lib::intvector_intrinsics::vec256 = v1··;
     let ws3: lib::intvector_intrinsics::vec256 = v3··;
-    let v00: lib::intvector_intrinsics::vec256 = (&ws)[4usize];
-    let v10: lib::intvector_intrinsics::vec256 = (&ws)[5usize];
-    let v20: lib::intvector_intrinsics::vec256 = (&ws)[6usize];
-    let v30: lib::intvector_intrinsics::vec256 = (&ws)[7usize];
+    let v00: lib::intvector_intrinsics::vec256 = (&mut ws)[4usize];
+    let v10: lib::intvector_intrinsics::vec256 = (&mut ws)[5usize];
+    let v20: lib::intvector_intrinsics::vec256 = (&mut ws)[6usize];
+    let v30: lib::intvector_intrinsics::vec256 = (&mut ws)[7usize];
     let v0·0: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v00, v10);
     let v1·0: lib::intvector_intrinsics::vec256 =
@@ -4370,10 +4331,10 @@ pub fn sha3_256(
     let ws5: lib::intvector_intrinsics::vec256 = v2··0;
     let ws6: lib::intvector_intrinsics::vec256 = v1··0;
     let ws7: lib::intvector_intrinsics::vec256 = v3··0;
-    let v01: lib::intvector_intrinsics::vec256 = (&ws)[8usize];
-    let v11: lib::intvector_intrinsics::vec256 = (&ws)[9usize];
-    let v21: lib::intvector_intrinsics::vec256 = (&ws)[10usize];
-    let v31: lib::intvector_intrinsics::vec256 = (&ws)[11usize];
+    let v01: lib::intvector_intrinsics::vec256 = (&mut ws)[8usize];
+    let v11: lib::intvector_intrinsics::vec256 = (&mut ws)[9usize];
+    let v21: lib::intvector_intrinsics::vec256 = (&mut ws)[10usize];
+    let v31: lib::intvector_intrinsics::vec256 = (&mut ws)[11usize];
     let v0·1: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v01, v11);
     let v1·1: lib::intvector_intrinsics::vec256 =
@@ -4394,10 +4355,10 @@ pub fn sha3_256(
     let ws9: lib::intvector_intrinsics::vec256 = v2··1;
     let ws10: lib::intvector_intrinsics::vec256 = v1··1;
     let ws11: lib::intvector_intrinsics::vec256 = v3··1;
-    let v02: lib::intvector_intrinsics::vec256 = (&ws)[12usize];
-    let v12: lib::intvector_intrinsics::vec256 = (&ws)[13usize];
-    let v22: lib::intvector_intrinsics::vec256 = (&ws)[14usize];
-    let v32: lib::intvector_intrinsics::vec256 = (&ws)[15usize];
+    let v02: lib::intvector_intrinsics::vec256 = (&mut ws)[12usize];
+    let v12: lib::intvector_intrinsics::vec256 = (&mut ws)[13usize];
+    let v22: lib::intvector_intrinsics::vec256 = (&mut ws)[14usize];
+    let v32: lib::intvector_intrinsics::vec256 = (&mut ws)[15usize];
     let v0·2: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v02, v12);
     let v1·2: lib::intvector_intrinsics::vec256 =
@@ -4418,10 +4379,10 @@ pub fn sha3_256(
     let ws13: lib::intvector_intrinsics::vec256 = v2··2;
     let ws14: lib::intvector_intrinsics::vec256 = v1··2;
     let ws15: lib::intvector_intrinsics::vec256 = v3··2;
-    let v03: lib::intvector_intrinsics::vec256 = (&ws)[16usize];
-    let v13: lib::intvector_intrinsics::vec256 = (&ws)[17usize];
-    let v23: lib::intvector_intrinsics::vec256 = (&ws)[18usize];
-    let v33: lib::intvector_intrinsics::vec256 = (&ws)[19usize];
+    let v03: lib::intvector_intrinsics::vec256 = (&mut ws)[16usize];
+    let v13: lib::intvector_intrinsics::vec256 = (&mut ws)[17usize];
+    let v23: lib::intvector_intrinsics::vec256 = (&mut ws)[18usize];
+    let v33: lib::intvector_intrinsics::vec256 = (&mut ws)[19usize];
     let v0·3: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v03, v13);
     let v1·3: lib::intvector_intrinsics::vec256 =
@@ -4442,10 +4403,10 @@ pub fn sha3_256(
     let ws17: lib::intvector_intrinsics::vec256 = v2··3;
     let ws18: lib::intvector_intrinsics::vec256 = v1··3;
     let ws19: lib::intvector_intrinsics::vec256 = v3··3;
-    let v04: lib::intvector_intrinsics::vec256 = (&ws)[20usize];
-    let v14: lib::intvector_intrinsics::vec256 = (&ws)[21usize];
-    let v24: lib::intvector_intrinsics::vec256 = (&ws)[22usize];
-    let v34: lib::intvector_intrinsics::vec256 = (&ws)[23usize];
+    let v04: lib::intvector_intrinsics::vec256 = (&mut ws)[20usize];
+    let v14: lib::intvector_intrinsics::vec256 = (&mut ws)[21usize];
+    let v24: lib::intvector_intrinsics::vec256 = (&mut ws)[22usize];
+    let v34: lib::intvector_intrinsics::vec256 = (&mut ws)[23usize];
     let v0·4: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v04, v14);
     let v1·4: lib::intvector_intrinsics::vec256 =
@@ -4466,10 +4427,10 @@ pub fn sha3_256(
     let ws21: lib::intvector_intrinsics::vec256 = v2··4;
     let ws22: lib::intvector_intrinsics::vec256 = v1··4;
     let ws23: lib::intvector_intrinsics::vec256 = v3··4;
-    let v05: lib::intvector_intrinsics::vec256 = (&ws)[24usize];
-    let v15: lib::intvector_intrinsics::vec256 = (&ws)[25usize];
-    let v25: lib::intvector_intrinsics::vec256 = (&ws)[26usize];
-    let v35: lib::intvector_intrinsics::vec256 = (&ws)[27usize];
+    let v05: lib::intvector_intrinsics::vec256 = (&mut ws)[24usize];
+    let v15: lib::intvector_intrinsics::vec256 = (&mut ws)[25usize];
+    let v25: lib::intvector_intrinsics::vec256 = (&mut ws)[26usize];
+    let v35: lib::intvector_intrinsics::vec256 = (&mut ws)[27usize];
     let v0·5: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v05, v15);
     let v1·5: lib::intvector_intrinsics::vec256 =
@@ -4490,10 +4451,10 @@ pub fn sha3_256(
     let ws25: lib::intvector_intrinsics::vec256 = v2··5;
     let ws26: lib::intvector_intrinsics::vec256 = v1··5;
     let ws27: lib::intvector_intrinsics::vec256 = v3··5;
-    let v06: lib::intvector_intrinsics::vec256 = (&ws)[28usize];
-    let v16: lib::intvector_intrinsics::vec256 = (&ws)[29usize];
-    let v26: lib::intvector_intrinsics::vec256 = (&ws)[30usize];
-    let v36: lib::intvector_intrinsics::vec256 = (&ws)[31usize];
+    let v06: lib::intvector_intrinsics::vec256 = (&mut ws)[28usize];
+    let v16: lib::intvector_intrinsics::vec256 = (&mut ws)[29usize];
+    let v26: lib::intvector_intrinsics::vec256 = (&mut ws)[30usize];
+    let v36: lib::intvector_intrinsics::vec256 = (&mut ws)[31usize];
     let v0·6: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v06, v16);
     let v1·6: lib::intvector_intrinsics::vec256 =
@@ -4552,13 +4513,13 @@ pub fn sha3_256(
         0u32,
         1u32,
         (&mut s)[i as usize] =
-            lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
+            lib::intvector_intrinsics::vec256_xor((&mut s)[i as usize], (&mut ws)[i as usize])
     );
     let mut b00: [u8; 256] = [0u8; 256usize];
     let mut b10: [u8; 256] = [0u8; 256usize];
     let mut b20: [u8; 256] = [0u8; 256usize];
     let mut b30: [u8; 256] = [0u8; 256usize];
-    let mut b: crate::sha2_types::uint8_4p =
+    let b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b00,
@@ -4570,13 +4531,10 @@ pub fn sha3_256(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
@@ -4592,11 +4550,11 @@ pub fn sha3_256(
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
         let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
             [lib::intvector_intrinsics::vec256_zero; 32usize];
-        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-        let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-        let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-        let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-        let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+        let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+        let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+        let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+        let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
         let v0·7: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
         let v1·7: lib::intvector_intrinsics::vec256 =
@@ -4617,10 +4575,10 @@ pub fn sha3_256(
         let ws110: lib::intvector_intrinsics::vec256 = v2··7;
         let ws210: lib::intvector_intrinsics::vec256 = v1··7;
         let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-        let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-        let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-        let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-        let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+        let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+        let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+        let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+        let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
         let v0·8: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
         let v1·8: lib::intvector_intrinsics::vec256 =
@@ -4641,10 +4599,10 @@ pub fn sha3_256(
         let ws50: lib::intvector_intrinsics::vec256 = v2··8;
         let ws60: lib::intvector_intrinsics::vec256 = v1··8;
         let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-        let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-        let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-        let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-        let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+        let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+        let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+        let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+        let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
         let v0·9: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
         let v1·9: lib::intvector_intrinsics::vec256 =
@@ -4665,10 +4623,10 @@ pub fn sha3_256(
         let ws90: lib::intvector_intrinsics::vec256 = v2··9;
         let ws100: lib::intvector_intrinsics::vec256 = v1··9;
         let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-        let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-        let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-        let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-        let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+        let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+        let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+        let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+        let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
         let v0·10: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
         let v1·10: lib::intvector_intrinsics::vec256 =
@@ -4689,10 +4647,10 @@ pub fn sha3_256(
         let ws130: lib::intvector_intrinsics::vec256 = v2··10;
         let ws140: lib::intvector_intrinsics::vec256 = v1··10;
         let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-        let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-        let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-        let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-        let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+        let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+        let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+        let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+        let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
         let v0·11: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
         let v1·11: lib::intvector_intrinsics::vec256 =
@@ -4713,10 +4671,10 @@ pub fn sha3_256(
         let ws170: lib::intvector_intrinsics::vec256 = v2··11;
         let ws180: lib::intvector_intrinsics::vec256 = v1··11;
         let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-        let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-        let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-        let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-        let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+        let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+        let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+        let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+        let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
         let v0·12: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
         let v1·12: lib::intvector_intrinsics::vec256 =
@@ -4737,10 +4695,10 @@ pub fn sha3_256(
         let ws211: lib::intvector_intrinsics::vec256 = v2··12;
         let ws220: lib::intvector_intrinsics::vec256 = v1··12;
         let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-        let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-        let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-        let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-        let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+        let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+        let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+        let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+        let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
         let v0·13: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
         let v1·13: lib::intvector_intrinsics::vec256 =
@@ -4761,10 +4719,10 @@ pub fn sha3_256(
         let ws250: lib::intvector_intrinsics::vec256 = v2··13;
         let ws260: lib::intvector_intrinsics::vec256 = v1··13;
         let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-        let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-        let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-        let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-        let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+        let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+        let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+        let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+        let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
         let v0·14: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
         let v1·14: lib::intvector_intrinsics::vec256 =
@@ -4824,42 +4782,39 @@ pub fn sha3_256(
             1u32,
             lib::intvector_intrinsics::vec256_store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(32u32) as usize..],
-                (&ws32)[i0 as usize]
+                (&mut ws32)[i0 as usize]
             )
         );
         match rb
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref mut b01,
+                fst: b01,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref mut b11,
-                    snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-                }
+                { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
             }
             =>
               {
                   (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[768usize..])[0usize..rateInBytes1 as usize]
                   )
               }
         };
@@ -4878,11 +4833,11 @@ pub fn sha3_256(
                     1u32,
                     {
                         let uu____0: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(0u32) as usize];
+                            (&mut s)[i1.wrapping_add(0u32) as usize];
                         let uu____1: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(5u32) as usize];
+                            (&mut s)[i1.wrapping_add(5u32) as usize];
                         let uu____2: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(10u32) as usize];
+                            (&mut s)[i1.wrapping_add(10u32) as usize];
                         (&mut _C)[i1 as usize] =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____0,
@@ -4891,8 +4846,8 @@ pub fn sha3_256(
                                     lib::intvector_intrinsics::vec256_xor(
                                         uu____2,
                                         lib::intvector_intrinsics::vec256_xor(
-                                            (&s)[i1.wrapping_add(15u32) as usize],
-                                            (&s)[i1.wrapping_add(20u32) as usize]
+                                            (&mut s)[i1.wrapping_add(15u32) as usize],
+                                            (&mut s)[i1.wrapping_add(20u32) as usize]
                                         )
                                     )
                                 )
@@ -4906,9 +4861,9 @@ pub fn sha3_256(
                     1u32,
                     {
                         let uu____3: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
                         let uu____4: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
                         let _D: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
@@ -4924,13 +4879,13 @@ pub fn sha3_256(
                             1u32,
                             (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] =
                                 lib::intvector_intrinsics::vec256_xor(
-                                    (&s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
+                                    (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
                                     _D
                                 )
                         )
                     }
                 );
-                let x: lib::intvector_intrinsics::vec256 = (&s)[1usize];
+                let x: lib::intvector_intrinsics::vec256 = (&mut s)[1usize];
                 let mut current: [lib::intvector_intrinsics::vec256; 1] = [x; 1usize];
                 krml::unroll_for!(
                     24,
@@ -4938,10 +4893,10 @@ pub fn sha3_256(
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
-                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
-                        let temp: lib::intvector_intrinsics::vec256 = (&s)[_Y as usize];
-                        let uu____5: lib::intvector_intrinsics::vec256 = (&current)[0usize];
+                        let _Y: u32 = (&mut crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&mut crate::hash_sha3::keccak_rotc)[i1 as usize];
+                        let temp: lib::intvector_intrinsics::vec256 = (&mut s)[_Y as usize];
+                        let uu____5: lib::intvector_intrinsics::vec256 = (&mut current)[0usize];
                         (&mut s)[_Y as usize] =
                             lib::intvector_intrinsics::vec256_or(
                                 lib::intvector_intrinsics::vec256_shift_left64(uu____5, r),
@@ -4960,73 +4915,73 @@ pub fn sha3_256(
                     1u32,
                     {
                         let uu____6: lib::intvector_intrinsics::vec256 =
-                            (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____7: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v015: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____6,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____7,
-                                    (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____8: lib::intvector_intrinsics::vec256 =
-                            (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____9: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v115: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____8,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____9,
-                                    (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____10: lib::intvector_intrinsics::vec256 =
-                            (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____11: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v215: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____10,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____11,
-                                    (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____12: lib::intvector_intrinsics::vec256 =
-                            (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____13: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v315: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____12,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____13,
-                                    (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____14: lib::intvector_intrinsics::vec256 =
-                            (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____15: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v4: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____14,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____15,
-                                    (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v015;
@@ -5036,8 +4991,8 @@ pub fn sha3_256(
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
-                let uu____16: lib::intvector_intrinsics::vec256 = (&s)[0usize];
+                let c: u64 = (&mut crate::hash_sha3::keccak_rndc)[i0 as usize];
+                let uu____16: lib::intvector_intrinsics::vec256 = (&mut s)[0usize];
                 (&mut s)[0usize] =
                     lib::intvector_intrinsics::vec256_xor(
                         uu____16,
@@ -5050,11 +5005,11 @@ pub fn sha3_256(
     let mut hbuf: [u8; 1024] = [0u8; 1024usize];
     let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
         [lib::intvector_intrinsics::vec256_zero; 32usize];
-    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-    let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-    let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-    let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-    let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+    let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+    let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+    let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+    let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
     let v0·7: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
     let v1·7: lib::intvector_intrinsics::vec256 =
@@ -5075,10 +5030,10 @@ pub fn sha3_256(
     let ws110: lib::intvector_intrinsics::vec256 = v2··7;
     let ws210: lib::intvector_intrinsics::vec256 = v1··7;
     let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-    let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-    let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-    let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-    let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+    let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+    let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+    let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+    let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
     let v0·8: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
     let v1·8: lib::intvector_intrinsics::vec256 =
@@ -5099,10 +5054,10 @@ pub fn sha3_256(
     let ws50: lib::intvector_intrinsics::vec256 = v2··8;
     let ws60: lib::intvector_intrinsics::vec256 = v1··8;
     let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-    let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-    let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-    let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-    let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+    let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+    let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+    let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+    let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
     let v0·9: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
     let v1·9: lib::intvector_intrinsics::vec256 =
@@ -5123,10 +5078,10 @@ pub fn sha3_256(
     let ws90: lib::intvector_intrinsics::vec256 = v2··9;
     let ws100: lib::intvector_intrinsics::vec256 = v1··9;
     let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-    let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-    let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-    let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-    let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+    let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+    let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+    let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+    let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
     let v0·10: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
     let v1·10: lib::intvector_intrinsics::vec256 =
@@ -5147,10 +5102,10 @@ pub fn sha3_256(
     let ws130: lib::intvector_intrinsics::vec256 = v2··10;
     let ws140: lib::intvector_intrinsics::vec256 = v1··10;
     let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-    let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-    let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-    let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-    let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+    let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+    let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+    let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+    let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
     let v0·11: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
     let v1·11: lib::intvector_intrinsics::vec256 =
@@ -5171,10 +5126,10 @@ pub fn sha3_256(
     let ws170: lib::intvector_intrinsics::vec256 = v2··11;
     let ws180: lib::intvector_intrinsics::vec256 = v1··11;
     let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-    let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-    let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-    let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-    let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+    let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+    let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+    let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+    let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
     let v0·12: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
     let v1·12: lib::intvector_intrinsics::vec256 =
@@ -5195,10 +5150,10 @@ pub fn sha3_256(
     let ws211: lib::intvector_intrinsics::vec256 = v2··12;
     let ws220: lib::intvector_intrinsics::vec256 = v1··12;
     let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-    let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-    let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-    let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-    let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+    let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+    let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+    let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+    let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
     let v0·13: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
     let v1·13: lib::intvector_intrinsics::vec256 =
@@ -5219,10 +5174,10 @@ pub fn sha3_256(
     let ws250: lib::intvector_intrinsics::vec256 = v2··13;
     let ws260: lib::intvector_intrinsics::vec256 = v1··13;
     let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-    let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-    let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-    let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-    let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+    let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+    let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+    let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+    let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
     let v0·14: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
     let v1·14: lib::intvector_intrinsics::vec256 =
@@ -5282,35 +5237,40 @@ pub fn sha3_256(
         1u32,
         lib::intvector_intrinsics::vec256_store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
-            (&ws32)[i as usize]
+            (&mut ws32)[i as usize]
         )
     );
     match rb
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
               (b01[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[0usize..])[0usize..remOut as usize]
+              );
               (b11[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[256usize..])[0usize..remOut as usize]
+              );
               (b21[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[512usize..])[0usize..remOut as usize]
+              );
               (b31[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[768usize..])[0usize..remOut as usize]
+              )
           }
     }
 }
@@ -5335,7 +5295,7 @@ pub fn sha3_384(
             crate::sha2_types::uint8_3p
             { fst: input1, snd: crate::sha2_types::uint8_2p { fst: input2, snd: input3 } }
         };
-    let mut rb: crate::sha2_types::uint8_4p =
+    let rb: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: output0,
@@ -5352,7 +5312,7 @@ pub fn sha3_384(
         let mut b1: [u8; 256] = [0u8; 256usize];
         let mut b2: [u8; 256] = [0u8; 256usize];
         let mut b3: [u8; 256] = [0u8; 256usize];
-        let mut b·: crate::sha2_types::uint8_4p =
+        let b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
                 fst: &mut b0,
@@ -5364,43 +5324,40 @@ pub fn sha3_384(
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref b00,
+                fst: b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+                { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
             }
             =>
               match b·
               {
                   crate::sha2_types::uint8_4p
                   {
-                      fst: ref mut bl0,
+                      fst: bl0,
                       snd:
                       crate::sha2_types::uint8_3p
-                      {
-                          fst: ref mut bl1,
-                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                      }
+                      { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
                   }
                   =>
                     {
                         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -5413,7 +5370,7 @@ pub fn sha3_384(
     let mut b1: [u8; 256] = [0u8; 256usize];
     let mut b2: [u8; 256] = [0u8; 256usize];
     let mut b3: [u8; 256] = [0u8; 256usize];
-    let mut b·: crate::sha2_types::uint8_4p =
+    let b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b0,
@@ -5426,37 +5383,34 @@ pub fn sha3_384(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           match b·
           {
               crate::sha2_types::uint8_4p
               {
-                  fst: ref mut bl0,
+                  fst: bl0,
                   snd:
                   crate::sha2_types::uint8_3p
-                  {
-                      fst: ref mut bl1,
-                      snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                  }
+                  { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
               }
               =>
                 {
                     (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -5465,13 +5419,10 @@ pub fn sha3_384(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b10,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b20, snd: ref mut b30 }
-            }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
@@ -5487,51 +5438,51 @@ pub fn sha3_384(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[224usize..])
           }
     };
-    let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
-    let v1: lib::intvector_intrinsics::vec256 = (&ws)[1usize];
-    let v2: lib::intvector_intrinsics::vec256 = (&ws)[2usize];
-    let v3: lib::intvector_intrinsics::vec256 = (&ws)[3usize];
+    let v0: lib::intvector_intrinsics::vec256 = (&mut ws)[0usize];
+    let v1: lib::intvector_intrinsics::vec256 = (&mut ws)[1usize];
+    let v2: lib::intvector_intrinsics::vec256 = (&mut ws)[2usize];
+    let v3: lib::intvector_intrinsics::vec256 = (&mut ws)[3usize];
     let v0·: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v0, v1);
     let v1·: lib::intvector_intrinsics::vec256 =
@@ -5552,10 +5503,10 @@ pub fn sha3_384(
     let ws1: lib::intvector_intrinsics::vec256 = v2··;
     let ws2: lib::intvector_intrinsics::vec256 = v1··;
     let ws3: lib::intvector_intrinsics::vec256 = v3··;
-    let v00: lib::intvector_intrinsics::vec256 = (&ws)[4usize];
-    let v10: lib::intvector_intrinsics::vec256 = (&ws)[5usize];
-    let v20: lib::intvector_intrinsics::vec256 = (&ws)[6usize];
-    let v30: lib::intvector_intrinsics::vec256 = (&ws)[7usize];
+    let v00: lib::intvector_intrinsics::vec256 = (&mut ws)[4usize];
+    let v10: lib::intvector_intrinsics::vec256 = (&mut ws)[5usize];
+    let v20: lib::intvector_intrinsics::vec256 = (&mut ws)[6usize];
+    let v30: lib::intvector_intrinsics::vec256 = (&mut ws)[7usize];
     let v0·0: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v00, v10);
     let v1·0: lib::intvector_intrinsics::vec256 =
@@ -5576,10 +5527,10 @@ pub fn sha3_384(
     let ws5: lib::intvector_intrinsics::vec256 = v2··0;
     let ws6: lib::intvector_intrinsics::vec256 = v1··0;
     let ws7: lib::intvector_intrinsics::vec256 = v3··0;
-    let v01: lib::intvector_intrinsics::vec256 = (&ws)[8usize];
-    let v11: lib::intvector_intrinsics::vec256 = (&ws)[9usize];
-    let v21: lib::intvector_intrinsics::vec256 = (&ws)[10usize];
-    let v31: lib::intvector_intrinsics::vec256 = (&ws)[11usize];
+    let v01: lib::intvector_intrinsics::vec256 = (&mut ws)[8usize];
+    let v11: lib::intvector_intrinsics::vec256 = (&mut ws)[9usize];
+    let v21: lib::intvector_intrinsics::vec256 = (&mut ws)[10usize];
+    let v31: lib::intvector_intrinsics::vec256 = (&mut ws)[11usize];
     let v0·1: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v01, v11);
     let v1·1: lib::intvector_intrinsics::vec256 =
@@ -5600,10 +5551,10 @@ pub fn sha3_384(
     let ws9: lib::intvector_intrinsics::vec256 = v2··1;
     let ws10: lib::intvector_intrinsics::vec256 = v1··1;
     let ws11: lib::intvector_intrinsics::vec256 = v3··1;
-    let v02: lib::intvector_intrinsics::vec256 = (&ws)[12usize];
-    let v12: lib::intvector_intrinsics::vec256 = (&ws)[13usize];
-    let v22: lib::intvector_intrinsics::vec256 = (&ws)[14usize];
-    let v32: lib::intvector_intrinsics::vec256 = (&ws)[15usize];
+    let v02: lib::intvector_intrinsics::vec256 = (&mut ws)[12usize];
+    let v12: lib::intvector_intrinsics::vec256 = (&mut ws)[13usize];
+    let v22: lib::intvector_intrinsics::vec256 = (&mut ws)[14usize];
+    let v32: lib::intvector_intrinsics::vec256 = (&mut ws)[15usize];
     let v0·2: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v02, v12);
     let v1·2: lib::intvector_intrinsics::vec256 =
@@ -5624,10 +5575,10 @@ pub fn sha3_384(
     let ws13: lib::intvector_intrinsics::vec256 = v2··2;
     let ws14: lib::intvector_intrinsics::vec256 = v1··2;
     let ws15: lib::intvector_intrinsics::vec256 = v3··2;
-    let v03: lib::intvector_intrinsics::vec256 = (&ws)[16usize];
-    let v13: lib::intvector_intrinsics::vec256 = (&ws)[17usize];
-    let v23: lib::intvector_intrinsics::vec256 = (&ws)[18usize];
-    let v33: lib::intvector_intrinsics::vec256 = (&ws)[19usize];
+    let v03: lib::intvector_intrinsics::vec256 = (&mut ws)[16usize];
+    let v13: lib::intvector_intrinsics::vec256 = (&mut ws)[17usize];
+    let v23: lib::intvector_intrinsics::vec256 = (&mut ws)[18usize];
+    let v33: lib::intvector_intrinsics::vec256 = (&mut ws)[19usize];
     let v0·3: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v03, v13);
     let v1·3: lib::intvector_intrinsics::vec256 =
@@ -5648,10 +5599,10 @@ pub fn sha3_384(
     let ws17: lib::intvector_intrinsics::vec256 = v2··3;
     let ws18: lib::intvector_intrinsics::vec256 = v1··3;
     let ws19: lib::intvector_intrinsics::vec256 = v3··3;
-    let v04: lib::intvector_intrinsics::vec256 = (&ws)[20usize];
-    let v14: lib::intvector_intrinsics::vec256 = (&ws)[21usize];
-    let v24: lib::intvector_intrinsics::vec256 = (&ws)[22usize];
-    let v34: lib::intvector_intrinsics::vec256 = (&ws)[23usize];
+    let v04: lib::intvector_intrinsics::vec256 = (&mut ws)[20usize];
+    let v14: lib::intvector_intrinsics::vec256 = (&mut ws)[21usize];
+    let v24: lib::intvector_intrinsics::vec256 = (&mut ws)[22usize];
+    let v34: lib::intvector_intrinsics::vec256 = (&mut ws)[23usize];
     let v0·4: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v04, v14);
     let v1·4: lib::intvector_intrinsics::vec256 =
@@ -5672,10 +5623,10 @@ pub fn sha3_384(
     let ws21: lib::intvector_intrinsics::vec256 = v2··4;
     let ws22: lib::intvector_intrinsics::vec256 = v1··4;
     let ws23: lib::intvector_intrinsics::vec256 = v3··4;
-    let v05: lib::intvector_intrinsics::vec256 = (&ws)[24usize];
-    let v15: lib::intvector_intrinsics::vec256 = (&ws)[25usize];
-    let v25: lib::intvector_intrinsics::vec256 = (&ws)[26usize];
-    let v35: lib::intvector_intrinsics::vec256 = (&ws)[27usize];
+    let v05: lib::intvector_intrinsics::vec256 = (&mut ws)[24usize];
+    let v15: lib::intvector_intrinsics::vec256 = (&mut ws)[25usize];
+    let v25: lib::intvector_intrinsics::vec256 = (&mut ws)[26usize];
+    let v35: lib::intvector_intrinsics::vec256 = (&mut ws)[27usize];
     let v0·5: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v05, v15);
     let v1·5: lib::intvector_intrinsics::vec256 =
@@ -5696,10 +5647,10 @@ pub fn sha3_384(
     let ws25: lib::intvector_intrinsics::vec256 = v2··5;
     let ws26: lib::intvector_intrinsics::vec256 = v1··5;
     let ws27: lib::intvector_intrinsics::vec256 = v3··5;
-    let v06: lib::intvector_intrinsics::vec256 = (&ws)[28usize];
-    let v16: lib::intvector_intrinsics::vec256 = (&ws)[29usize];
-    let v26: lib::intvector_intrinsics::vec256 = (&ws)[30usize];
-    let v36: lib::intvector_intrinsics::vec256 = (&ws)[31usize];
+    let v06: lib::intvector_intrinsics::vec256 = (&mut ws)[28usize];
+    let v16: lib::intvector_intrinsics::vec256 = (&mut ws)[29usize];
+    let v26: lib::intvector_intrinsics::vec256 = (&mut ws)[30usize];
+    let v36: lib::intvector_intrinsics::vec256 = (&mut ws)[31usize];
     let v0·6: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v06, v16);
     let v1·6: lib::intvector_intrinsics::vec256 =
@@ -5758,13 +5709,13 @@ pub fn sha3_384(
         0u32,
         1u32,
         (&mut s)[i as usize] =
-            lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
+            lib::intvector_intrinsics::vec256_xor((&mut s)[i as usize], (&mut ws)[i as usize])
     );
     let mut b00: [u8; 256] = [0u8; 256usize];
     let mut b10: [u8; 256] = [0u8; 256usize];
     let mut b20: [u8; 256] = [0u8; 256usize];
     let mut b30: [u8; 256] = [0u8; 256usize];
-    let mut b: crate::sha2_types::uint8_4p =
+    let b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b00,
@@ -5776,13 +5727,10 @@ pub fn sha3_384(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
@@ -5798,11 +5746,11 @@ pub fn sha3_384(
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
         let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
             [lib::intvector_intrinsics::vec256_zero; 32usize];
-        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-        let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-        let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-        let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-        let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+        let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+        let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+        let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+        let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
         let v0·7: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
         let v1·7: lib::intvector_intrinsics::vec256 =
@@ -5823,10 +5771,10 @@ pub fn sha3_384(
         let ws110: lib::intvector_intrinsics::vec256 = v2··7;
         let ws210: lib::intvector_intrinsics::vec256 = v1··7;
         let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-        let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-        let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-        let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-        let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+        let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+        let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+        let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+        let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
         let v0·8: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
         let v1·8: lib::intvector_intrinsics::vec256 =
@@ -5847,10 +5795,10 @@ pub fn sha3_384(
         let ws50: lib::intvector_intrinsics::vec256 = v2··8;
         let ws60: lib::intvector_intrinsics::vec256 = v1··8;
         let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-        let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-        let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-        let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-        let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+        let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+        let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+        let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+        let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
         let v0·9: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
         let v1·9: lib::intvector_intrinsics::vec256 =
@@ -5871,10 +5819,10 @@ pub fn sha3_384(
         let ws90: lib::intvector_intrinsics::vec256 = v2··9;
         let ws100: lib::intvector_intrinsics::vec256 = v1··9;
         let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-        let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-        let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-        let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-        let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+        let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+        let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+        let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+        let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
         let v0·10: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
         let v1·10: lib::intvector_intrinsics::vec256 =
@@ -5895,10 +5843,10 @@ pub fn sha3_384(
         let ws130: lib::intvector_intrinsics::vec256 = v2··10;
         let ws140: lib::intvector_intrinsics::vec256 = v1··10;
         let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-        let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-        let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-        let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-        let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+        let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+        let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+        let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+        let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
         let v0·11: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
         let v1·11: lib::intvector_intrinsics::vec256 =
@@ -5919,10 +5867,10 @@ pub fn sha3_384(
         let ws170: lib::intvector_intrinsics::vec256 = v2··11;
         let ws180: lib::intvector_intrinsics::vec256 = v1··11;
         let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-        let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-        let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-        let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-        let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+        let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+        let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+        let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+        let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
         let v0·12: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
         let v1·12: lib::intvector_intrinsics::vec256 =
@@ -5943,10 +5891,10 @@ pub fn sha3_384(
         let ws211: lib::intvector_intrinsics::vec256 = v2··12;
         let ws220: lib::intvector_intrinsics::vec256 = v1··12;
         let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-        let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-        let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-        let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-        let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+        let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+        let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+        let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+        let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
         let v0·13: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
         let v1·13: lib::intvector_intrinsics::vec256 =
@@ -5967,10 +5915,10 @@ pub fn sha3_384(
         let ws250: lib::intvector_intrinsics::vec256 = v2··13;
         let ws260: lib::intvector_intrinsics::vec256 = v1··13;
         let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-        let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-        let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-        let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-        let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+        let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+        let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+        let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+        let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
         let v0·14: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
         let v1·14: lib::intvector_intrinsics::vec256 =
@@ -6030,42 +5978,39 @@ pub fn sha3_384(
             1u32,
             lib::intvector_intrinsics::vec256_store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(32u32) as usize..],
-                (&ws32)[i0 as usize]
+                (&mut ws32)[i0 as usize]
             )
         );
         match rb
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref mut b01,
+                fst: b01,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref mut b11,
-                    snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-                }
+                { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
             }
             =>
               {
                   (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[768usize..])[0usize..rateInBytes1 as usize]
                   )
               }
         };
@@ -6084,11 +6029,11 @@ pub fn sha3_384(
                     1u32,
                     {
                         let uu____0: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(0u32) as usize];
+                            (&mut s)[i1.wrapping_add(0u32) as usize];
                         let uu____1: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(5u32) as usize];
+                            (&mut s)[i1.wrapping_add(5u32) as usize];
                         let uu____2: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(10u32) as usize];
+                            (&mut s)[i1.wrapping_add(10u32) as usize];
                         (&mut _C)[i1 as usize] =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____0,
@@ -6097,8 +6042,8 @@ pub fn sha3_384(
                                     lib::intvector_intrinsics::vec256_xor(
                                         uu____2,
                                         lib::intvector_intrinsics::vec256_xor(
-                                            (&s)[i1.wrapping_add(15u32) as usize],
-                                            (&s)[i1.wrapping_add(20u32) as usize]
+                                            (&mut s)[i1.wrapping_add(15u32) as usize],
+                                            (&mut s)[i1.wrapping_add(20u32) as usize]
                                         )
                                     )
                                 )
@@ -6112,9 +6057,9 @@ pub fn sha3_384(
                     1u32,
                     {
                         let uu____3: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
                         let uu____4: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
                         let _D: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
@@ -6130,13 +6075,13 @@ pub fn sha3_384(
                             1u32,
                             (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] =
                                 lib::intvector_intrinsics::vec256_xor(
-                                    (&s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
+                                    (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
                                     _D
                                 )
                         )
                     }
                 );
-                let x: lib::intvector_intrinsics::vec256 = (&s)[1usize];
+                let x: lib::intvector_intrinsics::vec256 = (&mut s)[1usize];
                 let mut current: [lib::intvector_intrinsics::vec256; 1] = [x; 1usize];
                 krml::unroll_for!(
                     24,
@@ -6144,10 +6089,10 @@ pub fn sha3_384(
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
-                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
-                        let temp: lib::intvector_intrinsics::vec256 = (&s)[_Y as usize];
-                        let uu____5: lib::intvector_intrinsics::vec256 = (&current)[0usize];
+                        let _Y: u32 = (&mut crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&mut crate::hash_sha3::keccak_rotc)[i1 as usize];
+                        let temp: lib::intvector_intrinsics::vec256 = (&mut s)[_Y as usize];
+                        let uu____5: lib::intvector_intrinsics::vec256 = (&mut current)[0usize];
                         (&mut s)[_Y as usize] =
                             lib::intvector_intrinsics::vec256_or(
                                 lib::intvector_intrinsics::vec256_shift_left64(uu____5, r),
@@ -6166,73 +6111,73 @@ pub fn sha3_384(
                     1u32,
                     {
                         let uu____6: lib::intvector_intrinsics::vec256 =
-                            (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____7: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v015: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____6,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____7,
-                                    (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____8: lib::intvector_intrinsics::vec256 =
-                            (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____9: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v115: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____8,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____9,
-                                    (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____10: lib::intvector_intrinsics::vec256 =
-                            (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____11: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v215: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____10,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____11,
-                                    (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____12: lib::intvector_intrinsics::vec256 =
-                            (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____13: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v315: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____12,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____13,
-                                    (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____14: lib::intvector_intrinsics::vec256 =
-                            (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____15: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v4: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____14,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____15,
-                                    (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v015;
@@ -6242,8 +6187,8 @@ pub fn sha3_384(
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
-                let uu____16: lib::intvector_intrinsics::vec256 = (&s)[0usize];
+                let c: u64 = (&mut crate::hash_sha3::keccak_rndc)[i0 as usize];
+                let uu____16: lib::intvector_intrinsics::vec256 = (&mut s)[0usize];
                 (&mut s)[0usize] =
                     lib::intvector_intrinsics::vec256_xor(
                         uu____16,
@@ -6256,11 +6201,11 @@ pub fn sha3_384(
     let mut hbuf: [u8; 1024] = [0u8; 1024usize];
     let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
         [lib::intvector_intrinsics::vec256_zero; 32usize];
-    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-    let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-    let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-    let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-    let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+    let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+    let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+    let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+    let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
     let v0·7: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
     let v1·7: lib::intvector_intrinsics::vec256 =
@@ -6281,10 +6226,10 @@ pub fn sha3_384(
     let ws110: lib::intvector_intrinsics::vec256 = v2··7;
     let ws210: lib::intvector_intrinsics::vec256 = v1··7;
     let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-    let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-    let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-    let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-    let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+    let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+    let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+    let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+    let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
     let v0·8: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
     let v1·8: lib::intvector_intrinsics::vec256 =
@@ -6305,10 +6250,10 @@ pub fn sha3_384(
     let ws50: lib::intvector_intrinsics::vec256 = v2··8;
     let ws60: lib::intvector_intrinsics::vec256 = v1··8;
     let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-    let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-    let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-    let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-    let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+    let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+    let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+    let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+    let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
     let v0·9: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
     let v1·9: lib::intvector_intrinsics::vec256 =
@@ -6329,10 +6274,10 @@ pub fn sha3_384(
     let ws90: lib::intvector_intrinsics::vec256 = v2··9;
     let ws100: lib::intvector_intrinsics::vec256 = v1··9;
     let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-    let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-    let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-    let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-    let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+    let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+    let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+    let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+    let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
     let v0·10: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
     let v1·10: lib::intvector_intrinsics::vec256 =
@@ -6353,10 +6298,10 @@ pub fn sha3_384(
     let ws130: lib::intvector_intrinsics::vec256 = v2··10;
     let ws140: lib::intvector_intrinsics::vec256 = v1··10;
     let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-    let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-    let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-    let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-    let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+    let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+    let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+    let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+    let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
     let v0·11: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
     let v1·11: lib::intvector_intrinsics::vec256 =
@@ -6377,10 +6322,10 @@ pub fn sha3_384(
     let ws170: lib::intvector_intrinsics::vec256 = v2··11;
     let ws180: lib::intvector_intrinsics::vec256 = v1··11;
     let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-    let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-    let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-    let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-    let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+    let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+    let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+    let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+    let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
     let v0·12: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
     let v1·12: lib::intvector_intrinsics::vec256 =
@@ -6401,10 +6346,10 @@ pub fn sha3_384(
     let ws211: lib::intvector_intrinsics::vec256 = v2··12;
     let ws220: lib::intvector_intrinsics::vec256 = v1··12;
     let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-    let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-    let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-    let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-    let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+    let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+    let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+    let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+    let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
     let v0·13: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
     let v1·13: lib::intvector_intrinsics::vec256 =
@@ -6425,10 +6370,10 @@ pub fn sha3_384(
     let ws250: lib::intvector_intrinsics::vec256 = v2··13;
     let ws260: lib::intvector_intrinsics::vec256 = v1··13;
     let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-    let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-    let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-    let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-    let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+    let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+    let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+    let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+    let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
     let v0·14: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
     let v1·14: lib::intvector_intrinsics::vec256 =
@@ -6488,35 +6433,40 @@ pub fn sha3_384(
         1u32,
         lib::intvector_intrinsics::vec256_store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
-            (&ws32)[i as usize]
+            (&mut ws32)[i as usize]
         )
     );
     match rb
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
               (b01[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[0usize..])[0usize..remOut as usize]
+              );
               (b11[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[256usize..])[0usize..remOut as usize]
+              );
               (b21[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[512usize..])[0usize..remOut as usize]
+              );
               (b31[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[768usize..])[0usize..remOut as usize]
+              )
           }
     }
 }
@@ -6541,7 +6491,7 @@ pub fn sha3_512(
             crate::sha2_types::uint8_3p
             { fst: input1, snd: crate::sha2_types::uint8_2p { fst: input2, snd: input3 } }
         };
-    let mut rb: crate::sha2_types::uint8_4p =
+    let rb: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: output0,
@@ -6558,7 +6508,7 @@ pub fn sha3_512(
         let mut b1: [u8; 256] = [0u8; 256usize];
         let mut b2: [u8; 256] = [0u8; 256usize];
         let mut b3: [u8; 256] = [0u8; 256usize];
-        let mut b·: crate::sha2_types::uint8_4p =
+        let b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
                 fst: &mut b0,
@@ -6570,43 +6520,40 @@ pub fn sha3_512(
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref b00,
+                fst: b00,
                 snd:
                 crate::sha2_types::uint8_3p
-                { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+                { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
             }
             =>
               match b·
               {
                   crate::sha2_types::uint8_4p
                   {
-                      fst: ref mut bl0,
+                      fst: bl0,
                       snd:
                       crate::sha2_types::uint8_3p
-                      {
-                          fst: ref mut bl1,
-                          snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                      }
+                      { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
                   }
                   =>
                     {
                         (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
                         (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                            &(&mut b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -6619,7 +6566,7 @@ pub fn sha3_512(
     let mut b1: [u8; 256] = [0u8; 256usize];
     let mut b2: [u8; 256] = [0u8; 256usize];
     let mut b3: [u8; 256] = [0u8; 256usize];
-    let mut b·: crate::sha2_types::uint8_4p =
+    let b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b0,
@@ -6632,37 +6579,34 @@ pub fn sha3_512(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           match b·
           {
               crate::sha2_types::uint8_4p
               {
-                  fst: ref mut bl0,
+                  fst: bl0,
                   snd:
                   crate::sha2_types::uint8_3p
-                  {
-                      fst: ref mut bl1,
-                      snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                  }
+                  { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
               }
               =>
                 {
                     (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
                     (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                        &(&mut b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -6671,13 +6615,10 @@ pub fn sha3_512(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b10,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b20, snd: ref mut b30 }
-            }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
@@ -6693,51 +6634,51 @@ pub fn sha3_512(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b00,
+            fst: b00,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b10, snd: crate::sha2_types::uint8_2p { fst: ref b20, snd: ref b30 } }
+            { fst: b10, snd: crate::sha2_types::uint8_2p { fst: b20, snd: b30 } }
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b00[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b10[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b20[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b30[224usize..])
           }
     };
-    let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
-    let v1: lib::intvector_intrinsics::vec256 = (&ws)[1usize];
-    let v2: lib::intvector_intrinsics::vec256 = (&ws)[2usize];
-    let v3: lib::intvector_intrinsics::vec256 = (&ws)[3usize];
+    let v0: lib::intvector_intrinsics::vec256 = (&mut ws)[0usize];
+    let v1: lib::intvector_intrinsics::vec256 = (&mut ws)[1usize];
+    let v2: lib::intvector_intrinsics::vec256 = (&mut ws)[2usize];
+    let v3: lib::intvector_intrinsics::vec256 = (&mut ws)[3usize];
     let v0·: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v0, v1);
     let v1·: lib::intvector_intrinsics::vec256 =
@@ -6758,10 +6699,10 @@ pub fn sha3_512(
     let ws1: lib::intvector_intrinsics::vec256 = v2··;
     let ws2: lib::intvector_intrinsics::vec256 = v1··;
     let ws3: lib::intvector_intrinsics::vec256 = v3··;
-    let v00: lib::intvector_intrinsics::vec256 = (&ws)[4usize];
-    let v10: lib::intvector_intrinsics::vec256 = (&ws)[5usize];
-    let v20: lib::intvector_intrinsics::vec256 = (&ws)[6usize];
-    let v30: lib::intvector_intrinsics::vec256 = (&ws)[7usize];
+    let v00: lib::intvector_intrinsics::vec256 = (&mut ws)[4usize];
+    let v10: lib::intvector_intrinsics::vec256 = (&mut ws)[5usize];
+    let v20: lib::intvector_intrinsics::vec256 = (&mut ws)[6usize];
+    let v30: lib::intvector_intrinsics::vec256 = (&mut ws)[7usize];
     let v0·0: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v00, v10);
     let v1·0: lib::intvector_intrinsics::vec256 =
@@ -6782,10 +6723,10 @@ pub fn sha3_512(
     let ws5: lib::intvector_intrinsics::vec256 = v2··0;
     let ws6: lib::intvector_intrinsics::vec256 = v1··0;
     let ws7: lib::intvector_intrinsics::vec256 = v3··0;
-    let v01: lib::intvector_intrinsics::vec256 = (&ws)[8usize];
-    let v11: lib::intvector_intrinsics::vec256 = (&ws)[9usize];
-    let v21: lib::intvector_intrinsics::vec256 = (&ws)[10usize];
-    let v31: lib::intvector_intrinsics::vec256 = (&ws)[11usize];
+    let v01: lib::intvector_intrinsics::vec256 = (&mut ws)[8usize];
+    let v11: lib::intvector_intrinsics::vec256 = (&mut ws)[9usize];
+    let v21: lib::intvector_intrinsics::vec256 = (&mut ws)[10usize];
+    let v31: lib::intvector_intrinsics::vec256 = (&mut ws)[11usize];
     let v0·1: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v01, v11);
     let v1·1: lib::intvector_intrinsics::vec256 =
@@ -6806,10 +6747,10 @@ pub fn sha3_512(
     let ws9: lib::intvector_intrinsics::vec256 = v2··1;
     let ws10: lib::intvector_intrinsics::vec256 = v1··1;
     let ws11: lib::intvector_intrinsics::vec256 = v3··1;
-    let v02: lib::intvector_intrinsics::vec256 = (&ws)[12usize];
-    let v12: lib::intvector_intrinsics::vec256 = (&ws)[13usize];
-    let v22: lib::intvector_intrinsics::vec256 = (&ws)[14usize];
-    let v32: lib::intvector_intrinsics::vec256 = (&ws)[15usize];
+    let v02: lib::intvector_intrinsics::vec256 = (&mut ws)[12usize];
+    let v12: lib::intvector_intrinsics::vec256 = (&mut ws)[13usize];
+    let v22: lib::intvector_intrinsics::vec256 = (&mut ws)[14usize];
+    let v32: lib::intvector_intrinsics::vec256 = (&mut ws)[15usize];
     let v0·2: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v02, v12);
     let v1·2: lib::intvector_intrinsics::vec256 =
@@ -6830,10 +6771,10 @@ pub fn sha3_512(
     let ws13: lib::intvector_intrinsics::vec256 = v2··2;
     let ws14: lib::intvector_intrinsics::vec256 = v1··2;
     let ws15: lib::intvector_intrinsics::vec256 = v3··2;
-    let v03: lib::intvector_intrinsics::vec256 = (&ws)[16usize];
-    let v13: lib::intvector_intrinsics::vec256 = (&ws)[17usize];
-    let v23: lib::intvector_intrinsics::vec256 = (&ws)[18usize];
-    let v33: lib::intvector_intrinsics::vec256 = (&ws)[19usize];
+    let v03: lib::intvector_intrinsics::vec256 = (&mut ws)[16usize];
+    let v13: lib::intvector_intrinsics::vec256 = (&mut ws)[17usize];
+    let v23: lib::intvector_intrinsics::vec256 = (&mut ws)[18usize];
+    let v33: lib::intvector_intrinsics::vec256 = (&mut ws)[19usize];
     let v0·3: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v03, v13);
     let v1·3: lib::intvector_intrinsics::vec256 =
@@ -6854,10 +6795,10 @@ pub fn sha3_512(
     let ws17: lib::intvector_intrinsics::vec256 = v2··3;
     let ws18: lib::intvector_intrinsics::vec256 = v1··3;
     let ws19: lib::intvector_intrinsics::vec256 = v3··3;
-    let v04: lib::intvector_intrinsics::vec256 = (&ws)[20usize];
-    let v14: lib::intvector_intrinsics::vec256 = (&ws)[21usize];
-    let v24: lib::intvector_intrinsics::vec256 = (&ws)[22usize];
-    let v34: lib::intvector_intrinsics::vec256 = (&ws)[23usize];
+    let v04: lib::intvector_intrinsics::vec256 = (&mut ws)[20usize];
+    let v14: lib::intvector_intrinsics::vec256 = (&mut ws)[21usize];
+    let v24: lib::intvector_intrinsics::vec256 = (&mut ws)[22usize];
+    let v34: lib::intvector_intrinsics::vec256 = (&mut ws)[23usize];
     let v0·4: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v04, v14);
     let v1·4: lib::intvector_intrinsics::vec256 =
@@ -6878,10 +6819,10 @@ pub fn sha3_512(
     let ws21: lib::intvector_intrinsics::vec256 = v2··4;
     let ws22: lib::intvector_intrinsics::vec256 = v1··4;
     let ws23: lib::intvector_intrinsics::vec256 = v3··4;
-    let v05: lib::intvector_intrinsics::vec256 = (&ws)[24usize];
-    let v15: lib::intvector_intrinsics::vec256 = (&ws)[25usize];
-    let v25: lib::intvector_intrinsics::vec256 = (&ws)[26usize];
-    let v35: lib::intvector_intrinsics::vec256 = (&ws)[27usize];
+    let v05: lib::intvector_intrinsics::vec256 = (&mut ws)[24usize];
+    let v15: lib::intvector_intrinsics::vec256 = (&mut ws)[25usize];
+    let v25: lib::intvector_intrinsics::vec256 = (&mut ws)[26usize];
+    let v35: lib::intvector_intrinsics::vec256 = (&mut ws)[27usize];
     let v0·5: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v05, v15);
     let v1·5: lib::intvector_intrinsics::vec256 =
@@ -6902,10 +6843,10 @@ pub fn sha3_512(
     let ws25: lib::intvector_intrinsics::vec256 = v2··5;
     let ws26: lib::intvector_intrinsics::vec256 = v1··5;
     let ws27: lib::intvector_intrinsics::vec256 = v3··5;
-    let v06: lib::intvector_intrinsics::vec256 = (&ws)[28usize];
-    let v16: lib::intvector_intrinsics::vec256 = (&ws)[29usize];
-    let v26: lib::intvector_intrinsics::vec256 = (&ws)[30usize];
-    let v36: lib::intvector_intrinsics::vec256 = (&ws)[31usize];
+    let v06: lib::intvector_intrinsics::vec256 = (&mut ws)[28usize];
+    let v16: lib::intvector_intrinsics::vec256 = (&mut ws)[29usize];
+    let v26: lib::intvector_intrinsics::vec256 = (&mut ws)[30usize];
+    let v36: lib::intvector_intrinsics::vec256 = (&mut ws)[31usize];
     let v0·6: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v06, v16);
     let v1·6: lib::intvector_intrinsics::vec256 =
@@ -6964,13 +6905,13 @@ pub fn sha3_512(
         0u32,
         1u32,
         (&mut s)[i as usize] =
-            lib::intvector_intrinsics::vec256_xor((&s)[i as usize], (&ws)[i as usize])
+            lib::intvector_intrinsics::vec256_xor((&mut s)[i as usize], (&mut ws)[i as usize])
     );
     let mut b00: [u8; 256] = [0u8; 256usize];
     let mut b10: [u8; 256] = [0u8; 256usize];
     let mut b20: [u8; 256] = [0u8; 256usize];
     let mut b30: [u8; 256] = [0u8; 256usize];
-    let mut b: crate::sha2_types::uint8_4p =
+    let b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b00,
@@ -6982,13 +6923,10 @@ pub fn sha3_512(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
@@ -7004,11 +6942,11 @@ pub fn sha3_512(
         let mut hbuf: [u8; 1024] = [0u8; 1024usize];
         let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
             [lib::intvector_intrinsics::vec256_zero; 32usize];
-        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-        let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-        let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-        let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-        let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+        ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+        let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+        let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+        let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+        let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
         let v0·7: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
         let v1·7: lib::intvector_intrinsics::vec256 =
@@ -7029,10 +6967,10 @@ pub fn sha3_512(
         let ws110: lib::intvector_intrinsics::vec256 = v2··7;
         let ws210: lib::intvector_intrinsics::vec256 = v1··7;
         let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-        let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-        let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-        let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-        let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+        let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+        let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+        let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+        let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
         let v0·8: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
         let v1·8: lib::intvector_intrinsics::vec256 =
@@ -7053,10 +6991,10 @@ pub fn sha3_512(
         let ws50: lib::intvector_intrinsics::vec256 = v2··8;
         let ws60: lib::intvector_intrinsics::vec256 = v1··8;
         let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-        let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-        let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-        let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-        let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+        let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+        let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+        let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+        let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
         let v0·9: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
         let v1·9: lib::intvector_intrinsics::vec256 =
@@ -7077,10 +7015,10 @@ pub fn sha3_512(
         let ws90: lib::intvector_intrinsics::vec256 = v2··9;
         let ws100: lib::intvector_intrinsics::vec256 = v1··9;
         let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-        let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-        let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-        let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-        let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+        let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+        let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+        let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+        let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
         let v0·10: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
         let v1·10: lib::intvector_intrinsics::vec256 =
@@ -7101,10 +7039,10 @@ pub fn sha3_512(
         let ws130: lib::intvector_intrinsics::vec256 = v2··10;
         let ws140: lib::intvector_intrinsics::vec256 = v1··10;
         let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-        let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-        let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-        let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-        let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+        let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+        let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+        let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+        let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
         let v0·11: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
         let v1·11: lib::intvector_intrinsics::vec256 =
@@ -7125,10 +7063,10 @@ pub fn sha3_512(
         let ws170: lib::intvector_intrinsics::vec256 = v2··11;
         let ws180: lib::intvector_intrinsics::vec256 = v1··11;
         let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-        let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-        let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-        let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-        let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+        let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+        let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+        let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+        let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
         let v0·12: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
         let v1·12: lib::intvector_intrinsics::vec256 =
@@ -7149,10 +7087,10 @@ pub fn sha3_512(
         let ws211: lib::intvector_intrinsics::vec256 = v2··12;
         let ws220: lib::intvector_intrinsics::vec256 = v1··12;
         let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-        let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-        let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-        let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-        let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+        let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+        let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+        let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+        let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
         let v0·13: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
         let v1·13: lib::intvector_intrinsics::vec256 =
@@ -7173,10 +7111,10 @@ pub fn sha3_512(
         let ws250: lib::intvector_intrinsics::vec256 = v2··13;
         let ws260: lib::intvector_intrinsics::vec256 = v1··13;
         let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-        let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-        let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-        let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-        let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+        let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+        let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+        let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+        let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
         let v0·14: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
         let v1·14: lib::intvector_intrinsics::vec256 =
@@ -7236,42 +7174,39 @@ pub fn sha3_512(
             1u32,
             lib::intvector_intrinsics::vec256_store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(32u32) as usize..],
-                (&ws32)[i0 as usize]
+                (&mut ws32)[i0 as usize]
             )
         );
         match rb
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref mut b01,
+                fst: b01,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref mut b11,
-                    snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-                }
+                { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
             }
             =>
               {
                   (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
                   (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
-                      &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
+                      &(&mut (&mut hbuf)[768usize..])[0usize..rateInBytes1 as usize]
                   )
               }
         };
@@ -7290,11 +7225,11 @@ pub fn sha3_512(
                     1u32,
                     {
                         let uu____0: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(0u32) as usize];
+                            (&mut s)[i1.wrapping_add(0u32) as usize];
                         let uu____1: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(5u32) as usize];
+                            (&mut s)[i1.wrapping_add(5u32) as usize];
                         let uu____2: lib::intvector_intrinsics::vec256 =
-                            (&s)[i1.wrapping_add(10u32) as usize];
+                            (&mut s)[i1.wrapping_add(10u32) as usize];
                         (&mut _C)[i1 as usize] =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____0,
@@ -7303,8 +7238,8 @@ pub fn sha3_512(
                                     lib::intvector_intrinsics::vec256_xor(
                                         uu____2,
                                         lib::intvector_intrinsics::vec256_xor(
-                                            (&s)[i1.wrapping_add(15u32) as usize],
-                                            (&s)[i1.wrapping_add(20u32) as usize]
+                                            (&mut s)[i1.wrapping_add(15u32) as usize],
+                                            (&mut s)[i1.wrapping_add(20u32) as usize]
                                         )
                                     )
                                 )
@@ -7318,9 +7253,9 @@ pub fn sha3_512(
                     1u32,
                     {
                         let uu____3: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
                         let uu____4: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
                         let _D: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
@@ -7336,13 +7271,13 @@ pub fn sha3_512(
                             1u32,
                             (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] =
                                 lib::intvector_intrinsics::vec256_xor(
-                                    (&s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
+                                    (&mut s)[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize],
                                     _D
                                 )
                         )
                     }
                 );
-                let x: lib::intvector_intrinsics::vec256 = (&s)[1usize];
+                let x: lib::intvector_intrinsics::vec256 = (&mut s)[1usize];
                 let mut current: [lib::intvector_intrinsics::vec256; 1] = [x; 1usize];
                 krml::unroll_for!(
                     24,
@@ -7350,10 +7285,10 @@ pub fn sha3_512(
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
-                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
-                        let temp: lib::intvector_intrinsics::vec256 = (&s)[_Y as usize];
-                        let uu____5: lib::intvector_intrinsics::vec256 = (&current)[0usize];
+                        let _Y: u32 = (&mut crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&mut crate::hash_sha3::keccak_rotc)[i1 as usize];
+                        let temp: lib::intvector_intrinsics::vec256 = (&mut s)[_Y as usize];
+                        let uu____5: lib::intvector_intrinsics::vec256 = (&mut current)[0usize];
                         (&mut s)[_Y as usize] =
                             lib::intvector_intrinsics::vec256_or(
                                 lib::intvector_intrinsics::vec256_shift_left64(uu____5, r),
@@ -7372,73 +7307,73 @@ pub fn sha3_512(
                     1u32,
                     {
                         let uu____6: lib::intvector_intrinsics::vec256 =
-                            (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____7: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v015: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____6,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____7,
-                                    (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____8: lib::intvector_intrinsics::vec256 =
-                            (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____9: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v115: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____8,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____9,
-                                    (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____10: lib::intvector_intrinsics::vec256 =
-                            (&s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____11: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v215: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____10,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____11,
-                                    (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____12: lib::intvector_intrinsics::vec256 =
-                            (&s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____13: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v315: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____12,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____13,
-                                    (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         let uu____14: lib::intvector_intrinsics::vec256 =
-                            (&s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                            (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
                         let uu____15: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_lognot(
-                                (&s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                             );
                         let v4: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____14,
                                 lib::intvector_intrinsics::vec256_and(
                                     uu____15,
-                                    (&s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                                    (&mut s)[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
                                 )
                             );
                         (&mut s)[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v015;
@@ -7448,8 +7383,8 @@ pub fn sha3_512(
                         (&mut s)[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
-                let uu____16: lib::intvector_intrinsics::vec256 = (&s)[0usize];
+                let c: u64 = (&mut crate::hash_sha3::keccak_rndc)[i0 as usize];
+                let uu____16: lib::intvector_intrinsics::vec256 = (&mut s)[0usize];
                 (&mut s)[0usize] =
                     lib::intvector_intrinsics::vec256_xor(
                         uu____16,
@@ -7462,11 +7397,11 @@ pub fn sha3_512(
     let mut hbuf: [u8; 1024] = [0u8; 1024usize];
     let mut ws32: [lib::intvector_intrinsics::vec256; 32] =
         [lib::intvector_intrinsics::vec256_zero; 32usize];
-    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&s)[0usize..25usize]);
-    let v07: lib::intvector_intrinsics::vec256 = (&ws32)[0usize];
-    let v17: lib::intvector_intrinsics::vec256 = (&ws32)[1usize];
-    let v27: lib::intvector_intrinsics::vec256 = (&ws32)[2usize];
-    let v37: lib::intvector_intrinsics::vec256 = (&ws32)[3usize];
+    ((&mut ws32)[0usize..25usize]).copy_from_slice(&(&mut s)[0usize..25usize]);
+    let v07: lib::intvector_intrinsics::vec256 = (&mut ws32)[0usize];
+    let v17: lib::intvector_intrinsics::vec256 = (&mut ws32)[1usize];
+    let v27: lib::intvector_intrinsics::vec256 = (&mut ws32)[2usize];
+    let v37: lib::intvector_intrinsics::vec256 = (&mut ws32)[3usize];
     let v0·7: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v07, v17);
     let v1·7: lib::intvector_intrinsics::vec256 =
@@ -7487,10 +7422,10 @@ pub fn sha3_512(
     let ws110: lib::intvector_intrinsics::vec256 = v2··7;
     let ws210: lib::intvector_intrinsics::vec256 = v1··7;
     let ws33: lib::intvector_intrinsics::vec256 = v3··7;
-    let v08: lib::intvector_intrinsics::vec256 = (&ws32)[4usize];
-    let v18: lib::intvector_intrinsics::vec256 = (&ws32)[5usize];
-    let v28: lib::intvector_intrinsics::vec256 = (&ws32)[6usize];
-    let v38: lib::intvector_intrinsics::vec256 = (&ws32)[7usize];
+    let v08: lib::intvector_intrinsics::vec256 = (&mut ws32)[4usize];
+    let v18: lib::intvector_intrinsics::vec256 = (&mut ws32)[5usize];
+    let v28: lib::intvector_intrinsics::vec256 = (&mut ws32)[6usize];
+    let v38: lib::intvector_intrinsics::vec256 = (&mut ws32)[7usize];
     let v0·8: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v08, v18);
     let v1·8: lib::intvector_intrinsics::vec256 =
@@ -7511,10 +7446,10 @@ pub fn sha3_512(
     let ws50: lib::intvector_intrinsics::vec256 = v2··8;
     let ws60: lib::intvector_intrinsics::vec256 = v1··8;
     let ws70: lib::intvector_intrinsics::vec256 = v3··8;
-    let v09: lib::intvector_intrinsics::vec256 = (&ws32)[8usize];
-    let v19: lib::intvector_intrinsics::vec256 = (&ws32)[9usize];
-    let v29: lib::intvector_intrinsics::vec256 = (&ws32)[10usize];
-    let v39: lib::intvector_intrinsics::vec256 = (&ws32)[11usize];
+    let v09: lib::intvector_intrinsics::vec256 = (&mut ws32)[8usize];
+    let v19: lib::intvector_intrinsics::vec256 = (&mut ws32)[9usize];
+    let v29: lib::intvector_intrinsics::vec256 = (&mut ws32)[10usize];
+    let v39: lib::intvector_intrinsics::vec256 = (&mut ws32)[11usize];
     let v0·9: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v09, v19);
     let v1·9: lib::intvector_intrinsics::vec256 =
@@ -7535,10 +7470,10 @@ pub fn sha3_512(
     let ws90: lib::intvector_intrinsics::vec256 = v2··9;
     let ws100: lib::intvector_intrinsics::vec256 = v1··9;
     let ws111: lib::intvector_intrinsics::vec256 = v3··9;
-    let v010: lib::intvector_intrinsics::vec256 = (&ws32)[12usize];
-    let v110: lib::intvector_intrinsics::vec256 = (&ws32)[13usize];
-    let v210: lib::intvector_intrinsics::vec256 = (&ws32)[14usize];
-    let v310: lib::intvector_intrinsics::vec256 = (&ws32)[15usize];
+    let v010: lib::intvector_intrinsics::vec256 = (&mut ws32)[12usize];
+    let v110: lib::intvector_intrinsics::vec256 = (&mut ws32)[13usize];
+    let v210: lib::intvector_intrinsics::vec256 = (&mut ws32)[14usize];
+    let v310: lib::intvector_intrinsics::vec256 = (&mut ws32)[15usize];
     let v0·10: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v010, v110);
     let v1·10: lib::intvector_intrinsics::vec256 =
@@ -7559,10 +7494,10 @@ pub fn sha3_512(
     let ws130: lib::intvector_intrinsics::vec256 = v2··10;
     let ws140: lib::intvector_intrinsics::vec256 = v1··10;
     let ws150: lib::intvector_intrinsics::vec256 = v3··10;
-    let v011: lib::intvector_intrinsics::vec256 = (&ws32)[16usize];
-    let v111: lib::intvector_intrinsics::vec256 = (&ws32)[17usize];
-    let v211: lib::intvector_intrinsics::vec256 = (&ws32)[18usize];
-    let v311: lib::intvector_intrinsics::vec256 = (&ws32)[19usize];
+    let v011: lib::intvector_intrinsics::vec256 = (&mut ws32)[16usize];
+    let v111: lib::intvector_intrinsics::vec256 = (&mut ws32)[17usize];
+    let v211: lib::intvector_intrinsics::vec256 = (&mut ws32)[18usize];
+    let v311: lib::intvector_intrinsics::vec256 = (&mut ws32)[19usize];
     let v0·11: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v011, v111);
     let v1·11: lib::intvector_intrinsics::vec256 =
@@ -7583,10 +7518,10 @@ pub fn sha3_512(
     let ws170: lib::intvector_intrinsics::vec256 = v2··11;
     let ws180: lib::intvector_intrinsics::vec256 = v1··11;
     let ws190: lib::intvector_intrinsics::vec256 = v3··11;
-    let v012: lib::intvector_intrinsics::vec256 = (&ws32)[20usize];
-    let v112: lib::intvector_intrinsics::vec256 = (&ws32)[21usize];
-    let v212: lib::intvector_intrinsics::vec256 = (&ws32)[22usize];
-    let v312: lib::intvector_intrinsics::vec256 = (&ws32)[23usize];
+    let v012: lib::intvector_intrinsics::vec256 = (&mut ws32)[20usize];
+    let v112: lib::intvector_intrinsics::vec256 = (&mut ws32)[21usize];
+    let v212: lib::intvector_intrinsics::vec256 = (&mut ws32)[22usize];
+    let v312: lib::intvector_intrinsics::vec256 = (&mut ws32)[23usize];
     let v0·12: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v012, v112);
     let v1·12: lib::intvector_intrinsics::vec256 =
@@ -7607,10 +7542,10 @@ pub fn sha3_512(
     let ws211: lib::intvector_intrinsics::vec256 = v2··12;
     let ws220: lib::intvector_intrinsics::vec256 = v1··12;
     let ws230: lib::intvector_intrinsics::vec256 = v3··12;
-    let v013: lib::intvector_intrinsics::vec256 = (&ws32)[24usize];
-    let v113: lib::intvector_intrinsics::vec256 = (&ws32)[25usize];
-    let v213: lib::intvector_intrinsics::vec256 = (&ws32)[26usize];
-    let v313: lib::intvector_intrinsics::vec256 = (&ws32)[27usize];
+    let v013: lib::intvector_intrinsics::vec256 = (&mut ws32)[24usize];
+    let v113: lib::intvector_intrinsics::vec256 = (&mut ws32)[25usize];
+    let v213: lib::intvector_intrinsics::vec256 = (&mut ws32)[26usize];
+    let v313: lib::intvector_intrinsics::vec256 = (&mut ws32)[27usize];
     let v0·13: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v013, v113);
     let v1·13: lib::intvector_intrinsics::vec256 =
@@ -7631,10 +7566,10 @@ pub fn sha3_512(
     let ws250: lib::intvector_intrinsics::vec256 = v2··13;
     let ws260: lib::intvector_intrinsics::vec256 = v1··13;
     let ws270: lib::intvector_intrinsics::vec256 = v3··13;
-    let v014: lib::intvector_intrinsics::vec256 = (&ws32)[28usize];
-    let v114: lib::intvector_intrinsics::vec256 = (&ws32)[29usize];
-    let v214: lib::intvector_intrinsics::vec256 = (&ws32)[30usize];
-    let v314: lib::intvector_intrinsics::vec256 = (&ws32)[31usize];
+    let v014: lib::intvector_intrinsics::vec256 = (&mut ws32)[28usize];
+    let v114: lib::intvector_intrinsics::vec256 = (&mut ws32)[29usize];
+    let v214: lib::intvector_intrinsics::vec256 = (&mut ws32)[30usize];
+    let v314: lib::intvector_intrinsics::vec256 = (&mut ws32)[31usize];
     let v0·14: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v014, v114);
     let v1·14: lib::intvector_intrinsics::vec256 =
@@ -7694,35 +7629,40 @@ pub fn sha3_512(
         1u32,
         lib::intvector_intrinsics::vec256_store64_le(
             &mut (&mut hbuf)[i.wrapping_mul(32u32) as usize..],
-            (&ws32)[i as usize]
+            (&mut ws32)[i as usize]
         )
     );
     match rb
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
               (b01[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[0usize..])[0usize..remOut as usize]
+              );
               (b11[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[256usize..])[0usize..remOut as usize]
+              );
               (b21[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[512usize..])[0usize..remOut as usize]
+              );
               (b31[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
               +
-              remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
+              remOut as usize]).copy_from_slice(
+                  &(&mut (&mut hbuf)[768usize..])[0usize..remOut as usize]
+              )
           }
     }
 }
@@ -7734,7 +7674,7 @@ pub fn
 state_malloc() ->
     Box<[lib::intvector_intrinsics::vec256]>
 {
-    let buf: Box<[lib::intvector_intrinsics::vec256]> =
+    let mut buf: Box<[lib::intvector_intrinsics::vec256]> =
         vec![lib::intvector_intrinsics::vec256_zero; 25usize].into_boxed_slice();
     buf
 }
@@ -7743,7 +7683,7 @@ state_malloc() ->
 Free quadruple state buffer
 */
 pub fn
-state_free(s: &[lib::intvector_intrinsics::vec256])
+state_free(s: &mut [lib::intvector_intrinsics::vec256])
 { () }
 
 /**
@@ -7761,10 +7701,10 @@ Absorb number of blocks of 4 input buffers and write the output states
 pub fn
 shake128_absorb_nblocks(
     state: &mut [lib::intvector_intrinsics::vec256],
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
     inputByteLen: u32
 )
 {
@@ -7774,7 +7714,7 @@ shake128_absorb_nblocks(
         let mut b1: [u8; 256] = [0u8; 256usize];
         let mut b2: [u8; 256] = [0u8; 256usize];
         let mut b3: [u8; 256] = [0u8; 256usize];
-        let mut b·: crate::sha2_types::uint8_4p =
+        let b·: crate::sha2_types::uint8_4p =
             crate::sha2_types::uint8_4p
             {
                 fst: &mut b0,
@@ -7782,35 +7722,32 @@ shake128_absorb_nblocks(
                 crate::sha2_types::uint8_3p
                 { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
             };
-        let b00: &[u8] = input0;
-        let b10: &[u8] = input1;
-        let b20: &[u8] = input2;
-        let b30: &[u8] = input3;
+        let b00: &mut [u8] = input0;
+        let b10: &mut [u8] = input1;
+        let b20: &mut [u8] = input2;
+        let b30: &mut [u8] = input3;
         match b·
         {
             crate::sha2_types::uint8_4p
             {
-                fst: ref mut bl0,
+                fst: bl0,
                 snd:
                 crate::sha2_types::uint8_3p
-                {
-                    fst: ref mut bl1,
-                    snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-                }
+                { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
             }
             =>
               {
                   (bl0[0usize..168usize]).copy_from_slice(
-                      &(&b00[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
+                      &(&mut b00[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
                   );
                   (bl1[0usize..168usize]).copy_from_slice(
-                      &(&b10[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
+                      &(&mut b10[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
                   );
                   (bl2[0usize..168usize]).copy_from_slice(
-                      &(&b20[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
+                      &(&mut b20[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
                   );
                   (bl3[0usize..168usize]).copy_from_slice(
-                      &(&b30[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
+                      &(&mut b30[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
                   )
               }
         };
@@ -7837,10 +7774,10 @@ Absorb a final partial blocks of 4 input buffers and write the output states
 pub fn
 shake128_absorb_final(
     state: &mut [lib::intvector_intrinsics::vec256],
-    input0: &[u8],
-    input1: &[u8],
-    input2: &[u8],
-    input3: &[u8],
+    input0: &mut [u8],
+    input1: &mut [u8],
+    input2: &mut [u8],
+    input3: &mut [u8],
     inputByteLen: u32
 )
 {
@@ -7848,7 +7785,7 @@ shake128_absorb_final(
     let mut b1: [u8; 256] = [0u8; 256usize];
     let mut b2: [u8; 256] = [0u8; 256usize];
     let mut b3: [u8; 256] = [0u8; 256usize];
-    let mut b·: crate::sha2_types::uint8_4p =
+    let b·: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b0,
@@ -7857,35 +7794,32 @@ shake128_absorb_final(
             { fst: &mut b1, snd: crate::sha2_types::uint8_2p { fst: &mut b2, snd: &mut b3 } }
         };
     let rem: u32 = inputByteLen.wrapping_rem(168u32);
-    let b00: &[u8] = input0;
-    let b10: &[u8] = input1;
-    let b20: &[u8] = input2;
-    let b30: &[u8] = input3;
+    let b00: &mut [u8] = input0;
+    let b10: &mut [u8] = input1;
+    let b20: &mut [u8] = input2;
+    let b30: &mut [u8] = input3;
     match b·
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut bl0,
+            fst: bl0,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut bl1,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut bl2, snd: ref mut bl3 }
-            }
+            { fst: bl1, snd: crate::sha2_types::uint8_2p { fst: bl2, snd: bl3 } }
         }
         =>
           {
               (bl0[0usize..rem as usize]).copy_from_slice(
-                  &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                  &(&mut b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
               );
               (bl1[0usize..rem as usize]).copy_from_slice(
-                  &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                  &(&mut b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
               );
               (bl2[0usize..rem as usize]).copy_from_slice(
-                  &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                  &(&mut b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
               );
               (bl3[0usize..rem as usize]).copy_from_slice(
-                  &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                  &(&mut b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
               )
           }
     };
@@ -7893,13 +7827,10 @@ shake128_absorb_final(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b11,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b21, snd: ref mut b31 }
-            }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
@@ -7915,51 +7846,51 @@ shake128_absorb_final(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref b01,
+            fst: b01,
             snd:
             crate::sha2_types::uint8_3p
-            { fst: ref b11, snd: crate::sha2_types::uint8_2p { fst: ref b21, snd: ref b31 } }
+            { fst: b11, snd: crate::sha2_types::uint8_2p { fst: b21, snd: b31 } }
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b01[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b11[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b21[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b31[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b01[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b11[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b21[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b31[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b01[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b11[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b21[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b31[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b01[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b11[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b21[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b31[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b01[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b11[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b21[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b31[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b01[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b11[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b21[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b31[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b01[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b11[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b21[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b31[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b01[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b11[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b21[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&mut b31[224usize..])
           }
     };
-    let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
-    let v1: lib::intvector_intrinsics::vec256 = (&ws)[1usize];
-    let v2: lib::intvector_intrinsics::vec256 = (&ws)[2usize];
-    let v3: lib::intvector_intrinsics::vec256 = (&ws)[3usize];
+    let v0: lib::intvector_intrinsics::vec256 = (&mut ws)[0usize];
+    let v1: lib::intvector_intrinsics::vec256 = (&mut ws)[1usize];
+    let v2: lib::intvector_intrinsics::vec256 = (&mut ws)[2usize];
+    let v3: lib::intvector_intrinsics::vec256 = (&mut ws)[3usize];
     let v0·: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v0, v1);
     let v1·: lib::intvector_intrinsics::vec256 =
@@ -7980,10 +7911,10 @@ shake128_absorb_final(
     let ws1: lib::intvector_intrinsics::vec256 = v2··;
     let ws2: lib::intvector_intrinsics::vec256 = v1··;
     let ws3: lib::intvector_intrinsics::vec256 = v3··;
-    let v00: lib::intvector_intrinsics::vec256 = (&ws)[4usize];
-    let v10: lib::intvector_intrinsics::vec256 = (&ws)[5usize];
-    let v20: lib::intvector_intrinsics::vec256 = (&ws)[6usize];
-    let v30: lib::intvector_intrinsics::vec256 = (&ws)[7usize];
+    let v00: lib::intvector_intrinsics::vec256 = (&mut ws)[4usize];
+    let v10: lib::intvector_intrinsics::vec256 = (&mut ws)[5usize];
+    let v20: lib::intvector_intrinsics::vec256 = (&mut ws)[6usize];
+    let v30: lib::intvector_intrinsics::vec256 = (&mut ws)[7usize];
     let v0·0: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v00, v10);
     let v1·0: lib::intvector_intrinsics::vec256 =
@@ -8004,10 +7935,10 @@ shake128_absorb_final(
     let ws5: lib::intvector_intrinsics::vec256 = v2··0;
     let ws6: lib::intvector_intrinsics::vec256 = v1··0;
     let ws7: lib::intvector_intrinsics::vec256 = v3··0;
-    let v01: lib::intvector_intrinsics::vec256 = (&ws)[8usize];
-    let v11: lib::intvector_intrinsics::vec256 = (&ws)[9usize];
-    let v21: lib::intvector_intrinsics::vec256 = (&ws)[10usize];
-    let v31: lib::intvector_intrinsics::vec256 = (&ws)[11usize];
+    let v01: lib::intvector_intrinsics::vec256 = (&mut ws)[8usize];
+    let v11: lib::intvector_intrinsics::vec256 = (&mut ws)[9usize];
+    let v21: lib::intvector_intrinsics::vec256 = (&mut ws)[10usize];
+    let v31: lib::intvector_intrinsics::vec256 = (&mut ws)[11usize];
     let v0·1: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v01, v11);
     let v1·1: lib::intvector_intrinsics::vec256 =
@@ -8028,10 +7959,10 @@ shake128_absorb_final(
     let ws9: lib::intvector_intrinsics::vec256 = v2··1;
     let ws10: lib::intvector_intrinsics::vec256 = v1··1;
     let ws11: lib::intvector_intrinsics::vec256 = v3··1;
-    let v02: lib::intvector_intrinsics::vec256 = (&ws)[12usize];
-    let v12: lib::intvector_intrinsics::vec256 = (&ws)[13usize];
-    let v22: lib::intvector_intrinsics::vec256 = (&ws)[14usize];
-    let v32: lib::intvector_intrinsics::vec256 = (&ws)[15usize];
+    let v02: lib::intvector_intrinsics::vec256 = (&mut ws)[12usize];
+    let v12: lib::intvector_intrinsics::vec256 = (&mut ws)[13usize];
+    let v22: lib::intvector_intrinsics::vec256 = (&mut ws)[14usize];
+    let v32: lib::intvector_intrinsics::vec256 = (&mut ws)[15usize];
     let v0·2: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v02, v12);
     let v1·2: lib::intvector_intrinsics::vec256 =
@@ -8052,10 +7983,10 @@ shake128_absorb_final(
     let ws13: lib::intvector_intrinsics::vec256 = v2··2;
     let ws14: lib::intvector_intrinsics::vec256 = v1··2;
     let ws15: lib::intvector_intrinsics::vec256 = v3··2;
-    let v03: lib::intvector_intrinsics::vec256 = (&ws)[16usize];
-    let v13: lib::intvector_intrinsics::vec256 = (&ws)[17usize];
-    let v23: lib::intvector_intrinsics::vec256 = (&ws)[18usize];
-    let v33: lib::intvector_intrinsics::vec256 = (&ws)[19usize];
+    let v03: lib::intvector_intrinsics::vec256 = (&mut ws)[16usize];
+    let v13: lib::intvector_intrinsics::vec256 = (&mut ws)[17usize];
+    let v23: lib::intvector_intrinsics::vec256 = (&mut ws)[18usize];
+    let v33: lib::intvector_intrinsics::vec256 = (&mut ws)[19usize];
     let v0·3: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v03, v13);
     let v1·3: lib::intvector_intrinsics::vec256 =
@@ -8076,10 +8007,10 @@ shake128_absorb_final(
     let ws17: lib::intvector_intrinsics::vec256 = v2··3;
     let ws18: lib::intvector_intrinsics::vec256 = v1··3;
     let ws19: lib::intvector_intrinsics::vec256 = v3··3;
-    let v04: lib::intvector_intrinsics::vec256 = (&ws)[20usize];
-    let v14: lib::intvector_intrinsics::vec256 = (&ws)[21usize];
-    let v24: lib::intvector_intrinsics::vec256 = (&ws)[22usize];
-    let v34: lib::intvector_intrinsics::vec256 = (&ws)[23usize];
+    let v04: lib::intvector_intrinsics::vec256 = (&mut ws)[20usize];
+    let v14: lib::intvector_intrinsics::vec256 = (&mut ws)[21usize];
+    let v24: lib::intvector_intrinsics::vec256 = (&mut ws)[22usize];
+    let v34: lib::intvector_intrinsics::vec256 = (&mut ws)[23usize];
     let v0·4: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v04, v14);
     let v1·4: lib::intvector_intrinsics::vec256 =
@@ -8100,10 +8031,10 @@ shake128_absorb_final(
     let ws21: lib::intvector_intrinsics::vec256 = v2··4;
     let ws22: lib::intvector_intrinsics::vec256 = v1··4;
     let ws23: lib::intvector_intrinsics::vec256 = v3··4;
-    let v05: lib::intvector_intrinsics::vec256 = (&ws)[24usize];
-    let v15: lib::intvector_intrinsics::vec256 = (&ws)[25usize];
-    let v25: lib::intvector_intrinsics::vec256 = (&ws)[26usize];
-    let v35: lib::intvector_intrinsics::vec256 = (&ws)[27usize];
+    let v05: lib::intvector_intrinsics::vec256 = (&mut ws)[24usize];
+    let v15: lib::intvector_intrinsics::vec256 = (&mut ws)[25usize];
+    let v25: lib::intvector_intrinsics::vec256 = (&mut ws)[26usize];
+    let v35: lib::intvector_intrinsics::vec256 = (&mut ws)[27usize];
     let v0·5: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v05, v15);
     let v1·5: lib::intvector_intrinsics::vec256 =
@@ -8124,10 +8055,10 @@ shake128_absorb_final(
     let ws25: lib::intvector_intrinsics::vec256 = v2··5;
     let ws26: lib::intvector_intrinsics::vec256 = v1··5;
     let ws27: lib::intvector_intrinsics::vec256 = v3··5;
-    let v06: lib::intvector_intrinsics::vec256 = (&ws)[28usize];
-    let v16: lib::intvector_intrinsics::vec256 = (&ws)[29usize];
-    let v26: lib::intvector_intrinsics::vec256 = (&ws)[30usize];
-    let v36: lib::intvector_intrinsics::vec256 = (&ws)[31usize];
+    let v06: lib::intvector_intrinsics::vec256 = (&mut ws)[28usize];
+    let v16: lib::intvector_intrinsics::vec256 = (&mut ws)[29usize];
+    let v26: lib::intvector_intrinsics::vec256 = (&mut ws)[30usize];
+    let v36: lib::intvector_intrinsics::vec256 = (&mut ws)[31usize];
     let v0·6: lib::intvector_intrinsics::vec256 =
         lib::intvector_intrinsics::vec256_interleave_low64(v06, v16);
     let v1·6: lib::intvector_intrinsics::vec256 =
@@ -8186,13 +8117,13 @@ shake128_absorb_final(
         0u32,
         1u32,
         state[i as usize] =
-            lib::intvector_intrinsics::vec256_xor(state[i as usize], (&ws)[i as usize])
+            lib::intvector_intrinsics::vec256_xor(state[i as usize], (&mut ws)[i as usize])
     );
     let mut b01: [u8; 256] = [0u8; 256usize];
     let mut b11: [u8; 256] = [0u8; 256usize];
     let mut b21: [u8; 256] = [0u8; 256usize];
     let mut b31: [u8; 256] = [0u8; 256usize];
-    let mut b: crate::sha2_types::uint8_4p =
+    let b: crate::sha2_types::uint8_4p =
         crate::sha2_types::uint8_4p
         {
             fst: &mut b01,
@@ -8204,13 +8135,10 @@ shake128_absorb_final(
     {
         crate::sha2_types::uint8_4p
         {
-            fst: ref mut b02,
+            fst: b02,
             snd:
             crate::sha2_types::uint8_3p
-            {
-                fst: ref mut b12,
-                snd: crate::sha2_types::uint8_2p { fst: ref mut b22, snd: ref mut b32 }
-            }
+            { fst: b12, snd: crate::sha2_types::uint8_2p { fst: b22, snd: b32 } }
         }
         =>
           {
@@ -8251,10 +8179,10 @@ shake128_squeeze_nblocks(
         let mut ws: [lib::intvector_intrinsics::vec256; 32] =
             [lib::intvector_intrinsics::vec256_zero; 32usize];
         ((&mut ws)[0usize..25usize]).copy_from_slice(&state[0usize..25usize]);
-        let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
-        let v1: lib::intvector_intrinsics::vec256 = (&ws)[1usize];
-        let v2: lib::intvector_intrinsics::vec256 = (&ws)[2usize];
-        let v3: lib::intvector_intrinsics::vec256 = (&ws)[3usize];
+        let v0: lib::intvector_intrinsics::vec256 = (&mut ws)[0usize];
+        let v1: lib::intvector_intrinsics::vec256 = (&mut ws)[1usize];
+        let v2: lib::intvector_intrinsics::vec256 = (&mut ws)[2usize];
+        let v3: lib::intvector_intrinsics::vec256 = (&mut ws)[3usize];
         let v0·: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v0, v1);
         let v1·: lib::intvector_intrinsics::vec256 =
@@ -8275,10 +8203,10 @@ shake128_squeeze_nblocks(
         let ws1: lib::intvector_intrinsics::vec256 = v2··;
         let ws2: lib::intvector_intrinsics::vec256 = v1··;
         let ws3: lib::intvector_intrinsics::vec256 = v3··;
-        let v00: lib::intvector_intrinsics::vec256 = (&ws)[4usize];
-        let v10: lib::intvector_intrinsics::vec256 = (&ws)[5usize];
-        let v20: lib::intvector_intrinsics::vec256 = (&ws)[6usize];
-        let v30: lib::intvector_intrinsics::vec256 = (&ws)[7usize];
+        let v00: lib::intvector_intrinsics::vec256 = (&mut ws)[4usize];
+        let v10: lib::intvector_intrinsics::vec256 = (&mut ws)[5usize];
+        let v20: lib::intvector_intrinsics::vec256 = (&mut ws)[6usize];
+        let v30: lib::intvector_intrinsics::vec256 = (&mut ws)[7usize];
         let v0·0: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v00, v10);
         let v1·0: lib::intvector_intrinsics::vec256 =
@@ -8299,10 +8227,10 @@ shake128_squeeze_nblocks(
         let ws5: lib::intvector_intrinsics::vec256 = v2··0;
         let ws6: lib::intvector_intrinsics::vec256 = v1··0;
         let ws7: lib::intvector_intrinsics::vec256 = v3··0;
-        let v01: lib::intvector_intrinsics::vec256 = (&ws)[8usize];
-        let v11: lib::intvector_intrinsics::vec256 = (&ws)[9usize];
-        let v21: lib::intvector_intrinsics::vec256 = (&ws)[10usize];
-        let v31: lib::intvector_intrinsics::vec256 = (&ws)[11usize];
+        let v01: lib::intvector_intrinsics::vec256 = (&mut ws)[8usize];
+        let v11: lib::intvector_intrinsics::vec256 = (&mut ws)[9usize];
+        let v21: lib::intvector_intrinsics::vec256 = (&mut ws)[10usize];
+        let v31: lib::intvector_intrinsics::vec256 = (&mut ws)[11usize];
         let v0·1: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v01, v11);
         let v1·1: lib::intvector_intrinsics::vec256 =
@@ -8323,10 +8251,10 @@ shake128_squeeze_nblocks(
         let ws9: lib::intvector_intrinsics::vec256 = v2··1;
         let ws10: lib::intvector_intrinsics::vec256 = v1··1;
         let ws11: lib::intvector_intrinsics::vec256 = v3··1;
-        let v02: lib::intvector_intrinsics::vec256 = (&ws)[12usize];
-        let v12: lib::intvector_intrinsics::vec256 = (&ws)[13usize];
-        let v22: lib::intvector_intrinsics::vec256 = (&ws)[14usize];
-        let v32: lib::intvector_intrinsics::vec256 = (&ws)[15usize];
+        let v02: lib::intvector_intrinsics::vec256 = (&mut ws)[12usize];
+        let v12: lib::intvector_intrinsics::vec256 = (&mut ws)[13usize];
+        let v22: lib::intvector_intrinsics::vec256 = (&mut ws)[14usize];
+        let v32: lib::intvector_intrinsics::vec256 = (&mut ws)[15usize];
         let v0·2: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v02, v12);
         let v1·2: lib::intvector_intrinsics::vec256 =
@@ -8347,10 +8275,10 @@ shake128_squeeze_nblocks(
         let ws13: lib::intvector_intrinsics::vec256 = v2··2;
         let ws14: lib::intvector_intrinsics::vec256 = v1··2;
         let ws15: lib::intvector_intrinsics::vec256 = v3··2;
-        let v03: lib::intvector_intrinsics::vec256 = (&ws)[16usize];
-        let v13: lib::intvector_intrinsics::vec256 = (&ws)[17usize];
-        let v23: lib::intvector_intrinsics::vec256 = (&ws)[18usize];
-        let v33: lib::intvector_intrinsics::vec256 = (&ws)[19usize];
+        let v03: lib::intvector_intrinsics::vec256 = (&mut ws)[16usize];
+        let v13: lib::intvector_intrinsics::vec256 = (&mut ws)[17usize];
+        let v23: lib::intvector_intrinsics::vec256 = (&mut ws)[18usize];
+        let v33: lib::intvector_intrinsics::vec256 = (&mut ws)[19usize];
         let v0·3: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v03, v13);
         let v1·3: lib::intvector_intrinsics::vec256 =
@@ -8371,10 +8299,10 @@ shake128_squeeze_nblocks(
         let ws17: lib::intvector_intrinsics::vec256 = v2··3;
         let ws18: lib::intvector_intrinsics::vec256 = v1··3;
         let ws19: lib::intvector_intrinsics::vec256 = v3··3;
-        let v04: lib::intvector_intrinsics::vec256 = (&ws)[20usize];
-        let v14: lib::intvector_intrinsics::vec256 = (&ws)[21usize];
-        let v24: lib::intvector_intrinsics::vec256 = (&ws)[22usize];
-        let v34: lib::intvector_intrinsics::vec256 = (&ws)[23usize];
+        let v04: lib::intvector_intrinsics::vec256 = (&mut ws)[20usize];
+        let v14: lib::intvector_intrinsics::vec256 = (&mut ws)[21usize];
+        let v24: lib::intvector_intrinsics::vec256 = (&mut ws)[22usize];
+        let v34: lib::intvector_intrinsics::vec256 = (&mut ws)[23usize];
         let v0·4: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v04, v14);
         let v1·4: lib::intvector_intrinsics::vec256 =
@@ -8395,10 +8323,10 @@ shake128_squeeze_nblocks(
         let ws21: lib::intvector_intrinsics::vec256 = v2··4;
         let ws22: lib::intvector_intrinsics::vec256 = v1··4;
         let ws23: lib::intvector_intrinsics::vec256 = v3··4;
-        let v05: lib::intvector_intrinsics::vec256 = (&ws)[24usize];
-        let v15: lib::intvector_intrinsics::vec256 = (&ws)[25usize];
-        let v25: lib::intvector_intrinsics::vec256 = (&ws)[26usize];
-        let v35: lib::intvector_intrinsics::vec256 = (&ws)[27usize];
+        let v05: lib::intvector_intrinsics::vec256 = (&mut ws)[24usize];
+        let v15: lib::intvector_intrinsics::vec256 = (&mut ws)[25usize];
+        let v25: lib::intvector_intrinsics::vec256 = (&mut ws)[26usize];
+        let v35: lib::intvector_intrinsics::vec256 = (&mut ws)[27usize];
         let v0·5: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v05, v15);
         let v1·5: lib::intvector_intrinsics::vec256 =
@@ -8419,10 +8347,10 @@ shake128_squeeze_nblocks(
         let ws25: lib::intvector_intrinsics::vec256 = v2··5;
         let ws26: lib::intvector_intrinsics::vec256 = v1··5;
         let ws27: lib::intvector_intrinsics::vec256 = v3··5;
-        let v06: lib::intvector_intrinsics::vec256 = (&ws)[28usize];
-        let v16: lib::intvector_intrinsics::vec256 = (&ws)[29usize];
-        let v26: lib::intvector_intrinsics::vec256 = (&ws)[30usize];
-        let v36: lib::intvector_intrinsics::vec256 = (&ws)[31usize];
+        let v06: lib::intvector_intrinsics::vec256 = (&mut ws)[28usize];
+        let v16: lib::intvector_intrinsics::vec256 = (&mut ws)[29usize];
+        let v26: lib::intvector_intrinsics::vec256 = (&mut ws)[30usize];
+        let v36: lib::intvector_intrinsics::vec256 = (&mut ws)[31usize];
         let v0·6: lib::intvector_intrinsics::vec256 =
             lib::intvector_intrinsics::vec256_interleave_low64(v06, v16);
         let v1·6: lib::intvector_intrinsics::vec256 =
@@ -8482,7 +8410,7 @@ shake128_squeeze_nblocks(
             1u32,
             lib::intvector_intrinsics::vec256_store64_le(
                 &mut (&mut hbuf)[i0.wrapping_mul(32u32) as usize..],
-                (&ws)[i0 as usize]
+                (&mut ws)[i0 as usize]
             )
         );
         let b0: &mut [u8] = output0;
@@ -8490,16 +8418,16 @@ shake128_squeeze_nblocks(
         let b2: &mut [u8] = output2;
         let b3: &mut [u8] = output3;
         (b0[i.wrapping_mul(168u32) as usize..i.wrapping_mul(168u32) as usize + 168usize]).copy_from_slice(
-            &(&(&hbuf)[0usize..])[0usize..168usize]
+            &(&mut (&mut hbuf)[0usize..])[0usize..168usize]
         );
         (b1[i.wrapping_mul(168u32) as usize..i.wrapping_mul(168u32) as usize + 168usize]).copy_from_slice(
-            &(&(&hbuf)[256usize..])[0usize..168usize]
+            &(&mut (&mut hbuf)[256usize..])[0usize..168usize]
         );
         (b2[i.wrapping_mul(168u32) as usize..i.wrapping_mul(168u32) as usize + 168usize]).copy_from_slice(
-            &(&(&hbuf)[512usize..])[0usize..168usize]
+            &(&mut (&mut hbuf)[512usize..])[0usize..168usize]
         );
         (b3[i.wrapping_mul(168u32) as usize..i.wrapping_mul(168u32) as usize + 168usize]).copy_from_slice(
-            &(&(&hbuf)[768usize..])[0usize..168usize]
+            &(&mut (&mut hbuf)[768usize..])[0usize..168usize]
         );
         krml::unroll_for!(
             24,
@@ -8544,9 +8472,9 @@ shake128_squeeze_nblocks(
                     1u32,
                     {
                         let uu____3: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize];
                         let uu____4: lib::intvector_intrinsics::vec256 =
-                            (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                            (&mut _C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
                         let _D: lib::intvector_intrinsics::vec256 =
                             lib::intvector_intrinsics::vec256_xor(
                                 uu____3,
@@ -8576,10 +8504,10 @@ shake128_squeeze_nblocks(
                     0u32,
                     1u32,
                     {
-                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
-                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
+                        let _Y: u32 = (&mut crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&mut crate::hash_sha3::keccak_rotc)[i1 as usize];
                         let temp: lib::intvector_intrinsics::vec256 = state[_Y as usize];
-                        let uu____5: lib::intvector_intrinsics::vec256 = (&current)[0usize];
+                        let uu____5: lib::intvector_intrinsics::vec256 = (&mut current)[0usize];
                         state[_Y as usize] =
                             lib::intvector_intrinsics::vec256_or(
                                 lib::intvector_intrinsics::vec256_shift_left64(uu____5, r),
@@ -8674,7 +8602,7 @@ shake128_squeeze_nblocks(
                         state[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
                     }
                 );
-                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
+                let c: u64 = (&mut crate::hash_sha3::keccak_rndc)[i0 as usize];
                 let uu____16: lib::intvector_intrinsics::vec256 = state[0usize];
                 state[0usize] =
                     lib::intvector_intrinsics::vec256_xor(

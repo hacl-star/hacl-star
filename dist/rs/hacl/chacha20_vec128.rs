@@ -138,7 +138,7 @@
 
 #[inline] fn chacha20_core_128(
     k: &mut [lib::intvector_intrinsics::vec128],
-    ctx: &[lib::intvector_intrinsics::vec128],
+    ctx: &mut [lib::intvector_intrinsics::vec128],
     ctr: u32
 )
 {
@@ -176,8 +176,8 @@
 
 #[inline] fn chacha20_init_128(
     ctx: &mut [lib::intvector_intrinsics::vec128],
-    k: &[u8],
-    n: &[u8],
+    k: &mut [u8],
+    n: &mut [u8],
     ctr: u32
 )
 {
@@ -188,7 +188,7 @@
         0u32,
         1u32,
         {
-            let x: u32 = (&crate::chacha20::chacha20_constants)[i as usize];
+            let x: u32 = (&mut crate::chacha20::chacha20_constants)[i as usize];
             let os: &mut [u32] = &mut (&mut (&mut ctx1)[0usize..])[0usize..];
             os[i as usize] = x
         }
@@ -200,7 +200,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = k.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = k.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -216,7 +216,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = n.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -230,7 +230,7 @@
         0u32,
         1u32,
         {
-            let x: u32 = (&ctx1)[i as usize];
+            let x: u32 = (&mut ctx1)[i as usize];
             let x0: lib::intvector_intrinsics::vec128 = lib::intvector_intrinsics::vec128_load32(x);
             let
             os: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
@@ -248,9 +248,9 @@
 pub fn chacha20_encrypt_128(
     len: u32,
     out: &mut [u8],
-    text: &[u8],
-    key: &[u8],
-    n: &[u8],
+    text: &mut [u8],
+    key: &mut [u8],
+    n: &mut [u8],
     ctr: u32
 )
 {
@@ -263,26 +263,26 @@ pub fn chacha20_encrypt_128(
     for i in 0u32..nb
     {
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(256u32) as usize);
-        let uu____1: (&[u8], &[u8]) = text.split_at(i.wrapping_mul(256u32) as usize);
+        let uu____1: (&mut [u8], &mut [u8]) = text.split_at_mut(i.wrapping_mul(256u32) as usize);
         let mut k: [lib::intvector_intrinsics::vec128; 16] =
             [lib::intvector_intrinsics::vec128_zero; 16usize];
-        crate::chacha20_vec128::chacha20_core_128(&mut k, &ctx, i);
-        let st0: lib::intvector_intrinsics::vec128 = (&k)[0usize];
-        let st1: lib::intvector_intrinsics::vec128 = (&k)[1usize];
-        let st2: lib::intvector_intrinsics::vec128 = (&k)[2usize];
-        let st3: lib::intvector_intrinsics::vec128 = (&k)[3usize];
-        let st4: lib::intvector_intrinsics::vec128 = (&k)[4usize];
-        let st5: lib::intvector_intrinsics::vec128 = (&k)[5usize];
-        let st6: lib::intvector_intrinsics::vec128 = (&k)[6usize];
-        let st7: lib::intvector_intrinsics::vec128 = (&k)[7usize];
-        let st8: lib::intvector_intrinsics::vec128 = (&k)[8usize];
-        let st9: lib::intvector_intrinsics::vec128 = (&k)[9usize];
-        let st10: lib::intvector_intrinsics::vec128 = (&k)[10usize];
-        let st11: lib::intvector_intrinsics::vec128 = (&k)[11usize];
-        let st12: lib::intvector_intrinsics::vec128 = (&k)[12usize];
-        let st13: lib::intvector_intrinsics::vec128 = (&k)[13usize];
-        let st14: lib::intvector_intrinsics::vec128 = (&k)[14usize];
-        let st15: lib::intvector_intrinsics::vec128 = (&k)[15usize];
+        crate::chacha20_vec128::chacha20_core_128(&mut k, &mut ctx, i);
+        let st0: lib::intvector_intrinsics::vec128 = (&mut k)[0usize];
+        let st1: lib::intvector_intrinsics::vec128 = (&mut k)[1usize];
+        let st2: lib::intvector_intrinsics::vec128 = (&mut k)[2usize];
+        let st3: lib::intvector_intrinsics::vec128 = (&mut k)[3usize];
+        let st4: lib::intvector_intrinsics::vec128 = (&mut k)[4usize];
+        let st5: lib::intvector_intrinsics::vec128 = (&mut k)[5usize];
+        let st6: lib::intvector_intrinsics::vec128 = (&mut k)[6usize];
+        let st7: lib::intvector_intrinsics::vec128 = (&mut k)[7usize];
+        let st8: lib::intvector_intrinsics::vec128 = (&mut k)[8usize];
+        let st9: lib::intvector_intrinsics::vec128 = (&mut k)[9usize];
+        let st10: lib::intvector_intrinsics::vec128 = (&mut k)[10usize];
+        let st11: lib::intvector_intrinsics::vec128 = (&mut k)[11usize];
+        let st12: lib::intvector_intrinsics::vec128 = (&mut k)[12usize];
+        let st13: lib::intvector_intrinsics::vec128 = (&mut k)[13usize];
+        let st14: lib::intvector_intrinsics::vec128 = (&mut k)[14usize];
+        let st15: lib::intvector_intrinsics::vec128 = (&mut k)[15usize];
         let v0·: lib::intvector_intrinsics::vec128 =
             lib::intvector_intrinsics::vec128_interleave_low32(st0, st1);
         let v1·: lib::intvector_intrinsics::vec128 =
@@ -403,10 +403,10 @@ pub fn chacha20_encrypt_128(
             {
                 let x: lib::intvector_intrinsics::vec128 =
                     lib::intvector_intrinsics::vec128_load32_le(
-                        &uu____1.1[i0.wrapping_mul(16u32) as usize..]
+                        &mut uu____1.1[i0.wrapping_mul(16u32) as usize..]
                     );
                 let y: lib::intvector_intrinsics::vec128 =
-                    lib::intvector_intrinsics::vec128_xor(x, (&k)[i0 as usize]);
+                    lib::intvector_intrinsics::vec128_xor(x, (&mut k)[i0 as usize]);
                 lib::intvector_intrinsics::vec128_store32_le(
                     &mut uu____0.1[i0.wrapping_mul(16u32) as usize..],
                     y
@@ -419,27 +419,27 @@ pub fn chacha20_encrypt_128(
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(256u32) as usize);
         let mut plain: [u8; 256] = [0u8; 256usize];
         ((&mut plain)[0usize..rem as usize]).copy_from_slice(
-            &(&text[nb.wrapping_mul(256u32) as usize..])[0usize..rem as usize]
+            &(&mut text[nb.wrapping_mul(256u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [lib::intvector_intrinsics::vec128; 16] =
             [lib::intvector_intrinsics::vec128_zero; 16usize];
-        crate::chacha20_vec128::chacha20_core_128(&mut k, &ctx, nb);
-        let st0: lib::intvector_intrinsics::vec128 = (&k)[0usize];
-        let st1: lib::intvector_intrinsics::vec128 = (&k)[1usize];
-        let st2: lib::intvector_intrinsics::vec128 = (&k)[2usize];
-        let st3: lib::intvector_intrinsics::vec128 = (&k)[3usize];
-        let st4: lib::intvector_intrinsics::vec128 = (&k)[4usize];
-        let st5: lib::intvector_intrinsics::vec128 = (&k)[5usize];
-        let st6: lib::intvector_intrinsics::vec128 = (&k)[6usize];
-        let st7: lib::intvector_intrinsics::vec128 = (&k)[7usize];
-        let st8: lib::intvector_intrinsics::vec128 = (&k)[8usize];
-        let st9: lib::intvector_intrinsics::vec128 = (&k)[9usize];
-        let st10: lib::intvector_intrinsics::vec128 = (&k)[10usize];
-        let st11: lib::intvector_intrinsics::vec128 = (&k)[11usize];
-        let st12: lib::intvector_intrinsics::vec128 = (&k)[12usize];
-        let st13: lib::intvector_intrinsics::vec128 = (&k)[13usize];
-        let st14: lib::intvector_intrinsics::vec128 = (&k)[14usize];
-        let st15: lib::intvector_intrinsics::vec128 = (&k)[15usize];
+        crate::chacha20_vec128::chacha20_core_128(&mut k, &mut ctx, nb);
+        let st0: lib::intvector_intrinsics::vec128 = (&mut k)[0usize];
+        let st1: lib::intvector_intrinsics::vec128 = (&mut k)[1usize];
+        let st2: lib::intvector_intrinsics::vec128 = (&mut k)[2usize];
+        let st3: lib::intvector_intrinsics::vec128 = (&mut k)[3usize];
+        let st4: lib::intvector_intrinsics::vec128 = (&mut k)[4usize];
+        let st5: lib::intvector_intrinsics::vec128 = (&mut k)[5usize];
+        let st6: lib::intvector_intrinsics::vec128 = (&mut k)[6usize];
+        let st7: lib::intvector_intrinsics::vec128 = (&mut k)[7usize];
+        let st8: lib::intvector_intrinsics::vec128 = (&mut k)[8usize];
+        let st9: lib::intvector_intrinsics::vec128 = (&mut k)[9usize];
+        let st10: lib::intvector_intrinsics::vec128 = (&mut k)[10usize];
+        let st11: lib::intvector_intrinsics::vec128 = (&mut k)[11usize];
+        let st12: lib::intvector_intrinsics::vec128 = (&mut k)[12usize];
+        let st13: lib::intvector_intrinsics::vec128 = (&mut k)[13usize];
+        let st14: lib::intvector_intrinsics::vec128 = (&mut k)[14usize];
+        let st15: lib::intvector_intrinsics::vec128 = (&mut k)[15usize];
         let v0·: lib::intvector_intrinsics::vec128 =
             lib::intvector_intrinsics::vec128_interleave_low32(st0, st1);
         let v1·: lib::intvector_intrinsics::vec128 =
@@ -560,10 +560,10 @@ pub fn chacha20_encrypt_128(
             {
                 let x: lib::intvector_intrinsics::vec128 =
                     lib::intvector_intrinsics::vec128_load32_le(
-                        &(&plain)[i.wrapping_mul(16u32) as usize..]
+                        &mut (&mut plain)[i.wrapping_mul(16u32) as usize..]
                     );
                 let y: lib::intvector_intrinsics::vec128 =
-                    lib::intvector_intrinsics::vec128_xor(x, (&k)[i as usize]);
+                    lib::intvector_intrinsics::vec128_xor(x, (&mut k)[i as usize]);
                 lib::intvector_intrinsics::vec128_store32_le(
                     &mut (&mut plain)[i.wrapping_mul(16u32) as usize..],
                     y
@@ -571,7 +571,7 @@ pub fn chacha20_encrypt_128(
             }
         );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
-            &(&(&plain)[0usize..])[0usize..rem as usize]
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }
@@ -579,9 +579,9 @@ pub fn chacha20_encrypt_128(
 pub fn chacha20_decrypt_128(
     len: u32,
     out: &mut [u8],
-    cipher: &[u8],
-    key: &[u8],
-    n: &[u8],
+    cipher: &mut [u8],
+    key: &mut [u8],
+    n: &mut [u8],
     ctr: u32
 )
 {
@@ -594,26 +594,26 @@ pub fn chacha20_decrypt_128(
     for i in 0u32..nb
     {
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(256u32) as usize);
-        let uu____1: (&[u8], &[u8]) = cipher.split_at(i.wrapping_mul(256u32) as usize);
+        let uu____1: (&mut [u8], &mut [u8]) = cipher.split_at_mut(i.wrapping_mul(256u32) as usize);
         let mut k: [lib::intvector_intrinsics::vec128; 16] =
             [lib::intvector_intrinsics::vec128_zero; 16usize];
-        crate::chacha20_vec128::chacha20_core_128(&mut k, &ctx, i);
-        let st0: lib::intvector_intrinsics::vec128 = (&k)[0usize];
-        let st1: lib::intvector_intrinsics::vec128 = (&k)[1usize];
-        let st2: lib::intvector_intrinsics::vec128 = (&k)[2usize];
-        let st3: lib::intvector_intrinsics::vec128 = (&k)[3usize];
-        let st4: lib::intvector_intrinsics::vec128 = (&k)[4usize];
-        let st5: lib::intvector_intrinsics::vec128 = (&k)[5usize];
-        let st6: lib::intvector_intrinsics::vec128 = (&k)[6usize];
-        let st7: lib::intvector_intrinsics::vec128 = (&k)[7usize];
-        let st8: lib::intvector_intrinsics::vec128 = (&k)[8usize];
-        let st9: lib::intvector_intrinsics::vec128 = (&k)[9usize];
-        let st10: lib::intvector_intrinsics::vec128 = (&k)[10usize];
-        let st11: lib::intvector_intrinsics::vec128 = (&k)[11usize];
-        let st12: lib::intvector_intrinsics::vec128 = (&k)[12usize];
-        let st13: lib::intvector_intrinsics::vec128 = (&k)[13usize];
-        let st14: lib::intvector_intrinsics::vec128 = (&k)[14usize];
-        let st15: lib::intvector_intrinsics::vec128 = (&k)[15usize];
+        crate::chacha20_vec128::chacha20_core_128(&mut k, &mut ctx, i);
+        let st0: lib::intvector_intrinsics::vec128 = (&mut k)[0usize];
+        let st1: lib::intvector_intrinsics::vec128 = (&mut k)[1usize];
+        let st2: lib::intvector_intrinsics::vec128 = (&mut k)[2usize];
+        let st3: lib::intvector_intrinsics::vec128 = (&mut k)[3usize];
+        let st4: lib::intvector_intrinsics::vec128 = (&mut k)[4usize];
+        let st5: lib::intvector_intrinsics::vec128 = (&mut k)[5usize];
+        let st6: lib::intvector_intrinsics::vec128 = (&mut k)[6usize];
+        let st7: lib::intvector_intrinsics::vec128 = (&mut k)[7usize];
+        let st8: lib::intvector_intrinsics::vec128 = (&mut k)[8usize];
+        let st9: lib::intvector_intrinsics::vec128 = (&mut k)[9usize];
+        let st10: lib::intvector_intrinsics::vec128 = (&mut k)[10usize];
+        let st11: lib::intvector_intrinsics::vec128 = (&mut k)[11usize];
+        let st12: lib::intvector_intrinsics::vec128 = (&mut k)[12usize];
+        let st13: lib::intvector_intrinsics::vec128 = (&mut k)[13usize];
+        let st14: lib::intvector_intrinsics::vec128 = (&mut k)[14usize];
+        let st15: lib::intvector_intrinsics::vec128 = (&mut k)[15usize];
         let v0·: lib::intvector_intrinsics::vec128 =
             lib::intvector_intrinsics::vec128_interleave_low32(st0, st1);
         let v1·: lib::intvector_intrinsics::vec128 =
@@ -734,10 +734,10 @@ pub fn chacha20_decrypt_128(
             {
                 let x: lib::intvector_intrinsics::vec128 =
                     lib::intvector_intrinsics::vec128_load32_le(
-                        &uu____1.1[i0.wrapping_mul(16u32) as usize..]
+                        &mut uu____1.1[i0.wrapping_mul(16u32) as usize..]
                     );
                 let y: lib::intvector_intrinsics::vec128 =
-                    lib::intvector_intrinsics::vec128_xor(x, (&k)[i0 as usize]);
+                    lib::intvector_intrinsics::vec128_xor(x, (&mut k)[i0 as usize]);
                 lib::intvector_intrinsics::vec128_store32_le(
                     &mut uu____0.1[i0.wrapping_mul(16u32) as usize..],
                     y
@@ -750,27 +750,27 @@ pub fn chacha20_decrypt_128(
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(256u32) as usize);
         let mut plain: [u8; 256] = [0u8; 256usize];
         ((&mut plain)[0usize..rem as usize]).copy_from_slice(
-            &(&cipher[nb.wrapping_mul(256u32) as usize..])[0usize..rem as usize]
+            &(&mut cipher[nb.wrapping_mul(256u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [lib::intvector_intrinsics::vec128; 16] =
             [lib::intvector_intrinsics::vec128_zero; 16usize];
-        crate::chacha20_vec128::chacha20_core_128(&mut k, &ctx, nb);
-        let st0: lib::intvector_intrinsics::vec128 = (&k)[0usize];
-        let st1: lib::intvector_intrinsics::vec128 = (&k)[1usize];
-        let st2: lib::intvector_intrinsics::vec128 = (&k)[2usize];
-        let st3: lib::intvector_intrinsics::vec128 = (&k)[3usize];
-        let st4: lib::intvector_intrinsics::vec128 = (&k)[4usize];
-        let st5: lib::intvector_intrinsics::vec128 = (&k)[5usize];
-        let st6: lib::intvector_intrinsics::vec128 = (&k)[6usize];
-        let st7: lib::intvector_intrinsics::vec128 = (&k)[7usize];
-        let st8: lib::intvector_intrinsics::vec128 = (&k)[8usize];
-        let st9: lib::intvector_intrinsics::vec128 = (&k)[9usize];
-        let st10: lib::intvector_intrinsics::vec128 = (&k)[10usize];
-        let st11: lib::intvector_intrinsics::vec128 = (&k)[11usize];
-        let st12: lib::intvector_intrinsics::vec128 = (&k)[12usize];
-        let st13: lib::intvector_intrinsics::vec128 = (&k)[13usize];
-        let st14: lib::intvector_intrinsics::vec128 = (&k)[14usize];
-        let st15: lib::intvector_intrinsics::vec128 = (&k)[15usize];
+        crate::chacha20_vec128::chacha20_core_128(&mut k, &mut ctx, nb);
+        let st0: lib::intvector_intrinsics::vec128 = (&mut k)[0usize];
+        let st1: lib::intvector_intrinsics::vec128 = (&mut k)[1usize];
+        let st2: lib::intvector_intrinsics::vec128 = (&mut k)[2usize];
+        let st3: lib::intvector_intrinsics::vec128 = (&mut k)[3usize];
+        let st4: lib::intvector_intrinsics::vec128 = (&mut k)[4usize];
+        let st5: lib::intvector_intrinsics::vec128 = (&mut k)[5usize];
+        let st6: lib::intvector_intrinsics::vec128 = (&mut k)[6usize];
+        let st7: lib::intvector_intrinsics::vec128 = (&mut k)[7usize];
+        let st8: lib::intvector_intrinsics::vec128 = (&mut k)[8usize];
+        let st9: lib::intvector_intrinsics::vec128 = (&mut k)[9usize];
+        let st10: lib::intvector_intrinsics::vec128 = (&mut k)[10usize];
+        let st11: lib::intvector_intrinsics::vec128 = (&mut k)[11usize];
+        let st12: lib::intvector_intrinsics::vec128 = (&mut k)[12usize];
+        let st13: lib::intvector_intrinsics::vec128 = (&mut k)[13usize];
+        let st14: lib::intvector_intrinsics::vec128 = (&mut k)[14usize];
+        let st15: lib::intvector_intrinsics::vec128 = (&mut k)[15usize];
         let v0·: lib::intvector_intrinsics::vec128 =
             lib::intvector_intrinsics::vec128_interleave_low32(st0, st1);
         let v1·: lib::intvector_intrinsics::vec128 =
@@ -891,10 +891,10 @@ pub fn chacha20_decrypt_128(
             {
                 let x: lib::intvector_intrinsics::vec128 =
                     lib::intvector_intrinsics::vec128_load32_le(
-                        &(&plain)[i.wrapping_mul(16u32) as usize..]
+                        &mut (&mut plain)[i.wrapping_mul(16u32) as usize..]
                     );
                 let y: lib::intvector_intrinsics::vec128 =
-                    lib::intvector_intrinsics::vec128_xor(x, (&k)[i as usize]);
+                    lib::intvector_intrinsics::vec128_xor(x, (&mut k)[i as usize]);
                 lib::intvector_intrinsics::vec128_store32_le(
                     &mut (&mut plain)[i.wrapping_mul(16u32) as usize..],
                     y
@@ -902,7 +902,7 @@ pub fn chacha20_decrypt_128(
             }
         );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
-            &(&(&plain)[0usize..])[0usize..rem as usize]
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }

@@ -4,7 +4,7 @@
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
 
-#[inline] fn add_scalar(out: &mut [u64], f1: &[u64], f2: u64)
+#[inline] fn add_scalar(out: &mut [u64], f1: &mut [u64], f2: u64)
 {
     if evercrypt::targetconfig::hacl_can_compile_inline_asm
     { vale::inline_x64_fadd_inline::add_scalar(out, f1, f2) }
@@ -12,7 +12,7 @@
     { lowstar::ignore::ignore::<u64>(vale::stdcalls_x64_fadd::add_scalar_e(out, f1, f2)) }
 }
 
-#[inline] fn fadd(out: &mut [u64], f1: &[u64], f2: &[u64])
+#[inline] fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     if evercrypt::targetconfig::hacl_can_compile_inline_asm
     { vale::inline_x64_fadd_inline::fadd(out, f1, f2) }
@@ -20,7 +20,7 @@
     { lowstar::ignore::ignore::<u64>(vale::stdcalls_x64_fadd::fadd_e(out, f1, f2)) }
 }
 
-#[inline] fn fsub(out: &mut [u64], f1: &[u64], f2: &[u64])
+#[inline] fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     if evercrypt::targetconfig::hacl_can_compile_inline_asm
     { vale::inline_x64_fadd_inline::fsub(out, f1, f2) }
@@ -28,7 +28,7 @@
     { lowstar::ignore::ignore::<u64>(vale::stdcalls_x64_fsub::fsub_e(out, f1, f2)) }
 }
 
-#[inline] fn fmul(out: &mut [u64], f1: &[u64], f2: &mut [u64], tmp: &mut [u64])
+#[inline] fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64])
 {
     if evercrypt::targetconfig::hacl_can_compile_inline_asm
     { vale::inline_x64_fmul_inline::fmul(out, f1, f2, &mut tmp[0usize..]) }
@@ -40,7 +40,7 @@
     }
 }
 
-#[inline] fn fmul2(out: &mut [u64], f1: &[u64], f2: &mut [u64], tmp: &mut [u64])
+#[inline] fn fmul2(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64])
 {
     if evercrypt::targetconfig::hacl_can_compile_inline_asm
     { vale::inline_x64_fmul_inline::fmul2(out, f1, f2, tmp) }
@@ -48,7 +48,7 @@
     { lowstar::ignore::ignore::<u64>(vale::stdcalls_x64_fmul::fmul2_e(tmp, f1, out, f2)) }
 }
 
-#[inline] fn fmul_scalar(out: &mut [u64], f1: &[u64], f2: u64)
+#[inline] fn fmul_scalar(out: &mut [u64], f1: &mut [u64], f2: u64)
 {
     if evercrypt::targetconfig::hacl_can_compile_inline_asm
     { vale::inline_x64_fmul_inline::fmul_scalar(out, f1, f2) }
@@ -56,7 +56,7 @@
     { lowstar::ignore::ignore::<u64>(vale::stdcalls_x64_fmul::fmul_scalar_e(out, f1, f2)) }
 }
 
-#[inline] fn fsqr(out: &mut [u64], f1: &[u64], tmp: &mut [u64])
+#[inline] fn fsqr(out: &mut [u64], f1: &mut [u64], tmp: &mut [u64])
 {
     if evercrypt::targetconfig::hacl_can_compile_inline_asm
     { vale::inline_x64_fsqr_inline::fsqr(out, f1, tmp) }
@@ -64,7 +64,7 @@
     { lowstar::ignore::ignore::<u64>(vale::stdcalls_x64_fsqr::fsqr_e(tmp, f1, out)) }
 }
 
-#[inline] fn fsqr2(out: &mut [u64], f: &[u64], tmp: &mut [u64])
+#[inline] fn fsqr2(out: &mut [u64], f: &mut [u64], tmp: &mut [u64])
 {
     if evercrypt::targetconfig::hacl_can_compile_inline_asm
     { vale::inline_x64_fsqr_inline::fsqr2(out, f, tmp) }
@@ -90,8 +90,8 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64])
     let nq_p1: (&mut [u64], &mut [u64]) = nq.1.split_at_mut(8usize);
     let tmp1: (&mut [u64], &mut [u64]) = nq_p1.1.split_at_mut(8usize);
     let x1: (&mut [u64], &mut [u64]) = q.split_at_mut(0usize);
-    let x2: (&[u64], &[u64]) = nq_p1.0.split_at(0usize);
-    let z2: (&[u64], &[u64]) = x2.1.split_at(4usize);
+    let x2: (&mut [u64], &mut [u64]) = nq_p1.0.split_at_mut(0usize);
+    let z2: (&mut [u64], &mut [u64]) = x2.1.split_at_mut(4usize);
     let dc: (&mut [u64], &mut [u64]) = tmp1.1.split_at_mut(8usize);
     let ab: (&mut [u64], &mut [u64]) = dc.0.split_at_mut(0usize);
     let a: (&mut [u64], &mut [u64]) = ab.1.split_at_mut(0usize);
@@ -107,9 +107,9 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64])
     crate::curve25519_64::fsub(c.0, z31.0, z31.1);
     let mut f1_copy: [u64; 8] = [0u64; 8usize];
     ((&mut f1_copy)[0usize..8usize]).copy_from_slice(&dc.1[0usize..8usize]);
-    crate::curve25519_64::fmul2(dc.1, &f1_copy, ab1.1, tmp2);
-    let d1: (&[u64], &[u64]) = dc.1.split_at(0usize);
-    let c1: (&[u64], &[u64]) = d1.1.split_at(4usize);
+    crate::curve25519_64::fmul2(dc.1, &mut f1_copy, ab1.1, tmp2);
+    let d1: (&mut [u64], &mut [u64]) = dc.1.split_at_mut(0usize);
+    let c1: (&mut [u64], &mut [u64]) = d1.1.split_at_mut(4usize);
     crate::curve25519_64::fadd(z31.0, c1.0, c1.1);
     crate::curve25519_64::fsub(z31.1, c1.0, c1.1);
     let ab2: (&mut [u64], &mut [u64]) = ab1.1.split_at_mut(0usize);
@@ -117,7 +117,7 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64])
     crate::curve25519_64::fsqr2(dc1.1, ab2.1, tmp2);
     let mut f1_copy0: [u64; 8] = [0u64; 8usize];
     ((&mut f1_copy0)[0usize..8usize]).copy_from_slice(&tmp1.0[0usize..8usize]);
-    crate::curve25519_64::fsqr2(tmp1.0, &f1_copy0, tmp2);
+    crate::curve25519_64::fsqr2(tmp1.0, &mut f1_copy0, tmp2);
     let a1: (&mut [u64], &mut [u64]) = ab2.1.split_at_mut(0usize);
     let b1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(4usize);
     let d0: (&mut [u64], &mut [u64]) = dc1.1.split_at_mut(0usize);
@@ -128,24 +128,24 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64])
     b1.0[3usize] = c0.1[3usize];
     let mut f2_copy: [u64; 4] = [0u64; 4usize];
     ((&mut f2_copy)[0usize..4usize]).copy_from_slice(&c0.1[0usize..4usize]);
-    crate::curve25519_64::fsub(c0.1, c0.0, &f2_copy);
+    crate::curve25519_64::fsub(c0.1, c0.0, &mut f2_copy);
     crate::curve25519_64::fmul_scalar(b1.1, c0.1, 121665u64);
     let mut f1_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut f1_copy1)[0usize..4usize]).copy_from_slice(&b1.1[0usize..4usize]);
-    crate::curve25519_64::fadd(b1.1, &f1_copy1, c0.0);
+    crate::curve25519_64::fadd(b1.1, &mut f1_copy1, c0.0);
     let ab3: (&mut [u64], &mut [u64]) = ab2.1.split_at_mut(0usize);
-    let dc2: (&[u64], &[u64]) = dc1.1.split_at(0usize);
+    let dc2: (&mut [u64], &mut [u64]) = dc1.1.split_at_mut(0usize);
     crate::curve25519_64::fmul2(nq_p1.0, dc2.1, ab3.1, tmp2);
     let z310: (&mut [u64], &mut [u64]) = tmp1.0.split_at_mut(4usize);
     let mut f1_copy2: [u64; 4] = [0u64; 4usize];
     ((&mut f1_copy2)[0usize..4usize]).copy_from_slice(&z310.1[0usize..4usize]);
-    crate::curve25519_64::fmul(z310.1, &f1_copy2, x1.1, tmp2)
+    crate::curve25519_64::fmul(z310.1, &mut f1_copy2, x1.1, tmp2)
 }
 
 fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64])
 {
-    let x2: (&[u64], &[u64]) = nq.split_at(0usize);
-    let z2: (&[u64], &[u64]) = x2.1.split_at(4usize);
+    let x2: (&mut [u64], &mut [u64]) = nq.split_at_mut(0usize);
+    let z2: (&mut [u64], &mut [u64]) = x2.1.split_at_mut(4usize);
     let ab: (&mut [u64], &mut [u64]) = tmp1.split_at_mut(0usize);
     let dc: (&mut [u64], &mut [u64]) = ab.1.split_at_mut(8usize);
     let a: (&mut [u64], &mut [u64]) = dc.0.split_at_mut(0usize);
@@ -163,17 +163,17 @@ fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64])
     b1.0[3usize] = c.1[3usize];
     let mut f2_copy: [u64; 4] = [0u64; 4usize];
     ((&mut f2_copy)[0usize..4usize]).copy_from_slice(&c.1[0usize..4usize]);
-    crate::curve25519_64::fsub(c.1, c.0, &f2_copy);
+    crate::curve25519_64::fsub(c.1, c.0, &mut f2_copy);
     crate::curve25519_64::fmul_scalar(b1.1, c.1, 121665u64);
     let mut f1_copy: [u64; 4] = [0u64; 4usize];
     ((&mut f1_copy)[0usize..4usize]).copy_from_slice(&b1.1[0usize..4usize]);
-    crate::curve25519_64::fadd(b1.1, &f1_copy, c.0);
+    crate::curve25519_64::fadd(b1.1, &mut f1_copy, c.0);
     let ab1: (&mut [u64], &mut [u64]) = dc.0.split_at_mut(0usize);
-    let dc1: (&[u64], &[u64]) = dc.1.split_at(0usize);
+    let dc1: (&mut [u64], &mut [u64]) = dc.1.split_at_mut(0usize);
     crate::curve25519_64::fmul2(nq, dc1.1, ab1.1, tmp2)
 }
 
-fn montgomery_ladder(out: &mut [u64], key: &[u8], init: &mut [u64])
+fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64])
 {
     let mut tmp2: [u64; 16] = [0u64; 16usize];
     let mut p01_tmp1_swap: [u64; 33] = [0u64; 33usize];
@@ -229,18 +229,18 @@ fn montgomery_ladder(out: &mut [u64], key: &[u8], init: &mut [u64])
     crate::curve25519_64::point_double(tmp1.0, tmp1.1, &mut tmp2);
     crate::curve25519_64::point_double(tmp1.0, tmp1.1, &mut tmp2);
     crate::curve25519_64::point_double(tmp1.0, tmp1.1, &mut tmp2);
-    let p010: (&[u64], &[u64]) = p01_tmp10.1.split_at(0usize);
+    let p010: (&mut [u64], &mut [u64]) = p01_tmp10.1.split_at_mut(0usize);
     (out[0usize..8usize]).copy_from_slice(&p010.1[0usize..8usize])
 }
 
-fn fsquare_times(o: &mut [u64], inp: &[u64], tmp: &mut [u64], n: u32)
+fn fsquare_times(o: &mut [u64], inp: &mut [u64], tmp: &mut [u64], n: u32)
 {
     crate::curve25519_64::fsqr(o, inp, tmp);
     for _i in 0u32..n.wrapping_sub(1u32)
     {
         let mut f1_copy: [u64; 4] = [0u64; 4usize];
         ((&mut f1_copy)[0usize..4usize]).copy_from_slice(&o[0usize..4usize]);
-        crate::curve25519_64::fsqr(o, &f1_copy, tmp)
+        crate::curve25519_64::fsqr(o, &mut f1_copy, tmp)
     }
 }
 
@@ -277,11 +277,11 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64])
     crate::curve25519_64::fsquare_times(t010.1, c1.1, tmp110.1, 20u32);
     let mut f1_copy: [u64; 4] = [0u64; 4usize];
     ((&mut f1_copy)[0usize..4usize]).copy_from_slice(&t010.1[0usize..4usize]);
-    crate::curve25519_64::fmul(t010.1, &f1_copy, c1.1, tmp);
+    crate::curve25519_64::fmul(t010.1, &mut f1_copy, c1.1, tmp);
     let tmp120: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
     let mut i_copy: [u64; 4] = [0u64; 4usize];
     ((&mut i_copy)[0usize..4usize]).copy_from_slice(&t010.1[0usize..4usize]);
-    crate::curve25519_64::fsquare_times(t010.1, &i_copy, tmp120.1, 10u32);
+    crate::curve25519_64::fsquare_times(t010.1, &mut i_copy, tmp120.1, 10u32);
     let mut f2_copy2: [u64; 4] = [0u64; 4usize];
     ((&mut f2_copy2)[0usize..4usize]).copy_from_slice(&c1.0[0usize..4usize]);
     crate::curve25519_64::fmul(c1.0, t010.1, &mut f2_copy2, tmp);
@@ -295,20 +295,20 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64])
     crate::curve25519_64::fsquare_times(t011.1, c10.1, tmp14.1, 100u32);
     let mut f1_copy0: [u64; 4] = [0u64; 4usize];
     ((&mut f1_copy0)[0usize..4usize]).copy_from_slice(&t011.1[0usize..4usize]);
-    crate::curve25519_64::fmul(t011.1, &f1_copy0, c10.1, tmp);
+    crate::curve25519_64::fmul(t011.1, &mut f1_copy0, c10.1, tmp);
     let tmp111: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
     let mut i_copy0: [u64; 4] = [0u64; 4usize];
     ((&mut i_copy0)[0usize..4usize]).copy_from_slice(&t011.1[0usize..4usize]);
-    crate::curve25519_64::fsquare_times(t011.1, &i_copy0, tmp111.1, 50u32);
+    crate::curve25519_64::fsquare_times(t011.1, &mut i_copy0, tmp111.1, 50u32);
     let mut f1_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut f1_copy1)[0usize..4usize]).copy_from_slice(&t011.1[0usize..4usize]);
-    crate::curve25519_64::fmul(t011.1, &f1_copy1, b11.1, tmp);
+    crate::curve25519_64::fmul(t011.1, &mut f1_copy1, b11.1, tmp);
     let tmp121: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
     let mut i_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut i_copy1)[0usize..4usize]).copy_from_slice(&t011.1[0usize..4usize]);
-    crate::curve25519_64::fsquare_times(t011.1, &i_copy1, tmp121.1, 5u32);
+    crate::curve25519_64::fsquare_times(t011.1, &mut i_copy1, tmp121.1, 5u32);
     let a: (&mut [u64], &mut [u64]) = b1.0.split_at_mut(0usize);
-    let t0: (&[u64], &[u64]) = t011.1.split_at(0usize);
+    let t0: (&mut [u64], &mut [u64]) = t011.1.split_at_mut(0usize);
     crate::curve25519_64::fmul(o, t0.1, a.1, tmp)
 }
 
@@ -354,8 +354,8 @@ fn encode_point(o: &mut [u8], i: &mut [u64])
     let mut tmp_w: [u64; 16] = [0u64; 16usize];
     crate::curve25519_64::finv(&mut tmp, z.1, &mut tmp_w);
     let mut f1_copy: [u64; 4] = [0u64; 4usize];
-    ((&mut f1_copy)[0usize..4usize]).copy_from_slice(&(&tmp)[0usize..4usize]);
-    crate::curve25519_64::fmul(&mut tmp, &f1_copy, z.0, &mut tmp_w);
+    ((&mut f1_copy)[0usize..4usize]).copy_from_slice(&(&mut tmp)[0usize..4usize]);
+    crate::curve25519_64::fmul(&mut tmp, &mut f1_copy, z.0, &mut tmp_w);
     crate::curve25519_64::store_felem(&mut u64s, &mut tmp);
     krml::unroll_for!(
         4,
@@ -364,7 +364,7 @@ fn encode_point(o: &mut [u8], i: &mut [u64])
         1u32,
         lowstar::endianness::store64_le(
             &mut o[i0.wrapping_mul(8u32) as usize..],
-            (&u64s)[i0 as usize]
+            (&mut u64s)[i0 as usize]
         )
     )
 }
@@ -377,7 +377,7 @@ Compute the scalar multiple of a point.
 @param pub Pointer to 32 bytes of memory where the public point is read from.
 */
 pub fn
-scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
+scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8])
 {
     let mut init: [u64; 8] = [0u64; 8usize];
     let mut init_copy: [u64; 8] = [0u64; 8usize];
@@ -388,7 +388,7 @@ scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = r#pub.split_at(i.wrapping_mul(8u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = r#pub.split_at_mut(i.wrapping_mul(8u32) as usize);
             let u: u64 = lowstar::endianness::load64_le(bj.1);
             let r: u64 = u;
             let x: u64 = r;
@@ -396,7 +396,7 @@ scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
             os.1[i as usize] = x
         }
     );
-    let tmp3: u64 = (&tmp)[3usize];
+    let tmp3: u64 = (&mut tmp)[3usize];
     (&mut tmp)[3usize] = tmp3 & 0x7fffffffffffffffu64;
     let x: (&mut [u64], &mut [u64]) = init.split_at_mut(0usize);
     let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(4usize);
@@ -404,11 +404,11 @@ scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
     z.1[1usize] = 0u64;
     z.1[2usize] = 0u64;
     z.1[3usize] = 0u64;
-    z.0[0usize] = (&tmp)[0usize];
-    z.0[1usize] = (&tmp)[1usize];
-    z.0[2usize] = (&tmp)[2usize];
-    z.0[3usize] = (&tmp)[3usize];
-    ((&mut init_copy)[0usize..8usize]).copy_from_slice(&(&init)[0usize..8usize]);
+    z.0[0usize] = (&mut tmp)[0usize];
+    z.0[1usize] = (&mut tmp)[1usize];
+    z.0[2usize] = (&mut tmp)[2usize];
+    z.0[3usize] = (&mut tmp)[3usize];
+    ((&mut init_copy)[0usize..8usize]).copy_from_slice(&(&mut init)[0usize..8usize]);
     crate::curve25519_64::montgomery_ladder(&mut init, r#priv, &mut init_copy);
     crate::curve25519_64::encode_point(out, &mut init)
 }
@@ -422,7 +422,7 @@ This computes a scalar multiplication of the secret/private key with the curve's
 @param priv Pointer to 32 bytes of memory where the secret/private key is read from.
 */
 pub fn
-secret_to_public(r#pub: &mut [u8], r#priv: &[u8])
+secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8])
 {
     let mut basepoint: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(
@@ -431,12 +431,12 @@ secret_to_public(r#pub: &mut [u8], r#priv: &[u8])
         0u32,
         1u32,
         {
-            let x: u8 = (&crate::curve25519_64::g25519)[i as usize];
+            let x: u8 = (&mut crate::curve25519_64::g25519)[i as usize];
             let os: (&mut [u8], &mut [u8]) = basepoint.split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
-    crate::curve25519_64::scalarmult(r#pub, r#priv, &basepoint)
+    crate::curve25519_64::scalarmult(r#pub, r#priv, &mut basepoint)
 }
 
 /**
@@ -447,10 +447,10 @@ Execute the diffie-hellmann key exchange.
 @param pub Pointer to 32 bytes of memory where **their** public point is read from.
 */
 pub fn
-ecdh(out: &mut [u8], r#priv: &[u8], r#pub: &[u8]) ->
+ecdh(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) ->
     bool
 {
-    let zeros: [u8; 32] = [0u8; 32usize];
+    let mut zeros: [u8; 32] = [0u8; 32usize];
     crate::curve25519_64::scalarmult(out, r#priv, r#pub);
     let mut res: [u8; 1] = [255u8; 1usize];
     krml::unroll_for!(
@@ -459,11 +459,11 @@ ecdh(out: &mut [u8], r#priv: &[u8], r#pub: &[u8]) ->
         0u32,
         1u32,
         {
-            let uu____0: u8 = fstar::uint8::eq_mask(out[i as usize], (&zeros)[i as usize]);
-            (&mut res)[0usize] = uu____0 & (&res)[0usize]
+            let uu____0: u8 = fstar::uint8::eq_mask(out[i as usize], (&mut zeros)[i as usize]);
+            (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
         }
     );
-    let z: u8 = (&res)[0usize];
+    let z: u8 = (&mut res)[0usize];
     let r: bool = z == 255u8;
     ! r
 }

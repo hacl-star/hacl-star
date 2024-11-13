@@ -4,7 +4,7 @@
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
 
-#[inline] pub(crate) fn is_felem_zero_vartime(f: &[u64]) -> bool
+#[inline] pub(crate) fn is_felem_zero_vartime(f: &mut [u64]) -> bool
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -14,7 +14,7 @@
     f0 == 0u64 && f1 == 0u64 && f2 == 0u64 && f3 == 0u64 && f4 == 0u64
 }
 
-#[inline] pub(crate) fn is_felem_eq_vartime(f1: &[u64], f2: &[u64]) -> bool
+#[inline] pub(crate) fn is_felem_eq_vartime(f1: &mut [u64], f2: &mut [u64]) -> bool
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -29,7 +29,7 @@
     a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4
 }
 
-#[inline] pub(crate) fn is_felem_lt_prime_minus_order_vartime(f: &[u64]) -> bool
+#[inline] pub(crate) fn is_felem_lt_prime_minus_order_vartime(f: &mut [u64]) -> bool
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -47,7 +47,7 @@
     else if f1 > 0x1950b75fc4402u64 { false } else { f0 < 0xda1722fc9baeeu64 }
 }
 
-#[inline] pub(crate) fn load_felem(f: &mut [u64], b: &[u8])
+#[inline] pub(crate) fn load_felem(f: &mut [u64], b: &mut [u8])
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     krml::unroll_for!(
@@ -56,7 +56,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = b.split_at(i.wrapping_mul(8u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = b.split_at_mut(i.wrapping_mul(8u32) as usize);
             let u: u64 = lowstar::endianness::load64_be(bj.1);
             let r: u64 = u;
             let x: u64 = r;
@@ -64,10 +64,10 @@
             os.1[i as usize] = x
         }
     );
-    let s0: u64 = (&tmp)[3usize];
-    let s1: u64 = (&tmp)[2usize];
-    let s2: u64 = (&tmp)[1usize];
-    let s3: u64 = (&tmp)[0usize];
+    let s0: u64 = (&mut tmp)[3usize];
+    let s1: u64 = (&mut tmp)[2usize];
+    let s2: u64 = (&mut tmp)[1usize];
+    let s3: u64 = (&mut tmp)[0usize];
     let f0: u64 = s0 & 0xfffffffffffffu64;
     let f1: u64 = s0.wrapping_shr(52u32) | (s1 & 0xffffffffffu64).wrapping_shl(12u32);
     let f2: u64 = s1.wrapping_shr(40u32) | (s2 & 0xfffffffu64).wrapping_shl(24u32);
@@ -85,7 +85,7 @@
     f[4usize] = f40
 }
 
-#[inline] pub(crate) fn load_felem_lt_prime_vartime(f: &mut [u64], b: &[u8]) -> bool
+#[inline] pub(crate) fn load_felem_lt_prime_vartime(f: &mut [u64], b: &mut [u8]) -> bool
 {
     crate::bignum_k256::load_felem(f, b);
     let f0: u64 = f[0usize];
@@ -102,7 +102,7 @@
     ! is_ge_p
 }
 
-#[inline] pub(crate) fn store_felem(b: &mut [u8], f: &[u64])
+#[inline] pub(crate) fn store_felem(b: &mut [u8], f: &mut [u64])
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     let f0: u64 = f[0usize];
@@ -127,11 +127,14 @@
         "i",
         0u32,
         1u32,
-        lowstar::endianness::store64_be(&mut b[i.wrapping_mul(8u32) as usize..], (&tmp)[i as usize])
+        lowstar::endianness::store64_be(
+            &mut b[i.wrapping_mul(8u32) as usize..],
+            (&mut tmp)[i as usize]
+        )
     )
 }
 
-#[inline] pub(crate) fn fmul_small_num(out: &mut [u64], f: &[u64], num: u64)
+#[inline] pub(crate) fn fmul_small_num(out: &mut [u64], f: &mut [u64], num: u64)
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -155,7 +158,7 @@
     out[4usize] = f40
 }
 
-#[inline] pub(crate) fn fadd(out: &mut [u64], f1: &[u64], f2: &[u64])
+#[inline] pub(crate) fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -184,7 +187,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub(crate) fn fsub(out: &mut [u64], f1: &[u64], f2: &[u64], x: u64)
+#[inline] pub(crate) fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], x: u64)
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -223,7 +226,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub(crate) fn fmul(out: &mut [u64], f1: &[u64], f2: &[u64])
+#[inline] pub(crate) fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -357,7 +360,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub(crate) fn fsqr(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fsqr(out: &mut [u64], f: &mut [u64])
 {
     let a0: u64 = f[0usize];
     let a1: u64 = f[1usize];
@@ -458,7 +461,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub(crate) fn fnormalize_weak(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fnormalize_weak(out: &mut [u64], f: &mut [u64])
 {
     let t0: u64 = f[0usize];
     let t1: u64 = f[1usize];
@@ -494,7 +497,7 @@
     out[4usize] = f4
 }
 
-#[inline] pub(crate) fn fnormalize(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fnormalize(out: &mut [u64], f: &mut [u64])
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -597,7 +600,7 @@
         f[4usize] = f4;
         let mut f_copy: [u64; 5] = [0u64; 5usize];
         ((&mut f_copy)[0usize..5usize]).copy_from_slice(&f[0usize..5usize]);
-        crate::bignum_k256::fnormalize(f, &f_copy)
+        crate::bignum_k256::fnormalize(f, &mut f_copy)
     }
 }
 
@@ -607,22 +610,22 @@
     {
         let mut x_copy: [u64; 5] = [0u64; 5usize];
         ((&mut x_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-        crate::bignum_k256::fsqr(out, &x_copy)
+        crate::bignum_k256::fsqr(out, &mut x_copy)
     }
 }
 
-#[inline] pub(crate) fn fsquare_times(out: &mut [u64], a: &[u64], b: u32)
+#[inline] pub(crate) fn fsquare_times(out: &mut [u64], a: &mut [u64], b: u32)
 {
     (out[0usize..5usize]).copy_from_slice(&a[0usize..5usize]);
     for _i in 0u32..b
     {
         let mut x_copy: [u64; 5] = [0u64; 5usize];
         ((&mut x_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-        crate::bignum_k256::fsqr(out, &x_copy)
+        crate::bignum_k256::fsqr(out, &mut x_copy)
     }
 }
 
-#[inline] pub(crate) fn fexp_223_23(out: &mut [u64], x2: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fexp_223_23(out: &mut [u64], x2: &mut [u64], f: &mut [u64])
 {
     let mut x3: [u64; 5] = [0u64; 5usize];
     let mut x22: [u64; 5] = [0u64; 5usize];
@@ -631,78 +634,78 @@
     crate::bignum_k256::fsquare_times(x2, f, 1u32);
     let mut f1_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&x2[0usize..5usize]);
-    crate::bignum_k256::fmul(x2, &f1_copy, f);
+    crate::bignum_k256::fmul(x2, &mut f1_copy, f);
     crate::bignum_k256::fsquare_times(&mut x3, x2, 1u32);
     let mut f1_copy0: [u64; 5] = [0u64; 5usize];
-    ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&(&x3)[0usize..5usize]);
-    crate::bignum_k256::fmul(&mut x3, &f1_copy0, f);
-    crate::bignum_k256::fsquare_times(out, &x3, 3u32);
+    ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&(&mut x3)[0usize..5usize]);
+    crate::bignum_k256::fmul(&mut x3, &mut f1_copy0, f);
+    crate::bignum_k256::fsquare_times(out, &mut x3, 3u32);
     let mut f1_copy1: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy1)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy1, &x3);
+    crate::bignum_k256::fmul(out, &mut f1_copy1, &mut x3);
     crate::bignum_k256::fsquare_times_in_place(out, 3u32);
     let mut f1_copy2: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy2)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy2, &x3);
+    crate::bignum_k256::fmul(out, &mut f1_copy2, &mut x3);
     crate::bignum_k256::fsquare_times_in_place(out, 2u32);
     let mut f1_copy3: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy3)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy3, x2);
+    crate::bignum_k256::fmul(out, &mut f1_copy3, x2);
     crate::bignum_k256::fsquare_times(&mut x22, out, 11u32);
     let mut f1_copy4: [u64; 5] = [0u64; 5usize];
-    ((&mut f1_copy4)[0usize..5usize]).copy_from_slice(&(&x22)[0usize..5usize]);
-    crate::bignum_k256::fmul(&mut x22, &f1_copy4, out);
-    crate::bignum_k256::fsquare_times(&mut x44, &x22, 22u32);
+    ((&mut f1_copy4)[0usize..5usize]).copy_from_slice(&(&mut x22)[0usize..5usize]);
+    crate::bignum_k256::fmul(&mut x22, &mut f1_copy4, out);
+    crate::bignum_k256::fsquare_times(&mut x44, &mut x22, 22u32);
     let mut f1_copy5: [u64; 5] = [0u64; 5usize];
-    ((&mut f1_copy5)[0usize..5usize]).copy_from_slice(&(&x44)[0usize..5usize]);
-    crate::bignum_k256::fmul(&mut x44, &f1_copy5, &x22);
-    crate::bignum_k256::fsquare_times(&mut x88, &x44, 44u32);
+    ((&mut f1_copy5)[0usize..5usize]).copy_from_slice(&(&mut x44)[0usize..5usize]);
+    crate::bignum_k256::fmul(&mut x44, &mut f1_copy5, &mut x22);
+    crate::bignum_k256::fsquare_times(&mut x88, &mut x44, 44u32);
     let mut f1_copy6: [u64; 5] = [0u64; 5usize];
-    ((&mut f1_copy6)[0usize..5usize]).copy_from_slice(&(&x88)[0usize..5usize]);
-    crate::bignum_k256::fmul(&mut x88, &f1_copy6, &x44);
-    crate::bignum_k256::fsquare_times(out, &x88, 88u32);
+    ((&mut f1_copy6)[0usize..5usize]).copy_from_slice(&(&mut x88)[0usize..5usize]);
+    crate::bignum_k256::fmul(&mut x88, &mut f1_copy6, &mut x44);
+    crate::bignum_k256::fsquare_times(out, &mut x88, 88u32);
     let mut f1_copy7: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy7)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy7, &x88);
+    crate::bignum_k256::fmul(out, &mut f1_copy7, &mut x88);
     crate::bignum_k256::fsquare_times_in_place(out, 44u32);
     let mut f1_copy8: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy8)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy8, &x44);
+    crate::bignum_k256::fmul(out, &mut f1_copy8, &mut x44);
     crate::bignum_k256::fsquare_times_in_place(out, 3u32);
     let mut f1_copy9: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy9)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy9, &x3);
+    crate::bignum_k256::fmul(out, &mut f1_copy9, &mut x3);
     crate::bignum_k256::fsquare_times_in_place(out, 23u32);
     let mut f1_copy10: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy10)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy10, &x22)
+    crate::bignum_k256::fmul(out, &mut f1_copy10, &mut x22)
 }
 
-#[inline] pub(crate) fn finv(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn finv(out: &mut [u64], f: &mut [u64])
 {
     let mut x2: [u64; 5] = [0u64; 5usize];
     crate::bignum_k256::fexp_223_23(out, &mut x2, f);
     crate::bignum_k256::fsquare_times_in_place(out, 5u32);
     let mut f1_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy, f);
+    crate::bignum_k256::fmul(out, &mut f1_copy, f);
     crate::bignum_k256::fsquare_times_in_place(out, 3u32);
     let mut f1_copy0: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy0, &x2);
+    crate::bignum_k256::fmul(out, &mut f1_copy0, &mut x2);
     crate::bignum_k256::fsquare_times_in_place(out, 2u32);
     let mut f1_copy1: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy1)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy1, f)
+    crate::bignum_k256::fmul(out, &mut f1_copy1, f)
 }
 
-#[inline] pub(crate) fn fsqrt(out: &mut [u64], f: &[u64])
+#[inline] pub(crate) fn fsqrt(out: &mut [u64], f: &mut [u64])
 {
     let mut x2: [u64; 5] = [0u64; 5usize];
     crate::bignum_k256::fexp_223_23(out, &mut x2, f);
     crate::bignum_k256::fsquare_times_in_place(out, 6u32);
     let mut f1_copy: [u64; 5] = [0u64; 5usize];
     ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
-    crate::bignum_k256::fmul(out, &f1_copy, &x2);
+    crate::bignum_k256::fmul(out, &mut f1_copy, &mut x2);
     crate::bignum_k256::fsquare_times_in_place(out, 2u32)
 }

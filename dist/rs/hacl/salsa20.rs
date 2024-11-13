@@ -64,7 +64,7 @@
     crate::salsa20::double_round(st)
 }
 
-#[inline] fn salsa20_core(k: &mut [u32], ctx: &[u32], ctr: u32)
+#[inline] fn salsa20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32)
 {
     (k[0usize..16usize]).copy_from_slice(&ctx[0usize..16usize]);
     let ctr_u32: u32 = ctr;
@@ -84,7 +84,7 @@
     k[8usize] = (k[8usize]).wrapping_add(ctr_u32)
 }
 
-#[inline] fn salsa20_key_block0(out: &mut [u8], key: &[u8], n: &[u8])
+#[inline] fn salsa20_key_block0(out: &mut [u8], key: &mut [u8], n: &mut [u8])
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k: [u32; 16] = [0u32; 16usize];
@@ -96,7 +96,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = key.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -110,7 +110,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = n.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -119,32 +119,35 @@
         }
     );
     (&mut ctx)[0usize] = 0x61707865u32;
-    let k0: (&[u32], &[u32]) = k32.split_at(0usize);
-    let k1: (&[u32], &[u32]) = k0.1.split_at(4usize);
+    let k0: (&mut [u32], &mut [u32]) = k32.split_at_mut(0usize);
+    let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
     ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..4usize]);
     (&mut ctx)[5usize] = 0x3320646eu32;
-    ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&n32)[0usize..2usize]);
+    ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&mut n32)[0usize..2usize]);
     (&mut ctx)[8usize] = 0u32;
     (&mut ctx)[9usize] = 0u32;
     (&mut ctx)[10usize] = 0x79622d32u32;
     ((&mut ctx)[11usize..11usize + 4usize]).copy_from_slice(&k1.1[0usize..4usize]);
     (&mut ctx)[15usize] = 0x6b206574u32;
-    crate::salsa20::salsa20_core(&mut k, &ctx, 0u32);
+    crate::salsa20::salsa20_core(&mut k, &mut ctx, 0u32);
     krml::unroll_for!(
         16,
         "i",
         0u32,
         1u32,
-        lowstar::endianness::store32_le(&mut out[i.wrapping_mul(4u32) as usize..], (&k)[i as usize])
+        lowstar::endianness::store32_le(
+            &mut out[i.wrapping_mul(4u32) as usize..],
+            (&mut k)[i as usize]
+        )
     )
 }
 
 #[inline] fn salsa20_encrypt(
     len: u32,
     out: &mut [u8],
-    text: &[u8],
-    key: &[u8],
-    n: &[u8],
+    text: &mut [u8],
+    key: &mut [u8],
+    n: &mut [u8],
     ctr: u32
 )
 {
@@ -157,7 +160,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = key.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -171,7 +174,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = n.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -180,27 +183,27 @@
         }
     );
     (&mut ctx)[0usize] = 0x61707865u32;
-    let k0: (&[u32], &[u32]) = k32.split_at(0usize);
-    let k1: (&[u32], &[u32]) = k0.1.split_at(4usize);
+    let k0: (&mut [u32], &mut [u32]) = k32.split_at_mut(0usize);
+    let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
     ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..4usize]);
     (&mut ctx)[5usize] = 0x3320646eu32;
-    ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&n32)[0usize..2usize]);
+    ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&mut n32)[0usize..2usize]);
     (&mut ctx)[8usize] = ctr;
     (&mut ctx)[9usize] = 0u32;
     (&mut ctx)[10usize] = 0x79622d32u32;
     ((&mut ctx)[11usize..11usize + 4usize]).copy_from_slice(&k1.1[0usize..4usize]);
     (&mut ctx)[15usize] = 0x6b206574u32;
-    let k: [u32; 16] = [0u32; 16usize];
-    lowstar::ignore::ignore::<&[u32]>(&k);
+    let mut k: [u32; 16] = [0u32; 16usize];
+    lowstar::ignore::ignore::<&mut [u32]>(&mut k);
     let rem: u32 = len.wrapping_rem(64u32);
     let nb: u32 = len.wrapping_div(64u32);
     let rem1: u32 = len.wrapping_rem(64u32);
     for i in 0u32..nb
     {
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(64u32) as usize);
-        let uu____1: (&[u8], &[u8]) = text.split_at(i.wrapping_mul(64u32) as usize);
+        let uu____1: (&mut [u8], &mut [u8]) = text.split_at_mut(i.wrapping_mul(64u32) as usize);
         let mut k10: [u32; 16] = [0u32; 16usize];
-        crate::salsa20::salsa20_core(&mut k10, &ctx, i);
+        crate::salsa20::salsa20_core(&mut k10, &mut ctx, i);
         let mut bl: [u32; 16] = [0u32; 16usize];
         krml::unroll_for!(
             16,
@@ -208,7 +211,8 @@
             0u32,
             1u32,
             {
-                let bj: (&[u8], &[u8]) = uu____1.1.split_at(i0.wrapping_mul(4u32) as usize);
+                let bj: (&mut [u8], &mut [u8]) =
+                    uu____1.1.split_at_mut(i0.wrapping_mul(4u32) as usize);
                 let u: u32 = lowstar::endianness::load32_le(bj.1);
                 let r: u32 = u;
                 let x: u32 = r;
@@ -222,7 +226,7 @@
             0u32,
             1u32,
             {
-                let x: u32 = (&bl)[i0 as usize] ^ (&k10)[i0 as usize];
+                let x: u32 = (&mut bl)[i0 as usize] ^ (&mut k10)[i0 as usize];
                 let os: (&mut [u32], &mut [u32]) = bl.split_at_mut(0usize);
                 os.1[i0 as usize] = x
             }
@@ -234,7 +238,7 @@
             1u32,
             lowstar::endianness::store32_le(
                 &mut uu____0.1[i0.wrapping_mul(4u32) as usize..],
-                (&bl)[i0 as usize]
+                (&mut bl)[i0 as usize]
             )
         )
     };
@@ -243,10 +247,10 @@
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(64u32) as usize);
         let mut plain: [u8; 64] = [0u8; 64usize];
         ((&mut plain)[0usize..rem as usize]).copy_from_slice(
-            &(&text[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
+            &(&mut text[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
         );
         let mut k10: [u32; 16] = [0u32; 16usize];
-        crate::salsa20::salsa20_core(&mut k10, &ctx, nb);
+        crate::salsa20::salsa20_core(&mut k10, &mut ctx, nb);
         let mut bl: [u32; 16] = [0u32; 16usize];
         krml::unroll_for!(
             16,
@@ -254,7 +258,7 @@
             0u32,
             1u32,
             {
-                let bj: (&[u8], &[u8]) = plain.split_at(i.wrapping_mul(4u32) as usize);
+                let bj: (&mut [u8], &mut [u8]) = plain.split_at_mut(i.wrapping_mul(4u32) as usize);
                 let u: u32 = lowstar::endianness::load32_le(bj.1);
                 let r: u32 = u;
                 let x: u32 = r;
@@ -268,7 +272,7 @@
             0u32,
             1u32,
             {
-                let x: u32 = (&bl)[i as usize] ^ (&k10)[i as usize];
+                let x: u32 = (&mut bl)[i as usize] ^ (&mut k10)[i as usize];
                 let os: (&mut [u32], &mut [u32]) = bl.split_at_mut(0usize);
                 os.1[i as usize] = x
             }
@@ -280,11 +284,11 @@
             1u32,
             lowstar::endianness::store32_le(
                 &mut (&mut plain)[i.wrapping_mul(4u32) as usize..],
-                (&bl)[i as usize]
+                (&mut bl)[i as usize]
             )
         );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
-            &(&(&plain)[0usize..])[0usize..rem as usize]
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }
@@ -292,9 +296,9 @@
 #[inline] fn salsa20_decrypt(
     len: u32,
     out: &mut [u8],
-    cipher: &[u8],
-    key: &[u8],
-    n: &[u8],
+    cipher: &mut [u8],
+    key: &mut [u8],
+    n: &mut [u8],
     ctr: u32
 )
 {
@@ -307,7 +311,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = key.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -321,7 +325,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = n.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -330,27 +334,27 @@
         }
     );
     (&mut ctx)[0usize] = 0x61707865u32;
-    let k0: (&[u32], &[u32]) = k32.split_at(0usize);
-    let k1: (&[u32], &[u32]) = k0.1.split_at(4usize);
+    let k0: (&mut [u32], &mut [u32]) = k32.split_at_mut(0usize);
+    let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
     ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..4usize]);
     (&mut ctx)[5usize] = 0x3320646eu32;
-    ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&n32)[0usize..2usize]);
+    ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&mut n32)[0usize..2usize]);
     (&mut ctx)[8usize] = ctr;
     (&mut ctx)[9usize] = 0u32;
     (&mut ctx)[10usize] = 0x79622d32u32;
     ((&mut ctx)[11usize..11usize + 4usize]).copy_from_slice(&k1.1[0usize..4usize]);
     (&mut ctx)[15usize] = 0x6b206574u32;
-    let k: [u32; 16] = [0u32; 16usize];
-    lowstar::ignore::ignore::<&[u32]>(&k);
+    let mut k: [u32; 16] = [0u32; 16usize];
+    lowstar::ignore::ignore::<&mut [u32]>(&mut k);
     let rem: u32 = len.wrapping_rem(64u32);
     let nb: u32 = len.wrapping_div(64u32);
     let rem1: u32 = len.wrapping_rem(64u32);
     for i in 0u32..nb
     {
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(64u32) as usize);
-        let uu____1: (&[u8], &[u8]) = cipher.split_at(i.wrapping_mul(64u32) as usize);
+        let uu____1: (&mut [u8], &mut [u8]) = cipher.split_at_mut(i.wrapping_mul(64u32) as usize);
         let mut k10: [u32; 16] = [0u32; 16usize];
-        crate::salsa20::salsa20_core(&mut k10, &ctx, i);
+        crate::salsa20::salsa20_core(&mut k10, &mut ctx, i);
         let mut bl: [u32; 16] = [0u32; 16usize];
         krml::unroll_for!(
             16,
@@ -358,7 +362,8 @@
             0u32,
             1u32,
             {
-                let bj: (&[u8], &[u8]) = uu____1.1.split_at(i0.wrapping_mul(4u32) as usize);
+                let bj: (&mut [u8], &mut [u8]) =
+                    uu____1.1.split_at_mut(i0.wrapping_mul(4u32) as usize);
                 let u: u32 = lowstar::endianness::load32_le(bj.1);
                 let r: u32 = u;
                 let x: u32 = r;
@@ -372,7 +377,7 @@
             0u32,
             1u32,
             {
-                let x: u32 = (&bl)[i0 as usize] ^ (&k10)[i0 as usize];
+                let x: u32 = (&mut bl)[i0 as usize] ^ (&mut k10)[i0 as usize];
                 let os: (&mut [u32], &mut [u32]) = bl.split_at_mut(0usize);
                 os.1[i0 as usize] = x
             }
@@ -384,7 +389,7 @@
             1u32,
             lowstar::endianness::store32_le(
                 &mut uu____0.1[i0.wrapping_mul(4u32) as usize..],
-                (&bl)[i0 as usize]
+                (&mut bl)[i0 as usize]
             )
         )
     };
@@ -393,10 +398,10 @@
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(64u32) as usize);
         let mut plain: [u8; 64] = [0u8; 64usize];
         ((&mut plain)[0usize..rem as usize]).copy_from_slice(
-            &(&cipher[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
+            &(&mut cipher[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
         );
         let mut k10: [u32; 16] = [0u32; 16usize];
-        crate::salsa20::salsa20_core(&mut k10, &ctx, nb);
+        crate::salsa20::salsa20_core(&mut k10, &mut ctx, nb);
         let mut bl: [u32; 16] = [0u32; 16usize];
         krml::unroll_for!(
             16,
@@ -404,7 +409,7 @@
             0u32,
             1u32,
             {
-                let bj: (&[u8], &[u8]) = plain.split_at(i.wrapping_mul(4u32) as usize);
+                let bj: (&mut [u8], &mut [u8]) = plain.split_at_mut(i.wrapping_mul(4u32) as usize);
                 let u: u32 = lowstar::endianness::load32_le(bj.1);
                 let r: u32 = u;
                 let x: u32 = r;
@@ -418,7 +423,7 @@
             0u32,
             1u32,
             {
-                let x: u32 = (&bl)[i as usize] ^ (&k10)[i as usize];
+                let x: u32 = (&mut bl)[i as usize] ^ (&mut k10)[i as usize];
                 let os: (&mut [u32], &mut [u32]) = bl.split_at_mut(0usize);
                 os.1[i as usize] = x
             }
@@ -430,16 +435,16 @@
             1u32,
             lowstar::endianness::store32_le(
                 &mut (&mut plain)[i.wrapping_mul(4u32) as usize..],
-                (&bl)[i as usize]
+                (&mut bl)[i as usize]
             )
         );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
-            &(&(&plain)[0usize..])[0usize..rem as usize]
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }
 
-#[inline] fn hsalsa20(out: &mut [u8], key: &[u8], n: &[u8])
+#[inline] fn hsalsa20(out: &mut [u8], key: &mut [u8], n: &mut [u8])
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k32: [u32; 8] = [0u32; 8usize];
@@ -450,7 +455,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = key.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -464,7 +469,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = n.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -472,25 +477,25 @@
             os.1[i as usize] = x
         }
     );
-    let k0: (&[u32], &[u32]) = k32.split_at(0usize);
-    let k1: (&[u32], &[u32]) = k0.1.split_at(4usize);
+    let k0: (&mut [u32], &mut [u32]) = k32.split_at_mut(0usize);
+    let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
     (&mut ctx)[0usize] = 0x61707865u32;
     ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..4usize]);
     (&mut ctx)[5usize] = 0x3320646eu32;
-    ((&mut ctx)[6usize..6usize + 4usize]).copy_from_slice(&(&n32)[0usize..4usize]);
+    ((&mut ctx)[6usize..6usize + 4usize]).copy_from_slice(&(&mut n32)[0usize..4usize]);
     (&mut ctx)[10usize] = 0x79622d32u32;
     ((&mut ctx)[11usize..11usize + 4usize]).copy_from_slice(&k1.1[0usize..4usize]);
     (&mut ctx)[15usize] = 0x6b206574u32;
     crate::salsa20::rounds(&mut ctx);
-    let r0: u32 = (&ctx)[0usize];
-    let r1: u32 = (&ctx)[5usize];
-    let r2: u32 = (&ctx)[10usize];
-    let r3: u32 = (&ctx)[15usize];
-    let r4: u32 = (&ctx)[6usize];
-    let r5: u32 = (&ctx)[7usize];
-    let r6: u32 = (&ctx)[8usize];
-    let r7: u32 = (&ctx)[9usize];
-    let res: [u32; 8] = [r0, r1, r2, r3, r4, r5, r6, r7];
+    let r0: u32 = (&mut ctx)[0usize];
+    let r1: u32 = (&mut ctx)[5usize];
+    let r2: u32 = (&mut ctx)[10usize];
+    let r3: u32 = (&mut ctx)[15usize];
+    let r4: u32 = (&mut ctx)[6usize];
+    let r5: u32 = (&mut ctx)[7usize];
+    let r6: u32 = (&mut ctx)[8usize];
+    let r7: u32 = (&mut ctx)[9usize];
+    let mut res: [u32; 8] = [r0, r1, r2, r3, r4, r5, r6, r7];
     krml::unroll_for!(
         8,
         "i",
@@ -498,26 +503,33 @@
         1u32,
         lowstar::endianness::store32_le(
             &mut out[i.wrapping_mul(4u32) as usize..],
-            (&res)[i as usize]
+            (&mut res)[i as usize]
         )
     )
 }
 
-pub fn salsa20_encrypt0(len: u32, out: &mut [u8], text: &[u8], key: &[u8], n: &[u8], ctr: u32)
+pub fn salsa20_encrypt0(
+    len: u32,
+    out: &mut [u8],
+    text: &mut [u8],
+    key: &mut [u8],
+    n: &mut [u8],
+    ctr: u32
+)
 { crate::salsa20::salsa20_encrypt(len, out, text, key, n, ctr) }
 
 pub fn salsa20_decrypt0(
     len: u32,
     out: &mut [u8],
-    cipher: &[u8],
-    key: &[u8],
-    n: &[u8],
+    cipher: &mut [u8],
+    key: &mut [u8],
+    n: &mut [u8],
     ctr: u32
 )
 { crate::salsa20::salsa20_decrypt(len, out, cipher, key, n, ctr) }
 
-pub fn salsa20_key_block00(out: &mut [u8], key: &[u8], n: &[u8])
+pub fn salsa20_key_block00(out: &mut [u8], key: &mut [u8], n: &mut [u8])
 { crate::salsa20::salsa20_key_block0(out, key, n) }
 
-pub fn hsalsa200(out: &mut [u8], key: &[u8], n: &[u8])
+pub fn hsalsa200(out: &mut [u8], key: &mut [u8], n: &mut [u8])
 { crate::salsa20::hsalsa20(out, key, n) }

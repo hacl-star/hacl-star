@@ -104,7 +104,7 @@
     st[4usize] = std30.wrapping_shl(7u32) | std30.wrapping_shr(25u32)
 }
 
-#[inline] fn chacha20_core_32(k: &mut [u32], ctx: &[u32], ctr: u32)
+#[inline] fn chacha20_core_32(k: &mut [u32], ctx: &mut [u32], ctr: u32)
 {
     (k[0usize..16usize]).copy_from_slice(&ctx[0usize..16usize]);
     let ctr_u32: u32 = 1u32.wrapping_mul(ctr);
@@ -134,7 +134,7 @@
     k[12usize] = (k[12usize]).wrapping_add(cv)
 }
 
-#[inline] fn chacha20_init_32(ctx: &mut [u32], k: &[u8], n: &[u8], ctr: u32)
+#[inline] fn chacha20_init_32(ctx: &mut [u32], k: &mut [u8], n: &mut [u8], ctr: u32)
 {
     let mut ctx1: [u32; 16] = [0u32; 16usize];
     krml::unroll_for!(
@@ -143,7 +143,7 @@
         0u32,
         1u32,
         {
-            let x: u32 = (&crate::chacha20::chacha20_constants)[i as usize];
+            let x: u32 = (&mut crate::chacha20::chacha20_constants)[i as usize];
             let os: &mut [u32] = &mut (&mut (&mut ctx1)[0usize..])[0usize..];
             os[i as usize] = x
         }
@@ -155,7 +155,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = k.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = k.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -171,7 +171,7 @@
         0u32,
         1u32,
         {
-            let bj: (&[u8], &[u8]) = n.split_at(i.wrapping_mul(4u32) as usize);
+            let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
@@ -185,7 +185,7 @@
         0u32,
         1u32,
         {
-            let x: u32 = (&ctx1)[i as usize];
+            let x: u32 = (&mut ctx1)[i as usize];
             let os: (&mut [u32], &mut [u32]) = ctx.split_at_mut(0usize);
             os.1[i as usize] = x
         }
@@ -198,9 +198,9 @@
 pub fn chacha20_encrypt_32(
     len: u32,
     out: &mut [u8],
-    text: &[u8],
-    key: &[u8],
-    n: &[u8],
+    text: &mut [u8],
+    key: &mut [u8],
+    n: &mut [u8],
     ctr: u32
 )
 {
@@ -212,9 +212,9 @@ pub fn chacha20_encrypt_32(
     for i in 0u32..nb
     {
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(64u32) as usize);
-        let uu____1: (&[u8], &[u8]) = text.split_at(i.wrapping_mul(64u32) as usize);
+        let uu____1: (&mut [u8], &mut [u8]) = text.split_at_mut(i.wrapping_mul(64u32) as usize);
         let mut k: [u32; 16] = [0u32; 16usize];
-        crate::chacha20_vec32::chacha20_core_32(&mut k, &ctx, i);
+        crate::chacha20_vec32::chacha20_core_32(&mut k, &mut ctx, i);
         krml::unroll_for!(
             16,
             "i0",
@@ -222,9 +222,9 @@ pub fn chacha20_encrypt_32(
             1u32,
             {
                 let u: u32 =
-                    lowstar::endianness::load32_le(&uu____1.1[i0.wrapping_mul(4u32) as usize..]);
+                    lowstar::endianness::load32_le(&mut uu____1.1[i0.wrapping_mul(4u32) as usize..]);
                 let x: u32 = u;
-                let y: u32 = x ^ (&k)[i0 as usize];
+                let y: u32 = x ^ (&mut k)[i0 as usize];
                 lowstar::endianness::store32_le(&mut uu____0.1[i0.wrapping_mul(4u32) as usize..], y)
             }
         )
@@ -234,10 +234,10 @@ pub fn chacha20_encrypt_32(
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(64u32) as usize);
         let mut plain: [u8; 64] = [0u8; 64usize];
         ((&mut plain)[0usize..rem as usize]).copy_from_slice(
-            &(&text[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
+            &(&mut text[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [u32; 16] = [0u32; 16usize];
-        crate::chacha20_vec32::chacha20_core_32(&mut k, &ctx, nb);
+        crate::chacha20_vec32::chacha20_core_32(&mut k, &mut ctx, nb);
         krml::unroll_for!(
             16,
             "i",
@@ -245,9 +245,11 @@ pub fn chacha20_encrypt_32(
             1u32,
             {
                 let u: u32 =
-                    lowstar::endianness::load32_le(&(&plain)[i.wrapping_mul(4u32) as usize..]);
+                    lowstar::endianness::load32_le(
+                        &mut (&mut plain)[i.wrapping_mul(4u32) as usize..]
+                    );
                 let x: u32 = u;
-                let y: u32 = x ^ (&k)[i as usize];
+                let y: u32 = x ^ (&mut k)[i as usize];
                 lowstar::endianness::store32_le(
                     &mut (&mut plain)[i.wrapping_mul(4u32) as usize..],
                     y
@@ -255,7 +257,7 @@ pub fn chacha20_encrypt_32(
             }
         );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
-            &(&(&plain)[0usize..])[0usize..rem as usize]
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }
@@ -263,9 +265,9 @@ pub fn chacha20_encrypt_32(
 pub fn chacha20_decrypt_32(
     len: u32,
     out: &mut [u8],
-    cipher: &[u8],
-    key: &[u8],
-    n: &[u8],
+    cipher: &mut [u8],
+    key: &mut [u8],
+    n: &mut [u8],
     ctr: u32
 )
 {
@@ -277,9 +279,9 @@ pub fn chacha20_decrypt_32(
     for i in 0u32..nb
     {
         let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(64u32) as usize);
-        let uu____1: (&[u8], &[u8]) = cipher.split_at(i.wrapping_mul(64u32) as usize);
+        let uu____1: (&mut [u8], &mut [u8]) = cipher.split_at_mut(i.wrapping_mul(64u32) as usize);
         let mut k: [u32; 16] = [0u32; 16usize];
-        crate::chacha20_vec32::chacha20_core_32(&mut k, &ctx, i);
+        crate::chacha20_vec32::chacha20_core_32(&mut k, &mut ctx, i);
         krml::unroll_for!(
             16,
             "i0",
@@ -287,9 +289,9 @@ pub fn chacha20_decrypt_32(
             1u32,
             {
                 let u: u32 =
-                    lowstar::endianness::load32_le(&uu____1.1[i0.wrapping_mul(4u32) as usize..]);
+                    lowstar::endianness::load32_le(&mut uu____1.1[i0.wrapping_mul(4u32) as usize..]);
                 let x: u32 = u;
-                let y: u32 = x ^ (&k)[i0 as usize];
+                let y: u32 = x ^ (&mut k)[i0 as usize];
                 lowstar::endianness::store32_le(&mut uu____0.1[i0.wrapping_mul(4u32) as usize..], y)
             }
         )
@@ -299,10 +301,10 @@ pub fn chacha20_decrypt_32(
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(64u32) as usize);
         let mut plain: [u8; 64] = [0u8; 64usize];
         ((&mut plain)[0usize..rem as usize]).copy_from_slice(
-            &(&cipher[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
+            &(&mut cipher[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [u32; 16] = [0u32; 16usize];
-        crate::chacha20_vec32::chacha20_core_32(&mut k, &ctx, nb);
+        crate::chacha20_vec32::chacha20_core_32(&mut k, &mut ctx, nb);
         krml::unroll_for!(
             16,
             "i",
@@ -310,9 +312,11 @@ pub fn chacha20_decrypt_32(
             1u32,
             {
                 let u: u32 =
-                    lowstar::endianness::load32_le(&(&plain)[i.wrapping_mul(4u32) as usize..]);
+                    lowstar::endianness::load32_le(
+                        &mut (&mut plain)[i.wrapping_mul(4u32) as usize..]
+                    );
                 let x: u32 = u;
-                let y: u32 = x ^ (&k)[i as usize];
+                let y: u32 = x ^ (&mut k)[i as usize];
                 lowstar::endianness::store32_le(
                     &mut (&mut plain)[i.wrapping_mul(4u32) as usize..],
                     y
@@ -320,7 +324,7 @@ pub fn chacha20_decrypt_32(
             }
         );
         (uu____2.1[0usize..rem as usize]).copy_from_slice(
-            &(&(&plain)[0usize..])[0usize..rem as usize]
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }

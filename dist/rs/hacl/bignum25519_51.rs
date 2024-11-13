@@ -4,7 +4,7 @@
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
 
-#[inline] pub(crate) fn fadd(out: &mut [u64], f1: &[u64], f2: &[u64])
+#[inline] pub(crate) fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     let f10: u64 = f1[0usize];
     let f20: u64 = f2[0usize];
@@ -23,7 +23,7 @@
     out[4usize] = f14.wrapping_add(f24)
 }
 
-#[inline] pub(crate) fn fsub(out: &mut [u64], f1: &[u64], f2: &[u64])
+#[inline] pub(crate) fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64])
 {
     let f10: u64 = f1[0usize];
     let f20: u64 = f2[0usize];
@@ -44,12 +44,12 @@
 
 #[inline] pub(crate) fn fmul(
     out: &mut [u64],
-    f1: &[u64],
-    f2: &[u64],
-    uu___: &[fstar::uint128::uint128]
+    f1: &mut [u64],
+    f2: &mut [u64],
+    uu___: &mut [fstar::uint128::uint128]
 )
 {
-    lowstar::ignore::ignore::<&[fstar::uint128::uint128]>(uu___);
+    lowstar::ignore::ignore::<&mut [fstar::uint128::uint128]>(uu___);
     let f10: u64 = f1[0usize];
     let f11: u64 = f1[1usize];
     let f12: u64 = f1[2usize];
@@ -147,12 +147,12 @@
 
 #[inline] pub(crate) fn fmul2(
     out: &mut [u64],
-    f1: &[u64],
-    f2: &[u64],
-    uu___: &[fstar::uint128::uint128]
+    f1: &mut [u64],
+    f2: &mut [u64],
+    uu___: &mut [fstar::uint128::uint128]
 )
 {
-    lowstar::ignore::ignore::<&[fstar::uint128::uint128]>(uu___);
+    lowstar::ignore::ignore::<&mut [fstar::uint128::uint128]>(uu___);
     let f10: u64 = f1[0usize];
     let f11: u64 = f1[1usize];
     let f12: u64 = f1[2usize];
@@ -355,7 +355,7 @@
     out[9usize] = o242
 }
 
-#[inline] pub(crate) fn fmul1(out: &mut [u64], f1: &[u64], f2: u64)
+#[inline] pub(crate) fn fmul1(out: &mut [u64], f1: &mut [u64], f2: u64)
 {
     let f10: u64 = f1[0usize];
     let f11: u64 = f1[1usize];
@@ -402,9 +402,13 @@
     out[4usize] = o4
 }
 
-#[inline] pub(crate) fn fsqr(out: &mut [u64], f: &[u64], uu___: &[fstar::uint128::uint128])
+#[inline] pub(crate) fn fsqr(
+    out: &mut [u64],
+    f: &mut [u64],
+    uu___: &mut [fstar::uint128::uint128]
+)
 {
-    lowstar::ignore::ignore::<&[fstar::uint128::uint128]>(uu___);
+    lowstar::ignore::ignore::<&mut [fstar::uint128::uint128]>(uu___);
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
     let f2: u64 = f[2usize];
@@ -481,9 +485,13 @@
     out[4usize] = o40
 }
 
-#[inline] pub(crate) fn fsqr2(out: &mut [u64], f: &[u64], uu___: &[fstar::uint128::uint128])
+#[inline] pub(crate) fn fsqr2(
+    out: &mut [u64],
+    f: &mut [u64],
+    uu___: &mut [fstar::uint128::uint128]
+)
 {
-    lowstar::ignore::ignore::<&[fstar::uint128::uint128]>(uu___);
+    lowstar::ignore::ignore::<&mut [fstar::uint128::uint128]>(uu___);
     let f10: u64 = f[0usize];
     let f11: u64 = f[1usize];
     let f12: u64 = f[2usize];
@@ -674,7 +682,7 @@
     out[9usize] = o240
 }
 
-pub(crate) fn store_felem(u64s: &mut [u64], f: &[u64])
+pub(crate) fn store_felem(u64s: &mut [u64], f: &mut [u64])
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];

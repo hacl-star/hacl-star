@@ -15,7 +15,14 @@ Expand pseudorandom key to desired length.
 @param len Length of output keying material.
 */
 pub fn
-expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u32, len: u32)
+expand_sha2_256(
+    okm: &mut [u8],
+    prk: &mut [u8],
+    prklen: u32,
+    info: &mut [u8],
+    infolen: u32,
+    len: u32
+)
 {
     let tlen: u32 = 32u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -30,8 +37,8 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if i == 0u32
         {
             crate::hmac::compute_sha2_256(
@@ -45,26 +52,26 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_sha2_256(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         ((&mut output.1[i.wrapping_mul(tlen) as usize..])[0usize..tlen as usize]).copy_from_slice(
-            &(&tag)[0usize..tlen as usize]
+            &(&mut tag)[0usize..tlen as usize]
         )
     };
     if n.wrapping_mul(tlen) < len
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if n == 0u32
         {
             crate::hmac::compute_sha2_256(
@@ -78,19 +85,19 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_sha2_256(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
-            &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
+            &(&mut (&mut tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
     }
 }
@@ -105,7 +112,7 @@ Extract a fixed-length pseudorandom key from input keying material.
 @param ikmlen Length of input keying material.
 */
 pub fn
-extract_sha2_256(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
+extract_sha2_256(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::hmac::compute_sha2_256(prk, salt, saltlen, ikm, ikmlen) }
 
 /**
@@ -119,7 +126,14 @@ Expand pseudorandom key to desired length.
 @param len Length of output keying material.
 */
 pub fn
-expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u32, len: u32)
+expand_sha2_384(
+    okm: &mut [u8],
+    prk: &mut [u8],
+    prklen: u32,
+    info: &mut [u8],
+    infolen: u32,
+    len: u32
+)
 {
     let tlen: u32 = 48u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -134,8 +148,8 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if i == 0u32
         {
             crate::hmac::compute_sha2_384(
@@ -149,26 +163,26 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_sha2_384(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         ((&mut output.1[i.wrapping_mul(tlen) as usize..])[0usize..tlen as usize]).copy_from_slice(
-            &(&tag)[0usize..tlen as usize]
+            &(&mut tag)[0usize..tlen as usize]
         )
     };
     if n.wrapping_mul(tlen) < len
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if n == 0u32
         {
             crate::hmac::compute_sha2_384(
@@ -182,19 +196,19 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_sha2_384(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
-            &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
+            &(&mut (&mut tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
     }
 }
@@ -209,7 +223,7 @@ Extract a fixed-length pseudorandom key from input keying material.
 @param ikmlen Length of input keying material.
 */
 pub fn
-extract_sha2_384(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
+extract_sha2_384(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::hmac::compute_sha2_384(prk, salt, saltlen, ikm, ikmlen) }
 
 /**
@@ -223,7 +237,14 @@ Expand pseudorandom key to desired length.
 @param len Length of output keying material.
 */
 pub fn
-expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u32, len: u32)
+expand_sha2_512(
+    okm: &mut [u8],
+    prk: &mut [u8],
+    prklen: u32,
+    info: &mut [u8],
+    infolen: u32,
+    len: u32
+)
 {
     let tlen: u32 = 64u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -238,8 +259,8 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if i == 0u32
         {
             crate::hmac::compute_sha2_512(
@@ -253,26 +274,26 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_sha2_512(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         ((&mut output.1[i.wrapping_mul(tlen) as usize..])[0usize..tlen as usize]).copy_from_slice(
-            &(&tag)[0usize..tlen as usize]
+            &(&mut tag)[0usize..tlen as usize]
         )
     };
     if n.wrapping_mul(tlen) < len
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if n == 0u32
         {
             crate::hmac::compute_sha2_512(
@@ -286,19 +307,19 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_sha2_512(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
-            &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
+            &(&mut (&mut tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
     }
 }
@@ -313,7 +334,7 @@ Extract a fixed-length pseudorandom key from input keying material.
 @param ikmlen Length of input keying material.
 */
 pub fn
-extract_sha2_512(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
+extract_sha2_512(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::hmac::compute_sha2_512(prk, salt, saltlen, ikm, ikmlen) }
 
 /**
@@ -327,7 +348,14 @@ Expand pseudorandom key to desired length.
 @param len Length of output keying material.
 */
 pub fn
-expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u32, len: u32)
+expand_blake2s_32(
+    okm: &mut [u8],
+    prk: &mut [u8],
+    prklen: u32,
+    info: &mut [u8],
+    infolen: u32,
+    len: u32
+)
 {
     let tlen: u32 = 32u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -342,8 +370,8 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if i == 0u32
         {
             crate::hmac::compute_blake2s_32(
@@ -357,26 +385,26 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_blake2s_32(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         ((&mut output.1[i.wrapping_mul(tlen) as usize..])[0usize..tlen as usize]).copy_from_slice(
-            &(&tag)[0usize..tlen as usize]
+            &(&mut tag)[0usize..tlen as usize]
         )
     };
     if n.wrapping_mul(tlen) < len
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if n == 0u32
         {
             crate::hmac::compute_blake2s_32(
@@ -390,19 +418,19 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_blake2s_32(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
-            &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
+            &(&mut (&mut tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
     }
 }
@@ -417,7 +445,7 @@ Extract a fixed-length pseudorandom key from input keying material.
 @param ikmlen Length of input keying material.
 */
 pub fn
-extract_blake2s_32(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
+extract_blake2s_32(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::hmac::compute_blake2s_32(prk, salt, saltlen, ikm, ikmlen) }
 
 /**
@@ -431,7 +459,14 @@ Expand pseudorandom key to desired length.
 @param len Length of output keying material.
 */
 pub fn
-expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u32, len: u32)
+expand_blake2b_32(
+    okm: &mut [u8],
+    prk: &mut [u8],
+    prklen: u32,
+    info: &mut [u8],
+    infolen: u32,
+    len: u32
+)
 {
     let tlen: u32 = 64u32;
     let n: u32 = len.wrapping_div(tlen);
@@ -446,8 +481,8 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = i.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if i == 0u32
         {
             crate::hmac::compute_blake2b_32(
@@ -461,26 +496,26 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_blake2b_32(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         ((&mut output.1[i.wrapping_mul(tlen) as usize..])[0usize..tlen as usize]).copy_from_slice(
-            &(&tag)[0usize..tlen as usize]
+            &(&mut tag)[0usize..tlen as usize]
         )
     };
     if n.wrapping_mul(tlen) < len
     {
         let ctr: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen.wrapping_add(infolen) as usize);
         ctr.1[0usize] = n.wrapping_add(1u32) as u8;
-        lowstar::ignore::ignore::<&[u8]>(&text);
-        let text0: (&[u8], &[u8]) = text.split_at(tlen as usize);
+        lowstar::ignore::ignore::<&mut [u8]>(&mut text);
+        let text0: (&mut [u8], &mut [u8]) = text.split_at_mut(tlen as usize);
         if n == 0u32
         {
             crate::hmac::compute_blake2b_32(
@@ -494,19 +529,19 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
         else
         {
             ((&mut (&mut text)[0usize..])[0usize..tlen as usize]).copy_from_slice(
-                &(&tag)[0usize..tlen as usize]
+                &(&mut tag)[0usize..tlen as usize]
             );
             crate::hmac::compute_blake2b_32(
                 &mut tag,
                 prk,
                 prklen,
-                &text,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
         let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
-            &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
+            &(&mut (&mut tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
     }
 }
@@ -521,5 +556,5 @@ Extract a fixed-length pseudorandom key from input keying material.
 @param ikmlen Length of input keying material.
 */
 pub fn
-extract_blake2b_32(prk: &mut [u8], salt: &[u8], saltlen: u32, ikm: &[u8], ikmlen: u32)
+extract_blake2b_32(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32)
 { crate::hmac::compute_blake2b_32(prk, salt, saltlen, ikm, ikmlen) }

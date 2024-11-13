@@ -60,57 +60,57 @@ pub fn
 create_in(a: crate::streaming_types::hash_alg) ->
     crate::hmac_drbg::state
 {
-    let k: &[u8] =
+    let k: &mut [u8] =
         match a
         {
             crate::streaming_types::hash_alg::SHA1 =>
               {
-                  let buf: Box<[u8]> = vec![0u8; 20usize].into_boxed_slice();
-                  &buf
+                  let mut buf: Box<[u8]> = vec![0u8; 20usize].into_boxed_slice();
+                  &mut buf
               },
             crate::streaming_types::hash_alg::SHA2_256 =>
               {
-                  let buf: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
-                  &buf
+                  let mut buf: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
+                  &mut buf
               },
             crate::streaming_types::hash_alg::SHA2_384 =>
               {
-                  let buf: Box<[u8]> = vec![0u8; 48usize].into_boxed_slice();
-                  &buf
+                  let mut buf: Box<[u8]> = vec![0u8; 48usize].into_boxed_slice();
+                  &mut buf
               },
             crate::streaming_types::hash_alg::SHA2_512 =>
               {
-                  let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
-                  &buf
+                  let mut buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
+                  &mut buf
               },
             _ => panic!("Precondition of the function most likely violated")
         };
-    let v: &[u8] =
+    let v: &mut [u8] =
         match a
         {
             crate::streaming_types::hash_alg::SHA1 =>
               {
-                  let buf: Box<[u8]> = vec![0u8; 20usize].into_boxed_slice();
-                  &buf
+                  let mut buf: Box<[u8]> = vec![0u8; 20usize].into_boxed_slice();
+                  &mut buf
               },
             crate::streaming_types::hash_alg::SHA2_256 =>
               {
-                  let buf: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
-                  &buf
+                  let mut buf: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
+                  &mut buf
               },
             crate::streaming_types::hash_alg::SHA2_384 =>
               {
-                  let buf: Box<[u8]> = vec![0u8; 48usize].into_boxed_slice();
-                  &buf
+                  let mut buf: Box<[u8]> = vec![0u8; 48usize].into_boxed_slice();
+                  &mut buf
               },
             crate::streaming_types::hash_alg::SHA2_512 =>
               {
-                  let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
-                  &buf
+                  let mut buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
+                  &mut buf
               },
             _ => panic!("Precondition of the function most likely violated")
         };
-    let ctr: Box<[u32]> = vec![1u32].into_boxed_slice();
+    let mut ctr: Box<[u32]> = vec![1u32].into_boxed_slice();
     crate::hmac_drbg::state { k: (*k).into(), v: (*v).into(), reseed_counter: ctr }
 }
 
@@ -129,13 +129,13 @@ Instantiate the DRBG.
 pub fn
 instantiate(
     a: crate::streaming_types::hash_alg,
-    mut st: crate::hmac_drbg::state,
+    st: crate::hmac_drbg::state,
     entropy_input_len: u32,
-    entropy_input: &[u8],
+    entropy_input: &mut [u8],
     nonce_len: u32,
-    nonce: &[u8],
+    nonce: &mut [u8],
     personalization_string_len: u32,
-    personalization_string: &[u8]
+    personalization_string: &mut [u8]
 )
 {
     match a
@@ -185,7 +185,7 @@ instantiate(
                   )
                   as
                   usize]).copy_from_slice(
-                      &(&seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
+                      &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                           personalization_string_len
                       )
                       as
@@ -193,7 +193,7 @@ instantiate(
                   )
               };
               (&mut input)[20usize] = 0u8;
-              crate::hmac::compute_sha1(k·.1, k, 20u32, &input, input_len);
+              crate::hmac::compute_sha1(k·.1, k, 20u32, &mut input, input_len);
               crate::hmac::compute_sha1(v, k·.1, 20u32, v, 20u32);
               (k[0usize..20usize]).copy_from_slice(&k·.1[0usize..20usize]);
               if
@@ -220,7 +220,7 @@ instantiate(
                       ).wrapping_add(personalization_string_len)
                       as
                       usize]).copy_from_slice(
-                          &(&seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
+                          &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                               personalization_string_len
                           )
                           as
@@ -228,7 +228,7 @@ instantiate(
                       )
                   };
                   (&mut input0)[20usize] = 1u8;
-                  crate::hmac::compute_sha1(k·0.1, k, 20u32, &input0, input_len0);
+                  crate::hmac::compute_sha1(k·0.1, k, 20u32, &mut input0, input_len0);
                   crate::hmac::compute_sha1(v, k·0.1, 20u32, v, 20u32);
                   (k[0usize..20usize]).copy_from_slice(&k·0.1[0usize..20usize])
               }
@@ -278,7 +278,7 @@ instantiate(
                   )
                   as
                   usize]).copy_from_slice(
-                      &(&seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
+                      &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                           personalization_string_len
                       )
                       as
@@ -286,7 +286,7 @@ instantiate(
                   )
               };
               (&mut input)[32usize] = 0u8;
-              crate::hmac::compute_sha2_256(k·.1, k, 32u32, &input, input_len);
+              crate::hmac::compute_sha2_256(k·.1, k, 32u32, &mut input, input_len);
               crate::hmac::compute_sha2_256(v, k·.1, 32u32, v, 32u32);
               (k[0usize..32usize]).copy_from_slice(&k·.1[0usize..32usize]);
               if
@@ -313,7 +313,7 @@ instantiate(
                       ).wrapping_add(personalization_string_len)
                       as
                       usize]).copy_from_slice(
-                          &(&seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
+                          &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                               personalization_string_len
                           )
                           as
@@ -321,7 +321,7 @@ instantiate(
                       )
                   };
                   (&mut input0)[32usize] = 1u8;
-                  crate::hmac::compute_sha2_256(k·0.1, k, 32u32, &input0, input_len0);
+                  crate::hmac::compute_sha2_256(k·0.1, k, 32u32, &mut input0, input_len0);
                   crate::hmac::compute_sha2_256(v, k·0.1, 32u32, v, 32u32);
                   (k[0usize..32usize]).copy_from_slice(&k·0.1[0usize..32usize])
               }
@@ -371,7 +371,7 @@ instantiate(
                   )
                   as
                   usize]).copy_from_slice(
-                      &(&seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
+                      &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                           personalization_string_len
                       )
                       as
@@ -379,7 +379,7 @@ instantiate(
                   )
               };
               (&mut input)[48usize] = 0u8;
-              crate::hmac::compute_sha2_384(k·.1, k, 48u32, &input, input_len);
+              crate::hmac::compute_sha2_384(k·.1, k, 48u32, &mut input, input_len);
               crate::hmac::compute_sha2_384(v, k·.1, 48u32, v, 48u32);
               (k[0usize..48usize]).copy_from_slice(&k·.1[0usize..48usize]);
               if
@@ -406,7 +406,7 @@ instantiate(
                       ).wrapping_add(personalization_string_len)
                       as
                       usize]).copy_from_slice(
-                          &(&seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
+                          &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                               personalization_string_len
                           )
                           as
@@ -414,7 +414,7 @@ instantiate(
                       )
                   };
                   (&mut input0)[48usize] = 1u8;
-                  crate::hmac::compute_sha2_384(k·0.1, k, 48u32, &input0, input_len0);
+                  crate::hmac::compute_sha2_384(k·0.1, k, 48u32, &mut input0, input_len0);
                   crate::hmac::compute_sha2_384(v, k·0.1, 48u32, v, 48u32);
                   (k[0usize..48usize]).copy_from_slice(&k·0.1[0usize..48usize])
               }
@@ -464,7 +464,7 @@ instantiate(
                   )
                   as
                   usize]).copy_from_slice(
-                      &(&seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
+                      &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                           personalization_string_len
                       )
                       as
@@ -472,7 +472,7 @@ instantiate(
                   )
               };
               (&mut input)[64usize] = 0u8;
-              crate::hmac::compute_sha2_512(k·.1, k, 64u32, &input, input_len);
+              crate::hmac::compute_sha2_512(k·.1, k, 64u32, &mut input, input_len);
               crate::hmac::compute_sha2_512(v, k·.1, 64u32, v, 64u32);
               (k[0usize..64usize]).copy_from_slice(&k·.1[0usize..64usize]);
               if
@@ -499,7 +499,7 @@ instantiate(
                       ).wrapping_add(personalization_string_len)
                       as
                       usize]).copy_from_slice(
-                          &(&seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
+                          &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(nonce_len).wrapping_add(
                               personalization_string_len
                           )
                           as
@@ -507,7 +507,7 @@ instantiate(
                       )
                   };
                   (&mut input0)[64usize] = 1u8;
-                  crate::hmac::compute_sha2_512(k·0.1, k, 64u32, &input0, input_len0);
+                  crate::hmac::compute_sha2_512(k·0.1, k, 64u32, &mut input0, input_len0);
                   crate::hmac::compute_sha2_512(v, k·0.1, 64u32, v, 64u32);
                   (k[0usize..64usize]).copy_from_slice(&k·0.1[0usize..64usize])
               }
@@ -529,11 +529,11 @@ Reseed the DRBG.
 pub fn
 reseed(
     a: crate::streaming_types::hash_alg,
-    mut st: crate::hmac_drbg::state,
+    st: crate::hmac_drbg::state,
     entropy_input_len: u32,
-    entropy_input: &[u8],
+    entropy_input: &mut [u8],
     additional_input_input_len: u32,
-    additional_input_input: &[u8]
+    additional_input_input: &mut [u8]
 )
 {
     match a
@@ -567,7 +567,7 @@ reseed(
                   )
                   as
                   usize]).copy_from_slice(
-                      &(&seed_material)[0usize..entropy_input_len.wrapping_add(
+                      &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(
                           additional_input_input_len
                       )
                       as
@@ -575,7 +575,7 @@ reseed(
                   )
               };
               (&mut input)[20usize] = 0u8;
-              crate::hmac::compute_sha1(k·.1, k, 20u32, &input, input_len);
+              crate::hmac::compute_sha1(k·.1, k, 20u32, &mut input, input_len);
               crate::hmac::compute_sha1(v, k·.1, 20u32, v, 20u32);
               (k[0usize..20usize]).copy_from_slice(&k·.1[0usize..20usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -592,7 +592,7 @@ reseed(
                       )
                       as
                       usize]).copy_from_slice(
-                          &(&seed_material)[0usize..entropy_input_len.wrapping_add(
+                          &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(
                               additional_input_input_len
                           )
                           as
@@ -600,7 +600,7 @@ reseed(
                       )
                   };
                   (&mut input0)[20usize] = 1u8;
-                  crate::hmac::compute_sha1(k·0.1, k, 20u32, &input0, input_len0);
+                  crate::hmac::compute_sha1(k·0.1, k, 20u32, &mut input0, input_len0);
                   crate::hmac::compute_sha1(v, k·0.1, 20u32, v, 20u32);
                   (k[0usize..20usize]).copy_from_slice(&k·0.1[0usize..20usize])
               };
@@ -635,7 +635,7 @@ reseed(
                   )
                   as
                   usize]).copy_from_slice(
-                      &(&seed_material)[0usize..entropy_input_len.wrapping_add(
+                      &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(
                           additional_input_input_len
                       )
                       as
@@ -643,7 +643,7 @@ reseed(
                   )
               };
               (&mut input)[32usize] = 0u8;
-              crate::hmac::compute_sha2_256(k·.1, k, 32u32, &input, input_len);
+              crate::hmac::compute_sha2_256(k·.1, k, 32u32, &mut input, input_len);
               crate::hmac::compute_sha2_256(v, k·.1, 32u32, v, 32u32);
               (k[0usize..32usize]).copy_from_slice(&k·.1[0usize..32usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -660,7 +660,7 @@ reseed(
                       )
                       as
                       usize]).copy_from_slice(
-                          &(&seed_material)[0usize..entropy_input_len.wrapping_add(
+                          &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(
                               additional_input_input_len
                           )
                           as
@@ -668,7 +668,7 @@ reseed(
                       )
                   };
                   (&mut input0)[32usize] = 1u8;
-                  crate::hmac::compute_sha2_256(k·0.1, k, 32u32, &input0, input_len0);
+                  crate::hmac::compute_sha2_256(k·0.1, k, 32u32, &mut input0, input_len0);
                   crate::hmac::compute_sha2_256(v, k·0.1, 32u32, v, 32u32);
                   (k[0usize..32usize]).copy_from_slice(&k·0.1[0usize..32usize])
               };
@@ -703,7 +703,7 @@ reseed(
                   )
                   as
                   usize]).copy_from_slice(
-                      &(&seed_material)[0usize..entropy_input_len.wrapping_add(
+                      &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(
                           additional_input_input_len
                       )
                       as
@@ -711,7 +711,7 @@ reseed(
                   )
               };
               (&mut input)[48usize] = 0u8;
-              crate::hmac::compute_sha2_384(k·.1, k, 48u32, &input, input_len);
+              crate::hmac::compute_sha2_384(k·.1, k, 48u32, &mut input, input_len);
               crate::hmac::compute_sha2_384(v, k·.1, 48u32, v, 48u32);
               (k[0usize..48usize]).copy_from_slice(&k·.1[0usize..48usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -728,7 +728,7 @@ reseed(
                       )
                       as
                       usize]).copy_from_slice(
-                          &(&seed_material)[0usize..entropy_input_len.wrapping_add(
+                          &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(
                               additional_input_input_len
                           )
                           as
@@ -736,7 +736,7 @@ reseed(
                       )
                   };
                   (&mut input0)[48usize] = 1u8;
-                  crate::hmac::compute_sha2_384(k·0.1, k, 48u32, &input0, input_len0);
+                  crate::hmac::compute_sha2_384(k·0.1, k, 48u32, &mut input0, input_len0);
                   crate::hmac::compute_sha2_384(v, k·0.1, 48u32, v, 48u32);
                   (k[0usize..48usize]).copy_from_slice(&k·0.1[0usize..48usize])
               };
@@ -771,7 +771,7 @@ reseed(
                   )
                   as
                   usize]).copy_from_slice(
-                      &(&seed_material)[0usize..entropy_input_len.wrapping_add(
+                      &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(
                           additional_input_input_len
                       )
                       as
@@ -779,7 +779,7 @@ reseed(
                   )
               };
               (&mut input)[64usize] = 0u8;
-              crate::hmac::compute_sha2_512(k·.1, k, 64u32, &input, input_len);
+              crate::hmac::compute_sha2_512(k·.1, k, 64u32, &mut input, input_len);
               crate::hmac::compute_sha2_512(v, k·.1, 64u32, v, 64u32);
               (k[0usize..64usize]).copy_from_slice(&k·.1[0usize..64usize]);
               if entropy_input_len.wrapping_add(additional_input_input_len) != 0u32
@@ -796,7 +796,7 @@ reseed(
                       )
                       as
                       usize]).copy_from_slice(
-                          &(&seed_material)[0usize..entropy_input_len.wrapping_add(
+                          &(&mut seed_material)[0usize..entropy_input_len.wrapping_add(
                               additional_input_input_len
                           )
                           as
@@ -804,7 +804,7 @@ reseed(
                       )
                   };
                   (&mut input0)[64usize] = 1u8;
-                  crate::hmac::compute_sha2_512(k·0.1, k, 64u32, &input0, input_len0);
+                  crate::hmac::compute_sha2_512(k·0.1, k, 64u32, &mut input0, input_len0);
                   crate::hmac::compute_sha2_512(v, k·0.1, 64u32, v, 64u32);
                   (k[0usize..64usize]).copy_from_slice(&k·0.1[0usize..64usize])
               };
@@ -828,17 +828,17 @@ pub fn
 generate(
     a: crate::streaming_types::hash_alg,
     output: &mut [u8],
-    mut st: crate::hmac_drbg::state,
+    st: crate::hmac_drbg::state,
     n: u32,
     additional_input_len: u32,
-    additional_input: &[u8]
+    additional_input: &mut [u8]
 ) ->
     bool
 {
     match a
     {
         crate::streaming_types::hash_alg::SHA1 =>
-          if (&st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
+          if (&mut st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
           { false }
           else
           {
@@ -858,7 +858,7 @@ generate(
                       )
                   };
                   (&mut input)[20usize] = 0u8;
-                  crate::hmac::compute_sha1(k·.1, k, 20u32, &input, input_len);
+                  crate::hmac::compute_sha1(k·.1, k, 20u32, &mut input, input_len);
                   crate::hmac::compute_sha1(v, k·.1, 20u32, v, 20u32);
                   (k[0usize..20usize]).copy_from_slice(&k·.1[0usize..20usize]);
                   if additional_input_len != 0u32
@@ -874,7 +874,7 @@ generate(
                           )
                       };
                       (&mut input0)[20usize] = 1u8;
-                      crate::hmac::compute_sha1(k·0.1, k, 20u32, &input0, input_len0);
+                      crate::hmac::compute_sha1(k·0.1, k, 20u32, &mut input0, input_len0);
                       crate::hmac::compute_sha1(v, k·0.1, 20u32, v, 20u32);
                       (k[0usize..20usize]).copy_from_slice(&k·0.1[0usize..20usize])
                   }
@@ -895,7 +895,7 @@ generate(
                       out.1.split_at_mut(max.wrapping_mul(20u32) as usize);
                   crate::hmac::compute_sha1(v, k, 20u32, v, 20u32);
                   (block.1[0usize..n.wrapping_sub(max.wrapping_mul(20u32)) as usize]).copy_from_slice(
-                      &(&v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(20u32)) as usize]
+                      &(&mut v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(20u32)) as usize]
                   )
               };
               let input_len: u32 = 21u32.wrapping_add(additional_input_len);
@@ -909,7 +909,7 @@ generate(
                   )
               };
               (&mut input)[20usize] = 0u8;
-              crate::hmac::compute_sha1(k·.1, k, 20u32, &input, input_len);
+              crate::hmac::compute_sha1(k·.1, k, 20u32, &mut input, input_len);
               crate::hmac::compute_sha1(v, k·.1, 20u32, v, 20u32);
               (k[0usize..20usize]).copy_from_slice(&k·.1[0usize..20usize]);
               if additional_input_len != 0u32
@@ -925,7 +925,7 @@ generate(
                       )
                   };
                   (&mut input0)[20usize] = 1u8;
-                  crate::hmac::compute_sha1(k·0.1, k, 20u32, &input0, input_len0);
+                  crate::hmac::compute_sha1(k·0.1, k, 20u32, &mut input0, input_len0);
                   crate::hmac::compute_sha1(v, k·0.1, 20u32, v, 20u32);
                   (k[0usize..20usize]).copy_from_slice(&k·0.1[0usize..20usize])
               };
@@ -934,7 +934,7 @@ generate(
               true
           },
         crate::streaming_types::hash_alg::SHA2_256 =>
-          if (&st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
+          if (&mut st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
           { false }
           else
           {
@@ -954,7 +954,7 @@ generate(
                       )
                   };
                   (&mut input)[32usize] = 0u8;
-                  crate::hmac::compute_sha2_256(k·.1, k, 32u32, &input, input_len);
+                  crate::hmac::compute_sha2_256(k·.1, k, 32u32, &mut input, input_len);
                   crate::hmac::compute_sha2_256(v, k·.1, 32u32, v, 32u32);
                   (k[0usize..32usize]).copy_from_slice(&k·.1[0usize..32usize]);
                   if additional_input_len != 0u32
@@ -970,7 +970,7 @@ generate(
                           )
                       };
                       (&mut input0)[32usize] = 1u8;
-                      crate::hmac::compute_sha2_256(k·0.1, k, 32u32, &input0, input_len0);
+                      crate::hmac::compute_sha2_256(k·0.1, k, 32u32, &mut input0, input_len0);
                       crate::hmac::compute_sha2_256(v, k·0.1, 32u32, v, 32u32);
                       (k[0usize..32usize]).copy_from_slice(&k·0.1[0usize..32usize])
                   }
@@ -991,7 +991,7 @@ generate(
                       out.1.split_at_mut(max.wrapping_mul(32u32) as usize);
                   crate::hmac::compute_sha2_256(v, k, 32u32, v, 32u32);
                   (block.1[0usize..n.wrapping_sub(max.wrapping_mul(32u32)) as usize]).copy_from_slice(
-                      &(&v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(32u32)) as usize]
+                      &(&mut v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(32u32)) as usize]
                   )
               };
               let input_len: u32 = 33u32.wrapping_add(additional_input_len);
@@ -1005,7 +1005,7 @@ generate(
                   )
               };
               (&mut input)[32usize] = 0u8;
-              crate::hmac::compute_sha2_256(k·.1, k, 32u32, &input, input_len);
+              crate::hmac::compute_sha2_256(k·.1, k, 32u32, &mut input, input_len);
               crate::hmac::compute_sha2_256(v, k·.1, 32u32, v, 32u32);
               (k[0usize..32usize]).copy_from_slice(&k·.1[0usize..32usize]);
               if additional_input_len != 0u32
@@ -1021,7 +1021,7 @@ generate(
                       )
                   };
                   (&mut input0)[32usize] = 1u8;
-                  crate::hmac::compute_sha2_256(k·0.1, k, 32u32, &input0, input_len0);
+                  crate::hmac::compute_sha2_256(k·0.1, k, 32u32, &mut input0, input_len0);
                   crate::hmac::compute_sha2_256(v, k·0.1, 32u32, v, 32u32);
                   (k[0usize..32usize]).copy_from_slice(&k·0.1[0usize..32usize])
               };
@@ -1030,7 +1030,7 @@ generate(
               true
           },
         crate::streaming_types::hash_alg::SHA2_384 =>
-          if (&st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
+          if (&mut st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
           { false }
           else
           {
@@ -1050,7 +1050,7 @@ generate(
                       )
                   };
                   (&mut input)[48usize] = 0u8;
-                  crate::hmac::compute_sha2_384(k·.1, k, 48u32, &input, input_len);
+                  crate::hmac::compute_sha2_384(k·.1, k, 48u32, &mut input, input_len);
                   crate::hmac::compute_sha2_384(v, k·.1, 48u32, v, 48u32);
                   (k[0usize..48usize]).copy_from_slice(&k·.1[0usize..48usize]);
                   if additional_input_len != 0u32
@@ -1066,7 +1066,7 @@ generate(
                           )
                       };
                       (&mut input0)[48usize] = 1u8;
-                      crate::hmac::compute_sha2_384(k·0.1, k, 48u32, &input0, input_len0);
+                      crate::hmac::compute_sha2_384(k·0.1, k, 48u32, &mut input0, input_len0);
                       crate::hmac::compute_sha2_384(v, k·0.1, 48u32, v, 48u32);
                       (k[0usize..48usize]).copy_from_slice(&k·0.1[0usize..48usize])
                   }
@@ -1087,7 +1087,7 @@ generate(
                       out.1.split_at_mut(max.wrapping_mul(48u32) as usize);
                   crate::hmac::compute_sha2_384(v, k, 48u32, v, 48u32);
                   (block.1[0usize..n.wrapping_sub(max.wrapping_mul(48u32)) as usize]).copy_from_slice(
-                      &(&v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(48u32)) as usize]
+                      &(&mut v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(48u32)) as usize]
                   )
               };
               let input_len: u32 = 49u32.wrapping_add(additional_input_len);
@@ -1101,7 +1101,7 @@ generate(
                   )
               };
               (&mut input)[48usize] = 0u8;
-              crate::hmac::compute_sha2_384(k·.1, k, 48u32, &input, input_len);
+              crate::hmac::compute_sha2_384(k·.1, k, 48u32, &mut input, input_len);
               crate::hmac::compute_sha2_384(v, k·.1, 48u32, v, 48u32);
               (k[0usize..48usize]).copy_from_slice(&k·.1[0usize..48usize]);
               if additional_input_len != 0u32
@@ -1117,7 +1117,7 @@ generate(
                       )
                   };
                   (&mut input0)[48usize] = 1u8;
-                  crate::hmac::compute_sha2_384(k·0.1, k, 48u32, &input0, input_len0);
+                  crate::hmac::compute_sha2_384(k·0.1, k, 48u32, &mut input0, input_len0);
                   crate::hmac::compute_sha2_384(v, k·0.1, 48u32, v, 48u32);
                   (k[0usize..48usize]).copy_from_slice(&k·0.1[0usize..48usize])
               };
@@ -1126,7 +1126,7 @@ generate(
               true
           },
         crate::streaming_types::hash_alg::SHA2_512 =>
-          if (&st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
+          if (&mut st.reseed_counter)[0usize] > crate::hmac_drbg::reseed_interval
           { false }
           else
           {
@@ -1146,7 +1146,7 @@ generate(
                       )
                   };
                   (&mut input)[64usize] = 0u8;
-                  crate::hmac::compute_sha2_512(k·.1, k, 64u32, &input, input_len);
+                  crate::hmac::compute_sha2_512(k·.1, k, 64u32, &mut input, input_len);
                   crate::hmac::compute_sha2_512(v, k·.1, 64u32, v, 64u32);
                   (k[0usize..64usize]).copy_from_slice(&k·.1[0usize..64usize]);
                   if additional_input_len != 0u32
@@ -1162,7 +1162,7 @@ generate(
                           )
                       };
                       (&mut input0)[64usize] = 1u8;
-                      crate::hmac::compute_sha2_512(k·0.1, k, 64u32, &input0, input_len0);
+                      crate::hmac::compute_sha2_512(k·0.1, k, 64u32, &mut input0, input_len0);
                       crate::hmac::compute_sha2_512(v, k·0.1, 64u32, v, 64u32);
                       (k[0usize..64usize]).copy_from_slice(&k·0.1[0usize..64usize])
                   }
@@ -1183,7 +1183,7 @@ generate(
                       out.1.split_at_mut(max.wrapping_mul(64u32) as usize);
                   crate::hmac::compute_sha2_512(v, k, 64u32, v, 64u32);
                   (block.1[0usize..n.wrapping_sub(max.wrapping_mul(64u32)) as usize]).copy_from_slice(
-                      &(&v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(64u32)) as usize]
+                      &(&mut v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(64u32)) as usize]
                   )
               };
               let input_len: u32 = 65u32.wrapping_add(additional_input_len);
@@ -1197,7 +1197,7 @@ generate(
                   )
               };
               (&mut input)[64usize] = 0u8;
-              crate::hmac::compute_sha2_512(k·.1, k, 64u32, &input, input_len);
+              crate::hmac::compute_sha2_512(k·.1, k, 64u32, &mut input, input_len);
               crate::hmac::compute_sha2_512(v, k·.1, 64u32, v, 64u32);
               (k[0usize..64usize]).copy_from_slice(&k·.1[0usize..64usize]);
               if additional_input_len != 0u32
@@ -1213,7 +1213,7 @@ generate(
                       )
                   };
                   (&mut input0)[64usize] = 1u8;
-                  crate::hmac::compute_sha2_512(k·0.1, k, 64u32, &input0, input_len0);
+                  crate::hmac::compute_sha2_512(k·0.1, k, 64u32, &mut input0, input_len0);
                   crate::hmac::compute_sha2_512(v, k·0.1, 64u32, v, 64u32);
                   (k[0usize..64usize]).copy_from_slice(&k·0.1[0usize..64usize])
               };
