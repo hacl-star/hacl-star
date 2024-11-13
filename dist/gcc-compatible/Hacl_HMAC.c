@@ -87,7 +87,6 @@ Hacl_HMAC_compute_md5(
     opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint32_t s[4U] = { 0x67452301U, 0xefcdab89U, 0x98badcfeU, 0x10325476U };
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_MD5_update_last(s, 0ULL, ipad, 64U);
@@ -116,6 +115,7 @@ Hacl_HMAC_compute_md5(
     Hacl_Hash_MD5_update_multi(s, full_blocks, n_blocks);
     Hacl_Hash_MD5_update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   }
+  uint8_t *dst1 = ipad;
   Hacl_Hash_MD5_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_MD5_init(s);
@@ -311,11 +311,10 @@ Hacl_HMAC_compute_sha2_224(
     0U,
     8U,
     1U,
-    uint32_t *os = st;
     uint32_t x = Hacl_Hash_SHA2_h224[i];
+    uint32_t *os = st;
     os[i] = x;);
   uint32_t *s = st;
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_SHA2_sha224_update_last(0ULL + (uint64_t)64U, 64U, ipad, s);
@@ -347,6 +346,7 @@ Hacl_HMAC_compute_sha2_224(
       rem,
       s);
   }
+  uint8_t *dst1 = ipad;
   Hacl_Hash_SHA2_sha224_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_SHA2_sha224_init(s);
@@ -819,7 +819,6 @@ Hacl_HMAC_compute_sha3_224(
     opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint64_t s[25U] = { 0U };
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_224, s, ipad, 144U);
@@ -848,6 +847,7 @@ Hacl_HMAC_compute_sha3_224(
     Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_224, s, full_blocks, n_blocks);
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_224, s, rem, rem_len);
   }
+  uint8_t *dst1 = ipad;
   uint32_t remOut = 28U;
   uint8_t hbuf0[256U] = { 0U };
   uint64_t ws0[32U] = { 0U };
@@ -945,7 +945,6 @@ Hacl_HMAC_compute_sha3_256(
     opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint64_t s[25U] = { 0U };
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_256, s, ipad, 136U);
@@ -974,6 +973,7 @@ Hacl_HMAC_compute_sha3_256(
     Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_256, s, full_blocks, n_blocks);
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_256, s, rem, rem_len);
   }
+  uint8_t *dst1 = ipad;
   uint32_t remOut = 32U;
   uint8_t hbuf0[256U] = { 0U };
   uint64_t ws0[32U] = { 0U };
@@ -1071,7 +1071,6 @@ Hacl_HMAC_compute_sha3_384(
     opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint64_t s[25U] = { 0U };
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_384, s, ipad, 104U);
@@ -1100,6 +1099,7 @@ Hacl_HMAC_compute_sha3_384(
     Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_384, s, full_blocks, n_blocks);
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_384, s, rem, rem_len);
   }
+  uint8_t *dst1 = ipad;
   uint32_t remOut = 48U;
   uint8_t hbuf0[256U] = { 0U };
   uint64_t ws0[32U] = { 0U };
@@ -1197,7 +1197,6 @@ Hacl_HMAC_compute_sha3_512(
     opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint64_t s[25U] = { 0U };
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_512, s, ipad, 72U);
@@ -1226,6 +1225,7 @@ Hacl_HMAC_compute_sha3_512(
     Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_512, s, full_blocks, n_blocks);
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_512, s, rem, rem_len);
   }
+  uint8_t *dst1 = ipad;
   uint32_t remOut = 64U;
   uint8_t hbuf0[256U] = { 0U };
   uint64_t ws0[32U] = { 0U };

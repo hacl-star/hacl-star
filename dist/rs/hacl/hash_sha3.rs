@@ -222,7 +222,7 @@ fn hash_len(a: crate::streaming_types::hash_alg) -> u32
     }
 }
 
-fn update_multi_sha3(
+pub(crate) fn update_multi_sha3(
     a: crate::streaming_types::hash_alg,
     s: &mut [u64],
     blocks: &[u8],
@@ -247,7 +247,7 @@ fn update_multi_sha3(
     }
 }
 
-fn update_last_sha3(
+pub(crate) fn update_last_sha3(
     a: crate::streaming_types::hash_alg,
     s: &mut [u64],
     input: &[u8],

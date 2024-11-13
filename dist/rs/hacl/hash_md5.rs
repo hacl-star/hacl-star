@@ -19,7 +19,7 @@ const _t: [u32; 64] =
         0xffeff47du32, 0x85845dd1u32, 0x6fa87e4fu32, 0xfe2ce6e0u32, 0xa3014314u32, 0x4e0811a1u32,
         0xf7537e82u32, 0xbd3af235u32, 0x2ad7d2bbu32, 0xeb86d391u32];
 
-fn init(s: &mut [u32])
+pub(crate) fn init(s: &mut [u32])
 { krml::unroll_for!(4, "i", 0u32, 1u32, s[i as usize] = (&crate::hash_md5::_h0)[i as usize]) }
 
 fn update(abcd: &mut [u32], x: &[u8])
@@ -1277,7 +1277,7 @@ fn pad(len: u64, dst: &mut [u8])
     lowstar::endianness::store64_le(dst3.1, len.wrapping_shl(3u32))
 }
 
-fn finish(s: &[u32], dst: &mut [u8])
+pub(crate) fn finish(s: &[u32], dst: &mut [u8])
 {
     krml::unroll_for!(
         4,
@@ -1291,7 +1291,7 @@ fn finish(s: &[u32], dst: &mut [u8])
     )
 }
 
-fn update_multi(s: &mut [u32], blocks: &[u8], n_blocks: u32)
+pub(crate) fn update_multi(s: &mut [u32], blocks: &[u8], n_blocks: u32)
 {
     for i in 0u32..n_blocks
     {
@@ -1301,7 +1301,7 @@ fn update_multi(s: &mut [u32], blocks: &[u8], n_blocks: u32)
     }
 }
 
-fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len: u32)
+pub(crate) fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len: u32)
 {
     let blocks_n: u32 = input_len.wrapping_div(64u32);
     let blocks_len: u32 = blocks_n.wrapping_mul(64u32);
@@ -1326,7 +1326,7 @@ fn update_last(s: &mut [u32], prev_len: u64, input: &[u8], input_len: u32)
     crate::hash_md5::update_multi(s, tmp.1, tmp_len.wrapping_div(64u32))
 }
 
-fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
+pub(crate) fn hash_oneshot(output: &mut [u8], input: &[u8], input_len: u32)
 {
     let mut s: [u32; 4] = [0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32];
     let blocks_n: u32 = input_len.wrapping_div(64u32);

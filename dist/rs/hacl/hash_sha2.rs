@@ -265,7 +265,7 @@ pub(crate) fn sha256_finish(st: &[u32], h: &mut [u8])
     (h[0usize..32usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..32usize])
 }
 
-#[inline] fn sha224_init(hash: &mut [u32])
+pub(crate) fn sha224_init(hash: &mut [u32])
 {
     krml::unroll_for!(
         8,
@@ -280,13 +280,13 @@ pub(crate) fn sha256_finish(st: &[u32], h: &mut [u8])
     )
 }
 
-#[inline] fn sha224_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
+pub(crate) fn sha224_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
 { crate::hash_sha2::sha256_update_nblocks(len, b, st) }
 
-fn sha224_update_last(totlen: u64, len: u32, b: &[u8], st: &mut [u32])
+pub(crate) fn sha224_update_last(totlen: u64, len: u32, b: &[u8], st: &mut [u32])
 { crate::hash_sha2::sha256_update_last(totlen, len, b, st) }
 
-#[inline] fn sha224_finish(st: &[u32], h: &mut [u8])
+pub(crate) fn sha224_finish(st: &[u32], h: &mut [u8])
 {
     let mut hbuf: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(
