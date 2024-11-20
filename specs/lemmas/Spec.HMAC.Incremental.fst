@@ -12,10 +12,13 @@ friend Spec.Agile.HMAC
 
 // Processes exactly one block: the input key xored with the ipad
 let init a k =
+  Spec.Agile.Hash.init a
+
+let init_input a k =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   let k = Spec.Agile.HMAC.wrap a k in
-  Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) (Spec.Agile.Hash.init_extra_state a) (xor (u8 0x36) k)
+  xor (u8 0x36) k
 
 let finish a k s =
   assert_norm (pow2 32 < pow2 61);
@@ -36,51 +39,28 @@ module L = Spec.Hash.Lemmas
 let mod_mod (a: hash_alg): Lemma (block_length a % block_length a == 0) = allow_inversion hash_alg
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
-let hmac_is_hmac_incremental a key data =
+let hmac_is_hmac_incremental a key input =
   (**) allow_inversion hash_alg;
   (**) assert_norm (pow2 32 < pow2 61);
   (**) assert_norm (pow2 32 < pow2 125);
-  let k = Spec.Agile.HMAC.wrap a key in
-  (**) assert (S.length (xor (u8 0x36) k) == block_length a);
+  let xored_k = init_input a key in
+  (**) assert (S.length xored_k == block_length a);
   (**) mod_mod a;
-  let xored_k: bytes_blocks a = xor (u8 0x36) k in
-  let h00 = update_multi a (Spec.Agile.Hash.init a) (init_extra_state a) xored_k in
-  let blocks, last = Spec.Hash.Incremental.Definitions.split_blocks a data in
-  (**) assert (S.length blocks % block_length a == 0);
-  (**) FStar.Math.Lemmas.modulo_addition_lemma (S.length blocks) (block_length a) 1;
-  (**) assert ((block_length a + S.length blocks) % block_length a == 0);
+  (**) Math.Lemmas.modulo_lemma 0 (block_length a);
 
-  let h01 = update_multi a h00 (hmac_extra_state a) blocks in
-  let h02 = Spec.Hash.Incremental.Definitions.update_last a h01 (if is_keccak a then () else (block_length a + S.length blocks)) last in
+  let xored_k: bytes_blocks a = xored_k in
+  let input1 = xored_k `S.append` input in
+  let bs, rest = Spec.Hash.Incremental.Definitions.split_blocks a input1 in
 
-  let h1 = Spec.Agile.Hash.finish a h02 () in
-  let h2 = hash a (Seq.append (xor (u8 0x5c) k) h1) in
-
-  (**) assert (h00 `S.equal` my_init a key);
-  (**) assert (h2 `S.equal` my_finish a key h02);
-  (**) assert (h2 `S.equal` hmac_incremental a key data);
+  let hash0 = init a in
+  let hash1 = update_multi a hash0 (init_extra_state a) bs in
+  let hash2 = Spec.Hash.Incremental.Definitions.update_last a hash1 (if is_keccak a then () else (S.length bs)) rest in
+  let hash3 = finish a hash2 () in
+  let hash4 = hash a ((xor (u8 0x5c) (wrap a key)) `S.append` hash3) in
+  (**) assert (hash4 `S.equal` hmac_incremental a key input);
 
   calc (S.equal) {
-    h01;
-  (S.equal) {}
-    update_multi a (update_multi a (init a) (init_extra_state a) xored_k) (hmac_extra_state a) blocks;
-  (S.equal) {
-    if is_blake a then
-      L.update_multi_associative_blake a (init a) 0 (block_length a) xored_k blocks
-    else
-      L.update_multi_associative a (init a) xored_k blocks
-  }
-    update_multi a (init a) (init_extra_state a) (xored_k `S.append` blocks);
-  };
-
-  let blocks', last' = Spec.Hash.Incremental.Definitions.split_blocks a (xored_k `S.append` data) in
-
-  calc (S.equal) {
-    h1;
-  (S.equal) { admit () }
-    Spec.Hash.Incremental.Definitions.hash_incremental a (xored_k `S.append` data) ();
-  (S.equal) { Spec.Hash.Incremental.hash_is_hash_incremental' a (xored_k `S.append` data) () }
-    hash' a (xored_k `S.append` data) ();
-  (S.equal) { }
-    hash a (xored_k `S.append` data);
+    hash3;
+  (S.equal) { Spec.Hash.Incremental.hash_is_hash_incremental' a input1 () }
+    hash' a input1 ();
   }

@@ -14,8 +14,22 @@ let hmac_extra_state (a:hash_alg) : extra_state a = match a with
   | Blake2B | Blake2S -> block_length a
   | _ -> allow_inversion hash_alg; ()
 
-// Computes ipad xor key + feeds it into the hash
+// We adopt the more complicated init / init_input form of incrementality
+// defined rather recently in the streaming functor for the needs of Blake2. In
+// this style, init_input_s captures the initial input that needs to be fed into
+// the incremental algorithm, with the understanding that it might be the only
+// input. This saves the need for an excruciating case analysis in the
+// hmac_incremental definition below, and awful reasoning on split_blocks.
 val init: a:fixed_len_alg -> key: sized_key a -> words_state a
+
+// To understand the intent behind this peculiar style of specification, it
+// suffices to look at Hacl.Streaming.Interface.fsti -- we're simply trying to
+// meet this interface, and prove the central "spec is incremental" lemma
+// expected by this functor.
+let init_input_length a = block_length a
+
+// This one computes the ipad xored with the key. Think of it as a "pre-input".
+val init_input: a:fixed_len_alg -> key: sized_key a -> b:bytes { S.length b == init_input_length a }
 
 // Compute first digest, compute opad, feed opad into second hash, feed hash sum
 // into the second hash, write out second digest into destination. For the
@@ -27,30 +41,24 @@ val finish:
   h:words_state a ->
   lbytes (hash_length a)
 
+// This definition is *exactly* in the style expected by Hacl.Streaming.Interface.spec_is_incremental
 let hmac_incremental
   (a: fixed_len_alg)
   (k: sized_key a)
-  (data: bytes):
+  (input: bytes):
   Pure (lbytes (hash_length a))
-    (requires (Seq.length data + block_length a) `less_than_max_input_length` a)
+    (requires (Seq.length input + init_input_length a) `less_than_max_input_length` a)
     (ensures fun _ -> True)
 =
-  let s = init a k in
-  let bs, l = Spec.Hash.Incremental.Definitions.split_blocks a data in
-  let s = Spec.Agile.Hash.update_multi a s (hmac_extra_state a) bs in
-  (* Backtrack if necessary to satisfy the semantics of split_blocks. This whole
-  logic will be replicated in the implementation in the update_last
-  implementation, which will have access to the key at runtime because it will
-  be stored in the state. *)
-  let s =
-    if S.length bs = 0 then
-      (* We made a mistake: the padded key should *not* have been fed into update_multi -- discard previous state, and restart. *)
-      let k = Spec.Agile.HMAC.wrap a k in
-      Spec.Hash.Incremental.Definitions.update_last a (Spec.Agile.Hash.init a) (if is_keccak a then () else 0) (Spec.Agile.HMAC.xor (u8 0x36) k)
-    else
-      Spec.Hash.Incremental.Definitions.update_last a s (if is_keccak a then () else block_length a + S.length bs) l
+  let input1 = S.append (init_input a k) input in
+  let bs, rest = Spec.Hash.Incremental.Definitions.split_blocks a input1 in
+  (**) Math.Lemmas.modulo_lemma 0 (block_length a);
+  let hash0 = init a k in
+  let hash1 = Spec.Agile.Hash.update_multi a hash0 (Spec.Agile.Hash.init_extra_state a) bs in
+  let hash2 =
+    Spec.Hash.Incremental.Definitions.update_last a hash1 (if is_keccak a then () else S.length bs) rest
   in
-  finish a k s
+  finish a k hash2
 
 val hmac_is_hmac_incremental (a: fixed_len_alg) (k: sized_key a) (data: bytes):
   Lemma
