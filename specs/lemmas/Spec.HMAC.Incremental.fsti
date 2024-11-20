@@ -38,7 +38,18 @@ let hmac_incremental
   let s = init a k in
   let bs, l = Spec.Hash.Incremental.Definitions.split_blocks a data in
   let s = Spec.Agile.Hash.update_multi a s (hmac_extra_state a) bs in
-  let s = Spec.Hash.Incremental.Definitions.update_last a s (if is_keccak a then () else block_length a + S.length bs) l in
+  (* Backtrack if necessary to satisfy the semantics of split_blocks. This whole
+  logic will be replicated in the implementation in the update_last
+  implementation, which will have access to the key at runtime because it will
+  be stored in the state. *)
+  let s =
+    if S.length bs = 0 then
+      (* We made a mistake: the padded key should *not* have been fed into update_multi -- discard previous state, and restart. *)
+      let k = Spec.Agile.HMAC.wrap a k in
+      Spec.Hash.Incremental.Definitions.update_last a (Spec.Agile.Hash.init a) (if is_keccak a then () else 0) (Spec.Agile.HMAC.xor (u8 0x36) k)
+    else
+      Spec.Hash.Incremental.Definitions.update_last a s (if is_keccak a then () else block_length a + S.length bs) l
+  in
   finish a k s
 
 val hmac_is_hmac_incremental (a: fixed_len_alg) (k: sized_key a) (data: bytes):

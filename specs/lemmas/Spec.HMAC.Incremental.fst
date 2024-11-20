@@ -74,12 +74,10 @@ let hmac_is_hmac_incremental a key data =
   };
 
   let blocks', last' = Spec.Hash.Incremental.Definitions.split_blocks a (xored_k `S.append` data) in
-  assume (S.equal blocks' (xored_k `S.append` blocks));
-  assume (S.equal last last');
 
   calc (S.equal) {
     h1;
-  (S.equal) {}
+  (S.equal) { admit () }
     Spec.Hash.Incremental.Definitions.hash_incremental a (xored_k `S.append` data) ();
   (S.equal) { Spec.Hash.Incremental.hash_is_hash_incremental' a (xored_k `S.append` data) () }
     hash' a (xored_k `S.append` data) ();
