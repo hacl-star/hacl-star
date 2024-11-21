@@ -1,5 +1,5 @@
 [
-  "°\u0011ËLŸ'\u0015\u001fÚ×½Ñ\u0000\"²ã",
+  "kr»$Zwÿîéßô\u000fÁ´ØÆ",
   [
     [
       "Spec.Agile.HMAC.lbytes",
@@ -13,7 +13,52 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "7ba405c434950300668e4e7d40e3ee2a"
+      "af1fa311001e59db65dbf0f7cab414f4"
+    ],
+    [
+      "Spec.Agile.HMAC.wrap",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_Lib.IntTypes.S128",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Tm_unit", "equation_Lib.IntTypes.uint8",
+        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
+        "equation_Spec.Hash.Definitions.block_word_length",
+        "equation_Spec.Hash.Definitions.bytes",
+        "equation_Spec.Hash.Definitions.fixed_len_alg",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "equation_Spec.Hash.Definitions.less_than_max_input_length",
+        "equation_Spec.Hash.Definitions.word_length",
+        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_042ec925769949f282ab80a26a462500",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_d58134fb55bef01eae6b023f162e2553",
+        "typing_FStar.Seq.Base.length",
+        "typing_Spec.Hash.Definitions.less_than_max_input_length",
+        "typing_Spec.Hash.Definitions.word_length"
+      ],
+      0,
+      "a6c809b51befab3255a2467e0cba1986"
+    ],
+    [
+      "Spec.Agile.HMAC.xor",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "e3029f72e85d6610cbb47e9a6a0e7b0a"
     ]
   ]
 ]
