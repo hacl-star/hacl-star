@@ -101,37 +101,28 @@ let alg_of_impl (i: impl { is_valid_impl i }): alg = dfst i
 // always a pointer to bytes. Here, that's no longer true because of Blake2, so
 // we need to be a little more verbose.
 noeq
-type state_impl (pred128 pred256: Type0): impl -> Type0 =
-| MD5_s: p:Hacl.Hash.Definitions.state md5 -> state_impl pred128 pred256 md5
-| SHA1_s: p:Hacl.Hash.Definitions.state sha1 -> state_impl pred128 pred256 sha1
-| SHA2_224_s: p:Hacl.Hash.Definitions.state sha2_224 -> state_impl pred128 pred256 sha2_224
-| SHA2_256_s: p:Hacl.Hash.Definitions.state sha2_256 -> state_impl pred128 pred256 sha2_256
-| SHA2_384_s: p:Hacl.Hash.Definitions.state sha2_384 -> state_impl pred128 pred256 sha2_384
-| SHA2_512_s: p:Hacl.Hash.Definitions.state sha2_512 -> state_impl pred128 pred256 sha2_512
-| SHA3_224_s: p:Hacl.Hash.Definitions.state sha3_224 -> state_impl pred128 pred256 sha3_224
-| SHA3_256_s: p:Hacl.Hash.Definitions.state sha3_256 -> state_impl pred128 pred256 sha3_256
-| SHA3_384_s: p:Hacl.Hash.Definitions.state sha3_384 -> state_impl pred128 pred256 sha3_384
-| SHA3_512_s: p:Hacl.Hash.Definitions.state sha3_512 -> state_impl pred128 pred256 sha3_512
-| Blake2S_s: p:Hacl.Hash.Definitions.state blake2s_32 -> state_impl pred128 pred256 blake2s_32
-| Blake2S_128_s: _: squash pred128 -> p:Hacl.Hash.Definitions.state blake2s_128 -> state_impl pred128 pred256 blake2s_128
-| Blake2B_s: p:Hacl.Hash.Definitions.state blake2b_32 -> state_impl pred128 pred256 blake2b_32
-| Blake2B_256_s: _: squash pred256 -> p:Hacl.Hash.Definitions.state blake2b_256 -> state_impl pred128 pred256 blake2b_256
-
-let pred128 = EverCrypt.TargetConfig.hacl_can_compile_vec128
-let pred256 = EverCrypt.TargetConfig.hacl_can_compile_vec128
-
-let state_s_doesnt_work (a: alg) =
-  match a with
-  | Blake2S -> state_impl pred128 pred256 (if pred128 then blake2s_128 else blake2s_32)
-  | Blake2B -> state_impl pred128 pred256 (if pred256 then blake2b_256 else blake2b_32)
-  | _ -> state_impl pred128 pred256 (| a, () |)
-
-let state_s (a: alg) =
-  state_impl pred128 pred256 (
-    match a with
-    | Blake2S -> if pred128 then blake2s_128 else blake2s_32
-    | Blake2B -> if pred256 then blake2b_256 else blake2b_32
-    | _ -> (| a, () |))
+type state_s: alg -> Type0 =
+| MD5_s: p:Hacl.Hash.Definitions.state (|MD5, ()|) -> state_s MD5
+| SHA1_s: p:Hacl.Hash.Definitions.state (|SHA1, ()|) -> state_s SHA1
+| SHA2_224_s: p:Hacl.Hash.Definitions.state (|SHA2_224, ()|) -> state_s SHA2_224
+| SHA2_256_s: p:Hacl.Hash.Definitions.state (|SHA2_256, ()|) -> state_s SHA2_256
+| SHA2_384_s: p:Hacl.Hash.Definitions.state (|SHA2_384, ()|) -> state_s SHA2_384
+| SHA2_512_s: p:Hacl.Hash.Definitions.state (|SHA2_512, ()|) -> state_s SHA2_512
+| SHA3_224_s: p:Hacl.Hash.Definitions.state (|SHA3_224, ()|) -> state_s SHA3_224
+| SHA3_256_s: p:Hacl.Hash.Definitions.state (|SHA3_256, ()|) -> state_s SHA3_256
+| SHA3_384_s: p:Hacl.Hash.Definitions.state (|SHA3_384, ()|) -> state_s SHA3_384
+| SHA3_512_s: p:Hacl.Hash.Definitions.state (|SHA3_512, ()|) -> state_s SHA3_512
+| Blake2S_s: p:Hacl.Hash.Definitions.state (|Blake2S, Hacl.Impl.Blake2.Core.M32|) -> state_s Blake2S
+| Blake2S_128_s:
+  _:squash (EverCrypt.TargetConfig.hacl_can_compile_vec128 /\
+    EverCrypt.AutoConfig2.vec128_enabled) ->
+  p:Hacl.Hash.Definitions.state (|Blake2S, Hacl.Impl.Blake2.Core.M128|) ->
+  state_s Blake2S
+| Blake2B_s: p:Hacl.Hash.Definitions.state (|Blake2B, Hacl.Impl.Blake2.Core.M32|) -> state_s Blake2B
+| Blake2B_256_s:
+  _:squash (EverCrypt.TargetConfig.hacl_can_compile_vec256 /\
+    EverCrypt.AutoConfig2.vec256_enabled) ->
+  p:Hacl.Hash.Definitions.state (|Blake2B, Hacl.Impl.Blake2.Core.M256|) -> state_s Blake2B
 
 let invert_state_s (a: alg): Lemma
   (requires True)
@@ -142,7 +133,7 @@ let invert_state_s (a: alg): Lemma
 
 [@@strict_on_arguments [1]]
 inline_for_extraction
-let impl_of_state (#a: G.erased fixed_len_alg) (s: state_s a): i:impl { alg_of_impl i == G.reveal a } =
+let impl_of_state #a (s: state_s a): i:impl { alg_of_impl i == a } =
   match s with
   | MD5_s _ -> md5
   | SHA1_s _ -> sha1
