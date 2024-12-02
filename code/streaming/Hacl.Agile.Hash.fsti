@@ -27,10 +27,24 @@ open LowStar.BufferOps
 /// A corollary is that we need the type of implementations to be representable,
 /// instead of being a meta-time parameter that is evaluated away. The `impl`
 /// dependent pair in Hash.Definitions is thus ill-suited.
+///
+/// We do not expect clients to use this module directly -- this merely serves
+/// as an argument for a streaming functor, right now, the streaming, agile hmac
+/// API. Note that we do not have an agile, streaming hash API because of the
+/// historical discrepancies between keyed and non-keyed hash algorithms. This
+/// could conceivably be resolved.
 
 inline_for_extraction noextract
 val _sync_decl1: unit
 
+/// Interesting design note: the streaming functor does not account for the
+/// possibility of allocation failure in create_in (a.k.a. malloc). So, to avoid
+/// the possibility of failure, we bake into the impl that the static
+/// precondition is verified. Up to the caller to check -- we cannot return NULL
+/// here. We'll deal with it at the outer layer by re-wrapping the
+/// initialization function for the streaming HMAC.
+///
+/// Note that this still extracts.
 type impl =
   | MD5
   | SHA1
@@ -43,9 +57,9 @@ type impl =
   | SHA3_384
   | SHA3_512
   | Blake2S_32
-  | Blake2S_128
+  | Blake2S_128: squash EverCrypt.TargetConfig.hacl_can_compile_vec128 -> impl
   | Blake2B_32
-  | Blake2B_256
+  | Blake2B_256: squash EverCrypt.TargetConfig.hacl_can_compile_vec256 -> impl
 
 inline_for_extraction noextract
 val _sync_decl2: unit
@@ -64,9 +78,9 @@ let alg_of_impl (i: impl): fixed_len_alg =
   | SHA3_384 -> Spec.Agile.Hash.SHA3_384
   | SHA3_512 -> Spec.Agile.Hash.SHA3_512
   | Blake2S_32 -> Spec.Agile.Hash.Blake2S
-  | Blake2S_128 -> Spec.Agile.Hash.Blake2S
+  | Blake2S_128 _ -> Spec.Agile.Hash.Blake2S
   | Blake2B_32 -> Spec.Agile.Hash.Blake2B
-  | Blake2B_256 -> Spec.Agile.Hash.Blake2B
+  | Blake2B_256 _ -> Spec.Agile.Hash.Blake2B
 
 let e_impl = G.erased impl
 
@@ -153,10 +167,6 @@ inline_for_extraction noextract
 let preserves_freeable #a (s: state a) (h0 h1: HS.mem): Type0 =
   freeable h0 s ==> freeable h1 s
 
-/// This function will generally not extract properly, so it should be used with
-/// great care. Callers must:
-/// - run with evercrypt/fst in scope to benefit from the definition of this function
-/// - know, at call-site, the concrete value of a via suitable usage of inline_for_extraction
 inline_for_extraction noextract
 val alloca: a:impl -> StackInline (state a)
   (requires (fun _ -> True))
@@ -166,43 +176,37 @@ val alloca: a:impl -> StackInline (state a)
     B.fresh_loc (footprint s h1) h0 h1 /\
     M.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint s h1))))
 
-[@@ Comment "Returns NULL if the choice of implemenatation is not supported on
-the target platform. For instance, attempting to create a Blake2B_256 HMAC on an
-ARM machine will fail."]
-val malloc_in: a:impl -> r:HS.rid -> FStar.HyperStack.ST.ST (B.buffer (state_s a))
+val create_in: a:impl -> r:HS.rid -> FStar.HyperStack.ST.ST (state a)
   (requires (fun _ ->
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
-    if a = Blake2S_128 && not EverCrypt.TargetConfig.hacl_can_compile_vec128 ||
-      a = Blake2B_256 && not EverCrypt.TargetConfig.hacl_can_compile_vec256
-    then
-      s == B.null
-    else
-      B.length s == 1 /\ // this turns the result type into state a
+    // RETURN TYPE ABOVE: was B.buffer (state_s a)
+    // if a = Blake2S_128 && not EverCrypt.TargetConfig.hacl_can_compile_vec128 ||
+    //   a = Blake2B_256 && not EverCrypt.TargetConfig.hacl_can_compile_vec256
+    // then
+    //   s == B.null
+    // else
+    //   B.length s == 1 /\ // this turns the result type into state a
       invariant s h1 /\
       M.(modifies loc_none h0 h1) /\
       B.fresh_loc (footprint s h1) h0 h1 /\
       M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
       freeable h1 s))
 
-(** @type: true
-*)
-val malloc: a:impl -> FStar.HyperStack.ST.ST (B.buffer (state_s a))
+val create: a:impl -> FStar.HyperStack.ST.ST (state a)
   (requires fun h0 -> True)
   (ensures fun h0 s h1 ->
-    if a = Blake2S_128 && not EverCrypt.TargetConfig.hacl_can_compile_vec128 ||
-      a = Blake2B_256 && not EverCrypt.TargetConfig.hacl_can_compile_vec256
-    then
-      s == B.null
-    else
-      B.length s == 1 /\ // this turns the result type into state a
+    // if a = Blake2S_128 && not EverCrypt.TargetConfig.hacl_can_compile_vec128 ||
+    //   a = Blake2B_256 && not EverCrypt.TargetConfig.hacl_can_compile_vec256
+    // then
+    //   s == B.null
+    // else
+    //   B.length s == 1 /\ // this turns the result type into state a
       invariant s h1 /\
       M.(modifies loc_none h0 h1) /\
       B.fresh_loc (footprint s h1) h0 h1 /\
       freeable h1 s)
 
-(** @type: true
-*)
 val init: #a:e_impl -> (
   let a = Ghost.reveal a in
   s: state a -> Stack unit
@@ -218,8 +222,6 @@ inline_for_extraction noextract
 let ev_of_uint64 a (prevlen: UInt64.t { UInt64.v prevlen % block_length a = 0 }): Spec.Hash.Definitions.extra_state a =
   (if is_blake a then UInt64.v prevlen else ())
 
-(** @type: true
-*)
 val update_multi:
   #a:e_impl -> (
   let a = Ghost.reveal a in
@@ -245,8 +247,6 @@ inline_for_extraction noextract
 let prev_len_of_uint64 a (prevlen: UInt64.t { UInt64.v prevlen % block_length a = 0 }): Spec.Hash.Incremental.prev_length_t a =
   (if is_keccak a then () else UInt64.v prevlen)
 
-(** @type: true
-*)
 val update_last:
   #a:e_impl -> (
   let a = Ghost.reveal a in
@@ -272,8 +272,6 @@ val update_last:
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
 
-(** @type: true
-*)
 val finish:
   #a:e_impl -> (
   let a = Ghost.reveal a in
@@ -291,8 +289,6 @@ val finish:
     B.as_seq h1 dst == Spec.Agile.Hash.finish (alg_of_impl a) (repr s h0) () /\
     preserves_freeable s h0 h1))
 
-(** @type: true
-*)
 val free_:
   #a:e_impl -> (
   let a = Ghost.reveal a in

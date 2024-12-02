@@ -42,11 +42,11 @@ type state_s : impl -> Type0 =
 | SHA3_384_s: p:Hacl.Hash.Definitions.state (| H.SHA3_384, () |) -> state_s SHA3_384
 | SHA3_512_s: p:Hacl.Hash.Definitions.state (| H.SHA3_512, () |) -> state_s SHA3_512
 | Blake2S_s: p:Hacl.Hash.Definitions.state H.((|Blake2S, Hacl.Impl.Blake2.Core.M32 |)) -> state_s Blake2S_32
-| Blake2S_128_s: _: squash EverCrypt.TargetConfig.hacl_can_compile_vec128 ->
-    p:Hacl.Hash.Definitions.state H.((|Blake2S, Hacl.Impl.Blake2.Core.M128 |)) -> state_s Blake2S_128
+| Blake2S_128_s: s: squash EverCrypt.TargetConfig.hacl_can_compile_vec128 ->
+    p:Hacl.Hash.Definitions.state H.((|Blake2S, Hacl.Impl.Blake2.Core.M128 |)) -> state_s (Blake2S_128 s)
 | Blake2B_s: p:Hacl.Hash.Definitions.state H.((| Blake2B, Hacl.Impl.Blake2.Core.M32 |)) -> state_s Blake2B_32
-| Blake2B_256_s: _: squash EverCrypt.TargetConfig.hacl_can_compile_vec256 ->
-    p:Hacl.Hash.Definitions.state H.((| Blake2B, Hacl.Impl.Blake2.Core.M256 |)) -> state_s Blake2B_256
+| Blake2B_256_s: s: squash EverCrypt.TargetConfig.hacl_can_compile_vec256 ->
+    p:Hacl.Hash.Definitions.state H.((| Blake2B, Hacl.Impl.Blake2.Core.M256 |)) -> state_s (Blake2B_256 s)
 
 let invert_state_s (a: impl): Lemma
   (requires True)
@@ -70,9 +70,9 @@ let impl_of_state_s (#a: G.erased impl) (s: state_s a): i:impl { i == G.reveal a
   | SHA3_384_s _ -> SHA3_384
   | SHA3_512_s _ -> SHA3_512
   | Blake2S_s _ -> Blake2S_32
-  | Blake2S_128_s _ _ -> Blake2S_128
+  | Blake2S_128_s s _ -> Blake2S_128 s
   | Blake2B_s _ -> Blake2B_32
-  | Blake2B_256_s _ _ -> Blake2B_256
+  | Blake2B_256_s s _ -> Blake2B_256 s
 
 let _: squash (inversion impl) = allow_inversion impl
 
@@ -89,9 +89,9 @@ let impl_of_impl (i: impl): Hacl.Hash.Definitions.impl =
   | SHA3_384 -> (| H.SHA3_384, () |)
   | SHA3_512 -> (| H.SHA3_512, () |)
   | Blake2S_32 -> (| H.Blake2S, Hacl.Impl.Blake2.Core.M32 |)
-  | Blake2S_128 -> (| H.Blake2S, Hacl.Impl.Blake2.Core.M128 |)
+  | Blake2S_128 _ -> (| H.Blake2S, Hacl.Impl.Blake2.Core.M128 |)
   | Blake2B_32 -> (| H.Blake2B, Hacl.Impl.Blake2.Core.M32 |)
-  | Blake2B_256 -> (| H.Blake2B, Hacl.Impl.Blake2.Core.M256 |)
+  | Blake2B_256 _ -> (| H.Blake2B, Hacl.Impl.Blake2.Core.M256 |)
 
 [@@strict_on_arguments [1]]
 inline_for_extraction
@@ -156,64 +156,59 @@ let alloca a =
     | SHA3_512 -> SHA3_512_s (B.alloca 0UL 25ul)
     | Blake2S_32 ->
         Blake2S_s (B.alloca 0ul 16ul)
-    | Blake2S_128 ->
+    | Blake2S_128 _ ->
         if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
           Blake2S_128_s () (B.alloca (zero_element Spec.Blake2.Blake2S M128) (impl_state_len (impl_of_impl a)))
         else
-          LowStar.Failure.failwith "ERROR: this build does not support 128-bit vectorized Blake2s"
+          false_elim ()
     | Blake2B_32 ->
         Blake2B_s (B.alloca 0uL 16ul)
-    | Blake2B_256 ->
+    | Blake2B_256 _ ->
         if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
           Blake2B_256_s () (B.alloca (zero_element Spec.Blake2.Blake2B M256) (impl_state_len (impl_of_impl a)))
         else
-          LowStar.Failure.failwith "ERROR: this build does not support 256-bit vectorized Blake2b"
+          false_elim ()
   in
   B.alloca s 1ul
 
 [@@strict_on_arguments [0]]
-let malloc_in a r =
+let create_in a r =
   let h0 = ST.get () in
-  if a = Blake2S_128 && not EverCrypt.TargetConfig.hacl_can_compile_vec128 ||
-    a = Blake2B_256 && not EverCrypt.TargetConfig.hacl_can_compile_vec256
-  then
-    B.null #(state_s a)
-  else
-    let s: state_s a =
-      match a with
-      | MD5 -> MD5_s (B.malloc r 0ul 4ul)
-      | SHA1 -> SHA1_s (B.malloc r 0ul 5ul)
-      | SHA2_224 -> SHA2_224_s (B.malloc r 0ul 8ul)
-      | SHA2_256 -> SHA2_256_s (B.malloc r 0ul 8ul)
-      | SHA2_384 -> SHA2_384_s (B.malloc r 0UL 8ul)
-      | SHA2_512 -> SHA2_512_s (B.malloc r 0UL 8ul)
-      | SHA3_224 -> SHA3_224_s (B.malloc r 0UL 25ul)
-      | SHA3_256 -> SHA3_256_s (B.malloc r 0UL 25ul)
-      | SHA3_384 -> SHA3_384_s (B.malloc r 0UL 25ul)
-      | SHA3_512 -> SHA3_512_s (B.malloc r 0UL 25ul)
-      | Blake2S_32 ->
-          Blake2S_s (B.malloc r 0ul 16ul)
-      | Blake2S_128 ->
-          // As usual, to prevent linking errors (missing symbols) on systems that
-          // do not have this implementation available.
-          if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-            Blake2S_128_s () (Hacl.Blake2s_128.malloc_with_key r)
-          else
-            false_elim ()
-      | Blake2B_32 ->
-          Blake2B_s (B.malloc r 0UL 16ul)
-      | Blake2B_256 ->
-          // As usual, to prevent linking errors (missing symbols) on systems that
-          // do not have this implementation available.
-          if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-            Blake2B_256_s () (Hacl.Blake2b_256.malloc_with_key r)
-          else
-            false_elim ()
-    in
-    B.malloc r s 1ul
+  let s: state_s a =
+    match a with
+    | MD5 -> MD5_s (B.malloc r 0ul 4ul)
+    | SHA1 -> SHA1_s (B.malloc r 0ul 5ul)
+    | SHA2_224 -> SHA2_224_s (B.malloc r 0ul 8ul)
+    | SHA2_256 -> SHA2_256_s (B.malloc r 0ul 8ul)
+    | SHA2_384 -> SHA2_384_s (B.malloc r 0UL 8ul)
+    | SHA2_512 -> SHA2_512_s (B.malloc r 0UL 8ul)
+    | SHA3_224 -> SHA3_224_s (B.malloc r 0UL 25ul)
+    | SHA3_256 -> SHA3_256_s (B.malloc r 0UL 25ul)
+    | SHA3_384 -> SHA3_384_s (B.malloc r 0UL 25ul)
+    | SHA3_512 -> SHA3_512_s (B.malloc r 0UL 25ul)
+    | Blake2S_32 ->
+        Blake2S_s (B.malloc r 0ul 16ul)
+    | Blake2S_128 _ ->
+        // As usual, to prevent linking errors (missing symbols) on systems that
+        // do not have this implementation available.
+        if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+          Blake2S_128_s () (Hacl.Blake2s_128.malloc_with_key r)
+        else
+          false_elim ()
+    | Blake2B_32 ->
+        Blake2B_s (B.malloc r 0UL 16ul)
+    | Blake2B_256 _ ->
+        // As usual, to prevent linking errors (missing symbols) on systems that
+        // do not have this implementation available.
+        if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+          Blake2B_256_s () (Hacl.Blake2b_256.malloc_with_key r)
+        else
+          false_elim ()
+  in
+  B.malloc r s 1ul
 
-let malloc a =
-  malloc_in a HS.root
+let create a =
+  create_in a HS.root
 
 let init #a s =
   match !*s with
@@ -417,15 +412,15 @@ let copy #a s_src s_dst =
       [@inline_let] let s_dst: state Blake2S_32 = s_dst in
       let p_dst = Blake2S_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 16ul
-  | Blake2S_128_s _ p_src ->
-      [@inline_let] let s_dst: state Blake2S_128 = s_dst in
+  | Blake2S_128_s s p_src ->
+      [@inline_let] let s_dst: state (Blake2S_128 s) = s_dst in
       let p_dst = Blake2S_128_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 4ul
   | Blake2B_s p_src ->
       [@inline_let] let s_dst: state Blake2B_32 = s_dst in
       let p_dst = Blake2B_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 16ul
-  | Blake2B_256_s _ p_src ->
-      [@inline_let] let s_dst: state Blake2B_256 = s_dst in
+  | Blake2B_256_s s p_src ->
+      [@inline_let] let s_dst: state (Blake2B_256 s) = s_dst in
       let p_dst = Blake2B_256_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 4ul
