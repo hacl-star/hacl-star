@@ -38,7 +38,9 @@ let max_input_len64 a = D.max_input_len64 a
 // Stateful key definition, keeps its length at runtime
 ///////////////////////////////////////////////////////
 
-let state (i: index) = (b:B.buffer uint8 { B.len b == dsnd i }) & UInt32.t
+let key_and_len (i: index) = (b:B.buffer uint8 { B.len b == dsnd i }) & UInt32.t
+
+let state = key_and_len
 
 let footprint (#i: index) h (s: state i): GTot B.loc =
   let k, l = s in

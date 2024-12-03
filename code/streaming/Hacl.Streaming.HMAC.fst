@@ -104,6 +104,8 @@ let hmac: block index =
 
 module F = Hacl.Streaming.Functor
 
+let agile_state i = F.state_s hmac i (stateful_agile_hash_state.s i) (state i)
+
 inline_for_extraction noextract
 let alloca i = F.alloca hmac i (stateful_agile_hash_state.s i) (state i)
 
