@@ -47,7 +47,7 @@ let stateful_agile_hash_state: Hacl.Streaming.Interface.stateful index =
 
 // Stateful key definition, keeps its length at runtime
 
-let state (i: index) = B.buffer uint8 & B.pointer UInt32.t
+let state (i: index) = (b:B.buffer uint8 { B.len b == dsnd i }) & B.pointer UInt32.t
 
 let footprint (#i: index) h (s: state i): GTot B.loc =
   let k, l = s in
@@ -59,9 +59,12 @@ let invariant (#i: index) h (s: state i): Type0 =
   dsnd i <> 0ul ==>
     B.(loc_disjoint (loc_addr_of_buffer k) (loc_addr_of_buffer l)) /\ B.live h k)
 
+let t (i: index) =
+  s:S.seq uint8 { S.length s == UInt32.v (dsnd i) }
+
 let v (i: index) h (s: state i) =
   let k, l = s in
-  B.as_seq h k
+  (B.as_seq h k <: t i)
 
 inline_for_extraction noextract
 let stateful_runtime_key: stateful index =
@@ -70,7 +73,7 @@ let stateful_runtime_key: stateful index =
     (* footprint *) footprint
     (* freeable *) (fun #i h (k, l) -> (if dsnd i <> 0ul then B.freeable k else True) /\ B.freeable l)
     (* invariant *) (fun #i h s -> invariant #i h s)
-    (* t *) (fun i -> S.seq uint8)
+    (* t *) (fun i -> t i)
     (* v *) v
     (* invariant_loc_in_footprint *) (fun #_ h s -> let k, l = s in ())
     (* frame_invariant *) (fun (#i: index) l (s: state i) (h0: HS.mem) (h1: HS.mem) ->
@@ -110,6 +113,9 @@ let stateful_runtime_key: stateful index =
 inline_for_extraction noextract
 let alg (i: index) = alg_of_impl (dfst i)
 
+let _ = allow_inversion Spec.Agile.Hash.fixed_len_alg
+let _ = allow_inversion impl
+
 inline_for_extraction noextract
 let hmac: block index =
   Block
@@ -118,25 +124,39 @@ let hmac: block index =
     (* key *) stateful_runtime_key
     (* output_length_t *) UInt32.t
     (* max_input_len *) (fun i ->
-      let a = alg i in
-      D.max_input_len64 a `FStar.UInt64.sub` D.block_len a)
-    (* output_length *) (fun i -> D.hash_len (alg i))
-    (* block_len *) (fun i -> D.block_len (alg i))
-    (* blocks_state_len *) (fun i -> D.block_len (alg i))
-    (* init_input_len *) (fun i -> D.block_len (alg i))
-    (* init_input_s *) (fun i k -> Spec.HMAC.Incremental.init_input (alg i) k)
-    (* init_s *) (fun i k -> Spec.HMAC.Incremental.init (alg i) k)
+      D.max_input_len64 (alg i))
+    (* output_length *) (fun i _ ->
+      Spec.Hash.Definitions.hash_length (alg i))
+    (* block_len *) (fun i ->
+      D.block_len (alg i))
+    (* blocks_state_len *) (fun i ->
+      D.block_len (alg i))
+    (* init_input_len *) (fun i ->
+      D.block_len (alg i))
+    (* init_input_s *) (fun i k ->
+      Spec.HMAC.Incremental.init_input (alg i) k)
+    (* init_s *) (fun i k ->
+      Spec.HMAC.Incremental.init (alg i) k)
     (* update_multi_s *) (fun i s prevlen data ->
-      Spec.Agile.Hash.update_multi (alg i) s prevlen data)
+      let a = alg i in
+      if Spec.Hash.Definitions.is_blake a then
+        Spec.Agile.Hash.update_multi (alg i) s prevlen data
+      else
+        Spec.Agile.Hash.update_multi (alg i) s () data)
     (* update_last_s *) (fun i s prevlen data ->
-      Spec.Hash.Incremental.Definitions.update_last (alg i) s prevlen data)
+      let a = alg i in
+      if Spec.Hash.Definitions.is_keccak a then
+        Spec.Hash.Incremental.Definitions.update_last (alg i) s () data
+      else
+        Spec.Hash.Incremental.Definitions.update_last (alg i) s prevlen data)
     (* finish_s *) (fun i k s l ->
       Spec.HMAC.Incremental.finish (alg i) k s)
-    (* spec_s *) (fun i k input l -> Spec.Agile.HMAC.hmac (alg i) k input)
+    (* spec_s *) (fun i k input l ->
+      Spec.Agile.HMAC.hmac (alg i) k input)
     (* update_multi_zero *) (fun i s prevlen ->
       let a = alg i in
       if Spec.Hash.Definitions.is_blake a then
-        Spec.Hash.Lemmas.update_multi_zero_blake a prevlen s
+        Spec.Hash.Lemmas.update_multi_zero_blake a (prevlen <: Spec.Hash.Definitions.extra_state a) s
       else
         Spec.Hash.Lemmas.update_multi_zero a s)
     (* update_multi_associative *) (fun i s prevlen1 prevlen2 input1 input2 ->
@@ -147,8 +167,10 @@ let hmac: block index =
         Spec.Hash.Lemmas.update_multi_associative a s input1 input2)
     (* spec_is_incremental *) (fun i k input l ->
       Spec.HMAC.Incremental.hmac_is_hmac_incremental (alg i) k input)
-    (* index_of_state *) (fun i s ->
-      impl_of_state i s)
+    (* index_of_state *) (fun i s k ->
+      let i: impl = impl_of_state (dfst i) s in
+  admit ())
+      //i, !*kl)
     (* init *) (fun i k buf s -> admit ())
     (* update_multi *) (fun i s prevlen blocks len -> admit ())
     (* update_last *) (fun i s prevlen last last_len -> admit ())

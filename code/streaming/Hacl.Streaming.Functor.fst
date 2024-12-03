@@ -266,8 +266,8 @@ let frame_key #index c i l s h0 h1 =
 
 let index_of_state #index c i t t' s =
   let open LowStar.BufferOps in
-  let State block_state _ _ _ _ = !*s in
-  c.index_of_state i block_state
+  let State block_state _ _ _ k = !*s in
+  c.index_of_state i block_state k
 
 let seen_length #index c i t t' s =
   let open LowStar.BufferOps in
@@ -388,7 +388,7 @@ let copy #index c i t t' state r =
 
   // All source state is suffixed by 0.
   let State block_state0 buf0 total_len0 seen0 k0 = !*state in
-  let i = c.index_of_state i block_state0 in
+  let i = c.index_of_state i block_state0 k0 in
 
   (**) let h0 = ST.get () in
 
@@ -576,7 +576,7 @@ let reset #index c i t t' state key =
   let open LowStar.BufferOps in
   (**) let h1 = ST.get () in
   let State block_state buf _ _ k' = !*state in
-  let i = c.index_of_state i block_state in
+  let i = c.index_of_state i block_state k' in
   LowStar.Ignore.ignore i; // This is only used in types and proofs
   [@inline_let]
   let block_state: c.state.s i = block_state in
@@ -1508,7 +1508,7 @@ let update #index c i t t' state chunk chunk_len =
   let open LowStar.BufferOps in
   let s = !*state in
   let State block_state buf_ total_len seen k' = s in
-  let i = c.index_of_state i block_state in
+  let i = c.index_of_state i block_state k' in
 
   if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 chunk_len >^ c.max_input_len i -^ total_len) then
     Hacl.Streaming.Types.MaximumLengthExceeded
