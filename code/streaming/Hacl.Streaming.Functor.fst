@@ -267,6 +267,7 @@ let frame_key #index c i l s h0 h1 =
 let index_of_state #index c i t t' s =
   let open LowStar.BufferOps in
   let State block_state _ _ _ k = !*s in
+  allow_inversion key_management;
   c.index_of_state i block_state k
 
 let seen_length #index c i t t' s =
@@ -1508,6 +1509,7 @@ let update #index c i t t' state chunk chunk_len =
   let open LowStar.BufferOps in
   let s = !*state in
   let State block_state buf_ total_len seen k' = s in
+  allow_inversion key_management;
   let i = c.index_of_state i block_state k' in
 
   if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 chunk_len >^ c.max_input_len i -^ total_len) then

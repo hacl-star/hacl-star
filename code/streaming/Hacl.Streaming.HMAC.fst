@@ -113,8 +113,17 @@ let stateful_runtime_key: stateful index =
 inline_for_extraction noextract
 let alg (i: index) = alg_of_impl (dfst i)
 
-let _ = allow_inversion Spec.Agile.Hash.fixed_len_alg
-let _ = allow_inversion impl
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+let index_of_state (i: G.erased index) (s: Hacl.Agile.Hash.state (dfst i)) (k: state i): Stack index
+  (requires (fun h0 -> Hacl.Agile.Hash.invariant s h0 /\ invariant h0 k))
+  (ensures (fun h0 i' h1 -> h0 == h1 /\ G.reveal i == i'))
+=
+  let k: state i = k in
+  let _, kl = k in
+  let kl: UInt32.t = !*kl in
+  let i: impl = impl_of_state (dfst i) s in
+  (| i, kl |)
 
 inline_for_extraction noextract
 let hmac: block index =
@@ -167,11 +176,12 @@ let hmac: block index =
         Spec.Hash.Lemmas.update_multi_associative a s input1 input2)
     (* spec_is_incremental *) (fun i k input l ->
       Spec.HMAC.Incremental.hmac_is_hmac_incremental (alg i) k input)
-    (* index_of_state *) (fun i s k ->
-      let i: impl = impl_of_state (dfst i) s in
-  admit ())
-      //i, !*kl)
+    (* index_of_state *) index_of_state
     (* init *) (fun i k buf s -> admit ())
-    (* update_multi *) (fun i s prevlen blocks len -> admit ())
-    (* update_last *) (fun i s prevlen last last_len -> admit ())
+    (* update_multi *) (fun i s prevlen blocks len ->
+      Hacl.Agile.Hash.update_multi s prevlen blocks len
+    )
+    (* update_last *) (fun i s prevlen last last_len ->
+      Hacl.Agile.Hash.update_last s prevlen last last_len
+    )
     (* finish *) (fun i k s dst l -> admit ())
