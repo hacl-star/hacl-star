@@ -16,6 +16,8 @@ module D = Hacl.Hash.Definitions
 open Hacl.Agile.Hash
 open Hacl.Streaming.Interface
 
+val _sync_decl: unit
+
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 /// We find ourselves in the same situation as with the most recent iteration of
@@ -106,7 +108,7 @@ inline_for_extraction noextract
 let alg (i: index) = alg_of_impl (dfst i)
 
 val init: (i:G.erased index -> (
-    let i = G.reveal i in
+    let i: index = G.reveal i in
     k: state i ->
     buf_: B.buffer uint8 { B.length buf_ = UInt32.v (D.block_len (alg i)) } ->
     s: Hacl.Agile.Hash.state (dfst i) -> Stack unit

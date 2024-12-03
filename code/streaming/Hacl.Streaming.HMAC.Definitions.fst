@@ -16,10 +16,12 @@ module D = Hacl.Hash.Definitions
 open Hacl.Agile.Hash
 open Hacl.Streaming.Interface
 
+let _sync_decl = ()
+
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 friend Spec.Agile.HMAC
-friend Spec.Incremental.HMAC
+friend Spec.HMAC.Incremental
 
-let init k buf s =
+let init (i: G.erased index) k buf s =
   admit ()
