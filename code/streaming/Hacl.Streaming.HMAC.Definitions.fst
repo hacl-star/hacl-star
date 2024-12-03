@@ -99,6 +99,7 @@ let init (i: G.erased index) k buf s =
   (**) assert_norm (pow2 32 < pow2 125);
   Hacl.Agile.Hash.init s;
   let i = Hacl.Agile.Hash.impl_of_state (dfst i) s in
+  (**) let h00 = ST.get () in
   push_frame ();
   (**) let h0 = ST.get () in
   let block = alloca_block i (Lib.IntTypes.u8 0) in
@@ -115,4 +116,7 @@ let init (i: G.erased index) k buf s =
   (**) let h2 = ST.get () in
   (**) assert (B.as_seq h2 buf `S.equal` Spec.HMAC.Incremental.init_input (alg_of_impl i) (B.as_seq h0 k));
   pop_frame ();
-  admit ()
+  (**) let h3 = ST.get () in
+  assert (B.modifies (B.loc_buffer buf) h00 h3);
+  Hacl.Agile.Hash.frame_invariant (B.loc_buffer buf) s h00 h3;
+  ()
