@@ -47,6 +47,8 @@ let index_of_state (i: G.erased index) (s: Hacl.Agile.Hash.state (dfst i)) (k: s
   let i: impl = impl_of_state (dfst i) s in
   (| i, kl |)
 
+#push-options "--z3rlimit 200"
+
 inline_for_extraction noextract
 let hmac: block index =
   Block
@@ -106,4 +108,4 @@ let hmac: block index =
     (* update_last *) (fun i s prevlen last last_len ->
       Hacl.Agile.Hash.update_last s prevlen last last_len
     )
-    (* finish *) (fun i k s dst l -> admit ())
+    (* finish *) (fun i k s dst l -> finish i k s dst l)

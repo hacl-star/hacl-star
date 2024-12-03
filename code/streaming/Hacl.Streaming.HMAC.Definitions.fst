@@ -120,3 +120,68 @@ let init (i: G.erased index) k buf s =
   assert (B.modifies (B.loc_buffer buf) h00 h3);
   Hacl.Agile.Hash.frame_invariant (B.loc_buffer buf) s h00 h3;
   ()
+
+let finish (i: G.erased index) k s dst _ =
+  (**) Hacl.HMAC.hash_lt_block (alg_of_impl (dfst i));
+  (**) assert_norm (pow2 32 < pow2 61);
+  (**) assert_norm (pow2 32 < pow2 64);
+  (**) assert_norm (pow2 32 < pow2 125);
+  let i = Hacl.Agile.Hash.impl_of_state (dfst i) s in
+  (**) let h00 = ST.get () in
+  push_frame ();
+  (**) let h0 = ST.get () in
+  let k, k_len = k in
+  let wrapped_key = alloca_block i (Lib.IntTypes.u8 0) in
+  (**) let h01 = ST.get () in
+  wrap_key i wrapped_key k k_len;
+  (**) let h1 = ST.get () in
+  (**) assert (B.fresh_loc (B.loc_buffer wrapped_key) h0 h1);
+  (**) B.loc_unused_in_not_unused_in_disjoint h00;
+  (**) B.loc_unused_in_not_unused_in_disjoint h0;
+  (**) B.loc_unused_in_not_unused_in_disjoint h01;
+  (**) B.loc_unused_in_not_unused_in_disjoint h1;
+  (**) B.(modifies_only_not_unused_in loc_none h00 h0);
+  (**) B.(modifies_only_not_unused_in loc_none h0 h1);
+  (**) B.(modifies_only_not_unused_in loc_none h0 h01);
+  (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h1);
+  (**) assert (B.modifies B.loc_none h0 h01);
+  (**) assert (B.length k > 0 ==> B.as_seq h01 k == B.as_seq h00 k);
+  (**) assert (B.length k == 0 ==> B.as_seq h01 k `S.equal` B.as_seq h00 k);
+  (**) assert (B.length k == 0 ==> B.as_seq h01 k == B.as_seq h00 k);
+  (**) assert (B.as_seq h1 wrapped_key == Spec.Agile.HMAC.wrap (alg_of_impl i) (B.as_seq h00 k));
+
+  let opad = alloca_block i (Lib.IntTypes.u8 0x5c) in
+  (**) let h2 = ST.get () in
+  (**) assert (B.fresh_loc (B.loc_buffer opad) h1 h2);
+  (**) B.loc_unused_in_not_unused_in_disjoint h2;
+  (**) B.(modifies_only_not_unused_in loc_none h1 h2);
+  (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h2);
+  C.Loops.in_place_map2 opad wrapped_key (D.block_len (alg_of_impl i)) Lib.IntTypes.( (^.) );
+  (**) let h20 = ST.get () in
+
+  let tmp_hash = alloca_block i (Lib.IntTypes.u8 0) in
+  (**) let h3 = ST.get () in
+  (**) assert (B.fresh_loc (B.loc_buffer tmp_hash) h2 h3);
+  (**) B.loc_unused_in_not_unused_in_disjoint h3;
+  (**) B.(modifies_only_not_unused_in (loc_buffer opad) h2 h3);
+  (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h3);
+  let tmp_hash = B.sub tmp_hash 0ul (D.hash_len (alg_of_impl i)) in
+
+  (**) assert B.(modifies loc_none h00 h3);
+  (**) Hacl.Agile.Hash.frame_invariant B.loc_none s h00 h3;
+  Hacl.Agile.Hash.finish s tmp_hash;
+  (**) let h4 = ST.get () in
+  Hacl.Agile.Hash.hash i dst opad (D.block_len (alg_of_impl i));
+  (**) let h5 = ST.get () in
+  (**) Hacl.Agile.Hash.frame_invariant B.(loc_buffer dst) s h4 h5;
+  (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h5);
+  pop_frame ();
+  (**) let h6 = ST.get () in
+  (**) B.modifies_fresh_frame_popped h00 h0 (B.loc_buffer dst `B.loc_union` Hacl.Agile.Hash.footprint s h00) h5 h6;
+  (**) B.popped_modifies h5 h6;
+  (**) Hacl.Agile.Hash.frame_invariant (B.loc_region_only false (HS.get_tip h5)) s h5 h6;
+  (**) assert (Hacl.Agile.Hash.invariant s h6);
+  (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h6);
+  (**) assert (ST.equal_stack_domains h00 h6);
+  (**) assert (Hacl.Agile.Hash.freeable h00 s ==> Hacl.Agile.Hash.freeable h6 s);
+  ()

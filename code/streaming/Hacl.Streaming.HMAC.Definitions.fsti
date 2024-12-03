@@ -123,3 +123,25 @@ val init: (i:G.erased index -> (
       B.(modifies (loc_union (Hacl.Agile.Hash.footprint s h0) (loc_buffer buf_)) h0 h1) /\
       Hacl.Agile.Hash.footprint s h0 == Hacl.Agile.Hash.footprint s h1 /\
       (Hacl.Agile.Hash.freeable h0 s ==> Hacl.Agile.Hash.freeable h1 s))))
+
+val finish: (
+    i: G.erased index -> (
+    let i = G.reveal i in
+    k: state i ->
+    s: Hacl.Agile.Hash.state (dfst i) ->
+    dst:B.buffer uint8 ->
+    l: UInt32.t { B.length dst == Spec.Agile.Hash.hash_length (alg i) } ->
+    Stack unit
+    (requires fun h0 ->
+      Hacl.Agile.Hash.invariant s h0 /\
+      B.live h0 dst /\
+      B.(loc_disjoint (Hacl.Agile.Hash.footprint s h0) (loc_buffer dst)) /\ (
+      invariant h0 k /\
+      B.(loc_disjoint (footprint h0 k) (loc_buffer dst)) /\
+      B.(loc_disjoint (footprint h0 k) (Hacl.Agile.Hash.footprint s h0))))
+    (ensures fun h0 _ h1 ->
+      Hacl.Agile.Hash.invariant s h1 /\
+      B.(modifies (loc_buffer dst `loc_union` (Hacl.Agile.Hash.footprint s h0)) h0 h1) /\
+      Hacl.Agile.Hash.footprint s h0 == Hacl.Agile.Hash.footprint s h1 /\
+      B.as_seq h1 dst == Spec.HMAC.Incremental.finish (alg i) (v i h0 k) (Hacl.Agile.Hash.repr s h0) /\
+      (Hacl.Agile.Hash.freeable h0 s ==> Hacl.Agile.Hash.freeable h1 s))))
