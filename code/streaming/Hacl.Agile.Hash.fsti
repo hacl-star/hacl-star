@@ -334,3 +334,5 @@ val copy:
       preserves_freeable s_dst h0 h1 /\
       invariant s_dst h1 /\
       repr s_dst h1 == repr s_src h0))
+
+val hash: i:impl -> Hacl.Hash.Definitions.hash_st (alg_of_impl i)

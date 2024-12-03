@@ -424,3 +424,20 @@ let copy #a s_src s_dst =
       [@inline_let] let s_dst: state (Blake2B_256 s) = s_dst in
       let p_dst = Blake2B_256_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 4ul
+
+let hash i dst input input_len =
+  match i with
+  | MD5 -> Hacl.Hash.MD5.hash_oneshot dst input input_len
+  | SHA1  -> Hacl.Hash.SHA1.hash_oneshot dst input input_len
+  | SHA2_224 -> Hacl.Streaming.SHA2.hash_224 dst input input_len
+  | SHA2_256 -> Hacl.Streaming.SHA2.hash_256 dst input input_len
+  | SHA2_384 -> Hacl.Streaming.SHA2.hash_384 dst input input_len
+  | SHA2_512 -> Hacl.Streaming.SHA2.hash_512 dst input input_len
+  | SHA3_224 -> Hacl.Hash.SHA3.hash Spec.Agile.Hash.SHA3_224 dst input input_len
+  | SHA3_256 -> Hacl.Hash.SHA3.hash Spec.Agile.Hash.SHA3_256 dst input input_len
+  | SHA3_384 -> Hacl.Hash.SHA3.hash Spec.Agile.Hash.SHA3_384 dst input input_len
+  | SHA3_512 -> Hacl.Hash.SHA3.hash Spec.Agile.Hash.SHA3_512 dst input input_len
+  | Blake2S_32 -> Hacl.Hash.Blake2s_32.hash dst input input_len
+  | Blake2S_128 _ -> Hacl.Hash.Blake2s_128.hash dst input input_len
+  | Blake2B_32 -> Hacl.Hash.Blake2b_32.hash dst input input_len
+  | Blake2B_256 _ -> Hacl.Hash.Blake2b_256.hash dst input input_len
