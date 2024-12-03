@@ -46,6 +46,30 @@ let alloca_block i init =
   assert (B.as_seq h r `S.equal` S.create (Spec.Agile.Hash.block_length (alg_of_impl i)) init);
   r
 
+noextract inline_for_extraction
+val alloca_block_and_hash (#a: Type0) (i: G.erased impl) (init: a):
+  ST.StackInline (b:B.buffer a)
+    (requires (fun h ->
+      HS.is_stack_region (HS.get_tip h)))
+    (ensures (fun h0 s h1 ->
+      let l = Spec.Agile.Hash.block_length (alg_of_impl i) + Spec.Agile.Hash.hash_length (alg_of_impl i) in
+      M.(modifies M.loc_none h0 h1) /\
+      B.frameOf s == HS.get_tip h0 /\
+      B.length s == l /\
+      B.as_seq h1 s == Seq.create l init /\
+      B.live h1 s /\
+      B.fresh_loc (M.loc_buffer s) h0 h1))
+
+// This extracts in C without a VLA.
+let alloca_block_and_hash i init =
+  let b = B.alloca init (168ul `FStar.UInt32.add` 64ul) in
+  assert (D.block_len (alg_of_impl i) `FStar.UInt32.lte` 168ul);
+  assert (D.hash_len (alg_of_impl i) `FStar.UInt32.lte` 64ul);
+  let r = B.sub b 0ul (D.block_len (alg_of_impl i) `FStar.UInt32.add` D.hash_len (alg_of_impl i)) in
+  let h = ST.get () in
+  assert (B.as_seq h r `S.equal` S.create (Spec.Agile.Hash.block_length (alg_of_impl i) + Spec.Agile.Hash.hash_length (alg_of_impl i)) init);
+  r
+
 // TODO: copy-paste from Hacl.HMAC, but can deal with NULL keys
 inline_for_extraction noextract
 let wrap_key_st (a: Spec.Agile.Hash.fixed_len_alg) =
@@ -127,6 +151,7 @@ let finish (i: G.erased index) k s dst _ =
   (**) assert_norm (pow2 32 < pow2 64);
   (**) assert_norm (pow2 32 < pow2 125);
   let i = Hacl.Agile.Hash.impl_of_state (dfst i) s in
+  let a = alg_of_impl i in
   (**) let h00 = ST.get () in
   push_frame ();
   (**) let h0 = ST.get () in
@@ -148,30 +173,35 @@ let finish (i: G.erased index) k s dst _ =
   (**) assert (B.length k > 0 ==> B.as_seq h01 k == B.as_seq h00 k);
   (**) assert (B.length k == 0 ==> B.as_seq h01 k `S.equal` B.as_seq h00 k);
   (**) assert (B.length k == 0 ==> B.as_seq h01 k == B.as_seq h00 k);
-  (**) assert (B.as_seq h1 wrapped_key == Spec.Agile.HMAC.wrap (alg_of_impl i) (B.as_seq h00 k));
+  (**) assert (B.as_seq h1 wrapped_key == Spec.Agile.HMAC.wrap a (B.as_seq h00 k));
 
-  let opad = alloca_block i (Lib.IntTypes.u8 0x5c) in
+  let opad_and_tmp_hash = alloca_block_and_hash i (Lib.IntTypes.u8 0x5c) in
+  let opad = B.sub opad_and_tmp_hash 0ul (D.block_len a) in
   (**) let h2 = ST.get () in
-  (**) assert (B.fresh_loc (B.loc_buffer opad) h1 h2);
+  (**) assert (B.fresh_loc (B.loc_buffer opad_and_tmp_hash) h1 h2);
   (**) B.loc_unused_in_not_unused_in_disjoint h2;
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
   (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h2);
-  C.Loops.in_place_map2 opad wrapped_key (D.block_len (alg_of_impl i)) Lib.IntTypes.( (^.) );
+  C.Loops.in_place_map2 opad wrapped_key (D.block_len a) Lib.IntTypes.( (^.) );
   (**) let h20 = ST.get () in
+  (**) assert (B.as_seq h20 opad `S.equal` Spec.Agile.HMAC.xor (Lib.IntTypes.u8 0x5c) (Spec.Agile.HMAC.wrap a (B.as_seq h00 k)));
 
-  let tmp_hash = alloca_block i (Lib.IntTypes.u8 0) in
+  let tmp_hash = B.sub opad_and_tmp_hash (D.block_len a) (D.hash_len a) in
+  (**) assert (B.disjoint opad tmp_hash);
   (**) let h3 = ST.get () in
-  (**) assert (B.fresh_loc (B.loc_buffer tmp_hash) h2 h3);
-  (**) B.loc_unused_in_not_unused_in_disjoint h3;
-  (**) B.(modifies_only_not_unused_in (loc_buffer opad) h2 h3);
   (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h3);
-  let tmp_hash = B.sub tmp_hash 0ul (D.hash_len (alg_of_impl i)) in
 
   (**) assert B.(modifies loc_none h00 h3);
   (**) Hacl.Agile.Hash.frame_invariant B.loc_none s h00 h3;
   Hacl.Agile.Hash.finish s tmp_hash;
   (**) let h4 = ST.get () in
-  Hacl.Agile.Hash.hash i dst opad (D.block_len (alg_of_impl i));
+  (**) assert (B.as_seq h4 tmp_hash `S.equal` Spec.Agile.Hash.finish a (Hacl.Agile.Hash.repr s h00) ());
+  (**) assert (B.as_seq h4 opad_and_tmp_hash `S.equal` (
+    S.append
+      (Spec.Agile.HMAC.xor (Lib.IntTypes.u8 0x5c) (Spec.Agile.HMAC.wrap a (B.as_seq h00 k)))
+      (Spec.Agile.Hash.finish a (Hacl.Agile.Hash.repr s h00) ())));
+
+  Hacl.Agile.Hash.hash i dst opad_and_tmp_hash (D.block_len a `FStar.UInt32.add` D.hash_len a);
   (**) let h5 = ST.get () in
   (**) Hacl.Agile.Hash.frame_invariant B.(loc_buffer dst) s h4 h5;
   (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h5);
