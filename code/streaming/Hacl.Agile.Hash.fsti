@@ -334,21 +334,3 @@ val copy:
       preserves_freeable s_dst h0 h1 /\
       invariant s_dst h1 /\
       repr s_dst h1 == repr s_src h0))
-
-let stateful_agile_hash_state: Hacl.Streaming.Interface.stateful impl =
-  Hacl.Streaming.Interface.Stateful
-    state
-    (fun #i h s -> footprint s h)
-    freeable
-    (fun #i h s -> invariant s h)
-    (fun i -> Spec.Hash.Definitions.words_state (alg_of_impl i))
-    (fun i h s -> repr s h)
-    (fun #i h s -> invariant_loc_in_footprint s h)
-    (fun #i l s h0 h1 ->
-      frame_invariant l s h0 h1;
-      frame_invariant_implies_footprint_preservation l s h0 h1)
-    (fun #i l s h0 h1 -> ())
-    alloca
-    create_in
-    (fun i -> free #i)
-    (fun i -> copy #i)
