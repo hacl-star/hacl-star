@@ -18,6 +18,7 @@ open Hacl.Streaming.Interface
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
+inline_for_extraction noextract
 let stateful_agile_hash_state: Hacl.Streaming.Interface.stateful Hacl.Streaming.HMAC.Definitions.index =
   Hacl.Streaming.Interface.Stateful
     (fun i -> state (dfst i))
