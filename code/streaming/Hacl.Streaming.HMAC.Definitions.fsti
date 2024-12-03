@@ -33,17 +33,15 @@ type index = i:impl & l:UInt32.t { Spec.Agile.HMAC.keysized (alg_of_impl i) (UIn
 // Stateful key definition, keeps its length at runtime
 ///////////////////////////////////////////////////////
 
-let state (i: index) = (b:B.buffer uint8 { B.len b == dsnd i }) & B.pointer UInt32.t
+let state (i: index) = (b:B.buffer uint8 { B.len b == dsnd i }) & UInt32.t
 
 let footprint (#i: index) h (s: state i): GTot B.loc =
   let k, l = s in
-  (if dsnd i = 0ul then B.loc_none else B.loc_addr_of_buffer k) `B.loc_union` B.loc_addr_of_buffer l
+  if dsnd i = 0ul then B.loc_none else B.loc_addr_of_buffer k
 
 let invariant (#i: index) h (s: state i): Type0 =
   let k, l = s in
-  B.len k == B.deref h l /\ B.live h l /\ B.deref h l == dsnd i /\ (
-  dsnd i <> 0ul ==>
-    B.(loc_disjoint (loc_addr_of_buffer k) (loc_addr_of_buffer l)) /\ B.live h k)
+  B.len k == l /\ l == dsnd i /\ (dsnd i <> 0ul ==> B.live h k)
 
 let t (i: index) =
   s:S.seq uint8 { S.length s == UInt32.v (dsnd i) }
@@ -54,7 +52,7 @@ let v (i: index) h (s: state i) =
 
 let freeable #i h (s: state i) =
   let k, l = s in
-  (if dsnd i <> 0ul then B.freeable k else True) /\ B.freeable l
+  if dsnd i <> 0ul then B.freeable k else True
 
 inline_for_extraction noextract
 let stateful_runtime_key: stateful index =
@@ -80,19 +78,16 @@ let stateful_runtime_key: stateful index =
       let l = dsnd i in
       if l = 0ul then
         let k = B.null in
-        let l = B.alloca l 1ul in
         let h = ST.get () in
         k, l
       else
-        B.alloca (Lib.IntTypes.u8 0) l, B.alloca l 1ul
+        B.alloca (Lib.IntTypes.u8 0) l, l
     )
-    (* create_in *) (fun i r -> (if dsnd i = 0ul then B.null else B.malloc r Lib.IntTypes.(u8 0) (dsnd i)), B.malloc r (dsnd i) 1ul)
-    (* free *) (fun _ (k, l) -> if !*l <> 0ul then B.free k; B.free l)
+    (* create_in *) (fun i r -> (if dsnd i = 0ul then B.null else B.malloc r Lib.IntTypes.(u8 0) (dsnd i)), dsnd i)
+    (* free *) (fun _ (k, l) -> if l <> 0ul then B.free k)
     (* copy *) (fun i s_src s_dst ->
       let k_src, l_src = s_src in
       let k_dst, l_dst = s_dst in
-      let l_src = !*l_src in
-      let l_dst = !*l_dst in
       assert (l_src == l_dst);
       let h0 = ST.get () in
       if l_src <> 0ul then

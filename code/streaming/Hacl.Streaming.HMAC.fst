@@ -44,7 +44,6 @@ let index_of_state (i: G.erased index) (s: Hacl.Agile.Hash.state (dfst i)) (k: s
 =
   let k: state i = k in
   let _, kl = k in
-  let kl: UInt32.t = !*kl in
   let i: impl = impl_of_state (dfst i) s in
   (| i, kl |)
 
