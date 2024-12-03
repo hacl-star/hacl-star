@@ -41,7 +41,7 @@ val alloca_block (#a: Type0) (i: G.erased impl) (init: a):
 let alloca_block i init =
   let b = B.alloca init 168ul in
   assert (D.block_len (alg_of_impl i) `FStar.UInt32.lte` 168ul);
-  let r = B.sub b 0ul (D.block_len (alg_of_impl i)) in
+  let r = B.sub b 0ul (block_len (alg_of_impl i)) in
   let h = ST.get () in
   assert (B.as_seq h r `S.equal` S.create (Spec.Agile.Hash.block_length (alg_of_impl i)) init);
   r
@@ -65,7 +65,7 @@ let alloca_block_and_hash i init =
   let b = B.alloca init (168ul `FStar.UInt32.add` 64ul) in
   assert (D.block_len (alg_of_impl i) `FStar.UInt32.lte` 168ul);
   assert (D.hash_len (alg_of_impl i) `FStar.UInt32.lte` 64ul);
-  let r = B.sub b 0ul (D.block_len (alg_of_impl i) `FStar.UInt32.add` D.hash_len (alg_of_impl i)) in
+  let r = B.sub b 0ul (block_len (alg_of_impl i) `FStar.UInt32.add` hash_len (alg_of_impl i)) in
   let h = ST.get () in
   assert (B.as_seq h r `S.equal` S.create (Spec.Agile.Hash.block_length (alg_of_impl i) + Spec.Agile.Hash.hash_length (alg_of_impl i)) init);
   r
@@ -86,7 +86,6 @@ let wrap_key_st (a: Spec.Agile.Hash.fixed_len_alg) =
       B.as_seq h1 output == Spec.Agile.HMAC.wrap a (B.as_seq h0 key))
 
 // TODO: copy-paste from Hacl.HMAC, but calling impl-agile hash
-inline_for_extraction noextract
 let wrap_key (impl: impl): wrap_key_st (alg_of_impl impl) =
 fun output key len ->
   [@inline_let]
@@ -94,11 +93,11 @@ fun output key len ->
   [@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
   let i = Hacl.HMAC.helper_smtpat a len in
   let nkey = B.sub output 0ul i in
-  let zeroes = B.sub output i (D.block_len a `FStar.UInt32.sub` i) in
+  let zeroes = B.sub output i (block_len a `FStar.UInt32.sub` i) in
   (**) assert B.(loc_disjoint (loc_buffer nkey) (loc_buffer zeroes));
   (**) let h0 = ST.get () in
   (**) assert (Seq.equal (B.as_seq h0 zeroes) (Seq.create (UInt32.v (D.block_len a `FStar.UInt32.sub` i)) (Lib.IntTypes.u8 0)));
-  if len `FStar.UInt32.lte` D.block_len a then begin
+  if len `FStar.UInt32.lte` block_len a then begin
     if len `FStar.UInt32.gt` 0ul then
       B.blit key 0ul nkey 0ul len;
     let h1 = ST.get () in
@@ -123,6 +122,7 @@ let init (i: G.erased index) k buf s =
   (**) assert_norm (pow2 32 < pow2 125);
   Hacl.Agile.Hash.init s;
   let i = Hacl.Agile.Hash.impl_of_state (dfst i) s in
+  let a = alg_of_impl i in
   (**) let h00 = ST.get () in
   push_frame ();
   (**) let h0 = ST.get () in
@@ -136,9 +136,9 @@ let init (i: G.erased index) k buf s =
   (**) B.(modifies_only_not_unused_in loc_none h0 h1);
   wrap_key i block k k_len;
   let ipad = alloca_block i (Lib.IntTypes.u8 0x36) in
-  C.Loops.map2 buf ipad block (D.block_len (alg_of_impl i)) Lib.IntTypes.( (^.) );
+  C.Loops.map2 buf ipad block (block_len a) Lib.IntTypes.( (^.) );
   (**) let h2 = ST.get () in
-  (**) assert (B.as_seq h2 buf `S.equal` Spec.HMAC.Incremental.init_input (alg_of_impl i) (B.as_seq h0 k));
+  (**) assert (B.as_seq h2 buf `S.equal` Spec.HMAC.Incremental.init_input a (B.as_seq h0 k));
   pop_frame ();
   (**) let h3 = ST.get () in
   assert (B.modifies (B.loc_buffer buf) h00 h3);
@@ -176,17 +176,17 @@ let finish (i: G.erased index) k s dst _ =
   (**) assert (B.as_seq h1 wrapped_key == Spec.Agile.HMAC.wrap a (B.as_seq h00 k));
 
   let opad_and_tmp_hash = alloca_block_and_hash i (Lib.IntTypes.u8 0x5c) in
-  let opad = B.sub opad_and_tmp_hash 0ul (D.block_len a) in
+  let opad = B.sub opad_and_tmp_hash 0ul (block_len a) in
   (**) let h2 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer opad_and_tmp_hash) h1 h2);
   (**) B.loc_unused_in_not_unused_in_disjoint h2;
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
   (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h2);
-  C.Loops.in_place_map2 opad wrapped_key (D.block_len a) Lib.IntTypes.( (^.) );
+  C.Loops.in_place_map2 opad wrapped_key (block_len a) Lib.IntTypes.( (^.) );
   (**) let h20 = ST.get () in
   (**) assert (B.as_seq h20 opad `S.equal` Spec.Agile.HMAC.xor (Lib.IntTypes.u8 0x5c) (Spec.Agile.HMAC.wrap a (B.as_seq h00 k)));
 
-  let tmp_hash = B.sub opad_and_tmp_hash (D.block_len a) (D.hash_len a) in
+  let tmp_hash = B.sub opad_and_tmp_hash (block_len a) (hash_len a) in
   (**) assert (B.disjoint opad tmp_hash);
   (**) let h3 = ST.get () in
   (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h3);
@@ -201,7 +201,7 @@ let finish (i: G.erased index) k s dst _ =
       (Spec.Agile.HMAC.xor (Lib.IntTypes.u8 0x5c) (Spec.Agile.HMAC.wrap a (B.as_seq h00 k)))
       (Spec.Agile.Hash.finish a (Hacl.Agile.Hash.repr s h00) ())));
 
-  Hacl.Agile.Hash.hash i dst opad_and_tmp_hash (D.block_len a `FStar.UInt32.add` D.hash_len a);
+  Hacl.Agile.Hash.hash i dst opad_and_tmp_hash (block_len a `FStar.UInt32.add` hash_len a);
   (**) let h5 = ST.get () in
   (**) Hacl.Agile.Hash.frame_invariant B.(loc_buffer dst) s h4 h5;
   (**) assert (Hacl.Agile.Hash.footprint s h00 == Hacl.Agile.Hash.footprint s h5);

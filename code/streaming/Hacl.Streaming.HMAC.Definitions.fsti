@@ -29,6 +29,11 @@ val _sync_decl: unit
 /// another if they key lengths differ.
 type index = i:impl & l:UInt32.t { Spec.Agile.HMAC.keysized (alg_of_impl i) (UInt32.v l) }
 
+// Code quality (non-inlining variants)
+let hash_len a = D.hash_len a
+let block_len a = D.block_len a
+let max_input_len64 a = D.max_input_len64 a
+
 ///////////////////////////////////////////////////////
 // Stateful key definition, keeps its length at runtime
 ///////////////////////////////////////////////////////
@@ -42,6 +47,15 @@ let footprint (#i: index) h (s: state i): GTot B.loc =
 let invariant (#i: index) h (s: state i): Type0 =
   let k, l = s in
   B.len k == l /\ l == dsnd i /\ (dsnd i <> 0ul ==> B.live h k)
+
+let index_of_state (i: G.erased index) (s: Hacl.Agile.Hash.state (dfst i)) (k: state i): Stack index
+  (requires (fun h0 -> Hacl.Agile.Hash.invariant s h0 /\ invariant h0 k))
+  (ensures (fun h0 i' h1 -> h0 == h1 /\ G.reveal i == i'))
+=
+  let k: state i = k in
+  let _, kl = k in
+  let i: impl = impl_of_state (dfst i) s in
+  (| i, kl |)
 
 let t (i: index) =
   s:S.seq uint8 { S.length s == UInt32.v (dsnd i) }

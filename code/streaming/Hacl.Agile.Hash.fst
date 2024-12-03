@@ -438,6 +438,14 @@ let hash i dst input input_len =
   | SHA3_384 -> Hacl.Hash.SHA3.hash Spec.Agile.Hash.SHA3_384 dst input input_len
   | SHA3_512 -> Hacl.Hash.SHA3.hash Spec.Agile.Hash.SHA3_512 dst input input_len
   | Blake2S_32 -> Hacl.Hash.Blake2s_32.hash dst input input_len
-  | Blake2S_128 _ -> Hacl.Hash.Blake2s_128.hash dst input input_len
+  | Blake2S_128 _ ->
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        Hacl.Hash.Blake2s_128.hash dst input input_len
+      else
+        false_elim ()
   | Blake2B_32 -> Hacl.Hash.Blake2b_32.hash dst input input_len
-  | Blake2B_256 _ -> Hacl.Hash.Blake2b_256.hash dst input input_len
+  | Blake2B_256 _ ->
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        Hacl.Hash.Blake2b_256.hash dst input input_len
+      else
+        false_elim ()

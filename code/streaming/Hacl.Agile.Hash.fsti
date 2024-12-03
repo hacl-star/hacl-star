@@ -82,6 +82,7 @@ let alg_of_impl (i: impl): fixed_len_alg =
   | Blake2B_32 -> Spec.Agile.Hash.Blake2B
   | Blake2B_256 _ -> Spec.Agile.Hash.Blake2B
 
+inline_for_extraction noextract
 let e_impl = G.erased impl
 
 [@CAbstractStruct]

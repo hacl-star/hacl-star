@@ -39,15 +39,6 @@ let stateful_agile_hash_state: Hacl.Streaming.Interface.stateful Hacl.Streaming.
 
 open Hacl.Streaming.HMAC.Definitions
 
-let index_of_state (i: G.erased index) (s: Hacl.Agile.Hash.state (dfst i)) (k: state i): Stack index
-  (requires (fun h0 -> Hacl.Agile.Hash.invariant s h0 /\ invariant h0 k))
-  (ensures (fun h0 i' h1 -> h0 == h1 /\ G.reveal i == i'))
-=
-  let k: state i = k in
-  let _, kl = k in
-  let i: impl = impl_of_state (dfst i) s in
-  (| i, kl |)
-
 #push-options "--z3rlimit 200"
 
 inline_for_extraction noextract
@@ -58,15 +49,15 @@ let hmac: block index =
     (* key *) stateful_runtime_key
     (* output_length_t *) UInt32.t
     (* max_input_len *) (fun i ->
-      D.max_input_len64 (alg i))
+      max_input_len64 (alg i))
     (* output_length *) (fun i _ ->
       Spec.Hash.Definitions.hash_length (alg i))
     (* block_len *) (fun i ->
-      D.block_len (alg i))
+      block_len (alg i))
     (* blocks_state_len *) (fun i ->
-      D.block_len (alg i))
+      block_len (alg i))
     (* init_input_len *) (fun i ->
-      D.block_len (alg i))
+      block_len (alg i))
     (* init_input_s *) (fun i k ->
       Spec.HMAC.Incremental.init_input (alg i) k)
     (* init_s *) (fun i k ->
@@ -110,3 +101,14 @@ let hmac: block index =
       Hacl.Agile.Hash.update_last s prevlen last last_len
     )
     (* finish *) (fun i k s dst l -> finish i k s dst l)
+
+module F = Hacl.Streaming.Functor
+
+inline_for_extraction noextract
+let alloca i = F.alloca hmac i (stateful_agile_hash_state.s i) (state i)
+
+let malloc i = F.malloc hmac i (stateful_agile_hash_state.s i) (state i)
+let reset (i: G.erased index) = F.reset hmac i (stateful_agile_hash_state.s i) (state i)
+let update (i: G.erased index) = F.update hmac i (stateful_agile_hash_state.s i) (state i)
+let digest (i: G.erased index) = F.digest hmac i (stateful_agile_hash_state.s i) (state i)
+let free (i: G.erased index) = F.free hmac i (stateful_agile_hash_state.s i) (state i)
