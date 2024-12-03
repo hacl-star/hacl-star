@@ -444,7 +444,7 @@ let poly1305 (fs : field_spec) : I.block unit =
       poly_is_incremental_lazy key input)
 
     (* index_of_state *)
-    (fun _ _ -> ())
+    (fun _ _ _ -> ())
 
     (* init *)
     (fun _ k _ s ->

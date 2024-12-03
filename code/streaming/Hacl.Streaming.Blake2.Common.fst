@@ -693,7 +693,7 @@ let blake2 (a : alg)
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
     (fun i (p, k) input _ ->
       spec_is_incremental a p i.last_node k input) (* spec_is_incremental *)
-    (fun _ (kk, nn, last_node, _) -> { key_length = kk; digest_length = nn; last_node }) (* index_of_state *)
+    (fun _ (kk, nn, last_node, _) _ -> { key_length = kk; digest_length = nn; last_node }) (* index_of_state *)
 
     (* init *)
     (fun i k' buf_ acc ->
