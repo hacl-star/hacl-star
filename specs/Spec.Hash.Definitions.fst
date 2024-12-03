@@ -271,7 +271,7 @@ let hash_length (a: hash_alg { not (is_shake a) }): Lib.IntTypes.(n:size_nat { 
     | Blake2S -> 4 * 8
     | Blake2B -> 8 * 8
 
-(** Padding *
+(** Padding *)
 
 (* Number of zeroes that should go into the padding *)
 let pad0_length (a:md_alg) (len:nat): Tot (n:nat{(len + 1 + n + len_length a) % block_length a = 0}) =

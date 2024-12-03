@@ -26,7 +26,7 @@ friend Hacl.HMAC
 
 noextract inline_for_extraction
 val alloca_block (#a: Type0) (i: G.erased impl) (init: a):
-  ST.StackInline (b:B.buffer a)
+  ST.StackInline (B.buffer a)
     (requires (fun h ->
       HS.is_stack_region (HS.get_tip h)))
     (ensures (fun h0 s h1 ->
@@ -48,7 +48,7 @@ let alloca_block i init =
 
 noextract inline_for_extraction
 val alloca_block_and_hash (#a: Type0) (i: G.erased impl) (init: a):
-  ST.StackInline (b:B.buffer a)
+  ST.StackInline (B.buffer a)
     (requires (fun h ->
       HS.is_stack_region (HS.get_tip h)))
     (ensures (fun h0 s h1 ->
