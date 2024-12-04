@@ -76,7 +76,8 @@ let impl_of_state_s (#a: G.erased impl) (s: state_s a): i:impl { i == G.reveal a
 
 let _: squash (inversion impl) = allow_inversion impl
 
-let impl_of_impl (i: impl): Hacl.Hash.Definitions.impl =
+// Forcing the result type to be GTot since we can't represent D.impl in Low*
+let impl_of_impl (i: impl): GTot Hacl.Hash.Definitions.impl =
   match i with
   | MD5 -> (| H.MD5, () |)
   | SHA1 -> (| H.SHA1, () |)
@@ -138,8 +139,6 @@ let frame_invariant #a l s h0 h1 =
   let state = B.deref h0 s in
   assert (repr_eq (repr s h0) (repr s h1))
 
-inline_for_extraction noextract
-[@@strict_on_arguments [0]]
 let alloca a =
   let open Hacl.Impl.Blake2.Core in
   let s: state_s a =
@@ -158,20 +157,19 @@ let alloca a =
         Blake2S_s (B.alloca 0ul 16ul)
     | Blake2S_128 _ ->
         if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-          Blake2S_128_s () (B.alloca (zero_element Spec.Blake2.Blake2S M128) (impl_state_len (impl_of_impl a)))
+          Blake2S_128_s () (B.alloca (zero_element Spec.Blake2.Blake2S M128) (impl_state_len (| Blake2S, M128 |)))
         else
           false_elim ()
     | Blake2B_32 ->
         Blake2B_s (B.alloca 0uL 16ul)
     | Blake2B_256 _ ->
         if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-          Blake2B_256_s () (B.alloca (zero_element Spec.Blake2.Blake2B M256) (impl_state_len (impl_of_impl a)))
+          Blake2B_256_s () (B.alloca (zero_element Spec.Blake2.Blake2B M256) (impl_state_len (| Blake2B, M256 |)))
         else
           false_elim ()
   in
   B.alloca s 1ul
 
-[@@strict_on_arguments [0]]
 let create_in a r =
   let h0 = ST.get () in
   let s: state_s a =

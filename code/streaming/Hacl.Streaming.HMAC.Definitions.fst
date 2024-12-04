@@ -85,13 +85,19 @@ let wrap_key_st (a: Spec.Agile.Hash.fixed_len_alg) =
       B.(modifies (loc_buffer output) h0 h1) /\
       B.as_seq h1 output == Spec.Agile.HMAC.wrap a (B.as_seq h0 key))
 
+// TODO: copy-paste from Hacl.HMAC, but does not rely on inline_for_extraction helpers (which generates poor code)
+inline_for_extraction
+let helper_smtpat (a: Spec.Agile.Hash.fixed_len_alg) (len: UInt32.t{ UInt32.v len `Spec.Agile.Hash.less_than_max_input_length` a }):
+  x:UInt32.t { x `FStar.UInt32.lte` D.block_len a } =
+  if len `FStar.UInt32.lte` block_len a then len else hash_len a
+
 // TODO: copy-paste from Hacl.HMAC, but calling impl-agile hash
 let wrap_key (impl: impl): wrap_key_st (alg_of_impl impl) =
 fun output key len ->
   [@inline_let]
   let a = alg_of_impl impl in
   [@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
-  let i = Hacl.HMAC.helper_smtpat a len in
+  let i = helper_smtpat a len in
   let nkey = B.sub output 0ul i in
   let zeroes = B.sub output i (block_len a `FStar.UInt32.sub` i) in
   (**) assert B.(loc_disjoint (loc_buffer nkey) (loc_buffer zeroes));

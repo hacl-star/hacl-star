@@ -25,6 +25,7 @@
 
 #include "internal/Hacl_Streaming_HMAC.h"
 
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA3.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
@@ -573,6 +574,271 @@ update_multi(Hacl_Agile_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint
   KRML_HOST_EXIT(255U);
 }
 
+static void
+update_last(Hacl_Agile_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_t last_len)
+{
+  Hacl_Agile_Hash_state_s scrut = *s;
+  if (scrut.tag == MD5_s)
+  {
+    uint32_t *p1 = scrut.case_MD5_s;
+    Hacl_Hash_MD5_update_last(p1, prev_len, last, last_len);
+    return;
+  }
+  if (scrut.tag == SHA1_s)
+  {
+    uint32_t *p1 = scrut.case_SHA1_s;
+    Hacl_Hash_SHA1_update_last(p1, prev_len, last, last_len);
+    return;
+  }
+  if (scrut.tag == SHA2_224_s)
+  {
+    uint32_t *p1 = scrut.case_SHA2_224_s;
+    Hacl_Hash_SHA2_sha224_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
+    return;
+  }
+  if (scrut.tag == SHA2_256_s)
+  {
+    uint32_t *p1 = scrut.case_SHA2_256_s;
+    Hacl_Hash_SHA2_sha256_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
+    return;
+  }
+  if (scrut.tag == SHA2_384_s)
+  {
+    uint64_t *p1 = scrut.case_SHA2_384_s;
+    Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(prev_len),
+        FStar_UInt128_uint64_to_uint128((uint64_t)last_len)),
+      last_len,
+      last,
+      p1);
+    return;
+  }
+  if (scrut.tag == SHA2_512_s)
+  {
+    uint64_t *p1 = scrut.case_SHA2_512_s;
+    Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(prev_len),
+        FStar_UInt128_uint64_to_uint128((uint64_t)last_len)),
+      last_len,
+      last,
+      p1);
+    return;
+  }
+  if (scrut.tag == SHA3_224_s)
+  {
+    uint64_t *p1 = scrut.case_SHA3_224_s;
+    Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_224, p1, last, last_len);
+    return;
+  }
+  if (scrut.tag == SHA3_256_s)
+  {
+    uint64_t *p1 = scrut.case_SHA3_256_s;
+    Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_256, p1, last, last_len);
+    return;
+  }
+  if (scrut.tag == SHA3_384_s)
+  {
+    uint64_t *p1 = scrut.case_SHA3_384_s;
+    Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_384, p1, last, last_len);
+    return;
+  }
+  if (scrut.tag == SHA3_512_s)
+  {
+    uint64_t *p1 = scrut.case_SHA3_512_s;
+    Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_512, p1, last, last_len);
+    return;
+  }
+  if (scrut.tag == Blake2S_s)
+  {
+    uint32_t *p1 = scrut.case_Blake2S_s;
+    uint32_t wv[16U] = { 0U };
+    Hacl_Hash_Blake2s_update_last(last_len, wv, p1, false, prev_len, last_len, last);
+    return;
+  }
+  if (scrut.tag == Blake2S_128_s)
+  {
+    Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
+    #if HACL_CAN_COMPILE_VEC128
+    KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
+    Hacl_Hash_Blake2s_Simd128_update_last(last_len, wv, p1, false, prev_len, last_len, last);
+    return;
+    #else
+    KRML_MAYBE_UNUSED_VAR(p1);
+    return;
+    #endif
+  }
+  if (scrut.tag == Blake2B_s)
+  {
+    uint64_t *p1 = scrut.case_Blake2B_s;
+    uint64_t wv[16U] = { 0U };
+    Hacl_Hash_Blake2b_update_last(last_len,
+      wv,
+      p1,
+      false,
+      FStar_UInt128_uint64_to_uint128(prev_len),
+      last_len,
+      last);
+    return;
+  }
+  if (scrut.tag == Blake2B_256_s)
+  {
+    Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
+    #if HACL_CAN_COMPILE_VEC256
+    KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv[4U] KRML_POST_ALIGN(32) = { 0U };
+    Hacl_Hash_Blake2b_Simd256_update_last(last_len,
+      wv,
+      p1,
+      false,
+      FStar_UInt128_uint64_to_uint128(prev_len),
+      last_len,
+      last);
+    return;
+    #else
+    KRML_MAYBE_UNUSED_VAR(p1);
+    return;
+    #endif
+  }
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
+}
+
+static void finish(Hacl_Agile_Hash_state_s *s, uint8_t *dst)
+{
+  Hacl_Agile_Hash_state_s scrut = *s;
+  if (scrut.tag == MD5_s)
+  {
+    uint32_t *p1 = scrut.case_MD5_s;
+    Hacl_Hash_MD5_finish(p1, dst);
+    return;
+  }
+  if (scrut.tag == SHA1_s)
+  {
+    uint32_t *p1 = scrut.case_SHA1_s;
+    Hacl_Hash_SHA1_finish(p1, dst);
+    return;
+  }
+  if (scrut.tag == SHA2_224_s)
+  {
+    uint32_t *p1 = scrut.case_SHA2_224_s;
+    Hacl_Hash_SHA2_sha224_finish(p1, dst);
+    return;
+  }
+  if (scrut.tag == SHA2_256_s)
+  {
+    uint32_t *p1 = scrut.case_SHA2_256_s;
+    Hacl_Hash_SHA2_sha256_finish(p1, dst);
+    return;
+  }
+  if (scrut.tag == SHA2_384_s)
+  {
+    uint64_t *p1 = scrut.case_SHA2_384_s;
+    Hacl_Hash_SHA2_sha384_finish(p1, dst);
+    return;
+  }
+  if (scrut.tag == SHA2_512_s)
+  {
+    uint64_t *p1 = scrut.case_SHA2_512_s;
+    Hacl_Hash_SHA2_sha512_finish(p1, dst);
+    return;
+  }
+  if (scrut.tag == SHA3_224_s)
+  {
+    uint64_t *p1 = scrut.case_SHA3_224_s;
+    uint32_t remOut = 28U;
+    uint8_t hbuf[256U] = { 0U };
+    uint64_t ws[32U] = { 0U };
+    memcpy(ws, p1, 25U * sizeof (uint64_t));
+    for (uint32_t i = 0U; i < 32U; i++)
+    {
+      store64_le(hbuf + i * 8U, ws[i]);
+    }
+    memcpy(dst + 28U - remOut, hbuf, remOut * sizeof (uint8_t));
+    return;
+  }
+  if (scrut.tag == SHA3_256_s)
+  {
+    uint64_t *p1 = scrut.case_SHA3_256_s;
+    uint32_t remOut = 32U;
+    uint8_t hbuf[256U] = { 0U };
+    uint64_t ws[32U] = { 0U };
+    memcpy(ws, p1, 25U * sizeof (uint64_t));
+    for (uint32_t i = 0U; i < 32U; i++)
+    {
+      store64_le(hbuf + i * 8U, ws[i]);
+    }
+    memcpy(dst + 32U - remOut, hbuf, remOut * sizeof (uint8_t));
+    return;
+  }
+  if (scrut.tag == SHA3_384_s)
+  {
+    uint64_t *p1 = scrut.case_SHA3_384_s;
+    uint32_t remOut = 48U;
+    uint8_t hbuf[256U] = { 0U };
+    uint64_t ws[32U] = { 0U };
+    memcpy(ws, p1, 25U * sizeof (uint64_t));
+    for (uint32_t i = 0U; i < 32U; i++)
+    {
+      store64_le(hbuf + i * 8U, ws[i]);
+    }
+    memcpy(dst + 48U - remOut, hbuf, remOut * sizeof (uint8_t));
+    return;
+  }
+  if (scrut.tag == SHA3_512_s)
+  {
+    uint64_t *p1 = scrut.case_SHA3_512_s;
+    uint32_t remOut = 64U;
+    uint8_t hbuf[256U] = { 0U };
+    uint64_t ws[32U] = { 0U };
+    memcpy(ws, p1, 25U * sizeof (uint64_t));
+    for (uint32_t i = 0U; i < 32U; i++)
+    {
+      store64_le(hbuf + i * 8U, ws[i]);
+    }
+    memcpy(dst + 64U - remOut, hbuf, remOut * sizeof (uint8_t));
+    return;
+  }
+  if (scrut.tag == Blake2S_s)
+  {
+    uint32_t *p1 = scrut.case_Blake2S_s;
+    Hacl_Hash_Blake2s_finish(32U, dst, p1);
+    return;
+  }
+  if (scrut.tag == Blake2S_128_s)
+  {
+    Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
+    #if HACL_CAN_COMPILE_VEC128
+    Hacl_Hash_Blake2s_Simd128_finish(32U, dst, p1);
+    return;
+    #else
+    KRML_MAYBE_UNUSED_VAR(p1);
+    return;
+    #endif
+  }
+  if (scrut.tag == Blake2B_s)
+  {
+    uint64_t *p1 = scrut.case_Blake2B_s;
+    Hacl_Hash_Blake2b_finish(64U, dst, p1);
+    return;
+  }
+  if (scrut.tag == Blake2B_256_s)
+  {
+    Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
+    #if HACL_CAN_COMPILE_VEC256
+    Hacl_Hash_Blake2b_Simd256_finish(64U, dst, p1);
+    return;
+    #else
+    KRML_MAYBE_UNUSED_VAR(p1);
+    return;
+    #endif
+  }
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
+}
+
 static void free_(Hacl_Agile_Hash_state_s *s)
 {
   Hacl_Agile_Hash_state_s scrut = *s;
@@ -657,6 +923,244 @@ static void free_(Hacl_Agile_Hash_state_s *s)
   KRML_HOST_FREE(s);
 }
 
+static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
+{
+  Hacl_Agile_Hash_state_s scrut = *s_src;
+  if (scrut.tag == MD5_s)
+  {
+    uint32_t *p_src = scrut.case_MD5_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint32_t *p_dst;
+    if (x1.tag == MD5_s)
+    {
+      p_dst = x1.case_MD5_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 4U * sizeof (uint32_t));
+    return;
+  }
+  if (scrut.tag == SHA1_s)
+  {
+    uint32_t *p_src = scrut.case_SHA1_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint32_t *p_dst;
+    if (x1.tag == SHA1_s)
+    {
+      p_dst = x1.case_SHA1_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 5U * sizeof (uint32_t));
+    return;
+  }
+  if (scrut.tag == SHA2_224_s)
+  {
+    uint32_t *p_src = scrut.case_SHA2_224_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint32_t *p_dst;
+    if (x1.tag == SHA2_224_s)
+    {
+      p_dst = x1.case_SHA2_224_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 8U * sizeof (uint32_t));
+    return;
+  }
+  if (scrut.tag == SHA2_256_s)
+  {
+    uint32_t *p_src = scrut.case_SHA2_256_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint32_t *p_dst;
+    if (x1.tag == SHA2_256_s)
+    {
+      p_dst = x1.case_SHA2_256_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 8U * sizeof (uint32_t));
+    return;
+  }
+  if (scrut.tag == SHA2_384_s)
+  {
+    uint64_t *p_src = scrut.case_SHA2_384_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint64_t *p_dst;
+    if (x1.tag == SHA2_384_s)
+    {
+      p_dst = x1.case_SHA2_384_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 8U * sizeof (uint64_t));
+    return;
+  }
+  if (scrut.tag == SHA2_512_s)
+  {
+    uint64_t *p_src = scrut.case_SHA2_512_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint64_t *p_dst;
+    if (x1.tag == SHA2_512_s)
+    {
+      p_dst = x1.case_SHA2_512_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 8U * sizeof (uint64_t));
+    return;
+  }
+  if (scrut.tag == SHA3_224_s)
+  {
+    uint64_t *p_src = scrut.case_SHA3_224_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint64_t *p_dst;
+    if (x1.tag == SHA3_224_s)
+    {
+      p_dst = x1.case_SHA3_224_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 25U * sizeof (uint64_t));
+    return;
+  }
+  if (scrut.tag == SHA3_256_s)
+  {
+    uint64_t *p_src = scrut.case_SHA3_256_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint64_t *p_dst;
+    if (x1.tag == SHA3_256_s)
+    {
+      p_dst = x1.case_SHA3_256_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 25U * sizeof (uint64_t));
+    return;
+  }
+  if (scrut.tag == SHA3_384_s)
+  {
+    uint64_t *p_src = scrut.case_SHA3_384_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint64_t *p_dst;
+    if (x1.tag == SHA3_384_s)
+    {
+      p_dst = x1.case_SHA3_384_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 25U * sizeof (uint64_t));
+    return;
+  }
+  if (scrut.tag == SHA3_512_s)
+  {
+    uint64_t *p_src = scrut.case_SHA3_512_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint64_t *p_dst;
+    if (x1.tag == SHA3_512_s)
+    {
+      p_dst = x1.case_SHA3_512_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 25U * sizeof (uint64_t));
+    return;
+  }
+  if (scrut.tag == Blake2S_s)
+  {
+    uint32_t *p_src = scrut.case_Blake2S_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint32_t *p_dst;
+    if (x1.tag == Blake2S_s)
+    {
+      p_dst = x1.case_Blake2S_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 16U * sizeof (uint32_t));
+    return;
+  }
+  if (scrut.tag == Blake2S_128_s)
+  {
+    Lib_IntVector_Intrinsics_vec128 *p_src = scrut.case_Blake2S_128_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    Lib_IntVector_Intrinsics_vec128 *p_dst;
+    if (x1.tag == Blake2S_128_s)
+    {
+      p_dst = x1.case_Blake2S_128_s;
+    }
+    else
+    {
+      p_dst =
+        KRML_EABORT(Lib_IntVector_Intrinsics_vec128 *,
+          "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+    return;
+  }
+  if (scrut.tag == Blake2B_s)
+  {
+    uint64_t *p_src = scrut.case_Blake2B_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    uint64_t *p_dst;
+    if (x1.tag == Blake2B_s)
+    {
+      p_dst = x1.case_Blake2B_s;
+    }
+    else
+    {
+      p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 16U * sizeof (uint64_t));
+    return;
+  }
+  if (scrut.tag == Blake2B_256_s)
+  {
+    Lib_IntVector_Intrinsics_vec256 *p_src = scrut.case_Blake2B_256_s;
+    Hacl_Agile_Hash_state_s x1 = *s_dst;
+    Lib_IntVector_Intrinsics_vec256 *p_dst;
+    if (x1.tag == Blake2B_256_s)
+    {
+      p_dst = x1.case_Blake2B_256_s;
+    }
+    else
+    {
+      p_dst =
+        KRML_EABORT(Lib_IntVector_Intrinsics_vec256 *,
+          "unreachable (pattern matches are exhaustive in F*)");
+    }
+    memcpy(p_dst, p_src, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+    return;
+  }
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
+}
+
 static void hash(Hacl_Agile_Hash_impl i, uint8_t *dst, uint8_t *input, uint32_t input_len)
 {
   switch (i)
@@ -734,6 +1238,66 @@ static void hash(Hacl_Agile_Hash_impl i, uint8_t *dst, uint8_t *input, uint32_t 
         Hacl_Hash_Blake2b_Simd256_hash_with_key(dst, 64U, input, input_len, NULL, 0U);
         #endif
         break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+static uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return 16U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return 20U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return 28U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return 32U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return 48U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return 64U;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return 32U;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        return 64U;
+      }
+    case Spec_Hash_Definitions_SHA3_224:
+      {
+        return 28U;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return 32U;
+      }
+    case Spec_Hash_Definitions_SHA3_384:
+      {
+        return 48U;
+      }
+    case Spec_Hash_Definitions_SHA3_512:
+      {
+        return 64U;
       }
     default:
       {
@@ -891,160 +1455,14 @@ index_of_state(Hacl_Agile_Hash_state_s *s, Hacl_Streaming_HMAC_Definitions_key_a
 static void wrap_key(Hacl_Agile_Hash_impl impl, uint8_t *output, uint8_t *key, uint32_t len)
 {
   uint8_t *nkey = output;
-  uint32_t sw;
-  switch (alg_of_impl(impl))
-  {
-    case Spec_Hash_Definitions_MD5:
-      {
-        sw = 64U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA1:
-      {
-        sw = 64U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        sw = 64U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        sw = 64U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        sw = 128U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        sw = 128U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_224:
-      {
-        sw = 144U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        sw = 136U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_384:
-      {
-        sw = 104U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_512:
-      {
-        sw = 72U;
-        break;
-      }
-    case Spec_Hash_Definitions_Shake128:
-      {
-        sw = 168U;
-        break;
-      }
-    case Spec_Hash_Definitions_Shake256:
-      {
-        sw = 136U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        sw = 64U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        sw = 128U;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
   uint32_t ite;
-  if (len <= sw)
+  if (len <= block_len(alg_of_impl(impl)))
   {
     ite = len;
   }
   else
   {
-    switch (alg_of_impl(impl))
-    {
-      case Spec_Hash_Definitions_MD5:
-        {
-          ite = 16U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA1:
-        {
-          ite = 20U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA2_224:
-        {
-          ite = 28U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA2_256:
-        {
-          ite = 32U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA2_384:
-        {
-          ite = 48U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA2_512:
-        {
-          ite = 64U;
-          break;
-        }
-      case Spec_Hash_Definitions_Blake2S:
-        {
-          ite = 32U;
-          break;
-        }
-      case Spec_Hash_Definitions_Blake2B:
-        {
-          ite = 64U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA3_224:
-        {
-          ite = 28U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA3_256:
-        {
-          ite = 32U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA3_384:
-        {
-          ite = 48U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA3_512:
-        {
-          ite = 64U;
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
-    }
+    ite = hash_len(alg_of_impl(impl));
   }
   uint8_t *zeroes = output + ite;
   KRML_MAYBE_UNUSED_VAR(zeroes);
@@ -1080,6 +1498,35 @@ init0(Hacl_Streaming_HMAC_Definitions_key_and_len k, uint8_t *buf, Hacl_Agile_Ha
     uint8_t yi = block[i];
     buf[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
+}
+
+static void
+finish0(
+  Hacl_Streaming_HMAC_Definitions_key_and_len k,
+  Hacl_Agile_Hash_state_s *s,
+  uint8_t *dst
+)
+{
+  Hacl_Agile_Hash_impl i1 = impl_of_state(s);
+  Spec_Hash_Definitions_hash_alg a = alg_of_impl(i1);
+  uint8_t *k1 = k.fst;
+  uint32_t k_len = k.snd;
+  uint8_t b0[168U] = { 0U };
+  uint8_t *wrapped_key = b0;
+  wrap_key(i1, wrapped_key, k1, k_len);
+  uint8_t b[232U];
+  memset(b, 0x5cU, 232U * sizeof (uint8_t));
+  uint8_t *opad_and_tmp_hash = b;
+  uint8_t *opad = opad_and_tmp_hash;
+  for (uint32_t i = 0U; i < block_len(a); i++)
+  {
+    uint8_t xi = opad[i];
+    uint8_t yi = wrapped_key[i];
+    opad[i] = (uint32_t)xi ^ (uint32_t)yi;
+  }
+  uint8_t *tmp_hash = opad_and_tmp_hash + block_len(a);
+  finish(s, tmp_hash);
+  hash(i1, dst, opad_and_tmp_hash, block_len(a) + hash_len(a));
 }
 
 static Hacl_Agile_Hash_impl
@@ -1526,6 +1973,158 @@ Hacl_Streaming_HMAC_update(
       );
   }
   return Hacl_Streaming_Types_Success;
+}
+
+void
+Hacl_Streaming_HMAC_digest(Hacl_Streaming_HMAC_agile_state *state, uint8_t *output, uint32_t l)
+{
+  KRML_MAYBE_UNUSED_VAR(l);
+  Hacl_Streaming_HMAC_agile_state scrut0 = *state;
+  Hacl_Streaming_HMAC_Definitions_key_and_len k = scrut0.p_key;
+  Hacl_Agile_Hash_state_s *block_state0 = scrut0.block_state;
+  Hacl_Streaming_HMAC_Definitions_index i1 = index_of_state(block_state0, k);
+  Hacl_Streaming_HMAC_agile_state scrut = *state;
+  Hacl_Agile_Hash_state_s *block_state = scrut.block_state;
+  uint8_t *buf_ = scrut.buf;
+  uint64_t total_len = scrut.total_len;
+  Hacl_Streaming_HMAC_Definitions_key_and_len k_ = scrut.p_key;
+  uint32_t r;
+  if
+  (
+    total_len
+    % (uint64_t)block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1)))
+    == 0ULL
+    && total_len > 0ULL
+  )
+  {
+    r = block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1)));
+  }
+  else
+  {
+    r =
+      (uint32_t)(total_len
+      % (uint64_t)block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))));
+  }
+  uint8_t *buf_1 = buf_;
+  Hacl_Agile_Hash_state_s s;
+  uint32_t buf0[4U] = { 0U };
+  uint32_t buf1[5U] = { 0U };
+  uint32_t buf2[8U] = { 0U };
+  uint32_t buf3[8U] = { 0U };
+  uint64_t buf4[8U] = { 0U };
+  uint64_t buf5[8U] = { 0U };
+  uint64_t buf6[25U] = { 0U };
+  uint64_t buf7[25U] = { 0U };
+  uint64_t buf8[25U] = { 0U };
+  uint64_t buf9[25U] = { 0U };
+  uint32_t buf10[16U] = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 buf11[4U] KRML_POST_ALIGN(16) = { 0U };
+  uint64_t buf12[16U] = { 0U };
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 buf[4U] KRML_POST_ALIGN(32) = { 0U };
+  switch (dfst__Hacl_Agile_Hash_impl_uint32_t(i1))
+  {
+    case Hacl_Agile_Hash_MD5:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = buf0 } });
+        break;
+      }
+    case Hacl_Agile_Hash_SHA1:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = buf1 } });
+        break;
+      }
+    case Hacl_Agile_Hash_SHA2_224:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = buf2 } });
+        break;
+      }
+    case Hacl_Agile_Hash_SHA2_256:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = buf3 } });
+        break;
+      }
+    case Hacl_Agile_Hash_SHA2_384:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = buf4 } });
+        break;
+      }
+    case Hacl_Agile_Hash_SHA2_512:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = buf5 } });
+        break;
+      }
+    case Hacl_Agile_Hash_SHA3_224:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = buf6 } });
+        break;
+      }
+    case Hacl_Agile_Hash_SHA3_256:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = buf7 } });
+        break;
+      }
+    case Hacl_Agile_Hash_SHA3_384:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = buf8 } });
+        break;
+      }
+    case Hacl_Agile_Hash_SHA3_512:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = buf9 } });
+        break;
+      }
+    case Hacl_Agile_Hash_Blake2S_32:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = buf10 } });
+        break;
+      }
+    case Hacl_Agile_Hash_Blake2S_128:
+      {
+        #if HACL_CAN_COMPILE_VEC128
+        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_128_s, { .case_Blake2S_128_s = buf11 } });
+        #else
+        s = FStar_Pervasives_false_elim__Hacl_Agile_Hash_state_s();
+        #endif
+        break;
+      }
+    case Hacl_Agile_Hash_Blake2B_32:
+      {
+        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = buf12 } });
+        break;
+      }
+    case Hacl_Agile_Hash_Blake2B_256:
+      {
+        #if HACL_CAN_COMPILE_VEC256
+        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_256_s, { .case_Blake2B_256_s = buf } });
+        #else
+        s = FStar_Pervasives_false_elim__Hacl_Agile_Hash_state_s();
+        #endif
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  Hacl_Agile_Hash_state_s tmp_block_state = s;
+  copy(block_state, &tmp_block_state);
+  uint64_t prev_len = total_len - (uint64_t)r;
+  uint32_t ite;
+  if (r % block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))) == 0U && r > 0U)
+  {
+    ite = block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1)));
+  }
+  else
+  {
+    ite = r % block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1)));
+  }
+  uint8_t *buf_last = buf_1 + r - ite;
+  uint8_t *buf_multi = buf_1;
+  update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
+  uint64_t prev_len_last = total_len - (uint64_t)r;
+  update_last(&tmp_block_state, prev_len_last, buf_last, r);
+  finish0(k_, &tmp_block_state, output);
 }
 
 void Hacl_Streaming_HMAC_free(Hacl_Streaming_HMAC_agile_state *state)

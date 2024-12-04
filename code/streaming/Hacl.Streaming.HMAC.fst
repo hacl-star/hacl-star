@@ -209,5 +209,5 @@ let reset i state key key_length =
   end
 
 let update (i: G.erased index) = F.update hmac i (stateful_agile_hash_state.s i) (state i)
-let digest (i: G.erased index) = F.digest hmac i (stateful_agile_hash_state.s i) (state i)
+let digest (i: G.erased index) = F.digest_erased hmac i (stateful_agile_hash_state.s i) (state i)
 let free (i: G.erased index) = F.free hmac i (stateful_agile_hash_state.s i) (state i)
