@@ -23,7 +23,7 @@
  */
 
 
-#include "internal/Hacl_Streaming_HMAC.h"
+#include "Hacl_Streaming_HMAC.h"
 
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA3.h"
@@ -213,11 +213,6 @@ static Hacl_Agile_Hash_impl impl_of_state(Hacl_Agile_Hash_state_s *s)
   return impl_of_state_s(*s);
 }
 
-Hacl_Agile_Hash_state_s FStar_Pervasives_false_elim__Hacl_Agile_Hash_state_s(void)
-{
-  return FStar_Pervasives_false_elim__Hacl_Agile_Hash_state_s();
-}
-
 static Hacl_Agile_Hash_state_s *create_in(Hacl_Agile_Hash_impl a)
 {
   Hacl_Agile_Hash_state_s s;
@@ -300,7 +295,9 @@ static Hacl_Agile_Hash_state_s *create_in(Hacl_Agile_Hash_impl a)
             }
           );
         #else
-        s = FStar_Pervasives_false_elim__Hacl_Agile_Hash_state_s();
+        s =
+          KRML_EABORT(Hacl_Agile_Hash_state_s,
+            "provably unreachable code: did an unverified caller violate a precondition\?");
         #endif
         break;
       }
@@ -321,7 +318,9 @@ static Hacl_Agile_Hash_state_s *create_in(Hacl_Agile_Hash_impl a)
             }
           );
         #else
-        s = FStar_Pervasives_false_elim__Hacl_Agile_Hash_state_s();
+        s =
+          KRML_EABORT(Hacl_Agile_Hash_state_s,
+            "provably unreachable code: did an unverified caller violate a precondition\?");
         #endif
         break;
       }
@@ -2083,7 +2082,9 @@ Hacl_Streaming_HMAC_digest(Hacl_Streaming_HMAC_agile_state *state, uint8_t *outp
         #if HACL_CAN_COMPILE_VEC128
         s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_128_s, { .case_Blake2S_128_s = buf11 } });
         #else
-        s = FStar_Pervasives_false_elim__Hacl_Agile_Hash_state_s();
+        s =
+          KRML_EABORT(Hacl_Agile_Hash_state_s,
+            "provably unreachable code: did an unverified caller violate a precondition\?");
         #endif
         break;
       }
@@ -2097,7 +2098,9 @@ Hacl_Streaming_HMAC_digest(Hacl_Streaming_HMAC_agile_state *state, uint8_t *outp
         #if HACL_CAN_COMPILE_VEC256
         s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_256_s, { .case_Blake2B_256_s = buf } });
         #else
-        s = FStar_Pervasives_false_elim__Hacl_Agile_Hash_state_s();
+        s =
+          KRML_EABORT(Hacl_Agile_Hash_state_s,
+            "provably unreachable code: did an unverified caller violate a precondition\?");
         #endif
         break;
       }
