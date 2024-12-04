@@ -63,6 +63,13 @@ typedef uint8_t Hacl_Agile_Hash_impl;
 
 typedef struct Hacl_Agile_Hash_state_s_s Hacl_Agile_Hash_state_s;
 
+typedef struct Hacl_Streaming_HMAC_Definitions_index_s
+{
+  Hacl_Agile_Hash_impl fst;
+  uint32_t snd;
+}
+Hacl_Streaming_HMAC_Definitions_index;
+
 typedef struct Hacl_Streaming_HMAC_Definitions_key_and_len_s
 {
   uint8_t *fst;
@@ -82,10 +89,14 @@ Hacl_Streaming_HMAC_agile_state;
 Hacl_Streaming_HMAC_agile_state
 *Hacl_Streaming_HMAC_malloc(Hacl_Agile_Hash_impl impl, uint8_t *key, uint32_t key_length);
 
-void
+Hacl_Streaming_HMAC_Definitions_index
+Hacl_Streaming_HMAC_get_impl(Hacl_Streaming_HMAC_agile_state *s);
+
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_HMAC_reset(
   Hacl_Streaming_HMAC_agile_state *state,
-  Hacl_Streaming_HMAC_Definitions_key_and_len key
+  uint8_t *key,
+  uint32_t key_length
 );
 
 Hacl_Streaming_Types_error_code

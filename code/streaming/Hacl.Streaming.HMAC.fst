@@ -158,8 +158,56 @@ let malloc impl key key_length r =
   else
     malloc_internal (| impl, key_length |) (mk key key_length) r
 
+inline_for_extraction noextract
+let mk' (#i: index) (k:B.buffer uint8) (k_len:key_length (dfst i) { k_len == B.len k /\ k_len == dsnd i }): hmac.key.s i =
+  k, k_len
 
-let reset (i: G.erased index) = F.reset hmac i (stateful_agile_hash_state.s i) (state i)
+val reset:
+  i: G.erased index -> (
+  let c = hmac in
+  let i = G.reveal i in
+  let t = Hacl.Agile.Hash.state (dfst i) in
+  let t' = state i in
+  let open F in
+  state:state c i t t' ->
+  k:B.buffer uint8 ->
+  k_len:key_length (dfst i) { k_len == B.len k } ->
+  Stack Hacl.Streaming.Types.error_code
+  (requires (fun h0 ->
+    invariant c i h0 state /\ (
+    k_len == dsnd i ==> (
+    let key = mk' #i k k_len in
+    c.key.invariant #i h0 key /\
+    B.loc_disjoint (c.key.footprint #i h0 key) (footprint c i h0 state)))))
+  (ensures (fun h0 r h1 ->
+    let open Hacl.Streaming.Types in
+    match r with
+    | InvalidLength -> k_len <> dsnd i
+    | Success ->
+        k_len == dsnd i /\ (
+        let key = mk k k_len in
+        invariant c i h1 state /\
+        seen c i h1 state == S.empty /\
+        reveal_key c i h1 state == c.key.v i h0 key /\
+        footprint c i h0 state == footprint c i h1 state /\
+        B.(modifies (footprint c i h0 state) h0 h1) /\
+        preserves_freeable c i state h0 h1)
+    | _ -> False)))
+
+let get_impl (i: G.erased index) = F.index_of_state hmac i (stateful_agile_hash_state.s i) (state i)
+
+private
+let reset_internal (i: G.erased index) = F.reset hmac i (stateful_agile_hash_state.s i) (state i)
+
+let reset i state key key_length =
+  let (| _, k_len |) = get_impl i state in
+  if key_length <> k_len then
+    Hacl.Streaming.Types.InvalidLength
+  else begin
+    reset_internal i state (key, key_length);
+    Hacl.Streaming.Types.Success
+  end
+
 let update (i: G.erased index) = F.update hmac i (stateful_agile_hash_state.s i) (state i)
 let digest (i: G.erased index) = F.digest hmac i (stateful_agile_hash_state.s i) (state i)
 let free (i: G.erased index) = F.free hmac i (stateful_agile_hash_state.s i) (state i)

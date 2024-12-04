@@ -1212,8 +1212,17 @@ Hacl_Streaming_HMAC_agile_state
       ((Hacl_Streaming_HMAC_Definitions_key_and_len){ .fst = key, .snd = key_length }));
 }
 
-void
-Hacl_Streaming_HMAC_reset(
+Hacl_Streaming_HMAC_Definitions_index
+Hacl_Streaming_HMAC_get_impl(Hacl_Streaming_HMAC_agile_state *s)
+{
+  Hacl_Streaming_HMAC_agile_state scrut = *s;
+  Hacl_Streaming_HMAC_Definitions_key_and_len k = scrut.p_key;
+  Hacl_Agile_Hash_state_s *block_state = scrut.block_state;
+  return index_of_state(block_state, k);
+}
+
+static void
+reset_internal(
   Hacl_Streaming_HMAC_agile_state *state,
   Hacl_Streaming_HMAC_Definitions_key_and_len key
 )
@@ -1242,6 +1251,23 @@ Hacl_Streaming_HMAC_reset(
       .p_key = k_1
     };
   state[0U] = tmp;
+}
+
+Hacl_Streaming_Types_error_code
+Hacl_Streaming_HMAC_reset(
+  Hacl_Streaming_HMAC_agile_state *state,
+  uint8_t *key,
+  uint32_t key_length
+)
+{
+  uint32_t k_len = Hacl_Streaming_HMAC_get_impl(state).snd;
+  if (key_length != k_len)
+  {
+    return Hacl_Streaming_Types_InvalidLength;
+  }
+  reset_internal(state,
+    ((Hacl_Streaming_HMAC_Definitions_key_and_len){ .fst = key, .snd = key_length }));
+  return Hacl_Streaming_Types_Success;
 }
 
 Hacl_Streaming_Types_error_code
