@@ -47,6 +47,13 @@ extern "C" {
 
 Hacl_Agile_Hash_state_s FStar_Pervasives_false_elim__Hacl_Agile_Hash_state_s(void);
 
+typedef struct Hacl_Streaming_HMAC_Definitions_index_s
+{
+  Hacl_Agile_Hash_impl fst;
+  uint32_t snd;
+}
+Hacl_Streaming_HMAC_Definitions_index;
+
 #if defined(__cplusplus)
 }
 #endif

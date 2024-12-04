@@ -109,7 +109,56 @@ let agile_state i = F.state_s hmac i (stateful_agile_hash_state.s i) (state i)
 inline_for_extraction noextract
 let alloca i = F.alloca hmac i (stateful_agile_hash_state.s i) (state i)
 
-let malloc i = F.malloc hmac i (stateful_agile_hash_state.s i) (state i)
+private
+let malloc_internal i = F.malloc hmac i (stateful_agile_hash_state.s i) (state i)
+
+inline_for_extraction noextract
+let mk #impl (k:B.buffer uint8) (k_len:key_length impl { k_len == B.len k }): key_and_len (| impl, k_len |) =
+  k, k_len
+
+[@ Comment "This function returns NULL if the user requests a choice of
+implementation that has not been enabled at build-time (e.g. Blake2b_256 on an
+ARM machine)." ]
+val malloc:
+  impl:impl -> k:B.buffer uint8 -> k_len:key_length impl { k_len == B.len k } -> (
+  let c = hmac in
+  let i = (| impl, k_len |) in
+  let k = mk #impl k k_len in
+  let t = Hacl.Agile.Hash.state impl in
+  let t' = state i in
+  let open F in
+  r:HS.rid ->
+  ST (B.buffer (state_s c i t t'))
+  (requires (fun h0 ->
+    c.key.invariant #i h0 k /\
+    HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    if B.g_is_null s then
+      h0 == h1
+    else
+      B.length s == 1 /\
+      invariant c i h1 s /\
+      freeable c i h1 s /\
+      seen c i h1 s == S.empty /\
+      reveal_key c i h1 s == c.key.v i h0 k /\
+      B.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint c i h1 s) h0 h1 /\
+      B.(loc_includes (loc_region_only true r) (footprint c i h1 s)))))
+
+private
+let is_blake2b_256 = function Blake2B_256 _ -> true | _ -> false
+private
+let is_blake2s_128 = function Blake2S_128 _ -> true | _ -> false
+
+let malloc impl key key_length r =
+  if not EverCrypt.TargetConfig.hacl_can_compile_vec256 && is_blake2b_256 impl then
+    B.null
+  else if not EverCrypt.TargetConfig.hacl_can_compile_vec128 && is_blake2s_128 impl then
+    B.null
+  else
+    malloc_internal (| impl, key_length |) (mk key key_length) r
+
+
 let reset (i: G.erased index) = F.reset hmac i (stateful_agile_hash_state.s i) (state i)
 let update (i: G.erased index) = F.update hmac i (stateful_agile_hash_state.s i) (state i)
 let digest (i: G.erased index) = F.digest hmac i (stateful_agile_hash_state.s i) (state i)

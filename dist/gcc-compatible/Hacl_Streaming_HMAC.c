@@ -1109,8 +1109,8 @@ static uint32_t dsnd__Hacl_Agile_Hash_impl_uint32_t(Hacl_Streaming_HMAC_Definiti
   return __proj__Mkdtuple2__item___2__Hacl_Agile_Hash_impl_uint32_t(t);
 }
 
-Hacl_Streaming_HMAC_agile_state
-*Hacl_Streaming_HMAC_malloc(
+KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
+*malloc_internal(
   Hacl_Streaming_HMAC_Definitions_index i,
   Hacl_Streaming_HMAC_Definitions_key_and_len key
 )
@@ -1158,6 +1158,58 @@ Hacl_Streaming_HMAC_agile_state
   p[0U] = s;
   init0(key, buf0, block_state);
   return p;
+}
+
+KRML_MAYBE_UNUSED static bool is_blake2b_256(Hacl_Agile_Hash_impl uu___)
+{
+  switch (uu___)
+  {
+    case Hacl_Agile_Hash_Blake2B_256:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
+}
+
+KRML_MAYBE_UNUSED static bool is_blake2s_128(Hacl_Agile_Hash_impl uu___)
+{
+  switch (uu___)
+  {
+    case Hacl_Agile_Hash_Blake2S_128:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
+}
+
+Hacl_Streaming_HMAC_agile_state
+*Hacl_Streaming_HMAC_malloc(Hacl_Agile_Hash_impl impl, uint8_t *key, uint32_t key_length)
+{
+  KRML_MAYBE_UNUSED_VAR(key);
+  KRML_MAYBE_UNUSED_VAR(key_length);
+  #if !HACL_CAN_COMPILE_VEC256
+  if (is_blake2b_256(impl))
+  {
+    return NULL;
+  }
+  #endif
+  #if !HACL_CAN_COMPILE_VEC128
+  if (is_blake2s_128(impl))
+  {
+    return NULL;
+  }
+  #endif
+  return
+    malloc_internal(((Hacl_Streaming_HMAC_Definitions_index){ .fst = impl, .snd = key_length }),
+      ((Hacl_Streaming_HMAC_Definitions_key_and_len){ .fst = key, .snd = key_length }));
 }
 
 void

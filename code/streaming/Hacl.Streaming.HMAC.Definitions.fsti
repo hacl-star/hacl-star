@@ -27,7 +27,8 @@ val _sync_decl: unit
 /// index* so that we can statically enforce that the lengths match. This means
 /// that a client of the streaming HMAC interface cannot copy from one state to
 /// another if they key lengths differ.
-type index = i:impl & l:UInt32.t { Spec.Agile.HMAC.keysized (alg_of_impl i) (UInt32.v l) }
+let key_length i = l:UInt32.t { Spec.Agile.HMAC.keysized (alg_of_impl i) (UInt32.v l) }
+type index = i:impl & key_length i
 
 // Code quality (non-inlining variants)
 let hash_len a = D.hash_len a
