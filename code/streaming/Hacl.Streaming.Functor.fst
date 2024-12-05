@@ -1816,9 +1816,9 @@ let digest #index c i t t' state output l =
   assert (B.(modifies mloc h0 h7))
 #pop-options
 
-let digest_erased #index c i t t' state output l =
+let digest_erased #index c i t t' state output digest_length =
   let i = index_of_state #index c i t t' state in
-  digest #index c i t t' state output l
+  digest #index c i t t' state output digest_length
 
 let free #index c i t t' state =
   let _ = allow_inversion key_management in

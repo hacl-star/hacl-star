@@ -107,9 +107,16 @@ Hacl_Streaming_HMAC_update(
 );
 
 void
-Hacl_Streaming_HMAC_digest(Hacl_Streaming_HMAC_agile_state *state, uint8_t *output, uint32_t l);
+Hacl_Streaming_HMAC_digest(
+  Hacl_Streaming_HMAC_agile_state *state,
+  uint8_t *output,
+  uint32_t digest_length
+);
 
 void Hacl_Streaming_HMAC_free(Hacl_Streaming_HMAC_agile_state *state);
+
+Hacl_Streaming_HMAC_agile_state
+*Hacl_Streaming_HMAC_copy(Hacl_Streaming_HMAC_agile_state *state);
 
 #if defined(__cplusplus)
 }

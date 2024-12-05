@@ -115,4 +115,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_HMAC_free =
       foreign "Hacl_Streaming_HMAC_free"
         ((ptr hacl_Streaming_HMAC_agile_state) @-> (returning void))
+    let hacl_Streaming_HMAC_copy =
+      foreign "Hacl_Streaming_HMAC_copy"
+        ((ptr hacl_Streaming_HMAC_agile_state) @->
+           (returning (ptr hacl_Streaming_HMAC_agile_state)))
   end
