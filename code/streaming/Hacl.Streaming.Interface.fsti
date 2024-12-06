@@ -336,8 +336,14 @@ type block (index: Type0) =
   // Stateful operations
   index_of_state: (i:G.erased index -> (
     let i = G.reveal i in
-    s: state.s i -> Stack index
-    (fun h0 -> state.invariant #i h0 s)
+    s: state.s i -> k: optional_key i km key -> Stack index
+    (fun h0 -> state.invariant #i h0 s /\ (
+      allow_inversion key_management;
+      match km with
+      | Erased -> True
+      | Runtime ->
+          key.invariant #i h0 k /\
+          B.(loc_disjoint (key.footprint #i h0 k) (state.footprint #i h0 s))))
     (fun h0 i' h1 -> h0 == h1 /\ i' == i))) ->
 
 

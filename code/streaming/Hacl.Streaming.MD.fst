@@ -127,7 +127,7 @@ let hacl_md (a:alg)// : block unit =
       Spec.Hash.Incremental.hash_is_hash_incremental' a input ())
 
     (* index_of_state *)
-    (fun _ _ -> ())
+    (fun _ _ _ -> ())
 
     (* init *)
     (fun _ _ _ s ->

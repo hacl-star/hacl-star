@@ -167,7 +167,7 @@ let hacl_keccak (a: G.erased alg): block alg =
       Spec.Hash.Incremental.hash_is_hash_incremental' a input (if is_shake_ a then (Lib.IntTypes.v l) else ()))
 
     (* index_of_state *)
-    (fun _ (a, _) -> a)
+    (fun _ (a, _) _ -> a)
 
     (* init *)
     (fun _ _ _ (a, s) -> Hacl.Hash.SHA3.init a s)
