@@ -57,7 +57,7 @@ let hmac_input_fits a =
   | SHA3_512 -> ()
 
 #restart-solver
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 500"
 
 let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
