@@ -34,6 +34,15 @@ endif
 
 FSTAR_EXE := $(FSTAR_HOME)/bin/fstar.exe
 
+# Check that the relevant homes and executables at least exist.
+mustexist =						\
+  $(if $(wildcard $(value $(strip $1))),,		\
+    $(error $1 ($(value $(strip $1))) does not exist))
+
+$(call mustexist, FSTAR_HOME)
+$(call mustexist, FSTAR_EXE)
+$(call mustexist, KRML_HOME)
+
 ifndef FSTAR_ULIB
 FSTAR_ULIB := $(shell if test -d "$(FSTAR_HOME)/ulib" ; then echo "$(FSTAR_HOME)/ulib" ; else echo "$(FSTAR_HOME)/lib/fstar" ; fi)
 endif
@@ -125,7 +134,8 @@ FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 
 # 2. KaRaMeL
 
-KRML = $(KRML_HOME)/krml
+KRML := $(KRML_HOME)/krml
+$(call mustexist, KRML)
 
 BASE_FLAGS = \
   -no-prefix 'Hacl.Frodo.Random' \

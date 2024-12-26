@@ -55,6 +55,75 @@ depending on processor support and the target execution environment
 (*multiplexing*). Furthermore, EverCrypt offers an (*agile*) API that makes it
 simple to switch between algorithms (e.g., from SHA2 to SHA3).
 
+## Citing HACL*
+
+If you want to cite HACL\* in a research publication, here is some guidance to
+make sure you pick the right publications.
+
+- For HACL* in its current incarnation, including SIMD versions of algorithms: CCS'20.
+
+```
+@inproceedings{polubelova2020haclxn,
+  title={{HACLxN}: Verified generic {SIMD} crypto (for all your favourite platforms)},
+  author={Polubelova, Marina and Bhargavan, Karthikeyan and Protzenko, Jonathan and Beurdouche, Benjamin and Fromherz, Aymeric and Kulatova, Natalia and Zanella-B{\'e}guelin, Santiago},
+  booktitle={Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security},
+  pages={899--918},
+  year={2020}
+}
+```
+
+- For HACL* in general (discouraged, since none of that code exists anymore): CCS'17
+
+```
+@inproceedings{zinzindohoue2017hacl,
+  title={{HACL*}: A verified modern cryptographic library},
+  author={Zinzindohou{\'e}, Jean-Karim and Bhargavan, Karthikeyan and Protzenko, Jonathan and Beurdouche, Benjamin},
+  booktitle={Proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security},
+  pages={1789--1806},
+  year={2017}
+}
+```
+
+- For EverCrypt, the agile, multiplexing, CPU-detecting API on top of HACL\*: S&P'20
+
+```
+@inproceedings{protzenko2020evercrypt,
+  title={Evercrypt: A fast, verified, cross-platform cryptographic provider},
+  author={Protzenko, Jonathan and Parno, Bryan and Fromherz, Aymeric and Hawblitzel, Chris and Polubelova, Marina and Bhargavan, Karthikeyan and Beurdouche, Benjamin and Choi, Joonwon and Delignat-Lavaud, Antoine and Fournet, C{\'e}dric and others},
+  booktitle={2020 IEEE Symposium on Security and Privacy (SP)},
+  pages={983--1002},
+  year={2020},
+  organization={IEEE}
+}
+```
+
+- For HACL-WASM, the WebAssembly backend of HACL\*: S&P'19
+
+```
+@inproceedings{protzenko2019formally,
+  title={Formally verified cryptographic web applications in {WebAssembly}},
+  author={Protzenko, Jonathan and Beurdouche, Benjamin and Merigoux, Denis and Bhargavan, Karthikeyan},
+  booktitle={2019 IEEE Symposium on Security and Privacy (SP)},
+  pages={1256--1274},
+  year={2019},
+  organization={IEEE}
+}
+```
+
+- For the HACL streaming APIs with heap-allocated state and internal buffering (hashes, MACs): ICFP'23
+
+```
+@article{ho2023modularity,
+  title={Modularity, Code Specialization, and Zero-Cost Abstractions for Program Verification},
+  author={Ho, Son and Fromherz, Aymeric and Protzenko, Jonathan},
+  journal={Proceedings of the ACM on Programming Languages},
+  volume={7},
+  number={ICFP},
+  pages={385--416},
+  year={2023},
+  publisher={ACM New York, NY, USA}
+}
+```
 
 ## License
 

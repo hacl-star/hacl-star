@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "e4be411d93eeeb02cb8c93484cae8978"
+      "784475049d92c9c09e706885e589d816"
     ],
     [
       "Vale.AES.PPC64LE.GCMdecrypt.va_req_Gcm_blocks_decrypt_stdcall",
@@ -22,7 +22,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "602ec88cf847126496416a879febe8c3"
+      "73f849f6c782ff56149b70227e7728f2"
     ],
     [
       "Vale.AES.PPC64LE.GCMdecrypt.va_ens_Gcm_blocks_decrypt_stdcall",
@@ -31,7 +31,7 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.Ghost_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U16",
@@ -40,8 +40,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
-        "equation_Prims.l_and", "equation_Prims.nat",
-        "equation_Prims.squash", "equation_Prims.subtype_of",
+        "equation_Prims.nat",
         "equation_Vale.AES.PPC64LE.GCMdecrypt.va_req_Gcm_blocks_decrypt_stdcall",
         "equation_Vale.Arch.Types.reverse_bytes_quad32_seq",
         "equation_Vale.Def.Types_s.quad32",
@@ -50,15 +49,13 @@
         "equation_Vale.Def.Words_s.nat8", "equation_Vale.Def.Words_s.natN",
         "equation_Vale.Lib.Seqs_s.compose",
         "equation_Vale.Lib.Seqs_s.seq_map",
-        "equation_Vale.PPC64LE.Decls.va_state_eq",
         "equation_Vale.PPC64LE.Memory.base_typ_as_vale_type",
         "equation_Vale.PPC64LE.Memory.buffer128",
         "equation_Vale.PPC64LE.Memory.get_vale_heap",
-        "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
         "function_token_typing_Vale.Def.Words_s.nat32",
         "function_token_typing_Vale.Def.Words_s.nat8",
         "function_token_typing_Vale.PPC64LE.State.same_heap_types",
-        "int_inversion", "int_typing", "kinding_Vale.Def.Words_s.four@tok",
+        "int_typing", "kinding_Vale.Def.Words_s.four@tok",
         "lemma_FStar.Seq.Base.lemma_init_len",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Base.lemma_len_slice",
@@ -69,7 +66,6 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_12cfdc5e5e9b4a21e137c684eae73d5b",
         "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
@@ -87,7 +83,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "777954ec4e1fec06c5a0fec9efa4e8ef"
+      "b81cfd55e0541c8548f66e681dc4f197"
     ],
     [
       "Vale.AES.PPC64LE.GCMdecrypt.va_lemma_Gcm_blocks_decrypt_stdcall",
@@ -96,7 +92,7 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.Ghost_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U16",
@@ -151,7 +147,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "1254f41c4ac0901ac95e148f9d3281c3"
+      "5877b078f1e263430dcf6a436621c891"
     ],
     [
       "Vale.AES.PPC64LE.GCMdecrypt.va_wp_Gcm_blocks_decrypt_stdcall",
@@ -160,7 +156,7 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.Ghost_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U16",
@@ -233,7 +229,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "4e6aeaa018f6e05ac159558af40d72e0"
+      "b0b8b1e5c7a6d0d789660c3dd50225f5"
     ],
     [
       "Vale.AES.PPC64LE.GCMdecrypt.va_quick_Gcm_blocks_decrypt_stdcall",
@@ -245,7 +241,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "aedece797d58e414ceb4ec14ec84065e"
+      "181de7de9a2bc6e641cd3e3cf4a7e1ae"
     ]
   ]
 ]
