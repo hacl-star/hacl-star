@@ -1306,15 +1306,26 @@ EverCrypt_Hash_Incremental_state_t
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(block_len(a), sizeof (uint8_t));
+  if (buf == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf;
   EverCrypt_Hash_state_s *block_state = create_in(a);
   EverCrypt_Hash_Incremental_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf1, .total_len = (uint64_t)0U };
   EverCrypt_Hash_Incremental_state_t
   *p =
     (EverCrypt_Hash_Incremental_state_t *)KRML_HOST_MALLOC(sizeof (
         EverCrypt_Hash_Incremental_state_t
       ));
   p[0U] = s;
+  if (p == NULL)
+  {
+    free_(block_state);
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
   init(block_state);
   return p;
 }

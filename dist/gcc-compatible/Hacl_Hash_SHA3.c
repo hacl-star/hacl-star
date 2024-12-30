@@ -562,13 +562,25 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
   uint8_t *buf0 = (uint8_t *)KRML_HOST_CALLOC(block_len(a), sizeof (uint8_t));
+  if (buf0 == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf0;
   uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
   Hacl_Hash_SHA3_hash_buf block_state = { .fst = a, .snd = buf };
   Hacl_Hash_SHA3_state_t
-  s = { .block_state = block_state, .buf = buf0, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf1, .total_len = (uint64_t)0U };
   Hacl_Hash_SHA3_state_t
   *p = (Hacl_Hash_SHA3_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_SHA3_state_t));
   p[0U] = s;
+  if (p == NULL)
+  {
+    uint64_t *s1 = block_state.snd;
+    KRML_HOST_FREE(s1);
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
   uint64_t *s1 = block_state.snd;
   memset(s1, 0U, 25U * sizeof (uint64_t));
   return p;

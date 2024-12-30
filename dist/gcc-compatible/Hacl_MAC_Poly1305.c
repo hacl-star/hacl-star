@@ -443,16 +443,28 @@ void Hacl_MAC_Poly1305_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx
 Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(16U, sizeof (uint8_t));
+  if (buf == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf;
   uint64_t *r1 = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
   uint64_t *block_state = r1;
   uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
   memcpy(k_, key, 32U * sizeof (uint8_t));
   uint8_t *k_0 = k_;
   Hacl_MAC_Poly1305_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_0 };
+  s = { .block_state = block_state, .buf = buf1, .total_len = (uint64_t)0U, .p_key = k_0 };
   Hacl_MAC_Poly1305_state_t
   *p = (Hacl_MAC_Poly1305_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_MAC_Poly1305_state_t));
   p[0U] = s;
+  if (p == NULL)
+  {
+    KRML_HOST_FREE(k_0);
+    KRML_HOST_FREE(block_state);
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
   Hacl_MAC_Poly1305_poly1305_init(block_state, key);
   return p;
 }

@@ -1567,6 +1567,11 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
   *buf0 =
     (uint8_t *)KRML_HOST_CALLOC(block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i))),
       sizeof (uint8_t));
+  if (buf0 == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf0;
   Hacl_Agile_Hash_state_s *block_state = create_in(dfst__Hacl_Agile_Hash_impl_uint32_t(i));
   uint8_t *uu____0;
   if (dsnd__Hacl_Agile_Hash_impl_uint32_t(i) == 0U)
@@ -1594,7 +1599,7 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
   s =
     {
       .block_state = block_state,
-      .buf = buf0,
+      .buf = buf1,
       .total_len = (uint64_t)block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i))),
       .p_key = k_0
     };
@@ -1602,7 +1607,19 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
   *p =
     (Hacl_Streaming_HMAC_agile_state *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_HMAC_agile_state));
   p[0U] = s;
-  init0(key, buf0, block_state);
+  if (p == NULL)
+  {
+    uint8_t *k = k_0.fst;
+    uint32_t l = k_0.snd;
+    if (l != 0U)
+    {
+      KRML_HOST_FREE(k);
+    }
+    free_(block_state);
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
+  init0(key, buf1, block_state);
   return p;
 }
 

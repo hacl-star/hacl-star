@@ -134,7 +134,7 @@ val malloc:
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     if B.g_is_null s then
-      h0 == h1
+      B.(modifies loc_none h0 h1)
     else
       B.length s == 1 /\
       invariant c i h1 s /\

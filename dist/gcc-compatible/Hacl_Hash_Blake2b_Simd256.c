@@ -537,11 +537,16 @@ static Hacl_Hash_Blake2b_Simd256_state_t
 *malloc_raw(Hacl_Hash_Blake2b_index kk, Hacl_Hash_Blake2b_params_and_key key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
+  if (buf == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf;
   Lib_IntVector_Intrinsics_vec256
-  *wv =
+  *wv0 =
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
-  memset(wv, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256
   *b =
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
@@ -553,7 +558,7 @@ static Hacl_Hash_Blake2b_Simd256_state_t
       .fst = kk.key_length,
       .snd = kk.digest_length,
       .thd = kk.last_node,
-      .f3 = { .fst = wv, .snd = b }
+      .f3 = { .fst = wv0, .snd = b }
     };
   uint8_t kk10 = kk.key_length;
   uint32_t ite;
@@ -566,13 +571,22 @@ static Hacl_Hash_Blake2b_Simd256_state_t
     ite = 0U;
   }
   Hacl_Hash_Blake2b_Simd256_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
+  s = { .block_state = block_state, .buf = buf1, .total_len = (uint64_t)ite };
   Hacl_Hash_Blake2b_Simd256_state_t
   *p =
     (Hacl_Hash_Blake2b_Simd256_state_t *)KRML_HOST_MALLOC(sizeof (
         Hacl_Hash_Blake2b_Simd256_state_t
       ));
   p[0U] = s;
+  if (p == NULL)
+  {
+    Lib_IntVector_Intrinsics_vec256 *b0 = block_state.f3.snd;
+    Lib_IntVector_Intrinsics_vec256 *wv = block_state.f3.fst;
+    KRML_ALIGNED_FREE(wv);
+    KRML_ALIGNED_FREE(b0);
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
   Hacl_Hash_Blake2b_blake2_params *p1 = key.fst;
   uint8_t kk1 = p1->key_length;
   uint8_t nn = p1->digest_length;
@@ -583,9 +597,9 @@ static Hacl_Hash_Blake2b_Simd256_state_t
   uint8_t *k_1 = key.snd;
   if (!(kk20 == 0U))
   {
-    uint8_t *sub_b = buf + kk20;
+    uint8_t *sub_b = buf1 + kk20;
     memset(sub_b, 0U, (128U - kk20) * sizeof (uint8_t));
-    memcpy(buf, k_1, kk20 * sizeof (uint8_t));
+    memcpy(buf1, k_1, kk20 * sizeof (uint8_t));
   }
   Hacl_Hash_Blake2b_blake2_params pv = p1[0U];
   uint64_t tmp[8U] = { 0U };

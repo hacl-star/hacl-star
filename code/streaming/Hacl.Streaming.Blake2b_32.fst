@@ -75,18 +75,23 @@ val malloc_with_params_and_key:
   let t': Type0 = I.optional_key (G.reveal i) c.km c.key in
   let k: Common.params_and_key Spec.Blake2B (G.reveal i) = p, k in
   r: HS.rid ->
-  ST (state c i t t')
+  ST (B.buffer (state_s c i t t'))
   (requires (fun h0 ->
     blake2b_32.key.invariant #i h0 k /\
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
-    invariant c i h1 s /\
-    freeable c i h1 s /\
-    seen c i h1 s == S.empty /\
-    reveal_key blake2b_32 i h1 s == blake2b_32.key.v i h0 k /\
-    B.(modifies loc_none h0 h1) /\
-    B.fresh_loc (footprint c i h1 s) h0 h1 /\
-    B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
+    if B.g_is_null s then
+      // out of memory, underlying calls to the system malloc failed
+      B.(modifies loc_none h0 h1)
+    else
+      B.length s == 1 /\ // this turns the return type into a `state c i t t'`
+      invariant c i h1 s /\
+      freeable c i h1 s /\
+      seen c i h1 s == S.empty /\
+      reveal_key blake2b_32 i h1 s == blake2b_32.key.v i h0 k /\
+      B.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint c i h1 s) h0 h1 /\
+      B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 )
 
 let malloc_with_params_and_key i p last_node k r =
@@ -112,22 +117,27 @@ val malloc_with_key:
   let t: Type0 = c.state.s i in
   let t': Type0 = I.optional_key (G.reveal i) c.km c.key in
   r: HS.rid ->
-  ST (state c i t t')
+  ST (B.buffer (state_s c i t t'))
   (requires (fun h0 ->
     // This type is rather annoying to write, since we can't just copy-paste
     // from Functor (with a few suitable names in scope).
     B.live h0 k /\ // The other few bits required to conclude key_invariant will materialize after stack-allocating
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
-    invariant c i h1 s /\
-    freeable c i h1 s /\
-    seen c i h1 s == S.empty /\
-    reveal_key blake2b_32 i h1 s ==
-      ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk },
-      (if i.key_length = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))) /\
-    B.(modifies loc_none h0 h1) /\
-    B.fresh_loc (footprint c i h1 s) h0 h1 /\
-    B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
+    if B.g_is_null s then
+      // out of memory, underlying calls to the system malloc failed
+      B.(modifies loc_none h0 h1)
+    else
+      B.length s == 1 /\ // this turns the return type into a `state c i t t'`
+      invariant c i h1 s /\
+      freeable c i h1 s /\
+      seen c i h1 s == S.empty /\
+      reveal_key blake2b_32 i h1 s ==
+        ({ Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk },
+        (if i.key_length = 0uy then S.empty #uint8 else B.as_seq h0 (k <: B.buffer uint8))) /\
+      B.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint c i h1 s) h0 h1 /\
+      B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 )
 
 module ST = FStar.HyperStack.ST
@@ -146,24 +156,28 @@ let malloc_with_key k kk r =
 
   let s = malloc_with_params_and_key (G.hide i) p false k r in
   let h1 = ST.get () in
-  assert F.(freeable blake2b_32 i h1 s);
-  assert (nn == (Spec.blake2_default_params Spec.Blake2B).digest_length);
-  calc (==) {
-    F.reveal_key blake2b_32 i h1 s;
-  (==) { }
-    blake2b_32.key.v i h0 (p, k);
-  (==) { }
-    Common.key_v i h0 (p, k);
-  (==) { _ by (FStar.Tactics.trefl ()) }
-    P.v #Spec.Blake2B h0 p, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
-  (==) { }
-    { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk; Spec.digest_length = nn }, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
-  (==) { }
-    { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk }, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
-  };
+  (
+  if not (B.g_is_null s) then begin
+    assert F.(freeable blake2b_32 i h1 s);
+    assert (nn == (Spec.blake2_default_params Spec.Blake2B).digest_length);
+    calc (==) {
+      F.reveal_key blake2b_32 i h1 s;
+    (==) { }
+      blake2b_32.key.v i h0 (p, k);
+    (==) { }
+      Common.key_v i h0 (p, k);
+    (==) { _ by (FStar.Tactics.trefl ()) }
+      P.v #Spec.Blake2B h0 p, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
+    (==) { }
+      { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk; Spec.digest_length = nn }, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
+    (==) { }
+      { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk }, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
+  }
+  end);
   pop_frame ();
   let hf = ST.get () in
-  F.frame_invariant blake2b_32 i (B.loc_region_only false (HS.get_tip h1)) s h1 hf;
+  (if not (B.g_is_null s) then
+    F.frame_invariant blake2b_32 i (B.loc_region_only false (HS.get_tip h1)) s h1 hf);
   s
 
 // I generally don't like skipping signatures since there's a danger that a

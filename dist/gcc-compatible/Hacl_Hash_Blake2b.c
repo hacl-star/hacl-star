@@ -701,7 +701,12 @@ static Hacl_Hash_Blake2b_state_t
 *malloc_raw(Hacl_Hash_Blake2b_index kk, Hacl_Hash_Blake2b_params_and_key key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
-  uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
+  if (buf == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf;
+  uint64_t *wv0 = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   Hacl_Hash_Blake2b_block_state_t
   block_state =
@@ -709,7 +714,7 @@ static Hacl_Hash_Blake2b_state_t
       .fst = kk.key_length,
       .snd = kk.digest_length,
       .thd = kk.last_node,
-      .f3 = { .fst = wv, .snd = b }
+      .f3 = { .fst = wv0, .snd = b }
     };
   uint8_t kk10 = kk.key_length;
   uint32_t ite;
@@ -722,10 +727,19 @@ static Hacl_Hash_Blake2b_state_t
     ite = 0U;
   }
   Hacl_Hash_Blake2b_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
+  s = { .block_state = block_state, .buf = buf1, .total_len = (uint64_t)ite };
   Hacl_Hash_Blake2b_state_t
   *p = (Hacl_Hash_Blake2b_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2b_state_t));
   p[0U] = s;
+  if (p == NULL)
+  {
+    uint64_t *b0 = block_state.f3.snd;
+    uint64_t *wv = block_state.f3.fst;
+    KRML_HOST_FREE(wv);
+    KRML_HOST_FREE(b0);
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
   Hacl_Hash_Blake2b_blake2_params *p1 = key.fst;
   uint8_t kk1 = p1->key_length;
   uint8_t nn = p1->digest_length;
@@ -736,9 +750,9 @@ static Hacl_Hash_Blake2b_state_t
   uint8_t *k_1 = key.snd;
   if (!(kk20 == 0U))
   {
-    uint8_t *sub_b = buf + kk20;
+    uint8_t *sub_b = buf1 + kk20;
     memset(sub_b, 0U, (128U - kk20) * sizeof (uint8_t));
-    memcpy(buf, k_1, kk20 * sizeof (uint8_t));
+    memcpy(buf1, k_1, kk20 * sizeof (uint8_t));
   }
   Hacl_Hash_Blake2b_blake2_params pv = p1[0U];
   uint64_t tmp[8U] = { 0U };

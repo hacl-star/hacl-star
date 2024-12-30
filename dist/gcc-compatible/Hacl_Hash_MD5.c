@@ -1166,12 +1166,23 @@ void Hacl_Hash_MD5_hash_oneshot(uint8_t *output, uint8_t *input, uint32_t input_
 Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_malloc(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(64U, sizeof (uint8_t));
+  if (buf == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf;
   uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC(4U, sizeof (uint32_t));
   Hacl_Streaming_MD_state_32
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf1, .total_len = (uint64_t)0U };
   Hacl_Streaming_MD_state_32
   *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
   p[0U] = s;
+  if (p == NULL)
+  {
+    KRML_HOST_FREE(block_state);
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
   Hacl_Hash_MD5_init(block_state);
   return p;
 }
