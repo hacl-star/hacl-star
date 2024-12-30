@@ -26,8 +26,6 @@ module PP = Hacl.Impl.PCurves.PrecompPoints.P256
 open Hacl.Impl.PCurves.PrecompTable
 open Spec.P256
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 0 --admit_smt_queries true"
-
 //----------------
 
 
@@ -41,28 +39,35 @@ let p256_basepoint_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
 inline_for_extraction noextract
 let p256_basepoint_table_lseq_w4 : LSeq.lseq uint64 (192) =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 15);
-  Seq.seq_of_list p256_basepoint_table_list_w4
+  Seq.seq_of_list p256_basepoint_table_list_w4 
+
+let _:squash (48 * v p256_params.bn_limbs == 192) = assert_norm (48 * v p256_params.bn_limbs == 192)
+let _:squash (48ul *. p256_params.bn_limbs == 192ul) = 
+  assert(v (48ul *. p256_params.bn_limbs) == 192)
+let _:squash (96ul *. p256_params.bn_limbs == 384ul) = 
+  assert(v (96ul *. p256_params.bn_limbs) == 384)
+
 
 noextract
 val p256_basepoint_table_lemma_w4: unit ->
   Lemma ((forall (i:nat{i < 16}). precomp_table_acc_inv g_aff 16
          p256_basepoint_table_lseq_w4 i))
 
+#push-options "--z3rlimit 100"
 noextract
 let p256_basepoint_table_lemma_w4 () =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 15);
   SPT.precomp_base_table_lemma #_ #_ #(3ul*.4ul) mk_pcurve_precomp_base_table S.base_point 16 p256_basepoint_table_lseq_w4
+#pop-options
 
 val p256_basepoint_table_w4:
   x:glbuffer uint64 192ul{witnessed x p256_basepoint_table_lseq_w4 /\ recallable x}
 
-#push-options "--fuel 2 --ifuel 2"
+#push-options "--fuel 2 --ifuel 2 --z3rlimit 100"
 let p256_basepoint_table_w4:
   x:glbuffer uint64 192ul{witnessed x p256_basepoint_table_lseq_w4 /\ recallable x} =
   createL_global p256_basepoint_table_list_w4
 #pop-options
-
-#push-options "--admit_smt_queries true"
 
 inline_for_extraction noextract
 let p256_precomp_basepoint_table_w4 : precomp_table_w4 g_aff = {
@@ -78,11 +83,12 @@ inline_for_extraction noextract
 let p256_g_pow2_64_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table PP.proj_g_pow2_64 15)
 
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 let p256_g_pow2_64_table_lseq_w4 : LSeq.lseq uint64 192 =
-  admit();
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table PP.proj_g_pow2_64 15);
   Seq.seq_of_list p256_g_pow2_64_table_list_w4
+#pop-options
 
 noextract
 val p256_g_pow2_64_table_lemma_w4: unit ->
@@ -99,7 +105,7 @@ let p256_g_pow2_64_table_lemma_w4 () =
 val p256_g_pow2_64_table_w4 :
   x:glbuffer uint64 192ul{witnessed x p256_g_pow2_64_table_lseq_w4 /\ recallable x}
 
-#push-options "--fuel 2 --ifuel 2"
+#push-options "--fuel 2 --ifuel 2 --z3rlimit 100"
 let p256_g_pow2_64_table_w4 :
   x:glbuffer uint64 192ul{witnessed x p256_g_pow2_64_table_lseq_w4 /\ recallable x} =
   createL_global p256_g_pow2_64_table_list_w4
@@ -141,7 +147,7 @@ let p256_g_pow2_128_table_lemma_w4 () =
 val p256_g_pow2_128_table_w4 :
   x:glbuffer uint64 192ul{witnessed x p256_g_pow2_128_table_lseq_w4 /\ recallable x}
 
-#push-options "--fuel 2 --ifuel 2"
+#push-options "--fuel 2 --ifuel 2 --z3rlimit 100"
 let p256_g_pow2_128_table_w4 :
   x:glbuffer uint64 192ul{witnessed x p256_g_pow2_128_table_lseq_w4 /\ recallable x} =
   createL_global p256_g_pow2_128_table_list_w4
@@ -181,7 +187,7 @@ let p256_g_pow2_192_table_lemma_w4 () =
 val p256_g_pow2_192_table_w4 :
   x:glbuffer uint64 192ul{witnessed x p256_g_pow2_192_table_lseq_w4 /\ recallable x}
 
-#push-options "--fuel 2 --ifuel 2"
+#push-options "--fuel 2 --ifuel 2 --z3rlimit 100"
 let p256_g_pow2_192_table_w4 :
   x:glbuffer uint64 192ul{witnessed x p256_g_pow2_192_table_lseq_w4 /\ recallable x} =
   createL_global p256_g_pow2_192_table_list_w4
@@ -219,7 +225,7 @@ let p256_basepoint_table_lemma_w5 () =
 val p256_basepoint_table_w5:
   x:glbuffer uint64 384ul{witnessed x p256_basepoint_table_lseq_w5 /\ recallable x}
 
-#push-options "--fuel 2 --ifuel 2"
+#push-options "--fuel 2 --ifuel 2 --z3rlimit 100"
 let p256_basepoint_table_w5:
   x:glbuffer uint64 384ul{witnessed x p256_basepoint_table_lseq_w5 /\ recallable x} =
   createL_global p256_basepoint_table_list_w5
