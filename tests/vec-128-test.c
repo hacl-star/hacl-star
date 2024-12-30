@@ -238,7 +238,7 @@ main()
   x64 = Lib_IntVector_Intrinsics_vec128_extract64(vec0, 1);
   printf("extract64:\n");
   printf("computed:%"PRIx64"\n", x64);
-  printf("expected:%lx\n", 0x08090a0b0c0d0e0f);
+  printf("expected:%"PRIx64"\n", 0x08090a0b0c0d0e0f);
   if (x64 == 0x08090a0b0c0d0e0f) {
     printf("Success!\n");
   } else {

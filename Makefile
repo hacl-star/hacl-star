@@ -278,6 +278,11 @@ ifndef MAKE_RESTARTS
 # For KaRaMeL, we use --extract 'krml:*' to extract everything and let krml
 # decide what to keep based on reachability and bundling
 
+# When calling `fstar --dep` or `krml`, the length of the list of
+# arguments often exceeds a Windows-imposed limit. Thus, it is
+# necessary to save long lists of arguments into a response (`.rsp`)
+# file and pass the response file with `@` to said executables.
+
 # The `sed` invocation is currently necessary because, even though all
 # paths are absolute (HACL_HOME, FSTAR_HOME, etc.), F* still generates
 # dependency trees containing things like bin/../ulib (or
@@ -288,8 +293,10 @@ ifndef MAKE_RESTARTS
 .fstar-depend-%: .FORCE
 	@if ! [ -f .didhelp ]; then echo "ℹ️  This is F* version $(shell $(FSTAR_NO_FLAGS) --version)"; touch .didhelp; fi
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
+	@rm -f $@.rsp
+	@for f in $(notdir $(FSTAR_ROOTS)) ; do echo $$f ; done > $@.rsp
 	$(call run-with-log,\
-	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
+	  $(FSTAR_NO_FLAGS) --dep $* @$@.rsp --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract 'krml:* -FStar.Tactics -FStar.Reflection -FStar.Stubs' \
 	    --extract 'OCaml:-* +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@.tmp && \
 	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/\.\./!/!g' $@.tmp && mv $@.tmp $@ \
@@ -878,9 +885,11 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && mkdir -p $(dir $@)/lib_gen && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
+	rm -f $@.rsp
+	for f in $(filter %.krml,$^) ; do echo $$f ; done > $@.rsp
 	$(KRML) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \
-	  $(filter %.krml,$^) \
+	  @$@.rsp \
 	  -silent \
 	  -ccopt -Wno-unused \
 	  -warn-error @2@4-6@15@18@21+22 \
