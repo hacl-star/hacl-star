@@ -22,21 +22,7 @@ inline_for_extraction noextract
 let point_list {| cp:S.curve_params |} =
     x:list uint64{FL.length x == 3 * v cp.bn_limbs}
 
-(*
-inline_for_extraction noextract
-let felem_to_list {| cp:S.curve_params |} (x:S.felem) : felem_list =
-  if cp.bn_limbs = 4ul then 
-    [@inline_let] let x0 = x % pow2 64 in
-    [@inline_let] let x1 = x / pow2 64 % pow2 64 in
-    [@inline_let] let x2 = x / pow2 128 % pow2 64 in
-    [@inline_let] let x3 = x / pow2 192 % pow2 64 in
-    [@inline_let] let r = create4 (u64 x0) (u64 x1) (u64 x2) (u64 x3) in
-    assert_norm (FL.length r = 4);
-    r
-  else admit()
-*)
-
-#push-options "--fuel 2 --ifuel 2"
+#push-options "--fuel 2 --ifuel 2 --z3rlimit 100"
 inline_for_extraction noextract
 let rec felem_to_list_rec {| cp:S.curve_params |} (x:S.felem) (i:nat) : 
   Pure (list uint64)
@@ -46,7 +32,7 @@ let rec felem_to_list_rec {| cp:S.curve_params |} (x:S.felem) (i:nat) :
     [@inline_let] let x0 = x % pow2 64 in
     [@inline_let] let x1 = x / pow2 64 in
     [@inline_let] let l = felem_to_list_rec x1 (i - 1) in
-    [@inline_let] let r = l in
+    [@inline_let] let r = u64 x0 :: l in
     r)
   else []
 #pop-options

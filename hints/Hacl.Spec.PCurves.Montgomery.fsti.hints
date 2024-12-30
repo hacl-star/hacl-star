@@ -1,5 +1,5 @@
 [
-  "\u0016ÅQ9\u0017\u0019ãáS¡sﬁ};hu",
+  "ÉÙ,\r7MRMEœŸlÚûz",
   [
     [
       "Hacl.Spec.PCurves.Montgomery.mont_cancel_lemma_gen",
@@ -287,6 +287,27 @@
       "d5c66079f8179ab9992c5019477a3263"
     ],
     [
+      "Hacl.Spec.PCurves.Montgomery.qmont_inv_mul_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.PCurves.Montgomery.from_qmont",
+        "equation_Prims.nat", "equation_Spec.PCurves.PointOps.order",
+        "equation_Spec.PCurves.PointOps.qelem",
+        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
+        "int_inversion", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_order",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_eed193c8bca0cb6e8f0dba4f32163e92"
+      ],
+      0,
+      "1596a9938a99bcb93bfa4fe166c550d0"
+    ],
+    [
       "Hacl.Spec.PCurves.Montgomery.lemma_ecdsa_sign_s",
       1,
       0,
@@ -315,7 +336,7 @@
         "typing_Spec.PCurves.PointOps.order"
       ],
       0,
-      "735daff76ef521c730b573406d72ef5b"
+      "143f99968ddc63780f7a42d629dc147f"
     ]
   ]
 ]

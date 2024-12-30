@@ -1,5 +1,5 @@
 [
-  "¬bùˆ7ÓÔ¢HÛX}d[ÎÞ",
+  "¾›1ås±M’\u0015r*P\u000e¨X\u001d",
   [
     [
       "Hacl.Spec.PCurves.PrecompTable.felem_list",
@@ -8,7 +8,61 @@
       0,
       [ "@query" ],
       0,
-      "c0933573d720fe2af370846e54e3cca8"
+      "b74f3821a8fa89f1de2fc4d1f8d79dec"
+    ],
+    [
+      "Hacl.Spec.PCurves.PrecompTable.felem_to_list_rec",
+      1,
+      2,
+      2,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_24ab9d6f8778e9f64ff428ee94516112_1",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_2",
+        "binder_x_d42f946f9eac995d516b6a8f90360f7e_0",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
+        "data_elim_Spec.PCurves.PointOps.Mkcurve_params",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint64",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Prims.nonzero", "equation_Prims.op_Equals_Equals_Equals",
+        "equation_Prims.pos", "equation_Spec.PCurves.PointOps.felem",
+        "equation_Spec.PCurves.PointOps.is_fodd",
+        "equation_Spec.PCurves.PointOps.prime",
+        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
+        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
+        "function_token_typing_Lib.IntTypes.uint64",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Prims.Cons_a",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_885d343bb05f0e0838483c0d9717fbcd",
+        "refinement_interpretation_Tm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "refinement_interpretation_Tm_refine_e3c34e237254645ac98e7360d2057e48",
+        "typing_FStar.List.Tot.Base.length", "typing_Prims.pow2",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "a493246715771d672684ae07a72daba2"
     ],
     [
       "Hacl.Spec.PCurves.PrecompTable.felem_to_list",
@@ -58,7 +112,7 @@
         "typing_Spec.PCurves.PointOps.prime"
       ],
       0,
-      "1576198e5b815e4a26d5ad5687f9c94a"
+      "26032887fcb379d293716b8a36a44f9f"
     ],
     [
       "Hacl.Spec.PCurves.PrecompTable.proj_point_to_list",
@@ -89,7 +143,7 @@
         "typing_Hacl.Spec.PCurves.PrecompTable.felem_to_list"
       ],
       0,
-      "59350b01030bf494504b86f4b70730d2"
+      "357cd74b97af756da206f581603fba71"
     ],
     [
       "Hacl.Spec.PCurves.PrecompTable.point_inv_list",
@@ -115,7 +169,7 @@
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs"
       ],
       0,
-      "75b57ca96580ecf5b20eb504e96ad0c4"
+      "dd91ae9552fc703d956884c5bfec389e"
     ],
     [
       "Hacl.Spec.PCurves.PrecompTable.point_eval_list",
@@ -141,7 +195,7 @@
         "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__bn_limbs"
       ],
       0,
-      "a68f6c8fa400fd603efbc7e2bae163c1"
+      "358380a715391d8089f4b2a915fc91f5"
     ]
   ]
 ]
