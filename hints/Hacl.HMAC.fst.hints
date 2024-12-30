@@ -1792,10 +1792,10 @@
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Prims.nonzero", "equation_Prims.pos",
         "equation_Prims.squash", "equation_Spec.Agile.Hash.init_extra_state",
+        "equation_Spec.Agile.Hash.update_multi",
         "equation_Spec.Agile.Hash.update_multi_pre",
         "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
-        "equation_Spec.Hash.Definitions.bytes",
         "equation_Spec.Hash.Definitions.extra_state",
         "equation_Spec.Hash.Definitions.fixed_len_alg",
         "equation_Spec.Hash.Definitions.is_blake",
@@ -1807,12 +1807,12 @@
         "equation_Spec.Hash.Definitions.less_than_max_input_length",
         "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.state_word_length",
-        "equation_Spec.Hash.Definitions.to_blake_alg",
         "equation_Spec.Hash.Definitions.word",
         "equation_Spec.Hash.Definitions.word_length",
         "equation_Spec.Hash.Definitions.word_t",
         "equation_Spec.Hash.Definitions.words_state",
         "equation_Spec.Hash.Incremental.Definitions.split_blocks",
+        "equation_Spec.Hash.Incremental.Definitions.update_last",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
         "function_token_typing_Hacl.Streaming.MD.uu___0",
         "function_token_typing_Lib.IntTypes.uint8",
@@ -1876,10 +1876,8 @@
         "refinement_interpretation_Tm_refine_0f6fac539924180dade0d0d6a759e3ad",
         "refinement_interpretation_Tm_refine_19ac6a052799e5086e9c3eb3a21d54a5",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
-        "refinement_interpretation_Tm_refine_2fdb772b3bf863bc9c982dfbed276ef0",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_362e2dfd5fc10941f1049c892a15d4e9",
-        "refinement_interpretation_Tm_refine_3e46b9b636901b521182d7f3235361f9",
         "refinement_interpretation_Tm_refine_49d93a0cb246c536781f6c5dba1a6214",
         "refinement_interpretation_Tm_refine_4d0ce7f47c4d8bce294b81607b0905e4",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -1893,7 +1891,6 @@
         "refinement_interpretation_Tm_refine_91c352d831715ed604553457a8078865",
         "refinement_interpretation_Tm_refine_a8fa4255b4da3c02c368080086854c4b",
         "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
-        "refinement_interpretation_Tm_refine_aea67b15520b34c4ba6d26ecce33cea3",
         "refinement_interpretation_Tm_refine_ba4c0572cb0bbfa5d50baae339c12551",
         "refinement_interpretation_Tm_refine_bccf5300d87982e3ce0f7618196189a3",
         "refinement_interpretation_Tm_refine_be9f9b7469d07f7dec61b636d3fadb10",
@@ -1910,7 +1907,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits",
         "typing_FStar.UInt32.div", "typing_FStar.UInt32.rem",
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
-        "typing_Hacl.HMAC.len_add32", "typing_Hacl.HMAC.zero_to_len",
+        "typing_Hacl.HMAC.zero_to_len",
         "typing_Hacl.Hash.Definitions.as_seq",
         "typing_Hacl.Hash.Definitions.impl_state_len",
         "typing_Hacl.Hash.Definitions.impl_word", "typing_Lib.IntTypes.v",
@@ -1922,7 +1919,6 @@
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.length",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
-        "typing_Spec.Agile.Hash.update_multi_pre",
         "typing_Spec.Hash.Definitions.block_length",
         "typing_Spec.Hash.Definitions.is_md",
         "typing_Spec.Hash.Definitions.is_shake",
@@ -3103,7 +3099,7 @@
         "unit_typing"
       ],
       0,
-      "b7de4697f6a8e76aa30e88054e20c8cd"
+      "3c7d38c67d07c3591057a68aec2d6ea1"
     ],
     [
       "Hacl.HMAC.mk_compute",
@@ -3708,7 +3704,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "3608881f931ccecd276ed67502d49e4a"
+      "bb4e59f2b8c43b4215cb8b1491bcffb6"
     ],
     [
       "Hacl.HMAC.compute_sha3_224",
