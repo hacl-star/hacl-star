@@ -22,8 +22,6 @@ module S = Lib.Exponentiation.Definition
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-// val lemma_table_sub_len: len:nat -> table_len:nat -> i:nat{i < table_len} ->
-//   Lemma (i * len + len <= table_len * len)
 let lemma_table_sub_len len table_len i =
   Math.Lemmas.distributivity_add_left i 1 len;
   Math.Lemmas.lemma_mult_le_right len (i + 1) table_len

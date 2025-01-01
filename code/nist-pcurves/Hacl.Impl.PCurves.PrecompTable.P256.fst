@@ -1,4 +1,4 @@
-module Hacl.P256.PrecompTable
+module Hacl.Impl.PCurves.PrecompTable.P256
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -13,8 +13,8 @@ module LSeq = Lib.Sequence
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module SPT = Hacl.Spec.PrecompBaseTable
-module SPT256 = Hacl.Spec.PrecompBaseTable256
 module SPTK = Hacl.Spec.PCurves.PrecompTable
+module SPT256 = Hacl.Spec.PrecompBaseTable256
 
 module S = Spec.PCurves
 module SL = Spec.PCurves.Lemmas
