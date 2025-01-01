@@ -120,7 +120,7 @@ val ecdsa_verification_cmpr {| cp:S.curve_params |} {| bn_ops |} {| curve_consta
     b <==> (if S.is_point_at_inf (_X, _Y, _Z) then false
       else S.fmul _X (S.finv _Z) % S.order = as_nat h0 r)))
 
-#push-options "--z3rlimit 1000 --split_queries always" 
+#push-options "--z3rlimit 800 --split_queries always" 
 let ecdsa_verification_cmpr {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} r pk u1 u2 =
   push_frame ();
   let res = create_point #cp in
@@ -139,7 +139,6 @@ let ecdsa_verification_cmpr {| cp:S.curve_params |} {| bn_ops |} {| curve_consta
     if is_point_at_inf_vartime res then false
     else ecdsa_verify_finv res r in
   pop_frame ();
-  admit();
   b
 #pop-options
 
