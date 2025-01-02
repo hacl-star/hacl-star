@@ -1295,6 +1295,14 @@ static uint32_t block_len(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
+typedef struct option___EverCrypt_Hash_state_s__s
+{
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
+  EverCrypt_Hash_state_s *v;
+}
+option___EverCrypt_Hash_state_s_;
+
 /**
 Allocate initial state for the agile hash. The argument `a` stands for the
 choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
@@ -1311,23 +1319,55 @@ EverCrypt_Hash_Incremental_state_t
     return NULL;
   }
   uint8_t *buf1 = buf;
-  EverCrypt_Hash_state_s *block_state = create_in(a);
-  EverCrypt_Hash_Incremental_state_t
-  s = { .block_state = block_state, .buf = buf1, .total_len = (uint64_t)0U };
-  EverCrypt_Hash_Incremental_state_t
-  *p =
-    (EverCrypt_Hash_Incremental_state_t *)KRML_HOST_MALLOC(sizeof (
-        EverCrypt_Hash_Incremental_state_t
-      ));
-  p[0U] = s;
-  if (p == NULL)
+  option___EverCrypt_Hash_state_s_
+  block_state = { .tag = FStar_Pervasives_Native_Some, .v = create_in(a) };
+  if (block_state.tag == FStar_Pervasives_Native_None)
   {
-    free_(block_state);
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  init(block_state);
-  return p;
+  if (block_state.tag == FStar_Pervasives_Native_Some)
+  {
+    EverCrypt_Hash_state_s *block_state1 = block_state.v;
+    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+    k_ = FStar_Pervasives_Native_Some;
+    switch (k_)
+    {
+      case FStar_Pervasives_Native_None:
+        {
+          return NULL;
+        }
+      case FStar_Pervasives_Native_Some:
+        {
+          EverCrypt_Hash_Incremental_state_t
+          s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };
+          EverCrypt_Hash_Incremental_state_t
+          *p =
+            (EverCrypt_Hash_Incremental_state_t *)KRML_HOST_MALLOC(sizeof (
+                EverCrypt_Hash_Incremental_state_t
+              ));
+          p[0U] = s;
+          if (p == NULL)
+          {
+            free_(block_state1);
+            KRML_HOST_FREE(buf1);
+            return NULL;
+          }
+          init(block_state1);
+          return p;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
+    }
+  }
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 /**

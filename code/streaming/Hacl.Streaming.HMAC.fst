@@ -118,7 +118,8 @@ let mk #impl (k:B.buffer uint8) (k_len:key_length impl { k_len == B.len k }): ke
 
 [@ Comment "This function returns NULL if the user requests a choice of
 implementation that has not been enabled at build-time (e.g. Blake2b_256 on an
-ARM machine)." ]
+ARM machine). As with other `malloc` functions for streaming APIs, this function
+also returns NULL on allocation failure." ]
 val malloc:
   impl:impl -> k:B.buffer uint8 -> k_len:key_length impl { k_len == B.len k } -> (
   let c = hmac in
