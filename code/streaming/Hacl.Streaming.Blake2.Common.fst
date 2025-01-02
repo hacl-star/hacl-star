@@ -137,7 +137,7 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful (index a) =
     (fun i r ->
       let wv = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
       let b = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
-      i.key_length, i.digest_length, i.last_node, (wv, b))
+      Some (i.key_length, i.digest_length, i.last_node, (wv, b)))
     (* free *)
     (fun _ acc ->
       match acc with _, _, _, (wv, b) ->
@@ -265,7 +265,7 @@ let stateful_key (a : alg):
         let s = p, s in
         let h1 = ST.get () in
         assert (key_footprint #a #i h1 s == P.footprint h1 p);
-        s
+        Some s
       else
         let h0 = ST.get () in
         let p = P.create_in a i r in
@@ -281,7 +281,7 @@ let stateful_key (a : alg):
         assert B.(fresh_loc (key_footprint #a #i h1 s) h0 h1);
         assert B.(loc_includes (loc_region_only true r) (key_footprint #a #i h1 s));
         assert (key_freeable #a #i h1 s);
-        s)
+        Some s)
 
     (* free *)
     (fun (i: G.erased (index a)) (s: params_and_key a i) ->

@@ -33,7 +33,7 @@ let stateful_agile_hash_state: Hacl.Streaming.Interface.stateful Hacl.Streaming.
       frame_invariant_implies_footprint_preservation l s h0 h1)
     (fun #i l s h0 h1 -> ())
     (fun i -> alloca (dfst i))
-    (fun i r -> create_in (dfst i) r)
+    (fun i r -> Some (create_in (dfst i) r))
     (fun i -> free #(dfst i))
     (fun i -> copy #(dfst i))
 

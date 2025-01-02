@@ -86,7 +86,7 @@ let stateful_poly1305_ctx (fs : field_spec) : I.stateful unit =
       let r = B.malloc r (F32xN.zero n) 25ul in
       let h1 = ST.get () in
       P.ctx_inv_zeros #fs r h1;
-      r)
+      Some r)
     (fun _ s -> B.free s)
     (fun _ src dst ->
       let h0 = ST.get () in
