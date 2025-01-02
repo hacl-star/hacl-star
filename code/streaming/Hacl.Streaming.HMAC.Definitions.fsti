@@ -100,7 +100,16 @@ let stateful_runtime_key: stateful index =
       else
         B.alloca (Lib.IntTypes.u8 0) l, l
     )
-    (* create_in *) (fun i r -> Some ((if dsnd i = 0ul then B.null else B.malloc r Lib.IntTypes.(u8 0) (dsnd i)), dsnd i))
+    (* create_in *) (fun i r ->
+      if dsnd i = 0ul then
+        Some (B.null, dsnd i)
+      else
+        let k = fallible_malloc r Lib.IntTypes.(u8 0) (dsnd i) in
+        if B.is_null k then
+          None
+        else
+          Some (k, dsnd i)
+    )
     (* free *) (fun _ (k, l) -> if l <> 0ul then B.free k)
     (* copy *) (fun i s_src s_dst ->
       let k_src, l_src = s_src in

@@ -47,7 +47,7 @@ let agile_state: stateful Hash.alg =
       EverCrypt.Hash.frame_invariant_implies_footprint_preservation l s h0 h1)
     (fun #i l s h0 h1 -> ())
     EverCrypt.Hash.alloca
-    (fun a r -> Some (EverCrypt.Hash.create_in a r))
+    (fun a r -> EverCrypt.Hash.create_in a r)
     (fun i -> EverCrypt.Hash.free #i)
     (fun i -> EverCrypt.Hash.copy #i)
 

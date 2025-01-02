@@ -177,36 +177,34 @@ val alloca: a:impl -> StackInline (state a)
     B.fresh_loc (footprint s h1) h0 h1 /\
     M.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint s h1))))
 
-val create_in: a:impl -> r:HS.rid -> FStar.HyperStack.ST.ST (state a)
+val malloc_: a:impl -> r:HS.rid -> FStar.HyperStack.ST.ST (B.buffer (state_s a))
   (requires (fun _ ->
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
-    // RETURN TYPE ABOVE: was B.buffer (state_s a)
-    // if a = Blake2S_128 && not EverCrypt.TargetConfig.hacl_can_compile_vec128 ||
-    //   a = Blake2B_256 && not EverCrypt.TargetConfig.hacl_can_compile_vec256
-    // then
-    //   s == B.null
-    // else
-    //   B.length s == 1 /\ // this turns the result type into state a
+    if B.g_is_null s then
+      B.(modifies loc_none h0 h1)
+    else
+      B.length s == 1 /\
       invariant s h1 /\
       M.(modifies loc_none h0 h1) /\
       B.fresh_loc (footprint s h1) h0 h1 /\
       M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
       freeable h1 s))
 
-val create: a:impl -> FStar.HyperStack.ST.ST (state a)
-  (requires fun h0 -> True)
-  (ensures fun h0 s h1 ->
-    // if a = Blake2S_128 && not EverCrypt.TargetConfig.hacl_can_compile_vec128 ||
-    //   a = Blake2B_256 && not EverCrypt.TargetConfig.hacl_can_compile_vec256
-    // then
-    //   s == B.null
-    // else
-    //   B.length s == 1 /\ // this turns the result type into state a
-      invariant s h1 /\
-      M.(modifies loc_none h0 h1) /\
-      B.fresh_loc (footprint s h1) h0 h1 /\
-      freeable h1 s)
+val create_in: a:impl -> r:HS.rid -> FStar.HyperStack.ST.ST (option (state a))
+  (requires (fun _ ->
+    HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    match s with
+    | None -> B.(modifies loc_none h0 h1)
+    | Some s ->
+        invariant s h1 /\
+        M.(modifies loc_none h0 h1) /\
+        B.fresh_loc (footprint s h1) h0 h1 /\
+        M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
+        freeable h1 s))
+
+// TODO: expose create for potential C callers, which should return NULL for failures
 
 val init: #a:e_impl -> (
   let a = Ghost.reveal a in

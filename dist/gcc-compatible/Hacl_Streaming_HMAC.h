@@ -87,7 +87,7 @@ typedef struct Hacl_Streaming_HMAC_agile_state_s
 Hacl_Streaming_HMAC_agile_state;
 
 Hacl_Streaming_HMAC_agile_state
-*Hacl_Streaming_HMAC_malloc(Hacl_Agile_Hash_impl impl, uint8_t *key, uint32_t key_length);
+*Hacl_Streaming_HMAC_malloc_(Hacl_Agile_Hash_impl impl, uint8_t *key, uint32_t key_length);
 
 Hacl_Streaming_HMAC_Definitions_index
 Hacl_Streaming_HMAC_get_impl(Hacl_Streaming_HMAC_agile_state *s);

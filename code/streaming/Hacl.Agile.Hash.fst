@@ -76,8 +76,10 @@ let impl_of_state_s (#a: G.erased impl) (s: state_s a): i:impl { i == G.reveal a
 
 let _: squash (inversion impl) = allow_inversion impl
 
-// Forcing the result type to be GTot since we can't represent D.impl in Low*
-let impl_of_impl (i: impl): GTot Hacl.Hash.Definitions.impl =
+// Previously: forcing the result type to be GTot since we can't represent D.impl in Low*
+// Now: ok to use in inline_for_extraction
+inline_for_extraction noextract
+let impl_of_impl (i: impl): Hacl.Hash.Definitions.impl =
   match i with
   | MD5 -> (| H.MD5, () |)
   | SHA1 -> (| H.SHA1, () |)
@@ -170,43 +172,100 @@ let alloca a =
   in
   B.alloca s 1ul
 
-let create_in a r =
-  let h0 = ST.get () in
-  let s: state_s a =
-    match a with
-    | MD5 -> MD5_s (B.malloc r 0ul 4ul)
-    | SHA1 -> SHA1_s (B.malloc r 0ul 5ul)
-    | SHA2_224 -> SHA2_224_s (B.malloc r 0ul 8ul)
-    | SHA2_256 -> SHA2_256_s (B.malloc r 0ul 8ul)
-    | SHA2_384 -> SHA2_384_s (B.malloc r 0UL 8ul)
-    | SHA2_512 -> SHA2_512_s (B.malloc r 0UL 8ul)
-    | SHA3_224 -> SHA3_224_s (B.malloc r 0UL 25ul)
-    | SHA3_256 -> SHA3_256_s (B.malloc r 0UL 25ul)
-    | SHA3_384 -> SHA3_384_s (B.malloc r 0UL 25ul)
-    | SHA3_512 -> SHA3_512_s (B.malloc r 0UL 25ul)
-    | Blake2S_32 ->
-        Blake2S_s (B.malloc r 0ul 16ul)
-    | Blake2S_128 _ ->
-        // As usual, to prevent linking errors (missing symbols) on systems that
-        // do not have this implementation available.
-        if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-          Blake2S_128_s () (Hacl.Blake2s_128.malloc_with_key r)
-        else
-          false_elim ()
-    | Blake2B_32 ->
-        Blake2B_s (B.malloc r 0UL 16ul)
-    | Blake2B_256 _ ->
-        // As usual, to prevent linking errors (missing symbols) on systems that
-        // do not have this implementation available.
-        if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-          Blake2B_256_s () (Hacl.Blake2b_256.malloc_with_key r)
-        else
-          false_elim ()
-  in
-  B.malloc r s 1ul
+inline_for_extraction noextract
+val malloc_helper (#a: impl) (r: HS.rid) (init: impl_word (impl_of_impl a))
+  (mk: (b:Hacl.Hash.Definitions.state (impl_of_impl a)) -> Stack (state_s a)
+    (requires fun h0 -> True)
+    (ensures fun h0 s h1 -> h0 == h1 /\ p s == b)
+  ):
+  FStar.HyperStack.ST.ST (B.buffer (state_s a))
+  (requires (fun _ ->
+    HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    if B.g_is_null s then
+      B.(modifies loc_none h0 h1)
+    else
+      B.length s == 1 /\
+      invariant s h1 /\
+      M.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint s h1) h0 h1 /\
+      M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
+      freeable h1 s))
 
-let create a =
-  create_in a HS.root
+let malloc_helper #a r init mk =
+  let open Hacl.Streaming.Interface in
+  let h0 = ST.get () in
+  let s = fallible_malloc r init (impl_state_len (impl_of_impl a)) in
+    if B.is_null s then
+    B.null
+  else
+    let s: Hacl.Hash.Definitions.state (impl_of_impl a) = s in
+    let st = fallible_malloc r (mk s) 1ul in
+    if B.is_null st then (
+      B.free s;
+      let h1 = ST.get () in
+      B.(modifies_only_not_unused_in loc_none h0 h1);
+      B.null
+    ) else
+    st
+
+let malloc_ a r =
+  let h0 = ST.get () in
+  let open Hacl.Streaming.Interface in
+  // NOTE: the helper was a PAIN to write but hopefully it'll make maintenance better
+  match a with
+  | MD5 -> malloc_helper r 0ul (fun x -> MD5_s x)
+  | SHA1 -> malloc_helper r 0ul (fun x -> SHA1_s x)
+  | SHA2_224 -> malloc_helper r 0ul (fun x -> SHA2_224_s x)
+  | SHA2_256 -> malloc_helper r 0ul (fun x -> SHA2_256_s x)
+  | SHA2_384 -> malloc_helper r 0UL (fun x -> SHA2_384_s x)
+  | SHA2_512 -> malloc_helper r 0UL (fun x -> SHA2_512_s x)
+  | SHA3_224 -> malloc_helper r 0UL (fun x -> SHA3_224_s x)
+  | SHA3_256 -> malloc_helper r 0UL (fun x -> SHA3_256_s x)
+  | SHA3_384 -> malloc_helper r 0UL (fun x -> SHA3_384_s x)
+  | SHA3_512 -> malloc_helper r 0UL (fun x -> SHA3_512_s x)
+  | Blake2S_32 -> malloc_helper r 0ul (fun x -> Blake2S_s x)
+  | Blake2S_128 _ ->
+      // As usual, to prevent linking errors (missing symbols) on systems that
+      // do not have this implementation available.
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        let s = Hacl.Blake2s_128.malloc_with_key r in
+        if B.is_null s then
+          B.null
+        else
+          let st = fallible_malloc r (Blake2S_128_s () s) 1ul in
+          if B.is_null st then (
+            B.free s;
+            let h1 = ST.get () in
+            B.(modifies_only_not_unused_in loc_none h0 h1);
+            B.null
+          ) else
+            st
+      else
+        false_elim ()
+  | Blake2B_32 -> malloc_helper r 0UL (fun x -> Blake2B_s x)
+  | Blake2B_256 _ ->
+      // As usual, to prevent linking errors (missing symbols) on systems that
+      // do not have this implementation available.
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        let s = Hacl.Blake2b_256.malloc_with_key r in
+        if B.is_null s then
+          B.null
+        else
+          let st = fallible_malloc r (Blake2B_256_s () s) 1ul in
+          if B.is_null st then (
+            B.free s;
+            let h1 = ST.get () in
+            B.(modifies_only_not_unused_in loc_none h0 h1);
+            B.null
+          ) else
+            st
+      else
+        false_elim ()
+
+let create_in a r =
+  let st = malloc_ a r in
+  if B.is_null st then None else Some st
 
 let init #a s =
   match !*s with

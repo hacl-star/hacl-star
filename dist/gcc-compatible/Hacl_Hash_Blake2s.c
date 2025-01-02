@@ -703,18 +703,45 @@ static Hacl_Hash_Blake2s_state_t
   }
   uint8_t *buf1 = buf;
   uint32_t *wv0 = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
-  uint32_t *b = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
-  option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___
-  block_state =
+  option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___ block_state;
+  if (wv0 == NULL)
+  {
+    block_state =
+      (
+        (option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___){
+          .tag = FStar_Pervasives_Native_None
+        }
+      );
+  }
+  else
+  {
+    uint32_t *b = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
+    if (b == NULL)
     {
-      .tag = FStar_Pervasives_Native_Some,
-      .v = {
-        .fst = kk.key_length,
-        .snd = kk.digest_length,
-        .thd = kk.last_node,
-        .f3 = { .fst = wv0, .snd = b }
-      }
-    };
+      KRML_HOST_FREE(wv0);
+      block_state =
+        (
+          (option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___){
+            .tag = FStar_Pervasives_Native_None
+          }
+        );
+    }
+    else
+    {
+      block_state =
+        (
+          (option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___){
+            .tag = FStar_Pervasives_Native_Some,
+            .v = {
+              .fst = kk.key_length,
+              .snd = kk.digest_length,
+              .thd = kk.last_node,
+              .f3 = { .fst = wv0, .snd = b }
+            }
+          }
+        );
+    }
+  }
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf1);
@@ -750,10 +777,10 @@ static Hacl_Hash_Blake2s_state_t
           p[0U] = s;
           if (p == NULL)
           {
-            uint32_t *b0 = block_state1.f3.snd;
+            uint32_t *b = block_state1.f3.snd;
             uint32_t *wv = block_state1.f3.fst;
             KRML_HOST_FREE(wv);
-            KRML_HOST_FREE(b0);
+            KRML_HOST_FREE(b);
             KRML_HOST_FREE(buf1);
             return NULL;
           }
@@ -1428,18 +1455,45 @@ Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_copy(Hacl_Hash_Blake2s_state_t *sta
   }
   memcpy(buf, buf0, 64U * sizeof (uint8_t));
   uint32_t *wv0 = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
-  uint32_t *b = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
-  option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___
-  block_state =
+  option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___ block_state;
+  if (wv0 == NULL)
+  {
+    block_state =
+      (
+        (option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___){
+          .tag = FStar_Pervasives_Native_None
+        }
+      );
+  }
+  else
+  {
+    uint32_t *b = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
+    if (b == NULL)
     {
-      .tag = FStar_Pervasives_Native_Some,
-      .v = {
-        .fst = i.key_length,
-        .snd = i.digest_length,
-        .thd = i.last_node,
-        .f3 = { .fst = wv0, .snd = b }
-      }
-    };
+      KRML_HOST_FREE(wv0);
+      block_state =
+        (
+          (option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___){
+            .tag = FStar_Pervasives_Native_None
+          }
+        );
+    }
+    else
+    {
+      block_state =
+        (
+          (option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___){
+            .tag = FStar_Pervasives_Native_Some,
+            .v = {
+              .fst = i.key_length,
+              .snd = i.digest_length,
+              .thd = i.last_node,
+              .f3 = { .fst = wv0, .snd = b }
+            }
+          }
+        );
+    }
+  }
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf);
@@ -1468,10 +1522,10 @@ Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_copy(Hacl_Hash_Blake2s_state_t *sta
           p[0U] = s;
           if (p == NULL)
           {
-            uint32_t *b0 = block_state1.f3.snd;
+            uint32_t *b = block_state1.f3.snd;
             uint32_t *wv = block_state1.f3.fst;
             KRML_HOST_FREE(wv);
-            KRML_HOST_FREE(b0);
+            KRML_HOST_FREE(b);
             KRML_HOST_FREE(buf);
             return NULL;
           }

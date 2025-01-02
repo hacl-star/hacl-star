@@ -1776,8 +1776,17 @@ Hacl_MAC_Poly1305_Simd256_state_t *Hacl_MAC_Poly1305_Simd256_malloc(uint8_t *key
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 25U);
   memset(r1, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
-  option___Lib_IntVector_Intrinsics_vec256_
-  block_state = { .tag = FStar_Pervasives_Native_Some, .v = r1 };
+  option___Lib_IntVector_Intrinsics_vec256_ block_state;
+  if (r1 == NULL)
+  {
+    block_state =
+      ((option___Lib_IntVector_Intrinsics_vec256_){ .tag = FStar_Pervasives_Native_None });
+  }
+  else
+  {
+    block_state =
+      ((option___Lib_IntVector_Intrinsics_vec256_){ .tag = FStar_Pervasives_Native_Some, .v = r1 });
+  }
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf1);

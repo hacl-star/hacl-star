@@ -33,7 +33,7 @@ let stateful_agile_hash_state: Hacl.Streaming.Interface.stateful Hacl.Streaming.
       frame_invariant_implies_footprint_preservation l s h0 h1)
     (fun #i l s h0 h1 -> ())
     (fun i -> alloca (dfst i))
-    (fun i r -> Some (create_in (dfst i) r))
+    (fun i r -> create_in (dfst i) r)
     (fun i -> free #(dfst i))
     (fun i -> copy #(dfst i))
 
@@ -120,7 +120,7 @@ let mk #impl (k:B.buffer uint8) (k_len:key_length impl { k_len == B.len k }): ke
 implementation that has not been enabled at build-time (e.g. Blake2b_256 on an
 ARM machine). As with other `malloc` functions for streaming APIs, this function
 also returns NULL on allocation failure." ]
-val malloc:
+val malloc_:
   impl:impl -> k:B.buffer uint8 -> k_len:key_length impl { k_len == B.len k } -> (
   let c = hmac in
   let i = (| impl, k_len |) in
@@ -151,7 +151,7 @@ let is_blake2b_256 = function Blake2B_256 _ -> true | _ -> false
 private
 let is_blake2s_128 = function Blake2S_128 _ -> true | _ -> false
 
-let malloc impl key key_length r =
+let malloc_ impl key key_length r =
   if not EverCrypt.TargetConfig.hacl_can_compile_vec256 && is_blake2b_256 impl then
     B.null
   else if not EverCrypt.TargetConfig.hacl_can_compile_vec128 && is_blake2s_128 impl then

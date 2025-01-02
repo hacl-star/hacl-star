@@ -571,15 +571,33 @@ option___Spec_Hash_Definitions_hash_alg____uint64_t__;
 Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
-  uint8_t *buf0 = (uint8_t *)KRML_HOST_CALLOC(block_len(a), sizeof (uint8_t));
-  if (buf0 == NULL)
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(block_len(a), sizeof (uint8_t));
+  if (buf == NULL)
   {
     return NULL;
   }
-  uint8_t *buf1 = buf0;
-  uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-  option___Spec_Hash_Definitions_hash_alg____uint64_t__
-  block_state = { .tag = FStar_Pervasives_Native_Some, .v = { .fst = a, .snd = buf } };
+  uint8_t *buf1 = buf;
+  uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+  option___Spec_Hash_Definitions_hash_alg____uint64_t__ block_state;
+  if (s == NULL)
+  {
+    block_state =
+      (
+        (option___Spec_Hash_Definitions_hash_alg____uint64_t__){
+          .tag = FStar_Pervasives_Native_None
+        }
+      );
+  }
+  else
+  {
+    block_state =
+      (
+        (option___Spec_Hash_Definitions_hash_alg____uint64_t__){
+          .tag = FStar_Pervasives_Native_Some,
+          .v = { .fst = a, .snd = s }
+        }
+      );
+  }
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf1);
@@ -599,10 +617,10 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
       case FStar_Pervasives_Native_Some:
         {
           Hacl_Hash_SHA3_state_t
-          s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };
+          s0 = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };
           Hacl_Hash_SHA3_state_t
           *p = (Hacl_Hash_SHA3_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_SHA3_state_t));
-          p[0U] = s;
+          p[0U] = s0;
           if (p == NULL)
           {
             uint64_t *s1 = block_state1.snd;
@@ -647,18 +665,36 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
   uint64_t total_len0 = scrut0.total_len;
   Spec_Hash_Definitions_hash_alg i = block_state0.fst;
   KRML_CHECK_SIZE(sizeof (uint8_t), block_len(i));
-  uint8_t *buf1 = (uint8_t *)KRML_HOST_CALLOC(block_len(i), sizeof (uint8_t));
-  if (buf1 == NULL)
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(block_len(i), sizeof (uint8_t));
+  if (buf == NULL)
   {
     return NULL;
   }
-  memcpy(buf1, buf0, block_len(i) * sizeof (uint8_t));
-  uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-  option___Spec_Hash_Definitions_hash_alg____uint64_t__
-  block_state = { .tag = FStar_Pervasives_Native_Some, .v = { .fst = i, .snd = buf } };
+  memcpy(buf, buf0, block_len(i) * sizeof (uint8_t));
+  uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+  option___Spec_Hash_Definitions_hash_alg____uint64_t__ block_state;
+  if (s == NULL)
+  {
+    block_state =
+      (
+        (option___Spec_Hash_Definitions_hash_alg____uint64_t__){
+          .tag = FStar_Pervasives_Native_None
+        }
+      );
+  }
+  else
+  {
+    block_state =
+      (
+        (option___Spec_Hash_Definitions_hash_alg____uint64_t__){
+          .tag = FStar_Pervasives_Native_Some,
+          .v = { .fst = i, .snd = s }
+        }
+      );
+  }
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
-    KRML_HOST_FREE(buf1);
+    KRML_HOST_FREE(buf);
     return NULL;
   }
   if (block_state.tag == FStar_Pervasives_Native_Some)
@@ -679,15 +715,15 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
       case FStar_Pervasives_Native_Some:
         {
           Hacl_Hash_SHA3_state_t
-          s = { .block_state = block_state1, .buf = buf1, .total_len = total_len0 };
+          s0 = { .block_state = block_state1, .buf = buf, .total_len = total_len0 };
           Hacl_Hash_SHA3_state_t
           *p = (Hacl_Hash_SHA3_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_SHA3_state_t));
-          p[0U] = s;
+          p[0U] = s0;
           if (p == NULL)
           {
             uint64_t *s1 = block_state1.snd;
             KRML_HOST_FREE(s1);
-            KRML_HOST_FREE(buf1);
+            KRML_HOST_FREE(buf);
             return NULL;
           }
           return p;

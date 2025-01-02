@@ -549,22 +549,50 @@ static Hacl_Hash_Blake2s_Simd128_state_t
     (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
       sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
   memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
-  Lib_IntVector_Intrinsics_vec128
-  *b =
-    (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
-      sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
-  memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___
-  block_state =
+  block_state;
+  if (wv0 == NULL)
+  {
+    block_state =
+      (
+        (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+          .tag = FStar_Pervasives_Native_None
+        }
+      );
+  }
+  else
+  {
+    Lib_IntVector_Intrinsics_vec128
+    *b =
+      (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+        sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
+    memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+    if (b == NULL)
     {
-      .tag = FStar_Pervasives_Native_Some,
-      .v = {
-        .fst = kk.key_length,
-        .snd = kk.digest_length,
-        .thd = kk.last_node,
-        .f3 = { .fst = wv0, .snd = b }
-      }
-    };
+      KRML_ALIGNED_FREE(wv0);
+      block_state =
+        (
+          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+            .tag = FStar_Pervasives_Native_None
+          }
+        );
+    }
+    else
+    {
+      block_state =
+        (
+          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+            .tag = FStar_Pervasives_Native_Some,
+            .v = {
+              .fst = kk.key_length,
+              .snd = kk.digest_length,
+              .thd = kk.last_node,
+              .f3 = { .fst = wv0, .snd = b }
+            }
+          }
+        );
+    }
+  }
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf1);
@@ -603,10 +631,10 @@ static Hacl_Hash_Blake2s_Simd128_state_t
           p[0U] = s;
           if (p == NULL)
           {
-            Lib_IntVector_Intrinsics_vec128 *b0 = block_state1.f3.snd;
+            Lib_IntVector_Intrinsics_vec128 *b = block_state1.f3.snd;
             Lib_IntVector_Intrinsics_vec128 *wv = block_state1.f3.fst;
             KRML_ALIGNED_FREE(wv);
-            KRML_ALIGNED_FREE(b0);
+            KRML_ALIGNED_FREE(b);
             KRML_HOST_FREE(buf1);
             return NULL;
           }
@@ -1271,22 +1299,50 @@ Hacl_Hash_Blake2s_Simd128_state_t
     (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
       sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
   memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
-  Lib_IntVector_Intrinsics_vec128
-  *b =
-    (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
-      sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
-  memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___
-  block_state =
+  block_state;
+  if (wv0 == NULL)
+  {
+    block_state =
+      (
+        (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+          .tag = FStar_Pervasives_Native_None
+        }
+      );
+  }
+  else
+  {
+    Lib_IntVector_Intrinsics_vec128
+    *b =
+      (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+        sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
+    memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+    if (b == NULL)
     {
-      .tag = FStar_Pervasives_Native_Some,
-      .v = {
-        .fst = i.key_length,
-        .snd = i.digest_length,
-        .thd = i.last_node,
-        .f3 = { .fst = wv0, .snd = b }
-      }
-    };
+      KRML_ALIGNED_FREE(wv0);
+      block_state =
+        (
+          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+            .tag = FStar_Pervasives_Native_None
+          }
+        );
+    }
+    else
+    {
+      block_state =
+        (
+          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+            .tag = FStar_Pervasives_Native_Some,
+            .v = {
+              .fst = i.key_length,
+              .snd = i.digest_length,
+              .thd = i.last_node,
+              .f3 = { .fst = wv0, .snd = b }
+            }
+          }
+        );
+    }
+  }
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf);
@@ -1318,10 +1374,10 @@ Hacl_Hash_Blake2s_Simd128_state_t
           p[0U] = s;
           if (p == NULL)
           {
-            Lib_IntVector_Intrinsics_vec128 *b0 = block_state1.f3.snd;
+            Lib_IntVector_Intrinsics_vec128 *b = block_state1.f3.snd;
             Lib_IntVector_Intrinsics_vec128 *wv = block_state1.f3.fst;
             KRML_ALIGNED_FREE(wv);
-            KRML_ALIGNED_FREE(b0);
+            KRML_ALIGNED_FREE(b);
             KRML_HOST_FREE(buf);
             return NULL;
           }

@@ -213,114 +213,275 @@ static Hacl_Agile_Hash_impl impl_of_state(Hacl_Agile_Hash_state_s *s)
   return impl_of_state_s(*s);
 }
 
-static Hacl_Agile_Hash_state_s *create_in(Hacl_Agile_Hash_impl a)
+static Hacl_Agile_Hash_state_s *malloc(Hacl_Agile_Hash_impl a)
 {
-  Hacl_Agile_Hash_state_s s;
   switch (a)
   {
     case Hacl_Agile_Hash_MD5:
       {
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(4U, sizeof (uint32_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = buf } });
-        break;
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(4U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_SHA1:
       {
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(5U, sizeof (uint32_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = buf } });
-        break;
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(5U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_SHA2_224:
       {
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = buf } });
-        break;
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_SHA2_256:
       {
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = buf } });
-        break;
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_SHA2_384:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_SHA2_512:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_SHA3_224:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_SHA3_256:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_SHA3_384:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_SHA3_512:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_Blake2S_32:
       {
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = buf } });
-        break;
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_Blake2S_128:
       {
         #if HACL_CAN_COMPILE_VEC128
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Blake2S_128_s,
-              { .case_Blake2S_128_s = Hacl_Hash_Blake2s_Simd128_malloc_with_key() }
-            }
-          );
+        Lib_IntVector_Intrinsics_vec128 *s = Hacl_Hash_Blake2s_Simd128_malloc_with_key();
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_128_s, { .case_Blake2S_128_s = s } });
+        if (st == NULL)
+        {
+          KRML_ALIGNED_FREE(s);
+          return NULL;
+        }
+        return st;
         #else
-        s =
-          KRML_EABORT(Hacl_Agile_Hash_state_s,
-            "provably unreachable code: did an unverified caller violate a precondition\?");
+        KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+          __FILE__,
+          __LINE__,
+          "provably unreachable code: did an unverified caller violate a precondition\?");
+        KRML_HOST_EXIT(255U);
         #endif
         break;
       }
     case Hacl_Agile_Hash_Blake2B_32:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
-        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = s1 } });
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Hacl_Agile_Hash_Blake2B_256:
       {
         #if HACL_CAN_COMPILE_VEC256
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Blake2B_256_s,
-              { .case_Blake2B_256_s = Hacl_Hash_Blake2b_Simd256_malloc_with_key() }
-            }
-          );
+        Lib_IntVector_Intrinsics_vec256 *s = Hacl_Hash_Blake2b_Simd256_malloc_with_key();
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        Hacl_Agile_Hash_state_s
+        *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
+        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_256_s, { .case_Blake2B_256_s = s } });
+        if (st == NULL)
+        {
+          KRML_ALIGNED_FREE(s);
+          return NULL;
+        }
+        return st;
         #else
-        s =
-          KRML_EABORT(Hacl_Agile_Hash_state_s,
-            "provably unreachable code: did an unverified caller violate a precondition\?");
+        KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+          __FILE__,
+          __LINE__,
+          "provably unreachable code: did an unverified caller violate a precondition\?");
+        KRML_HOST_EXIT(255U);
         #endif
         break;
       }
@@ -330,10 +491,24 @@ static Hacl_Agile_Hash_state_s *create_in(Hacl_Agile_Hash_impl a)
         KRML_HOST_EXIT(253U);
       }
   }
-  Hacl_Agile_Hash_state_s
-  *buf = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-  buf[0U] = s;
-  return buf;
+}
+
+typedef struct option___Hacl_Agile_Hash_state_s__s
+{
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
+  Hacl_Agile_Hash_state_s *v;
+}
+option___Hacl_Agile_Hash_state_s_;
+
+static option___Hacl_Agile_Hash_state_s_ create_in(Hacl_Agile_Hash_impl a)
+{
+  Hacl_Agile_Hash_state_s *st = malloc(a);
+  if (st == NULL)
+  {
+    return ((option___Hacl_Agile_Hash_state_s_){ .tag = FStar_Pervasives_Native_None });
+  }
+  return ((option___Hacl_Agile_Hash_state_s_){ .tag = FStar_Pervasives_Native_Some, .v = st });
 }
 
 static void init(Hacl_Agile_Hash_state_s *s)
@@ -1555,14 +1730,6 @@ static uint32_t dsnd__Hacl_Agile_Hash_impl_uint32_t(Hacl_Streaming_HMAC_Definiti
   return __proj__Mkdtuple2__item___2__Hacl_Agile_Hash_impl_uint32_t(t);
 }
 
-typedef struct option___Hacl_Agile_Hash_state_s__s
-{
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
-  Hacl_Agile_Hash_state_s *v;
-}
-option___Hacl_Agile_Hash_state_s_;
-
 typedef struct option____uint8_t____uint32_t__s
 {
   FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
@@ -1580,17 +1747,16 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
   KRML_CHECK_SIZE(sizeof (uint8_t),
     block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i))));
   uint8_t
-  *buf0 =
+  *buf =
     (uint8_t *)KRML_HOST_CALLOC(block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i))),
       sizeof (uint8_t));
-  if (buf0 == NULL)
+  if (buf == NULL)
   {
     return NULL;
   }
-  uint8_t *buf1 = buf0;
+  uint8_t *buf1 = buf;
   option___Hacl_Agile_Hash_state_s_
-  block_state =
-    { .tag = FStar_Pervasives_Native_Some, .v = create_in(dfst__Hacl_Agile_Hash_impl_uint32_t(i)) };
+  block_state = create_in(dfst__Hacl_Agile_Hash_impl_uint32_t(i));
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf1);
@@ -1599,24 +1765,37 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Agile_Hash_state_s *block_state1 = block_state.v;
-    uint8_t *uu____0;
+    option____uint8_t____uint32_t_ k_;
     if (dsnd__Hacl_Agile_Hash_impl_uint32_t(i) == 0U)
     {
-      uu____0 = NULL;
+      k_ =
+        (
+          (option____uint8_t____uint32_t_){
+            .tag = FStar_Pervasives_Native_Some,
+            .v = { .fst = NULL, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i) }
+          }
+        );
     }
     else
     {
       KRML_CHECK_SIZE(sizeof (uint8_t), dsnd__Hacl_Agile_Hash_impl_uint32_t(i));
       uint8_t
-      *buf = (uint8_t *)KRML_HOST_CALLOC(dsnd__Hacl_Agile_Hash_impl_uint32_t(i), sizeof (uint8_t));
-      uu____0 = buf;
-    }
-    option____uint8_t____uint32_t_
-    k_ =
+      *k = (uint8_t *)KRML_HOST_CALLOC(dsnd__Hacl_Agile_Hash_impl_uint32_t(i), sizeof (uint8_t));
+      if (k == NULL)
       {
-        .tag = FStar_Pervasives_Native_Some,
-        .v = { .fst = uu____0, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i) }
-      };
+        k_ = ((option____uint8_t____uint32_t_){ .tag = FStar_Pervasives_Native_None });
+      }
+      else
+      {
+        k_ =
+          (
+            (option____uint8_t____uint32_t_){
+              .tag = FStar_Pervasives_Native_Some,
+              .v = { .fst = k, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i) }
+            }
+          );
+      }
+    }
     option____uint8_t____uint32_t_ k_0;
     if (k_.tag == FStar_Pervasives_Native_None)
     {
@@ -1720,7 +1899,7 @@ KRML_MAYBE_UNUSED static bool is_blake2s_128(Hacl_Agile_Hash_impl uu___)
 }
 
 Hacl_Streaming_HMAC_agile_state
-*Hacl_Streaming_HMAC_malloc(Hacl_Agile_Hash_impl impl, uint8_t *key, uint32_t key_length)
+*Hacl_Streaming_HMAC_malloc_(Hacl_Agile_Hash_impl impl, uint8_t *key, uint32_t key_length)
 {
   KRML_MAYBE_UNUSED_VAR(key);
   KRML_MAYBE_UNUSED_VAR(key_length);
@@ -2246,54 +2425,63 @@ Hacl_Streaming_HMAC_agile_state
   KRML_CHECK_SIZE(sizeof (uint8_t),
     block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))));
   uint8_t
-  *buf1 =
+  *buf =
     (uint8_t *)KRML_HOST_CALLOC(block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))),
       sizeof (uint8_t));
-  if (buf1 == NULL)
+  if (buf == NULL)
   {
     return NULL;
   }
-  memcpy(buf1,
+  memcpy(buf,
     buf0,
     block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))) * sizeof (uint8_t));
   option___Hacl_Agile_Hash_state_s_
-  block_state =
-    {
-      .tag = FStar_Pervasives_Native_Some,
-      .v = create_in(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))
-    };
+  block_state = create_in(dfst__Hacl_Agile_Hash_impl_uint32_t(i1));
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
-    KRML_HOST_FREE(buf1);
+    KRML_HOST_FREE(buf);
     return NULL;
   }
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Agile_Hash_state_s *block_state1 = block_state.v;
     copy(block_state0, block_state1);
-    uint8_t *uu____0;
+    option____uint8_t____uint32_t_ k_;
     if (dsnd__Hacl_Agile_Hash_impl_uint32_t(i1) == 0U)
     {
-      uu____0 = NULL;
+      k_ =
+        (
+          (option____uint8_t____uint32_t_){
+            .tag = FStar_Pervasives_Native_Some,
+            .v = { .fst = NULL, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i1) }
+          }
+        );
     }
     else
     {
       KRML_CHECK_SIZE(sizeof (uint8_t), dsnd__Hacl_Agile_Hash_impl_uint32_t(i1));
       uint8_t
-      *buf = (uint8_t *)KRML_HOST_CALLOC(dsnd__Hacl_Agile_Hash_impl_uint32_t(i1), sizeof (uint8_t));
-      uu____0 = buf;
-    }
-    option____uint8_t____uint32_t_
-    k_ =
+      *k = (uint8_t *)KRML_HOST_CALLOC(dsnd__Hacl_Agile_Hash_impl_uint32_t(i1), sizeof (uint8_t));
+      if (k == NULL)
       {
-        .tag = FStar_Pervasives_Native_Some,
-        .v = { .fst = uu____0, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i1) }
-      };
+        k_ = ((option____uint8_t____uint32_t_){ .tag = FStar_Pervasives_Native_None });
+      }
+      else
+      {
+        k_ =
+          (
+            (option____uint8_t____uint32_t_){
+              .tag = FStar_Pervasives_Native_Some,
+              .v = { .fst = k, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i1) }
+            }
+          );
+      }
+    }
     option____uint8_t____uint32_t_ k_0;
     if (k_.tag == FStar_Pervasives_Native_None)
     {
       free_(block_state1);
-      KRML_HOST_FREE(buf1);
+      KRML_HOST_FREE(buf);
       k_0 = ((option____uint8_t____uint32_t_){ .tag = FStar_Pervasives_Native_None });
     }
     else if (k_.tag == FStar_Pervasives_Native_Some)
@@ -2322,7 +2510,7 @@ Hacl_Streaming_HMAC_agile_state
     {
       Hacl_Streaming_HMAC_Definitions_key_and_len k_1 = k_0.v;
       Hacl_Streaming_HMAC_agile_state
-      s = { .block_state = block_state1, .buf = buf1, .total_len = total_len0, .p_key = k_1 };
+      s = { .block_state = block_state1, .buf = buf, .total_len = total_len0, .p_key = k_1 };
       Hacl_Streaming_HMAC_agile_state
       *p =
         (Hacl_Streaming_HMAC_agile_state *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_HMAC_agile_state));
@@ -2336,7 +2524,7 @@ Hacl_Streaming_HMAC_agile_state
           KRML_HOST_FREE(k);
         }
         free_(block_state1);
-        KRML_HOST_FREE(buf1);
+        KRML_HOST_FREE(buf);
         return NULL;
       }
       return p;

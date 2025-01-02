@@ -108,7 +108,11 @@ let stateful_keccak: stateful alg =
     (* alloca: *) (fun (a: alg) ->
       a, B.alloca (Lib.IntTypes.u64 0) 25ul)
     (* malloc: *) (fun a r ->
-      Some (a, B.malloc r (Lib.IntTypes.u64 0) 25ul))
+      let s = fallible_malloc r (Lib.IntTypes.u64 0) 25ul in
+      if B.is_null s then
+        None
+      else
+        Some (a, s))
     (* free: *) (fun _ (_, s) ->
       B.free s)
     (* copy: *) (fun _ (a, s_src) (a', s_dst) ->

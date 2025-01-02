@@ -89,8 +89,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       field hacl_Streaming_HMAC_agile_state "p_key"
         hacl_Streaming_HMAC_Definitions_key_and_len
     let _ = seal hacl_Streaming_HMAC_agile_state
-    let hacl_Streaming_HMAC_malloc =
-      foreign "Hacl_Streaming_HMAC_malloc"
+    let hacl_Streaming_HMAC_malloc_ =
+      foreign "Hacl_Streaming_HMAC_malloc_"
         (hacl_Agile_Hash_impl @->
            (ocaml_bytes @->
               (uint32_t @-> (returning (ptr hacl_Streaming_HMAC_agile_state)))))

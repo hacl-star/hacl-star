@@ -452,8 +452,17 @@ Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
   }
   uint8_t *buf1 = buf;
   uint64_t *r1 = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-  FStar_Pervasives_Native_option___uint64_t_
-  block_state = { .tag = FStar_Pervasives_Native_Some, .v = r1 };
+  FStar_Pervasives_Native_option___uint64_t_ block_state;
+  if (r1 == NULL)
+  {
+    block_state =
+      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_None });
+  }
+  else
+  {
+    block_state =
+      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_Some, .v = r1 });
+  }
   if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf1);
