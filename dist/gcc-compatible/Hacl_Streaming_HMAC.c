@@ -213,7 +213,7 @@ static Hacl_Agile_Hash_impl impl_of_state(Hacl_Agile_Hash_state_s *s)
   return impl_of_state_s(*s);
 }
 
-static Hacl_Agile_Hash_state_s *malloc(Hacl_Agile_Hash_impl a)
+static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
 {
   switch (a)
   {
@@ -503,7 +503,7 @@ option___Hacl_Agile_Hash_state_s_;
 
 static option___Hacl_Agile_Hash_state_s_ create_in(Hacl_Agile_Hash_impl a)
 {
-  Hacl_Agile_Hash_state_s *st = malloc(a);
+  Hacl_Agile_Hash_state_s *st = malloc_(a);
   if (st == NULL)
   {
     return ((option___Hacl_Agile_Hash_state_s_){ .tag = FStar_Pervasives_Native_None });
