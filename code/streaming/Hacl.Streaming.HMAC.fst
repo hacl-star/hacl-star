@@ -116,10 +116,14 @@ inline_for_extraction noextract
 let mk #impl (k:B.buffer uint8) (k_len:key_length impl { k_len == B.len k }): key_and_len (| impl, k_len |) =
   k, k_len
 
-[@ Comment "This function returns NULL if the user requests a choice of
+private
+let is_blake2b_256 = function Blake2B_256 _ -> true | _ -> false
+private
+let is_blake2s_128 = function Blake2S_128 _ -> true | _ -> false
+
+[@ Comment "This function returns InvalidAlgorithm if the user requests a choice of
 implementation that has not been enabled at build-time (e.g. Blake2b_256 on an
-ARM machine). As with other `malloc` functions for streaming APIs, this function
-also returns NULL on allocation failure." ]
+ARM machine). This function returns OutOfMemory on allocation failure." ]
 val malloc_:
   impl:impl -> k:B.buffer uint8 -> k_len:key_length impl { k_len == B.len k } -> (
   let c = hmac in
@@ -129,35 +133,51 @@ val malloc_:
   let t' = state i in
   let open F in
   r:HS.rid ->
-  ST (B.buffer (state_s c i t t'))
+  dst: B.pointer (state c i t t') ->
+  ST Hacl.Streaming.Types.error_code
   (requires (fun h0 ->
     c.key.invariant #i h0 k /\
+    B.live h0 dst /\
     HyperStack.ST.is_eternal_region r))
-  (ensures (fun h0 s h1 ->
-    if B.g_is_null s then
-      B.(modifies loc_none h0 h1)
-    else
-      B.length s == 1 /\
-      invariant c i h1 s /\
-      freeable c i h1 s /\
-      seen c i h1 s == S.empty /\
-      reveal_key c i h1 s == c.key.v i h0 k /\
-      B.(modifies loc_none h0 h1) /\
-      B.fresh_loc (footprint c i h1 s) h0 h1 /\
-      B.(loc_includes (loc_region_only true r) (footprint c i h1 s)))))
+  (ensures (fun h0 ret h1 ->
+    let open Hacl.Streaming.Types in
+    match ret with
+    | OutOfMemory ->
+        B.(modifies loc_none h0 h1)
+    | InvalidAlgorithm ->
+        not EverCrypt.TargetConfig.hacl_can_compile_vec256 && is_blake2b_256 impl ||
+        not EverCrypt.TargetConfig.hacl_can_compile_vec128 && is_blake2s_128 impl
+    | Success ->
+        let s = B.deref h1 dst in
+        invariant c i h1 s /\
+        freeable c i h1 s /\
+        seen c i h1 s == S.empty /\
+        reveal_key c i h1 s == c.key.v i h0 k /\
+        B.(modifies (loc_buffer dst) h0 h1) /\
+        B.fresh_loc (footprint c i h1 s) h0 h1 /\
+        B.(loc_includes (loc_region_only true r) (footprint c i h1 s))
+    | _ ->
+        False)))
 
-private
-let is_blake2b_256 = function Blake2B_256 _ -> true | _ -> false
-private
-let is_blake2s_128 = function Blake2S_128 _ -> true | _ -> false
-
-let malloc_ impl key key_length r =
+let malloc_ impl key key_length r dst =
+  let open Hacl.Streaming.Types in
   if not EverCrypt.TargetConfig.hacl_can_compile_vec256 && is_blake2b_256 impl then
-    B.null
+    InvalidAlgorithm
   else if not EverCrypt.TargetConfig.hacl_can_compile_vec128 && is_blake2s_128 impl then
-    B.null
+    InvalidAlgorithm
   else
-    malloc_internal (| impl, key_length |) (mk key key_length) r
+    let h0 = ST.get () in
+    let st = malloc_internal (| impl, key_length |) (mk key key_length) r in
+    if B.is_null st then
+      OutOfMemory
+    else
+      let open LowStar.BufferOps in
+      let h1 = ST.get () in
+      assert B.(loc_disjoint (loc_buffer dst) (F.footprint hmac (| impl, key_length |) h1 st));
+      dst *= st;
+      let h2 = ST.get () in
+      F.frame_invariant hmac (| impl, key_length |) (B.loc_buffer dst) st h1 h2;
+      Success
 
 inline_for_extraction noextract
 let mk' (#i: index) (k:B.buffer uint8) (k_len:key_length (dfst i) { k_len == B.len k /\ k_len == dsnd i }): hmac.key.s i =

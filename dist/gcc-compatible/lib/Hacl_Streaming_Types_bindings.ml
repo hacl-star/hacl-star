@@ -13,6 +13,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 2
     let hacl_Streaming_Types_error_code_Hacl_Streaming_Types_MaximumLengthExceeded
       = Unsigned.UInt8.of_int 3
+    let hacl_Streaming_Types_error_code_Hacl_Streaming_Types_OutOfMemory =
+      Unsigned.UInt8.of_int 4
     type hacl_Streaming_MD_state_32 =
       [ `hacl_Streaming_MD_state_32 ] structure
     let (hacl_Streaming_MD_state_32 :

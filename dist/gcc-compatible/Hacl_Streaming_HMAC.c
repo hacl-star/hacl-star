@@ -1898,26 +1898,39 @@ KRML_MAYBE_UNUSED static bool is_blake2s_128(Hacl_Agile_Hash_impl uu___)
   }
 }
 
-Hacl_Streaming_HMAC_agile_state
-*Hacl_Streaming_HMAC_malloc_(Hacl_Agile_Hash_impl impl, uint8_t *key, uint32_t key_length)
+Hacl_Streaming_Types_error_code
+Hacl_Streaming_HMAC_malloc_(
+  Hacl_Agile_Hash_impl impl,
+  uint8_t *key,
+  uint32_t key_length,
+  Hacl_Streaming_HMAC_agile_state **dst
+)
 {
   KRML_MAYBE_UNUSED_VAR(key);
   KRML_MAYBE_UNUSED_VAR(key_length);
+  KRML_MAYBE_UNUSED_VAR(dst);
   #if !HACL_CAN_COMPILE_VEC256
   if (is_blake2b_256(impl))
   {
-    return NULL;
+    return Hacl_Streaming_Types_InvalidAlgorithm;
   }
   #endif
   #if !HACL_CAN_COMPILE_VEC128
   if (is_blake2s_128(impl))
   {
-    return NULL;
+    return Hacl_Streaming_Types_InvalidAlgorithm;
   }
   #endif
-  return
+  Hacl_Streaming_HMAC_agile_state
+  *st =
     malloc_internal(((Hacl_Streaming_HMAC_Definitions_index){ .fst = impl, .snd = key_length }),
       ((Hacl_Streaming_HMAC_Definitions_key_and_len){ .fst = key, .snd = key_length }));
+  if (st == NULL)
+  {
+    return Hacl_Streaming_Types_OutOfMemory;
+  }
+  *dst = st;
+  return Hacl_Streaming_Types_Success;
 }
 
 Hacl_Streaming_HMAC_Definitions_index

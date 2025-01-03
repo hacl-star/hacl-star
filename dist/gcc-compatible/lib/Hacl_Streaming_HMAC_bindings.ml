@@ -93,7 +93,9 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Streaming_HMAC_malloc_"
         (hacl_Agile_Hash_impl @->
            (ocaml_bytes @->
-              (uint32_t @-> (returning (ptr hacl_Streaming_HMAC_agile_state)))))
+              (uint32_t @->
+                 ((ptr (ptr hacl_Streaming_HMAC_agile_state)) @->
+                    (returning hacl_Streaming_Types_error_code)))))
     let hacl_Streaming_HMAC_get_impl =
       foreign "Hacl_Streaming_HMAC_get_impl"
         ((ptr hacl_Streaming_HMAC_agile_state) @->
