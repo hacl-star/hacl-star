@@ -18,25 +18,6 @@ open Hacl.Streaming.Interface
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-inline_for_extraction noextract
-let stateful_agile_hash_state: Hacl.Streaming.Interface.stateful Hacl.Streaming.HMAC.Definitions.index =
-  Hacl.Streaming.Interface.Stateful
-    (fun i -> state (dfst i))
-    (fun #i h s -> footprint #(dfst i) s h)
-    (fun #i h s -> freeable #(dfst i) h s)
-    (fun #i h s -> invariant #(dfst i) s h)
-    (fun i -> Spec.Hash.Definitions.words_state (alg_of_impl (dfst i)))
-    (fun i h s -> repr s h)
-    (fun #i h s -> invariant_loc_in_footprint s h)
-    (fun #i l s h0 h1 ->
-      frame_invariant l s h0 h1;
-      frame_invariant_implies_footprint_preservation l s h0 h1)
-    (fun #i l s h0 h1 -> ())
-    (fun i -> alloca (dfst i))
-    (fun i r -> create_in (dfst i) r)
-    (fun i -> free #(dfst i))
-    (fun i -> copy #(dfst i))
-
 open Hacl.Streaming.HMAC.Definitions
 
 #push-options "--z3rlimit 200"
@@ -65,15 +46,15 @@ let hmac: block index =
     (* update_multi_s *) (fun i s prevlen data ->
       let a = alg i in
       if Spec.Hash.Definitions.is_blake a then
-        Spec.Agile.Hash.update_multi (alg i) s prevlen data
+        Spec.Agile.Hash.update_multi (alg i) (fst s) prevlen data, snd s
       else
-        Spec.Agile.Hash.update_multi (alg i) s () data)
+        Spec.Agile.Hash.update_multi (alg i) (fst s) () data, snd s)
     (* update_last_s *) (fun i s prevlen data ->
       let a = alg i in
       if Spec.Hash.Definitions.is_keccak a then
-        Spec.Hash.Incremental.Definitions.update_last (alg i) s () data
+        Spec.Hash.Incremental.Definitions.update_last (alg i) (fst s) () data, snd s
       else
-        Spec.Hash.Incremental.Definitions.update_last (alg i) s prevlen data)
+        Spec.Hash.Incremental.Definitions.update_last (alg i) (fst s) prevlen data, snd s)
     (* finish_s *) (fun i k s l ->
       Spec.HMAC.Incremental.finish (alg i) k s)
     (* spec_s *) (fun i k input l ->
@@ -81,24 +62,32 @@ let hmac: block index =
     (* update_multi_zero *) (fun i s prevlen ->
       let a = alg i in
       if Spec.Hash.Definitions.is_blake a then
-        Spec.Hash.Lemmas.update_multi_zero_blake a (prevlen <: Spec.Hash.Definitions.extra_state a) s
+        Spec.Hash.Lemmas.update_multi_zero_blake a (prevlen <: Spec.Hash.Definitions.extra_state a) (fst s)
       else
-        Spec.Hash.Lemmas.update_multi_zero a s)
+        Spec.Hash.Lemmas.update_multi_zero a (fst s))
     (* update_multi_associative *) (fun i s prevlen1 prevlen2 input1 input2 ->
       let a = alg i in
       if Spec.Hash.Definitions.is_blake a then
-        Spec.Hash.Lemmas.update_multi_associative_blake a s prevlen1 prevlen2 input1 input2
+        Spec.Hash.Lemmas.update_multi_associative_blake a (fst s) prevlen1 prevlen2 input1 input2
       else
-        Spec.Hash.Lemmas.update_multi_associative a s input1 input2)
+        Spec.Hash.Lemmas.update_multi_associative a (fst s) input1 input2)
     (* spec_is_incremental *) (fun i k input l ->
       Spec.HMAC.Incremental.hmac_is_hmac_incremental (alg i) k input)
-    (* index_of_state *) index_of_state
+    (* index_of_state *) (fun i s k -> index_of_state i (fst s) k)
     (* init *) (fun i k buf s -> init i k buf s)
     (* update_multi *) (fun i s prevlen blocks len ->
-      Hacl.Agile.Hash.update_multi s prevlen blocks len
+      let s1, s2 = s in
+      let h0 = ST.get () in
+      Hacl.Agile.Hash.update_multi s1 prevlen blocks len;
+      let h1 = ST.get () in
+      Hacl.Agile.Hash.frame_invariant (Hacl.Agile.Hash.footprint s1 h0) s2 h0 h1
     )
     (* update_last *) (fun i s prevlen last last_len ->
-      Hacl.Agile.Hash.update_last s prevlen last last_len
+      let s1, s2 = s in
+      let h0 = ST.get () in
+      Hacl.Agile.Hash.update_last s1 prevlen last last_len;
+      let h1 = ST.get () in
+      Hacl.Agile.Hash.frame_invariant (Hacl.Agile.Hash.footprint s1 h0) s2 h0 h1
     )
     (* finish *) (fun i k s dst l -> finish i k s dst l)
 
@@ -129,11 +118,11 @@ val malloc_:
   let c = hmac in
   let i = (| impl, k_len |) in
   let k = mk #impl k k_len in
-  let t = Hacl.Agile.Hash.state impl in
+  let t = two_state (| impl, k_len |)  in
   let t' = state i in
   let open F in
   r:HS.rid ->
-  dst: B.pointer (state c i t t') ->
+  dst: B.pointer (F.state c i t t') ->
   ST Hacl.Streaming.Types.error_code
   (requires (fun h0 ->
     c.key.invariant #i h0 k /\
@@ -187,7 +176,7 @@ val reset:
   i: G.erased index -> (
   let c = hmac in
   let i = G.reveal i in
-  let t = Hacl.Agile.Hash.state (dfst i) in
+  let t = two_state i in
   let t' = state i in
   let open F in
   state:state c i t t' ->

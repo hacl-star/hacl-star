@@ -18,11 +18,11 @@ open Hacl.Streaming.Interface
 
 let _sync_decl = ()
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
-
 friend Spec.Agile.HMAC
 friend Spec.HMAC.Incremental
 friend Hacl.HMAC
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 400"
 
 noextract inline_for_extraction
 val alloca_block (#a: Type0) (i: G.erased impl) (init: a):
@@ -126,29 +126,94 @@ let init (i: G.erased index) k buf s =
   (**) assert_norm (pow2 32 < pow2 61);
   (**) assert_norm (pow2 32 < pow2 64);
   (**) assert_norm (pow2 32 < pow2 125);
-  Hacl.Agile.Hash.init s;
-  let i = Hacl.Agile.Hash.impl_of_state (dfst i) s in
+  let s1, s2 = s in
+  (**) let h000 = ST.get () in
+  Hacl.Agile.Hash.init s1;
+  (**) let h001 = ST.get () in
+  (**) Hacl.Agile.Hash.(frame_invariant (footprint s1 h000) s2 h000 h001);
+  Hacl.Agile.Hash.init s2;
+  (**) let h002 = ST.get () in
+  (**) Hacl.Agile.Hash.(frame_invariant (footprint s2 h001) s1 h001 h002);
+  (**) assert Hacl.Agile.Hash.(invariant s1 h002);
+  (**) assert Hacl.Agile.Hash.(invariant s2 h002);
+  let i = Hacl.Agile.Hash.impl_of_state (dfst i) s1 in
   let a = alg_of_impl i in
   (**) let h00 = ST.get () in
+  (**) assert Hacl.Agile.Hash.(invariant s1 h00);
+  (**) assert Hacl.Agile.Hash.(invariant s2 h00);
+  let k0 = k in
+  let k, k_len = k in
+  (**) assert (B.as_seq h000 k `S.equal` B.as_seq h00 k);
   push_frame ();
   (**) let h0 = ST.get () in
+  (**) assert (B.as_seq h000 k `S.equal` B.as_seq h0 k);
+  (**) assert Hacl.Agile.Hash.(footprint s2 h000 == footprint s2 h0);
+  (**) assert Hacl.Agile.Hash.(footprint s2 h00 == footprint s2 h0);
+  // (**) Hacl.Agile.Hash.frame_invariant (B.loc_region_only false (HS.get_tip h0)) s1 h00 h0;
+  (**) Hacl.Agile.Hash.frame_invariant (B.loc_region_only false (HS.get_tip h0)) s2 h00 h0;
+  // (**) assert Hacl.Agile.Hash.(invariant s1 h0);
+  (**) assert Hacl.Agile.Hash.(invariant s2 h0);
   let block = alloca_block i (Lib.IntTypes.u8 0) in
 
   (**) let h1 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer block) h0 h1);
-  let k, k_len = k in
+  // (**) B.loc_unused_in_not_unused_in_disjoint h0;
+  // (**) B.loc_unused_in_not_unused_in_disjoint h1;
+  // (**) B.(modifies_only_not_unused_in loc_none h0 h1);
+  wrap_key i block k k_len;
+  (**) let h10 = ST.get () in
+  let ipad = alloca_block i (Lib.IntTypes.u8 0x36) in
+  let h11 = ST.get () in
+  let opad = alloca_block i (Lib.IntTypes.u8 0x5c) in
+  let h12 = ST.get () in
+  (**) assert (B.fresh_loc (B.loc_buffer ipad) h1 h11);
+  (**) assert (B.fresh_loc (B.loc_buffer opad) h11 h12);
   (**) B.loc_unused_in_not_unused_in_disjoint h0;
   (**) B.loc_unused_in_not_unused_in_disjoint h1;
-  (**) B.(modifies_only_not_unused_in loc_none h0 h1);
-  wrap_key i block k k_len;
-  let ipad = alloca_block i (Lib.IntTypes.u8 0x36) in
+  (**) B.loc_unused_in_not_unused_in_disjoint h10;
+  (**) B.loc_unused_in_not_unused_in_disjoint h11;
+  (**) B.loc_unused_in_not_unused_in_disjoint h12;
+  (**) B.(modifies_only_not_unused_in loc_none h10 h12);
+  (**) assert B.(loc_disjoint (loc_buffer opad) (loc_buffer ipad));
+  (**) assert (B.as_seq h12 block `S.equal` (Spec.Agile.HMAC.wrap a (B.as_seq h000 k)));
   C.Loops.map2 buf ipad block (block_len a) Lib.IntTypes.( (^.) );
+  (**) let h13 = ST.get () in
+  (**) assert (B.as_seq h13 buf `S.equal` Spec.HMAC.Incremental.init_input a (B.as_seq h0 k));
+  C.Loops.in_place_map2 opad block (block_len a) Lib.IntTypes.( (^.) );
   (**) let h2 = ST.get () in
   (**) assert (B.as_seq h2 buf `S.equal` Spec.HMAC.Incremental.init_input a (B.as_seq h0 k));
+  (**) assert (B.as_seq h2 opad `S.equal` (
+    let k = Spec.Agile.HMAC.wrap a (B.as_seq h000 k) in
+    Spec.Agile.HMAC.xor (Lib.IntTypes.u8 0x5c) k));
+  (**) (B.modifies_only_not_unused_in (B.loc_buffer buf) h0 h2);
+  // (**) Hacl.Agile.Hash.(frame_invariant (B.loc_buffer buf) s1 h0 h2);
+  (**) Hacl.Agile.Hash.(frame_invariant (B.loc_buffer buf) s2 h0 h2);
+  (**) assert (Hacl.Agile.Hash.repr s2 h2 `S.equal` Spec.Agile.Hash.init a);
+  Hacl.Agile.Hash.update_multi s2 0UL opad (Hacl.Hash.Definitions.block_len a);
+  (**) let h20 = ST.get () in
+  (**) assert (Hacl.Agile.Hash.repr s2 h20 `S.equal` (
+    let k = Spec.Agile.HMAC.wrap a (B.as_seq h000 k) in
+    let opad = Spec.Agile.HMAC.xor (Lib.IntTypes.u8 0x5c) k in
+    Spec.Agile.Hash.(update_multi a (init a) (init_extra_state a) opad)));
+  (**) assert B.(modifies (Hacl.Agile.Hash.footprint s2 h0) h2 h20);
+  (**) assert (B.as_seq h20 buf `S.equal` Spec.HMAC.Incremental.init_input a (B.as_seq h000 k));
+  (**) B.modifies_trans (B.loc_buffer buf) h0 h2 (Hacl.Agile.Hash.footprint s2 h0) h20;
   pop_frame ();
   (**) let h3 = ST.get () in
-  assert (B.modifies (B.loc_buffer buf) h00 h3);
-  Hacl.Agile.Hash.frame_invariant (B.loc_buffer buf) s h00 h3;
+  (**) B.modifies_fresh_frame_popped h00 h0 (B.loc_buffer buf `B.loc_union` Hacl.Agile.Hash.footprint s2 h00) h20 h3;
+  (**) B.popped_modifies h20 h3;
+  (**) assert (B.modifies (B.loc_buffer buf `B.loc_union` (Hacl.Agile.Hash.footprint s2 h00)) h00 h3);
+  (**) B.modifies_loc_includes (B.loc_buffer buf `B.loc_union` (two_footprint h00 s)) h00 h3
+    (B.loc_buffer buf `B.loc_union` (Hacl.Agile.Hash.footprint s2 h00));
+  (**) B.modifies_trans (two_footprint h000 s) h000 h00 (B.loc_buffer buf `B.loc_union` (two_footprint h00 s)) h3;
+  (**) Hacl.Agile.Hash.frame_invariant (B.loc_buffer buf `B.loc_union` Hacl.Agile.Hash.footprint s2 h00) s1 h00 h3;
+  (**) assert (Hacl.Agile.Hash.repr s1 h3 `S.equal` Spec.Agile.Hash.init a);
+  (**) Hacl.Agile.Hash.frame_invariant (B.loc_region_only false (HS.get_tip h20)) s2 h20 h3;
+  (**) assert (Hacl.Agile.Hash.repr s2 h3 `S.equal` (
+    let k = Spec.Agile.HMAC.wrap a (B.as_seq h000 k) in
+    let opad = Spec.Agile.HMAC.xor (Lib.IntTypes.u8 0x5c) k in
+    Spec.Agile.Hash.(update_multi a (init a) (init_extra_state a) opad)));
+  (**) frame_invariant (B.loc_buffer buf `B.loc_union` Hacl.Agile.Hash.footprint s2 h00) k0 h00 h3;
   ()
 
 let finish (i: G.erased index) k s dst _ =
