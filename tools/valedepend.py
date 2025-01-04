@@ -128,7 +128,7 @@ def vale_types_command(source_vaf):
             for y in sorted(dump_deps[x]):
                 # if x depends on y, y must appear first
                 collect_dumps_in_order(y)
-            x_vaf = re.sub('\.dump$', '.types.vaf', x)
+            x_vaf = re.sub('\\.dump$', '.types.vaf', x)
             depends(types_vaf, x)
     for vaf in sorted(vaf_vaf_deps[source_vaf] | {source_vaf}):
         for x in sorted(vaf_dump_deps[vaf]):
