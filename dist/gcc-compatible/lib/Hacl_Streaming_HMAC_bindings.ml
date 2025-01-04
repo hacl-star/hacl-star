@@ -73,6 +73,18 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_HMAC_Definitions_key_and_len_snd =
       field hacl_Streaming_HMAC_Definitions_key_and_len "snd" uint32_t
     let _ = seal hacl_Streaming_HMAC_Definitions_key_and_len
+    type hacl_Streaming_HMAC_Definitions_two_state =
+      [ `hacl_Streaming_HMAC_Definitions_two_state ] structure
+    let (hacl_Streaming_HMAC_Definitions_two_state :
+      [ `hacl_Streaming_HMAC_Definitions_two_state ] structure typ) =
+      structure "Hacl_Streaming_HMAC_Definitions_two_state_s"
+    let hacl_Streaming_HMAC_Definitions_two_state_fst =
+      field hacl_Streaming_HMAC_Definitions_two_state "fst"
+        (ptr hacl_Agile_Hash_state_s)
+    let hacl_Streaming_HMAC_Definitions_two_state_snd =
+      field hacl_Streaming_HMAC_Definitions_two_state "snd"
+        (ptr hacl_Agile_Hash_state_s)
+    let _ = seal hacl_Streaming_HMAC_Definitions_two_state
     type hacl_Streaming_HMAC_agile_state =
       [ `hacl_Streaming_HMAC_agile_state ] structure
     let (hacl_Streaming_HMAC_agile_state :
@@ -80,7 +92,7 @@ module Bindings(F:Cstubs.FOREIGN) =
       structure "Hacl_Streaming_HMAC_agile_state_s"
     let hacl_Streaming_HMAC_agile_state_block_state =
       field hacl_Streaming_HMAC_agile_state "block_state"
-        (ptr hacl_Agile_Hash_state_s)
+        hacl_Streaming_HMAC_Definitions_two_state
     let hacl_Streaming_HMAC_agile_state_buf =
       field hacl_Streaming_HMAC_agile_state "buf" (ptr uint8_t)
     let hacl_Streaming_HMAC_agile_state_total_len =

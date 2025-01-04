@@ -77,9 +77,16 @@ typedef struct Hacl_Streaming_HMAC_Definitions_key_and_len_s
 }
 Hacl_Streaming_HMAC_Definitions_key_and_len;
 
+typedef struct Hacl_Streaming_HMAC_Definitions_two_state_s
+{
+  Hacl_Agile_Hash_state_s *fst;
+  Hacl_Agile_Hash_state_s *snd;
+}
+Hacl_Streaming_HMAC_Definitions_two_state;
+
 typedef struct Hacl_Streaming_HMAC_agile_state_s
 {
-  Hacl_Agile_Hash_state_s *block_state;
+  Hacl_Streaming_HMAC_Definitions_two_state block_state;
   uint8_t *buf;
   uint64_t total_len;
   Hacl_Streaming_HMAC_Definitions_key_and_len p_key;
