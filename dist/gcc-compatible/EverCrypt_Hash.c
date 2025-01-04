@@ -2450,6 +2450,9 @@ Free a state previously allocated with `create_in`.
 */
 void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_state_t *state)
 {
+  EverCrypt_Hash_state_s *block_state0 = (*state).block_state;
+  Spec_Hash_Definitions_hash_alg i1 = alg_of_state(block_state0);
+  KRML_MAYBE_UNUSED_VAR(i1);
   EverCrypt_Hash_Incremental_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;

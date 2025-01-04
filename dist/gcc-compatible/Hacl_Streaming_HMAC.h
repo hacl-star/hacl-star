@@ -70,26 +70,34 @@ typedef struct Hacl_Streaming_HMAC_Definitions_index_s
 }
 Hacl_Streaming_HMAC_Definitions_index;
 
-typedef struct Hacl_Streaming_HMAC_Definitions_key_and_len_s
-{
-  uint8_t *fst;
-  uint32_t snd;
-}
-Hacl_Streaming_HMAC_Definitions_key_and_len;
-
 typedef struct Hacl_Streaming_HMAC_Definitions_two_state_s
 {
-  Hacl_Agile_Hash_state_s *fst;
+  uint32_t fst;
   Hacl_Agile_Hash_state_s *snd;
+  Hacl_Agile_Hash_state_s *thd;
 }
 Hacl_Streaming_HMAC_Definitions_two_state;
+
+Hacl_Agile_Hash_state_s
+*Hacl_Streaming_HMAC_s1(
+  Hacl_Streaming_HMAC_Definitions_index i,
+  Hacl_Streaming_HMAC_Definitions_two_state s
+);
+
+Hacl_Agile_Hash_state_s
+*Hacl_Streaming_HMAC_s2(
+  Hacl_Streaming_HMAC_Definitions_index i,
+  Hacl_Streaming_HMAC_Definitions_two_state s
+);
+
+Hacl_Streaming_HMAC_Definitions_index
+Hacl_Streaming_HMAC_index_of_state(Hacl_Streaming_HMAC_Definitions_two_state s);
 
 typedef struct Hacl_Streaming_HMAC_agile_state_s
 {
   Hacl_Streaming_HMAC_Definitions_two_state block_state;
   uint8_t *buf;
   uint64_t total_len;
-  Hacl_Streaming_HMAC_Definitions_key_and_len p_key;
 }
 Hacl_Streaming_HMAC_agile_state;
 

@@ -126,7 +126,7 @@ let init (i: G.erased index) k buf s =
   (**) assert_norm (pow2 32 < pow2 61);
   (**) assert_norm (pow2 32 < pow2 64);
   (**) assert_norm (pow2 32 < pow2 125);
-  let _, s1, s2 = s in
+  let k_len, s1, s2 = s in
   (**) let h000 = ST.get () in
   Hacl.Agile.Hash.init s1;
   (**) let h001 = ST.get () in
@@ -142,7 +142,6 @@ let init (i: G.erased index) k buf s =
   (**) assert Hacl.Agile.Hash.(invariant s1 h00);
   (**) assert Hacl.Agile.Hash.(invariant s2 h00);
   let k0 = k in
-  let k, k_len = k in
   (**) assert (B.as_seq h000 k `S.equal` B.as_seq h00 k);
   push_frame ();
   (**) let h0 = ST.get () in
@@ -216,7 +215,7 @@ let init (i: G.erased index) k buf s =
   (**) frame_invariant (B.loc_buffer buf `B.loc_union` Hacl.Agile.Hash.footprint s2 h00) k0 h00 h3;
   ()
 
-let finish (i: G.erased index) s dst _ =
+let finish (i: G.erased index) _ s dst _ =
   (**) Hacl.HMAC.hash_lt_block (alg_of_impl (dfst i));
   (**) assert_norm (pow2 32 < pow2 61);
   (**) assert_norm (pow2 32 < pow2 64);

@@ -1599,15 +1599,6 @@ static uint64_t max_input_len64(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
-static Hacl_Streaming_HMAC_Definitions_index
-index_of_state(Hacl_Agile_Hash_state_s *s, Hacl_Streaming_HMAC_Definitions_key_and_len k)
-{
-  Hacl_Streaming_HMAC_Definitions_key_and_len k1 = k;
-  uint32_t kl = k1.snd;
-  Hacl_Agile_Hash_impl i1 = impl_of_state(s);
-  return ((Hacl_Streaming_HMAC_Definitions_index){ .fst = i1, .snd = kl });
-}
-
 static void wrap_key(Hacl_Agile_Hash_impl impl, uint8_t *output, uint8_t *key, uint32_t len)
 {
   uint8_t *nkey = output;
@@ -1634,24 +1625,18 @@ static void wrap_key(Hacl_Agile_Hash_impl impl, uint8_t *output, uint8_t *key, u
   hash(impl, nkey, key, len);
 }
 
-static void
-init0(
-  Hacl_Streaming_HMAC_Definitions_key_and_len k,
-  uint8_t *buf,
-  Hacl_Streaming_HMAC_Definitions_two_state s
-)
+static void init0(uint8_t *k, uint8_t *buf, Hacl_Streaming_HMAC_Definitions_two_state s)
 {
-  Hacl_Agile_Hash_state_s *s1 = s.fst;
-  Hacl_Agile_Hash_state_s *s2 = s.snd;
+  uint32_t k_len = s.fst;
+  Hacl_Agile_Hash_state_s *s1 = s.snd;
+  Hacl_Agile_Hash_state_s *s2 = s.thd;
   init(s1);
   init(s2);
   Hacl_Agile_Hash_impl i1 = impl_of_state(s1);
   Spec_Hash_Definitions_hash_alg a = alg_of_impl(i1);
-  uint8_t *k1 = k.fst;
-  uint32_t k_len = k.snd;
   uint8_t b0[168U] = { 0U };
   uint8_t *block = b0;
-  wrap_key(i1, block, k1, k_len);
+  wrap_key(i1, block, k, k_len);
   uint8_t b1[168U];
   memset(b1, 0x36U, 168U * sizeof (uint8_t));
   uint8_t *ipad = b1;
@@ -1675,13 +1660,42 @@ init0(
 
 static void finish0(Hacl_Streaming_HMAC_Definitions_two_state s, uint8_t *dst)
 {
-  Hacl_Agile_Hash_state_s *s1 = s.fst;
-  Hacl_Agile_Hash_state_s *s2 = s.snd;
+  Hacl_Agile_Hash_state_s *s2 = s.thd;
+  Hacl_Agile_Hash_state_s *s1 = s.snd;
   Hacl_Agile_Hash_impl i1 = impl_of_state(s1);
   Spec_Hash_Definitions_hash_alg a = alg_of_impl(i1);
   finish(s1, dst);
   update_last(s2, (uint64_t)block_len(a), dst, hash_len(a));
   finish(s2, dst);
+}
+
+Hacl_Agile_Hash_state_s
+*Hacl_Streaming_HMAC_s1(
+  Hacl_Streaming_HMAC_Definitions_index i,
+  Hacl_Streaming_HMAC_Definitions_two_state s
+)
+{
+  KRML_MAYBE_UNUSED_VAR(i);
+  return s.snd;
+}
+
+Hacl_Agile_Hash_state_s
+*Hacl_Streaming_HMAC_s2(
+  Hacl_Streaming_HMAC_Definitions_index i,
+  Hacl_Streaming_HMAC_Definitions_two_state s
+)
+{
+  KRML_MAYBE_UNUSED_VAR(i);
+  return s.thd;
+}
+
+Hacl_Streaming_HMAC_Definitions_index
+Hacl_Streaming_HMAC_index_of_state(Hacl_Streaming_HMAC_Definitions_two_state s)
+{
+  Hacl_Agile_Hash_state_s *s11 = s.snd;
+  uint32_t kl = s.fst;
+  Hacl_Agile_Hash_impl i1 = impl_of_state(s11);
+  return ((Hacl_Streaming_HMAC_Definitions_index){ .fst = i1, .snd = kl });
 }
 
 static Hacl_Agile_Hash_impl
@@ -1711,27 +1725,16 @@ static uint32_t dsnd__Hacl_Agile_Hash_impl_uint32_t(Hacl_Streaming_HMAC_Definiti
   return __proj__Mkdtuple2__item___2__Hacl_Agile_Hash_impl_uint32_t(t);
 }
 
-typedef struct option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s___s
+typedef struct option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s___s
 {
   FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
   tag;
   Hacl_Streaming_HMAC_Definitions_two_state v;
 }
-option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__;
-
-typedef struct option____uint8_t____uint32_t__s
-{
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
-  Hacl_Streaming_HMAC_Definitions_key_and_len v;
-}
-option____uint8_t____uint32_t_;
+option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__;
 
 KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
-*malloc_internal(
-  Hacl_Streaming_HMAC_Definitions_index i,
-  Hacl_Streaming_HMAC_Definitions_key_and_len key
-)
+*malloc_internal(Hacl_Streaming_HMAC_Definitions_index i, uint8_t *key)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t),
     block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i))));
@@ -1744,26 +1747,26 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
     return NULL;
   }
   uint8_t *buf1 = buf;
-  Hacl_Agile_Hash_state_s *s10 = malloc_(dfst__Hacl_Agile_Hash_impl_uint32_t(i));
-  option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__ block_state;
-  if (s10 == NULL)
+  Hacl_Agile_Hash_state_s *s110 = malloc_(dfst__Hacl_Agile_Hash_impl_uint32_t(i));
+  option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__ block_state;
+  if (s110 == NULL)
   {
     block_state =
       (
-        (option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
+        (option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
           .tag = FStar_Pervasives_Native_None
         }
       );
   }
   else
   {
-    Hacl_Agile_Hash_state_s *s2 = malloc_(dfst__Hacl_Agile_Hash_impl_uint32_t(i));
-    if (s2 == NULL)
+    Hacl_Agile_Hash_state_s *s21 = malloc_(dfst__Hacl_Agile_Hash_impl_uint32_t(i));
+    if (s21 == NULL)
     {
-      KRML_HOST_FREE(s10);
+      KRML_HOST_FREE(s110);
       block_state =
         (
-          (option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
+          (option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
             .tag = FStar_Pervasives_Native_None
           }
         );
@@ -1772,9 +1775,9 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
     {
       block_state =
         (
-          (option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
+          (option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
             .tag = FStar_Pervasives_Native_Some,
-            .v = { .fst = s10, .snd = s2 }
+            .v = { .fst = dsnd__Hacl_Agile_Hash_impl_uint32_t(i), .snd = s110, .thd = s21 }
           }
         );
     }
@@ -1787,107 +1790,47 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Streaming_HMAC_Definitions_two_state block_state1 = block_state.v;
-    option____uint8_t____uint32_t_ k_;
-    if (dsnd__Hacl_Agile_Hash_impl_uint32_t(i) == 0U)
+    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+    k_ = FStar_Pervasives_Native_Some;
+    switch (k_)
     {
-      k_ =
-        (
-          (option____uint8_t____uint32_t_){
-            .tag = FStar_Pervasives_Native_Some,
-            .v = { .fst = NULL, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i) }
-          }
-        );
-    }
-    else
-    {
-      KRML_CHECK_SIZE(sizeof (uint8_t), dsnd__Hacl_Agile_Hash_impl_uint32_t(i));
-      uint8_t
-      *k = (uint8_t *)KRML_HOST_CALLOC(dsnd__Hacl_Agile_Hash_impl_uint32_t(i), sizeof (uint8_t));
-      if (k == NULL)
-      {
-        k_ = ((option____uint8_t____uint32_t_){ .tag = FStar_Pervasives_Native_None });
-      }
-      else
-      {
-        k_ =
-          (
-            (option____uint8_t____uint32_t_){
-              .tag = FStar_Pervasives_Native_Some,
-              .v = { .fst = k, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i) }
-            }
-          );
-      }
-    }
-    option____uint8_t____uint32_t_ k_0;
-    if (k_.tag == FStar_Pervasives_Native_None)
-    {
-      Hacl_Agile_Hash_state_s *s1 = block_state1.fst;
-      Hacl_Agile_Hash_state_s *s2 = block_state1.snd;
-      free_(s1);
-      free_(s2);
-      KRML_HOST_FREE(buf1);
-      k_0 = ((option____uint8_t____uint32_t_){ .tag = FStar_Pervasives_Native_None });
-    }
-    else if (k_.tag == FStar_Pervasives_Native_Some)
-    {
-      Hacl_Streaming_HMAC_Definitions_key_and_len k_1 = k_.v;
-      uint8_t *k_src = key.fst;
-      uint32_t l_src = key.snd;
-      uint8_t *k_dst = k_1.fst;
-      if (l_src != 0U)
-      {
-        memcpy(k_dst, k_src, l_src * sizeof (uint8_t));
-      }
-      k_0 = ((option____uint8_t____uint32_t_){ .tag = FStar_Pervasives_Native_Some, .v = k_1 });
-    }
-    else
-    {
-      k_0 =
-        KRML_EABORT(option____uint8_t____uint32_t_,
-          "unreachable (pattern matches are exhaustive in F*)");
-    }
-    if (k_0.tag == FStar_Pervasives_Native_None)
-    {
-      return NULL;
-    }
-    if (k_0.tag == FStar_Pervasives_Native_Some)
-    {
-      Hacl_Streaming_HMAC_Definitions_key_and_len k_1 = k_0.v;
-      Hacl_Streaming_HMAC_agile_state
-      s =
+      case FStar_Pervasives_Native_None:
         {
-          .block_state = block_state1,
-          .buf = buf1,
-          .total_len = (uint64_t)block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i))),
-          .p_key = k_1
-        };
-      Hacl_Streaming_HMAC_agile_state
-      *p =
-        (Hacl_Streaming_HMAC_agile_state *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_HMAC_agile_state));
-      p[0U] = s;
-      if (p == NULL)
-      {
-        uint8_t *k = k_1.fst;
-        uint32_t l = k_1.snd;
-        if (l != 0U)
-        {
-          KRML_HOST_FREE(k);
+          return NULL;
         }
-        Hacl_Agile_Hash_state_s *s1 = block_state1.fst;
-        Hacl_Agile_Hash_state_s *s2 = block_state1.snd;
-        free_(s1);
-        free_(s2);
-        KRML_HOST_FREE(buf1);
-        return NULL;
-      }
-      init0(key, buf1, block_state1);
-      return p;
+      case FStar_Pervasives_Native_Some:
+        {
+          Hacl_Streaming_HMAC_agile_state
+          s =
+            {
+              .block_state = block_state1,
+              .buf = buf1,
+              .total_len = (uint64_t)block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i)))
+            };
+          Hacl_Streaming_HMAC_agile_state
+          *p =
+            (Hacl_Streaming_HMAC_agile_state *)KRML_HOST_MALLOC(sizeof (
+                Hacl_Streaming_HMAC_agile_state
+              ));
+          p[0U] = s;
+          if (p == NULL)
+          {
+            Hacl_Agile_Hash_state_s *s21 = block_state1.thd;
+            Hacl_Agile_Hash_state_s *s11 = block_state1.snd;
+            free_(s11);
+            free_(s21);
+            KRML_HOST_FREE(buf1);
+            return NULL;
+          }
+          init0(key, buf1, block_state1);
+          return p;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
     }
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -1952,7 +1895,7 @@ Hacl_Streaming_HMAC_malloc_(
   Hacl_Streaming_HMAC_agile_state
   *st =
     malloc_internal(((Hacl_Streaming_HMAC_Definitions_index){ .fst = impl, .snd = key_length }),
-      ((Hacl_Streaming_HMAC_Definitions_key_and_len){ .fst = key, .snd = key_length }));
+      key);
   if (st == NULL)
   {
     return Hacl_Streaming_Types_OutOfMemory;
@@ -1961,54 +1904,27 @@ Hacl_Streaming_HMAC_malloc_(
   return Hacl_Streaming_Types_Success;
 }
 
-static Hacl_Agile_Hash_state_s
-*fst___Hacl_Agile_Hash_state_s___Hacl_Agile_Hash_state_s_(
-  Hacl_Streaming_HMAC_Definitions_two_state x
-)
-{
-  return x.fst;
-}
-
 Hacl_Streaming_HMAC_Definitions_index
 Hacl_Streaming_HMAC_get_impl(Hacl_Streaming_HMAC_agile_state *s)
 {
-  Hacl_Streaming_HMAC_agile_state scrut = *s;
-  Hacl_Streaming_HMAC_Definitions_key_and_len k = scrut.p_key;
-  Hacl_Streaming_HMAC_Definitions_two_state block_state = scrut.block_state;
-  return
-    index_of_state(fst___Hacl_Agile_Hash_state_s___Hacl_Agile_Hash_state_s_(block_state),
-      k);
+  Hacl_Streaming_HMAC_Definitions_two_state block_state = (*s).block_state;
+  return Hacl_Streaming_HMAC_index_of_state(block_state);
 }
 
-static void
-reset_internal(
-  Hacl_Streaming_HMAC_agile_state *state,
-  Hacl_Streaming_HMAC_Definitions_key_and_len key
-)
+static void reset_internal(Hacl_Streaming_HMAC_agile_state *state, uint8_t *key)
 {
   Hacl_Streaming_HMAC_agile_state scrut = *state;
-  Hacl_Streaming_HMAC_Definitions_key_and_len k_ = scrut.p_key;
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_HMAC_Definitions_two_state block_state = scrut.block_state;
-  Hacl_Streaming_HMAC_Definitions_index
-  i1 = index_of_state(fst___Hacl_Agile_Hash_state_s___Hacl_Agile_Hash_state_s_(block_state), k_);
+  Hacl_Streaming_HMAC_Definitions_index i1 = Hacl_Streaming_HMAC_index_of_state(block_state);
   KRML_MAYBE_UNUSED_VAR(i1);
   init0(key, buf, block_state);
-  uint8_t *k_src = key.fst;
-  uint32_t l_src = key.snd;
-  uint8_t *k_dst = k_.fst;
-  if (l_src != 0U)
-  {
-    memcpy(k_dst, k_src, l_src * sizeof (uint8_t));
-  }
-  Hacl_Streaming_HMAC_Definitions_key_and_len k_1 = k_;
   Hacl_Streaming_HMAC_agile_state
   tmp =
     {
       .block_state = block_state,
       .buf = buf,
-      .total_len = (uint64_t)block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))),
-      .p_key = k_1
+      .total_len = (uint64_t)block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1)))
     };
   state[0U] = tmp;
 }
@@ -2025,8 +1941,7 @@ Hacl_Streaming_HMAC_reset(
   {
     return Hacl_Streaming_Types_InvalidLength;
   }
-  reset_internal(state,
-    ((Hacl_Streaming_HMAC_Definitions_key_and_len){ .fst = key, .snd = key_length }));
+  reset_internal(state, key);
   return Hacl_Streaming_Types_Success;
 }
 
@@ -2040,9 +1955,7 @@ Hacl_Streaming_HMAC_update(
   Hacl_Streaming_HMAC_agile_state s = *state;
   Hacl_Streaming_HMAC_Definitions_two_state block_state = s.block_state;
   uint64_t total_len = s.total_len;
-  Hacl_Streaming_HMAC_Definitions_key_and_len k_ = s.p_key;
-  Hacl_Streaming_HMAC_Definitions_index
-  i1 = index_of_state(fst___Hacl_Agile_Hash_state_s___Hacl_Agile_Hash_state_s_(block_state), k_);
+  Hacl_Streaming_HMAC_Definitions_index i1 = Hacl_Streaming_HMAC_index_of_state(block_state);
   if
   (
     (uint64_t)chunk_len
@@ -2070,11 +1983,10 @@ Hacl_Streaming_HMAC_update(
   }
   if (chunk_len <= block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))) - sz)
   {
-    Hacl_Streaming_HMAC_agile_state s1 = *state;
-    Hacl_Streaming_HMAC_Definitions_two_state block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
-    Hacl_Streaming_HMAC_Definitions_key_and_len k_1 = s1.p_key;
+    Hacl_Streaming_HMAC_agile_state s3 = *state;
+    Hacl_Streaming_HMAC_Definitions_two_state block_state1 = s3.block_state;
+    uint8_t *buf = s3.buf;
+    uint64_t total_len1 = s3.total_len;
     uint32_t sz1;
     if
     (
@@ -2101,18 +2013,16 @@ Hacl_Streaming_HMAC_update(
         (Hacl_Streaming_HMAC_agile_state){
           .block_state = block_state1,
           .buf = buf,
-          .total_len = total_len2,
-          .p_key = k_1
+          .total_len = total_len2
         }
       );
   }
   else if (sz == 0U)
   {
-    Hacl_Streaming_HMAC_agile_state s1 = *state;
-    Hacl_Streaming_HMAC_Definitions_two_state block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
-    Hacl_Streaming_HMAC_Definitions_key_and_len k_1 = s1.p_key;
+    Hacl_Streaming_HMAC_agile_state s3 = *state;
+    Hacl_Streaming_HMAC_Definitions_two_state block_state1 = s3.block_state;
+    uint8_t *buf = s3.buf;
+    uint64_t total_len1 = s3.total_len;
     uint32_t sz1;
     if
     (
@@ -2133,7 +2043,7 @@ Hacl_Streaming_HMAC_update(
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      Hacl_Agile_Hash_state_s *s11 = block_state1.fst;
+      Hacl_Agile_Hash_state_s *s11 = block_state1.snd;
       update_multi(s11,
         prevlen,
         buf,
@@ -2163,7 +2073,7 @@ Hacl_Streaming_HMAC_update(
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    Hacl_Agile_Hash_state_s *s11 = block_state1.fst;
+    Hacl_Agile_Hash_state_s *s11 = block_state1.snd;
     update_multi(s11, total_len1, data1, data1_len);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
@@ -2173,8 +2083,7 @@ Hacl_Streaming_HMAC_update(
         (Hacl_Streaming_HMAC_agile_state){
           .block_state = block_state1,
           .buf = buf,
-          .total_len = total_len1 + (uint64_t)chunk_len,
-          .p_key = k_1
+          .total_len = total_len1 + (uint64_t)chunk_len
         }
       );
   }
@@ -2183,11 +2092,10 @@ Hacl_Streaming_HMAC_update(
     uint32_t diff = block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))) - sz;
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
-    Hacl_Streaming_HMAC_agile_state s1 = *state;
-    Hacl_Streaming_HMAC_Definitions_two_state block_state10 = s1.block_state;
-    uint8_t *buf0 = s1.buf;
-    uint64_t total_len10 = s1.total_len;
-    Hacl_Streaming_HMAC_Definitions_key_and_len k_1 = s1.p_key;
+    Hacl_Streaming_HMAC_agile_state s3 = *state;
+    Hacl_Streaming_HMAC_Definitions_two_state block_state10 = s3.block_state;
+    uint8_t *buf0 = s3.buf;
+    uint64_t total_len10 = s3.total_len;
     uint32_t sz10;
     if
     (
@@ -2214,15 +2122,13 @@ Hacl_Streaming_HMAC_update(
         (Hacl_Streaming_HMAC_agile_state){
           .block_state = block_state10,
           .buf = buf0,
-          .total_len = total_len2,
-          .p_key = k_1
+          .total_len = total_len2
         }
       );
-    Hacl_Streaming_HMAC_agile_state s10 = *state;
-    Hacl_Streaming_HMAC_Definitions_two_state block_state1 = s10.block_state;
-    uint8_t *buf = s10.buf;
-    uint64_t total_len1 = s10.total_len;
-    Hacl_Streaming_HMAC_Definitions_key_and_len k_10 = s10.p_key;
+    Hacl_Streaming_HMAC_agile_state s30 = *state;
+    Hacl_Streaming_HMAC_Definitions_two_state block_state1 = s30.block_state;
+    uint8_t *buf = s30.buf;
+    uint64_t total_len1 = s30.total_len;
     uint32_t sz1;
     if
     (
@@ -2243,7 +2149,7 @@ Hacl_Streaming_HMAC_update(
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      Hacl_Agile_Hash_state_s *s11 = block_state1.fst;
+      Hacl_Agile_Hash_state_s *s11 = block_state1.snd;
       update_multi(s11,
         prevlen,
         buf,
@@ -2275,7 +2181,7 @@ Hacl_Streaming_HMAC_update(
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    Hacl_Agile_Hash_state_s *s11 = block_state1.fst;
+    Hacl_Agile_Hash_state_s *s11 = block_state1.snd;
     update_multi(s11, total_len1, data1, data1_len);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
@@ -2285,8 +2191,7 @@ Hacl_Streaming_HMAC_update(
         (Hacl_Streaming_HMAC_agile_state){
           .block_state = block_state1,
           .buf = buf,
-          .total_len = total_len1 + (uint64_t)(chunk_len - diff),
-          .p_key = k_10
+          .total_len = total_len1 + (uint64_t)(chunk_len - diff)
         }
       );
   }
@@ -2294,12 +2199,12 @@ Hacl_Streaming_HMAC_update(
 }
 
 typedef struct
-____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s___s
+___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s____uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s___s
 {
   Hacl_Streaming_HMAC_Definitions_two_state fst;
   Hacl_Streaming_HMAC_Definitions_two_state snd;
 }
-____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__;
+___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s____uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__;
 
 void
 Hacl_Streaming_HMAC_digest(
@@ -2309,15 +2214,12 @@ Hacl_Streaming_HMAC_digest(
 )
 {
   KRML_MAYBE_UNUSED_VAR(digest_length);
+  Hacl_Streaming_HMAC_Definitions_two_state block_state0 = (*state).block_state;
+  Hacl_Streaming_HMAC_Definitions_index i1 = Hacl_Streaming_HMAC_index_of_state(block_state0);
   Hacl_Streaming_HMAC_agile_state scrut0 = *state;
-  Hacl_Streaming_HMAC_Definitions_key_and_len k = scrut0.p_key;
-  Hacl_Streaming_HMAC_Definitions_two_state block_state0 = scrut0.block_state;
-  Hacl_Streaming_HMAC_Definitions_index
-  i1 = index_of_state(fst___Hacl_Agile_Hash_state_s___Hacl_Agile_Hash_state_s_(block_state0), k);
-  Hacl_Streaming_HMAC_agile_state scrut1 = *state;
-  Hacl_Streaming_HMAC_Definitions_two_state block_state = scrut1.block_state;
-  uint8_t *buf_ = scrut1.buf;
-  uint64_t total_len = scrut1.total_len;
+  Hacl_Streaming_HMAC_Definitions_two_state block_state = scrut0.block_state;
+  uint8_t *buf_ = scrut0.buf;
+  uint64_t total_len = scrut0.total_len;
   uint32_t r;
   if
   (
@@ -2441,7 +2343,7 @@ Hacl_Streaming_HMAC_digest(
         KRML_HOST_EXIT(253U);
       }
   }
-  Hacl_Agile_Hash_state_s s10 = s0;
+  Hacl_Agile_Hash_state_s s110 = s0;
   Hacl_Agile_Hash_state_s s;
   uint32_t buf14[4U] = { 0U };
   uint32_t buf15[5U] = { 0U };
@@ -2547,16 +2449,18 @@ Hacl_Streaming_HMAC_digest(
         KRML_HOST_EXIT(253U);
       }
   }
-  Hacl_Agile_Hash_state_s s20 = s;
-  Hacl_Streaming_HMAC_Definitions_two_state tmp_block_state = { .fst = &s10, .snd = &s20 };
-  ____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__
+  Hacl_Agile_Hash_state_s s210 = s;
+  Hacl_Streaming_HMAC_Definitions_two_state
+  tmp_block_state =
+    { .fst = dsnd__Hacl_Agile_Hash_impl_uint32_t(i1), .snd = &s110, .thd = &s210 };
+  ___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s____uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__
   scrut = { .fst = block_state, .snd = tmp_block_state };
-  Hacl_Agile_Hash_state_s *s2_ = scrut.snd.snd;
-  Hacl_Agile_Hash_state_s *s1_ = scrut.snd.fst;
-  Hacl_Agile_Hash_state_s *s2 = scrut.fst.snd;
-  Hacl_Agile_Hash_state_s *s11 = scrut.fst.fst;
-  copy(s11, s1_);
-  copy(s2, s2_);
+  Hacl_Agile_Hash_state_s *s2_ = scrut.snd.thd;
+  Hacl_Agile_Hash_state_s *s1_ = scrut.snd.snd;
+  Hacl_Agile_Hash_state_s *s21 = scrut.fst.thd;
+  Hacl_Agile_Hash_state_s *s111 = scrut.fst.snd;
+  copy(s111, s1_);
+  copy(s21, s2_);
   uint64_t prev_len = total_len - (uint64_t)r;
   uint32_t ite;
   if (r % block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))) == 0U && r > 0U)
@@ -2569,30 +2473,26 @@ Hacl_Streaming_HMAC_digest(
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
-  Hacl_Agile_Hash_state_s *s12 = tmp_block_state.fst;
-  update_multi(s12, prev_len, buf_multi, 0U);
+  Hacl_Agile_Hash_state_s *s112 = tmp_block_state.snd;
+  update_multi(s112, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
-  Hacl_Agile_Hash_state_s *s1 = tmp_block_state.fst;
-  update_last(s1, prev_len_last, buf_last, r);
+  Hacl_Agile_Hash_state_s *s11 = tmp_block_state.snd;
+  update_last(s11, prev_len_last, buf_last, r);
   finish0(tmp_block_state, output);
 }
 
 void Hacl_Streaming_HMAC_free(Hacl_Streaming_HMAC_agile_state *state)
 {
+  Hacl_Streaming_HMAC_Definitions_two_state block_state0 = (*state).block_state;
+  Hacl_Streaming_HMAC_Definitions_index i1 = Hacl_Streaming_HMAC_index_of_state(block_state0);
+  KRML_MAYBE_UNUSED_VAR(i1);
   Hacl_Streaming_HMAC_agile_state scrut = *state;
-  Hacl_Streaming_HMAC_Definitions_key_and_len k_ = scrut.p_key;
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_HMAC_Definitions_two_state block_state = scrut.block_state;
-  uint8_t *k = k_.fst;
-  uint32_t l = k_.snd;
-  if (l != 0U)
-  {
-    KRML_HOST_FREE(k);
-  }
-  Hacl_Agile_Hash_state_s *s1 = block_state.fst;
-  Hacl_Agile_Hash_state_s *s2 = block_state.snd;
-  free_(s1);
-  free_(s2);
+  Hacl_Agile_Hash_state_s *s21 = block_state.thd;
+  Hacl_Agile_Hash_state_s *s11 = block_state.snd;
+  free_(s11);
+  free_(s21);
   KRML_HOST_FREE(buf);
   KRML_HOST_FREE(state);
 }
@@ -2604,9 +2504,7 @@ Hacl_Streaming_HMAC_agile_state
   Hacl_Streaming_HMAC_Definitions_two_state block_state0 = scrut0.block_state;
   uint8_t *buf0 = scrut0.buf;
   uint64_t total_len0 = scrut0.total_len;
-  Hacl_Streaming_HMAC_Definitions_key_and_len k0 = scrut0.p_key;
-  Hacl_Streaming_HMAC_Definitions_index
-  i1 = index_of_state(fst___Hacl_Agile_Hash_state_s___Hacl_Agile_Hash_state_s_(block_state0), k0);
+  Hacl_Streaming_HMAC_Definitions_index i1 = Hacl_Streaming_HMAC_index_of_state(block_state0);
   KRML_CHECK_SIZE(sizeof (uint8_t),
     block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))));
   uint8_t
@@ -2620,26 +2518,26 @@ Hacl_Streaming_HMAC_agile_state
   memcpy(buf,
     buf0,
     block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1))) * sizeof (uint8_t));
-  Hacl_Agile_Hash_state_s *s10 = malloc_(dfst__Hacl_Agile_Hash_impl_uint32_t(i1));
-  option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__ block_state;
-  if (s10 == NULL)
+  Hacl_Agile_Hash_state_s *s110 = malloc_(dfst__Hacl_Agile_Hash_impl_uint32_t(i1));
+  option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__ block_state;
+  if (s110 == NULL)
   {
     block_state =
       (
-        (option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
+        (option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
           .tag = FStar_Pervasives_Native_None
         }
       );
   }
   else
   {
-    Hacl_Agile_Hash_state_s *s2 = malloc_(dfst__Hacl_Agile_Hash_impl_uint32_t(i1));
-    if (s2 == NULL)
+    Hacl_Agile_Hash_state_s *s21 = malloc_(dfst__Hacl_Agile_Hash_impl_uint32_t(i1));
+    if (s21 == NULL)
     {
-      KRML_HOST_FREE(s10);
+      KRML_HOST_FREE(s110);
       block_state =
         (
-          (option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
+          (option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
             .tag = FStar_Pervasives_Native_None
           }
         );
@@ -2648,9 +2546,9 @@ Hacl_Streaming_HMAC_agile_state
     {
       block_state =
         (
-          (option____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
+          (option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__){
             .tag = FStar_Pervasives_Native_Some,
-            .v = { .fst = s10, .snd = s2 }
+            .v = { .fst = dsnd__Hacl_Agile_Hash_impl_uint32_t(i1), .snd = s110, .thd = s21 }
           }
         );
     }
@@ -2663,108 +2561,49 @@ Hacl_Streaming_HMAC_agile_state
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Streaming_HMAC_Definitions_two_state block_state1 = block_state.v;
-    ____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__
+    ___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s____uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__
     scrut = { .fst = block_state0, .snd = block_state1 };
-    Hacl_Agile_Hash_state_s *s2_ = scrut.snd.snd;
-    Hacl_Agile_Hash_state_s *s1_ = scrut.snd.fst;
-    Hacl_Agile_Hash_state_s *s20 = scrut.fst.snd;
-    Hacl_Agile_Hash_state_s *s11 = scrut.fst.fst;
-    copy(s11, s1_);
-    copy(s20, s2_);
-    option____uint8_t____uint32_t_ k_;
-    if (dsnd__Hacl_Agile_Hash_impl_uint32_t(i1) == 0U)
+    Hacl_Agile_Hash_state_s *s2_ = scrut.snd.thd;
+    Hacl_Agile_Hash_state_s *s1_ = scrut.snd.snd;
+    Hacl_Agile_Hash_state_s *s21 = scrut.fst.thd;
+    Hacl_Agile_Hash_state_s *s111 = scrut.fst.snd;
+    copy(s111, s1_);
+    copy(s21, s2_);
+    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+    k_ = FStar_Pervasives_Native_Some;
+    switch (k_)
     {
-      k_ =
-        (
-          (option____uint8_t____uint32_t_){
-            .tag = FStar_Pervasives_Native_Some,
-            .v = { .fst = NULL, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i1) }
-          }
-        );
-    }
-    else
-    {
-      KRML_CHECK_SIZE(sizeof (uint8_t), dsnd__Hacl_Agile_Hash_impl_uint32_t(i1));
-      uint8_t
-      *k = (uint8_t *)KRML_HOST_CALLOC(dsnd__Hacl_Agile_Hash_impl_uint32_t(i1), sizeof (uint8_t));
-      if (k == NULL)
-      {
-        k_ = ((option____uint8_t____uint32_t_){ .tag = FStar_Pervasives_Native_None });
-      }
-      else
-      {
-        k_ =
-          (
-            (option____uint8_t____uint32_t_){
-              .tag = FStar_Pervasives_Native_Some,
-              .v = { .fst = k, .snd = dsnd__Hacl_Agile_Hash_impl_uint32_t(i1) }
-            }
-          );
-      }
-    }
-    option____uint8_t____uint32_t_ k_0;
-    if (k_.tag == FStar_Pervasives_Native_None)
-    {
-      Hacl_Agile_Hash_state_s *s1 = block_state1.fst;
-      Hacl_Agile_Hash_state_s *s2 = block_state1.snd;
-      free_(s1);
-      free_(s2);
-      KRML_HOST_FREE(buf);
-      k_0 = ((option____uint8_t____uint32_t_){ .tag = FStar_Pervasives_Native_None });
-    }
-    else if (k_.tag == FStar_Pervasives_Native_Some)
-    {
-      Hacl_Streaming_HMAC_Definitions_key_and_len k_1 = k_.v;
-      uint8_t *k_src = k0.fst;
-      uint32_t l_src = k0.snd;
-      uint8_t *k_dst = k_1.fst;
-      if (l_src != 0U)
-      {
-        memcpy(k_dst, k_src, l_src * sizeof (uint8_t));
-      }
-      k_0 = ((option____uint8_t____uint32_t_){ .tag = FStar_Pervasives_Native_Some, .v = k_1 });
-    }
-    else
-    {
-      k_0 =
-        KRML_EABORT(option____uint8_t____uint32_t_,
-          "unreachable (pattern matches are exhaustive in F*)");
-    }
-    if (k_0.tag == FStar_Pervasives_Native_None)
-    {
-      return NULL;
-    }
-    if (k_0.tag == FStar_Pervasives_Native_Some)
-    {
-      Hacl_Streaming_HMAC_Definitions_key_and_len k_1 = k_0.v;
-      Hacl_Streaming_HMAC_agile_state
-      s = { .block_state = block_state1, .buf = buf, .total_len = total_len0, .p_key = k_1 };
-      Hacl_Streaming_HMAC_agile_state
-      *p =
-        (Hacl_Streaming_HMAC_agile_state *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_HMAC_agile_state));
-      p[0U] = s;
-      if (p == NULL)
-      {
-        uint8_t *k = k_1.fst;
-        uint32_t l = k_1.snd;
-        if (l != 0U)
+      case FStar_Pervasives_Native_None:
         {
-          KRML_HOST_FREE(k);
+          return NULL;
         }
-        Hacl_Agile_Hash_state_s *s1 = block_state1.fst;
-        Hacl_Agile_Hash_state_s *s2 = block_state1.snd;
-        free_(s1);
-        free_(s2);
-        KRML_HOST_FREE(buf);
-        return NULL;
-      }
-      return p;
+      case FStar_Pervasives_Native_Some:
+        {
+          Hacl_Streaming_HMAC_agile_state
+          s = { .block_state = block_state1, .buf = buf, .total_len = total_len0 };
+          Hacl_Streaming_HMAC_agile_state
+          *p =
+            (Hacl_Streaming_HMAC_agile_state *)KRML_HOST_MALLOC(sizeof (
+                Hacl_Streaming_HMAC_agile_state
+              ));
+          p[0U] = s;
+          if (p == NULL)
+          {
+            Hacl_Agile_Hash_state_s *s210 = block_state1.thd;
+            Hacl_Agile_Hash_state_s *s11 = block_state1.snd;
+            free_(s11);
+            free_(s210);
+            KRML_HOST_FREE(buf);
+            return NULL;
+          }
+          return p;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
     }
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
