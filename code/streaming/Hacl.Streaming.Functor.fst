@@ -474,7 +474,7 @@ let copy #index c i t t' state r =
         (**) c.state.frame_invariant #i B.loc_none block_state0 h0 h1;
         (**) assert (invariant c i h2 state);
 
-        c.state.copy (G.hide i) block_state0 block_state;
+        c.state.copy i block_state0 block_state;
         (**) let h2 = ST.get () in
         (**) B.loc_unused_in_not_unused_in_disjoint h2;
         (**) B.(modifies_only_not_unused_in loc_none h1 h2);
@@ -1790,7 +1790,7 @@ let digest #index c i t t' state output l =
   stateful_frame_preserves_freeable #index #c.state #i B.loc_none block_state h1 h2;
   optional_frame #_ #i #c.km #c.key B.loc_none k' h1 h2;
 
-  c.state.copy (G.hide i) block_state tmp_block_state;
+  c.state.copy i block_state tmp_block_state;
 
   let h3 = ST.get () in
   c.state.frame_invariant #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
@@ -1916,6 +1916,7 @@ let digest_erased #index c i t t' state output digest_length =
 
 let free #index c i t t' state =
   let _ = allow_inversion key_management in
+  let i = index_of_state c i t t' state in
   let open LowStar.BufferOps in
   let State block_state buf _ _ k' = !*state in
   let h0 = ST.get () in

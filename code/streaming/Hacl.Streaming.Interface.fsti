@@ -120,7 +120,7 @@ type stateful (index: Type0) =
           freeable #i h1 s))) ->
 
   free: (
-    i: G.erased index -> (
+    i: index -> (
     let i = G.reveal i in
     s:s i -> ST unit
     (requires fun h0 ->
@@ -130,8 +130,7 @@ type stateful (index: Type0) =
       B.(modifies (footprint #i h0 s) h0 h1)))) ->
 
   copy: (
-    i:G.erased index -> (
-    let i = G.reveal i in
+    i:index -> (
     s_src:s i ->
     s_dst:s i ->
     Stack unit

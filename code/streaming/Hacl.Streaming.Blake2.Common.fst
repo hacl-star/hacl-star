@@ -303,10 +303,10 @@ let stateful_key (a : alg):
             Some s)
 
     (* free *)
-    (fun (i: G.erased (index a)) (s: params_and_key a i) ->
+    (fun (i: index a) (s: params_and_key a i) ->
       let p, s = s in
       let kk = (P.get_params p).key_length in
-      assert (kk = (G.reveal i).key_length);
+      assert (kk = i.key_length);
       P.free #a p;
       if kk = 0uy then () else B.free (s <: B.buffer uint8))
 
@@ -314,7 +314,7 @@ let stateful_key (a : alg):
     (fun i (s_src': params_and_key a i) (s_dst': params_and_key a i) ->
       let p_src, s_src = s_src' in
       let kk = (P.get_params p_src).key_length in
-      assert (kk = (G.reveal i).key_length);
+      assert (kk = i.key_length);
       let p_dst, s_dst = s_dst' in
       let h0 = ST.get () in
       if kk <> 0uy then begin

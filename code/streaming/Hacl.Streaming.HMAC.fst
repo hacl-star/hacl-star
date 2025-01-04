@@ -22,10 +22,26 @@ open Hacl.Streaming.HMAC.Definitions
 
 #push-options "--z3rlimit 200"
 
+let s1 #i (s: two_state i) =
+  let _, s1, _ = s in
+  s1
+
+let s2 #i (s: two_state i) =
+  let _, _, s2 = s in
+  s2
+
+let index_of_state (i: G.erased index) (s: two_state i) (k: G.erased (t i)): Stack index
+  (requires (fun h0 -> two_invariant h0 s))
+  (ensures (fun h0 i' h1 -> h0 == h1 /\ G.reveal i == i'))
+=
+  let kl, s1, _ = s in
+  let i: impl = impl_of_state (dfst i) s1 in
+  (| i, kl |)
+
 inline_for_extraction noextract
 let hmac: block index =
   Block
-    (* km *) Runtime
+    (* km *) Erased
     (* state *) stateful_agile_hash_state
     (* key *) stateful_runtime_key
     (* output_length_t *) UInt32.t
@@ -73,17 +89,17 @@ let hmac: block index =
         Spec.Hash.Lemmas.update_multi_associative a (fst s) input1 input2)
     (* spec_is_incremental *) (fun i k input l ->
       Spec.HMAC.Incremental.hmac_is_hmac_incremental (alg i) k input)
-    (* index_of_state *) (fun i s k -> index_of_state i (fst s) k)
+    (* index_of_state *) index_of_state
     (* init *) (fun i k buf s -> init i k buf s)
     (* update_multi *) (fun i s prevlen blocks len ->
-      let s1, s2 = s in
+      let _, s1, s2 = s in
       let h0 = ST.get () in
       Hacl.Agile.Hash.update_multi s1 prevlen blocks len;
       let h1 = ST.get () in
       Hacl.Agile.Hash.frame_invariant (Hacl.Agile.Hash.footprint s1 h0) s2 h0 h1
     )
     (* update_last *) (fun i s prevlen last last_len ->
-      let s1, s2 = s in
+      let _, s1, s2 = s in
       let h0 = ST.get () in
       Hacl.Agile.Hash.update_last s1 prevlen last last_len;
       let h1 = ST.get () in
@@ -93,17 +109,13 @@ let hmac: block index =
 
 module F = Hacl.Streaming.Functor
 
-let agile_state i = F.state_s hmac i (stateful_agile_hash_state.s i) (state i)
+let agile_state i = F.state_s hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
 
 inline_for_extraction noextract
-let alloca i = F.alloca hmac i (stateful_agile_hash_state.s i) (state i)
+let alloca i = F.alloca hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
 
 private
-let malloc_internal i = F.malloc hmac i (stateful_agile_hash_state.s i) (state i)
-
-inline_for_extraction noextract
-let mk #impl (k:B.buffer uint8) (k_len:key_length impl { k_len == B.len k }): key_and_len (| impl, k_len |) =
-  k, k_len
+let malloc_internal i = F.malloc hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
 
 private
 let is_blake2b_256 = function Blake2B_256 _ -> true | _ -> false
@@ -117,9 +129,8 @@ val malloc_:
   impl:impl -> k:B.buffer uint8 -> k_len:key_length impl { k_len == B.len k } -> (
   let c = hmac in
   let i = (| impl, k_len |) in
-  let k = mk #impl k k_len in
+  let t' = G.erased (t i) in
   let t = two_state (| impl, k_len |)  in
-  let t' = state i in
   let open F in
   r:HS.rid ->
   dst: B.pointer (F.state c i t t') ->
@@ -156,7 +167,7 @@ let malloc_ impl key key_length r dst =
     InvalidAlgorithm
   else
     let h0 = ST.get () in
-    let st = malloc_internal (| impl, key_length |) (mk key key_length) r in
+    let st = malloc_internal (| impl, key_length |) key r in
     if B.is_null st then
       OutOfMemory
     else
@@ -168,16 +179,12 @@ let malloc_ impl key key_length r dst =
       F.frame_invariant hmac (| impl, key_length |) (B.loc_buffer dst) st h1 h2;
       Success
 
-inline_for_extraction noextract
-let mk' (#i: index) (k:B.buffer uint8) (k_len:key_length (dfst i) { k_len == B.len k /\ k_len == dsnd i }): hmac.key.s i =
-  k, k_len
-
 val reset:
   i: G.erased index -> (
   let c = hmac in
   let i = G.reveal i in
+  let t' = G.erased (t i) in
   let t = two_state i in
-  let t' = state i in
   let open F in
   state:state c i t t' ->
   k:B.buffer uint8 ->
@@ -186,7 +193,7 @@ val reset:
   (requires (fun h0 ->
     invariant c i h0 state /\ (
     k_len == dsnd i ==> (
-    let key = mk' #i k k_len in
+    let key = k in
     c.key.invariant #i h0 key /\
     B.loc_disjoint (c.key.footprint #i h0 key) (footprint c i h0 state)))))
   (ensures (fun h0 r h1 ->
@@ -195,7 +202,7 @@ val reset:
     | InvalidLength -> k_len <> dsnd i
     | Success ->
         k_len == dsnd i /\ (
-        let key = mk k k_len in
+        let key = k in
         invariant c i h1 state /\
         seen c i h1 state == S.empty /\
         reveal_key c i h1 state == c.key.v i h0 key /\
@@ -204,21 +211,22 @@ val reset:
         preserves_freeable c i state h0 h1)
     | _ -> False)))
 
-let get_impl (i: G.erased index) = F.index_of_state hmac i (stateful_agile_hash_state.s i) (state i)
+let get_impl (i: G.erased index) = F.index_of_state hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
 
 private
-let reset_internal (i: G.erased index) = F.reset hmac i (stateful_agile_hash_state.s i) (state i)
+let reset_internal (i: G.erased index) = F.reset hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
 
 let reset i state key key_length =
   let (| _, k_len |) = get_impl i state in
   if key_length <> k_len then
     Hacl.Streaming.Types.InvalidLength
   else begin
-    reset_internal i state (key, key_length);
+    reset_internal i state key;
     Hacl.Streaming.Types.Success
   end
 
-let update (i: G.erased index) = F.update hmac i (stateful_agile_hash_state.s i) (state i)
-let digest (i: G.erased index) = F.digest_erased hmac i (stateful_agile_hash_state.s i) (state i)
-let free (i: G.erased index) = F.free hmac i (stateful_agile_hash_state.s i) (state i)
-let copy (i: G.erased index) = F.copy hmac i (stateful_agile_hash_state.s i) (state i)
+let update (i: G.erased index) = F.update hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
+let digest (i: G.erased index) = F.digest_erased hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
+let free (i: G.erased index) = F.free hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
+let copy (i: G.erased index) = F.copy hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
+ 
