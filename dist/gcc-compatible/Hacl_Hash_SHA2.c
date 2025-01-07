@@ -489,7 +489,9 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA2_malloc_256(void)
           Hacl_Streaming_MD_state_32
           *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             KRML_HOST_FREE(block_state1);
@@ -567,7 +569,9 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA2_copy_256(Hacl_Streaming_MD_state_32 *
           Hacl_Streaming_MD_state_32
           *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             KRML_HOST_FREE(block_state1);
@@ -909,7 +913,9 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA2_malloc_224(void)
           Hacl_Streaming_MD_state_32
           *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             KRML_HOST_FREE(block_state1);
@@ -1061,7 +1067,9 @@ Hacl_Streaming_MD_state_64 *Hacl_Hash_SHA2_malloc_512(void)
           Hacl_Streaming_MD_state_64
           *p = (Hacl_Streaming_MD_state_64 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_64));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             KRML_HOST_FREE(block_state1);
@@ -1139,7 +1147,9 @@ Hacl_Streaming_MD_state_64 *Hacl_Hash_SHA2_copy_512(Hacl_Streaming_MD_state_64 *
           Hacl_Streaming_MD_state_64
           *p = (Hacl_Streaming_MD_state_64 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_64));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             KRML_HOST_FREE(block_state1);
@@ -1482,7 +1492,9 @@ Hacl_Streaming_MD_state_64 *Hacl_Hash_SHA2_malloc_384(void)
           Hacl_Streaming_MD_state_64
           *p = (Hacl_Streaming_MD_state_64 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_64));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             KRML_HOST_FREE(block_state1);

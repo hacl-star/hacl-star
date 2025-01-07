@@ -5977,7 +5977,9 @@ Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_SHA3_Simd256_state_malloc(void)
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 25U);
   if (buf != NULL)
+  {
     memset(buf, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  }
   return buf;
 }
 

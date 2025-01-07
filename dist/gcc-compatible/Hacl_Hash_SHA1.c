@@ -242,7 +242,9 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_malloc(void)
           Hacl_Streaming_MD_state_32
           *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             KRML_HOST_FREE(block_state1);
@@ -543,7 +545,9 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_copy(Hacl_Streaming_MD_state_32 *stat
           Hacl_Streaming_MD_state_32
           *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             KRML_HOST_FREE(block_state1);

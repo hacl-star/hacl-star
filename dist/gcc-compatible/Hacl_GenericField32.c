@@ -92,7 +92,9 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
         Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
       ));
   if (buf != NULL)
+  {
     buf[0U] = res;
+  }
   return buf;
 }
 

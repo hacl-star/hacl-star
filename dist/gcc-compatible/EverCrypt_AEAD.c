@@ -90,7 +90,9 @@ create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   EverCrypt_AEAD_state_s
   *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
   if (p != NULL)
+  {
     p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek });
+  }
   memcpy(ek, k, 32U * sizeof (uint8_t));
   dst[0U] = p;
   return EverCrypt_Error_Success;
@@ -117,7 +119,9 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     EverCrypt_AEAD_state_s
     *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     if (p != NULL)
+    {
       p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek });
+    }
     *dst = p;
     return EverCrypt_Error_Success;
   }
@@ -148,7 +152,9 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     EverCrypt_AEAD_state_s
     *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     if (p != NULL)
+    {
       p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek });
+    }
     *dst = p;
     return EverCrypt_Error_Success;
   }

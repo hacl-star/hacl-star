@@ -621,7 +621,9 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
           Hacl_Hash_SHA3_state_t
           *p = (Hacl_Hash_SHA3_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_SHA3_state_t));
           if (p != NULL)
+          {
             p[0U] = s0;
+          }
           if (p == NULL)
           {
             uint64_t *s1 = block_state1.snd;
@@ -720,7 +722,9 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
           Hacl_Hash_SHA3_state_t
           *p = (Hacl_Hash_SHA3_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_SHA3_state_t));
           if (p != NULL)
+          {
             p[0U] = s0;
+          }
           if (p == NULL)
           {
             uint64_t *s1 = block_state1.snd;

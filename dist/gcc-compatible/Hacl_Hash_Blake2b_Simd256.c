@@ -530,7 +530,9 @@ Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_Simd256_malloc_with_key(void)
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
   if (buf != NULL)
+  {
     memset(buf, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  }
   return buf;
 }
 
@@ -557,7 +559,9 @@ static Hacl_Hash_Blake2b_Simd256_state_t
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
   if (wv0 != NULL)
+  {
     memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  }
   option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___
   block_state;
   if (wv0 == NULL)
@@ -576,7 +580,9 @@ static Hacl_Hash_Blake2b_Simd256_state_t
       (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
         sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
     if (b != NULL)
+    {
       memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+    }
     if (b == NULL)
     {
       KRML_ALIGNED_FREE(wv0);
@@ -639,7 +645,9 @@ static Hacl_Hash_Blake2b_Simd256_state_t
                 Hacl_Hash_Blake2b_Simd256_state_t
               ));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             Lib_IntVector_Intrinsics_vec256 *b = block_state1.f3.snd;
@@ -1347,7 +1355,9 @@ Hacl_Hash_Blake2b_Simd256_state_t
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
   if (wv0 != NULL)
+  {
     memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  }
   option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___
   block_state;
   if (wv0 == NULL)
@@ -1366,7 +1376,9 @@ Hacl_Hash_Blake2b_Simd256_state_t
       (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
         sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
     if (b != NULL)
+    {
       memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+    }
     if (b == NULL)
     {
       KRML_ALIGNED_FREE(wv0);
@@ -1422,7 +1434,9 @@ Hacl_Hash_Blake2b_Simd256_state_t
                 Hacl_Hash_Blake2b_Simd256_state_t
               ));
           if (p != NULL)
+          {
             p[0U] = s;
+          }
           if (p == NULL)
           {
             Lib_IntVector_Intrinsics_vec256 *b = block_state1.f3.snd;

@@ -1776,7 +1776,9 @@ Hacl_MAC_Poly1305_Simd256_state_t *Hacl_MAC_Poly1305_Simd256_malloc(uint8_t *key
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 25U);
   if (r1 != NULL)
+  {
     memset(r1, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  }
   option___Lib_IntVector_Intrinsics_vec256_ block_state;
   if (r1 == NULL)
   {
@@ -1847,7 +1849,9 @@ Hacl_MAC_Poly1305_Simd256_state_t *Hacl_MAC_Poly1305_Simd256_malloc(uint8_t *key
             Hacl_MAC_Poly1305_Simd256_state_t
           ));
       if (p != NULL)
+      {
         p[0U] = s;
+      }
       if (p == NULL)
       {
         KRML_HOST_FREE(k_1);

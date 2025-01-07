@@ -1024,7 +1024,9 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum4096_32_mont_ctx_init(uin
         Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
       ));
   if (buf != NULL)
+  {
     buf[0U] = res;
+  }
   return buf;
 }
 

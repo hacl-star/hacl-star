@@ -1032,7 +1032,9 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum4096_mont_ctx_init(uint64
         Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
       ));
   if (buf != NULL)
+  {
     buf[0U] = res;
+  }
   return buf;
 }
 
