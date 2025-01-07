@@ -256,11 +256,16 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 
 .PRECIOUS: %.fst %.fsti
 
+# Find this file in the library. We could also just call F* with
+# 'LowStar.Endianness.fst' in the invocation below since F* tries to
+# find files in the command line in its include path.
+LowStar_Endianness_fst := $(shell $(FSTAR_EXE) --locate_file LowStar.Endianness.fst)
+
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_SOURCE_DIRS)) \
     $(addsuffix /*.fst,$(ALL_HACL_SOURCE_DIRS))) \
-  $(FSTAR_ULIB)/LowStar.Endianness.fst \
+  $(LowStar_Endianness_fst) \
   $(wildcard $(VALE_FSTS)) # empty during the first stage
 
 # We currently force regeneration of three depend files. This is long.

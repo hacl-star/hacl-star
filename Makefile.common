@@ -33,9 +33,10 @@ mustexist =						\
 $(call mustexist, FSTAR_EXE)
 $(call mustexist, KRML_HOME)
 
-ifndef FSTAR_ULIB
-FSTAR_ULIB := $(shell if test -d "$(FSTAR_HOME)/ulib" ; then echo "$(FSTAR_HOME)/ulib" ; else echo "$(FSTAR_HOME)/lib/fstar" ; fi)
-endif
+# Find the location of the checked files in F*'s library, for the
+# vale-depend call. Note: we still rely on the fact this directory is
+# flat.
+FSTAR_ULIB_CHECKED := $(dir $(shell $(FSTAR_EXE) --locate_file Prims.fst.checked))
 
 ifndef VALE_HOME
 # assuming an Everest source tree
@@ -57,15 +58,15 @@ sanitize_path=$(call maybe_cygpath,$(realpath $(1)))
 
 HACL_HOME := $(call sanitize_path,$(HACL_HOME))
 KRML_HOME := $(call sanitize_path,$(KRML_HOME))
-FSTAR_ULIB := $(call sanitize_path,$(FSTAR_ULIB))
+FSTAR_ULIB_CHECKED := $(call sanitize_path,$(FSTAR_ULIB_CHECKED))
 VALE_HOME := $(call sanitize_path,$(VALE_HOME))
 
 include $(HACL_HOME)/Makefile.include
 
-# $(FSTAR_ULIB)/.cache necessary for Vale
+# $(FSTAR_ULIB_CHECKED) necessary for vale-depend
 INCLUDES = \
   $(ALL_HACL_DIRS) \
-  $(FSTAR_ULIB)/.cache \
+  $(FSTAR_ULIB_CHECKED) \
   $(KRML_HOME)/krmllib/obj \
   $(KRML_HOME)/krmllib
 
