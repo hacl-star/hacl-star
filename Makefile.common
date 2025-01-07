@@ -28,6 +28,14 @@ mustexist =						\
   $(if $(wildcard $(value $(strip $1))),,		\
     $(error $1 ($(value $(strip $1))) does not exist))
 
+# eval $(FSTAR_OCAMLENV) extends the environment so we can
+# find fstar's ocaml libraries.
+FSTAR_OCAMLENV := $(shell $(FSTAR_EXE) --ocamlenv)
+
+# We also set this variable to reduce warnings
+FSTAR_OCAMLENV += OCAMLFIND_IGNORE_DUPS_IN='$(shell ocamlc -where)/compiler-libs';
+FSTAR_OCAMLENV += export OCAMLFIND_IGNORE_DUPS_IN;
+
 # $(call mustexist, FSTAR_HOME)
 # ^ No longer needed, we just need the .exe
 $(call mustexist, FSTAR_EXE)
@@ -233,14 +241,8 @@ TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 
 ALL_CMX_FILES = $(subst obj/Lib_Buffer.cmx,obj/Lib_Memzero0.cmx obj/Lib_Buffer.cmx,$(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC))))
 
-ifeq ($(OS),Windows_NT)
-  export OCAMLPATH := $(FSTAR_HOME)/lib;$(OCAMLPATH)
-else
-  export OCAMLPATH := $(FSTAR_HOME)/lib:$(OCAMLPATH)
-endif
-
 # Warning 8: this pattern-matching is not exhaustive.
 # Warning 20: this argument will not be used by the function.
 # Warning 26: unused variable
-OCAMLOPT = OCAMLFIND_IGNORE_DUPS_IN="`ocamlc -where`/compiler-libs" ocamlfind opt -package fstar.lib -linkpkg -thread -g -I $(HACL_HOME)/obj -w -8-20-26
-OCAMLSHARED = OCAMLFIND_IGNORE_DUPS_IN="`ocamlc -where`/compiler-libs" ocamlfind opt -shared -package fstar.lib -thread -g -I $(HACL_HOME)/obj -w -8-20-26
+OCAMLOPT    = eval "$(FSTAR_OCAMLENV)" && ocamlfind opt -package fstar.lib -linkpkg -thread -g -I $(HACL_HOME)/obj -w -8-20-26
+OCAMLSHARED = eval "$(FSTAR_OCAMLENV)" && ocamlfind opt -shared -package fstar.lib -thread -g -I $(HACL_HOME)/obj -w -8-20-26

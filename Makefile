@@ -1039,7 +1039,7 @@ obj/libhaclml.cmxa: $(filter-out $(HACL_HOME)/obj/Meta_Interface.cmx,$(ALL_CMX_F
 # JP: doesn't work because a PPX is prepended for some reason
 # ocamlfind mklib -o haclml -package fstar.lib -g -I $(HACL_HOME)/obj $(addprefix $(HACL_HOME)/obj/*.,cmo cmx ml o)
 	$(call run-with-log,\
-	  OCAMLFIND_IGNORE_DUPS_IN="`ocamlc -where`/compiler-libs" ocamlfind opt -thread -a -o $@ -package fstar.lib -g -I $(HACL_HOME)/obj $^ \
+	  eval "$(FSTAR_OCAMLENV)" && ocamlfind opt -thread -a -o $@ -package fstar.lib -g -I $(HACL_HOME)/obj $^ \
 	  ,[OCAMLOPT-CMXA] libhaclml,$(call to-obj-dir,$@))
 
 
