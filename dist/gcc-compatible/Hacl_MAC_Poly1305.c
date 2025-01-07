@@ -518,7 +518,8 @@ Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
       s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U, .p_key = k_1 };
       Hacl_MAC_Poly1305_state_t
       *p = (Hacl_MAC_Poly1305_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_MAC_Poly1305_state_t));
-      p[0U] = s;
+      if (p != NULL)
+        p[0U] = s;
       if (p == NULL)
       {
         KRML_HOST_FREE(k_1);

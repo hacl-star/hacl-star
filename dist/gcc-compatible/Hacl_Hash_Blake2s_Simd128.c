@@ -522,7 +522,8 @@ Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_Simd128_malloc_with_key(void)
   *buf =
     (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
       sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
-  memset(buf, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  if (buf != NULL)
+    memset(buf, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   return buf;
 }
 
@@ -548,7 +549,8 @@ static Hacl_Hash_Blake2s_Simd128_state_t
   *wv0 =
     (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
       sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
-  memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  if (wv0 != NULL)
+    memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___
   block_state;
   if (wv0 == NULL)
@@ -566,7 +568,8 @@ static Hacl_Hash_Blake2s_Simd128_state_t
     *b =
       (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
         sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
-    memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+    if (b != NULL)
+      memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
     if (b == NULL)
     {
       KRML_ALIGNED_FREE(wv0);
@@ -628,7 +631,8 @@ static Hacl_Hash_Blake2s_Simd128_state_t
             (Hacl_Hash_Blake2s_Simd128_state_t *)KRML_HOST_MALLOC(sizeof (
                 Hacl_Hash_Blake2s_Simd128_state_t
               ));
-          p[0U] = s;
+          if (p != NULL)
+            p[0U] = s;
           if (p == NULL)
           {
             Lib_IntVector_Intrinsics_vec128 *b = block_state1.f3.snd;
@@ -1298,7 +1302,8 @@ Hacl_Hash_Blake2s_Simd128_state_t
   *wv0 =
     (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
       sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
-  memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  if (wv0 != NULL)
+    memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___
   block_state;
   if (wv0 == NULL)
@@ -1316,7 +1321,8 @@ Hacl_Hash_Blake2s_Simd128_state_t
     *b =
       (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
         sizeof (Lib_IntVector_Intrinsics_vec128) * 4U);
-    memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+    if (b != NULL)
+      memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
     if (b == NULL)
     {
       KRML_ALIGNED_FREE(wv0);
@@ -1371,7 +1377,8 @@ Hacl_Hash_Blake2s_Simd128_state_t
             (Hacl_Hash_Blake2s_Simd128_state_t *)KRML_HOST_MALLOC(sizeof (
                 Hacl_Hash_Blake2s_Simd128_state_t
               ));
-          p[0U] = s;
+          if (p != NULL)
+            p[0U] = s;
           if (p == NULL)
           {
             Lib_IntVector_Intrinsics_vec128 *b = block_state1.f3.snd;

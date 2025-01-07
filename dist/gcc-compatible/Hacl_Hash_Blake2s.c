@@ -774,7 +774,8 @@ static Hacl_Hash_Blake2s_state_t
           s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)ite };
           Hacl_Hash_Blake2s_state_t
           *p = (Hacl_Hash_Blake2s_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2s_state_t));
-          p[0U] = s;
+          if (p != NULL)
+            p[0U] = s;
           if (p == NULL)
           {
             uint32_t *b = block_state1.f3.snd;
@@ -1519,7 +1520,8 @@ Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_copy(Hacl_Hash_Blake2s_state_t *sta
           s = { .block_state = block_state1, .buf = buf, .total_len = total_len0 };
           Hacl_Hash_Blake2s_state_t
           *p = (Hacl_Hash_Blake2s_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2s_state_t));
-          p[0U] = s;
+          if (p != NULL)
+            p[0U] = s;
           if (p == NULL)
           {
             uint32_t *b = block_state1.f3.snd;

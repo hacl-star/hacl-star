@@ -227,7 +227,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint32_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -245,7 +246,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint32_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -263,7 +265,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint32_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -281,7 +284,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint32_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -299,7 +303,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint64_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -317,7 +322,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint64_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -335,7 +341,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint64_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -353,7 +360,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint64_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -371,7 +379,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint64_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -389,7 +398,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint64_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -407,7 +417,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint32_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -425,7 +436,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         }
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_128_s, { .case_Blake2S_128_s = s } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_128_s, { .case_Blake2S_128_s = s } });
         if (st == NULL)
         {
           KRML_ALIGNED_FREE(s);
@@ -451,7 +463,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         uint64_t *s1 = s;
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = s1 } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = s1 } });
         if (st == NULL)
         {
           KRML_HOST_FREE(s1);
@@ -469,7 +482,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         }
         Hacl_Agile_Hash_state_s
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
-        st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_256_s, { .case_Blake2B_256_s = s } });
+        if (st != NULL)
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_256_s, { .case_Blake2B_256_s = s } });
         if (st == NULL)
         {
           KRML_ALIGNED_FREE(s);
@@ -1812,7 +1826,8 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
             (Hacl_Streaming_HMAC_agile_state *)KRML_HOST_MALLOC(sizeof (
                 Hacl_Streaming_HMAC_agile_state
               ));
-          p[0U] = s;
+          if (p != NULL)
+            p[0U] = s;
           if (p == NULL)
           {
             Hacl_Agile_Hash_state_s *s21 = block_state1.thd;
@@ -2586,7 +2601,8 @@ Hacl_Streaming_HMAC_agile_state
             (Hacl_Streaming_HMAC_agile_state *)KRML_HOST_MALLOC(sizeof (
                 Hacl_Streaming_HMAC_agile_state
               ));
-          p[0U] = s;
+          if (p != NULL)
+            p[0U] = s;
           if (p == NULL)
           {
             Hacl_Agile_Hash_state_s *s210 = block_state1.thd;
