@@ -251,4 +251,4 @@ ALL_CMX_FILES = $(subst obj/Lib_Buffer.cmx,obj/Lib_Memzero0.cmx obj/Lib_Buffer.c
 # Warning 20: this argument will not be used by the function.
 # Warning 26: unused variable
 OCAMLOPT    = eval "$(FSTAR_OCAMLENV)" && ocamlfind opt -package fstar.lib -linkpkg -thread -g -I $(HACL_HOME)/obj -w -8-20-26
-OCAMLSHARED = eval "$(FSTAR_OCAMLENV)" && ocamlfind opt -shared -package fstar.lib -thread -g -I $(HACL_HOME)/obj -w -8-20-26
+OCAMLSHARED = eval "$(FSTAR_OCAMLENV)" && ocamlfind opt -shared -package fstar.pluginlib -thread -g -I $(HACL_HOME)/obj -w -8-20-26
