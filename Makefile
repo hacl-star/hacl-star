@@ -289,7 +289,7 @@ ifndef MAKE_RESTARTS
 # file and pass the response file with `@` to said executables.
 
 # The `sed` invocation is currently necessary because, even though all
-# paths are absolute (HACL_HOME, FSTAR_HOME, etc.), F* still generates
+# paths are absolute (HACL_HOME, FSTAR_EXE, etc.), F* still generates
 # dependency trees containing things like bin/../ulib (or
 # bin/../lib/fstar if F* is installed from opam or from `make
 # install`) We need to remove such detours by hand, which is done by
@@ -892,7 +892,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	rm -f $@.rsp
 	for f in $(filter %.krml,$^) ; do echo $$f ; done > $@.rsp
-	$(KRML) $(DEFAULT_FLAGS) \
+	$(KRML) -fstar $(FSTAR_EXE) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  @$@.rsp \
 	  -silent \
@@ -904,7 +904,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
 	echo "This code was generated with the following toolchain." > $(dir $@)/INFO.txt
-	echo "F* version: $(shell cd $(FSTAR_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
+	echo "F* version: $(shell $(FSTAR_EXE) --version | tr '\n' ' ')" >> $(dir $@)/INFO.txt
 	echo "KaRaMeL version: $(shell cd $(KRML_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
 	if [ "$*" == "wasm" ]; then touch $@; fi
@@ -919,7 +919,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
-	$(KRML) -silent \
+	$(KRML) -silent -fstar $(FSTAR_EXE) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -no-prefix $(subst Hacl_Test_,Hacl.Test.,$*) \

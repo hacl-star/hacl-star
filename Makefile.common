@@ -16,12 +16,20 @@ endif
 # Makefile.config
 -include $(HACL_HOME)/Makefile.config
 
+# Essentially FSTAR_EXE ?= fstar.exe, but we want to
+# 1) Make it absolute
+# 2) Fail early if not found
+ifndef FSTAR_EXE
+FSTAR_EXE := $(shell which fstar.exe)
+ifneq ($(.SHELLSTATUS),0)
+  $(error "Did not find F* in PATH, add it or set FSTAR_EXE")
+endif
+endif
+
 ifndef KRML_HOME
 # assuming an Everest source tree
 KRML_HOME 	:= $(HACL_HOME)/../karamel
 endif
-
-include locate_fstar.mk
 
 # Check that the relevant homes and executables at least exist.
 mustexist =						\
@@ -36,8 +44,6 @@ FSTAR_OCAMLENV := $(shell $(FSTAR_EXE) --ocamlenv)
 FSTAR_OCAMLENV += OCAMLFIND_IGNORE_DUPS_IN='$(shell ocamlc -where)/compiler-libs';
 FSTAR_OCAMLENV += export OCAMLFIND_IGNORE_DUPS_IN;
 
-# $(call mustexist, FSTAR_HOME)
-# ^ No longer needed, we just need the .exe
 $(call mustexist, FSTAR_EXE)
 $(call mustexist, KRML_HOME)
 
