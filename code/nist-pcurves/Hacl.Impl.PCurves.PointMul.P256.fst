@@ -43,6 +43,9 @@ module PT = Hacl.Impl.PrecompTable
 val point_mul: point_mul_t
 let point_mul = point_mul_gen
 
+let _ : squash (3ul *. 4ul == 12ul) = 
+  assert_norm (v (3ul *. 4ul) == 12)
+
 let _ : squash (16ul *! 12ul == 192ul) = 
   assert_norm (v (16ul *! 12ul) == 192)
 
@@ -68,6 +71,12 @@ inline_for_extraction noextract
 let mk_pcurve_concrete_ops = mk_pcurve_concrete_ops #p256_params #p256_bn_ops #p256_curve_constants #p256_field_ops #p256_inv_sqrt #p256_point_ops
 
 inline_for_extraction noextract
+let table_inv_w4 = table_inv_w4 #p256_params #p256_bn_ops #p256_curve_constants #p256_field_ops #p256_inv_sqrt #p256_point_ops
+
+inline_for_extraction noextract
+let table_inv_w5 = table_inv_w5 #p256_params #p256_bn_ops #p256_curve_constants #p256_field_ops #p256_inv_sqrt #p256_point_ops
+
+inline_for_extraction noextract
 val point_mul_g_noalloc 
   : out:point -> scalar:felem
   -> q1:point -> q2:point
@@ -91,9 +100,9 @@ val point_mul_g_noalloc
     S.to_aff_point (from_mont_point (as_point_nat h1 out)) ==
     LE.exp_four_fw S.mk_pcurve_comm_monoid g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
 
-#push-options "--z3rlimit 150 --admit_smt_queries true"
+#push-options "--z3rlimit 1800 --split_queries always"
 let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
-  [@inline_let] let len = 12ul in
+  [@inline_let] let len = 3ul *. 4ul in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let l = 4ul in
@@ -127,7 +136,7 @@ let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
   let r3 = sub scalar (2ul*.bLen) bLen in
   let r4 = sub scalar (3ul*.bLen) bLen in
   SPT256.lemma_decompose_nat256_as_four_u64_lbignum (as_seq h0 scalar);
-
+  
   assert (table_len *! len == 192ul);
   assert (Lib.Buffer.length pt.g_pow2_192_w4.table_w4 == 192);
 
@@ -213,20 +222,20 @@ val point_mul_g_double_vartime_noalloc :
     S.to_aff_point (S.point_mul_double_g
       (as_nat h0 scalar1) (as_nat h0 scalar2) (from_mont_point (as_point_nat h0 q2))))
 
-#push-options "--z3rlimit 150 --admit_smt_queries true"
+#push-options "--z3rlimit 800 --split_queries always"
 let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
-  [@inline_let] let len = 3ul *. cp.bn_limbs in
+  [@inline_let] let len = 3ul *. 4ul in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let l = 5ul in
   [@inline_let] let table_len = 32ul in
-  [@inline_let] let bLen = cp.bn_limbs in
-  [@inline_let] let bBits = size cp.bits in
+  [@inline_let] let bLen = 4ul in
+  [@inline_let] let bBits = 64ul in
   assert_norm (pow2 (v l) == v table_len);
   let h0 = ST.get () in
-  pt.basepoint_w5.table_lemma_w5 ();
   recall_contents pt.basepoint_w5.table_w5 pt.basepoint_w5.table_lseq_w5;
   let h1 = ST.get () in
+  pt.basepoint_w5.table_lemma_w5 ();
   assert (table_inv_w5 (as_seq h1 q1) (as_seq h1 pt.basepoint_w5.table_w5));
   assert (table_inv_w5 (as_seq h1 q2) (as_seq h1 table2));
   ME.mk_lexp_double_fw_tables len ctx_len k l table_len
@@ -235,7 +244,6 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
     (BE.lprecomp_get_vartime len ctx_len k l table_len)
     (null uint64) q1 bLen bBits scalar1 q2 scalar2
     (to_const pt.basepoint_w5.table_w5) (to_const table2) out;
-
   SE.exp_double_fw_lemma S.mk_pcurve_concrete_ops
     (from_mont_point (as_point_nat h0 q1)) cp.bits (as_nat h0 scalar1)
     (from_mont_point (as_point_nat h0 q2)) (as_nat h0 scalar2) 5
