@@ -15,10 +15,30 @@ open Hacl.Impl.PCurves.InvSqrt
 open Hacl.Impl.PCurves.Point
 
 module S = Spec.PCurves
+module BE = Hacl.Impl.Exponentiation
 
 include Hacl.Impl.PCurves.Group
 include Hacl.Impl.PCurves.PrecompTable
 
+inline_for_extraction noextract
+let table_inv_w4 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *. cp.bn_limbs) 16ul =
+  [@inline_let] let len = 3ul *. cp.bn_limbs in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_pcurve_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+  BE.table_inv_precomp len ctx_len k l table_len
+
+
+inline_for_extraction noextract
+let table_inv_w5 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *. cp.bn_limbs) 32ul =
+  [@inline_let] let len = 3ul *. cp.bn_limbs in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_pcurve_concrete_ops in
+  [@inline_let] let l = 5ul in
+  [@inline_let] let table_len = 32ul in
+  assert_norm (pow2 (v l) == v table_len);
+  BE.table_inv_precomp len ctx_len k l table_len
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 noextract inline_for_extraction
@@ -52,11 +72,6 @@ let point_mul_g_t {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| 
     S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
     S.to_aff_point (S.point_mul_g (as_nat h0 scalar)))
 
-[@(strict_on_arguments [0;1;2;3;4;5;6])]
-noextract inline_for_extraction
-val point_mul_g_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
-                {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |}: point_mul_g_t
-
 noextract inline_for_extraction
 let point_mul_double_g_t {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
                        {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |} = 
@@ -71,12 +86,6 @@ let point_mul_double_g_t {| cp:S.curve_params |} {| bn_ops |} {| curve_constants
     S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
     S.to_aff_point (S.point_mul_double_g (as_nat h0 scalar1) (as_nat h0 scalar2)
       (from_mont_point (as_point_nat h0 p))))
-
-[@(strict_on_arguments [0;1;2;3;4;5;6])]
-noextract inline_for_extraction
-val point_mul_double_g_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
-                       {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |}: point_mul_double_g_t
-
 
 inline_for_extraction
 class point_mul_ops {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}

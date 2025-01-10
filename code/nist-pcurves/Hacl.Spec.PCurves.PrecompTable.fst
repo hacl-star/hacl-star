@@ -33,25 +33,55 @@ let list_as_felem {| cp:S.curve_params |} (f:felem_list) : lseq uint64 (v cp.bn_
   Seq.seq_of_list f <: lseq uint64 (v cp.bn_limbs)
 
 
+val felem_to_list_lemma_rec_eval: {| cp:S.curve_params |} -> x:S.felem -> i:nat ->
+  Lemma (requires (i <= v cp.bn_limbs /\ x < pow2 (i * 64))) 
+        (ensures (BD.bn_v #U64 #i (Seq.seq_of_list (felem_to_list_rec x i)) == 
+                  x))
+
+#push-options "--fuel 2 --ifuel 2"
+let rec felem_to_list_lemma_rec_eval x i =
+  if i > 0 then (
+    [@inline_let] let x0 = x % pow2 64 in
+    [@inline_let] let x1 = x / pow2 64 in
+    [@inline_let] let l = felem_to_list_rec x1 (i - 1) in
+    [@inline_let] let r = (u64 x0) :: l in
+    assert (List.Tot.length r == i);
+    assert (Seq.length (Seq.seq_of_list r) == i);
+    assert (Seq.index (Seq.seq_of_list r) 0 == u64 x0);
+    let r0 = Seq.slice (Seq.seq_of_list r) 0 1 in
+    let r1 = Seq.slice (Seq.seq_of_list r) 1 i in
+    assert (Seq.index r0 0 == u64 x0);
+    BD.bn_eval1 #U64 r0;
+    assert (BD.bn_v #U64 #1 r0 == x0);
+    Seq.lemma_eq_intro (Seq.slice (Seq.seq_of_list r) 1 i) (Seq.seq_of_list l);
+    assert (Seq.slice (Seq.seq_of_list r) 1 i == Seq.seq_of_list l);
+    BD.bn_eval_split_i #U64 #i (Seq.seq_of_list r) 1;
+    assert (BD.bn_v #U64 #i (Seq.seq_of_list r) == 
+            BD.bn_v #U64 #1 r0 + pow2 64 * BD.bn_v #U64 #(i-1) r1); 
+    Math.Lemmas.lemma_div_lt x (64 * i) 64;
+    assert (x1 < pow2 (64 * i - 64));
+    assert (x1 < pow2 (64 * (i - 1)));
+    felem_to_list_lemma_rec_eval x1 (i-1);
+    assert (BD.bn_v #U64 #(i-1) (Seq.seq_of_list l) == x1);
+    assert (BD.bn_v #U64 #i (Seq.seq_of_list r) == x0 + pow2 64 * x1);
+    assert (BD.bn_v #U64 #i (Seq.seq_of_list r) == x)
+  )
+  else (
+    assert (felem_to_list_rec x i == []);
+    assert (BD.bn_v #U64 #0 (Seq.seq_of_list []) == 0)
+  )
+#pop-options
+
 val felem_to_list_lemma_eval: {| cp:S.curve_params |} -> x:S.felem ->
   Lemma (BD.bn_v (list_as_felem (felem_to_list x)) == x)
 
 let felem_to_list_lemma_eval {| cp:S.curve_params |} x =
-  if cp.bn_limbs = 4ul then (
-    assume (cp.bits == 256);
-    let x0 = x % pow2 64 in
-    let x1 = x / pow2 64 % pow2 64 in
-    let x2 = x / pow2 128 % pow2 64 in
-    let x3 = x / pow2 192 % pow2 64 in
-    let bn_x = list_as_felem (felem_to_list x) in
-    create4_lemma (u64 x0) (u64 x1) (u64 x2) (u64 x3);
-      assert (v bn_x.[0] == x0 /\ v bn_x.[1] == x1 /\ v bn_x.[2] == x2 /\ v bn_x.[3] == x3);
-    Hacl.Impl.PCurves.Bignum.bn_v_is_as_nat4 bn_x;
-      assert (BD.bn_v bn_x = x0 + x1 * pow2 64 + x2 * pow2 128 + x3 * pow2 192);
-    Hacl.Spec.PrecompBaseTable256.lemma_decompose_nat256_as_four_u64 x)
-  else admit()
-
-
+  assert (64 * v cp.bn_limbs >= cp.bits);
+  Math.Lemmas.pow2_le_compat (64 * v cp.bn_limbs) cp.bits;
+  assert (pow2 (64 * v cp.bn_limbs) >= pow2 cp.bits);
+  assert (x < pow2 (64 * v cp.bn_limbs));
+  felem_to_list_lemma_rec_eval x (v cp.bn_limbs)
+  
 //--------------------------------------------
 
 val proj_point_to_list_sub {| cp:S.curve_params |} : p:S.proj_point -> Lemma

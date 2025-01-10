@@ -146,6 +146,8 @@ def compute_fstar_deps():
             if '(Warning ' in line:
                 # example: "(Warning 307) logic qualifier is deprecated"
                 continue
+            if line.startswith('#'):
+                continue
             if line.endswith(':'):
                 line = line + ' '
             # lines are of the form:

@@ -2,14 +2,16 @@ module Hacl.Spec.PrecompBaseTable256
 
 open FStar.Mul
 open Lib.IntTypes
+open Lib.Sequence
 
-module LSeq = Lib.Sequence
+module BSeq = Lib.ByteSequence
 module Loops = Lib.LoopCombinators
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
-module BD = Hacl.Spec.Bignum.Definitions
 
-#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+module SB = Hacl.Spec.Bignum.Base
+
+open Hacl.Spec.Bignum.Definitions
+
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let lemma_mod_pow2_sub x a b =
   calc (==) {
@@ -21,7 +23,6 @@ let lemma_mod_pow2_sub x a b =
     (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 x a (a + b) }
     x % pow2 (a + b) - x % pow2 a;
   }
-
 
 let lemma_decompose_nat256_as_four_u64 x =
   let x0 = x % pow2 64 in

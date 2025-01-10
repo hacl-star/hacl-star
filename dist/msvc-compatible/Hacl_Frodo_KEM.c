@@ -30,6 +30,7 @@
 
 void randombytes_(uint32_t len, uint8_t *res)
 {
-  Lib_RandomBuffer_System_randombytes(res, len);
+  bool b = Lib_RandomBuffer_System_randombytes(res, len);
+  KRML_MAYBE_UNUSED_VAR(b);
 }
 

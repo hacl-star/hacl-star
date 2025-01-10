@@ -120,7 +120,34 @@ val ecdsa_verification_cmpr {| cp:S.curve_params |} {| bn_ops |} {| curve_consta
     b <==> (if S.is_point_at_inf (_X, _Y, _Z) then false
       else S.fmul _X (S.finv _Z) % S.order = as_nat h0 r)))
 
-#push-options "--z3rlimit 1000 --split_queries always" 
+val lemma_ecdsa_verification {| cp:S.curve_params |} : p1:S.proj_point -> p2:S.proj_point -> b:bool -> r:nat ->
+  Lemma (requires (r > 0 /\ S.to_aff_point p1 == S.to_aff_point p2 /\
+                  (let _X2, _Y2, _Z2 = p2 in
+                   b = (if S.is_point_at_inf p2 then false else S.fmul _X2 (S.finv _Z2) % S.order = r))))
+        (ensures (let _X1, _Y1, _Z1 = p1 in
+                   b = (if S.is_point_at_inf p1 then false else S.fmul _X1 (S.finv _Z1) % S.order = r)))
+
+#push-options "--z3rlimit 200"
+let lemma_ecdsa_verification p1 p2 b r = 
+    let _X1, _Y1, _Z1 = p1 in
+    let _X2, _Y2, _Z2 = p2 in
+    SL.lemma_aff_is_point_at_inf p1;
+    SL.lemma_aff_is_point_at_inf p2;
+    if S.is_point_at_inf p1 then (
+      assert (_Z1 = 0);
+      assert (S.is_aff_point_at_inf (S.to_aff_point p1));
+      assert (S.is_aff_point_at_inf (S.to_aff_point p2));
+      assert (_Z2 = 0 || (_X2 = 0 && _Y2 = 0));
+      if _Z2 = 0  then assert (b = false)
+      else (assert (_X2 = 0);
+            assert (b = (S.fmul _X2 (S.finv _Z2) % S.order = r));
+            assert (b = (0 = r));
+            assert (b = false))
+    )
+    else ()
+#pop-options    
+
+#push-options "--z3rlimit 200"
 let ecdsa_verification_cmpr {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} r pk u1 u2 =
   push_frame ();
   let res = create_point #cp in
@@ -130,18 +157,14 @@ let ecdsa_verification_cmpr {| cp:S.curve_params |} {| bn_ops |} {| curve_consta
   assert (S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
     S.to_aff_point (S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2)
       (from_mont_point (as_point_nat h0 pk))));
+  let b = if is_point_at_inf_vartime res then
+             false
+          else ecdsa_verify_finv res r in
+  pop_frame();
+  lemma_ecdsa_verification (S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (from_mont_point (as_point_nat h0 pk))) (from_mont_point (as_point_nat h1 res)) b (as_nat h0 r);
+  b 
+#pop-options 
 
-  SL.lemma_aff_is_point_at_inf (from_mont_point (as_point_nat h1 res));
-  SL.lemma_aff_is_point_at_inf
-    (S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (from_mont_point (as_point_nat h0 pk)));
-
-  let b =
-    if is_point_at_inf_vartime res then false
-    else ecdsa_verify_finv res r in
-  pop_frame ();
-  admit();
-  b
-#pop-options
 
 inline_for_extraction noextract
 val load_signature {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} (r_q s_q:felem) (sign_r sign_s:lbytes (size cp.bytes)) : Stack bool

@@ -51,11 +51,23 @@ val mk_compute:
   finish: D.finish_st i ->
   compute_st (D.get_alg i)
 
+[@@ Comment "Write the HMAC-MD5 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
+`dst` must point to 16 bytes of memory."]
+val compute_md5: compute_st MD5
+
 [@@ Comment "Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.
 
 The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
 `dst` must point to 20 bytes of memory."]
 val compute_sha1: compute_st SHA1
+
+[@@ Comment "Write the HMAC-SHA-2-224 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+`dst` must point to 28 bytes of memory."]
+val compute_sha2_224: compute_st SHA2_224
 
 [@@ Comment "Write the HMAC-SHA-2-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
 
@@ -74,6 +86,30 @@ val compute_sha2_384: compute_st SHA2_384
 The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
 `dst` must point to 64 bytes of memory."]
 val compute_sha2_512: compute_st SHA2_512
+
+[@@ Comment "Write the HMAC-SHA-3-224 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 144 bytes.
+`dst` must point to 28 bytes of memory."]
+val compute_sha3_224: compute_st SHA3_224
+
+[@@ Comment "Write the HMAC-SHA-3-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 136 bytes.
+`dst` must point to 32 bytes of memory."]
+val compute_sha3_256: compute_st SHA3_256
+
+[@@ Comment "Write the HMAC-SHA-3-384 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 104 bytes.
+`dst` must point to 48 bytes of memory."]
+val compute_sha3_384: compute_st SHA3_384
+
+[@@ Comment "Write the HMAC-SHA-3-512 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 72 bytes.
+`dst` must point to 64 bytes of memory."]
+val compute_sha3_512: compute_st SHA3_512
 
 [@@ Comment "Write the HMAC-BLAKE2s MAC of a message (`data`) by using a key (`key`) into `dst`.
 
