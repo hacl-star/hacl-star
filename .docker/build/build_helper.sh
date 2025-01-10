@@ -5,7 +5,7 @@ out_file=$2
 threads=$3
 branchname=$4
 
-export FSTAR_HOME=$(pwd)/FStar
+export FSTAR_EXE=$(pwd)/FStar/bin/fstar.exe
 
 eval $(opam config env)
 
