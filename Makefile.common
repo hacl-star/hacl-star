@@ -40,8 +40,8 @@ mustexist =						\
 # find fstar's ocaml libraries.
 FSTAR_OCAMLENV := $(shell $(FSTAR_EXE) --ocamlenv)
 
-# We also set this variable to reduce warnings
-FSTAR_OCAMLENV += OCAMLFIND_IGNORE_DUPS_IN='$(shell ocamlc -where)/compiler-libs';
+# We also extend this variable to reduce warnings.
+FSTAR_OCAMLENV += OCAMLFIND_IGNORE_DUPS_IN='$(shell ocamlc -where)/compiler-libs:$(OCAMLFIND_IGNORE_DUPS_IN)';
 FSTAR_OCAMLENV += export OCAMLFIND_IGNORE_DUPS_IN;
 
 $(call mustexist, FSTAR_EXE)
