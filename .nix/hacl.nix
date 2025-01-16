@@ -146,7 +146,6 @@
     buildInputs = [openssl.dev];
 
     VALE_HOME = vale;
-    FSTAR_HOME = fstar;
     KRML_HOME = karamel;
 
     configurePhase = "export HACL_HOME=$(pwd)";

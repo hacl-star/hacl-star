@@ -261,11 +261,16 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 
 .PRECIOUS: %.fst %.fsti
 
+# Find this file in the library. We could also just call F* with
+# 'LowStar.Endianness.fst' in the invocation below since F* tries to
+# find files in the command line in its include path.
+LowStar_Endianness_fst := $(shell $(FSTAR_EXE) --locate_file LowStar.Endianness.fst)
+
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_SOURCE_DIRS)) \
     $(addsuffix /*.fst,$(ALL_HACL_SOURCE_DIRS))) \
-  $(FSTAR_ULIB)/LowStar.Endianness.fst \
+  $(LowStar_Endianness_fst) \
   $(wildcard $(VALE_FSTS)) # empty during the first stage
 
 # We currently force regeneration of three depend files. This is long.
@@ -283,8 +288,13 @@ ifndef MAKE_RESTARTS
 # For KaRaMeL, we use --extract 'krml:*' to extract everything and let krml
 # decide what to keep based on reachability and bundling
 
+# When calling `fstar --dep` or `krml`, the length of the list of
+# arguments often exceeds a Windows-imposed limit. Thus, it is
+# necessary to save long lists of arguments into a response (`.rsp`)
+# file and pass the response file with `@` to said executables.
+
 # The `sed` invocation is currently necessary because, even though all
-# paths are absolute (HACL_HOME, FSTAR_HOME, etc.), F* still generates
+# paths are absolute (HACL_HOME, FSTAR_EXE, etc.), F* still generates
 # dependency trees containing things like bin/../ulib (or
 # bin/../lib/fstar if F* is installed from opam or from `make
 # install`) We need to remove such detours by hand, which is done by
@@ -293,8 +303,10 @@ ifndef MAKE_RESTARTS
 .fstar-depend-%: .FORCE
 	@if ! [ -f .didhelp ]; then echo "ℹ️  This is F* version $(shell $(FSTAR_NO_FLAGS) --version)"; touch .didhelp; fi
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
+	@rm -f $@.rsp
+	@for f in $(notdir $(FSTAR_ROOTS)) ; do echo $$f ; done > $@.rsp
 	$(call run-with-log,\
-	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
+	  $(FSTAR_NO_FLAGS) --dep $* @$@.rsp --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract 'krml:* -FStar.Tactics -FStar.Reflection -FStar.Stubs' \
 	    --extract 'OCaml:-* +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@.tmp && \
 	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/\.\./!/!g' $@.tmp && mv $@.tmp $@ \
@@ -911,9 +923,11 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && mkdir -p $(dir $@)/lib_gen && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
-	$(KRML) $(KRML_EXTRA) $(DEFAULT_FLAGS) \
+	rm -f $@.rsp
+	for f in $(filter %.krml,$^) ; do echo $$f ; done > $@.rsp
+	$(KRML) -fstar $(FSTAR_EXE) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \
-	  $(filter %.krml,$^) \
+	  @$@.rsp \
 	  -silent \
 	  -ccopt -Wno-unused \
 	  -warn-error @2@4-6@15@18@21+22 \
@@ -923,7 +937,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
 	echo "This code was generated with the following toolchain." > $(dir $@)/INFO.txt
-	echo "F* version: $(shell cd $(FSTAR_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
+	echo "F* version: $(shell $(FSTAR_EXE) --version | tr '\n' ' ')" >> $(dir $@)/INFO.txt
 	echo "KaRaMeL version: $(shell cd $(KRML_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
 	touch $@ # target not created for wasm and rust... but still creating it to avoid spurious rebuilds
@@ -938,7 +952,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
-	$(KRML) -silent \
+	$(KRML) -silent -fstar $(FSTAR_EXE) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -no-prefix $(subst Hacl_Test_,Hacl.Test.,$*) \
@@ -1061,7 +1075,7 @@ obj/libhaclml.cmxa: $(filter-out $(HACL_HOME)/obj/Meta_Interface.cmx,$(ALL_CMX_F
 # JP: doesn't work because a PPX is prepended for some reason
 # ocamlfind mklib -o haclml -package fstar.lib -g -I $(HACL_HOME)/obj $(addprefix $(HACL_HOME)/obj/*.,cmo cmx ml o)
 	$(call run-with-log,\
-	  OCAMLFIND_IGNORE_DUPS_IN="`ocamlc -where`/compiler-libs" ocamlfind opt -a -o $@ -package fstar.lib -g -I $(HACL_HOME)/obj $^ \
+	  eval "$(FSTAR_OCAMLENV)" && ocamlfind opt -thread -a -o $@ -package fstar.lib -g -I $(HACL_HOME)/obj $^ \
 	  ,[OCAMLOPT-CMXA] libhaclml,$(call to-obj-dir,$@))
 
 

@@ -14,7 +14,7 @@ Our code relies on the following tools, which must be installed before building:
 * [F*](https://github.com/FStarLang/FStar) (`master` branch),
   [KaRaMeL](https://github.com/FStarLang/karamel) (`master` branch),
   and Z3 (version [4.5.1](https://github.com/FStarLang/binaries/tree/master/z3-tested))
-  * Set the `FSTAR_HOME` environment variable to the F* directory (e.g., `FSTAR_HOME = FStar`)
+  * Install `fstar.exe` into your path (`make install` in the F* repo), or set `FSTAR_EXE` to the location of the executable.
   * Set the `KRML_HOME` environment variable to the KaRaMeL directory (e.g., `KRML_HOME = karamel`)
   * (See the [HACL* installation guide](../INSTALL.md) for directions on installing F*, KaRaMeL, and Z3 and setting environment variables)
 * An installed C/C++ compiler, used by SCons to compile C/C++ files

@@ -8310,7 +8310,7 @@ static void test_one_curve25519(vector0 v)
 {
   uint8_t *result = v.result;
   uint32_t result_len = v.result_len;
-  uint8_t *public = v.public;
+  uint8_t *public0 = v.public;
   uint32_t public_len = v.public_len;
   uint8_t *private_ = v.private_;
   uint32_t private__len = v.private__len;
@@ -8318,7 +8318,7 @@ static void test_one_curve25519(vector0 v)
   uint8_t dst[32U] = { 0U };
   if (public_len == 32U && private__len == 32U)
   {
-    EverCrypt_Curve25519_scalarmult(dst, private_, public);
+    EverCrypt_Curve25519_scalarmult(dst, private_, public0);
   }
   if (result_len == 32U && valid)
   {
