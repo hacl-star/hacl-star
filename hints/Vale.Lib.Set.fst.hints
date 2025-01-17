@@ -12,21 +12,20 @@
         "binder_x_ae567c2fb75be05905677af440075565_1",
         "binder_x_d7225297ca1a1ec6844d3652f1a46890_2",
         "binder_x_d81ce3e0a7e9266eb475a56ef4ca0603_0", "bool_inversion",
-        "equality_tok_Prims.LexTop@tok",
         "function_token_typing_Prims.__cache_version_number__",
-        "function_token_typing_Prims.int", "int_inversion", "int_typing",
-        "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
-        "lemma_FStar.Set.mem_singleton", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_Negation",
-        "projection_inverse_BoxBool_proj_0",
+        "int_inversion", "int_typing", "lemma_FStar.Set.mem_complement",
+        "lemma_FStar.Set.mem_intersect", "lemma_FStar.Set.mem_singleton",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_6268074eed4ab807d2471ecaa6d94df2",
         "refinement_interpretation_Tm_refine_a1de8daedb3a03e65182911e08473885",
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
-        "typing_FStar.Set.singleton", "well-founded-ordering-on-nat"
+        "typing_FStar.Set.singleton", "typing_Prims.int",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "282f4065a79f6e4f2fa2d08f3126c2dd"
+      "c2f453d1501fa5176d2e1c254b4ece5d"
     ],
     [
       "Vale.Lib.Set.remove_between",
@@ -35,7 +34,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThanOrEqual" ],
       0,
-      "003efae734e6c365302f5826b6a18e85"
+      "b04d76d264bec0e815e6b3198d463e94"
     ],
     [
       "Vale.Lib.Set.remove_between_reveal",
@@ -47,16 +46,16 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
         "equation_Vale.Lib.Set.remove_between",
         "function_token_typing_Prims.__cache_version_number__",
-        "function_token_typing_Prims.int", "int_inversion",
-        "primitive_Prims.op_LessThanOrEqual",
+        "int_inversion", "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_72ffcbdb7a7dbf1acd542d96c7babf51",
-        "refinement_interpretation_Tm_refine_73f213e2db1ed36fbfb9c962fdf7a80a",
-        "typing_FStar.Set.mem", "typing_Vale.Lib.Set.remove_between",
+        "refinement_interpretation_Tm_refine_d042405c73e04efeed564cc295889c5e",
+        "typing_FStar.Set.mem", "typing_Prims.int",
+        "typing_Vale.Lib.Set.remove_between",
         "typing_Vale.Lib.Set.remove_between_"
       ],
       0,
-      "f537d41bdd56c6c7486c83fbcc5dcc87"
+      "017d51cef6e6ba87966d9d481a6c034a"
     ],
     [
       "Vale.Lib.Set.lemma_sel_restrict",
@@ -65,16 +64,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Map.restrict", "equation_FStar.Map.sel",
-        "fuel_guarded_inversion_FStar.Map.t",
-        "function_token_typing_Prims.__cache_version_number__",
-        "proj_equation_FStar.Map.Mkt_mappings",
-        "projection_inverse_FStar.Map.Mkt_mappings",
-        "token_correspondence_FStar.Map.__proj__Mkt__item__mappings"
+        "lemma_FStar.Map.lemma_SelRestrict", "typing_Prims.int"
       ],
       0,
-      "09a459179759f2c45bacc1cdc0eeff25"
+      "96456bd2652d1cece2a22ee2c022539e"
     ]
   ]
 ]

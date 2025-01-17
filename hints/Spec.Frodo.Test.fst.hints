@@ -7,19 +7,14 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.IntTypes.U8@tok",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.GaloisField.gf", "function_token_typing_Prims.int",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "proj_equation_Spec.GaloisField.GF_t",
-        "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "typing_Prims.int"
       ],
       0,
-      "aa2b78ed6a9ecdbf97fac4c628d011ac"
+      "4d494e75ec9c9b43575fbdab079f8081"
     ],
     [
       "Spec.Frodo.Test.test_frodo",
@@ -29,7 +24,8 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.uint8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Prims.nat", "equation_Prims.pos", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.Frodo.Params.bytes_pkhash",
@@ -42,35 +38,34 @@
         "equation_Spec.Frodo.Params.secretmatrixbytes_len",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
         "fuel_guarded_inversion_FStar.Pervasives.result",
-        "function_token_typing_Lib.IntTypes.uint8",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "proj_equation_Spec.GaloisField.GF_t",
+        "proj_equation_Spec.GaloisField.GF_@t",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_037793798b027400b91499030f0dd468",
-        "refinement_interpretation_Tm_refine_3691b279eddc1ca6b5b7ea9a139f2926",
+        "projection_inverse_Spec.GaloisField.GF_@t",
+        "refinement_interpretation_Tm_refine_1f7c08f21f367506d8d1a5748ec6ee8c",
+        "refinement_interpretation_Tm_refine_26183f9b950e73f460b1d320f78ef284",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_55f848066cd5ee4e0810122d2ff9c6c2",
         "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
+        "refinement_interpretation_Tm_refine_773e46f2e995a2b81815482ecd499b63",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_87c5103c853d4db312ee047d56ccc477",
-        "refinement_interpretation_Tm_refine_89cbb1bc07d6d002ff3d0a3015673c1d",
-        "refinement_interpretation_Tm_refine_8ceb14ec8edbe56f86d2b650d98f37a3",
-        "refinement_interpretation_Tm_refine_aeb90181bac76594096d027dfdcf29fd",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_e8f00c92e4678ea1eb9b934e6fa46592",
+        "refinement_interpretation_Tm_refine_8092bdbad96c1b4f93685c19fcc5a58e",
+        "refinement_interpretation_Tm_refine_b0523e209c79a90a2d166a0dbcd67585",
+        "refinement_interpretation_Tm_refine_bfdb3a8863ad334a5f7b1b25054d1b4a",
+        "refinement_interpretation_Tm_refine_d84291baf180f7e4f23827fc50b7f18e",
         "refinement_interpretation_Tm_refine_ebc3ed3355a58f9806521921c64734d2",
-        "typing_FStar.List.Tot.Base.length", "typing_Lib.IntTypes.unsigned",
-        "typing_Spec.Frodo.Params.bytes_mu",
+        "typing_FStar.List.Tot.Base.length", "typing_Lib.IntTypes.int_t",
+        "typing_Lib.IntTypes.unsigned", "typing_Spec.Frodo.Params.bytes_mu",
         "typing_Spec.Frodo.Params.crypto_bytes",
         "typing_Spec.Frodo.Params.crypto_ciphertextbytes",
         "typing_Spec.Frodo.Params.crypto_publickeybytes",
         "typing_Spec.Frodo.Params.crypto_secretkeybytes",
         "typing_Spec.Frodo.Params.ct1bytes_len",
         "typing_Spec.Frodo.Params.secretmatrixbytes_len",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d57c3307bc2794263ee031c25983a136"
+      "be373e2fb2ffd202d0e9ff268d151ebf"
     ],
     [
       "Spec.Frodo.Test.test_frodo",
@@ -78,50 +73,14 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Prims.pos", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Frodo.Params.bytes_pkhash",
-        "equation_Spec.Frodo.Params.bytes_seed_a",
-        "equation_Spec.Frodo.Params.crypto_publickeybytes",
-        "equation_Spec.Frodo.Params.crypto_secretkeybytes",
-        "equation_Spec.Frodo.Params.ct1bytes_len",
-        "equation_Spec.Frodo.Params.params_nbar",
-        "equation_Spec.Frodo.Params.publicmatrixbytes_len",
-        "equation_Spec.Frodo.Params.secretmatrixbytes_len",
-        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
-        "fuel_guarded_inversion_FStar.Pervasives.result",
-        "function_token_typing_Lib.IntTypes.uint8",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "proj_equation_Spec.GaloisField.GF_t",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_037793798b027400b91499030f0dd468",
-        "refinement_interpretation_Tm_refine_3691b279eddc1ca6b5b7ea9a139f2926",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "equation_Spec.Frodo.Params.crypto_bytes",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_87c5103c853d4db312ee047d56ccc477",
-        "refinement_interpretation_Tm_refine_89cbb1bc07d6d002ff3d0a3015673c1d",
-        "refinement_interpretation_Tm_refine_8ceb14ec8edbe56f86d2b650d98f37a3",
-        "refinement_interpretation_Tm_refine_aeb90181bac76594096d027dfdcf29fd",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_e8f00c92e4678ea1eb9b934e6fa46592",
         "refinement_interpretation_Tm_refine_ebc3ed3355a58f9806521921c64734d2",
-        "typing_FStar.List.Tot.Base.length", "typing_Lib.IntTypes.unsigned",
-        "typing_Spec.Frodo.Params.bytes_mu",
-        "typing_Spec.Frodo.Params.crypto_bytes",
-        "typing_Spec.Frodo.Params.crypto_ciphertextbytes",
-        "typing_Spec.Frodo.Params.crypto_publickeybytes",
-        "typing_Spec.Frodo.Params.crypto_secretkeybytes",
-        "typing_Spec.Frodo.Params.ct1bytes_len",
-        "typing_Spec.Frodo.Params.secretmatrixbytes_len",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Spec.Frodo.Params.crypto_bytes"
       ],
       0,
-      "3724c6ab4311a0d1afac0b0dac7bc574"
+      "dec11bff7bd3572f11400f7a8aeef899"
     ],
     [
       "Spec.Frodo.Test.test",
@@ -133,7 +92,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.result"
       ],
       0,
-      "3d5f482d195ff467a7de1babbce56783"
+      "37f3018f805c4da22c056ca900749170"
     ]
   ]
 ]

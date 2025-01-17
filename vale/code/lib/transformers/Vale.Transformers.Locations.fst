@@ -50,10 +50,10 @@ let downgrade_val_raise_val_u0_u1 #a x = FStar.Universe.downgrade_val_raise_val 
 let location_val_t a =
   match a with
   | ALocMem -> heap_impl
-  | ALocStack -> FStar.Universe.raise_t (machine_stack & memTaint_t)
-  | ALocReg r -> FStar.Universe.raise_t (t_reg r)
-  | ALocCf -> FStar.Universe.raise_t flag_val_t
-  | ALocOf -> FStar.Universe.raise_t flag_val_t
+  | ALocStack -> FStar.Universe.raise_t u#0 u#1 (machine_stack & memTaint_t)
+  | ALocReg r -> FStar.Universe.raise_t u#0 u#1 (t_reg r)
+  | ALocCf -> FStar.Universe.raise_t u#0 u#1 flag_val_t
+  | ALocOf -> FStar.Universe.raise_t u#0 u#1 flag_val_t
 
 (* See fsti *)
 let location_val_eqt a =
@@ -65,13 +65,13 @@ let location_val_eqt a =
   | ALocOf -> flag_val_t
 
 (* See fsti *)
-let eval_location a s =
+let eval_location (a:location) (s:machine_state) : location_val_t a =
   match a with
   | ALocMem -> s.ms_heap
-  | ALocStack -> FStar.Universe.raise_val (s.ms_stack, s.ms_stackTaint)
-  | ALocReg r -> FStar.Universe.raise_val (eval_reg r s)
-  | ALocCf -> FStar.Universe.raise_val (cf s.ms_flags)
-  | ALocOf -> FStar.Universe.raise_val (overflow s.ms_flags)
+  | ALocStack -> FStar.Universe.raise_val u#0 u#1 (s.ms_stack, s.ms_stackTaint)
+  | ALocReg r -> FStar.Universe.raise_val u#0 u#1 (eval_reg r s)
+  | ALocCf -> FStar.Universe.raise_val u#0 u#1 (cf s.ms_flags)
+  | ALocOf -> FStar.Universe.raise_val u#0 u#1 (overflow s.ms_flags)
 
 (* See fsti *)
 let update_location a v s =
@@ -83,13 +83,13 @@ let update_location a v s =
     let v = FStar.Universe.downgrade_val (coerce v) in
     { s with ms_stack = fst v ; ms_stackTaint = snd v }
   | ALocReg r ->
-    let v = FStar.Universe.downgrade_val v in
+    let v = FStar.Universe.downgrade_val u#0 u#1 v in
     update_reg' r v s
   | ALocCf ->
-    let v = FStar.Universe.downgrade_val v in
+    let v = FStar.Universe.downgrade_val u#0 u#1 v in
     { s with ms_flags = FStar.FunctionalExtensionality.on_dom flag (fun f -> if f = fCarry then v else s.ms_flags f) }
   | ALocOf ->
-    let v = FStar.Universe.downgrade_val v in
+    let v = FStar.Universe.downgrade_val u#0 u#1 v in
     { s with ms_flags = FStar.FunctionalExtensionality.on_dom flag (fun f -> if f = fOverflow then v else s.ms_flags f) }
 
 (* See fsti *)

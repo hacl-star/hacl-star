@@ -8,7 +8,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "8ff4c52de06b99fbc12d4c522d84229d"
+      "3974fe57d8627965a15ecce0e1be931e"
     ],
     [
       "Vale.Def.Words.Seq.seq_to_seq_four_to_seq_BE",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "8197f7e0e2f9bd76bd85f21f77894755"
+      "7aabc72e72dea2d65cc619858e0ae2db"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_to_seq_four_LE",
@@ -26,7 +26,7 @@
       0,
       [ "@query" ],
       0,
-      "bd04e950e9eb0d84acfc703f89f80292"
+      "f26b6656d947a20dd75cf2f29ce8e640"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_to_seq_four_BE",
@@ -35,7 +35,7 @@
       0,
       [ "@query" ],
       0,
-      "577f339e488467baa2880c0d0b24a4d1"
+      "9445c0e4c7fa932c53767970eae4450d"
     ],
     [
       "Vale.Def.Words.Seq.four_to_nat_to_four_8",
@@ -44,7 +44,7 @@
       0,
       [ "@query" ],
       0,
-      "abdd07515bf1c2c78ab33d2ca7d635f4"
+      "bbf6ab903e2f5d0e92464cbaafe4952e"
     ],
     [
       "Vale.Def.Words.Seq.nat_to_four_to_nat",
@@ -53,22 +53,16 @@
       0,
       [ "@query" ],
       0,
-      "339ca141c8c25bd838cf8379fcce3426"
+      "854bc199325861526c882ea62879c685"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_LE_is_seq_four_to_seq_LE",
       1,
       1,
       0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.Def.Words.Seq_s.seq4",
-        "equation_Vale.Def.Words.Seq_s.seqn",
-        "fuel_guarded_inversion_Vale.Def.Words_s.four",
-        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
-      ],
+      [ "@query" ],
       0,
-      "789f96a29d85b7b450392d2c0c741781"
+      "1f8e756eda8360473d36a160e2ac538c"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_BE_is_seq_four_to_seq_BE",
@@ -77,7 +71,7 @@
       0,
       [ "@query" ],
       0,
-      "992af1e89cd49f9f03453d93b32ada90"
+      "93eb57dbfac7f5f17f09a8be6aad8961"
     ],
     [
       "Vale.Def.Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_LE",
@@ -86,27 +80,26 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "FStar.Ghost_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
-        "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
+        "FStar.Ghost_interpretation_Tm_arrow_50804f875ccbc6826e85364cf89715d5",
+        "FStar.Seq.Base_interpretation_Tm_arrow_14c84956e8b59092b61b1d57a9b4abfd",
         "equation_Prims.nat",
         "equation_Vale.Def.Words.Seq_s.seq_nat32_to_seq_nat8_LE",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.Lib.Seqs_s.compose",
-        "equation_Vale.Lib.Seqs_s.seq_map",
-        "function_token_typing_Vale.Def.Words_s.nat32",
-        "function_token_typing_Vale.Def.Words_s.nat8", "int_inversion",
+        "equation_Vale.Lib.Seqs_s.seq_map", "int_inversion",
         "kinding_Vale.Def.Words_s.four@tok",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_12cfdc5e5e9b4a21e137c684eae73d5b",
+        "refinement_interpretation_Tm_refine_40010472284eb8c91681f1af22dddcf4",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_93ab65736391883123761d1ec2c7d4b6",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
         "typing_FStar.Seq.Base.init", "typing_FStar.Seq.Base.length",
-        "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca",
-        "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
+        "typing_Tm_abs_132b15bf263840a6e1750bcb9a657479",
+        "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE",
+        "typing_Vale.Def.Words_s.nat32", "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "2a6cf75aea3238d047f176a9ac0f8f36"
+      "9d4264224549ecbe2240104f0df35907"
     ],
     [
       "Vale.Def.Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_BE",
@@ -115,27 +108,26 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "FStar.Ghost_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
-        "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
+        "FStar.Ghost_interpretation_Tm_arrow_50804f875ccbc6826e85364cf89715d5",
+        "FStar.Seq.Base_interpretation_Tm_arrow_14c84956e8b59092b61b1d57a9b4abfd",
         "equation_Prims.nat",
         "equation_Vale.Def.Words.Seq_s.seq_nat32_to_seq_nat8_BE",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.Lib.Seqs_s.compose",
-        "equation_Vale.Lib.Seqs_s.seq_map",
-        "function_token_typing_Vale.Def.Words_s.nat32",
-        "function_token_typing_Vale.Def.Words_s.nat8", "int_inversion",
+        "equation_Vale.Lib.Seqs_s.seq_map", "int_inversion",
         "kinding_Vale.Def.Words_s.four@tok",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_12cfdc5e5e9b4a21e137c684eae73d5b",
+        "refinement_interpretation_Tm_refine_40010472284eb8c91681f1af22dddcf4",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_93ab65736391883123761d1ec2c7d4b6",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
         "typing_FStar.Seq.Base.init", "typing_FStar.Seq.Base.length",
-        "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca",
-        "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_BE"
+        "typing_Tm_abs_132b15bf263840a6e1750bcb9a657479",
+        "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_BE",
+        "typing_Vale.Def.Words_s.nat32", "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "9c14d41e3be9cb302221973205183d50"
+      "6c190fbc5d04af0ecee725ca7d6f3b3c"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_LE_injective",
@@ -144,7 +136,7 @@
       0,
       [ "@query" ],
       0,
-      "14e794c6185fc91a990d68ee51555df7"
+      "655239ae34a0d371b21e354e95b7fc5b"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_BE_injective",
@@ -153,7 +145,7 @@
       0,
       [ "@query" ],
       0,
-      "a2922d4744afb3600ec9a4c3d31016f7"
+      "50b08f715cd56f47f0d6d1b6dd3430d1"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_LE_injective_specific",
@@ -162,7 +154,7 @@
       0,
       [ "@query" ],
       0,
-      "7ad396ee17ba2c86f2dda241858d7dc3"
+      "58cc99d53be005ac2ba13d517878a62c"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_BE_injective_specific",
@@ -171,7 +163,7 @@
       0,
       [ "@query" ],
       0,
-      "2d190979815991e069e5660adb43d1e0"
+      "4e2f968c2bdd20c972163026a1d78eff"
     ],
     [
       "Vale.Def.Words.Seq.four_to_nat_8_injective",
@@ -180,7 +172,7 @@
       0,
       [ "@query" ],
       0,
-      "6a5944ec91f08c67a2bb9a5f40c7eaad"
+      "487f2dded8c25a5a5b54b9ddb91f6bbf"
     ],
     [
       "Vale.Def.Words.Seq.nat_to_four_8_injective",
@@ -189,7 +181,7 @@
       0,
       [ "@query" ],
       0,
-      "028504be4b313d4545bd1db0135cb7bb"
+      "7d0ec3ecc0176097303f881148d41f84"
     ],
     [
       "Vale.Def.Words.Seq.append_distributes_seq_to_seq_four_LE",
@@ -201,10 +193,10 @@
         "equation_FStar.Seq.Base.op_At_Bar",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0fe8a12189cf4c417dda723cc135a9ac"
+        "refinement_interpretation_Tm_refine_561f4cbe2b96a4f9810166b66cb3a622"
       ],
       0,
-      "dd2fd5ad6d83a66888858ce72bd8e9bf"
+      "d0c0aecb410177ab55fe3aeb4996549e"
     ],
     [
       "Vale.Def.Words.Seq.append_distributes_seq_to_seq_four_BE",
@@ -216,10 +208,10 @@
         "equation_FStar.Seq.Base.op_At_Bar",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0fe8a12189cf4c417dda723cc135a9ac"
+        "refinement_interpretation_Tm_refine_561f4cbe2b96a4f9810166b66cb3a622"
       ],
       0,
-      "8dcf299ac987a36a2cb5d7548f1e1d9e"
+      "c3cec74cbc1e8df156e23e1b48f07a25"
     ]
   ]
 ]

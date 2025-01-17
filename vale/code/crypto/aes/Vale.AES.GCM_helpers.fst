@@ -21,7 +21,6 @@ let extra_bytes_helper (n:nat) : Lemma
   (ensures bytes_to_quad_size n == n / 16 + 1)
   =
   ()
-
 #reset-options "--smtencoding.elim_box true --z3rlimit 25 --max_ifuel 1 --initial_fuel 0 --max_fuel 1"
 let bytes_to_quad_size_no_extra_bytes num_bytes = ()
 
@@ -232,8 +231,6 @@ let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
   assert(8 <= i /\ i < 12 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q2) (i % 4));
   assert(12 <= i /\ i < 16 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q3) (i % 4))
 
-
-#reset-options "--smtencoding.elim_box true --z3rlimit 60 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 let lemma_pad_to_32_bits_helper (s s'':seq4 nat8) (n:nat) : Lemma
   (requires
     n <= 2 /\
@@ -278,6 +275,7 @@ let lemma_pad_to_32_bits (s s'':seq4 nat8) (n:nat) : Lemma
   assert (n == 4 ==> x % pow2 (8 * n) == x % 0x100000000);
   ()
 
+#reset-options "--smtencoding.elim_box true --z3rlimit 60 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 let lemma_mod_n_8_lower1 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures lo64 q % pow2 (8 * n) == q.lo0 % pow2 (8 * n))

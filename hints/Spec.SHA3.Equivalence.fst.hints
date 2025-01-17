@@ -9,13 +9,13 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_e1a3e9d590a60ca4850dfa02df692d9f"
       ],
       0,
-      "8c9c25b064b9b8457d96527118fe1d74"
+      "0514d294d2ea97607e3c5ae46f00a22b"
     ],
     [
       "Spec.SHA3.Equivalence.state_chi",
@@ -25,12 +25,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d9ed87c3879a7533537b488ba8b3d8ca"
+      "a30cd7515c422497d157dc4a7759825c"
     ],
     [
       "Spec.SHA3.Equivalence.state_chi_inner_equivalence0",
@@ -44,7 +44,7 @@
         "equation_Spec.SHA3.Equivalence.state_chi_inner",
         "equation_Spec.SHA3.state_chi_inner0",
         "equation_Spec.SHA3.state_chi_inner1", "int_inversion", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -52,7 +52,7 @@
         "refinement_interpretation_Tm_refine_e1a3e9d590a60ca4850dfa02df692d9f"
       ],
       0,
-      "e85d4ce553084404876995a7e204edcc"
+      "3be83bd7f57a0e85333ad89929b87dd4"
     ],
     [
       "Spec.SHA3.Equivalence.state_chi_inner_equivalence1",
@@ -64,36 +64,36 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Lib.IntTypes_interpretation_Tm_arrow_f4a9562bad893d799188b75efefcbe4b",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.uint64",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.int_t",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
         "equation_Spec.SHA3.Equivalence.state_chi_inner",
         "equation_Spec.SHA3.get", "equation_Spec.SHA3.set",
         "function_token_typing_Lib.IntTypes.logand",
-        "function_token_typing_Lib.IntTypes.logxor",
-        "function_token_typing_Lib.IntTypes.uint64", "int_inversion",
-        "int_typing", "lemma_FStar.Seq.Base.lemma_index_upd2",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "function_token_typing_Lib.IntTypes.logxor", "int_inversion",
+        "int_typing", "lemma_FStar.Int.pow2_values",
+        "lemma_FStar.Seq.Base.lemma_index_upd2",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0d492040a26ebd254bec390f7ea810d6",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
-        "refinement_interpretation_Tm_refine_6e296b6b449dd8fe1af30e0e60e4afd6",
+        "refinement_interpretation_Tm_refine_55f848066cd5ee4e0810122d2ff9c6c2",
         "refinement_interpretation_Tm_refine_702f039c10121f45738178e39cad2936",
+        "refinement_interpretation_Tm_refine_93ab65736391883123761d1ec2c7d4b6",
+        "refinement_interpretation_Tm_refine_ad488cd5ad5fff5cbd1535a8b6a91c7f",
+        "refinement_interpretation_Tm_refine_b7402aa7861cac6f057003334a84a271",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_dee0f34b44c44e6d512c6db0858b92ef",
-        "refinement_interpretation_Tm_refine_df81b3f17797c6f405c1dbb191651292",
         "refinement_interpretation_Tm_refine_e1a3e9d590a60ca4850dfa02df692d9f",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.logand",
-        "typing_Lib.IntTypes.lognot", "typing_Lib.IntTypes.logxor",
-        "typing_Lib.Sequence.index", "typing_Lib.Sequence.upd",
-        "typing_Spec.SHA3.get", "typing_Spec.SHA3.set",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "typing_Lib.IntTypes.logand", "typing_Lib.IntTypes.lognot",
+        "typing_Lib.IntTypes.logxor", "typing_Lib.Sequence.index",
+        "typing_Lib.Sequence.upd", "typing_Spec.SHA3.get",
+        "typing_Spec.SHA3.set", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0e8caf4f492388ec48be7059d9440343"
+      "815bbe89b66293fa41ac58f3e78ec5e2"
     ],
     [
       "Spec.SHA3.Equivalence.state_chi_equivalence",
@@ -105,12 +105,12 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "equation_Prims.nat", "equation_Spec.SHA3.Equivalence.state_chi",
         "equation_Spec.SHA3.state_chi", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "1a37cdb408c53a411d2e51ce342a5934"
+      "3fbfef71075e65c6e3a56f772f0d7cd6"
     ]
   ]
 ]

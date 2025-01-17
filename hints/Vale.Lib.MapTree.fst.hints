@@ -8,12 +8,13 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "equation_Prims.nat",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "typing_Prims.int"
       ],
       0,
-      "49cee440b4fea06f200dcaec69825efe"
+      "25fa00d50ad19d1013356e7bc56b47c0"
     ],
     [
       "Vale.Lib.MapTree.__proj__Node__item___0",
@@ -22,12 +23,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.Lib.MapTree.Node",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_131752844997e94d70cad487765e1288"
+        "refinement_interpretation_Tm_refine_635accbbfc14b5661126f348775b2e00"
       ],
       0,
-      "cda1a0e8e3ac52e6c6a92ec3b09094b9"
+      "2b002c1b3ce5d6f2c0b938009b06a2df"
     ],
     [
       "Vale.Lib.MapTree.__proj__Node__item___1",
@@ -36,12 +35,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.Lib.MapTree.Node",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_131752844997e94d70cad487765e1288"
+        "refinement_interpretation_Tm_refine_635accbbfc14b5661126f348775b2e00"
       ],
       0,
-      "7e44b354998604e002bdff6a7ed38eba"
+      "873229bc20215745a925c3574e777c2a"
     ],
     [
       "Vale.Lib.MapTree.__proj__Node__item___2",
@@ -50,12 +47,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.Lib.MapTree.Node",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_131752844997e94d70cad487765e1288"
+        "refinement_interpretation_Tm_refine_635accbbfc14b5661126f348775b2e00"
       ],
       0,
-      "7a7dc362e087d47bc5fadb4b57b71b8b"
+      "7c363810a2c6fa3df2c63913eba0b961"
     ],
     [
       "Vale.Lib.MapTree.__proj__Node__item___3",
@@ -64,12 +59,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.Lib.MapTree.Node",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_131752844997e94d70cad487765e1288"
+        "refinement_interpretation_Tm_refine_635accbbfc14b5661126f348775b2e00"
       ],
       0,
-      "e914a90a807cc8cacf5b0973f1c59bd7"
+      "d7a1648c72a926f056e5bc6412df6798"
     ],
     [
       "Vale.Lib.MapTree.__proj__Node__item___4",
@@ -78,12 +71,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.Lib.MapTree.Node",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_131752844997e94d70cad487765e1288"
+        "refinement_interpretation_Tm_refine_635accbbfc14b5661126f348775b2e00"
       ],
       0,
-      "467d13d6e23020e2e218fd30dd58a8c4"
+      "91745a1b583fd84cd602511874c3cdc0"
     ],
     [
       "Vale.Lib.MapTree.height",
@@ -94,10 +85,11 @@
         "@MaxIFuel_assumption", "@query",
         "disc_equation_Vale.Lib.MapTree.Empty",
         "disc_equation_Vale.Lib.MapTree.Node",
-        "fuel_guarded_inversion_Vale.Lib.MapTree.tree"
+        "fuel_guarded_inversion_Vale.Lib.MapTree.tree",
+        "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "0a480bf1fa5f2ab974c42e5397e6fdff"
+      "ede53703b15788e4937918bc71ca6a27"
     ],
     [
       "Vale.Lib.MapTree.mkNode",
@@ -113,7 +105,7 @@
         "typing_Vale.Lib.MapTree.height"
       ],
       0,
-      "4c1ccf11bd23642aefe7c5d01e842cc7"
+      "51d16b1c6b3714359f2a1ab95fd4a549"
     ],
     [
       "Vale.Lib.MapTree.get",
@@ -122,16 +114,15 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "binder_x_d367b870ff7533df600153f672bdeb06_4",
+        "binder_x_d6baacfdc59f2b5496352b76bf710d34_4",
         "disc_equation_Vale.Lib.MapTree.Empty",
-        "disc_equation_Vale.Lib.MapTree.Node", "equation_Prims.eqtype",
-        "equation_Prims.op_Equals_Equals_Equals",
+        "disc_equation_Vale.Lib.MapTree.Node",
         "fuel_guarded_inversion_Vale.Lib.MapTree.tree",
         "projection_inverse_BoxBool_proj_0",
         "subterm_ordering_Vale.Lib.MapTree.Node"
       ],
       0,
-      "33e2227e9cfd052f2a71ba7efd0b657f"
+      "695f8c92c73fce22609972ddd5d7a066"
     ],
     [
       "Vale.Lib.MapTree.put",
@@ -140,16 +131,15 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "binder_x_d367b870ff7533df600153f672bdeb06_4",
+        "binder_x_6514c9579a09f80f4faf5a53154efd5d_4",
         "disc_equation_Vale.Lib.MapTree.Empty",
-        "disc_equation_Vale.Lib.MapTree.Node", "equation_Prims.eqtype",
-        "equation_Prims.op_Equals_Equals_Equals",
+        "disc_equation_Vale.Lib.MapTree.Node",
         "fuel_guarded_inversion_Vale.Lib.MapTree.tree",
         "projection_inverse_BoxBool_proj_0",
         "subterm_ordering_Vale.Lib.MapTree.Node"
       ],
       0,
-      "53da155ee062d21712dfd81940506492"
+      "5944eaa171059afda7e125c57aec73dc"
     ],
     [
       "Vale.Lib.MapTree.inv",
@@ -158,16 +148,15 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "binder_x_d367b870ff7533df600153f672bdeb06_4",
+        "binder_x_22bf49c8c3284ccf37d251f05faed843_4",
         "disc_equation_Vale.Lib.MapTree.Empty",
-        "disc_equation_Vale.Lib.MapTree.Node", "equation_Prims.eqtype",
-        "equation_Prims.op_Equals_Equals_Equals",
+        "disc_equation_Vale.Lib.MapTree.Node",
         "fuel_guarded_inversion_Vale.Lib.MapTree.tree",
         "projection_inverse_BoxBool_proj_0",
         "subterm_ordering_Vale.Lib.MapTree.Node"
       ],
       0,
-      "c8ff452b6e5bef30cbbf6fdfe44bd436"
+      "992b0572ea18fbcd8f74f8aaf63049a0"
     ],
     [
       "Vale.Lib.MapTree.lemma_put_inv",
@@ -183,13 +172,13 @@
         "Vale.Lib.MapTree_interpretation_Tm_arrow_87fd7148829c07e8da0b20a2d843ccc0",
         "Vale.Lib.MapTree_interpretation_Tm_arrow_c8126b87a2c25bb477df4a7a6b0eea9e",
         "b2t_def", "binder_x_2e56f0f7014d6393bf76ee12c1ce5313_3",
-        "binder_x_64a6f2da4341770a4dee8aa1d0d4ae69_6",
+        "binder_x_55837d13eb398ab54b2c64ee28c84938_4",
+        "binder_x_9168501fb2a5a9c196fd714552a594f0_6",
         "binder_x_9cd1733a5204f989dbb2f01d5984df93_1",
-        "binder_x_b44871c1c4c7134db582f31d4f8332b2_7",
-        "binder_x_b44871c1c4c7134db582f31d4f8332b2_8",
-        "binder_x_d367b870ff7533df600153f672bdeb06_4",
-        "binder_x_d3faed7bbec7b3b3d41ce73e2f001f5c_5",
-        "binder_x_fe28d8bcde588226b4e538b35321de05_2", "bool_inversion",
+        "binder_x_a8cdd3591b01b45468088ec1202d6f8e_2",
+        "binder_x_d0d9e92c3c869160e66c5ac6957bcc78_7",
+        "binder_x_d0d9e92c3c869160e66c5ac6957bcc78_8",
+        "binder_x_d3faed7bbec7b3b3d41ce73e2f001f5c_5", "bool_inversion",
         "constructor_distinct_FStar.Pervasives.Native.Some",
         "constructor_distinct_Vale.Lib.MapTree.Empty",
         "constructor_distinct_Vale.Lib.MapTree.Node",
@@ -199,7 +188,6 @@
         "disc_equation_Vale.Lib.MapTree.Empty",
         "disc_equation_Vale.Lib.MapTree.Node", "equation_Prims.eqtype",
         "equation_Prims.l_and", "equation_Prims.nat",
-        "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.Lib.MapTree.balance",
         "equation_Vale.Lib.MapTree.height",
         "equation_Vale.Lib.MapTree.is_cmp",
@@ -210,37 +198,41 @@
         "equation_with_fuel_Vale.Lib.MapTree.inv.fuel_instrumented",
         "equation_with_fuel_Vale.Lib.MapTree.put.fuel_instrumented",
         "fuel_guarded_inversion_FStar.Pervasives.Native.option",
-        "fuel_guarded_inversion_Vale.Lib.MapTree.tree", "l_and-interp",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_GreaterThan",
+        "fuel_guarded_inversion_Vale.Lib.MapTree.tree", "int_inversion",
+        "l_and-interp", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_disEquality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_FStar.Pervasives.Native.Some_a",
-        "projection_inverse_FStar.Pervasives.Native.Some_v",
-        "projection_inverse_Vale.Lib.MapTree.Empty_a",
-        "projection_inverse_Vale.Lib.MapTree.Empty_b",
-        "projection_inverse_Vale.Lib.MapTree.Node__0",
-        "projection_inverse_Vale.Lib.MapTree.Node__1",
-        "projection_inverse_Vale.Lib.MapTree.Node__2",
-        "projection_inverse_Vale.Lib.MapTree.Node__3",
-        "projection_inverse_Vale.Lib.MapTree.Node__4",
-        "projection_inverse_Vale.Lib.MapTree.Node_a",
-        "projection_inverse_Vale.Lib.MapTree.Node_b",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_2",
+        "projection_inverse_FStar.Pervasives.Native.Some_@0",
+        "projection_inverse_FStar.Pervasives.Native.Some_@a",
+        "projection_inverse_FStar.Pervasives.Native.Some_@v",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@0",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@a",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@b",
+        "projection_inverse_Vale.Lib.MapTree.Node_@0",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_0",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_1",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_2",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_3",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_4",
+        "projection_inverse_Vale.Lib.MapTree.Node_@a",
+        "projection_inverse_Vale.Lib.MapTree.Node_@b",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_bfa8b3a9915bd6071ec310e6f00cc1ba",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "refinement_interpretation_Tm_refine_eeceea8364322fd110af76f4ba886396",
         "subterm_ordering_Vale.Lib.MapTree.Node",
         "token_correspondence_Vale.Lib.MapTree.put.fuel_instrumented",
         "true_interp", "typing_Vale.Lib.MapTree.height",
         "typing_Vale.Lib.MapTree.is_lt_option",
-        "typing_Vale.Lib.MapTree.put", "unit_inversion", "unit_typing"
+        "typing_Vale.Lib.MapTree.mkNode", "typing_Vale.Lib.MapTree.put",
+        "unit_inversion", "unit_typing"
       ],
       0,
-      "319c9a4116163e8bae7617af76c049d0"
+      "b11b0836401cd8335f7246abfdda3235"
     ],
     [
       "Vale.Lib.MapTree.lemma_get_put_self",
@@ -257,14 +249,14 @@
         "@fuel_irrelevance_Vale.Lib.MapTree.put.fuel_instrumented", "@query",
         "Vale.Lib.MapTree_interpretation_Tm_arrow_87fd7148829c07e8da0b20a2d843ccc0",
         "Vale.Lib.MapTree_interpretation_Tm_arrow_c8126b87a2c25bb477df4a7a6b0eea9e",
-        "b2t_def", "binder_x_2e56f0f7014d6393bf76ee12c1ce5313_3",
-        "binder_x_64a6f2da4341770a4dee8aa1d0d4ae69_6",
+        "b2t_def", "binder_x_15ab31e0cac9e1fbfc9038d14a43a6f1_2",
+        "binder_x_2e56f0f7014d6393bf76ee12c1ce5313_3",
+        "binder_x_30bfc9d600f28992fc2501b1ce350fd3_4",
         "binder_x_9cd1733a5204f989dbb2f01d5984df93_1",
-        "binder_x_b44871c1c4c7134db582f31d4f8332b2_7",
-        "binder_x_b44871c1c4c7134db582f31d4f8332b2_8",
-        "binder_x_d367b870ff7533df600153f672bdeb06_4",
+        "binder_x_d0d9e92c3c869160e66c5ac6957bcc78_7",
+        "binder_x_d0d9e92c3c869160e66c5ac6957bcc78_8",
         "binder_x_d3faed7bbec7b3b3d41ce73e2f001f5c_5",
-        "binder_x_fe28d8bcde588226b4e538b35321de05_2", "bool_inversion",
+        "binder_x_e321e26200f6901b7429e4087c788519_6", "bool_inversion",
         "constructor_distinct_FStar.Pervasives.Native.None",
         "constructor_distinct_FStar.Pervasives.Native.Some",
         "constructor_distinct_Vale.Lib.MapTree.Empty",
@@ -273,8 +265,7 @@
         "data_typing_intro_FStar.Pervasives.Native.Some@tok",
         "disc_equation_Vale.Lib.MapTree.Empty",
         "disc_equation_Vale.Lib.MapTree.Node", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
-        "equation_Vale.Lib.MapTree.balance",
+        "equation_Prims.nat", "equation_Vale.Lib.MapTree.balance",
         "equation_Vale.Lib.MapTree.height",
         "equation_Vale.Lib.MapTree.is_cmp",
         "equation_Vale.Lib.MapTree.is_lt_option",
@@ -290,22 +281,25 @@
         "primitive_Prims.op_disEquality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_FStar.Pervasives.Native.Some_a",
-        "projection_inverse_FStar.Pervasives.Native.Some_v",
-        "projection_inverse_Vale.Lib.MapTree.Empty_a",
-        "projection_inverse_Vale.Lib.MapTree.Empty_b",
-        "projection_inverse_Vale.Lib.MapTree.Node__0",
-        "projection_inverse_Vale.Lib.MapTree.Node__1",
-        "projection_inverse_Vale.Lib.MapTree.Node__2",
-        "projection_inverse_Vale.Lib.MapTree.Node__3",
-        "projection_inverse_Vale.Lib.MapTree.Node__4",
-        "projection_inverse_Vale.Lib.MapTree.Node_a",
-        "projection_inverse_Vale.Lib.MapTree.Node_b",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_4ffa7c32af891a41bd85ea57681cdae7",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_2",
+        "projection_inverse_FStar.Pervasives.Native.Some_@0",
+        "projection_inverse_FStar.Pervasives.Native.Some_@a",
+        "projection_inverse_FStar.Pervasives.Native.Some_@v",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@0",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@a",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@b",
+        "projection_inverse_Vale.Lib.MapTree.Node_@0",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_0",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_1",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_2",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_3",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_4",
+        "projection_inverse_Vale.Lib.MapTree.Node_@a",
+        "projection_inverse_Vale.Lib.MapTree.Node_@b",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_76160254ad78eaa2fbe8c7105597467a",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "subterm_ordering_Vale.Lib.MapTree.Node",
         "typing_Vale.Lib.MapTree.height",
         "typing_Vale.Lib.MapTree.is_lt_option",
@@ -313,7 +307,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "d8b414bf57735f4ab08c673ef924755e"
+      "381402ab42b247a5b4dfc63a00415f49"
     ],
     [
       "Vale.Lib.MapTree.lemma_get_put_other",
@@ -331,14 +325,15 @@
         "Vale.Lib.MapTree_interpretation_Tm_arrow_87fd7148829c07e8da0b20a2d843ccc0",
         "Vale.Lib.MapTree_interpretation_Tm_arrow_c8126b87a2c25bb477df4a7a6b0eea9e",
         "b2t_def", "binder_x_2e56f0f7014d6393bf76ee12c1ce5313_3",
-        "binder_x_64a6f2da4341770a4dee8aa1d0d4ae69_7",
+        "binder_x_4e6d1bc6d869aff87c39dc14bcb0827d_2",
+        "binder_x_4fbdc0e3efa58249349752a9410c3ce7_4",
+        "binder_x_67bb24713e0392ee40ac6f0c36f3007d_7",
         "binder_x_9cd1733a5204f989dbb2f01d5984df93_1",
-        "binder_x_b44871c1c4c7134db582f31d4f8332b2_8",
-        "binder_x_b44871c1c4c7134db582f31d4f8332b2_9",
-        "binder_x_d367b870ff7533df600153f672bdeb06_4",
+        "binder_x_d0d9e92c3c869160e66c5ac6957bcc78_8",
+        "binder_x_d0d9e92c3c869160e66c5ac6957bcc78_9",
         "binder_x_d3faed7bbec7b3b3d41ce73e2f001f5c_5",
-        "binder_x_d3faed7bbec7b3b3d41ce73e2f001f5c_6",
-        "binder_x_fe28d8bcde588226b4e538b35321de05_2", "bool_inversion",
+        "binder_x_d3faed7bbec7b3b3d41ce73e2f001f5c_6", "bool_inversion",
+        "constructor_distinct_FStar.Pervasives.Native.None",
         "constructor_distinct_FStar.Pervasives.Native.Some",
         "constructor_distinct_Tm_unit",
         "constructor_distinct_Vale.Lib.MapTree.Empty",
@@ -347,8 +342,7 @@
         "data_typing_intro_FStar.Pervasives.Native.Some@tok",
         "disc_equation_Vale.Lib.MapTree.Empty",
         "disc_equation_Vale.Lib.MapTree.Node", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
-        "equation_Vale.Lib.MapTree.balance",
+        "equation_Prims.nat", "equation_Vale.Lib.MapTree.balance",
         "equation_Vale.Lib.MapTree.height",
         "equation_Vale.Lib.MapTree.is_cmp",
         "equation_Vale.Lib.MapTree.is_lt_option",
@@ -358,38 +352,45 @@
         "equation_with_fuel_Vale.Lib.MapTree.get.fuel_instrumented",
         "equation_with_fuel_Vale.Lib.MapTree.inv.fuel_instrumented",
         "equation_with_fuel_Vale.Lib.MapTree.put.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.option",
         "fuel_guarded_inversion_Vale.Lib.MapTree.tree", "int_inversion",
         "l_and-interp", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_disEquality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_FStar.Pervasives.Native.Some_a",
-        "projection_inverse_FStar.Pervasives.Native.Some_v",
-        "projection_inverse_Vale.Lib.MapTree.Empty_a",
-        "projection_inverse_Vale.Lib.MapTree.Empty_b",
-        "projection_inverse_Vale.Lib.MapTree.Node__0",
-        "projection_inverse_Vale.Lib.MapTree.Node__1",
-        "projection_inverse_Vale.Lib.MapTree.Node__2",
-        "projection_inverse_Vale.Lib.MapTree.Node__3",
-        "projection_inverse_Vale.Lib.MapTree.Node__4",
-        "projection_inverse_Vale.Lib.MapTree.Node_a",
-        "projection_inverse_Vale.Lib.MapTree.Node_b",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_2",
+        "projection_inverse_FStar.Pervasives.Native.None_@0",
+        "projection_inverse_FStar.Pervasives.Native.None_@a",
+        "projection_inverse_FStar.Pervasives.Native.Some_@0",
+        "projection_inverse_FStar.Pervasives.Native.Some_@a",
+        "projection_inverse_FStar.Pervasives.Native.Some_@v",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@0",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@a",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@b",
+        "projection_inverse_Vale.Lib.MapTree.Node_@0",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_0",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_1",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_2",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_3",
+        "projection_inverse_Vale.Lib.MapTree.Node_@_4",
+        "projection_inverse_Vale.Lib.MapTree.Node_@a",
+        "projection_inverse_Vale.Lib.MapTree.Node_@b",
+        "refinement_interpretation_Tm_refine_19c5350221c6721f6968372ef18dc26a",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_f3918b6d5a3bfced72cf3303942d6c00",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "subterm_ordering_Vale.Lib.MapTree.Node",
+        "token_correspondence_Vale.Lib.MapTree.get.fuel_instrumented",
         "token_correspondence_Vale.Lib.MapTree.put.fuel_instrumented",
-        "typing_Vale.Lib.MapTree.height",
+        "typing_Vale.Lib.MapTree.get", "typing_Vale.Lib.MapTree.height",
         "typing_Vale.Lib.MapTree.is_lt_option",
         "typing_Vale.Lib.MapTree.mkNode", "typing_Vale.Lib.MapTree.put",
         "unit_inversion", "unit_typing"
       ],
       0,
-      "89291828b356123a2f984b688bc5cbe2"
+      "08208828d46c5d5312212ba7c22c4dae"
     ],
     [
       "Vale.Lib.MapTree.const",
@@ -404,14 +405,15 @@
         "data_typing_intro_Vale.Lib.MapTree.Empty@tok",
         "equation_Prims.eqtype",
         "equation_with_fuel_Vale.Lib.MapTree.inv.fuel_instrumented",
-        "projection_inverse_Vale.Lib.MapTree.Empty_a",
-        "projection_inverse_Vale.Lib.MapTree.Empty_b",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@0",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@a",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@b",
         "refinement_interpretation_Tm_refine_45141b9abce5adf1299e1d7ad7f1fcef",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "true_interp"
       ],
       0,
-      "7fe2db3ef98bdc1cc25843f82a2aaf4a"
+      "03b31ecbabe6039d609975a3ecdad9b0"
     ],
     [
       "Vale.Lib.MapTree.sel",
@@ -419,19 +421,15 @@
       1,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@MaxIFuel_assumption",
         "@fuel_correspondence_Vale.Lib.MapTree.get.fuel_instrumented",
-        "@query", "bool_inversion",
-        "disc_equation_FStar.Pervasives.Native.None",
+        "@query", "disc_equation_FStar.Pervasives.Native.None",
         "disc_equation_FStar.Pervasives.Native.Some",
-        "equation_with_fuel_Vale.Lib.MapTree.get.fuel_instrumented",
         "lemma_FStar.Pervasives.invertOption",
-        "typing_FStar.Pervasives.Native.uu___is_None",
-        "typing_FStar.Pervasives.Native.uu___is_Some",
-        "typing_Vale.Lib.MapTree.get"
+        "projection_inverse_BoxBool_proj_0", "typing_Vale.Lib.MapTree.get"
       ],
       0,
-      "d1cd123128d2d00062f0b247193c4a17"
+      "c3ddf9548f7db1e1464a844a2ecd76bb"
     ],
     [
       "Vale.Lib.MapTree.upd",
@@ -443,12 +441,12 @@
         "constructor_distinct_FStar.Pervasives.Native.None",
         "equation_Vale.Lib.MapTree.is_lt_option",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_ce042dfe68264a2e795f6664fac964ba"
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_2",
+        "refinement_interpretation_Tm_refine_08b482eec08e99f073d0e029e8f39d36"
       ],
       0,
-      "9c2f58cd4271afd71618ede7725bc799"
+      "87c34ad9c90f970346db8c0cf631f600"
     ],
     [
       "Vale.Lib.MapTree.lemma_const",
@@ -463,16 +461,18 @@
         "data_typing_intro_Vale.Lib.MapTree.Empty@tok",
         "equation_Vale.Lib.MapTree.const", "equation_Vale.Lib.MapTree.sel",
         "equation_with_fuel_Vale.Lib.MapTree.get.fuel_instrumented",
-        "projection_inverse_FStar.Pervasives.Native.None_a",
-        "projection_inverse_Vale.Lib.MapTree.Empty_a",
-        "projection_inverse_Vale.Lib.MapTree.Empty_b",
-        "projection_inverse_Vale.Lib.MapTree.Map_default_v",
-        "projection_inverse_Vale.Lib.MapTree.Map_is_le",
-        "projection_inverse_Vale.Lib.MapTree.Map_t",
+        "projection_inverse_FStar.Pervasives.Native.None_@0",
+        "projection_inverse_FStar.Pervasives.Native.None_@a",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@0",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@a",
+        "projection_inverse_Vale.Lib.MapTree.Empty_@b",
+        "projection_inverse_Vale.Lib.MapTree.Map_@default_v",
+        "projection_inverse_Vale.Lib.MapTree.Map_@is_le",
+        "projection_inverse_Vale.Lib.MapTree.Map_@t",
         "refinement_interpretation_Tm_refine_45141b9abce5adf1299e1d7ad7f1fcef"
       ],
       0,
-      "05354cfaa95d3385f6a2ca93d33ddef1"
+      "4950d0234000bf5c3c84e031e7a81416"
     ],
     [
       "Vale.Lib.MapTree.lemma_sel_upd_self",
@@ -484,16 +484,17 @@
         "@fuel_correspondence_Vale.Lib.MapTree.put.fuel_instrumented",
         "@query", "constructor_distinct_FStar.Pervasives.Native.Some",
         "equation_Vale.Lib.MapTree.sel", "equation_Vale.Lib.MapTree.upd",
-        "projection_inverse_FStar.Pervasives.Native.Some_a",
-        "projection_inverse_FStar.Pervasives.Native.Some_v",
-        "projection_inverse_Vale.Lib.MapTree.Map_default_v",
-        "projection_inverse_Vale.Lib.MapTree.Map_is_le",
-        "projection_inverse_Vale.Lib.MapTree.Map_t",
-        "refinement_interpretation_Tm_refine_ce042dfe68264a2e795f6664fac964ba",
+        "projection_inverse_FStar.Pervasives.Native.Some_@0",
+        "projection_inverse_FStar.Pervasives.Native.Some_@a",
+        "projection_inverse_FStar.Pervasives.Native.Some_@v",
+        "projection_inverse_Vale.Lib.MapTree.Map_@default_v",
+        "projection_inverse_Vale.Lib.MapTree.Map_@is_le",
+        "projection_inverse_Vale.Lib.MapTree.Map_@t",
+        "refinement_interpretation_Tm_refine_08b482eec08e99f073d0e029e8f39d36",
         "unit_inversion"
       ],
       0,
-      "19b4d4a05695adb369ccb1e31ecdde55"
+      "69898421603bea6e20fb343c4f022540"
     ],
     [
       "Vale.Lib.MapTree.lemma_sel_upd_other",
@@ -511,16 +512,16 @@
         "equation_Vale.Lib.MapTree.sel", "equation_Vale.Lib.MapTree.upd",
         "lemma_FStar.Pervasives.invertOption",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_Vale.Lib.MapTree.Map_default_v",
-        "projection_inverse_Vale.Lib.MapTree.Map_is_le",
-        "projection_inverse_Vale.Lib.MapTree.Map_t",
-        "refinement_interpretation_Tm_refine_ce042dfe68264a2e795f6664fac964ba",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_2",
+        "projection_inverse_Vale.Lib.MapTree.Map_@default_v",
+        "projection_inverse_Vale.Lib.MapTree.Map_@is_le",
+        "projection_inverse_Vale.Lib.MapTree.Map_@t",
+        "refinement_interpretation_Tm_refine_08b482eec08e99f073d0e029e8f39d36",
         "typing_Vale.Lib.MapTree.get", "unit_inversion"
       ],
       0,
-      "364f8db4419f8173fe1234c58e986d97"
+      "66c6117204ffe504be2a16a6d22de28f"
     ]
   ]
 ]

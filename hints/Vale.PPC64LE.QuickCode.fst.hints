@@ -11,14 +11,14 @@
         "equation_Prims.nat", "equation_Vale.Arch.HeapImpl.heaplet_id",
         "equation_Vale.PPC64LE.Machine_s.reg",
         "equation_Vale.PPC64LE.Machine_s.vec",
-        "function_token_typing_Prims.int",
         "haseqTm_refine_10933b2b7d83031ac55f8752406bdc16",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "haseqTm_refine_c365eb902b454950de62fba701d9049d",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "typing_Prims.int"
       ],
       0,
-      "f5d42ff19e99aec4d23219f0f6d23975"
+      "e1917321cd8cede39c650e8f96f1cb7f"
     ],
     [
       "Vale.PPC64LE.QuickCode.__proj__Mod_reg__item___0",
@@ -30,7 +30,7 @@
         "refinement_interpretation_Tm_refine_5f92f9e6bc0ccbd4c4a22c7db6695a20"
       ],
       0,
-      "71212248cbb4140d4023508f86e7d900"
+      "9578a8c2c9f12481b72b3c944d530dd4"
     ],
     [
       "Vale.PPC64LE.QuickCode.__proj__Mod_vec__item___0",
@@ -42,7 +42,7 @@
         "refinement_interpretation_Tm_refine_4f0a96a66dad22222c1a971fe1d706c1"
       ],
       0,
-      "d448532267ac4175509ee537aa19093c"
+      "dccc8282a83599aad6311fef29ebaa1c"
     ],
     [
       "Vale.PPC64LE.QuickCode.__proj__Mod_mem_heaplet__item___0",
@@ -54,7 +54,7 @@
         "refinement_interpretation_Tm_refine_653489788264eb44776856c2813a7efc"
       ],
       0,
-      "656d026a2f5ad171793e479a12506bc0"
+      "9ba38f8bc296b659205263e505a57eeb"
     ],
     [
       "Vale.PPC64LE.QuickCode.mod_eq",
@@ -77,7 +77,6 @@
         "constructor_distinct_Vale.PPC64LE.QuickCode.Mod_stackTaint",
         "constructor_distinct_Vale.PPC64LE.QuickCode.Mod_vec",
         "constructor_distinct_Vale.PPC64LE.QuickCode.Mod_xer",
-        "data_typing_intro_Vale.PPC64LE.QuickCode.Mod_ok@tok",
         "disc_equation_Vale.PPC64LE.QuickCode.Mod_None",
         "disc_equation_Vale.PPC64LE.QuickCode.Mod_cr0",
         "disc_equation_Vale.PPC64LE.QuickCode.Mod_mem",
@@ -102,16 +101,15 @@
         "equation_Vale.PPC64LE.Machine_s.reg",
         "equation_Vale.PPC64LE.Machine_s.vec",
         "fuel_guarded_inversion_Vale.PPC64LE.QuickCode.mod_t",
-        "function_token_typing_Prims.int",
         "haseqTm_refine_10933b2b7d83031ac55f8752406bdc16",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "haseqTm_refine_c365eb902b454950de62fba701d9049d",
         "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Vale.PPC64LE.QuickCode.Mod_mem_heaplet__0",
-        "projection_inverse_Vale.PPC64LE.QuickCode.Mod_reg__0",
-        "projection_inverse_Vale.PPC64LE.QuickCode.Mod_vec__0",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "typing_Vale.PPC64LE.QuickCode.uu___is_Mod_None",
+        "projection_inverse_Vale.PPC64LE.QuickCode.Mod_mem_heaplet_@_0",
+        "projection_inverse_Vale.PPC64LE.QuickCode.Mod_reg_@_0",
+        "projection_inverse_Vale.PPC64LE.QuickCode.Mod_vec_@_0",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "typing_Prims.int", "typing_Vale.PPC64LE.QuickCode.uu___is_Mod_None",
         "typing_Vale.PPC64LE.QuickCode.uu___is_Mod_cr0",
         "typing_Vale.PPC64LE.QuickCode.uu___is_Mod_mem",
         "typing_Vale.PPC64LE.QuickCode.uu___is_Mod_mem_heaplet",
@@ -122,10 +120,11 @@
         "typing_Vale.PPC64LE.QuickCode.uu___is_Mod_stackTaint",
         "typing_Vale.PPC64LE.QuickCode.uu___is_Mod_vec",
         "typing_Vale.PPC64LE.QuickCode.uu___is_Mod_xer",
-        "typing_tok_Vale.PPC64LE.QuickCode.Mod_None@tok"
+        "typing_tok_Vale.PPC64LE.QuickCode.Mod_None@tok",
+        "typing_tok_Vale.PPC64LE.QuickCode.Mod_xer@tok"
       ],
       0,
-      "9972de583c88912c9c24a5dd556c89ac"
+      "aadd34de340eca6a12af39b0efd70dfc"
     ],
     [
       "Vale.PPC64LE.QuickCode.update_state_mod",
@@ -149,7 +148,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "1df3e2ff3b49c63dd0dcc3bd3588f852"
+      "cabca9d131d8f7e52d6ca036a7a07f20"
     ],
     [
       "Vale.PPC64LE.QuickCode.update_state_mods",
@@ -159,14 +158,15 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Vale.PPC64LE.QuickCode_pretyping_86ab3ee9a9cf64cb085def6e073c77d3",
-        "binder_x_9eb216a68b72ac53e64236abef05807c_0",
-        "data_typing_intro_Vale.PPC64LE.QuickCode.Mod_ok@tok",
+        "binder_x_d46b6bc2545df34f21966916ec12e341_0",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equality_tok_Vale.PPC64LE.QuickCode.Mod_xer@tok",
         "fuel_guarded_inversion_Prims.list",
-        "projection_inverse_BoxBool_proj_0", "subterm_ordering_Prims.Cons"
+        "projection_inverse_BoxBool_proj_0", "subterm_ordering_Prims.Cons",
+        "typing_tok_Vale.PPC64LE.QuickCode.Mod_xer@tok"
       ],
       0,
-      "3a6f78b64ef83c480af3b6ae5b882c24"
+      "d7ac4c6e6db0ed8f66e52d37e9d238fb"
     ],
     [
       "Vale.PPC64LE.QuickCode.va_lemma_norm_mods",
@@ -182,7 +182,7 @@
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state"
       ],
       0,
-      "370c639e63692c3c8d2a6952199ecebc"
+      "88baf35f270b4bb6a64cf2ab079b272e"
     ],
     [
       "Vale.PPC64LE.QuickCode.__proj__QProc__item__proof",
@@ -192,10 +192,10 @@
       [
         "@MaxIFuel_assumption", "@query",
         "fuel_guarded_inversion_Vale.PPC64LE.QuickCode.quickCode",
-        "projection_inverse_Vale.PPC64LE.QuickCode.QProc_c"
+        "projection_inverse_Vale.PPC64LE.QuickCode.QProc_@c"
       ],
       0,
-      "51ad40358ff6247d76989800c255aeb6"
+      "056abbc1f832b0440d1a39c24b89a3b8"
     ]
   ]
 ]

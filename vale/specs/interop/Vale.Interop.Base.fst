@@ -108,7 +108,7 @@ let normal (#a:Type) (x:a) : a =
 #set-options "--initial_ifuel 1"
 
 [@__reduce__]
-let td_as_type : td -> Type =
+let td_as_type : td -> Type0 =
   function
   | TD_Base bt -> base_typ_as_type bt
   | TD_Buffer src bt _ -> buf_t src bt
@@ -121,7 +121,7 @@ let arg = t:td & td_as_type t
 //          and a result type `codom` that does not depend on the domain
 ////////////////////////////////////////////////////////////////////////////////
 [@(unifier_hint_injective) (__reduce__)]
-let rec n_arrow (dom:list td) (codom:Type) =
+let rec n_arrow (dom:list td) (codom:Type u#a) : Type u#a =
   match dom with
   | [] -> codom
   | hd::tl -> td_as_type hd -> n_arrow tl codom
@@ -131,7 +131,7 @@ let arr (dom:Type) (codom:Type) = dom -> codom
 
 [@__reduce__]
 let elim_1 (#dom:list td{Cons? dom})
-           (#r:Type)
+           (#r:Type u#a)
            (f:n_arrow dom r)
     : td_as_type (Cons?.hd dom) -> n_arrow (Cons?.tl dom) r =
     f
@@ -159,10 +159,10 @@ let intro_n_arrow_cons (hd:td) (b:Type) (tl:list td)
 //              and a result type codom that depends on the domain
 ////////////////////////////////////////////////////////////////////////////////
 [@(unifier_hint_injective) (__reduce__)]
-let rec n_dep_arrow (dom:list td) (codom: n_arrow dom Type) =
+let rec n_dep_arrow (dom:list td) (codom: n_arrow dom (Type u#a)) : Type u#a =
   match dom with
   | [] -> codom
-  | hd::tl -> x:td_as_type hd -> n_dep_arrow tl (elim_1 codom x)
+  | hd::tl -> x:td_as_type hd -> n_dep_arrow u#a tl (elim_1 codom x)
 
 [@__reduce__]
 let intro_dep_arrow_nil (b:Type)
@@ -292,6 +292,7 @@ let loc_all_args (args:list arg) : GTot B.loc =
     let l = List.Tot.map_gtot arg_loc args in
     List.Tot.fold_right_gtot l B.loc_union B.loc_none
 
+#restart-solver
 let all_live_cons (hd:arg) (tl:list arg) (h0:HS.mem)
   : Lemma
     (all_live h0 (hd :: tl) <==> (live_arg h0 hd /\ all_live h0 tl))

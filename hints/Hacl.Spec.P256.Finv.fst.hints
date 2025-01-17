@@ -12,23 +12,32 @@
         "equation_Hacl.Spec.P256.Finv.nat_mod_comm_monoid",
         "equation_Lib.NatMod.mk_nat_mod_comm_monoid",
         "equation_Lib.NatMod.nat_mod", "equation_Lib.NatMod.one_mod",
-        "equation_Spec.P256.PointOps.felem",
-        "equation_Spec.P256.PointOps.prime", "int_inversion", "int_typing",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "equation_Spec.P256.PointOps.prime", "int_inversion",
         "interpretation_Tm_abs_5728c7a1d6a5018d6dbb318a8992e28e",
         "primitive_Prims.op_Modulus",
-        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_one",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_@one",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@refl",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_one",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_@one",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@refl",
+        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
         "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_kinding_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl",
+        "typing_Hacl.Spec.P256.Finv.mk_to_nat_mod_comm_monoid",
+        "typing_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__one",
+        "typing_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__a_spec",
+        "typing_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__comm_monoid",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "c140ff4fa3db8eb5c06cc362864a41f2"
+      "7b703cc3addee9766d5187630f5fd0fb"
     ],
     [
       "Hacl.Spec.P256.Finv.mul_mod",
@@ -36,27 +45,31 @@
       0,
       0,
       [
-        "@query", "equation_Hacl.Spec.P256.Finv.mk_to_nat_mod_comm_monoid",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.P256.Finv.mk_to_nat_mod_comm_monoid",
         "equation_Hacl.Spec.P256.Finv.nat_mod_comm_monoid",
         "equation_Lib.NatMod.mk_nat_mod_comm_monoid",
         "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.nat_mod",
-        "equation_Spec.P256.PointOps.felem",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
         "equation_Spec.P256.PointOps.fmul",
-        "equation_Spec.P256.PointOps.prime",
+        "equation_Spec.P256.PointOps.prime", "int_inversion",
         "interpretation_Tm_abs_5728c7a1d6a5018d6dbb318a8992e28e",
-        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_refl",
-        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_@mul",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@refl",
+        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_@mul",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@refl",
+        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "token_correspondence_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__mul",
         "token_correspondence_Lib.NatMod.mul_mod",
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl"
       ],
       0,
-      "319b3edca33828e19d8269fb7e8a8445"
+      "46f8f4d1c2ed573daa8d458a3be5cde5"
     ],
     [
       "Hacl.Spec.P256.Finv.sqr_mod",
@@ -64,27 +77,31 @@
       0,
       0,
       [
-        "@query", "equation_Hacl.Spec.P256.Finv.mk_to_nat_mod_comm_monoid",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.P256.Finv.mk_to_nat_mod_comm_monoid",
         "equation_Hacl.Spec.P256.Finv.nat_mod_comm_monoid",
         "equation_Lib.NatMod.mk_nat_mod_comm_monoid",
         "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.nat_mod",
-        "equation_Spec.P256.PointOps.felem",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
         "equation_Spec.P256.PointOps.fmul",
-        "equation_Spec.P256.PointOps.prime",
+        "equation_Spec.P256.PointOps.prime", "int_inversion",
         "interpretation_Tm_abs_5728c7a1d6a5018d6dbb318a8992e28e",
-        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_refl",
-        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_@mul",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@refl",
+        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_@mul",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@refl",
+        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "token_correspondence_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__mul",
         "token_correspondence_Lib.NatMod.mul_mod",
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl"
       ],
       0,
-      "1a8a9e8f8331eff4aae954c92c2eebad"
+      "2878ebed0841d85446b2601657fcc0e1"
     ],
     [
       "Hacl.Spec.P256.Finv.fsquare_times_lemma",
@@ -99,7 +116,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "fc1af5f84da20391c0c47dc0f39edddc"
+      "262be943bec67859938b3163c295f531"
     ],
     [
       "Hacl.Spec.P256.Finv.fsquare_times_lemma",
@@ -118,15 +135,15 @@
         "equation_Spec.P256.PointOps.prime",
         "fuel_guarded_inversion_Lib.Exponentiation.Definition.comm_monoid",
         "interpretation_Tm_abs_5728c7a1d6a5018d6dbb318a8992e28e",
-        "proj_equation_Spec.Exponentiation.Mkconcrete_ops_to",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "proj_equation_Spec.Exponentiation.Mkconcrete_ops_@to",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@refl",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.Exponentiation.Mkconcrete_ops_to",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "projection_inverse_Spec.Exponentiation.Mkconcrete_ops_@to",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@refl",
         "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_kinding_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
@@ -139,7 +156,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "356f44bf150dfac2f31589f45c4be51d"
+      "2195f9738adf944ac5fa5e8911c45a30"
     ],
     [
       "Hacl.Spec.P256.Finv.lemma_pow_mod_1",
@@ -148,7 +165,7 @@
       0,
       [ "@query" ],
       0,
-      "2710f3c5d92a8fb996b593aa37616dc1"
+      "a8846df026e8cfc36821407d02d57f9f"
     ],
     [
       "Hacl.Spec.P256.Finv.lemma_pow_mod_1",
@@ -165,7 +182,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "63c64673702c68249ba35f3df93162cd"
+      "fc60e1b9e66579bdafd243643e1165ed"
     ],
     [
       "Hacl.Spec.P256.Finv.lemma_pow_mod_mul",
@@ -182,7 +199,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "baf04b0d2c7a751c8983161ca95f78fd"
+      "04d04e8001fce1b6e6fc2d561b507f9a"
     ],
     [
       "Hacl.Spec.P256.Finv.lemma_pow_mod_mul",
@@ -200,7 +217,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "6b87415e35ec742ce84db0d79ad5700c"
+      "624b74e4922bf9728ea2d3956b7b9810"
     ],
     [
       "Hacl.Spec.P256.Finv.lemma_pow_pow_mod",
@@ -216,7 +233,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "543398a974e52d1543bc2b688e198fb5"
+      "ce0b63886c01e13b652116f460423654"
     ],
     [
       "Hacl.Spec.P256.Finv.lemma_pow_pow_mod",
@@ -232,7 +249,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "bfcbc50f6dfe1214615f09b4c539eab4"
+      "89228046150481c7d7ba865c67e921e3"
     ],
     [
       "Hacl.Spec.P256.Finv.lemma_pow_pow_mod_mul",
@@ -249,7 +266,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "f177f2304c4cc73cfa3002ba1036a701"
+      "6dd9eaae014a5c67637f444c4dc1155b"
     ],
     [
       "Hacl.Spec.P256.Finv.lemma_pow_pow_mod_mul",
@@ -266,7 +283,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "4aa587c98f23b4053c8fa8a2d4ee7c59"
+      "ad83b3fc3f628018e886030d9131a55d"
     ],
     [
       "Hacl.Spec.P256.Finv.finv_lemma",
@@ -281,7 +298,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "e16e35644a080a15f37d04dd42031d9f"
+      "363745c634f5558a350a1f5f7167aa4c"
     ],
     [
       "Hacl.Spec.P256.Finv.finv_lemma",
@@ -297,7 +314,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "93aa45395b305fab75abd937923498eb"
+      "005dea39b7039fa5ddba1a9db7fb0c62"
     ],
     [
       "Hacl.Spec.P256.Finv.finv_is_finv_lemma",
@@ -316,7 +333,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "bd6f87a022f18facd7b667579d49759c"
+      "85c92d94ea2cf1eefb49b06d146f8174"
     ],
     [
       "Hacl.Spec.P256.Finv.fsqrt_lemma",
@@ -325,14 +342,13 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "equation_Spec.P256.PointOps.prime", "int_inversion", "int_typing",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Spec.P256.PointOps.prime", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "324eaf11a027b05be91dcdb00de1f7b4"
+      "6f84a0e0b192a28db6342e62ee350ba8"
     ],
     [
       "Hacl.Spec.P256.Finv.fsqrt_lemma",
@@ -348,7 +364,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "a2c299fe2c186f5f31821f617fd42e27"
+      "aad4e4b88d05f2eb352ccb1a0b46399b"
     ],
     [
       "Hacl.Spec.P256.Finv.fsqrt_is_fsqrt_lemma",
@@ -368,7 +384,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "2cce035a8476e6d23988600e8a0f1846"
+      "5a93108052a962422bf4636c872aca37"
     ]
   ]
 ]

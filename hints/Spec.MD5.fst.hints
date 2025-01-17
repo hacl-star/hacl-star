@@ -10,49 +10,56 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2d2bb34cffc7c20606aaf283cf3cbada"
+      "90544840adc6949c647cee3f6d4b8855"
     ],
     [
       "Spec.MD5.init",
       1,
-      8,
       2,
+      1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
         "@query", "constructor_distinct_Prims.Cons",
         "constructor_distinct_Prims.Nil",
         "constructor_distinct_Spec.Hash.Definitions.MD5",
         "data_elim_Prims.Cons", "data_typing_intro_Prims.Nil@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_Lib.IntTypes.uint32", "equation_Prims.nat",
+        "equation_Lib.IntTypes.int_t", "equation_Prims.nat",
         "equation_Spec.Hash.Definitions.state_word_length",
         "equation_Spec.Hash.Definitions.word",
         "equation_Spec.Hash.Definitions.word_t",
         "equation_Spec.MD5.init_as_list",
         "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
-        "function_token_typing_Lib.IntTypes.uint32", "int_inversion",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Prims.Cons_a",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Prims.Cons_@0",
+        "projection_inverse_Prims.Cons_@a",
+        "projection_inverse_Prims.Cons_@hd",
+        "projection_inverse_Prims.Cons_@tl",
+        "projection_inverse_Prims.Nil_@0", "projection_inverse_Prims.Nil_@a",
+        "refinement_interpretation_Tm_refine_3cfc2151d7c904784d36e50fca836e58",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_FStar.List.Tot.Base.length", "typing_Spec.MD5.init_as_list"
+        "typing_FStar.List.Tot.Base.length",
+        "typing_FStar.Seq.Base.seq_of_list", "typing_Lib.IntTypes.int_t",
+        "typing_Spec.MD5.init_as_list", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "97eded0771162fa2f0e5bb5b47bb2c20"
+      "031245f22ce588b5aae5ba5f72f1be94"
     ],
     [
       "Spec.MD5.t_as_list",
@@ -63,35 +70,26 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fb0eb97984110e9c165dd51153888bc0"
+      "d9091460e37516c22a102413525cc7bf"
     ],
     [
       "Spec.MD5.t",
       1,
       2,
       1,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint32",
-        "equation_Spec.MD5.t_as_list",
-        "function_token_typing_Lib.IntTypes.uint32",
-        "refinement_interpretation_Tm_refine_d2d1ea66f2b3a92c2deb42edcbb784ce",
-        "typing_FStar.Seq.Properties.seq_of_list",
-        "typing_Spec.MD5.t_as_list"
-      ],
+      [ "@query" ],
       0,
-      "2f5f86bdf68da01b1516ec9e99d2298a"
+      "1b6a02f97d4fe922340a61c28aaa8348"
     ],
     [
       "Spec.MD5.round_op_gen_aux",
@@ -100,28 +98,26 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_FStar.Seq.Properties.lseq", "equation_Lib.IntTypes.uint32",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.MD5.abcd_idx", "equation_Spec.MD5.abcd_t",
-        "equation_Spec.MD5.t", "equation_Spec.MD5.t_idx",
-        "equation_Spec.MD5.x_idx", "equation_Spec.MD5.x_t",
-        "function_token_typing_Lib.IntTypes.uint32", "int_inversion",
+        "equation_FStar.Seq.Properties.lseq", "equation_Lib.IntTypes.int_t",
+        "equation_Prims.nat", "equation_Spec.MD5.abcd_idx",
+        "equation_Spec.MD5.abcd_t", "equation_Spec.MD5.t",
+        "equation_Spec.MD5.t_idx", "equation_Spec.MD5.x_idx",
+        "equation_Spec.MD5.x_t", "int_inversion",
         "lemma_FStar.Seq.Base.lemma_len_upd",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2ca062977a42c36634b89c1c4f193f79",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_7acf795d50ec256996534a97e12bfa61",
-        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Tm_refine_7df49ea7fc73913e7f484249955dcdd0",
+        "refinement_interpretation_Tm_refine_8c936dae6be912e502a126d5e86fadcb",
         "refinement_interpretation_Tm_refine_c2b2f0397c6f216bb58dc34f34f2bdfe",
         "refinement_interpretation_Tm_refine_f4ec0a04344e7130939ebe4f31f6bd8f",
-        "typing_Spec.MD5.t"
+        "typing_Lib.IntTypes.int_t", "typing_Spec.MD5.t",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b1b88f2974769596e95bf6c77662cd98"
+      "becca1a4bc1369530f2c2182a9b1e958"
     ],
     [
       "Spec.MD5.round1_aux",
@@ -135,8 +131,6 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.UInt.fits",
@@ -147,8 +141,9 @@
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.rotval", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Prims.nat",
-        "equation_Spec.MD5.rotate_idx", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
+        "equation_Spec.MD5.rotate_idx",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_FStar.Int.pow2_values", "lemma_FStar.UInt32.vu_inv",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -161,7 +156,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "22770fa85e61146eb2999d59c95393fe"
+      "2ffdb0f35605a616ccbdc7b8c1e08226"
     ],
     [
       "Spec.MD5.round2_aux",
@@ -175,8 +170,6 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.UInt.fits",
@@ -187,8 +180,9 @@
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.rotval", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Prims.nat",
-        "equation_Spec.MD5.rotate_idx", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
+        "equation_Spec.MD5.rotate_idx",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_FStar.Int.pow2_values", "lemma_FStar.UInt32.vu_inv",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -201,7 +195,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9b0816a28aa7af877695ea9800d0d970"
+      "bca83a9b3549175989a43837e18de2db"
     ],
     [
       "Spec.MD5.round3_aux",
@@ -214,34 +208,34 @@
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equation_FStar.Seq.Properties.lseq", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.rotval", "equation_Lib.IntTypes.uint32",
-        "equation_Lib.IntTypes.v", "equation_Prims.nat",
-        "equation_Spec.MD5.rotate_idx", "equation_Spec.MD5.x_t",
-        "function_token_typing_Lib.IntTypes.uint32", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "equation_Lib.IntTypes.rotval", "equation_Lib.IntTypes.v",
+        "equation_Prims.nat", "equation_Spec.MD5.rotate_idx",
+        "equation_Spec.MD5.x_t", "int_typing", "lemma_FStar.Int.pow2_values",
+        "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0da46ef8643a6f8ea97a3358bc923338",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Tm_refine_7df49ea7fc73913e7f484249955dcdd0",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.uint_to_t"
+        "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.uint_to_t",
+        "typing_Lib.IntTypes.int_t", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "18cb5a79eef23571fdda9908a1308817"
+      "ed727f70d35033697c6befb9dcd0142f"
     ],
     [
       "Spec.MD5.round4_aux",
@@ -255,8 +249,6 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.UInt.fits",
@@ -267,8 +259,9 @@
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.rotval", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Prims.nat",
-        "equation_Spec.MD5.rotate_idx", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
+        "equation_Spec.MD5.rotate_idx",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_FStar.Int.pow2_values", "lemma_FStar.UInt32.vu_inv",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -281,7 +274,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1c9774769956307ba7ecfe56c7a27489"
+      "8ade0fa089c8a88deafb7f220c7d1627"
     ],
     [
       "Spec.MD5.overwrite_aux",
@@ -290,19 +283,21 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "equation_FStar.Seq.Properties.lseq", "equation_Lib.IntTypes.uint32",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_FStar.Seq.Properties.lseq", "equation_Lib.IntTypes.int_t",
         "equation_Spec.MD5.abcd_idx", "equation_Spec.MD5.abcd_t",
-        "equation_Spec.MD5.ia", "equation_Spec.MD5.ib",
-        "equation_Spec.MD5.ic", "equation_Spec.MD5.id",
-        "function_token_typing_Lib.IntTypes.uint32",
-        "lemma_FStar.Seq.Base.lemma_len_upd",
+        "equation_Spec.MD5.ib", "equation_Spec.MD5.ic",
+        "equation_Spec.MD5.id", "lemma_FStar.Seq.Base.lemma_len_upd",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2ca062977a42c36634b89c1c4f193f79",
         "refinement_interpretation_Tm_refine_7acf795d50ec256996534a97e12bfa61",
-        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
+        "refinement_interpretation_Tm_refine_7df49ea7fc73913e7f484249955dcdd0",
+        "refinement_interpretation_Tm_refine_8c936dae6be912e502a126d5e86fadcb",
+        "typing_Lib.IntTypes.int_t", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7b62430ad3cea8feb96fa94ca82e77ce"
+      "5853caf3a42981870d525db7e8c5a5d1"
     ],
     [
       "Spec.MD5.update_aux",
@@ -324,16 +319,16 @@
         "equation_Spec.Hash.Definitions.words_state",
         "equation_Spec.MD5.abcd_t", "equation_Spec.MD5.ia",
         "equation_Spec.MD5.ib", "equation_Spec.MD5.ic",
-        "equation_Spec.MD5.id", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_Spec.MD5.id", "int_typing", "lemma_FStar.Int.pow2_values",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
+        "refinement_interpretation_Tm_refine_55f848066cd5ee4e0810122d2ff9c6c2",
+        "refinement_interpretation_Tm_refine_7df49ea7fc73913e7f484249955dcdd0"
       ],
       0,
-      "bbef32aff9284fd134135ab4975d4727"
+      "fca3c497c7691720c8242404141947a0"
     ],
     [
       "Spec.MD5.update_aux",
@@ -345,26 +340,14 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Spec.Hash.Definitions.MD5",
-        "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_FStar.Seq.Properties.lseq", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Spec.Hash.Definitions.is_md",
-        "equation_Spec.Hash.Definitions.state_word_length",
-        "equation_Spec.Hash.Definitions.word",
-        "equation_Spec.Hash.Definitions.word_length",
-        "equation_Spec.Hash.Definitions.word_t",
-        "equation_Spec.Hash.Definitions.words_state",
-        "equation_Spec.MD5.abcd_t", "equation_Spec.MD5.ia",
-        "equation_Spec.MD5.ib", "equation_Spec.MD5.ic",
-        "equation_Spec.MD5.id", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
+        "equality_tok_Spec.Hash.Definitions.MD5@tok", "equation_Prims.nat",
+        "equation_Spec.Hash.Definitions.word_length", "int_typing",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "9c50247eb5c1af4a7fd97404022c3599"
+      "8fb992f6b56b392ba4b2ac8959c0395c"
     ],
     [
       "Spec.MD5.update",
@@ -378,7 +361,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "d8e4321f80e4498ec07a65c6dc6df4cd"
+      "c0a4f17cd78e50865810fa0a5aaffc87"
     ],
     [
       "Spec.MD5.update",
@@ -392,7 +375,7 @@
         "equation_Spec.Hash.Definitions.block_word_length"
       ],
       0,
-      "5dd44e3f536432c0029a8a65413b5886"
+      "a0bfa0b6fc69f112186a9cd0ae39b77e"
     ]
   ]
 ]

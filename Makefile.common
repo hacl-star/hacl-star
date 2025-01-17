@@ -134,7 +134,7 @@ FSTAR_NO_FLAGS = $(FSTAR_EXE) $(FSTAR_HINTS) \
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 
 %.fst-in %.fsti-in:
-	@echo $(FSTAR_INCLUDES)
+	@echo $(FSTAR_INCLUDES) --ext context_pruning
 
 # 2. KaRaMeL
 

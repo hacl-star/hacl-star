@@ -22,7 +22,7 @@
         "subterm_ordering_Vale.PPC64LE.Machine_s.While"
       ],
       0,
-      "be38eded30bad06a56fa1565141fae78"
+      "f0b32f4fda282dad074f52ddedb9e98d"
     ],
     [
       "Vale.PPC64LE.Lemmas.code_modifies_ghost",
@@ -39,7 +39,7 @@
         "projection_inverse_BoxBool_proj_0", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "a5d7302f336e1228835099e06a8ea614"
+      "2bdd4bc37c064465e138dcdadc286e68"
     ],
     [
       "Vale.PPC64LE.Lemmas.eval_ins",
@@ -50,7 +50,9 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Vale.PPC64LE.Lemmas.code_modifies_ghost.fuel_instrumented",
         "@fuel_correspondence_Vale.PPC64LE.Semantics_s.eval_code.fuel_instrumented",
-        "@query", "constructor_distinct_FStar.Pervasives.Native.Some",
+        "@query",
+        "Vale.PPC64LE.Machine_s_pretyping_978f4b2f7ba9d3e285b5fe0363a244f6",
+        "constructor_distinct_FStar.Pervasives.Native.Some",
         "disc_equation_FStar.Pervasives.Native.Some",
         "disc_equation_Vale.PPC64LE.Machine_s.Ins", "equation_Prims.nat",
         "equation_Vale.PPC64LE.Lemmas.eval_code",
@@ -62,14 +64,15 @@
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_FStar.Pervasives.Native.Some_a",
-        "projection_inverse_FStar.Pervasives.Native.Some_v",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_2",
+        "projection_inverse_FStar.Pervasives.Native.Some_@0",
+        "projection_inverse_FStar.Pervasives.Native.Some_@a",
+        "projection_inverse_FStar.Pervasives.Native.Some_@v",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d5074acd55e1d55ab7f60e72bebb48f1"
+      "36313a2c90a65ac725e4ecc0b7c4af7d"
     ],
     [
       "Vale.PPC64LE.Lemmas.lemma_cmp_ne",
@@ -79,13 +82,14 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.Def.Words_s.natN", "function_token_typing_Prims.int",
+        "equation_Vale.Def.Words_s.natN",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "typing_Prims.int"
       ],
       0,
-      "2af12f4fb01db41def5d62ebd9531099"
+      "fc1852cd5f3c094f43ef6ccc380ffc4e"
     ],
     [
       "Vale.PPC64LE.Lemmas.lemma_merge_total",
@@ -94,7 +98,7 @@
       0,
       [ "@query" ],
       0,
-      "a396be83fd69fd18d6b88e6e42fc1267"
+      "aa3c71bc56438c883e2a57c6db6fd537"
     ],
     [
       "Vale.PPC64LE.Lemmas.lemma_whileMerge_total",
@@ -103,7 +107,7 @@
       0,
       [ "@query" ],
       0,
-      "e07fbf7391f001c05b85920ec9782be7"
+      "f7b63d4571d2a70ffdecae2f332522e0"
     ]
   ]
 ]

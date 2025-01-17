@@ -13,13 +13,13 @@
         "disc_equation_Spec.Agile.DH.DH_Curve25519",
         "disc_equation_Spec.Agile.DH.DH_P256", "equation_Prims.nat",
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "c74b34ca72790865982c1fd5876dfdb9"
+      "6f1667afa21ea24a6e586f8fe8da28e0"
     ],
     [
       "Spec.Agile.DH.size_public",
@@ -33,13 +33,13 @@
         "disc_equation_Spec.Agile.DH.DH_Curve25519",
         "disc_equation_Spec.Agile.DH.DH_P256", "equation_Prims.nat",
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "05e41634a269b8b4543026f9af65593c"
+      "cb2acc81cbc326e1132f0236e4550fbc"
     ],
     [
       "Spec.Agile.DH.prime",
@@ -50,10 +50,11 @@
         "@MaxIFuel_assumption", "@query",
         "disc_equation_Spec.Agile.DH.DH_Curve25519",
         "disc_equation_Spec.Agile.DH.DH_P256",
-        "fuel_guarded_inversion_Spec.Agile.DH.algorithm"
+        "fuel_guarded_inversion_Spec.Agile.DH.algorithm",
+        "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "7e6b93c54fbc23835848a7ad00cad9e4"
+      "c2a6562be2f12b30479004da28d856c6"
     ],
     [
       "Spec.Agile.DH.clamp",
@@ -62,7 +63,7 @@
       1,
       [ "@query", "assumption_Spec.Agile.DH.algorithm__uu___haseq" ],
       0,
-      "2d42a0ee5c189defc44fa28371364ac0"
+      "1d5fdf757ff1da5669ce22cbc60d239a"
     ],
     [
       "Spec.Agile.DH.clamp",
@@ -73,15 +74,17 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Spec.Agile.DH.DH_Curve25519",
         "disc_equation_Spec.Agile.DH.DH_Curve25519",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Agile.DH.DH_Curve25519@tok",
-        "equation_Lib.Sequence.lseq", "equation_Spec.Agile.DH.scalar",
-        "equation_Spec.Agile.DH.size_key",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.Sequence.lseq",
+        "equation_Spec.Agile.DH.scalar", "equation_Spec.Agile.DH.size_key",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_348df7b05282e4d51c99c6591007846e",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
+        "refinement_interpretation_Tm_refine_55f848066cd5ee4e0810122d2ff9c6c2"
       ],
       0,
-      "86167e0bdad973c73dd42fdf8b0b5890"
+      "2967db8ef56506f01b8660416da14dad"
     ],
     [
       "Spec.Agile.DH.clamp",
@@ -90,7 +93,7 @@
       1,
       [ "@query", "assumption_Spec.Agile.DH.algorithm__uu___haseq" ],
       0,
-      "b29050feb1e4630c44cb29c9b173200b"
+      "7035329b760a54d24ddfb288f12e95c3"
     ],
     [
       "Spec.Agile.DH.dh",
@@ -100,19 +103,20 @@
       [
         "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U8",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Agile.DH.DH_Curve25519",
         "constructor_distinct_Spec.Agile.DH.DH_P256",
         "disc_equation_Spec.Agile.DH.DH_Curve25519",
         "disc_equation_Spec.Agile.DH.DH_P256",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Agile.DH.DH_Curve25519@tok",
         "equality_tok_Spec.Agile.DH.DH_P256@tok",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Spec.Agile.DH.scalar",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.Agile.DH.scalar",
         "equation_Spec.Agile.DH.serialized_point",
         "equation_Spec.Agile.DH.size_key",
         "equation_Spec.Agile.DH.size_public", "equation_Spec.Curve25519.one",
@@ -123,14 +127,13 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_55f848066cd5ee4e0810122d2ff9c6c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
-        "typing_Spec.Agile.DH.size_public", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.unsigned",
+        "typing_Prims.pow2", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1a48571b2eb7ee40f7087f1bfbde2657"
+      "e6f432093aa018c803e9b9cec5ac3f67"
     ],
     [
       "Spec.Agile.DH.secret_to_public",
@@ -138,36 +141,24 @@
       2,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
+        "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Spec.Agile.DH.DH_Curve25519",
         "constructor_distinct_Spec.Agile.DH.DH_P256",
         "disc_equation_Spec.Agile.DH.DH_Curve25519",
         "disc_equation_Spec.Agile.DH.DH_P256",
-        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Agile.DH.DH_Curve25519@tok",
         "equality_tok_Spec.Agile.DH.DH_P256@tok",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.Sequence.lseq",
         "equation_Spec.Agile.DH.scalar", "equation_Spec.Agile.DH.size_key",
         "equation_Spec.Agile.DH.size_public",
-        "equation_with_fuel_Prims.pow2.fuel_instrumented",
-        "fuel_guarded_inversion_Spec.Agile.DH.algorithm", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.IntTypes.unsigned", "typing_Spec.Agile.DH.size_key",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "fuel_guarded_inversion_Spec.Agile.DH.algorithm",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_55f848066cd5ee4e0810122d2ff9c6c2"
       ],
       0,
-      "f86b91f0114fb75bc2522bcf5d64dd2e"
+      "feb09c77fe38d697d5131590755b9a35"
     ]
   ]
 ]

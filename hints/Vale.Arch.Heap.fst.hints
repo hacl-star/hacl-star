@@ -17,9 +17,7 @@
         "equation_Vale.Arch.MachineHeap_s.machine_heap",
         "equation_Vale.Def.Words_s.nat8",
         "function_token_typing_Prims.__cache_version_number__",
-        "function_token_typing_Prims.int",
-        "function_token_typing_Vale.Def.Words_s.nat8", "int_inversion",
-        "kinding_Vale.Arch.HeapImpl.vale_heap@tok",
+        "int_inversion", "kinding_Vale.Arch.HeapImpl.vale_heap@tok",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_InDomConcat",
         "lemma_FStar.Map.lemma_InDomRestrict",
@@ -27,8 +25,8 @@
         "lemma_FStar.Set.lemma_equal_elim",
         "lemma_FStar.Set.lemma_equal_intro", "lemma_FStar.Set.mem_intersect",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
-        "proj_equation_Vale.Arch.HeapImpl.Mkvale_heap_layout_vl_inner",
-        "proj_equation_Vale.Arch.HeapImpl.ValeHeap_mh",
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_heap_layout_@vl_inner",
+        "proj_equation_Vale.Arch.HeapImpl.ValeHeap_@mh",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_c365eb902b454950de62fba701d9049d",
@@ -36,15 +34,16 @@
         "typing_FStar.Map.concat", "typing_FStar.Map.contains",
         "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
         "typing_FStar.Set.intersect", "typing_FStar.Set.mem",
+        "typing_Prims.int",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_full_heap__item__vf_heaplets",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_full_heap__item__vf_layout",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_heap_layout__item__vl_inner",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_heap_layout_inner__item__vl_heaplet_sets",
         "typing_Vale.Arch.HeapImpl.__proj__ValeHeap__item__mh",
-        "typing_Vale.Lib.Map16.sel"
+        "typing_Vale.Def.Words_s.nat8", "typing_Vale.Lib.Map16.sel"
       ],
       0,
-      "3290f0e89120597d2266848f4340c6a9"
+      "5022d5c611e4b398a725e2b4545fb5f6"
     ],
     [
       "Vale.Arch.Heap.heap_upd",
@@ -54,15 +53,15 @@
       [
         "@query", "equation_Vale.Arch.Heap.heap_get",
         "equation_Vale.Arch.Heap.heap_taint",
-        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_heap",
-        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_layout",
-        "proj_equation_Vale.Arch.HeapImpl.Mkvale_heap_layout_vl_taint",
-        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_heap",
-        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_layout",
-        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_heap_layout_vl_taint"
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_@vf_heap",
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_@vf_layout",
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_heap_layout_@vl_taint",
+        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_@vf_heap",
+        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_@vf_layout",
+        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_heap_layout_@vl_taint"
       ],
       0,
-      "57b83c5ed3b517d6fc739197e19ff8a2"
+      "1267dde516c664c7920e9ee86b05d981"
     ],
     [
       "Vale.Arch.Heap.heap_create_machine",
@@ -78,7 +77,7 @@
         "typing_Vale.Interop.down_mem"
       ],
       0,
-      "aaf017c96535e979d79ef646968fff11"
+      "5a74ab296de9408690388c0b47fbe2c1"
     ],
     [
       "Vale.Arch.Heap.heap_create_impl",
@@ -90,17 +89,17 @@
         "equation_Vale.Arch.Heap.heap_get",
         "equation_Vale.Arch.Heap.heap_taint",
         "equation_Vale.Arch.Heap.one_heaplet",
-        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_heap",
-        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_layout",
-        "proj_equation_Vale.Arch.HeapImpl.Mkvale_heap_layout_vl_taint",
-        "proj_equation_Vale.Arch.HeapImpl.ValeHeap_mh",
-        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_heap",
-        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_layout",
-        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_heap_layout_vl_taint",
-        "projection_inverse_Vale.Arch.HeapImpl.ValeHeap_mh"
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_@vf_heap",
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_@vf_layout",
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_heap_layout_@vl_taint",
+        "proj_equation_Vale.Arch.HeapImpl.ValeHeap_@mh",
+        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_@vf_heap",
+        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_@vf_layout",
+        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_heap_layout_@vl_taint",
+        "projection_inverse_Vale.Arch.HeapImpl.ValeHeap_@mh"
       ],
       0,
-      "b71e3385972efde13b708e1d3aec4257"
+      "2983f1a1c29b9b76d9de71a7ece1d2d6"
     ]
   ]
 ]
