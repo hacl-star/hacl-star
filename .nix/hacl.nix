@@ -79,6 +79,7 @@
           "dist/rs/krml/src/lib.rs"
           "dist/rs/lib/lib.rs"
           "dist/rs/lowstar/lib.rs"
+          ".scripts/remove_stale_hints.sh"
         ]
         || lib.any (lib.flip lib.hasPrefix relPath) [
           # prefixes of paths to allow in the source
@@ -154,7 +155,7 @@
 
     buildPhase = ''
       RESOURCEMONITOR=1 make -j$NIX_BUILD_CORES ci 2>&1 | tee log.txt
-      bash ${fstar-scripts}/remove_stale_hints.sh
+      bash .scripts/remove_stale_hints.sh
     '';
 
     installPhase = ''
