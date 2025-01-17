@@ -59,15 +59,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_finish =
       foreign "Hacl_Hash_Blake2b_finish"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    type k____uint64_t___uint64_t_ = [ `k____uint64_t___uint64_t_ ] structure
-    let (k____uint64_t___uint64_t_ :
-      [ `k____uint64_t___uint64_t_ ] structure typ) =
-      structure "K____uint64_t___uint64_t__s"
-    let k____uint64_t___uint64_t__fst =
-      field k____uint64_t___uint64_t_ "fst" (ptr uint64_t)
-    let k____uint64_t___uint64_t__snd =
-      field k____uint64_t___uint64_t_ "snd" (ptr uint64_t)
-    let _ = seal k____uint64_t___uint64_t_
     type hacl_Hash_Blake2b_block_state_t =
       [ `hacl_Hash_Blake2b_block_state_t ] structure
     let (hacl_Hash_Blake2b_block_state_t :
@@ -80,7 +71,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_block_state_t_thd =
       field hacl_Hash_Blake2b_block_state_t "thd" bool
     let hacl_Hash_Blake2b_block_state_t_f3 =
-      field hacl_Hash_Blake2b_block_state_t "f3" k____uint64_t___uint64_t_
+      field hacl_Hash_Blake2b_block_state_t "f3" (ptr uint64_t)
+    let hacl_Hash_Blake2b_block_state_t_f4 =
+      field hacl_Hash_Blake2b_block_state_t "f4" (ptr uint64_t)
     let _ = seal hacl_Hash_Blake2b_block_state_t
     type hacl_Hash_Blake2b_state_t = [ `hacl_Hash_Blake2b_state_t ] structure
     let (hacl_Hash_Blake2b_state_t :
