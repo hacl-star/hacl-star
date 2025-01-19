@@ -10,8 +10,9 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_correspondence_Vale.Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Vale.Poly1305.Equiv_interpretation_Tm_arrow_750b542a74c0f6cef7bc9c9174882097",
+        "Vale.Poly1305.Spec_s_interpretation_Tm_arrow_6c528cb178c0356159679935f3a11594",
         "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
         "bool_inversion", "bool_typing",
         "constructor_distinct_FStar.Integers.Signed",
@@ -91,6 +92,7 @@
         "function_token_typing_LowStar.Buffer.trivial_preorder",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
+        "function_token_typing_Vale.Poly1305.Equiv.block_fun",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing",
         "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
@@ -232,14 +234,13 @@
         "typing_FStar.Monotonic.HyperStack.live_region",
         "typing_FStar.Monotonic.HyperStack.remove_elt",
         "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.create",
-        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
-        "typing_FStar.Set.complement", "typing_FStar.Set.intersect",
-        "typing_FStar.Set.mem", "typing_FStar.Set.singleton",
-        "typing_FStar.Set.union", "typing_FStar.UInt.fits",
-        "typing_FStar.UInt.mod", "typing_FStar.UInt32.div",
-        "typing_FStar.UInt32.mul", "typing_FStar.UInt32.rem",
-        "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
-        "typing_Lib.ByteSequence.nat_from_bytes_le",
+        "typing_FStar.Seq.Base.slice", "typing_FStar.Set.complement",
+        "typing_FStar.Set.intersect", "typing_FStar.Set.mem",
+        "typing_FStar.Set.singleton", "typing_FStar.Set.union",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt.mod",
+        "typing_FStar.UInt32.div", "typing_FStar.UInt32.mul",
+        "typing_FStar.UInt32.rem", "typing_FStar.UInt32.uint_to_t",
+        "typing_FStar.UInt32.v", "typing_Lib.ByteSequence.nat_from_bytes_le",
         "typing_Lib.ByteSequence.nat_to_bytes_le",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
         "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
@@ -271,7 +272,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "726c0b687d15972f044d20df0ebb997d"
+      "e0a125b2dd86eb4692ab85b5ee18c026"
     ],
     [
       "EverCrypt.Poly1305.poly1305_vale",
@@ -330,7 +331,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c5f1ca73c09ca5191f03267c6c98f349"
+      "f709d4e1e88fef8dc7121bc085c1cfed"
     ],
     [
       "EverCrypt.Poly1305.poly1305_vale",
@@ -339,7 +340,7 @@
       0,
       [ "@query" ],
       0,
-      "62952aaec92865a1a39dc04f8b54b4b8"
+      "eeb1432e5fa8e44bdb0e32ed782ba1cd"
     ],
     [
       "EverCrypt.Poly1305.mac",
@@ -360,7 +361,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "32148f79c2c792fd2ff9322f1d3212da"
+      "f01f3a0eb3fb93f854138152390e7661"
     ],
     [
       "EverCrypt.Poly1305.mac",
@@ -442,7 +443,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "35b35df8c69610b6397fd4f4c0e077d0"
+      "54a2f4d33410d9bf11ba75b0663f71ba"
     ],
     [
       "EverCrypt.Poly1305.mac",
@@ -524,7 +525,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "fec9856353b29926147aa916b6169354"
+      "8459acf133b883946292ec643029a05d"
     ]
   ]
 ]

@@ -1330,7 +1330,10 @@ Hacl_MAC_Poly1305_Simd128_state_t *Hacl_MAC_Poly1305_Simd128_malloc(uint8_t *key
   *r1 =
     (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
       sizeof (Lib_IntVector_Intrinsics_vec128) * 25U);
-  memset(r1, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  if (r1 != NULL)
+  {
+    memset(r1, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  }
   Lib_IntVector_Intrinsics_vec128 *block_state = r1;
   uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
   memcpy(k_, key, 32U * sizeof (uint8_t));
@@ -1342,7 +1345,10 @@ Hacl_MAC_Poly1305_Simd128_state_t *Hacl_MAC_Poly1305_Simd128_malloc(uint8_t *key
     (Hacl_MAC_Poly1305_Simd128_state_t *)KRML_HOST_MALLOC(sizeof (
         Hacl_MAC_Poly1305_Simd128_state_t
       ));
-  p[0U] = s;
+  if (p != NULL)
+  {
+    p[0U] = s;
+  }
   Hacl_MAC_Poly1305_Simd128_poly1305_init(block_state, key);
   return p;
 }

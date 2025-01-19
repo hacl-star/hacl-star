@@ -1204,7 +1204,10 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum256_32_mont_ctx_init(uint
     (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *)KRML_HOST_MALLOC(sizeof (
         Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
       ));
-  buf[0U] = res;
+  if (buf != NULL)
+  {
+    buf[0U] = res;
+  }
   return buf;
 }
 
