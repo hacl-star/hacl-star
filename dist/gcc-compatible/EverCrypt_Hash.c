@@ -266,7 +266,10 @@ static EverCrypt_Hash_state_s *create_in(Spec_Hash_Definitions_hash_alg a)
   }
   EverCrypt_Hash_state_s
   *buf = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
-  buf[0U] = s;
+  if (buf != NULL)
+  {
+    buf[0U] = s;
+  }
   return buf;
 }
 
@@ -1314,7 +1317,10 @@ EverCrypt_Hash_Incremental_state_t
     (EverCrypt_Hash_Incremental_state_t *)KRML_HOST_MALLOC(sizeof (
         EverCrypt_Hash_Incremental_state_t
       ));
-  p[0U] = s;
+  if (p != NULL)
+  {
+    p[0U] = s;
+  }
   init(block_state);
   return p;
 }
