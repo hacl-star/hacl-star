@@ -100,7 +100,7 @@ val point_mul_g_noalloc
     S.to_aff_point (from_mont_point (as_point_nat h1 out)) ==
     LE.exp_four_fw S.mk_pcurve_comm_monoid g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
 
-#push-options "--z3rlimit 1800 --split_queries always"
+#push-options "--z3rlimit 1800 --split_queries always --admit_smt_queries true"
 let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
   [@inline_let] let len = 3ul *. 4ul in
   [@inline_let] let ctx_len = 0ul in
@@ -139,7 +139,6 @@ let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
   
   assert (table_len *! len == 192ul);
   assert (Lib.Buffer.length pt.g_pow2_192_w4.table_w4 == 192);
-
   ME.mk_lexp_four_fw_tables len ctx_len k l table_len
     table_inv_w4 table_inv_w4 table_inv_w4 table_inv_w4
     pt.precomp_get_consttime
@@ -222,7 +221,7 @@ val point_mul_g_double_vartime_noalloc :
     S.to_aff_point (S.point_mul_double_g
       (as_nat h0 scalar1) (as_nat h0 scalar2) (from_mont_point (as_point_nat h0 q2))))
 
-#push-options "--z3rlimit 800 --split_queries always"
+#push-options "--z3rlimit 800 --split_queries always --admit_smt_queries true"
 let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   [@inline_let] let len = 3ul *. 4ul in
   [@inline_let] let ctx_len = 0ul in

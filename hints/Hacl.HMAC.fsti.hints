@@ -1,5 +1,5 @@
 [
-  " ›ÚåHã92˛†¢ŒMêÕÙ",
+  "K`‹¢´9d\u001dG;»#/ÉÖ\u0005",
   [
     [
       "Hacl.HMAC.key_and_data_fits",
@@ -51,7 +51,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "7582e1d1417100066fd56bb9fe71c995"
+      "0fa3bd108e9ed2267cae6ac5da815b90"
     ],
     [
       "Hacl.HMAC.compute_st",
@@ -92,7 +92,7 @@
         "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "f83c1b357f5e3c1d0f19dd09454fb7d3"
+      "ea6edfbf62ea8b63bf0f33e1788b5ea4"
     ],
     [
       "Hacl.HMAC.mk_compute",
@@ -111,7 +111,21 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "0bb7a03ab3f5b8b21236c53422cee39e"
+      "a51acc721f6b7dd2c8f445b16c9345e7"
+    ],
+    [
+      "Hacl.HMAC.compute_md5",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.MD5",
+        "equality_tok_Spec.Hash.Definitions.MD5@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "25566e16da34b79917a65161c5418644"
     ],
     [
       "Hacl.HMAC.compute_sha1",
@@ -125,7 +139,21 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "8ee853edec16036c74482ca97a412ccd"
+      "e1b5698b079d595e5bda83268d5a0f0f"
+    ],
+    [
+      "Hacl.HMAC.compute_sha2_224",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
+        "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "7fb53b03fb80df11df3aca9bf41205cb"
     ],
     [
       "Hacl.HMAC.compute_sha2_256",
@@ -139,7 +167,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "dc17e573264504f82d6da0aecaca68dc"
+      "b635c6bbc2539b7612a6bbdc3eef512a"
     ],
     [
       "Hacl.HMAC.compute_sha2_384",
@@ -153,7 +181,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "2467ee3e1e32259d189a60af43002195"
+      "3c62ff1a1166e988890027cb62bdf5ea"
     ],
     [
       "Hacl.HMAC.compute_sha2_512",
@@ -167,7 +195,63 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "f8a469af7a3fab43a6e863dedf6c179e"
+      "eb022dcf442191fe885ab068480cc72e"
+    ],
+    [
+      "Hacl.HMAC.compute_sha3_224",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA3_224",
+        "equality_tok_Spec.Hash.Definitions.SHA3_224@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "cfd7ce356a61fee3d7fb3caafff75bc5"
+    ],
+    [
+      "Hacl.HMAC.compute_sha3_256",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA3_256",
+        "equality_tok_Spec.Hash.Definitions.SHA3_256@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "cd7afa39a5ef9ea549d2add559b80cd5"
+    ],
+    [
+      "Hacl.HMAC.compute_sha3_384",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA3_384",
+        "equality_tok_Spec.Hash.Definitions.SHA3_384@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "45ee863a136e016119108f836cecda37"
+    ],
+    [
+      "Hacl.HMAC.compute_sha3_512",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA3_512",
+        "equality_tok_Spec.Hash.Definitions.SHA3_512@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "a152dc30bd1ea4985686e9fa67596f0f"
     ],
     [
       "Hacl.HMAC.compute_blake2s_32",
@@ -181,7 +265,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "18b49b00492949f3bc7a15b5e6ac3f2e"
+      "a8aa1372b37e9868642ff5c1f758a64e"
     ],
     [
       "Hacl.HMAC.compute_blake2b_32",
@@ -195,7 +279,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "635591480da4d5b0a1bbef52a0e7889f"
+      "30e60dd4802bc173cf4d981912815a6b"
     ]
   ]
 ]
