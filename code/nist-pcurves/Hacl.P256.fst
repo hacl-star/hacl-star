@@ -73,7 +73,7 @@ let msg_as_felem alg msg_len msg res =
 
 [@ CInline ]
 val ecdsa_sign_msg_as_qelem:
-    signature:lbuffer uint8 (2ul *. 32ul)
+    signature:lbuffer uint8 (2ul *! 32ul)
   -> m_q:BN.felem
   -> private_key:lbuffer uint8 32ul
   -> nonce:lbuffer uint8 32ul ->
@@ -104,7 +104,7 @@ let ecdsa_sign_msg_as_qelem signature m_q private_key nonce =
 [@ CInline ]
 val ecdsa_verify_msg_as_qelem:
     m_q:BN.felem
-  -> public_key:lbuffer uint8 (2ul *. 32ul)
+  -> public_key:lbuffer uint8 (2ul *! 32ul)
   -> signature_r:lbuffer uint8 32ul
   -> signature_s:lbuffer uint8 32ul ->
   Stack bool

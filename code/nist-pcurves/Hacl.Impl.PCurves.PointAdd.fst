@@ -270,7 +270,7 @@ let point_add_7 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:
 
 inline_for_extraction noextract
 val point_add_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} :
-  tmp:lbuffer uint64 (6ul *. cp.bn_limbs) -> res:point -> p:point -> q:point -> Stack unit
+  tmp:lbuffer uint64 (6ul *! cp.bn_limbs) -> res:point -> p:point -> q:point -> Stack unit
   (requires fun h ->
     live h p /\ live h q /\ live h res /\ live h tmp /\
     eq_or_disjoint p q /\ disjoint q res /\ disjoint p res /\
@@ -286,15 +286,15 @@ let point_add_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |}
   let x3, y3, z3 = getx res, gety res, getz res in
   let t0 = sub tmp 0ul cp.bn_limbs in
   let t1 = sub tmp cp.bn_limbs cp.bn_limbs in
-  assert (v (2ul *. cp.bn_limbs) = 2 * v cp.bn_limbs);
-  assert (v (3ul *. cp.bn_limbs) = 3 * v cp.bn_limbs);
-  assert (v (4ul *. cp.bn_limbs) = 4 * v cp.bn_limbs);
-  assert (v (5ul *. cp.bn_limbs) = 5 * v cp.bn_limbs);
-  assert (v (6ul *. cp.bn_limbs) = 6 * v cp.bn_limbs);
-  let t2 = sub tmp (2ul *. cp.bn_limbs) cp.bn_limbs in
-  let t3 = sub tmp (3ul *. cp.bn_limbs) cp.bn_limbs in
-  let t4 = sub tmp (4ul *. cp.bn_limbs) cp.bn_limbs in
-  let t5 = sub tmp (5ul *. cp.bn_limbs) cp.bn_limbs in
+  assert (v (2ul *! cp.bn_limbs) = 2 * v cp.bn_limbs);
+  assert (v (3ul *! cp.bn_limbs) = 3 * v cp.bn_limbs);
+  assert (v (4ul *! cp.bn_limbs) = 4 * v cp.bn_limbs);
+  assert (v (5ul *! cp.bn_limbs) = 5 * v cp.bn_limbs);
+  assert (v (6ul *! cp.bn_limbs) = 6 * v cp.bn_limbs);
+  let t2 = sub tmp (2ul *! cp.bn_limbs) cp.bn_limbs in
+  let t3 = sub tmp (3ul *! cp.bn_limbs) cp.bn_limbs in
+  let t4 = sub tmp (4ul *! cp.bn_limbs) cp.bn_limbs in
+  let t5 = sub tmp (5ul *! cp.bn_limbs) cp.bn_limbs in
   point_add_1 t0 t1 t2 t3 t4 p q;
   point_add_2 t1 t2 t3 t4 t5 p q;
   point_add_3 x3 y3 t0 t2 p q;
@@ -306,9 +306,9 @@ let point_add_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |}
 
 let point_add {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} res p q =
   push_frame ();
-  let tmp = create (9ul *. cp.bn_limbs) (u64 0) in
-  let t0 = sub tmp 0ul (6ul *. cp.bn_limbs) in
-  let t1 = sub tmp (6ul *. cp.bn_limbs) (3ul *. cp.bn_limbs) in
+  let tmp = create (9ul *! cp.bn_limbs) (u64 0) in
+  let t0 = sub tmp 0ul (6ul *! cp.bn_limbs) in
+  let t1 = sub tmp (6ul *! cp.bn_limbs) (3ul *! cp.bn_limbs) in
   point_add_noalloc t0 t1 p q;
   copy res t1;
   pop_frame ()

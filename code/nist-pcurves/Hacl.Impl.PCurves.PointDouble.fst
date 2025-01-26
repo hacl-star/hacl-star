@@ -194,7 +194,7 @@ let point_double_6 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {|
 
 inline_for_extraction noextract
 val point_double_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|}:
-  tmp:lbuffer uint64 (5ul *. cp.bn_limbs) -> res:point -> p:point -> Stack unit
+  tmp:lbuffer uint64 (5ul *! cp.bn_limbs) -> res:point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ live h tmp /\
     eq_or_disjoint p res /\ disjoint tmp res /\ disjoint tmp p /\
@@ -209,12 +209,12 @@ let point_double_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants
   let x3, y3, z3 = getx res, gety res, getz res in
   let t0 = sub tmp 0ul cp.bn_limbs in
   let t1 = sub tmp cp.bn_limbs cp.bn_limbs in
-  assert (v (2ul *. cp.bn_limbs) = 2 * v cp.bn_limbs);
-  assert (v (3ul *. cp.bn_limbs) = 3 * v cp.bn_limbs);
-  assert (v (4ul *. cp.bn_limbs) = 4 * v cp.bn_limbs);
-  let t2 = sub tmp (2ul *. cp.bn_limbs) cp.bn_limbs in
-  let t3 = sub tmp (3ul *. cp.bn_limbs) cp.bn_limbs in
-  let t4 = sub tmp (4ul *. cp.bn_limbs) cp.bn_limbs in
+  assert (v (2ul *! cp.bn_limbs) = 2 * v cp.bn_limbs);
+  assert (v (3ul *! cp.bn_limbs) = 3 * v cp.bn_limbs);
+  assert (v (4ul *! cp.bn_limbs) = 4 * v cp.bn_limbs);
+  let t2 = sub tmp (2ul *! cp.bn_limbs) cp.bn_limbs in
+  let t3 = sub tmp (3ul *! cp.bn_limbs) cp.bn_limbs in
+  let t4 = sub tmp (4ul *! cp.bn_limbs) cp.bn_limbs in
   point_double_1 t0 t1 t2 t3 t4 p;
   f.fmul z3 x z;
   point_double_2 x3 y3 z3 t2;
@@ -226,6 +226,6 @@ let point_double_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants
 
 let point_double {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} res p =
   push_frame ();
-  let tmp = create (5ul *. cp.bn_limbs) (u64 0) in
+  let tmp = create (5ul *! cp.bn_limbs) (u64 0) in
   point_double_noalloc tmp res p;
   pop_frame ()

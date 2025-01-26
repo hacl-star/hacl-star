@@ -21,8 +21,8 @@ include Hacl.Impl.PCurves.Group
 include Hacl.Impl.PCurves.PrecompTable
 
 inline_for_extraction noextract
-let table_inv_w4 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *. cp.bn_limbs) 16ul =
-  [@inline_let] let len = 3ul *. cp.bn_limbs in
+let table_inv_w4 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *! cp.bn_limbs) 16ul =
+  [@inline_let] let len = 3ul *! cp.bn_limbs in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let l = 4ul in
@@ -31,8 +31,8 @@ let table_inv_w4 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f
 
 
 inline_for_extraction noextract
-let table_inv_w5 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *. cp.bn_limbs) 32ul =
-  [@inline_let] let len = 3ul *. cp.bn_limbs in
+let table_inv_w5 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *! cp.bn_limbs) 32ul =
+  [@inline_let] let len = 3ul *! cp.bn_limbs in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let l = 5ul in

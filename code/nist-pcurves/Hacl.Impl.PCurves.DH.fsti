@@ -22,7 +22,7 @@ module PP = Hacl.Impl.PCurves.PrecompTable
 inline_for_extraction noextract
 val ecp256dh_i {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |}
                {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} {| point_mul_ops |}:
-    public_key:lbuffer uint8 (2ul *. size cp.bytes)
+    public_key:lbuffer uint8 (2ul *! size cp.bytes)
   -> private_key:lbuffer uint8 (size cp.bytes) ->
   Stack bool
   (requires fun h ->
@@ -36,8 +36,8 @@ val ecp256dh_i {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| fie
 inline_for_extraction noextract
 val ecp256dh_r {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} 
                {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} {| point_mul_ops |}:
-    shared_secret:lbuffer uint8 (2ul *. size cp.bytes)
-  -> their_pubkey:lbuffer uint8 (2ul *. size cp.bytes)
+    shared_secret:lbuffer uint8 (2ul *! size cp.bytes)
+  -> their_pubkey:lbuffer uint8 (2ul *! size cp.bytes)
   -> private_key:lbuffer uint8 (size cp.bytes) ->
   Stack bool
   (requires fun h ->

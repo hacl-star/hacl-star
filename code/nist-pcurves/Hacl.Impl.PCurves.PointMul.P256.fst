@@ -43,14 +43,14 @@ module PT = Hacl.Impl.PrecompTable
 val point_mul: point_mul_t
 let point_mul = point_mul_gen
 
-let _ : squash (3ul *. 4ul == 12ul) = 
-  assert_norm (v (3ul *. 4ul) == 12)
+let _ : squash (3ul *! 4ul == 12ul) = 
+  assert_norm (v (3ul *! 4ul) == 12)
 
 let _ : squash (16ul *! 12ul == 192ul) = 
   assert_norm (v (16ul *! 12ul) == 192)
 
-let _ : squash (48ul *. 4ul == 192ul) = 
-  assert_norm (v (48ul *. 4ul) == 192)
+let _ : squash (48ul *! 4ul == 192ul) = 
+  assert_norm (v (48ul *! 4ul) == 192)
 
 inline_for_extraction noextract
 let cp = p256_params
@@ -100,9 +100,9 @@ val point_mul_g_noalloc
     S.to_aff_point (from_mont_point (as_point_nat h1 out)) ==
     LE.exp_four_fw S.mk_pcurve_comm_monoid g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
 
-#push-options "--z3rlimit 3000 --split_queries always"
+#push-options "--z3rlimit 3000 --split_queries always" 
 let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
-  [@inline_let] let len = 3ul *. 4ul in
+  [@inline_let] let len = 3ul *! 4ul in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let l = 4ul in
@@ -133,24 +133,36 @@ let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
 
   let r1 = sub scalar 0ul bLen in
   let r2 = sub scalar bLen bLen in
-  let r3 = sub scalar (2ul*.bLen) bLen in
-  let r4 = sub scalar (3ul*.bLen) bLen in
+  let r3 = sub scalar (2ul*!bLen) bLen in
+  let r4 = sub scalar (3ul*!bLen) bLen in
   SPT256.lemma_decompose_nat256_as_four_u64_lbignum (as_seq h0 scalar);
+
+  (* Annoying annotations to make F* prove the function call *)
+  let buf_null: lbuffer uint64 ctx_len = null uint64 in
+  let buf_q1 : lbuffer uint64 len = q1 in
+  let buf_q2 : lbuffer uint64 len = q2 in
+  let buf_q3 : lbuffer uint64 len = q3 in
+  let buf_q4 : lbuffer uint64 len = q4 in
+  let buf_base : clbuffer uint64 (table_len *! len) =
+      to_const pt.basepoint_w4.table_w4 in
+  let buf64 : clbuffer uint64 (table_len *! len) =
+      to_const pt.g_pow2_64_w4.table_w4 in
+  let buf128 : clbuffer uint64 (table_len *! len) =
+      to_const pt.g_pow2_128_w4.table_w4 in
+  let buf192 : clbuffer uint64 (table_len *! len) =
+      to_const pt.g_pow2_192_w4.table_w4 in
+  let buf_out : lbuffer uint64 len = out in
+  (* End annoying annotations *)
   
-  assert (table_len *! len == 192ul);
-  assert (Lib.Buffer.length pt.g_pow2_192_w4.table_w4 == 192);
   ME.mk_lexp_four_fw_tables len ctx_len k l table_len
     table_inv_w4 table_inv_w4 table_inv_w4 table_inv_w4
     pt.precomp_get_consttime
     pt.precomp_get_consttime
     pt.precomp_get_consttime
     pt.precomp_get_consttime
-    (null uint64) q1 bLen bBits r1 q2 r2 q3 r3 q4 r4
-    (to_const pt.basepoint_w4.table_w4)
-    (to_const pt.g_pow2_64_w4.table_w4)
-    (to_const pt.g_pow2_128_w4.table_w4)
-    (to_const pt.g_pow2_192_w4.table_w4)
-    out
+    buf_null buf_q1 bLen bBits r1 buf_q2 r2 buf_q3 r3 buf_q4 r4
+    buf_base buf64 buf128 buf192
+    buf_out
 #pop-options
 
 noextract
@@ -223,7 +235,7 @@ val point_mul_g_double_vartime_noalloc :
 
 #push-options "--z3rlimit 800 --split_queries always --admit_smt_queries true"
 let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
-  [@inline_let] let len = 3ul *. 4ul in
+  [@inline_let] let len = 3ul *! 4ul in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let l = 5ul in
@@ -254,7 +266,7 @@ val point_mul_double_g_gen : point_mul_double_g_t
 #push-options "--z3rlimit 150"
 let point_mul_double_g_gen res scalar1 scalar2 q2 =
   push_frame ();
-  [@inline_let] let len = 3ul *. cp.bn_limbs in
+  [@inline_let] let len = 3ul *! cp.bn_limbs in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let table_len = 32ul in

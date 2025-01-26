@@ -196,14 +196,14 @@ let proj_g_pow2_192_lseq_lemma () =
 
 #push-options "--fuel 1"
 inline_for_extraction
-val mk_proj_g_pow2_64 : unit -> StackInline (lbuffer uint64 (3ul *. 4ul))
+val mk_proj_g_pow2_64 : unit -> StackInline (lbuffer uint64 (3ul *! 4ul))
   (requires fun _ -> True)
   (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 proj_g_pow2_64_lseq)
 let mk_proj_g_pow2_64 () =
   createL proj_g_pow2_64_list
   
 inline_for_extraction
-val mk_proj_g_pow2_128 : unit -> StackInline (lbuffer uint64 (3ul *. 4ul))
+val mk_proj_g_pow2_128 : unit -> StackInline (lbuffer uint64 (3ul *! 4ul))
   (requires fun _ -> True)
   (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 proj_g_pow2_128_lseq)
 let mk_proj_g_pow2_128 () =
@@ -211,7 +211,7 @@ let mk_proj_g_pow2_128 () =
 
 
 inline_for_extraction
-val mk_proj_g_pow2_192 : unit -> StackInline (lbuffer uint64 (3ul *. 4ul))
+val mk_proj_g_pow2_192 : unit -> StackInline (lbuffer uint64 (3ul *! 4ul))
   (requires fun _ -> True)
   (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 proj_g_pow2_192_lseq)
 let mk_proj_g_pow2_192 () =

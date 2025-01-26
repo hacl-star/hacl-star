@@ -18,8 +18,8 @@ module S = Spec.PCurves
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val uncompressed_to_raw: {| cp:S.curve_params |} -> pk:lbuffer uint8 (1ul +. 2ul *. size cp.bytes) ->
-                         pk_raw:lbuffer uint8 (2ul *. size cp.bytes) -> Stack bool
+val uncompressed_to_raw: {| cp:S.curve_params |} -> pk:lbuffer uint8 (1ul +. 2ul *! size cp.bytes) ->
+                         pk_raw:lbuffer uint8 (2ul *! size cp.bytes) -> Stack bool
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
     (b <==> Some? (S.pk_uncompressed_to_raw (as_seq h0 pk))) /\
@@ -29,7 +29,7 @@ val uncompressed_to_raw: {| cp:S.curve_params |} -> pk:lbuffer uint8 (1ul +. 2ul
 inline_for_extraction noextract
 val compressed_to_raw {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|}:
   pk:lbuffer uint8 (1ul +. size cp.bytes) ->
-  pk_raw:lbuffer uint8 (2ul *. size cp.bytes) -> Stack bool
+  pk_raw:lbuffer uint8 (2ul *! size cp.bytes) -> Stack bool
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
     (v (1ul +. size cp.bytes) == cp.bytes + 1) /\
@@ -39,8 +39,8 @@ val compressed_to_raw {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |}
 
 inline_for_extraction noextract
 val raw_to_uncompressed {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|}:
-  pk_raw:lbuffer uint8 (2ul *. size cp.bytes) ->
-  pk:lbuffer uint8 (1ul +. 2ul *. size cp.bytes) -> Stack unit
+  pk_raw:lbuffer uint8 (2ul *! size cp.bytes) ->
+  pk:lbuffer uint8 (1ul +. 2ul *! size cp.bytes) -> Stack unit
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
     as_seq h1 pk == S.pk_uncompressed_from_raw (as_seq h0 pk_raw))
@@ -48,7 +48,7 @@ val raw_to_uncompressed {| cp:S.curve_params |} {| bn_ops |} {| curve_constants 
 
 inline_for_extraction noextract
 val raw_to_compressed {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|}:
-  pk_raw:lbuffer uint8 (2ul *. size cp.bytes) ->
+  pk_raw:lbuffer uint8 (2ul *! size cp.bytes) ->
   pk:lbuffer uint8 (1ul +. size cp.bytes) -> Stack unit
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 _ h1 -> modifies (loc pk) h0 h1 /\

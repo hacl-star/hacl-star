@@ -46,7 +46,7 @@ let create_felem {| c:S.curve_params |} =
 
 let create_widefelem {| c:S.curve_params |} =
   BD.bn_eval_zeroes #U64 (2 * v c.bn_limbs) (2 * v c.bn_limbs);
-  create (2ul *. (normalize_term c.bn_limbs)) (u64 0)
+  create (2ul *! (normalize_term c.bn_limbs)) (u64 0)
 
 
 let bn_make_u64_4 res a0 a1 a2 a3 =

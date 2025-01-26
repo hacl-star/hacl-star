@@ -21,11 +21,11 @@ module FI = Hacl.Impl.PCurves.InvSqrt
 ///  Create a point
 
 let create_aff_point {| cp:S.curve_params |}  =
-  create (2ul *. cp.bn_limbs) (u64 0)
+  create (2ul *! cp.bn_limbs) (u64 0)
 
 
 let create_point {| cp:S.curve_params |}  =
-  create (3ul *. cp.bn_limbs) (u64 0)
+  create (3ul *! cp.bn_limbs) (u64 0)
 
 
 let make_base_point {| cp:S.curve_params |} {| bn_ops |} {| cc:curve_constants |} p =

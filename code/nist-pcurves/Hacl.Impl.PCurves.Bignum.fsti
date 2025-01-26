@@ -24,7 +24,7 @@ inline_for_extraction
 let felem {| cp:S.curve_params |} = lbuffer uint64 cp.bn_limbs
 
 inline_for_extraction
-let widefelem {| cp:S.curve_params |} = lbuffer uint64 (2ul *. cp.bn_limbs)
+let widefelem {| cp:S.curve_params |} = lbuffer uint64 (2ul *! cp.bn_limbs)
 
 unfold
 let as_nat {| c:S.curve_params |} (h:mem) (e:felem) : GTot nat =
@@ -278,7 +278,7 @@ val bn_is_odd {| c:S.curve_params |} {| bn_ops |}:
 [@(strict_on_arguments [0;1])]
 inline_for_extraction noextract
 val bn2_to_bytes_be {| c:S.curve_params |} {| bn_ops |}:
-  res:lbuffer uint8 (2ul *. size c.bytes) -> x:felem -> y:felem -> Stack unit
+  res:lbuffer uint8 (2ul *! size c.bytes) -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
     disjoint x res /\ disjoint y res /\

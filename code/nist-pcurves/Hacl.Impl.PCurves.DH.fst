@@ -21,9 +21,9 @@ module PP = Hacl.Impl.PCurves.PrecompTable
 [@CInline]
 let ecp256dh_i {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| o:order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} public_key private_key =
   push_frame ();
-  let tmp = create (4ul *. cp.bn_limbs) (u64 0) in
+  let tmp = create (4ul *! cp.bn_limbs) (u64 0) in
   let sk = sub tmp 0ul cp.bn_limbs in
-  let pk = sub tmp cp.bn_limbs (3ul *. cp.bn_limbs) in
+  let pk = sub tmp cp.bn_limbs (3ul *! cp.bn_limbs) in
 
   let is_sk_valid = o.load_qelem_conditional sk private_key in
   pm.point_mul_g pk sk;
@@ -34,7 +34,7 @@ let ecp256dh_i {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| fie
 
 inline_for_extraction noextract
 val ecp256dh_r_ {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|}  {| point_ops |} {| PP.precomp_tables |} {| point_mul_ops |}:
-  is_pk_valid:bool -> ss:lbuffer uint8 (2ul *. size cp.bytes) -> pk:point -> sk:felem -> Stack unit
+  is_pk_valid:bool -> ss:lbuffer uint8 (2ul *! size cp.bytes) -> pk:point -> sk:felem -> Stack unit
   (requires fun h ->
     live h ss /\ live h pk /\ live h sk /\
     disjoint ss pk /\ disjoint ss sk /\ disjoint pk sk /\
@@ -57,9 +57,9 @@ let ecp256dh_r_ {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| fi
 let ecp256dh_r {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| o:order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| point_mul_ops |} shared_secret their_pubkey private_key =
   push_frame ();
   let open FStar.Mul in
-  let tmp = create (4ul *. size cp.bytes) (u64 0) in
+  let tmp = create (4ul *! size cp.bytes) (u64 0) in
   let sk = sub tmp 0ul cp.bn_limbs in
-  let pk = sub tmp cp.bn_limbs (3ul *. cp.bn_limbs) in
+  let pk = sub tmp cp.bn_limbs (3ul *! cp.bn_limbs) in
 
   let is_pk_valid = load_point_vartime pk their_pubkey in
   let is_sk_valid = o.load_qelem_conditional sk private_key in

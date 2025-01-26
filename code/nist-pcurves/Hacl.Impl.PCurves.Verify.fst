@@ -190,7 +190,7 @@ let load_signature {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {|
 inline_for_extraction noextract
 val ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} :
     m_q:felem
-  -> public_key:lbuffer uint8 (2ul *. size cp.bytes)
+  -> public_key:lbuffer uint8 (2ul *! size cp.bytes)
   -> signature_r:lbuffer uint8 (size cp.bytes)
   -> signature_s:lbuffer uint8 (size cp.bytes) ->
   Stack bool
@@ -203,12 +203,12 @@ val ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| bn_ops |} {| curve_cons
 
 let ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} m_q public_key signature_r signature_s =
   push_frame ();
-  let tmp = create (7ul *. cp.bn_limbs) (u64 0) in
-  let pk  = sub tmp 0ul (3ul *. cp.bn_limbs) in
-  let r_q = sub tmp (3ul *. cp.bn_limbs) cp.bn_limbs in
-  let s_q = sub tmp (4ul *. cp.bn_limbs) cp.bn_limbs in
-  let u1  = sub tmp (5ul *. cp.bn_limbs) cp.bn_limbs in
-  let u2  = sub tmp (6ul *. cp.bn_limbs) cp.bn_limbs in
+  let tmp = create (7ul *! cp.bn_limbs) (u64 0) in
+  let pk  = sub tmp 0ul (3ul *! cp.bn_limbs) in
+  let r_q = sub tmp (3ul *! cp.bn_limbs) cp.bn_limbs in
+  let s_q = sub tmp (4ul *! cp.bn_limbs) cp.bn_limbs in
+  let u1  = sub tmp (5ul *! cp.bn_limbs) cp.bn_limbs in
+  let u2  = sub tmp (6ul *! cp.bn_limbs) cp.bn_limbs in
 
   let is_pk_valid = load_point_vartime pk public_key in
   let is_rs_valid = load_signature r_q s_q signature_r signature_s in

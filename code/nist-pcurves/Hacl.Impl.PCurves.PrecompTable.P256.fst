@@ -42,10 +42,10 @@ let p256_basepoint_table_lseq_w4 : LSeq.lseq uint64 (192) =
   Seq.seq_of_list p256_basepoint_table_list_w4 
 
 let _:squash (48 * v p256_params.bn_limbs == 192) = assert_norm (48 * v p256_params.bn_limbs == 192)
-let _:squash (48ul *. p256_params.bn_limbs == 192ul) = 
-  assert(v (48ul *. p256_params.bn_limbs) == 192)
-let _:squash (96ul *. p256_params.bn_limbs == 384ul) = 
-  assert(v (96ul *. p256_params.bn_limbs) == 384)
+let _:squash (48ul *! p256_params.bn_limbs == 192ul) = 
+  assert(v (48ul *! p256_params.bn_limbs) == 192)
+let _:squash (96ul *! p256_params.bn_limbs == 384ul) = 
+  assert(v (96ul *! p256_params.bn_limbs) == 384)
 
 
 noextract
@@ -57,7 +57,7 @@ val p256_basepoint_table_lemma_w4: unit ->
 noextract
 let p256_basepoint_table_lemma_w4 () =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 15);
-  SPT.precomp_base_table_lemma #_ #_ #(3ul*.4ul) mk_pcurve_precomp_base_table S.base_point 16 p256_basepoint_table_lseq_w4
+  SPT.precomp_base_table_lemma #_ #_ #(3ul *! 4ul) mk_pcurve_precomp_base_table S.base_point 16 p256_basepoint_table_lseq_w4
 #pop-options
 
 val p256_basepoint_table_w4:

@@ -145,7 +145,7 @@ let check_signature {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {
 [@(strict_on_arguments [0;1;2;3;4;5;6;7])]
 inline_for_extraction noextract
 val ecdsa_sign_msg_as_qelem {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} :
-    signature:lbuffer uint8 (2ul *. size cp.bytes)
+    signature:lbuffer uint8 (2ul *! size cp.bytes)
   -> m_q:felem
   -> private_key:lbuffer uint8 (size cp.bytes)
   -> nonce:lbuffer uint8 (size cp.bytes) ->
@@ -162,13 +162,13 @@ val ecdsa_sign_msg_as_qelem {| cp:S.curve_params |} {| bn_ops |} {| curve_consta
 
 let ecdsa_sign_msg_as_qelem {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} signature m_q private_key nonce =
   push_frame ();
-  let rsdk_q = create (4ul *. cp.bn_limbs) (u64 0) in
+  let rsdk_q = create (4ul *! cp.bn_limbs) (u64 0) in
   let r_q = sub rsdk_q 0ul cp.bn_limbs in
   let s_q = sub rsdk_q cp.bn_limbs cp.bn_limbs in
-  assert (v (2ul *. cp.bn_limbs) == 2 * v cp.bn_limbs);
-  assert (v (3ul *. cp.bn_limbs) == 3 * v cp.bn_limbs);
-  let d_a = sub rsdk_q (2ul *. cp.bn_limbs) cp.bn_limbs in
-  let k_q = sub rsdk_q (3ul *. cp.bn_limbs) cp.bn_limbs in
+  assert (v (2ul *! cp.bn_limbs) == 2 * v cp.bn_limbs);
+  assert (v (3ul *! cp.bn_limbs) == 3 * v cp.bn_limbs);
+  let d_a = sub rsdk_q (2ul *! cp.bn_limbs) cp.bn_limbs in
+  let k_q = sub rsdk_q (3ul *! cp.bn_limbs) cp.bn_limbs in
   let are_sk_nonce_valid = ecdsa_sign_load d_a k_q private_key nonce in
   ecdsa_sign_r r_q k_q;
   ecdsa_sign_s s_q k_q r_q d_a m_q;

@@ -22,7 +22,7 @@ let uncompressed_to_raw {| cp:S.curve_params |} pk pk_raw =
   let pk0 = pk.(0ul) in
   if Lib.RawIntTypes.u8_to_UInt8 pk0 <> 0x04uy then false
   else begin
-    copy pk_raw (sub pk 1ul (2ul *. size cp.bytes));
+    copy pk_raw (sub pk 1ul (2ul *! size cp.bytes));
     true end
 
 #push-options "--z3rlimit 200 --split_queries always"
@@ -51,7 +51,7 @@ let compressed_to_raw {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |}
 let raw_to_uncompressed {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} pk_raw pk =
   let h0 = ST.get () in
   pk.(0ul) <- u8 0x04;
-  update_sub pk 1ul (2ul *. size cp.bytes) pk_raw;
+  update_sub pk 1ul (2ul *! size cp.bytes) pk_raw;
   let h1 = ST.get () in
   LSeq.eq_intro (as_seq h1 pk) (S.pk_uncompressed_from_raw (as_seq h0 pk_raw))
 

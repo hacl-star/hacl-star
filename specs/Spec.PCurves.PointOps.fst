@@ -38,12 +38,12 @@ class curve_params = {
   bn_limbs: x:size_t{v x == (bytes + 7) / 8 /\
   	    	     v x * 8 >= bytes /\
 		     v x > 0 /\
-		     v (2ul *. x) == 2 * v x /\
-		     v (3ul *. x) == 3 * v x /\
-		     v (4ul *. x) == 4 * v x /\
-		     v (5ul *. x) == 5 * v x /\
-		     v (6ul *. x) == 6 * v x /\
-		     v (7ul *. x) == 7 * v x /\
+		     v (2ul *! x) == 2 * v x /\
+		     v (3ul *! x) == 3 * v x /\
+		     v (4ul *! x) == 4 * v x /\
+		     v (5ul *! x) == 5 * v x /\
+		     v (6ul *! x) == 6 * v x /\
+		     v (7ul *! x) == 7 * v x /\
 		     1536 * v x <= max_size_t (* for precomp table *)};
   // also add co-factor?
 }
