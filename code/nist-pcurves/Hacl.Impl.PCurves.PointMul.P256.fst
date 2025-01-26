@@ -100,7 +100,7 @@ val point_mul_g_noalloc
     S.to_aff_point (from_mont_point (as_point_nat h1 out)) ==
     LE.exp_four_fw S.mk_pcurve_comm_monoid g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
 
-#push-options "--z3rlimit 1800 --split_queries always --admit_smt_queries true"
+#push-options "--z3rlimit 3000 --split_queries always"
 let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
   [@inline_let] let len = 3ul *. 4ul in
   [@inline_let] let ctx_len = 0ul in

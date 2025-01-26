@@ -1653,34 +1653,35 @@ point_mul_double_g(uint64_t *res, uint64_t *scalar1, uint64_t *scalar2, uint64_t
     point_add(q2, t2, tmp);
     memcpy(table2 + (2U * i + 3U) * 12U, tmp, 12U * sizeof (uint64_t)););
   uint64_t tmp0[12U] = { 0U };
-  uint32_t i0 = 255U;
+  uint32_t i0 = 60U;
   uint64_t bits_c = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar1, i0, 5U);
   uint32_t bits_l32 = (uint32_t)bits_c;
   const uint64_t *a_bits_l = p256_basepoint_table_w5 + bits_l32 * 12U;
   memcpy(res, (uint64_t *)a_bits_l, 12U * sizeof (uint64_t));
-  uint32_t i1 = 255U;
+  uint32_t i1 = 60U;
   uint64_t bits_c0 = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar2, i1, 5U);
   uint32_t bits_l320 = (uint32_t)bits_c0;
   const uint64_t *a_bits_l0 = table2 + bits_l320 * 12U;
   memcpy(tmp0, (uint64_t *)a_bits_l0, 12U * sizeof (uint64_t));
   point_add(res, tmp0, res);
   uint64_t tmp1[12U] = { 0U };
-  for (uint32_t i = 0U; i < 51U; i++)
-  {
+  KRML_MAYBE_FOR12(i,
+    0U,
+    12U,
+    1U,
     KRML_MAYBE_FOR5(i2, 0U, 5U, 1U, point_double(res, res););
-    uint32_t k = 255U - 5U * i - 5U;
+    uint32_t k = 60U - 5U * i - 5U;
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar2, k, 5U);
     uint32_t bits_l321 = (uint32_t)bits_l;
     const uint64_t *a_bits_l1 = table2 + bits_l321 * 12U;
     memcpy(tmp1, (uint64_t *)a_bits_l1, 12U * sizeof (uint64_t));
     point_add(res, tmp1, res);
-    uint32_t k0 = 255U - 5U * i - 5U;
+    uint32_t k0 = 60U - 5U * i - 5U;
     uint64_t bits_l0 = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar1, k0, 5U);
     uint32_t bits_l322 = (uint32_t)bits_l0;
     const uint64_t *a_bits_l2 = p256_basepoint_table_w5 + bits_l322 * 12U;
     memcpy(tmp1, (uint64_t *)a_bits_l2, 12U * sizeof (uint64_t));
-    point_add(res, tmp1, res);
-  }
+    point_add(res, tmp1, res););
 }
 
 /* SNIPPET_END: point_mul_double_g */
