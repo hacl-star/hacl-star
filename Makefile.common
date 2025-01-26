@@ -221,7 +221,7 @@ POLY_BUNDLE=-bundle 'Hacl.Streaming.Poly1305_32=Hacl.Poly1305_32,Hacl.Impl.Poly1
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 P256_BUNDLE= \
   -bundle Hacl.P256.PrecompTable -static-header Hacl.P256.PrecompTable \
-  -bundle Hacl.P256=Hacl.Impl.P256.*,Hacl.Spec.P256.*[rename=Hacl_P256]
+  -bundle Hacl.P256=Hacl.Impl.PCurves.*,Hacl.Spec.PCurves.*,Hacl.P256
 K256_BUNDLE= \
   -bundle Hacl.K256.Field,Hacl.Impl.K256.Finv[rename=Hacl_Bignum_K256] -static-header Hacl.K256.Field,Hacl.Impl.K256.Finv \
   -bundle Hacl.K256.PrecompTable -static-header Hacl.K256.PrecompTable \

@@ -146,7 +146,8 @@ let eea_pow2_odd a n =
 
 val mont_preconditions_d: pbits:pos -> rLen:pos -> n:pos{1 < n} -> Lemma
   (requires  n % 2 = 1)
-  (ensures  (let d, k = eea_pow2_odd (pbits * rLen) n in pow2 (pbits * rLen) * d % n == 1))
+  (ensures  (let d, k = eea_pow2_odd (pbits * rLen) n in
+             pow2 (pbits * rLen) * d % n == 1))
 
 let mont_preconditions_d pbits rLen n =
   let d, k = eea_pow2_odd (pbits * rLen) n in

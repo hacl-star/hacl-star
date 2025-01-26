@@ -35,9 +35,11 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Krmllib.h"
+
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_basepoint_table_w4[192U] =
+Hacl_P256_PrecompTable_p256_basepoint_table_w4[192U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 8784043285714375740ULL, 8483257759279461889ULL, 8789745728267363600ULL,
@@ -97,7 +99,7 @@ Hacl_P256_PrecompTable_precomp_basepoint_table_w4[192U] =
 
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_g_pow2_64_table_w4[192U] =
+Hacl_P256_PrecompTable_p256_g_pow2_64_table_w4[192U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 1499621593102562565ULL, 16692369783039433128ULL,
@@ -157,7 +159,7 @@ Hacl_P256_PrecompTable_precomp_g_pow2_64_table_w4[192U] =
 
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_g_pow2_128_table_w4[192U] =
+Hacl_P256_PrecompTable_p256_g_pow2_128_table_w4[192U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 14619254753077084366ULL, 13913835116514008593ULL,
@@ -220,7 +222,7 @@ Hacl_P256_PrecompTable_precomp_g_pow2_128_table_w4[192U] =
 
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_g_pow2_192_table_w4[192U] =
+Hacl_P256_PrecompTable_p256_g_pow2_192_table_w4[192U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 7870395003430845958ULL, 18001862936410067720ULL, 8006461232116967215ULL,
@@ -280,7 +282,7 @@ Hacl_P256_PrecompTable_precomp_g_pow2_192_table_w4[192U] =
 
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_basepoint_table_w5[384U] =
+Hacl_P256_PrecompTable_p256_basepoint_table_w5[384U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 8784043285714375740ULL, 8483257759279461889ULL, 8789745728267363600ULL,
@@ -394,6 +396,31 @@ Hacl_P256_PrecompTable_precomp_basepoint_table_w5[384U] =
     12967056942364782577ULL, 9034128755157395787ULL, 17898204904710512655ULL,
     8229373445062993977ULL, 13580036169519833644ULL
   };
+
+static inline void
+Hacl_P256_PrecompTable_precomp_get_consttime(
+  uint64_t *ctx,
+  const uint64_t *table,
+  uint64_t bits_l,
+  uint64_t *tmp
+)
+{
+  KRML_MAYBE_UNUSED_VAR(ctx);
+  memcpy(tmp, (uint64_t *)table, 12U * sizeof (uint64_t));
+  KRML_MAYBE_FOR15(i0,
+    0U,
+    15U,
+    1U,
+    uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i0 + 1U));
+    const uint64_t *res_j = table + (i0 + 1U) * 12U;
+    KRML_MAYBE_FOR12(i,
+      0U,
+      12U,
+      1U,
+      uint64_t *os = tmp;
+      uint64_t x = (c & res_j[i]) | (~c & tmp[i]);
+      os[i] = x;););
+}
 
 #if defined(__cplusplus)
 }

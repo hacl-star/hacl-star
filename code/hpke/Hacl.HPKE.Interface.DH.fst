@@ -108,7 +108,7 @@ let change_error_code (r:uint64) : Pure UInt32.t
 
 inline_for_extraction noextract
 let secret_to_public_p256 : secret_to_public_st (DH.DH_P256) True = fun o i ->
-  let res = Hacl.Impl.P256.DH.ecp256dh_i o i in
+  let res = Hacl.P256.dh_initiator o i in
   if res then 0ul else 1ul
   (* change_error_code res *)
 
@@ -131,7 +131,7 @@ let dh_p256 : dh_st (DH.DH_P256) True = fun o k i ->
   (**) let h0 = HyperStack.ST.get() in
   (**) nat_from_bytes_le_zero_is_zero 32 (as_seq h0 (gsub tmp (size 0) (size 32)));
   (**) nat_from_bytes_le_zero_is_zero 32 (as_seq h0 (gsub tmp (size 32) (size 32)));
-  let res = Hacl.Impl.P256.DH.ecp256dh_r tmp i k in
+  let res = Hacl.P256.dh_responder tmp i k in
   copy o tmp;
   pop_frame();
   (* change_error_code res *)

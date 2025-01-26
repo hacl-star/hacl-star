@@ -143,7 +143,7 @@ let rec dkp_nist_p cs dkp_prk counter =
   let bytes = labeled_expand (kem_hash_of_cs cs) (suite_id_kem cs) dkp_prk label_candidate counterbyte (size_dh_key cs) in
   let bytes = Lib.Sequence.map2 (logand #U8 #SEC) bytes (Seq.create (size_dh_key cs) (u8 255)) in
   let sk = nat_from_intseq_be #U8 #SEC bytes in
-  if sk = 0 || sk >= Spec.P256.prime then
+  if sk = 0 || sk >= Spec.P256.p256_prime then
     if (v counter) = 255 then None
     else dkp_nist_p cs dkp_prk (counter +! (u8 1))
   else

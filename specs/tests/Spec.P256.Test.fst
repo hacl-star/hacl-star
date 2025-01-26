@@ -4,6 +4,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.Meta
 
+open Spec.PCurves
 open Spec.P256
 open Spec.ECDSA.Test.Vectors
 open Spec.Hash.Definitions
@@ -22,7 +23,7 @@ let test_pk_compressed (a:hash_alg_ecdsa) (inp:vec_SigVer) : FStar.All.ML bool =
   let is_valid  = result in
 
   if not (msg_len <= max_size_t &&
-         min_input_length a <= msg_len &&
+         min_input_length a msg_len &&
          pk_x_len = 32 && pk_y_len = 32 &&
          sig_r_len = 32 && sig_s_len = 32)
   then false
@@ -48,7 +49,7 @@ let test_sigver (a:hash_alg_ecdsa) (inp:vec_SigVer) : FStar.All.ML bool =
   let is_valid  = result in
 
   if not (msg_len <= max_size_t &&
-         min_input_length a <= msg_len &&
+         min_input_length a msg_len &&
          pk_x_len = 32 && pk_y_len = 32 &&
          sig_r_len = 32 && sig_s_len = 32)
   then false
@@ -74,7 +75,7 @@ let test_siggen (a:hash_alg_ecdsa) (inp:vec_SigGen) : FStar.All.ML bool =
   let sig_s_len = String.strlen s' / 2 in
 
   if not (msg_len <= max_size_t &&
-         min_input_length a <= msg_len &&
+         min_input_length a msg_len &&
          sk_len = 32 && nonce_len = 32 &&
          pk_x_len = 32 && pk_y_len = 32 &&
          sig_r_len = 32 && sig_s_len = 32)

@@ -95,7 +95,7 @@ let prev_length_of_nat (a: hash_alg) (i: nat { i % U32.v (block_len a) = 0 }):
   else
     i
 
-#push-options "--z3rlimit 600"
+#push-options "--z3rlimit 2000"
 
 inline_for_extraction noextract
 let evercrypt_hash : block Hash.alg =

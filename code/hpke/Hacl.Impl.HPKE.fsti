@@ -40,7 +40,7 @@ val frame_ctx (#cs:S.ciphersuite) (ctx:context_s cs) (l:B.loc) (h0 h1:mem)
 
 inline_for_extraction noextract
 let setupBaseS_st (cs:S.ciphersuite) (p:Type0) =
-     o_pkE: key_dh_public cs
+    o_pkE: key_dh_public cs
   -> o_ctx: context_s cs
   -> skE: key_dh_secret cs
   -> pkR: serialized_point_dh cs

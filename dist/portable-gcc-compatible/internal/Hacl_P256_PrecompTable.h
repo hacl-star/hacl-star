@@ -35,11 +35,13 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-/* SNIPPET_START: Hacl_P256_PrecompTable_precomp_basepoint_table_w4 */
+#include "Hacl_Krmllib.h"
+
+/* SNIPPET_START: Hacl_P256_PrecompTable_p256_basepoint_table_w4 */
 
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_basepoint_table_w4[192U] =
+Hacl_P256_PrecompTable_p256_basepoint_table_w4[192U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 8784043285714375740ULL, 8483257759279461889ULL, 8789745728267363600ULL,
@@ -97,13 +99,13 @@ Hacl_P256_PrecompTable_precomp_basepoint_table_w4[192U] =
     3538840175098724094ULL
   };
 
-/* SNIPPET_END: Hacl_P256_PrecompTable_precomp_basepoint_table_w4 */
+/* SNIPPET_END: Hacl_P256_PrecompTable_p256_basepoint_table_w4 */
 
-/* SNIPPET_START: Hacl_P256_PrecompTable_precomp_g_pow2_64_table_w4 */
+/* SNIPPET_START: Hacl_P256_PrecompTable_p256_g_pow2_64_table_w4 */
 
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_g_pow2_64_table_w4[192U] =
+Hacl_P256_PrecompTable_p256_g_pow2_64_table_w4[192U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 1499621593102562565ULL, 16692369783039433128ULL,
@@ -161,13 +163,13 @@ Hacl_P256_PrecompTable_precomp_g_pow2_64_table_w4[192U] =
     7876582961192434984ULL
   };
 
-/* SNIPPET_END: Hacl_P256_PrecompTable_precomp_g_pow2_64_table_w4 */
+/* SNIPPET_END: Hacl_P256_PrecompTable_p256_g_pow2_64_table_w4 */
 
-/* SNIPPET_START: Hacl_P256_PrecompTable_precomp_g_pow2_128_table_w4 */
+/* SNIPPET_START: Hacl_P256_PrecompTable_p256_g_pow2_128_table_w4 */
 
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_g_pow2_128_table_w4[192U] =
+Hacl_P256_PrecompTable_p256_g_pow2_128_table_w4[192U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 14619254753077084366ULL, 13913835116514008593ULL,
@@ -228,13 +230,13 @@ Hacl_P256_PrecompTable_precomp_g_pow2_128_table_w4[192U] =
     5910544144088393959ULL, 14016615653353687369ULL, 11191676704772957822ULL
   };
 
-/* SNIPPET_END: Hacl_P256_PrecompTable_precomp_g_pow2_128_table_w4 */
+/* SNIPPET_END: Hacl_P256_PrecompTable_p256_g_pow2_128_table_w4 */
 
-/* SNIPPET_START: Hacl_P256_PrecompTable_precomp_g_pow2_192_table_w4 */
+/* SNIPPET_START: Hacl_P256_PrecompTable_p256_g_pow2_192_table_w4 */
 
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_g_pow2_192_table_w4[192U] =
+Hacl_P256_PrecompTable_p256_g_pow2_192_table_w4[192U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 7870395003430845958ULL, 18001862936410067720ULL, 8006461232116967215ULL,
@@ -292,13 +294,13 @@ Hacl_P256_PrecompTable_precomp_g_pow2_192_table_w4[192U] =
     15296495673182508601ULL
   };
 
-/* SNIPPET_END: Hacl_P256_PrecompTable_precomp_g_pow2_192_table_w4 */
+/* SNIPPET_END: Hacl_P256_PrecompTable_p256_g_pow2_192_table_w4 */
 
-/* SNIPPET_START: Hacl_P256_PrecompTable_precomp_basepoint_table_w5 */
+/* SNIPPET_START: Hacl_P256_PrecompTable_p256_basepoint_table_w5 */
 
 static const
 uint64_t
-Hacl_P256_PrecompTable_precomp_basepoint_table_w5[384U] =
+Hacl_P256_PrecompTable_p256_basepoint_table_w5[384U] =
   {
     0ULL, 0ULL, 0ULL, 0ULL, 1ULL, 18446744069414584320ULL, 18446744073709551615ULL, 4294967294ULL,
     0ULL, 0ULL, 0ULL, 0ULL, 8784043285714375740ULL, 8483257759279461889ULL, 8789745728267363600ULL,
@@ -413,7 +415,36 @@ Hacl_P256_PrecompTable_precomp_basepoint_table_w5[384U] =
     8229373445062993977ULL, 13580036169519833644ULL
   };
 
-/* SNIPPET_END: Hacl_P256_PrecompTable_precomp_basepoint_table_w5 */
+/* SNIPPET_END: Hacl_P256_PrecompTable_p256_basepoint_table_w5 */
+
+/* SNIPPET_START: Hacl_P256_PrecompTable_precomp_get_consttime */
+
+static inline void
+Hacl_P256_PrecompTable_precomp_get_consttime(
+  uint64_t *ctx,
+  const uint64_t *table,
+  uint64_t bits_l,
+  uint64_t *tmp
+)
+{
+  KRML_MAYBE_UNUSED_VAR(ctx);
+  memcpy(tmp, (uint64_t *)table, 12U * sizeof (uint64_t));
+  KRML_MAYBE_FOR15(i0,
+    0U,
+    15U,
+    1U,
+    uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i0 + 1U));
+    const uint64_t *res_j = table + (i0 + 1U) * 12U;
+    KRML_MAYBE_FOR12(i,
+      0U,
+      12U,
+      1U,
+      uint64_t *os = tmp;
+      uint64_t x = (c & res_j[i]) | (~c & tmp[i]);
+      os[i] = x;););
+}
+
+/* SNIPPET_END: Hacl_P256_PrecompTable_precomp_get_consttime */
 
 #if defined(__cplusplus)
 }

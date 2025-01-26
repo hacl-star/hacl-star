@@ -1,0 +1,117 @@
+[
+  "7…\u001dé¨Œ\u0011ÆµhšÇ%–èý",
+  [
+    [
+      "Spec.PCurves.Lemmas.lemma_exp_prime",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d3d05b32ff9e85e4153df339e981ad9b"
+    ],
+    [
+      "Spec.PCurves.Lemmas.lemma_exp_inv_prime",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "8e22bbcbe36ddc39dd983b749eae5ef6"
+    ],
+    [
+      "Spec.PCurves.Lemmas.lemma_aff_is_point_at_inf",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "bool_typing", "equation_Lib.NatMod.div_mod",
+        "equation_Lib.NatMod.inv_mod", "equation_Lib.NatMod.mul_mod",
+        "equation_Spec.PCurves.PointOps.finv",
+        "equation_Spec.PCurves.PointOps.fmul",
+        "equation_Spec.PCurves.PointOps.is_aff_point_at_inf",
+        "equation_Spec.PCurves.PointOps.is_fodd",
+        "equation_Spec.PCurves.PointOps.op_Star_Percent",
+        "equation_Spec.PCurves.PointOps.prime",
+        "equation_Spec.PCurves.PointOps.to_aff_point",
+        "equation_Spec.PCurves.PointOps.zero",
+        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
+        "function_token_typing_Prims.__cache_version_number__",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_Equality",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_prime",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
+        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
+        "token_correspondence_Spec.PCurves.PointOps.fmul",
+        "token_correspondence_Spec.PCurves.PointOps.op_Star_Percent",
+        "typing_Spec.PCurves.PointOps.__proj__Mkcurve_params__item__prime"
+      ],
+      0,
+      "8da2ce7f52a07bed353494f6391cf81c"
+    ],
+    [
+      "Spec.PCurves.Lemmas.aff_point_at_inf_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.felem",
+        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_Spec.PCurves.PointOps.felem"
+      ],
+      0,
+      "1ba35acdeaa11e34057b94127eb328d4"
+    ],
+    [
+      "Spec.PCurves.Lemmas.aff_point_add_comm_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.felem",
+        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_Spec.PCurves.PointOps.felem"
+      ],
+      0,
+      "06c9913d136859d48afcd19922b00b29"
+    ]
+  ]
+]

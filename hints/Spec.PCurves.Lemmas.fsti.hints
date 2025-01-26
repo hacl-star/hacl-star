@@ -1,0 +1,79 @@
+[
+  "\u001f¦2°\u001aˆ\fbÉ?qYs®\u0016‰",
+  [
+    [
+      "Spec.PCurves.Lemmas.lemma_exp_prime",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d00114ed339e66ddc025ff5b500a81cb"
+    ],
+    [
+      "Spec.PCurves.Lemmas.lemma_exp_inv_prime",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "29bd5d807ea111ab331cd21a7ceca21e"
+    ],
+    [
+      "Spec.PCurves.Lemmas.aff_point_at_inf_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.felem",
+        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_Spec.PCurves.PointOps.felem"
+      ],
+      0,
+      "5130baaae0fd24bfc09652858f6baf29"
+    ],
+    [
+      "Spec.PCurves.Lemmas.aff_point_add_comm_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.PCurves.PointOps.aff_point",
+        "equation_Spec.PCurves.PointOps.felem",
+        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_Spec.PCurves.PointOps.felem"
+      ],
+      0,
+      "21c2c8516141fff42c962c3f6c4ce410"
+    ]
+  ]
+]

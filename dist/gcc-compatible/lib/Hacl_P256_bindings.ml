@@ -2,12 +2,6 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    let hacl_Impl_P256_DH_ecp256dh_i =
-      foreign "Hacl_Impl_P256_DH_ecp256dh_i"
-        (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
-    let hacl_Impl_P256_DH_ecp256dh_r =
-      foreign "Hacl_Impl_P256_DH_ecp256dh_r"
-        (ocaml_bytes @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))
     let hacl_P256_ecdsa_sign_p256_sha2 =
       foreign "Hacl_P256_ecdsa_sign_p256_sha2"
         (ocaml_bytes @->

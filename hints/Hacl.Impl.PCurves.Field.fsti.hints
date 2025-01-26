@@ -1,0 +1,175 @@
+[
+  "\\≠\u0019 qù\u0011:ˇÆ†ËÏtæÄ",
+  [
+    [
+      "Hacl.Impl.PCurves.Field.feq_mask",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.PCurves.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "979100ed5486d7ad3cb758381a211601"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.fadd_t",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_54ac9d4028d740c58937018c82d138ad"
+      ],
+      0,
+      "fd1a195860c6f9cf67c7bce64a46a115"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.fsub_t",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_88dd0903359a80bbe8c5a00cac8e5b4e"
+      ],
+      0,
+      "d4255c977d76c390c30c0b121743aae3"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.fmul_t",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.PCurves.PointOps.felem",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.Bignum.bn_ops",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
+        "typing_Spec.PCurves.PointOps.prime"
+      ],
+      0,
+      "f62906efdd60244a7b61720499dee0c0"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.fsqr_t",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.PCurves.PointOps.felem",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Hacl.Impl.PCurves.Bignum.bn_ops",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
+        "typing_Spec.PCurves.PointOps.prime"
+      ],
+      0,
+      "798c00d3afd3564206a93fe0c6db31d0"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.from_mont_t",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "e89c3643e6f326b4682f58aa3059b97a"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.to_mont_t",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "7e5062f9cc57f83417b69b7f49139916"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.fnegate_conditional_vartime_t",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "7bf86e402466de2e264d35a1f4690f45"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.fdouble",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_fb5f9040d02e0d8344edc66807e3b6e8",
+        "typing_Spec.PCurves.PointOps.prime"
+      ],
+      0,
+      "1a4b51401b30d7eed8b21ec4cf90f863"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.fmul_by_b_coeff",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.PCurves.PointOps.felem",
+        "equation_Spec.PCurves.PointOps.prime",
+        "fuel_guarded_inversion_Spec.PCurves.PointOps.curve_params",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "proj_equation_Spec.PCurves.PointOps.Mkcurve_params_prime",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "ba438555813341ea366673b2f39d6f2e"
+    ],
+    [
+      "Hacl.Impl.PCurves.Field.fcube",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.PCurves.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_b874d0788e624a14cb6228d4e93a4964",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "1e3194a20d8a257b5a8286f676a0fd73"
+    ]
+  ]
+]
