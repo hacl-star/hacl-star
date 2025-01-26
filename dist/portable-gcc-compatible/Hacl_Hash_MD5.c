@@ -1209,7 +1209,10 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_malloc(void)
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   Hacl_Streaming_MD_state_32
   *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
-  p[0U] = s;
+  if (p != NULL)
+  {
+    p[0U] = s;
+  }
   Hacl_Hash_MD5_init(block_state);
   return p;
 }
@@ -1477,7 +1480,10 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_copy(Hacl_Streaming_MD_state_32 *state
   s = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
   Hacl_Streaming_MD_state_32
   *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
-  p[0U] = s;
+  if (p != NULL)
+  {
+    p[0U] = s;
+  }
   return p;
 }
 
