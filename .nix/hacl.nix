@@ -58,6 +58,7 @@
           "dist/Makefile.tmpl"
           "dist/configure"
           "dist/package-mozilla.sh"
+          ".scripts/remove_stale_hints.sh"
         ]
         || lib.any (lib.flip lib.hasPrefix relPath) [
           "code"
@@ -116,7 +117,6 @@
     buildInputs = [openssl.dev];
 
     VALE_HOME = vale;
-    FSTAR_HOME = fstar;
     KRML_HOME = karamel;
 
     configurePhase = "export HACL_HOME=$(pwd)";
@@ -125,7 +125,7 @@
 
     buildPhase = ''
       RESOURCEMONITOR=1 make -j$NIX_BUILD_CORES ci 2>&1 | tee log.txt
-      bash ${fstar-scripts}/remove_stale_hints.sh
+      bash .scripts/remove_stale_hints.sh
     '';
 
     installPhase = ''

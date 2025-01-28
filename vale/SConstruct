@@ -117,21 +117,6 @@ if 'KRML_HOME' in os.environ:
 else:
   karamel_default_path = '../../karamel'
 
-if 'FSTAR_HOME' in os.environ:
-  fstar_default_path = os.environ['FSTAR_HOME']
-else:
-  if sys.platform == 'win32':
-    find_fstar = FindFile('fstar.exe', os.environ['PATH'].split(';'))
-  else:
-    find_fstar = FindFile('fstar', os.environ['PATH'].split(':'))
-  if find_fstar == None:
-    # assume an Everest source tree
-    fstar_default_path = '../../FStar'
-  else
-    # assume F* is in some PATH directory ending with /bin
-    # (e.g. F* installed via opam)
-    fstar_default_path = find_fstar.path + '/..'
-
 def AddOptYesNo(name, dest, default, help):
   AddOption('--' + name, dest = dest, default = default, action = 'store_true', help = f'{help} (default {default})')
   AddOption('--NO-' + name, dest = dest, default = default, action = 'store_false')
@@ -141,8 +126,6 @@ AddOption('--VALE-PATH', dest = 'vale_path', type = 'string', default = vale_def
   help = 'Specify the path to Vale tool')
 AddOption('--KRML-PATH', dest = 'karamel_path', type = 'string', default = karamel_default_path, action = 'store',
   help = 'Specify the path to KaRaMeL')
-AddOption('--FSTAR-PATH', dest = 'fstar_path', type = 'string', default = fstar_default_path, action = 'store',
-  help = 'Specify the path to F* tool')
 AddOption('--FSTAR-Z3', dest = 'fstar_z3', type = 'string', default = '', action = 'store',
   help = 'Specify the path to z3 or z3.exe for F*')
 AddOptYesNo('FSTAR-MY-VERSION', dest = 'fstar_my_version', default = False,

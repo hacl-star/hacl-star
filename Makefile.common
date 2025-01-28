@@ -16,36 +16,41 @@ endif
 # Makefile.config
 -include $(HACL_HOME)/Makefile.config
 
+# Essentially FSTAR_EXE ?= fstar.exe, but we want to
+# 1) Make it absolute
+# 2) Fail early if not found
+ifndef FSTAR_EXE
+FSTAR_EXE := $(shell which fstar.exe)
+ifneq ($(.SHELLSTATUS),0)
+  $(error "Did not find F* in PATH, add it or set FSTAR_EXE")
+endif
+endif
+
 ifndef KRML_HOME
 # assuming an Everest source tree
 KRML_HOME 	:= $(HACL_HOME)/../karamel
 endif
-
-ifndef FSTAR_HOME
-  FSTAR_EXE=$(shell which fstar.exe)
-  ifeq ($(FSTAR_EXE),)
-    # F* not found in PATH, assuming an Everest source tree
-    FSTAR_HOME := $(HACL_HOME)/../FStar
-  else
-    # F* found in PATH, assuming directory name ends with /bin
-    FSTAR_HOME := $(dir $(FSTAR_EXE))/..
-  endif
-endif
-
-FSTAR_EXE := $(FSTAR_HOME)/bin/fstar.exe
 
 # Check that the relevant homes and executables at least exist.
 mustexist =						\
   $(if $(wildcard $(value $(strip $1))),,		\
     $(error $1 ($(value $(strip $1))) does not exist))
 
-$(call mustexist, FSTAR_HOME)
+# eval $(FSTAR_OCAMLENV) extends the environment so we can
+# find fstar's ocaml libraries.
+FSTAR_OCAMLENV := $(shell $(FSTAR_EXE) --ocamlenv)
+
+# We also extend this variable to reduce warnings.
+FSTAR_OCAMLENV += OCAMLFIND_IGNORE_DUPS_IN='$(shell ocamlc -where)/compiler-libs:$(OCAMLFIND_IGNORE_DUPS_IN)';
+FSTAR_OCAMLENV += export OCAMLFIND_IGNORE_DUPS_IN;
+
 $(call mustexist, FSTAR_EXE)
 $(call mustexist, KRML_HOME)
 
-ifndef FSTAR_ULIB
-FSTAR_ULIB := $(shell if test -d "$(FSTAR_HOME)/ulib" ; then echo "$(FSTAR_HOME)/ulib" ; else echo "$(FSTAR_HOME)/lib/fstar" ; fi)
-endif
+# Find the location of the checked files in F*'s library, for the
+# vale-depend call. Note: we still rely on the fact this directory is
+# flat.
+FSTAR_ULIB_CHECKED := $(dir $(shell $(FSTAR_EXE) --locate_file Prims.fst.checked))
 
 ifndef VALE_HOME
 # assuming an Everest source tree
@@ -67,16 +72,15 @@ sanitize_path=$(call maybe_cygpath,$(realpath $(1)))
 
 HACL_HOME := $(call sanitize_path,$(HACL_HOME))
 KRML_HOME := $(call sanitize_path,$(KRML_HOME))
-FSTAR_HOME := $(call sanitize_path,$(FSTAR_HOME))
-FSTAR_ULIB := $(call sanitize_path,$(FSTAR_ULIB))
+FSTAR_ULIB_CHECKED := $(call sanitize_path,$(FSTAR_ULIB_CHECKED))
 VALE_HOME := $(call sanitize_path,$(VALE_HOME))
 
 include $(HACL_HOME)/Makefile.include
 
-# $(FSTAR_ULIB)/.cache necessary for Vale
+# $(FSTAR_ULIB_CHECKED) necessary for vale-depend
 INCLUDES = \
   $(ALL_HACL_DIRS) \
-  $(FSTAR_ULIB)/.cache \
+  $(FSTAR_ULIB_CHECKED) \
   $(KRML_HOME)/krmllib/obj \
   $(KRML_HOME)/krmllib
 
@@ -244,14 +248,8 @@ TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 
 ALL_CMX_FILES = $(subst obj/Lib_Buffer.cmx,obj/Lib_Memzero0.cmx obj/Lib_Buffer.cmx,$(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC))))
 
-ifeq ($(OS),Windows_NT)
-  export OCAMLPATH := $(FSTAR_HOME)/lib;$(OCAMLPATH)
-else
-  export OCAMLPATH := $(FSTAR_HOME)/lib:$(OCAMLPATH)
-endif
-
 # Warning 8: this pattern-matching is not exhaustive.
 # Warning 20: this argument will not be used by the function.
 # Warning 26: unused variable
-OCAMLOPT = OCAMLFIND_IGNORE_DUPS_IN="`ocamlc -where`/compiler-libs" ocamlfind opt -package fstar.lib -linkpkg -thread -g -I $(HACL_HOME)/obj -w -8-20-26
-OCAMLSHARED = OCAMLFIND_IGNORE_DUPS_IN="`ocamlc -where`/compiler-libs" ocamlfind opt -shared -package fstar.lib -thread -g -I $(HACL_HOME)/obj -w -8-20-26
+OCAMLOPT    = eval "$(FSTAR_OCAMLENV)" && ocamlfind opt -package fstar.lib -linkpkg -thread -g -I $(HACL_HOME)/obj -w -8-20-26
+OCAMLSHARED = eval "$(FSTAR_OCAMLENV)" && ocamlfind opt -shared -package fstar.pluginlib -thread -g -I $(HACL_HOME)/obj -w -8-20-26
