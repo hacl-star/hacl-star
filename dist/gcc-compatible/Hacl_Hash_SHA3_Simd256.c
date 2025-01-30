@@ -25,6 +25,7 @@
 
 #include "Hacl_Hash_SHA3_Simd256.h"
 
+#include "Hacl_SHA2_Types.h"
 #include "internal/Hacl_Hash_SHA3.h"
 
 void

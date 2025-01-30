@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_HMAC_Blake2s_128.h"
-
 /**
 Expand pseudorandom key to desired length.
 

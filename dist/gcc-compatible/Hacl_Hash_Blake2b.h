@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Krmllib.h"
 
 typedef struct Hacl_Hash_Blake2b_blake2_params_s
 {

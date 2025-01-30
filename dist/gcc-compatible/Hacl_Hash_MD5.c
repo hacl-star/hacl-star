@@ -25,6 +25,7 @@
 
 #include "internal/Hacl_Hash_MD5.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "internal/Hacl_Hash_Blake2b.h"
 
 static uint32_t _h0[4U] = { 0x67452301U, 0xefcdab89U, 0x98badcfeU, 0x10325476U };

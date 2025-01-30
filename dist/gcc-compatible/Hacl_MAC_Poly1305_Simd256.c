@@ -25,6 +25,7 @@
 
 #include "internal/Hacl_MAC_Poly1305_Simd256.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "internal/Hacl_MAC_Poly1305.h"
 #include "internal/Hacl_Hash_Blake2b.h"
 

@@ -25,6 +25,9 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_HMAC.h"
+
 uint32_t Hacl_HMAC_DRBG_reseed_interval = 1024U;
 
 uint32_t Hacl_HMAC_DRBG_max_output_length = 65536U;

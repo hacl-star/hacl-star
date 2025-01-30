@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Spec.h"
-#include "Hacl_Krmllib.h"
 
 uint32_t Hacl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a);
 

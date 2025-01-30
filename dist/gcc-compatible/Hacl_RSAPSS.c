@@ -25,6 +25,9 @@
 
 #include "Hacl_RSAPSS.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"

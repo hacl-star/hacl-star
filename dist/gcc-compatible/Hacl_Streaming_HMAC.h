@@ -36,13 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Krmllib.h"
-#include "Hacl_Hash_SHA3.h"
-#include "Hacl_Hash_SHA2.h"
-#include "Hacl_Hash_Blake2s_Simd128.h"
-#include "Hacl_Hash_Blake2s.h"
-#include "Hacl_Hash_Blake2b_Simd256.h"
-#include "Hacl_Hash_Blake2b.h"
 
 #define Hacl_Agile_Hash_MD5 0
 #define Hacl_Agile_Hash_SHA1 1

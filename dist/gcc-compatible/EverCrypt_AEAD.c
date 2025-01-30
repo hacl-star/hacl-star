@@ -25,6 +25,10 @@
 
 #include "EverCrypt_AEAD.h"
 
+#include "Hacl_Spec.h"
+#include "EverCrypt_Error.h"
+#include "EverCrypt_Chacha20Poly1305.h"
+#include "EverCrypt_AutoConfig2.h"
 #include "internal/Vale.h"
 #include "internal/Hacl_Spec.h"
 #include "config.h"

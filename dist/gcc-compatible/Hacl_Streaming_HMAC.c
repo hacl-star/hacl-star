@@ -25,6 +25,14 @@
 
 #include "Hacl_Streaming_HMAC.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA3.h"
+#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Hash_Blake2s_Simd128.h"
+#include "Hacl_Hash_Blake2s.h"
+#include "Hacl_Hash_Blake2b_Simd256.h"
+#include "Hacl_Hash_Blake2b.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA3.h"
 #include "internal/Hacl_Hash_SHA2.h"

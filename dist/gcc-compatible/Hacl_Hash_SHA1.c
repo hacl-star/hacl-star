@@ -25,6 +25,7 @@
 
 #include "internal/Hacl_Hash_SHA1.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "internal/Hacl_Hash_MD5.h"
 #include "internal/Hacl_Hash_Blake2b.h"
 

@@ -25,6 +25,9 @@
 
 #include "internal/Hacl_Ed25519.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Ed25519_PrecompTable.h"

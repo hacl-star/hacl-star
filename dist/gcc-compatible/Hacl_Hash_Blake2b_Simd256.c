@@ -25,6 +25,9 @@
 
 #include "internal/Hacl_Hash_Blake2b_Simd256.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_Blake2b.h"
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "internal/Hacl_Hash_Blake2b.h"
 #include "lib_memzero0.h"

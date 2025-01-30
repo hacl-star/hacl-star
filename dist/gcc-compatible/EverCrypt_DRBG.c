@@ -25,6 +25,9 @@
 
 #include "EverCrypt_DRBG.h"
 
+#include "Lib_RandomBuffer_System.h"
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_HMAC_DRBG.h"
 #include "internal/EverCrypt_HMAC.h"
 #include "lib_memzero0.h"
 
