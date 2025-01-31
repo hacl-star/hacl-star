@@ -129,7 +129,8 @@ FSTAR_NO_FLAGS = $(FSTAR_EXE) $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
   --warn_error '@240+241@247-272-274@319@328@331@332@337' \
-  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false
+  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false \
+  --ext context_pruning
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 

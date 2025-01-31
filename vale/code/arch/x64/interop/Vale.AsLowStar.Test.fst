@@ -13,7 +13,7 @@ module MS = Vale.X64.Machine_s
 (* A little utility to trigger normalization in types *)
 let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
-#set-options "--ext context_pruning"
+
 ////////////////////////////////////////////////////////////////////////////////
 //First a little standalone, toy experiment
 [@__reduce__]
