@@ -25,6 +25,9 @@
 
 #include "internal/Hacl_MAC_Poly1305_Simd256.h"
 
+#include "internal/Hacl_MAC_Poly1305.h"
+#include "internal/Hacl_Hash_Blake2b.h"
+
 void Hacl_MAC_Poly1305_Simd256_load_acc4(Lib_IntVector_Intrinsics_vec256 *acc, uint8_t *b)
 {
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 e[5U] KRML_POST_ALIGN(32) = { 0U };
@@ -1752,28 +1755,124 @@ Hacl_MAC_Poly1305_Simd256_poly1305_finish(
   store64_le(tag + 8U, f31);
 }
 
+typedef struct option___Lib_IntVector_Intrinsics_vec256__s
+{
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
+  Lib_IntVector_Intrinsics_vec256 *v;
+}
+option___Lib_IntVector_Intrinsics_vec256_;
+
 Hacl_MAC_Poly1305_Simd256_state_t *Hacl_MAC_Poly1305_Simd256_malloc(uint8_t *key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(64U, sizeof (uint8_t));
+  if (buf == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf;
   Lib_IntVector_Intrinsics_vec256
   *r1 =
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 25U);
-  memset(r1, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
-  Lib_IntVector_Intrinsics_vec256 *block_state = r1;
-  uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
-  memcpy(k_, key, 32U * sizeof (uint8_t));
-  uint8_t *k_0 = k_;
-  Hacl_MAC_Poly1305_Simd256_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_0 };
-  Hacl_MAC_Poly1305_Simd256_state_t
-  *p =
-    (Hacl_MAC_Poly1305_Simd256_state_t *)KRML_HOST_MALLOC(sizeof (
-        Hacl_MAC_Poly1305_Simd256_state_t
-      ));
-  p[0U] = s;
-  Hacl_MAC_Poly1305_Simd256_poly1305_init(block_state, key);
-  return p;
+  if (r1 != NULL)
+  {
+    memset(r1, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  }
+  option___Lib_IntVector_Intrinsics_vec256_ block_state;
+  if (r1 == NULL)
+  {
+    block_state =
+      ((option___Lib_IntVector_Intrinsics_vec256_){ .tag = FStar_Pervasives_Native_None });
+  }
+  else
+  {
+    block_state =
+      ((option___Lib_IntVector_Intrinsics_vec256_){ .tag = FStar_Pervasives_Native_Some, .v = r1 });
+  }
+  if (block_state.tag == FStar_Pervasives_Native_None)
+  {
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
+  if (block_state.tag == FStar_Pervasives_Native_Some)
+  {
+    Lib_IntVector_Intrinsics_vec256 *block_state1 = block_state.v;
+    uint8_t *b = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
+    FStar_Pervasives_Native_option___uint8_t_ k_;
+    if (b == NULL)
+    {
+      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_None });
+    }
+    else
+    {
+      k_ =
+        ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+    }
+    FStar_Pervasives_Native_option___uint8_t_ k_0;
+    if (k_.tag == FStar_Pervasives_Native_None)
+    {
+      KRML_ALIGNED_FREE(block_state1);
+      KRML_HOST_FREE(buf1);
+      k_0 = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_None });
+    }
+    else if (k_.tag == FStar_Pervasives_Native_Some)
+    {
+      uint8_t *k_1 = k_.v;
+      memcpy(k_1, key, 32U * sizeof (uint8_t));
+      k_0 =
+        (
+          (FStar_Pervasives_Native_option___uint8_t_){
+            .tag = FStar_Pervasives_Native_Some,
+            .v = k_1
+          }
+        );
+    }
+    else
+    {
+      k_0 =
+        KRML_EABORT(FStar_Pervasives_Native_option___uint8_t_,
+          "unreachable (pattern matches are exhaustive in F*)");
+    }
+    if (k_0.tag == FStar_Pervasives_Native_None)
+    {
+      return NULL;
+    }
+    if (k_0.tag == FStar_Pervasives_Native_Some)
+    {
+      uint8_t *k_1 = k_0.v;
+      Hacl_MAC_Poly1305_Simd256_state_t
+      s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U, .p_key = k_1 };
+      Hacl_MAC_Poly1305_Simd256_state_t
+      *p =
+        (Hacl_MAC_Poly1305_Simd256_state_t *)KRML_HOST_MALLOC(sizeof (
+            Hacl_MAC_Poly1305_Simd256_state_t
+          ));
+      if (p != NULL)
+      {
+        p[0U] = s;
+      }
+      if (p == NULL)
+      {
+        KRML_HOST_FREE(k_1);
+        KRML_ALIGNED_FREE(block_state1);
+        KRML_HOST_FREE(buf1);
+        return NULL;
+      }
+      Hacl_MAC_Poly1305_Simd256_poly1305_init(block_state1, key);
+      return p;
+    }
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "unreachable (pattern matches are exhaustive in F*)");
+    KRML_HOST_EXIT(255U);
+  }
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 void Hacl_MAC_Poly1305_Simd256_reset(Hacl_MAC_Poly1305_Simd256_state_t *state, uint8_t *key)

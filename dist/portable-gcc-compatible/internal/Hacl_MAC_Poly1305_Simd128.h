@@ -35,6 +35,8 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "internal/Hacl_MAC_Poly1305.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "../Hacl_MAC_Poly1305_Simd128.h"
 #include "libintvector.h"
 

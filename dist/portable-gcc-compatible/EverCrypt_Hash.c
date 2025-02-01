@@ -155,72 +155,221 @@ static Spec_Hash_Definitions_hash_alg alg_of_state(EverCrypt_Hash_state_s *s)
 
 /* SNIPPET_END: alg_of_state */
 
-/* SNIPPET_START: create_in */
+/* SNIPPET_START: malloc_ */
 
-static EverCrypt_Hash_state_s *create_in(Spec_Hash_Definitions_hash_alg a)
+static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
 {
-  EverCrypt_Hash_state_s s;
   switch (a)
   {
     case Spec_Hash_Definitions_MD5:
       {
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(4U, sizeof (uint32_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = buf } });
-        break;
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(4U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_SHA1:
       {
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(5U, sizeof (uint32_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = buf } });
-        break;
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(5U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_SHA2_224:
       {
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = buf } });
-        break;
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = buf } });
-        break;
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_SHA3_224:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_SHA3_256:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_SHA3_384:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_SHA3_512:
       {
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = buf } });
-        break;
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
       }
     case Spec_Hash_Definitions_Blake2S:
       {
@@ -228,22 +377,62 @@ static EverCrypt_Hash_state_s *create_in(Spec_Hash_Definitions_hash_alg a)
         bool vec128 = EverCrypt_AutoConfig2_has_vec128();
         if (vec128)
         {
-          s =
-            (
-              (EverCrypt_Hash_state_s){
-                .tag = Blake2S_128_s,
-                { .case_Blake2S_128_s = Hacl_Hash_Blake2s_Simd128_malloc_with_key() }
-              }
-            );
+          Lib_IntVector_Intrinsics_vec128 *s = Hacl_Hash_Blake2s_Simd128_malloc_with_key();
+          if (s == NULL)
+          {
+            return NULL;
+          }
+          EverCrypt_Hash_state_s
+          *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+          if (st != NULL)
+          {
+            st[0U]
+            = ((EverCrypt_Hash_state_s){ .tag = Blake2S_128_s, { .case_Blake2S_128_s = s } });
+          }
+          if (st == NULL)
+          {
+            KRML_ALIGNED_FREE(s);
+            return NULL;
+          }
+          return st;
         }
-        else
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
+        if (s == NULL)
         {
-          uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
-          s = ((EverCrypt_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = buf } });
+          return NULL;
         }
+        uint32_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
         #else
-        uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = buf } });
+        uint32_t *s = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint32_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
         #endif
         break;
       }
@@ -253,22 +442,62 @@ static EverCrypt_Hash_state_s *create_in(Spec_Hash_Definitions_hash_alg a)
         bool vec256 = EverCrypt_AutoConfig2_has_vec256();
         if (vec256)
         {
-          s =
-            (
-              (EverCrypt_Hash_state_s){
-                .tag = Blake2B_256_s,
-                { .case_Blake2B_256_s = Hacl_Hash_Blake2b_Simd256_malloc_with_key() }
-              }
-            );
+          Lib_IntVector_Intrinsics_vec256 *s = Hacl_Hash_Blake2b_Simd256_malloc_with_key();
+          if (s == NULL)
+          {
+            return NULL;
+          }
+          EverCrypt_Hash_state_s
+          *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+          if (st != NULL)
+          {
+            st[0U]
+            = ((EverCrypt_Hash_state_s){ .tag = Blake2B_256_s, { .case_Blake2B_256_s = s } });
+          }
+          if (st == NULL)
+          {
+            KRML_ALIGNED_FREE(s);
+            return NULL;
+          }
+          return st;
         }
-        else
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
+        if (s == NULL)
         {
-          uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
-          s = ((EverCrypt_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = buf } });
+          return NULL;
         }
+        uint64_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
         #else
-        uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
-        s = ((EverCrypt_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = buf } });
+        uint64_t *s = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
+        if (s == NULL)
+        {
+          return NULL;
+        }
+        uint64_t *s1 = s;
+        EverCrypt_Hash_state_s
+        *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
+        if (st != NULL)
+        {
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = s1 } });
+        }
+        if (st == NULL)
+        {
+          KRML_HOST_FREE(s1);
+          return NULL;
+        }
+        return st;
         #endif
         break;
       }
@@ -278,10 +507,32 @@ static EverCrypt_Hash_state_s *create_in(Spec_Hash_Definitions_hash_alg a)
         KRML_HOST_EXIT(253U);
       }
   }
-  EverCrypt_Hash_state_s
-  *buf = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
-  buf[0U] = s;
-  return buf;
+}
+
+/* SNIPPET_END: malloc_ */
+
+/* SNIPPET_START: option___EverCrypt_Hash_state_s_ */
+
+typedef struct option___EverCrypt_Hash_state_s__s
+{
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
+  EverCrypt_Hash_state_s *v;
+}
+option___EverCrypt_Hash_state_s_;
+
+/* SNIPPET_END: option___EverCrypt_Hash_state_s_ */
+
+/* SNIPPET_START: create_in */
+
+static option___EverCrypt_Hash_state_s_ create_in(Spec_Hash_Definitions_hash_alg a)
+{
+  EverCrypt_Hash_state_s *s = malloc_(a);
+  if (s == NULL)
+  {
+    return ((option___EverCrypt_Hash_state_s_){ .tag = FStar_Pervasives_Native_None });
+  }
+  return ((option___EverCrypt_Hash_state_s_){ .tag = FStar_Pervasives_Native_Some, .v = s });
 }
 
 /* SNIPPET_END: create_in */
@@ -1364,17 +1615,62 @@ EverCrypt_Hash_Incremental_state_t
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(block_len(a), sizeof (uint8_t));
-  EverCrypt_Hash_state_s *block_state = create_in(a);
-  EverCrypt_Hash_Incremental_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  EverCrypt_Hash_Incremental_state_t
-  *p =
-    (EverCrypt_Hash_Incremental_state_t *)KRML_HOST_MALLOC(sizeof (
-        EverCrypt_Hash_Incremental_state_t
-      ));
-  p[0U] = s;
-  init(block_state);
-  return p;
+  if (buf == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf;
+  option___EverCrypt_Hash_state_s_ block_state = create_in(a);
+  if (block_state.tag == FStar_Pervasives_Native_None)
+  {
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
+  if (block_state.tag == FStar_Pervasives_Native_Some)
+  {
+    EverCrypt_Hash_state_s *block_state1 = block_state.v;
+    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+    k_ = FStar_Pervasives_Native_Some;
+    switch (k_)
+    {
+      case FStar_Pervasives_Native_None:
+        {
+          return NULL;
+        }
+      case FStar_Pervasives_Native_Some:
+        {
+          EverCrypt_Hash_Incremental_state_t
+          s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };
+          EverCrypt_Hash_Incremental_state_t
+          *p =
+            (EverCrypt_Hash_Incremental_state_t *)KRML_HOST_MALLOC(sizeof (
+                EverCrypt_Hash_Incremental_state_t
+              ));
+          if (p != NULL)
+          {
+            p[0U] = s;
+          }
+          if (p == NULL)
+          {
+            free_(block_state1);
+            KRML_HOST_FREE(buf1);
+            return NULL;
+          }
+          init(block_state1);
+          return p;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
+    }
+  }
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_malloc */
@@ -2341,6 +2637,9 @@ Free a state previously allocated with `create_in`.
 */
 void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_state_t *state)
 {
+  EverCrypt_Hash_state_s *block_state0 = (*state).block_state;
+  Spec_Hash_Definitions_hash_alg i1 = alg_of_state(block_state0);
+  KRML_MAYBE_UNUSED_VAR(i1);
   EverCrypt_Hash_Incremental_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;

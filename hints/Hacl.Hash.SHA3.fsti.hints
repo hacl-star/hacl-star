@@ -1,5 +1,5 @@
 [
-  "ôKü»ØoŒm4Ëð5\u000bš’˜",
+  "Hö\u001cÏo Béf,-\u0001©Á*¿",
   [
     [
       "Hacl.Hash.SHA3.block_len",
@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "fe81ebfb21b40b6f97cee09f94e95e28"
+      "7c332e90f98e8a4fef87cfaafa006582"
     ],
     [
       "Hacl.Hash.SHA3.hash_len",
@@ -17,16 +17,17 @@
       1,
       [ "@query" ],
       0,
-      "45d996e354d875674b3854bfe607b190"
+      "0e5e8eb4bf1da12687bce6723abd2fd8"
     ],
     [
       "Hacl.Hash.SHA3.init",
       1,
-      2,
+      1,
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.S128",
+        "Spec.Hash.Definitions_pretyping_332103d8b337802efb5758d608edf05f",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.S128",
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.S64",
@@ -37,16 +38,39 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
+        "data_typing_intro_Spec.Hash.Definitions.SHA2_256@tok",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Hacl.Hash.Definitions.get_alg",
+        "equation_Hacl.Hash.Definitions.impl_state_length",
         "equation_Hacl.Hash.Definitions.m_spec",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.uint64",
+        "equation_Lib.IntTypes.unsigned", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
         "equation_Spec.Hash.Definitions.is_keccak",
         "equation_Spec.Hash.Definitions.keccak_alg",
+        "equation_Spec.Hash.Definitions.state_word_length",
+        "equation_Spec.Hash.Definitions.word",
+        "equation_Spec.Hash.Definitions.word_t",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
+        "function_token_typing_Lib.IntTypes.uint64",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Prims.Mkdtuple2__1",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_94aa4514f79137639ea3f6b7d312b4ad",
-        "unit_typing"
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "refinement_interpretation_Tm_refine_fceb7d25d1a3b32ec2ffc6a651687135",
+        "typing_LowStar.Buffer.trivial_preorder", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.Hash.Definitions.is_keccak", "unit_typing"
       ],
       0,
-      "3e089207a91b9a0d3fbeb235121bd3b4"
+      "cbf11e9ba431656ea28aa1bc47db2c88"
     ],
     [
       "Hacl.Hash.SHA3.update_multi",
@@ -75,7 +99,7 @@
         "unit_typing"
       ],
       0,
-      "1ab0e2677e70745703cf02c5da9e7bdb"
+      "c8ab55b66250b540fd76b0b6b116b3bf"
     ],
     [
       "Hacl.Hash.SHA3.update_last",
@@ -104,7 +128,7 @@
         "unit_typing"
       ],
       0,
-      "d70320331d82dab0e98ab21c301e1adc"
+      "484dd714c9e02cab3d48eaddf5e56b25"
     ],
     [
       "Hacl.Hash.SHA3.finish",
@@ -145,7 +169,7 @@
         "typing_Spec.Hash.Definitions.is_keccak", "unit_typing"
       ],
       0,
-      "ca4b3a859f454d6b5eb39ec2929133cb"
+      "7fe8c3b99ebabea5ad54a095badd5c0e"
     ],
     [
       "Hacl.Hash.SHA3.hash",
@@ -154,7 +178,7 @@
       1,
       [ "@query" ],
       0,
-      "14183b291363607cb323b31971431677"
+      "d204c0ae9357ffc50a9b219bc471b5d9"
     ],
     [
       "Hacl.Hash.SHA3.v_len",
@@ -196,7 +220,7 @@
         "unit_typing"
       ],
       0,
-      "42d321db45c2161e0461a25b6cb28e9d"
+      "e8658b2937690b164c08ae12e6dbbb8b"
     ],
     [
       "Hacl.Hash.SHA3.finish_st",
@@ -233,7 +257,7 @@
         "typing_Spec.Hash.Definitions.is_keccak", "unit_typing"
       ],
       0,
-      "ea5134dadf17889446ae5591c91677c0"
+      "12099b3b3a5467bcab241fcd5889df9b"
     ]
   ]
 ]

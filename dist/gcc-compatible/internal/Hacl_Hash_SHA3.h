@@ -43,6 +43,8 @@ extern const uint32_t Hacl_Hash_SHA3_keccak_piln[24U];
 
 extern const uint64_t Hacl_Hash_SHA3_keccak_rndc[24U];
 
+void Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_hash_alg a, uint64_t *s);
+
 void
 Hacl_Hash_SHA3_update_multi_sha3(
   Spec_Hash_Definitions_hash_alg a,

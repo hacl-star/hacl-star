@@ -565,25 +565,25 @@ static void init(EverCrypt_Hash_state_s *s)
   if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
-    memset(p1, 0U, 25U * sizeof (uint64_t));
+    Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_224, p1);
     return;
   }
   if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
-    memset(p1, 0U, 25U * sizeof (uint64_t));
+    Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_256, p1);
     return;
   }
   if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
-    memset(p1, 0U, 25U * sizeof (uint64_t));
+    Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_384, p1);
     return;
   }
   if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
-    memset(p1, 0U, 25U * sizeof (uint64_t));
+    Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_512, p1);
     return;
   }
   if (scrut.tag == Blake2S_s)

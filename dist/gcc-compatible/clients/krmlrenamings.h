@@ -66,6 +66,7 @@
 #define Hacl_Streaming_Blake2s_128_out_bytes HACL_HASH_BLAKE2S_SIMD128_OUT_BYTES
 #define Hacl_Streaming_Keccak_hash_buf Hacl_Hash_SHA3_hash_buf
 #define Hacl_Streaming_Keccak_state_t Hacl_Hash_SHA3_state_t
+#define Hacl_Hash_SHA3_init_ Hacl_Hash_SHA3_init_
 #define Hacl_Impl_SHA2_Generic_h512 Hacl_Hash_SHA2_h512
 #define Hacl_Streaming_Keccak_block_len Hacl_Hash_SHA3_block_len
 #define Hacl_Streaming_Keccak_digest Hacl_Hash_SHA3_digest
