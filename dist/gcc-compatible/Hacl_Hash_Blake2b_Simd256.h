@@ -50,19 +50,13 @@ extern "C" {
 
 #define HACL_HASH_BLAKE2B_SIMD256_PERSONAL_BYTES (16U)
 
-typedef struct K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256__s
-{
-  Lib_IntVector_Intrinsics_vec256 *fst;
-  Lib_IntVector_Intrinsics_vec256 *snd;
-}
-K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_;
-
 typedef struct Hacl_Hash_Blake2b_Simd256_block_state_t_s
 {
   uint8_t fst;
   uint8_t snd;
   bool thd;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ f3;
+  Lib_IntVector_Intrinsics_vec256 *f3;
+  Lib_IntVector_Intrinsics_vec256 *f4;
 }
 Hacl_Hash_Blake2b_Simd256_block_state_t;
 

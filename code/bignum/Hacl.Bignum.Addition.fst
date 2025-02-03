@@ -267,6 +267,19 @@ let bn_add_eq_len_u (#t:limb_t) (aLen:size_t) : bn_add_eq_len_st t aLen =
   | U32 -> bn_add_eq_len_u32 aLen
   | U64 -> bn_add_eq_len_u64 aLen
 
+(* HACL-RS *)
+inline_for_extraction noextract
+let bn_add_eq_len_u_a (#t:limb_t) (aLen:size_t{v aLen > 0}) : bn_add_eq_len_st t aLen =
+  fun a b res ->
+  push_frame ();
+  let a_copy = create aLen (uint #t 0) in
+  let b_copy = create aLen (uint #t 0) in
+  copy a_copy a;
+  copy b_copy b;
+  let r = bn_add_eq_len_u #t aLen a_copy b_copy res in
+  pop_frame ();
+  r
+
 
 inline_for_extraction noextract
 val bn_add:
@@ -302,6 +315,35 @@ let bn_add #t aLen a bLen b res =
 
 
 inline_for_extraction noextract
+val bn_add_in_place:
+    #t:limb_t
+  -> aLen:size_t
+  -> bLen:size_t{v bLen <= v aLen}
+  -> b:lbignum t bLen
+  -> res:lbignum t aLen ->
+  Stack (carry t)
+  (requires fun h ->
+    live h b /\ live h res /\ disjoint b res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (let c, r = S.bn_add (as_seq h0 res) (as_seq h0 b) in
+    c_out == c /\ as_seq h1 res == r))
+
+let bn_add_in_place #t aLen bLen b res =
+  let h0 = ST.get () in
+  let res0 = sub res 0ul bLen in
+  let c0 = bn_add_eq_len bLen res0 b res0 in
+  let h1 = ST.get () in
+  if bLen <. aLen then begin
+    [@inline_let] let rLen = aLen -! bLen in
+    let res1 = sub res bLen rLen in
+    let c1 = bn_add_carry rLen res1 c0 res1 in
+    let h2 = ST.get () in
+    LSeq.lemma_concat2 (v bLen) (as_seq h1 res0) (v rLen) (as_seq h2 res1) (as_seq h2 res);
+    c1 end
+  else c0
+
+
+inline_for_extraction noextract
 val bn_add1:
     #t:limb_t
   -> aLen:size_t{0 < v aLen}
@@ -325,6 +367,34 @@ let bn_add1 #t aLen a b1 res =
     let a1 = sub a 1ul rLen in
     let res1 = sub res 1ul rLen in
     let c1 = bn_add_carry rLen a1 c0 res1 in
+    let h = ST.get () in
+    LSeq.lemma_concat2 1 (LSeq.sub (as_seq h0 res) 0 1) (v rLen) (as_seq h res1) (as_seq h res);
+    c1 end
+  else c0
+
+(* HACL-RS: Specific in-place version that only takes one argument when a == res.
+   Needed to avoid double sub on same index for a and res *)
+inline_for_extraction noextract
+val bn_add1_in_place:
+    #t:limb_t
+  -> aLen:size_t{0 < v aLen}
+  -> b1:limb t
+  -> res:lbignum t aLen ->
+  Stack (carry t)
+  (requires fun h -> live h res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (let c, r = S.bn_add1 (as_seq h0 res) b1 in
+    c_out == c /\ as_seq h1 res == r))
+
+let bn_add1_in_place #t aLen b1 res =
+  let c0 = addcarry_st (uint #t 0) res.(0ul) b1 (sub res 0ul 1ul) in
+  let h0 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 1) (LSeq.create 1 (LSeq.index (as_seq h0 res) 0));
+
+  if 1ul <. aLen then begin
+    [@inline_let] let rLen = aLen -! 1ul in
+    let res1 = sub res 1ul rLen in
+    let c1 = bn_add_carry rLen res1 c0 res1 in
     let h = ST.get () in
     LSeq.lemma_concat2 1 (LSeq.sub (as_seq h0 res) 0 1) (v rLen) (as_seq h res1) (as_seq h res);
     c1 end

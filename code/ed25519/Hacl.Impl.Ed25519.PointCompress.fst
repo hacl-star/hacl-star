@@ -169,11 +169,12 @@ val point_compress:
 let point_compress z p =
   push_frame();
   let tmp  = create 15ul (u64 0) in
+  point_compress_ tmp p;
+
   let zinv = sub tmp 0ul  5ul in
   let x    = sub tmp 5ul  5ul in
   let out  = sub tmp 10ul 5ul in
 
-  point_compress_ tmp p;
   let b = x_mod_2 x in
   store_51 z out;
   add_sign z b;

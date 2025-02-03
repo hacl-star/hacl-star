@@ -57,7 +57,7 @@ let msg_as_felem alg msg_len msg res =
   LowStar.Ignore.ignore msg_len;
   let mHash32 = sub mHash 0ul 32ul in
   BN.bn_from_bytes_be4 res mHash32;
-  Hacl.Impl.P256.Scalar.qmod_short res res;
+  Hacl.Impl.P256.Scalar.qmod_short_sa res res;
   pop_frame ()
 
 
