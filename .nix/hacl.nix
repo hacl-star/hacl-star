@@ -2,6 +2,7 @@
   bash,
   dotnet-runtime,
   fetchFromGitHub,
+  flock,
   fstar,
   fstar-scripts,
   git,
@@ -91,6 +92,7 @@
         time
         runlim
         rustc
+        flock
       ]
       ++ (with ocamlPackages; [
         ocaml
