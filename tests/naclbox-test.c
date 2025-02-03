@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "Hacl_NaCl.h"
+#include "Hacl_Curve25519_51.h"
 
 #include "naclbox_vectors.h"
 #include "test_helpers.h"
