@@ -210,6 +210,34 @@ ifneq ($(RESOURCEMONITOR),)
   RUNLIM = runlim -p -o $@.runlim
 endif
 
+# The WRAP variable is an optional command wrapper which can be customized
+# for each target. We set it to `flock top.lk` for files with heavy memory
+# consumption, to avoid running them in parallel. This is of course not ideal
+# since the machine may in fact have tons of memory, but make does not provide
+# a way to prevent parallelism according to memory usage.
+
+LOCK=flock top.lk
+obj/Hacl_Test_ECDSA.krml:                               WRAP=$(LOCK)
+obj/Vale.AES.PPC64LE.GCTR.fst.checked:                  WRAP=$(LOCK)
+obj/Hacl.Test.HMAC_DRBG.fst.checked:                    WRAP=$(LOCK)
+obj/Test.Vectors.fst.checked:                           WRAP=$(LOCK)
+obj/Vale.Transformers.InstructionReorder.fst.checked:   WRAP=$(LOCK)
+obj/Test.krml:                                          WRAP=$(LOCK)
+obj/Vale.AES.PPC64LE.GCMdecrypt.fst.checked:            WRAP=$(LOCK)
+obj/Spec.Frodo.Test.fst.checked:                        WRAP=$(LOCK)
+obj/Vale.AES.X64.AESGCM.fst.checked:                    WRAP=$(LOCK)
+obj/Hacl.Hash.SHA2.fst.checked:                         WRAP=$(LOCK)
+obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked:         WRAP=$(LOCK)
+obj/Vale.Wrapper.X64.GCMencryptOpt256.fst.checked:      WRAP=$(LOCK)
+obj/Vale.Wrapper.X64.GCMdecryptOpt.fst.checked:         WRAP=$(LOCK)
+obj/Hacl.Impl.SHA2.Core.fst.checked:                    WRAP=$(LOCK)
+obj/Vale.Wrapper.X64.GCMdecryptOpt256.fst.checked:      WRAP=$(LOCK)
+obj/Vale.AES.X64.GCMdecryptOpt.fst.checked:             WRAP=$(LOCK)
+obj/Vale.AES.X64.GCMencryptOpt.fst.checked:             WRAP=$(LOCK)
+obj/Vale.AES.PPC64LE.GCMencrypt.fst.checked:            WRAP=$(LOCK)
+obj/EverCrypt_Hash_Incremental.krml:                    WRAP=$(LOCK)
+obj/Test.Vectors.Chacha20Poly1305.fst.checked:          WRAP=$(LOCK)
+
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM)
 #
@@ -220,6 +248,7 @@ endif
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
   @echo "$(subst ",\",$1)" > $3.cmd; \
+  $(WRAP) \
   $(RUNLIM) \
   $(TIME) -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
@@ -236,7 +265,7 @@ run-with-log = \
     false; \
   fi
 else
-run-with-log = $(RUNLIM) $1
+run-with-log = $(WRAP) $(RUNLIM) $1
 endif
 
 
