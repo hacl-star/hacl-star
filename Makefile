@@ -715,7 +715,8 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_Hash_Blake2b_Simd256:"libintvector.h"' \
   -add-include 'Hacl_MAC_Poly1305_Simd256:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"'
+  -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"' \
+  -add-include 'Hacl_Streaming_Types:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
