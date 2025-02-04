@@ -175,17 +175,6 @@ Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128;
 
 typedef uint8_t Hacl_Streaming_Types_error_code;
 
-bool Hacl_Streaming_Types_uu___is_Success(Hacl_Streaming_Types_error_code projectee);
-
-bool Hacl_Streaming_Types_uu___is_InvalidAlgorithm(Hacl_Streaming_Types_error_code projectee);
-
-bool Hacl_Streaming_Types_uu___is_InvalidLength(Hacl_Streaming_Types_error_code projectee);
-
-bool
-Hacl_Streaming_Types_uu___is_MaximumLengthExceeded(Hacl_Streaming_Types_error_code projectee);
-
-bool Hacl_Streaming_Types_uu___is_OutOfMemory(Hacl_Streaming_Types_error_code projectee);
-
 typedef K____uint64_t___uint64_t_ Hacl_Streaming_Types_two_pointers;
 
 #if defined(__cplusplus)

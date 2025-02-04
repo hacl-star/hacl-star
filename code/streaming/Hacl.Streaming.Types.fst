@@ -1,6 +1,6 @@
 module Hacl.Streaming.Types
 
-inline_for_extraction // projectors
+[@@ no_auto_projectors]
 type error_code =
   | Success
   | InvalidAlgorithm
