@@ -1,6 +1,11 @@
 LIBRARY libevercrypt
 
 EXPORTS
+  Hacl_Streaming_Types_uu___is_Success
+  Hacl_Streaming_Types_uu___is_InvalidAlgorithm
+  Hacl_Streaming_Types_uu___is_InvalidLength
+  Hacl_Streaming_Types_uu___is_MaximumLengthExceeded
+  Hacl_Streaming_Types_uu___is_OutOfMemory
   Hacl_Hash_Blake2b_init
   Hacl_Hash_Blake2b_update_multi
   Hacl_Hash_Blake2b_update_last

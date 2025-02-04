@@ -33,6 +33,7 @@
 #include "Hacl_Hash_Blake2s.h"
 #include "Hacl_Hash_Blake2b_Simd256.h"
 #include "Hacl_Hash_Blake2b.h"
+#include "internal/Hacl_Streaming_Types.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA3.h"
 #include "internal/Hacl_Hash_SHA2.h"
@@ -1777,8 +1778,7 @@ static uint32_t dsnd__Hacl_Agile_Hash_impl_uint32_t(Hacl_Streaming_HMAC_Definiti
 
 typedef struct option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s___s
 {
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
+  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
   Hacl_Streaming_HMAC_Definitions_two_state v;
 }
 option___uint32_t____Hacl_Agile_Hash_state_s_____Hacl_Agile_Hash_state_s__;
@@ -1840,15 +1840,14 @@ KRML_MAYBE_UNUSED static Hacl_Streaming_HMAC_agile_state
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Streaming_HMAC_Definitions_two_state block_state1 = block_state.v;
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Streaming_HMAC_agile_state
           s =
@@ -2622,15 +2621,14 @@ Hacl_Streaming_HMAC_agile_state
     Hacl_Agile_Hash_state_s *s111 = scrut.fst.snd;
     copy(s111, s1_);
     copy(s21, s2_);
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Streaming_HMAC_agile_state
           s = { .block_state = block_state1, .buf = buf, .total_len = total_len0 };

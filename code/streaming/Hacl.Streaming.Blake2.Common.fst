@@ -14,6 +14,7 @@ module ST = FStar.HyperStack.ST
 open FStar.Mul
 
 module Loops = Lib.LoopCombinators
+module T = Hacl.Streaming.Types
 
 /// Opening a bunch of modules for Blake2
 /// =====================================

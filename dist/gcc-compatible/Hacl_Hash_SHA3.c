@@ -26,7 +26,7 @@
 #include "internal/Hacl_Hash_SHA3.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "internal/Hacl_Hash_Blake2b.h"
+#include "internal/Hacl_Streaming_Types.h"
 
 const
 uint32_t
@@ -637,8 +637,7 @@ Spec_Hash_Definitions_hash_alg Hacl_Hash_SHA3_get_alg(Hacl_Hash_SHA3_state_t *s)
 
 typedef struct option___Spec_Hash_Definitions_hash_alg____uint64_t___s
 {
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
+  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
   Hacl_Hash_SHA3_hash_buf v;
 }
 option___Spec_Hash_Definitions_hash_alg____uint64_t__;
@@ -681,15 +680,14 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Hash_SHA3_hash_buf block_state1 = block_state.v;
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Hash_SHA3_state_t
           s0 = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };
@@ -783,15 +781,14 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
     uint64_t *s_dst = scrut.snd.snd;
     uint64_t *s_src = scrut.fst.snd;
     memcpy(s_dst, s_src, 25U * sizeof (uint64_t));
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Hash_SHA3_state_t
           s0 = { .block_state = block_state1, .buf = buf, .total_len = total_len0 };

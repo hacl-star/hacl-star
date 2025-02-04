@@ -32,7 +32,10 @@ let blake2b_32 =
          Blake2b32.update_last Blake2b32.finish
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code
-let block_state_t (kk: G.erased (Common.index Spec.Blake2B)) = Common.s Spec.Blake2B kk Core.M32
+let block_state_t (kk: G.erased (Common.index Spec.Blake2B)) =
+  Hacl.Streaming.Blake2.Types.block_state_blake2b_32 kk
+let optional_block_state_t (kk: G.erased (Common.index Spec.Blake2B)) =
+  Hacl.Streaming.Blake2.Types.optional_block_state_blake2b_32 kk
 
 let state_t (kk: G.erased (Common.index Spec.Blake2B)) =
   F.state_s blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)

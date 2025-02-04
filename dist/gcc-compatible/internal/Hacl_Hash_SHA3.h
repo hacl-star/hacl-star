@@ -61,6 +61,12 @@ Hacl_Hash_SHA3_update_last_sha3(
   uint32_t input_len
 );
 
+#define FStar_Pervasives_Native_None 0
+#define FStar_Pervasives_Native_Some 1
+
+typedef uint8_t
+FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags;
+
 #if defined(__cplusplus)
 }
 #endif
