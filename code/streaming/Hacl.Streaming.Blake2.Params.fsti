@@ -82,16 +82,19 @@ val alloca: a: Spec.alg -> i:index a -> StackInline (params a i)
     B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint h1 s))))
 
 inline_for_extraction noextract
-val create_in: a: Spec.alg -> i:index a -> r:HS.rid -> ST (params a i)
+val create_in: a: Spec.alg -> i:index a -> r:HS.rid -> ST (option (params a i))
   (requires (fun h0 ->
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
-    invariant h1 s /\
-    v h1 s == { Spec.blake2_default_params a with Spec.key_length = i.key_length; Spec.digest_length = i.digest_length } /\
-    B.(modifies loc_none h0 h1) /\
-    B.fresh_loc (footprint h1 s) h0 h1 /\
-    B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
-    freeable h1 s))
+    match s with
+    | None -> B.(modifies loc_none h0 h1)
+    | Some s ->
+        invariant h1 s /\
+        v h1 s == { Spec.blake2_default_params a with Spec.key_length = i.key_length; Spec.digest_length = i.digest_length } /\
+        B.(modifies loc_none h0 h1) /\
+        B.fresh_loc (footprint h1 s) h0 h1 /\
+        B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
+        freeable h1 s))
 
 inline_for_extraction noextract
 val free: #a: Spec.alg -> #i:G.erased (index a) -> s:params a i -> ST unit

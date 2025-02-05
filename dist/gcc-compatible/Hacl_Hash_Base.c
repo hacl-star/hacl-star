@@ -25,6 +25,8 @@
 
 #include "Hacl_Hash_Base.h"
 
+#include "Hacl_Streaming_Types.h"
+
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)

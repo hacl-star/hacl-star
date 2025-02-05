@@ -25,6 +25,7 @@
 
 #include "Hacl_Bignum4096_32.h"
 
+#include "Hacl_Bignum.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"
@@ -1023,7 +1024,10 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum4096_32_mont_ctx_init(uin
     (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *)KRML_HOST_MALLOC(sizeof (
         Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
       ));
-  buf[0U] = res;
+  if (buf != NULL)
+  {
+    buf[0U] = res;
+  }
   return buf;
 }
 

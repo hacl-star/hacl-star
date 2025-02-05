@@ -194,25 +194,19 @@ val alloca: a:alg -> StackInline (state a)
 
 (** @type: true
 *)
-val create_in: a:alg -> r:HS.rid -> ST (state a)
+val create_in: a:alg -> r:HS.rid -> ST (option (state a))
   (requires (fun _ ->
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
+    match s with
+    | None -> M.(modifies loc_none h0 h1)
+    | Some s ->
     invariant s h1 /\
     M.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint s h1) h0 h1 /\
     M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
     freeable h1 s))
 
-(** @type: true
-*)
-val create: a:alg -> ST (state a)
-  (requires fun h0 -> True)
-  (ensures fun h0 s h1 ->
-    invariant s h1 /\
-    M.(modifies loc_none h0 h1) /\
-    B.fresh_loc (footprint s h1) h0 h1 /\
-    freeable h1 s)
 
 (** @type: true
 *)

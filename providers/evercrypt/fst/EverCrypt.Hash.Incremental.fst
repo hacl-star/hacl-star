@@ -47,7 +47,7 @@ let agile_state: stateful Hash.alg =
       EverCrypt.Hash.frame_invariant_implies_footprint_preservation l s h0 h1)
     (fun #i l s h0 h1 -> ())
     EverCrypt.Hash.alloca
-    EverCrypt.Hash.create_in
+    (fun a r -> EverCrypt.Hash.create_in a r)
     (fun i -> EverCrypt.Hash.free #i)
     (fun i -> EverCrypt.Hash.copy #i)
 
@@ -140,7 +140,7 @@ let evercrypt_hash : block Hash.alg =
         assert (S.equal input1 input);
         Spec.Hash.Incremental.hash_is_hash_incremental' a input ())
 
-    EverCrypt.Hash.alg_of_state
+    (fun a s _ -> EverCrypt.Hash.alg_of_state a s)
     (fun i _ _ -> EverCrypt.Hash.init #i)
     (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s prevlen blocks len)
     (fun i s prevlen last last_len ->

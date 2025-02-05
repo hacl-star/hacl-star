@@ -1129,15 +1129,19 @@ module M = LowStar.Modifies
 
 // A little wrapper needed by EverCrypt.Hash
 inline_for_extraction noextract
-let blake2_malloc_st (al:Spec.alg) (ms:m_spec) = r:rid -> ST.ST (state_p al ms)
+let blake2_malloc_st (al:Spec.alg) (ms:m_spec) = r:rid -> ST.ST (buffer (element_t al ms)) // (state_p al ms)
   (requires (fun h ->
     ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
-    live h1 s /\
-    M.(modifies loc_none h0 h1) /\
-    B.fresh_loc (loc_addr_of_buffer s) h0 h1 /\
-    (M.loc_includes (M.loc_region_only true r) (loc_addr_of_buffer s)) /\
-    freeable s))
+    if B.g_is_null s then
+      M.(modifies loc_none h0 h1)
+    else
+      B.len s == 4ul *. row_len al ms /\
+      live h1 s /\
+      M.(modifies loc_none h0 h1) /\
+      B.fresh_loc (loc_addr_of_buffer s) h0 h1 /\
+      (M.loc_includes (M.loc_region_only true r) (loc_addr_of_buffer s)) /\
+      freeable s))
 
 inline_for_extraction noextract
 val blake2_malloc:
@@ -1157,4 +1161,5 @@ let impl_state_len (al:Spec.alg) (ms:m_spec) : size_t = //{size_v s == impl_stat
 #pop-options
 
 let blake2_malloc a m r =
-  B.malloc r (Hacl.Impl.Blake2.Core.zero_element a m) (impl_state_len a m)
+  (**) mul_mod_lemma 4ul (row_len a m);
+  Hacl.Streaming.Interface.fallible_malloc r (Hacl.Impl.Blake2.Core.zero_element a m) (impl_state_len a m)

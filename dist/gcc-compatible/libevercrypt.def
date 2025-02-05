@@ -105,6 +105,7 @@ EXPORTS
   Hacl_Hash_SHA1_free
   Hacl_Hash_SHA1_copy
   Hacl_Hash_SHA1_hash
+  Hacl_Hash_SHA3_init_
   Hacl_Hash_SHA3_update_multi_sha3
   Hacl_Hash_SHA3_update_last_sha3
   Hacl_Hash_SHA3_get_alg
@@ -459,6 +460,16 @@ EXPORTS
   Hacl_Impl_Frodo_Pack_frodo_unpack
   Hacl_Impl_Frodo_Encode_frodo_key_encode
   Hacl_Impl_Frodo_Encode_frodo_key_decode
+  Hacl_Streaming_HMAC_s1
+  Hacl_Streaming_HMAC_s2
+  Hacl_Streaming_HMAC_index_of_state
+  Hacl_Streaming_HMAC_malloc_
+  Hacl_Streaming_HMAC_get_impl
+  Hacl_Streaming_HMAC_reset
+  Hacl_Streaming_HMAC_update
+  Hacl_Streaming_HMAC_digest
+  Hacl_Streaming_HMAC_free
+  Hacl_Streaming_HMAC_copy
   Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64
@@ -710,11 +721,11 @@ EXPORTS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase
   Hacl_HPKE_Curve51_CP32_SHA256_openBase
+  EverCrypt_Poly1305_mac
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
-  EverCrypt_Poly1305_mac
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA512_sealBase

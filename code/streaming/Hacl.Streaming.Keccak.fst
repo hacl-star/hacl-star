@@ -108,7 +108,11 @@ let stateful_keccak: stateful alg =
     (* alloca: *) (fun (a: alg) ->
       a, B.alloca (Lib.IntTypes.u64 0) 25ul)
     (* malloc: *) (fun a r ->
-      a, B.malloc r (Lib.IntTypes.u64 0) 25ul)
+      let s = fallible_malloc r (Lib.IntTypes.u64 0) 25ul in
+      if B.is_null s then
+        None
+      else
+        Some (a, s))
     (* free: *) (fun _ (_, s) ->
       B.free s)
     (* copy: *) (fun _ (a, s_src) (a', s_dst) ->
@@ -167,7 +171,7 @@ let hacl_keccak (a: G.erased alg): block alg =
       Spec.Hash.Incremental.hash_is_hash_incremental' a input (if is_shake_ a then (Lib.IntTypes.v l) else ()))
 
     (* index_of_state *)
-    (fun _ (a, _) -> a)
+    (fun _ (a, _) _ -> a)
 
     (* init *)
     (fun _ _ _ (a, s) -> Hacl.Hash.SHA3.init a s)

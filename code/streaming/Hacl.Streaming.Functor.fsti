@@ -269,18 +269,23 @@ let malloc_st
   (t':Type0 { t' == optional_key i c.km c.key }) =
   k:c.key.s i ->
   r: HS.rid ->
-  ST (state c i t t')
+  ST (B.buffer (state_s c i t t'))
   (requires (fun h0 ->
     c.key.invariant #i h0 k /\
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
-    invariant c i h1 s /\
-    freeable c i h1 s /\
-    seen c i h1 s == S.empty /\
-    reveal_key c i h1 s == c.key.v i h0 k /\
-    B.(modifies loc_none h0 h1) /\
-    B.fresh_loc (footprint c i h1 s) h0 h1 /\
-    B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
+    if B.g_is_null s then
+      // out of memory, underlying calls to the system malloc failed
+      B.(modifies loc_none h0 h1)
+    else
+      B.length s == 1 /\ // this turns the return type into a `state c i t t'`
+      invariant c i h1 s /\
+      freeable c i h1 s /\
+      seen c i h1 s == S.empty /\
+      reveal_key c i h1 s == c.key.v i h0 k /\
+      B.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint c i h1 s) h0 h1 /\
+      B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 
 inline_for_extraction noextract
 val malloc:
@@ -300,18 +305,23 @@ let copy_st
   (t':Type0 { t' == optional_key i c.km c.key }) =
   s0:state c i t t' ->
   r: HS.rid ->
-  ST (state c i t t')
+  ST (B.buffer (state_s c i t t'))
   (requires (fun h0 ->
     invariant c i h0 s0 /\
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
-    invariant c i h1 s /\
-    freeable c i h1 s /\
-    seen c i h1 s == seen c i h0 s0 /\
-    reveal_key c i h1 s == reveal_key c i h0 s0 /\
-    B.(modifies loc_none h0 h1) /\
-    B.fresh_loc (footprint c i h1 s) h0 h1 /\
-    B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
+    if B.g_is_null s then
+      // out of memory, underlying calls to the system malloc failed
+      B.(modifies loc_none h0 h1)
+    else
+      B.length s == 1 /\ // this turns the return type into a `state c i t t'`
+      invariant c i h1 s /\
+      freeable c i h1 s /\
+      seen c i h1 s == seen c i h0 s0 /\
+      reveal_key c i h1 s == reveal_key c i h0 s0 /\
+      B.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint c i h1 s) h0 h1 /\
+      B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 
 inline_for_extraction noextract
 val copy:

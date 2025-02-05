@@ -56,6 +56,7 @@ typedef uint8_t Spec_Hash_Definitions_hash_alg;
 #define Hacl_Streaming_Types_InvalidAlgorithm 1
 #define Hacl_Streaming_Types_InvalidLength 2
 #define Hacl_Streaming_Types_MaximumLengthExceeded 3
+#define Hacl_Streaming_Types_OutOfMemory 4
 
 typedef uint8_t Hacl_Streaming_Types_error_code;
 
