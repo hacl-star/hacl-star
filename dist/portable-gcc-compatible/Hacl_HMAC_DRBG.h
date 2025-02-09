@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_HMAC.h"
 
 /* SNIPPET_START: Hacl_HMAC_DRBG_supported_alg */
 

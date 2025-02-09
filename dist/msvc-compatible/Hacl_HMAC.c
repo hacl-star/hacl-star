@@ -25,6 +25,12 @@
 
 #include "internal/Hacl_HMAC.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA3.h"
+#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Hash_Blake2s.h"
+#include "Hacl_Hash_Blake2b.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA3.h"
 #include "internal/Hacl_Hash_SHA2.h"
@@ -858,7 +864,7 @@ Hacl_HMAC_compute_sha3_224(
   }
   memcpy(dst1 + 28U - remOut, hbuf0, remOut * sizeof (uint8_t));
   uint8_t *hash1 = ipad;
-  memset(s, 0U, 25U * sizeof (uint64_t));
+  Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_224, s);
   uint32_t block_len = 144U;
   uint32_t n_blocks0 = 28U / block_len;
   uint32_t rem0 = 28U % block_len;
@@ -984,7 +990,7 @@ Hacl_HMAC_compute_sha3_256(
   }
   memcpy(dst1 + 32U - remOut, hbuf0, remOut * sizeof (uint8_t));
   uint8_t *hash1 = ipad;
-  memset(s, 0U, 25U * sizeof (uint64_t));
+  Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_256, s);
   uint32_t block_len = 136U;
   uint32_t n_blocks0 = 32U / block_len;
   uint32_t rem0 = 32U % block_len;
@@ -1110,7 +1116,7 @@ Hacl_HMAC_compute_sha3_384(
   }
   memcpy(dst1 + 48U - remOut, hbuf0, remOut * sizeof (uint8_t));
   uint8_t *hash1 = ipad;
-  memset(s, 0U, 25U * sizeof (uint64_t));
+  Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_384, s);
   uint32_t block_len = 104U;
   uint32_t n_blocks0 = 48U / block_len;
   uint32_t rem0 = 48U % block_len;
@@ -1236,7 +1242,7 @@ Hacl_HMAC_compute_sha3_512(
   }
   memcpy(dst1 + 64U - remOut, hbuf0, remOut * sizeof (uint8_t));
   uint8_t *hash1 = ipad;
-  memset(s, 0U, 25U * sizeof (uint64_t));
+  Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_512, s);
   uint32_t block_len = 72U;
   uint32_t n_blocks0 = 64U / block_len;
   uint32_t rem0 = 64U % block_len;

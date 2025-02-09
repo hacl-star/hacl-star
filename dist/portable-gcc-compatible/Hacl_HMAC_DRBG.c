@@ -25,6 +25,9 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_HMAC.h"
+
 /* SNIPPET_START: Hacl_HMAC_DRBG_reseed_interval */
 
 uint32_t Hacl_HMAC_DRBG_reseed_interval = 1024U;

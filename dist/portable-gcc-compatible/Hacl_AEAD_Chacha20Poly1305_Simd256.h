@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Chacha20_Vec256.h"
-
 /* SNIPPET_START: Hacl_AEAD_Chacha20Poly1305_Simd256_encrypt */
 
 /**

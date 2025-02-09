@@ -35,10 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Streaming_Types.h"
-#include "Hacl_Krmllib.h"
-#include "Hacl_Hash_SHA2.h"
-
 /********************************************************************************
   Verified C library for EdDSA signing and verification on the edwards25519 curve.
 ********************************************************************************/

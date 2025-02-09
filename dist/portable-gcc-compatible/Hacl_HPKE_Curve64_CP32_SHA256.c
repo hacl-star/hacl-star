@@ -25,6 +25,10 @@
 
 #include "Hacl_HPKE_Curve64_CP32_SHA256.h"
 
+#include "Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE.h"
+#include "Hacl_HKDF.h"
+#include "Hacl_Curve25519_64.h"
+#include "Hacl_AEAD_Chacha20Poly1305.h"
 #include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_HPKE_Curve64_CP32_SHA256_setupBaseS */

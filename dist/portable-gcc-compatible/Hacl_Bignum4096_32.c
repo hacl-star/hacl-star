@@ -25,6 +25,7 @@
 
 #include "Hacl_Bignum4096_32.h"
 
+#include "Hacl_Bignum.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"

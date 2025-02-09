@@ -25,7 +25,18 @@
 
 #include "internal/EverCrypt_Hash.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA3.h"
+#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Hash_Blake2s_Simd128.h"
+#include "Hacl_Hash_Blake2s.h"
+#include "Hacl_Hash_Blake2b_Simd256.h"
+#include "Hacl_Hash_Blake2b.h"
+#include "EverCrypt_Error.h"
+#include "EverCrypt_AutoConfig2.h"
 #include "internal/Vale.h"
+#include "internal/Hacl_Streaming_Types.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA3.h"
 #include "internal/Hacl_Hash_SHA2.h"
@@ -515,8 +526,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
 
 typedef struct option___EverCrypt_Hash_state_s__s
 {
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
+  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
   EverCrypt_Hash_state_s *v;
 }
 option___EverCrypt_Hash_state_s_;
@@ -581,25 +591,25 @@ static void init(EverCrypt_Hash_state_s *s)
   if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
-    memset(p1, 0U, 25U * sizeof (uint64_t));
+    Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_224, p1);
     return;
   }
   if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
-    memset(p1, 0U, 25U * sizeof (uint64_t));
+    Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_256, p1);
     return;
   }
   if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
-    memset(p1, 0U, 25U * sizeof (uint64_t));
+    Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_384, p1);
     return;
   }
   if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
-    memset(p1, 0U, 25U * sizeof (uint64_t));
+    Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_512, p1);
     return;
   }
   if (scrut.tag == Blake2S_s)
@@ -1629,15 +1639,14 @@ EverCrypt_Hash_Incremental_state_t
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     EverCrypt_Hash_state_s *block_state1 = block_state.v;
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           EverCrypt_Hash_Incremental_state_t
           s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };

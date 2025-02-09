@@ -25,6 +25,9 @@
 
 #include "Hacl_HPKE_P256_CP128_SHA256.h"
 
+#include "Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE.h"
+#include "Hacl_HKDF.h"
+#include "Hacl_AEAD_Chacha20Poly1305_Simd128.h"
 #include "internal/Hacl_P256.h"
 
 uint32_t

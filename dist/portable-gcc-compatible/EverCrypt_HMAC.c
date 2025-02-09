@@ -25,6 +25,11 @@
 
 #include "internal/EverCrypt_HMAC.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Hash_Blake2s.h"
+#include "Hacl_Hash_Blake2b.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
@@ -71,14 +76,6 @@ bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___)
 }
 
 /* SNIPPET_END: EverCrypt_HMAC_is_supported_alg */
-
-/* SNIPPET_START: EverCrypt_HMAC_hash_256 */
-
-void
-(*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint8_t *x1, uint32_t x2) =
-  EverCrypt_Hash_Incremental_hash_256;
-
-/* SNIPPET_END: EverCrypt_HMAC_hash_256 */
 
 /* SNIPPET_START: EverCrypt_HMAC_compute_sha1 */
 
@@ -219,7 +216,7 @@ EverCrypt_HMAC_compute_sha2_256(
   }
   else
   {
-    EverCrypt_HMAC_hash_256(nkey, key, key_len);
+    EverCrypt_Hash_Incremental_hash_256(nkey, key, key_len);
   }
   uint8_t ipad[64U];
   memset(ipad, 0x36U, 64U * sizeof (uint8_t));

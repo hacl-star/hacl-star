@@ -25,6 +25,7 @@
 
 #include "Hacl_EC_Ed25519.h"
 
+#include "Hacl_Krmllib.h"
 #include "internal/Hacl_Ed25519.h"
 #include "internal/Hacl_Bignum25519_51.h"
 

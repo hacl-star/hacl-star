@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Ed25519.h"
-
 /* SNIPPET_START: EverCrypt_Ed25519_secret_to_public */
 
 void EverCrypt_Ed25519_secret_to_public(uint8_t *public_key, uint8_t *private_key);

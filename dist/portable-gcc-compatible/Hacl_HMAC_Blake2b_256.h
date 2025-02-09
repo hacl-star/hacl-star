@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Krmllib.h"
-#include "Hacl_Hash_Blake2b_Simd256.h"
-
 /* SNIPPET_START: Hacl_HMAC_Blake2b_256_compute_blake2b_256 */
 
 /**

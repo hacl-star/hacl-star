@@ -35,11 +35,19 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "internal/Hacl_Hash_SHA3.h"
 #include "../Hacl_MAC_Poly1305.h"
 
 void Hacl_MAC_Poly1305_poly1305_init(uint64_t *ctx, uint8_t *key);
 
 void Hacl_MAC_Poly1305_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx);
+
+typedef struct FStar_Pervasives_Native_option___uint8_t__s
+{
+  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
+  uint8_t *v;
+}
+FStar_Pervasives_Native_option___uint8_t_;
 
 #if defined(__cplusplus)
 }

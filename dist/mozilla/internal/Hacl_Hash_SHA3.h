@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_SHA3.h"
 
 extern const uint32_t Hacl_Hash_SHA3_keccak_rotc[24U];
@@ -42,6 +43,8 @@ extern const uint32_t Hacl_Hash_SHA3_keccak_rotc[24U];
 extern const uint32_t Hacl_Hash_SHA3_keccak_piln[24U];
 
 extern const uint64_t Hacl_Hash_SHA3_keccak_rndc[24U];
+
+void Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_hash_alg a, uint64_t *s);
 
 void
 Hacl_Hash_SHA3_update_multi_sha3(
@@ -58,6 +61,12 @@ Hacl_Hash_SHA3_update_last_sha3(
   uint8_t *input,
   uint32_t input_len
 );
+
+#define FStar_Pervasives_Native_None 0
+#define FStar_Pervasives_Native_Some 1
+
+typedef uint8_t
+FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags;
 
 #if defined(__cplusplus)
 }

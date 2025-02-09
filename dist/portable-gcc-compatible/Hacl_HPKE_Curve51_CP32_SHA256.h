@@ -36,9 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE.h"
-#include "Hacl_HKDF.h"
-#include "Hacl_Curve25519_51.h"
-#include "Hacl_AEAD_Chacha20Poly1305.h"
 
 /* SNIPPET_START: Hacl_HPKE_Curve51_CP32_SHA256_setupBaseS */
 

@@ -25,8 +25,10 @@
 
 #include "internal/Hacl_MAC_Poly1305.h"
 
-#include "internal/Hacl_Hash_SHA2.h"
-#include "internal/Hacl_Hash_Blake2b.h"
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "internal/Hacl_Streaming_Types.h"
+#include "internal/Hacl_Hash_SHA3.h"
 
 /* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_init */
 
@@ -466,23 +468,21 @@ Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
   }
   uint8_t *buf1 = buf;
   uint64_t *r1 = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-  FStar_Pervasives_Native_option___uint64_t_ block_state;
+  Hacl_Streaming_Types_optional_64 block_state;
   if (r1 == NULL)
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_None });
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_Some, .v = r1 });
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_Some, .v = r1 });
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     uint64_t *block_state1 = block_state.v;
     uint8_t *b = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));

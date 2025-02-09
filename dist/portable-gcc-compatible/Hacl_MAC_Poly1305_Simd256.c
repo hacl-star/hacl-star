@@ -25,8 +25,9 @@
 
 #include "internal/Hacl_MAC_Poly1305_Simd256.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "internal/Hacl_MAC_Poly1305.h"
-#include "internal/Hacl_Hash_Blake2b.h"
+#include "internal/Hacl_Hash_SHA3.h"
 
 /* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_load_acc4 */
 
@@ -1779,8 +1780,7 @@ Hacl_MAC_Poly1305_Simd256_poly1305_finish(
 
 typedef struct option___Lib_IntVector_Intrinsics_vec256__s
 {
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
+  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
   Lib_IntVector_Intrinsics_vec256 *v;
 }
 option___Lib_IntVector_Intrinsics_vec256_;
