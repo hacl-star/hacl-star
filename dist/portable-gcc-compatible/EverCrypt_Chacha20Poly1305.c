@@ -25,6 +25,10 @@
 
 #include "EverCrypt_Chacha20Poly1305.h"
 
+#include "Hacl_AEAD_Chacha20Poly1305_Simd256.h"
+#include "Hacl_AEAD_Chacha20Poly1305_Simd128.h"
+#include "Hacl_AEAD_Chacha20Poly1305.h"
+#include "EverCrypt_AutoConfig2.h"
 #include "config.h"
 
 /* SNIPPET_START: EverCrypt_Chacha20Poly1305_aead_encrypt */

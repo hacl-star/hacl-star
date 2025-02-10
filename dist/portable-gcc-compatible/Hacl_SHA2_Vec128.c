@@ -25,6 +25,7 @@
 
 #include "Hacl_SHA2_Vec128.h"
 
+#include "Hacl_SHA2_Types.h"
 #include "internal/Hacl_SHA2_Types.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "libintvector.h"

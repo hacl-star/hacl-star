@@ -25,6 +25,9 @@
 
 #include "Hacl_NaCl.h"
 
+#include "Hacl_Salsa20.h"
+#include "Hacl_MAC_Poly1305.h"
+#include "Hacl_Curve25519_51.h"
 #include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: secretbox_init */

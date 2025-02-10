@@ -25,7 +25,8 @@
 
 #include "internal/Hacl_Hash_SHA3.h"
 
-#include "internal/Hacl_Hash_Blake2b.h"
+#include "Hacl_Streaming_Types.h"
+#include "internal/Hacl_Streaming_Types.h"
 
 const
 uint32_t
@@ -234,6 +235,12 @@ static uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
         KRML_HOST_EXIT(253U);
       }
   }
+}
+
+void Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_hash_alg a, uint64_t *s)
+{
+  KRML_MAYBE_UNUSED_VAR(a);
+  memset(s, 0U, 25U * sizeof (uint64_t));
 }
 
 void
@@ -547,6 +554,74 @@ Hacl_Hash_SHA3_update_last_sha3(
   absorb_inner_32(b3, s);
 }
 
+static void squeeze(uint64_t *s, uint32_t rateInBytes, uint32_t outputByteLen, uint8_t *b)
+{
+  for (uint32_t i0 = 0U; i0 < outputByteLen / rateInBytes; i0++)
+  {
+    uint8_t hbuf[256U] = { 0U };
+    uint64_t ws[32U] = { 0U };
+    memcpy(ws, s, 25U * sizeof (uint64_t));
+    for (uint32_t i = 0U; i < 32U; i++)
+    {
+      store64_le(hbuf + i * 8U, ws[i]);
+    }
+    uint8_t *b0 = b;
+    memcpy(b0 + i0 * rateInBytes, hbuf, rateInBytes * sizeof (uint8_t));
+    for (uint32_t i1 = 0U; i1 < 24U; i1++)
+    {
+      uint64_t _C[5U] = { 0U };
+      KRML_MAYBE_FOR5(i,
+        0U,
+        5U,
+        1U,
+        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U]))););
+      KRML_MAYBE_FOR5(i2,
+        0U,
+        5U,
+        1U,
+        uint64_t uu____0 = _C[(i2 + 1U) % 5U];
+        uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
+        KRML_MAYBE_FOR5(i, 0U, 5U, 1U, s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;););
+      uint64_t x = s[1U];
+      uint64_t current = x;
+      for (uint32_t i = 0U; i < 24U; i++)
+      {
+        uint32_t _Y = Hacl_Hash_SHA3_keccak_piln[i];
+        uint32_t r = Hacl_Hash_SHA3_keccak_rotc[i];
+        uint64_t temp = s[_Y];
+        uint64_t uu____1 = current;
+        s[_Y] = uu____1 << r | uu____1 >> (64U - r);
+        current = temp;
+      }
+      KRML_MAYBE_FOR5(i,
+        0U,
+        5U,
+        1U,
+        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
+        uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
+        s[0U + 5U * i] = v0;
+        s[1U + 5U * i] = v1;
+        s[2U + 5U * i] = v2;
+        s[3U + 5U * i] = v3;
+        s[4U + 5U * i] = v4;);
+      uint64_t c = Hacl_Hash_SHA3_keccak_rndc[i1];
+      s[0U] = s[0U] ^ c;
+    }
+  }
+  uint32_t remOut = outputByteLen % rateInBytes;
+  uint8_t hbuf[256U] = { 0U };
+  uint64_t ws[32U] = { 0U };
+  memcpy(ws, s, 25U * sizeof (uint64_t));
+  for (uint32_t i = 0U; i < 32U; i++)
+  {
+    store64_le(hbuf + i * 8U, ws[i]);
+  }
+  memcpy(b + outputByteLen - remOut, hbuf, remOut * sizeof (uint8_t));
+}
+
 typedef struct hash_buf2_s
 {
   Hacl_Hash_SHA3_hash_buf fst;
@@ -562,8 +637,7 @@ Spec_Hash_Definitions_hash_alg Hacl_Hash_SHA3_get_alg(Hacl_Hash_SHA3_state_t *s)
 
 typedef struct option___Spec_Hash_Definitions_hash_alg____uint64_t___s
 {
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
+  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
   Hacl_Hash_SHA3_hash_buf v;
 }
 option___Spec_Hash_Definitions_hash_alg____uint64_t__;
@@ -606,15 +680,14 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Hash_SHA3_hash_buf block_state1 = block_state.v;
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Hash_SHA3_state_t
           s0 = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };
@@ -631,8 +704,9 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
             KRML_HOST_FREE(buf1);
             return NULL;
           }
+          Spec_Hash_Definitions_hash_alg a1 = block_state1.fst;
           uint64_t *s1 = block_state1.snd;
-          memset(s1, 0U, 25U * sizeof (uint64_t));
+          Hacl_Hash_SHA3_init_(a1, s1);
           return p;
         }
       default:
@@ -707,15 +781,14 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
     uint64_t *s_dst = scrut.snd.snd;
     uint64_t *s_src = scrut.fst.snd;
     memcpy(s_dst, s_src, 25U * sizeof (uint64_t));
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Hash_SHA3_state_t
           s0 = { .block_state = block_state1, .buf = buf, .total_len = total_len0 };
@@ -755,8 +828,9 @@ void Hacl_Hash_SHA3_reset(Hacl_Hash_SHA3_state_t *state)
   Hacl_Hash_SHA3_hash_buf block_state = scrut.block_state;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
   KRML_MAYBE_UNUSED_VAR(i);
+  Spec_Hash_Definitions_hash_alg a1 = block_state.fst;
   uint64_t *s = block_state.snd;
-  memset(s, 0U, 25U * sizeof (uint64_t));
+  Hacl_Hash_SHA3_init_(a1, s);
   Hacl_Hash_SHA3_state_t
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   state[0U] = tmp;
@@ -988,141 +1062,30 @@ digest_(
   Hacl_Hash_SHA3_update_last_sha3(a10, s1, buf_last, r);
   Spec_Hash_Definitions_hash_alg a11 = tmp_block_state.fst;
   uint64_t *s = tmp_block_state.snd;
-  if (a11 == Spec_Hash_Definitions_Shake128 || a11 == Spec_Hash_Definitions_Shake256)
+  bool sw;
+  switch (a11)
   {
-    for (uint32_t i0 = 0U; i0 < l / block_len(a11); i0++)
-    {
-      uint8_t hbuf[256U] = { 0U };
-      uint64_t ws[32U] = { 0U };
-      memcpy(ws, s, 25U * sizeof (uint64_t));
-      for (uint32_t i = 0U; i < 32U; i++)
+    case Spec_Hash_Definitions_Shake128:
       {
-        store64_le(hbuf + i * 8U, ws[i]);
+        sw = true;
+        break;
       }
-      uint8_t *b0 = output;
-      uint8_t *uu____0 = hbuf;
-      memcpy(b0 + i0 * block_len(a11), uu____0, block_len(a11) * sizeof (uint8_t));
-      for (uint32_t i1 = 0U; i1 < 24U; i1++)
+    case Spec_Hash_Definitions_Shake256:
       {
-        uint64_t _C[5U] = { 0U };
-        KRML_MAYBE_FOR5(i,
-          0U,
-          5U,
-          1U,
-          _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U]))););
-        KRML_MAYBE_FOR5(i2,
-          0U,
-          5U,
-          1U,
-          uint64_t uu____1 = _C[(i2 + 1U) % 5U];
-          uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____1 << 1U | uu____1 >> 63U);
-          KRML_MAYBE_FOR5(i, 0U, 5U, 1U, s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;););
-        uint64_t x = s[1U];
-        uint64_t current = x;
-        for (uint32_t i = 0U; i < 24U; i++)
-        {
-          uint32_t _Y = Hacl_Hash_SHA3_keccak_piln[i];
-          uint32_t r1 = Hacl_Hash_SHA3_keccak_rotc[i];
-          uint64_t temp = s[_Y];
-          uint64_t uu____2 = current;
-          s[_Y] = uu____2 << r1 | uu____2 >> (64U - r1);
-          current = temp;
-        }
-        KRML_MAYBE_FOR5(i,
-          0U,
-          5U,
-          1U,
-          uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
-          uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
-          uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-          uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-          uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-          s[0U + 5U * i] = v0;
-          s[1U + 5U * i] = v1;
-          s[2U + 5U * i] = v2;
-          s[3U + 5U * i] = v3;
-          s[4U + 5U * i] = v4;);
-        uint64_t c = Hacl_Hash_SHA3_keccak_rndc[i1];
-        s[0U] = s[0U] ^ c;
+        sw = true;
+        break;
       }
-    }
-    uint32_t remOut = l % block_len(a11);
-    uint8_t hbuf[256U] = { 0U };
-    uint64_t ws[32U] = { 0U };
-    memcpy(ws, s, 25U * sizeof (uint64_t));
-    for (uint32_t i = 0U; i < 32U; i++)
-    {
-      store64_le(hbuf + i * 8U, ws[i]);
-    }
-    memcpy(output + l - remOut, hbuf, remOut * sizeof (uint8_t));
+    default:
+      {
+        sw = false;
+      }
+  }
+  if (sw)
+  {
+    squeeze(s, block_len(a11), l, output);
     return;
   }
-  for (uint32_t i0 = 0U; i0 < hash_len(a11) / block_len(a11); i0++)
-  {
-    uint8_t hbuf[256U] = { 0U };
-    uint64_t ws[32U] = { 0U };
-    memcpy(ws, s, 25U * sizeof (uint64_t));
-    for (uint32_t i = 0U; i < 32U; i++)
-    {
-      store64_le(hbuf + i * 8U, ws[i]);
-    }
-    uint8_t *b0 = output;
-    uint8_t *uu____3 = hbuf;
-    memcpy(b0 + i0 * block_len(a11), uu____3, block_len(a11) * sizeof (uint8_t));
-    for (uint32_t i1 = 0U; i1 < 24U; i1++)
-    {
-      uint64_t _C[5U] = { 0U };
-      KRML_MAYBE_FOR5(i,
-        0U,
-        5U,
-        1U,
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U]))););
-      KRML_MAYBE_FOR5(i2,
-        0U,
-        5U,
-        1U,
-        uint64_t uu____4 = _C[(i2 + 1U) % 5U];
-        uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____4 << 1U | uu____4 >> 63U);
-        KRML_MAYBE_FOR5(i, 0U, 5U, 1U, s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;););
-      uint64_t x = s[1U];
-      uint64_t current = x;
-      for (uint32_t i = 0U; i < 24U; i++)
-      {
-        uint32_t _Y = Hacl_Hash_SHA3_keccak_piln[i];
-        uint32_t r1 = Hacl_Hash_SHA3_keccak_rotc[i];
-        uint64_t temp = s[_Y];
-        uint64_t uu____5 = current;
-        s[_Y] = uu____5 << r1 | uu____5 >> (64U - r1);
-        current = temp;
-      }
-      KRML_MAYBE_FOR5(i,
-        0U,
-        5U,
-        1U,
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
-        uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
-        uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
-        s[1U + 5U * i] = v1;
-        s[2U + 5U * i] = v2;
-        s[3U + 5U * i] = v3;
-        s[4U + 5U * i] = v4;);
-      uint64_t c = Hacl_Hash_SHA3_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
-    }
-  }
-  uint32_t remOut = hash_len(a11) % block_len(a11);
-  uint8_t hbuf[256U] = { 0U };
-  uint64_t ws[32U] = { 0U };
-  memcpy(ws, s, 25U * sizeof (uint64_t));
-  for (uint32_t i = 0U; i < 32U; i++)
-  {
-    store64_le(hbuf + i * 8U, ws[i]);
-  }
-  uint8_t *uu____6 = hbuf;
-  memcpy(output + hash_len(a11) - remOut, uu____6, remOut * sizeof (uint8_t));
+  squeeze(s, block_len(a11), hash_len(a11), output);
 }
 
 Hacl_Streaming_Types_error_code

@@ -57,6 +57,8 @@ extern void EverCrypt_AutoConfig2_disable_shaext(void);
 
 extern void EverCrypt_AutoConfig2_disable_aesni(void);
 
+typedef struct state_s_s state_s;
+
 extern void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,
@@ -124,7 +126,7 @@ static bool is_supported_alg(alg a)
 
 typedef uint8_t error_code;
 
-typedef struct state_s_s state_s;
+typedef struct state_s0_s state_s0;
 
 /**
 Create the required AEAD state for the algorithm.
@@ -142,7 +144,7 @@ Note: The caller must free the AEAD state by calling `EverCrypt_AEAD_free`.
   `EverCrypt_Error_UnsupportedAlgorithm` in case of a bad algorithm identifier.
   (See `EverCrypt_Error.h`.)
 */
-extern error_code EverCrypt_AEAD_create_in(alg a, state_s **dst, uint8_t *k);
+extern error_code EverCrypt_AEAD_create_in(alg a, state_s0 **dst, uint8_t *k);
 
 /**
 Encrypt and authenticate a message (`plain`) with associated data (`ad`).
@@ -165,7 +167,7 @@ Encrypt and authenticate a message (`plain`) with associated data (`ad`).
 */
 extern error_code
 EverCrypt_AEAD_encrypt(
-  state_s *s,
+  state_s0 *s,
   uint8_t *iv,
   uint32_t iv_len,
   uint8_t *ad,
@@ -209,7 +211,7 @@ Verify the authenticity of `ad` || `cipher` and decrypt `cipher` into `dst`.
 */
 extern error_code
 EverCrypt_AEAD_decrypt(
-  state_s *s,
+  state_s0 *s,
   uint8_t *iv,
   uint32_t iv_len,
   uint8_t *ad,
@@ -222,6 +224,58 @@ EverCrypt_AEAD_decrypt(
 
 extern void
 TestLib_compare_and_print(Prims_string uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
+
+typedef struct state_s___EverCrypt_Hash_state_s_____s
+{
+  state_s *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+state_s___EverCrypt_Hash_state_s____;
+
+/**
+Allocate initial state for the agile hash. The argument `a` stands for the
+choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
+efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
+before. The state is to be freed by calling `free`.
+*/
+extern state_s___EverCrypt_Hash_state_s____
+*EverCrypt_Hash_Incremental_malloc(Spec_Hash_Definitions_hash_alg a);
+
+/**
+Reset an existing state to the initial hash state with empty data.
+*/
+extern void EverCrypt_Hash_Incremental_reset(state_s___EverCrypt_Hash_state_s____ *state);
+
+/**
+Feed an arbitrary amount of data into the hash. This function returns
+EverCrypt_Error_Success for success, or EverCrypt_Error_MaximumLengthExceeded if
+the combined length of all of the data passed to `update` (since the last call
+to `init`) exceeds 2^61-1 bytes or 2^64-1 bytes, depending on the choice of
+algorithm. Both limits are unlikely to be attained in practice.
+*/
+extern error_code
+EverCrypt_Hash_Incremental_update(
+  state_s___EverCrypt_Hash_state_s____ *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
+);
+
+/**
+Write the resulting hash into `output`, an array whose length is
+algorithm-specific. You can use the macros defined earlier in this file to
+allocate a destination buffer of the right length. The state remains valid after
+a call to `digest`, meaning the user may feed more data into the hash via
+`update`. (The finish function operates on an internal copy of the state and
+therefore does not invalidate the client-held state.)
+*/
+extern void
+EverCrypt_Hash_Incremental_digest(state_s___EverCrypt_Hash_state_s____ *state, uint8_t *output);
+
+/**
+Free a state previously allocated with `create_in`.
+*/
+extern void EverCrypt_Hash_Incremental_free(state_s___EverCrypt_Hash_state_s____ *state);
 
 /**
 Hash `input`, of len `input_len`, into `output`, an array whose length is determined by
@@ -6774,14 +6828,58 @@ Compute the scalar multiple of a point.
 extern void
 EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
-static void Test_Hash_main(void)
+static void test_incremental_api(void)
 {
-
+  uint8_t b1[4U] = { 0x00U, 0x01U, 0x02U, 0x04U };
+  uint8_t b2[4U] = { 0x05U, 0x06U, 0x07U, 0x08U };
+  state_s___EverCrypt_Hash_state_s____
+  *st = EverCrypt_Hash_Incremental_malloc(Spec_Hash_Definitions_SHA2_256);
+  if (st == NULL)
+  {
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n", __FILE__, __LINE__, "OUT OF MEMORY");
+    KRML_HOST_EXIT(255U);
+  }
+  else
+  {
+    EverCrypt_Hash_Incremental_reset(st);
+  }
+  uint8_t dst[32U] = { 0U };
+  switch (EverCrypt_Hash_Incremental_update(st, b1, 4U))
+  {
+    case Success:
+      {
+        switch (EverCrypt_Hash_Incremental_update(st, b2, 4U))
+        {
+          case Success:
+            {
+              EverCrypt_Hash_Incremental_digest(st, dst);
+              EverCrypt_Hash_Incremental_free(st);
+              break;
+            }
+          default:
+            {
+              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
+            }
+        }
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
 }
 
-typedef struct state_s0_s state_s0;
+static void Test_Hash_main(void)
+{
+  test_incremental_api();
+}
 
-extern state_s0 *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg a);
+typedef struct state_s1_s state_s1;
+
+extern state_s1 *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg a);
 
 /**
 Instantiate the DRBG.
@@ -6794,7 +6892,7 @@ Instantiate the DRBG.
 */
 extern bool
 EverCrypt_DRBG_instantiate(
-  state_s0 *st,
+  state_s1 *st,
   uint8_t *personalization_string,
   uint32_t personalization_string_len
 );
@@ -6809,7 +6907,7 @@ Reseed the DRBG.
 @return True if and only if reseed was successful.
 */
 extern bool
-EverCrypt_DRBG_reseed(state_s0 *st, uint8_t *additional_input, uint32_t additional_input_len);
+EverCrypt_DRBG_reseed(state_s1 *st, uint8_t *additional_input, uint32_t additional_input_len);
 
 /**
 Generate output.
@@ -6825,7 +6923,7 @@ Generate output.
 extern bool
 EverCrypt_DRBG_generate(
   uint8_t *output,
-  state_s0 *st,
+  state_s1 *st,
   uint32_t n,
   uint8_t *additional_input,
   uint32_t additional_input_len
@@ -6836,7 +6934,7 @@ Uninstantiate and free the DRBG.
 
 @param st Pointer to DRBG state.
 */
-extern void EverCrypt_DRBG_uninstantiate(state_s0 *st);
+extern void EverCrypt_DRBG_uninstantiate(state_s1 *st);
 
 extern void
 EverCrypt_Cipher_chacha20(
@@ -8890,7 +8988,7 @@ test_aead_st(
   }
   else
   {
-    state_s *st = NULL;
+    state_s0 *st = NULL;
     error_code e = EverCrypt_AEAD_create_in(alg0, &st, key);
     switch (e)
     {
@@ -8900,7 +8998,7 @@ test_aead_st(
         }
       case Success:
         {
-          state_s *st1 = st;
+          state_s0 *st1 = st;
           uint32_t plaintext_blen;
           if (plaintext_len == 0U)
           {
@@ -9140,7 +9238,7 @@ test_one_hmac_drbg(
     KRML_CHECK_SIZE(sizeof (uint8_t), returned_bits_len);
     uint8_t output[returned_bits_len];
     memset(output, 0U, returned_bits_len * sizeof (uint8_t));
-    state_s0 *st = EverCrypt_DRBG_create_in(a);
+    state_s1 *st = EverCrypt_DRBG_create_in(a);
     bool ok = EverCrypt_DRBG_instantiate(st, personalization_string, personalization_string_len);
     if (ok)
     {

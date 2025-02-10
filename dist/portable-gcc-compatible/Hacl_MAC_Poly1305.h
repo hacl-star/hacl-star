@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_MAC_Poly1305_state_t */
 

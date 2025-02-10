@@ -25,6 +25,10 @@
 
 #include "internal/Hacl_Hash_Blake2b_Simd256.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_Blake2b.h"
+#include "internal/Hacl_Streaming_Types.h"
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "internal/Hacl_Hash_Blake2b.h"
 #include "lib_memzero0.h"
@@ -580,19 +584,6 @@ Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_Simd256_malloc_with_key(void)
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_malloc_with_key */
 
-/* SNIPPET_START: option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___ */
-
-typedef struct
-option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256____s
-{
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
-  Hacl_Hash_Blake2b_Simd256_block_state_t v;
-}
-option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___;
-
-/* SNIPPET_END: option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___ */
-
 /* SNIPPET_START: malloc_raw */
 
 static Hacl_Hash_Blake2b_Simd256_state_t
@@ -612,14 +603,13 @@ static Hacl_Hash_Blake2b_Simd256_state_t
   {
     memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   }
-  option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___
-  block_state;
+  Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256 block_state;
   if (wv0 == NULL)
   {
     block_state =
       (
-        (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___){
-          .tag = FStar_Pervasives_Native_None
+        (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256){
+          .tag = Hacl_Streaming_Blake2_Types_None
         }
       );
   }
@@ -638,8 +628,8 @@ static Hacl_Hash_Blake2b_Simd256_state_t
       KRML_ALIGNED_FREE(wv0);
       block_state =
         (
-          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___){
-            .tag = FStar_Pervasives_Native_None
+          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256){
+            .tag = Hacl_Streaming_Blake2_Types_None
           }
         );
     }
@@ -647,8 +637,8 @@ static Hacl_Hash_Blake2b_Simd256_state_t
     {
       block_state =
         (
-          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___){
-            .tag = FStar_Pervasives_Native_Some,
+          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256){
+            .tag = Hacl_Streaming_Blake2_Types_Some,
             .v = {
               .fst = kk.key_length,
               .snd = kk.digest_length,
@@ -659,23 +649,22 @@ static Hacl_Hash_Blake2b_Simd256_state_t
         );
     }
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Blake2_Types_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Blake2_Types_Some)
   {
-    Hacl_Hash_Blake2b_Simd256_block_state_t block_state1 = block_state.v;
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state1 = block_state.v;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           uint8_t kk10 = kk.key_length;
           uint32_t ite;
@@ -893,7 +882,7 @@ Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(void)
 
 static Hacl_Hash_Blake2b_index index_of_state(Hacl_Hash_Blake2b_Simd256_state_t *s)
 {
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = (*s).block_state;
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state = (*s).block_state;
   bool last_node = block_state.thd;
   uint8_t nn = block_state.snd;
   uint8_t kk1 = block_state.fst;
@@ -910,7 +899,7 @@ reset_raw(Hacl_Hash_Blake2b_Simd256_state_t *state, Hacl_Hash_Blake2b_params_and
 {
   Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = scrut.block_state;
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state = scrut.block_state;
   bool last_node0 = block_state.thd;
   uint8_t nn0 = block_state.snd;
   uint8_t kk10 = block_state.fst;
@@ -1111,7 +1100,7 @@ Hacl_Hash_Blake2b_Simd256_update(
   if (chunk_len <= 128U - sz)
   {
     Hacl_Hash_Blake2b_Simd256_state_t s1 = *state;
-    Hacl_Hash_Blake2b_Simd256_block_state_t block_state1 = s1.block_state;
+    Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -1139,7 +1128,7 @@ Hacl_Hash_Blake2b_Simd256_update(
   else if (sz == 0U)
   {
     Hacl_Hash_Blake2b_Simd256_state_t s1 = *state;
-    Hacl_Hash_Blake2b_Simd256_block_state_t block_state1 = s1.block_state;
+    Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -1207,7 +1196,7 @@ Hacl_Hash_Blake2b_Simd256_update(
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
     Hacl_Hash_Blake2b_Simd256_state_t s1 = *state;
-    Hacl_Hash_Blake2b_Simd256_block_state_t block_state10 = s1.block_state;
+    Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
     uint32_t sz10;
@@ -1232,7 +1221,7 @@ Hacl_Hash_Blake2b_Simd256_update(
         }
       );
     Hacl_Hash_Blake2b_Simd256_state_t s10 = *state;
-    Hacl_Hash_Blake2b_Simd256_block_state_t block_state1 = s10.block_state;
+    Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
     uint32_t sz1;
@@ -1315,14 +1304,14 @@ to see how many bytes were actually written.
 */
 uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, uint8_t *dst)
 {
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state0 = (*s).block_state;
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state0 = (*s).block_state;
   bool last_node0 = block_state0.thd;
   uint8_t nn0 = block_state0.snd;
   uint8_t kk0 = block_state0.fst;
   Hacl_Hash_Blake2b_index
   i1 = { .key_length = kk0, .digest_length = nn0, .last_node = last_node0 };
   Hacl_Hash_Blake2b_Simd256_state_t scrut = *s;
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = scrut.block_state;
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
   uint32_t r;
@@ -1337,7 +1326,7 @@ uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, u
   uint8_t *buf_1 = buf_;
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv0[4U] KRML_POST_ALIGN(32) = { 0U };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b[4U] KRML_POST_ALIGN(32) = { 0U };
-  Hacl_Hash_Blake2b_Simd256_block_state_t
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_256
   tmp_block_state =
     {
       .fst = i1.key_length,
@@ -1386,7 +1375,7 @@ uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, u
     buf_last);
   uint8_t nn1 = tmp_block_state.snd;
   Hacl_Hash_Blake2b_Simd256_finish((uint32_t)nn1, dst, tmp_block_state.f3.snd);
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state1 = (*s).block_state;
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state1 = (*s).block_state;
   bool last_node = block_state1.thd;
   uint8_t nn = block_state1.snd;
   uint8_t kk = block_state1.fst;
@@ -1400,7 +1389,7 @@ uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, u
 
 Hacl_Hash_Blake2b_index Hacl_Hash_Blake2b_Simd256_info(Hacl_Hash_Blake2b_Simd256_state_t *s)
 {
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = (*s).block_state;
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state = (*s).block_state;
   bool last_node = block_state.thd;
   uint8_t nn = block_state.snd;
   uint8_t kk = block_state.fst;
@@ -1419,7 +1408,7 @@ void Hacl_Hash_Blake2b_Simd256_free(Hacl_Hash_Blake2b_Simd256_state_t *state)
 {
   Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = scrut.block_state;
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state = scrut.block_state;
   Lib_IntVector_Intrinsics_vec256 *b = block_state.f3.snd;
   Lib_IntVector_Intrinsics_vec256 *wv = block_state.f3.fst;
   KRML_ALIGNED_FREE(wv);
@@ -1439,7 +1428,7 @@ Hacl_Hash_Blake2b_Simd256_state_t
 *Hacl_Hash_Blake2b_Simd256_copy(Hacl_Hash_Blake2b_Simd256_state_t *state)
 {
   Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state0 = scrut.block_state;
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state0 = scrut.block_state;
   uint8_t *buf0 = scrut.buf;
   uint64_t total_len0 = scrut.total_len;
   bool last_node = block_state0.thd;
@@ -1460,14 +1449,13 @@ Hacl_Hash_Blake2b_Simd256_state_t
   {
     memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   }
-  option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___
-  block_state;
+  Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256 block_state;
   if (wv0 == NULL)
   {
     block_state =
       (
-        (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___){
-          .tag = FStar_Pervasives_Native_None
+        (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256){
+          .tag = Hacl_Streaming_Blake2_Types_None
         }
       );
   }
@@ -1486,8 +1474,8 @@ Hacl_Hash_Blake2b_Simd256_state_t
       KRML_ALIGNED_FREE(wv0);
       block_state =
         (
-          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___){
-            .tag = FStar_Pervasives_Native_None
+          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256){
+            .tag = Hacl_Streaming_Blake2_Types_None
           }
         );
     }
@@ -1495,8 +1483,8 @@ Hacl_Hash_Blake2b_Simd256_state_t
     {
       block_state =
         (
-          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256___){
-            .tag = FStar_Pervasives_Native_Some,
+          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256){
+            .tag = Hacl_Streaming_Blake2_Types_Some,
             .v = {
               .fst = i.key_length,
               .snd = i.digest_length,
@@ -1507,26 +1495,25 @@ Hacl_Hash_Blake2b_Simd256_state_t
         );
     }
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Blake2_Types_None)
   {
     KRML_HOST_FREE(buf);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Blake2_Types_Some)
   {
-    Hacl_Hash_Blake2b_Simd256_block_state_t block_state1 = block_state.v;
+    Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state1 = block_state.v;
     Lib_IntVector_Intrinsics_vec256 *src_b = block_state0.f3.snd;
     Lib_IntVector_Intrinsics_vec256 *dst_b = block_state1.f3.snd;
     memcpy(dst_b, src_b, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Hash_Blake2b_Simd256_state_t
           s = { .block_state = block_state1, .buf = buf, .total_len = total_len0 };

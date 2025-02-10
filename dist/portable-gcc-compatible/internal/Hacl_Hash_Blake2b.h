@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "../Hacl_Hash_Blake2b.h"
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_params_and_key */
@@ -89,16 +88,6 @@ Hacl_Hash_Blake2b_update_last(
 void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_finish */
-
-/* SNIPPET_START: FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags */
-
-#define FStar_Pervasives_Native_None 0
-#define FStar_Pervasives_Native_Some 1
-
-/* SNIPPET_END: FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags */
-
-typedef uint8_t
-FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags;
 
 #if defined(__cplusplus)
 }

@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Bignum25519_51.h"
 #include "../Hacl_Curve25519_51.h"
 
 /* SNIPPET_START: Hacl_Curve25519_51_fsquare_times */

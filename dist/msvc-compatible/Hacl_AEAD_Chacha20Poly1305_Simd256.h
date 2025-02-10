@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Chacha20_Vec256.h"
-
 /**
 Encrypt a message `input` with key `key`.
 

@@ -25,9 +25,10 @@
 
 #include "internal/Hacl_Hash_SHA2.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "internal/Hacl_Streaming_Types.h"
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Hash_MD5.h"
-#include "internal/Hacl_Hash_Blake2b.h"
 
 void Hacl_Hash_SHA2_sha256_init(uint32_t *hash)
 {
@@ -455,34 +456,31 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA2_malloc_256(void)
   }
   uint8_t *buf1 = buf;
   uint32_t *b = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
-  FStar_Pervasives_Native_option___uint32_t_ block_state;
+  Hacl_Streaming_Types_optional_32 block_state;
   if (b == NULL)
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint32_t_){ .tag = FStar_Pervasives_Native_None });
+    block_state = ((Hacl_Streaming_Types_optional_32){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint32_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+    block_state = ((Hacl_Streaming_Types_optional_32){ .tag = Hacl_Streaming_Types_Some, .v = b });
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     uint32_t *block_state1 = block_state.v;
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Streaming_MD_state_32
           s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };
@@ -534,35 +532,32 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA2_copy_256(Hacl_Streaming_MD_state_32 *
   }
   memcpy(buf, buf0, 64U * sizeof (uint8_t));
   uint32_t *b = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
-  FStar_Pervasives_Native_option___uint32_t_ block_state;
+  Hacl_Streaming_Types_optional_32 block_state;
   if (b == NULL)
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint32_t_){ .tag = FStar_Pervasives_Native_None });
+    block_state = ((Hacl_Streaming_Types_optional_32){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint32_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+    block_state = ((Hacl_Streaming_Types_optional_32){ .tag = Hacl_Streaming_Types_Some, .v = b });
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     uint32_t *block_state1 = block_state.v;
     memcpy(block_state1, block_state0, 8U * sizeof (uint32_t));
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Streaming_MD_state_32
           s = { .block_state = block_state1, .buf = buf, .total_len = total_len0 };
@@ -879,34 +874,31 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA2_malloc_224(void)
   }
   uint8_t *buf1 = buf;
   uint32_t *b = (uint32_t *)KRML_HOST_CALLOC(8U, sizeof (uint32_t));
-  FStar_Pervasives_Native_option___uint32_t_ block_state;
+  Hacl_Streaming_Types_optional_32 block_state;
   if (b == NULL)
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint32_t_){ .tag = FStar_Pervasives_Native_None });
+    block_state = ((Hacl_Streaming_Types_optional_32){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint32_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+    block_state = ((Hacl_Streaming_Types_optional_32){ .tag = Hacl_Streaming_Types_Some, .v = b });
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     uint32_t *block_state1 = block_state.v;
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Streaming_MD_state_32
           s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };
@@ -1033,34 +1025,31 @@ Hacl_Streaming_MD_state_64 *Hacl_Hash_SHA2_malloc_512(void)
   }
   uint8_t *buf1 = buf;
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
-  FStar_Pervasives_Native_option___uint64_t_ block_state;
+  Hacl_Streaming_Types_optional_64 block_state;
   if (b == NULL)
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_None });
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_Some, .v = b });
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     uint64_t *block_state1 = block_state.v;
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Streaming_MD_state_64
           s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };
@@ -1112,35 +1101,32 @@ Hacl_Streaming_MD_state_64 *Hacl_Hash_SHA2_copy_512(Hacl_Streaming_MD_state_64 *
   }
   memcpy(buf, buf0, 128U * sizeof (uint8_t));
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
-  FStar_Pervasives_Native_option___uint64_t_ block_state;
+  Hacl_Streaming_Types_optional_64 block_state;
   if (b == NULL)
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_None });
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_Some, .v = b });
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     uint64_t *block_state1 = block_state.v;
     memcpy(block_state1, block_state0, 8U * sizeof (uint64_t));
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Streaming_MD_state_64
           s = { .block_state = block_state1, .buf = buf, .total_len = total_len0 };
@@ -1458,34 +1444,31 @@ Hacl_Streaming_MD_state_64 *Hacl_Hash_SHA2_malloc_384(void)
   }
   uint8_t *buf1 = buf;
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(8U, sizeof (uint64_t));
-  FStar_Pervasives_Native_option___uint64_t_ block_state;
+  Hacl_Streaming_Types_optional_64 block_state;
   if (b == NULL)
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_None });
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
-    block_state =
-      ((FStar_Pervasives_Native_option___uint64_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_Some, .v = b });
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     uint64_t *block_state1 = block_state.v;
-    FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-    k_ = FStar_Pervasives_Native_Some;
+    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
-      case FStar_Pervasives_Native_None:
+      case Hacl_Streaming_Types_None:
         {
           return NULL;
         }
-      case FStar_Pervasives_Native_Some:
+      case Hacl_Streaming_Types_Some:
         {
           Hacl_Streaming_MD_state_64
           s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U };

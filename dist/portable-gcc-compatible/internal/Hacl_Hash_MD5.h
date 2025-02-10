@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Hash_Blake2b.h"
+#include "Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_MD5.h"
 
 /* SNIPPET_START: Hacl_Hash_MD5_init */
@@ -68,18 +68,6 @@ Hacl_Hash_MD5_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32
 void Hacl_Hash_MD5_hash_oneshot(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 /* SNIPPET_END: Hacl_Hash_MD5_hash_oneshot */
-
-/* SNIPPET_START: FStar_Pervasives_Native_option___uint32_t_ */
-
-typedef struct FStar_Pervasives_Native_option___uint32_t__s
-{
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
-  uint32_t *v;
-}
-FStar_Pervasives_Native_option___uint32_t_;
-
-/* SNIPPET_END: FStar_Pervasives_Native_option___uint32_t_ */
 
 #if defined(__cplusplus)
 }

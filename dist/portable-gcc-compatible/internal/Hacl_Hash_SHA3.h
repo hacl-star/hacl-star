@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Hash_Blake2b.h"
+#include "Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_SHA3.h"
 
 /* SNIPPET_START: Hacl_Hash_SHA3_keccak_rotc */
@@ -55,6 +55,12 @@ extern const uint32_t Hacl_Hash_SHA3_keccak_piln[24U];
 extern const uint64_t Hacl_Hash_SHA3_keccak_rndc[24U];
 
 /* SNIPPET_END: Hacl_Hash_SHA3_keccak_rndc */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_init_ */
+
+void Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_hash_alg a, uint64_t *s);
+
+/* SNIPPET_END: Hacl_Hash_SHA3_init_ */
 
 /* SNIPPET_START: Hacl_Hash_SHA3_update_multi_sha3 */
 
@@ -79,6 +85,16 @@ Hacl_Hash_SHA3_update_last_sha3(
 );
 
 /* SNIPPET_END: Hacl_Hash_SHA3_update_last_sha3 */
+
+/* SNIPPET_START: FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags */
+
+#define FStar_Pervasives_Native_None 0
+#define FStar_Pervasives_Native_Some 1
+
+/* SNIPPET_END: FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags */
+
+typedef uint8_t
+FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags;
 
 #if defined(__cplusplus)
 }
