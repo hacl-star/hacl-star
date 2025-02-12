@@ -216,6 +216,9 @@ endif
 # consumption, to avoid running them in parallel. This is of course not
 # ideal since the machine may in fact have tons of memory, but make does
 # not provide a way to prevent parallelism according to memory usage.
+#
+# You can regenerate this list by running .scripts/memhogs.sh after a full
+# build with RESOURCEMONITOR=1.
 
 ifneq ($(USE_FLOCK),)
 LOCK=flock top.lk
