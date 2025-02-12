@@ -140,8 +140,8 @@ specs/tests/hpke/test_hpke.exe: obj/libhaclml.cmxa specs/tests/hpke/Test_Spec_Ag
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
-	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
+	USE_FLOCK=1 NOSHORTLOG=1 $(MAKE) vale-fst
+	FSTAR_DEPEND_FLAGS="--warn_error +285" USE_FLOCK=1 NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 	./tools/sloccount.sh
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
@@ -210,33 +210,42 @@ ifneq ($(RESOURCEMONITOR),)
   RUNLIM = runlim -p -o $@.runlim
 endif
 
-# The WRAP variable is an optional command wrapper which can be customized
-# for each target. We set it to `flock top.lk` for files with heavy memory
-# consumption, to avoid running them in parallel. This is of course not ideal
-# since the machine may in fact have tons of memory, but make does not provide
-# a way to prevent parallelism according to memory usage.
+# The WRAP variable is an optional command wrapper which can be
+# customized for each target. If USE_FLOCK is set (which it is during
+# CI) we set WRAP to `flock top.lk` for files with heavy memory
+# consumption, to avoid running them in parallel. This is of course not
+# ideal since the machine may in fact have tons of memory, but make does
+# not provide a way to prevent parallelism according to memory usage.
 
+ifneq ($(USE_FLOCK),)
 LOCK=flock top.lk
-obj/Hacl_Test_ECDSA.krml:                               WRAP=$(LOCK)
-obj/Vale.AES.PPC64LE.GCTR.fst.checked:                  WRAP=$(LOCK)
-obj/Hacl.Test.HMAC_DRBG.fst.checked:                    WRAP=$(LOCK)
-obj/Test.Vectors.fst.checked:                           WRAP=$(LOCK)
-obj/Vale.Transformers.InstructionReorder.fst.checked:   WRAP=$(LOCK)
-obj/Test.krml:                                          WRAP=$(LOCK)
-obj/Vale.AES.PPC64LE.GCMdecrypt.fst.checked:            WRAP=$(LOCK)
-obj/Spec.Frodo.Test.fst.checked:                        WRAP=$(LOCK)
-obj/Vale.AES.X64.AESGCM.fst.checked:                    WRAP=$(LOCK)
-obj/Hacl.Hash.SHA2.fst.checked:                         WRAP=$(LOCK)
-obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked:         WRAP=$(LOCK)
-obj/Vale.Wrapper.X64.GCMencryptOpt256.fst.checked:      WRAP=$(LOCK)
-obj/Vale.Wrapper.X64.GCMdecryptOpt.fst.checked:         WRAP=$(LOCK)
-obj/Hacl.Impl.SHA2.Core.fst.checked:                    WRAP=$(LOCK)
-obj/Vale.Wrapper.X64.GCMdecryptOpt256.fst.checked:      WRAP=$(LOCK)
-obj/Vale.AES.X64.GCMdecryptOpt.fst.checked:             WRAP=$(LOCK)
-obj/Vale.AES.X64.GCMencryptOpt.fst.checked:             WRAP=$(LOCK)
-obj/Vale.AES.PPC64LE.GCMencrypt.fst.checked:            WRAP=$(LOCK)
-obj/EverCrypt_Hash_Incremental.krml:                    WRAP=$(LOCK)
-obj/Test.Vectors.Chacha20Poly1305.fst.checked:          WRAP=$(LOCK)
+MEMHOGS := \
+	obj/Hacl_Test_ECDSA.krml \
+	obj/Hacl_Test_ECDSA.krml \
+	obj/Vale.AES.PPC64LE.GCTR.fst.checked \
+	obj/Hacl.Test.HMAC_DRBG.fst.checked \
+	obj/Test.Vectors.fst.checked \
+	obj/Vale.Transformers.InstructionReorder.fst.checked \
+	obj/Test.krml \
+	obj/Vale.AES.PPC64LE.GCMdecrypt.fst.checked \
+	obj/Spec.Frodo.Test.fst.checked \
+	obj/Vale.AES.X64.AESGCM.fst.checked \
+	obj/Hacl.Hash.SHA2.fst.checked \
+	obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked \
+	obj/Vale.Wrapper.X64.GCMencryptOpt256.fst.checked \
+	obj/Vale.Wrapper.X64.GCMdecryptOpt.fst.checked \
+	obj/Hacl.Impl.SHA2.Core.fst.checked \
+	obj/Vale.Wrapper.X64.GCMdecryptOpt256.fst.checked \
+	obj/Vale.AES.X64.GCMdecryptOpt.fst.checked \
+	obj/Vale.AES.X64.GCMencryptOpt.fst.checked \
+	obj/Vale.AES.PPC64LE.GCMencrypt.fst.checked \
+	obj/EverCrypt_Hash_Incremental.krml \
+	obj/Test.Vectors.Chacha20Poly1305.fst.checked \
+
+# If the target ($@) is in MEMHOGS, wrap with LOCK. Note this relies on
+# lazy evaluation of WRAP.
+WRAP=$(if $(filter $@,$(MEMHOGS)),$(LOCK),)
+endif
 
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM)
