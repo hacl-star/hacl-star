@@ -1,5 +1,5 @@
 [
-  "(ö·SˆtÃž'±°Í&z¹\u0002",
+  "28f6b7538874c39e27b1b0cd267ab902",
   [
     [
       "Spec.Box.publickey",
@@ -7,14 +7,15 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Spec.Box.size_publickey",
-        "equation_Spec.Poly1305.size_key",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "typing_Spec.Poly1305.size_key"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.Box.size_publickey",
+        "int_typing", "lemma_FStar.Int.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f8c590c2c4e909224db9488d91bf536f"
+      "6d9da40f635dc1ea77ed50d612837a4a"
     ],
     [
       "Spec.Box.secretkey",
@@ -22,14 +23,15 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Spec.Box.size_secretkey",
-        "equation_Spec.Poly1305.size_key",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "typing_Spec.Poly1305.size_key"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.Box.size_secretkey",
+        "int_typing", "lemma_FStar.Int.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d699aaf170f9b88d1f4a5f67453986b3"
+      "cd48daab9244d3bfd32e6c6a8e31851a"
     ],
     [
       "Spec.Box.ecdh",
@@ -37,26 +39,28 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Spec.Poly1305.size_key",
-        "equation_Spec.Salsa20.size_nonce", "int_typing",
-        "lemma_Lib.IntTypes.pow2_3", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.Box.secretkey",
+        "equation_Spec.Box.size_publickey",
+        "equation_Spec.Box.size_secretkey", "lemma_FStar.Int.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "token_correspondence_Prims.pow2.fuel_instrumented",
-        "typing_Prims.pow2", "typing_Spec.Poly1305.size_key",
-        "typing_Spec.Salsa20.size_nonce"
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
+        "typing_Lib.IntTypes.int_t", "typing_Prims.pow2",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "092424c49788662c7e1c48c818c62e5f"
+      "e9f8d3e877be2f57bd1c15d2a3064dec"
     ],
     [
       "Spec.Box.box_beforenm",
@@ -64,28 +68,37 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "bool_inversion",
+        "constructor_distinct_FStar.Pervasives.Native.None",
+        "constructor_distinct_FStar.Pervasives.Native.Some",
         "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.Box.ecdh",
         "equation_Spec.Box.secretkey", "equation_Spec.Box.size_secretkey",
-        "equation_Spec.Curve25519.one", "equation_Spec.Poly1305.size_block",
-        "equation_Spec.Salsa20.size_nonce", "equation_Spec.SecretBox.key",
-        "equation_Spec.SecretBox.size_key",
-        "function_token_typing_Spec.SecretBox.key",
-        "lemma_FStar.Pervasives.invertOption",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Spec.Curve25519.one", "equation_Spec.Curve25519.zero",
+        "equation_Spec.SecretBox.key", "equation_Spec.SecretBox.size_key",
+        "lemma_FStar.Int.pow2_values", "lemma_FStar.Pervasives.invertOption",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
+        "typing_Lib.IntTypes.int_t", "typing_Lib.IntTypes.unsigned",
         "typing_Prims.pow2", "typing_Spec.Box.ecdh",
-        "typing_Spec.Poly1305.size_block", "typing_Spec.Salsa20.size_nonce"
+        "typing_Spec.SecretBox.key", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6d85cea5f1413ecb4794e817daf5f681"
+      "70f240530fadb5635cae84586d9bbe58"
     ],
     [
       "Spec.Box.box_detached_afternm",
@@ -99,7 +112,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "062fd4b6afb41805a65e309b911e07dd"
+      "9a147b07cecf177525b56f9b81b444d5"
     ],
     [
       "Spec.Box.box_detached_afternm",
@@ -111,7 +124,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "688eaf14bf3cbd4d8928d32ce98dc14a"
+      "548b56a080a2b1e1c9c0d8a39e3e4508"
     ],
     [
       "Spec.Box.box_detached",
@@ -133,7 +146,7 @@
         "typing_Spec.Box.box_beforenm"
       ],
       0,
-      "a7c127916e396deadb89bd3a3f37b68c"
+      "70651764ec75c58808c9f9f22f9dd769"
     ],
     [
       "Spec.Box.box_detached",
@@ -145,7 +158,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a1bedf3e741bd64673582b201f660569"
+      "dc2e8c300578f689c0f21f3399d352ba"
     ],
     [
       "Spec.Box.box_open_detached_afternm",
@@ -159,7 +172,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "f35ebb6782b910aebc84feb76f872dbe"
+      "0a0cc2bd8dd67d079568d69a5daff1d4"
     ],
     [
       "Spec.Box.box_open_detached_afternm",
@@ -171,7 +184,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "81931fa58e2f1dcd2be1e963aafac821"
+      "32102aa7445f98e1ad22378ef22e76b2"
     ],
     [
       "Spec.Box.box_open_detached",
@@ -193,7 +206,7 @@
         "typing_Spec.Box.box_beforenm"
       ],
       0,
-      "319e3e7437a3c6ab5a55c4cc391c333f"
+      "80020db61db5dbb6fde3d59045da3fc7"
     ],
     [
       "Spec.Box.box_open_detached",
@@ -205,7 +218,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c31d1e90096ab4c843aa86847da338fb"
+      "386381a910e4d3a9922043c283cc5f5e"
     ],
     [
       "Spec.Box.box_easy_afternm",
@@ -227,7 +240,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "7174f869f27828e3a94a0788bebcd945"
+      "e166db7cf91ce12a96b5e1742e9b34be"
     ],
     [
       "Spec.Box.box_easy_afternm",
@@ -239,7 +252,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "11e37e240883b529f20d2eedf7b0471f"
+      "465e0fd1409b19da9e7973ce6d0e4154"
     ],
     [
       "Spec.Box.box_easy",
@@ -267,7 +280,7 @@
         "refinement_kinding_Tm_refine_6ea782d20d3a5b4d53411900c5408b2a"
       ],
       0,
-      "adf95ebdb77de5652a9b204fd29592ce"
+      "151bcb3d6eddf1d0327ba082d2ab0491"
     ],
     [
       "Spec.Box.box_easy",
@@ -279,7 +292,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1f0989fd48d89bff5118ee8c5115f58a"
+      "94226d0d9a8f9f2714d322e863503636"
     ],
     [
       "Spec.Box.box_open_easy_afternm",
@@ -307,7 +320,7 @@
         "typing_Lib.Sequence.length", "typing_Spec.Poly1305.size_block"
       ],
       0,
-      "c300d4e5b10a1e8dc74e0278396d2ff7"
+      "89bf5fe9b82a7281aaf57acd1abca9eb"
     ],
     [
       "Spec.Box.box_open_easy_afternm",
@@ -319,7 +332,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c05eab0f1b9df87d2b726a0edcf306cc"
+      "673038dfa10c39aa601df9c8d45b239b"
     ],
     [
       "Spec.Box.box_open_easy",
@@ -347,7 +360,7 @@
         "typing_Lib.Sequence.length", "typing_Spec.Poly1305.size_block"
       ],
       0,
-      "d5d2acad74ffc0ae88a48b0685ae4c2d"
+      "6a2c3cae6520baba8584b211dafc46a5"
     ],
     [
       "Spec.Box.box_open_easy",
@@ -359,7 +372,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "078cb6ca95d9f5b218cf136ac2111e6f"
+      "035bd49a5e9cf2335afac97e870faeef"
     ]
   ]
 ]
