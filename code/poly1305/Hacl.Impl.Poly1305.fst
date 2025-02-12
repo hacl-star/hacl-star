@@ -184,6 +184,7 @@ val poly1305_encode_last:
     felem_fits h1 f (1, 1, 1, 1, 1) /\
     (feval h1 f).[0] == S.encode (v len) (as_seq h0 b))
 
+#push-options "--z3rlimit 500 --split_queries always"
 let poly1305_encode_last #s f len b =
   push_frame();
   let tmp = create 16ul (u8 0) in
@@ -198,7 +199,7 @@ let poly1305_encode_last #s f len b =
   lemma_feval_is_fas_nat h1 f;
   set_bit f (len *! 8ul);
   pop_frame()
-
+#pop-options
 
 inline_for_extraction noextract
 val poly1305_encode_r:
