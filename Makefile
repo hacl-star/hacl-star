@@ -212,7 +212,7 @@ endif
 
 # The WRAP variable is an optional command wrapper which can be
 # customized for each target. If USE_FLOCK is set (which it is during
-# CI) we set WRAP to `flock top.lk` for files with heavy memory
+# CI) we set WRAP to `flock .top.lk` for files with heavy memory
 # consumption, to avoid running them in parallel. This is of course not
 # ideal since the machine may in fact have tons of memory, but make does
 # not provide a way to prevent parallelism according to memory usage.
@@ -221,7 +221,7 @@ endif
 # build with RESOURCEMONITOR=1.
 
 ifneq ($(USE_FLOCK),)
-LOCK=flock top.lk
+LOCK=flock .top.lk
 MEMHOGS := \
 	obj/Hacl_Test_ECDSA.krml \
 	obj/Hacl_Test_ECDSA.krml \
