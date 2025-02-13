@@ -140,8 +140,8 @@ specs/tests/hpke/test_hpke.exe: obj/libhaclml.cmxa specs/tests/hpke/Test_Spec_Ag
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
-	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
+	USE_FLOCK=1 NOSHORTLOG=1 $(MAKE) vale-fst
+	FSTAR_DEPEND_FLAGS="--warn_error +285" USE_FLOCK=1 NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 	./tools/sloccount.sh
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
@@ -210,6 +210,46 @@ ifneq ($(RESOURCEMONITOR),)
   RUNLIM = runlim -p -o $@.runlim
 endif
 
+# The WRAP variable is an optional command wrapper which can be
+# customized for each target. If USE_FLOCK is set (which it is during
+# CI) we set WRAP to `flock .top.lk` for files with heavy memory
+# consumption, to avoid running them in parallel. This is of course not
+# ideal since the machine may in fact have tons of memory, but make does
+# not provide a way to prevent parallelism according to memory usage.
+#
+# You can regenerate this list by running .scripts/memhogs.sh after a full
+# build with RESOURCEMONITOR=1.
+
+ifneq ($(USE_FLOCK),)
+LOCK=flock .top.lk
+MEMHOGS := \
+	obj/Hacl_Test_ECDSA.krml \
+	obj/Hacl_Test_ECDSA.krml \
+	obj/Vale.AES.PPC64LE.GCTR.fst.checked \
+	obj/Hacl.Test.HMAC_DRBG.fst.checked \
+	obj/Test.Vectors.fst.checked \
+	obj/Vale.Transformers.InstructionReorder.fst.checked \
+	obj/Test.krml \
+	obj/Vale.AES.PPC64LE.GCMdecrypt.fst.checked \
+	obj/Spec.Frodo.Test.fst.checked \
+	obj/Vale.AES.X64.AESGCM.fst.checked \
+	obj/Hacl.Hash.SHA2.fst.checked \
+	obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked \
+	obj/Vale.Wrapper.X64.GCMencryptOpt256.fst.checked \
+	obj/Vale.Wrapper.X64.GCMdecryptOpt.fst.checked \
+	obj/Hacl.Impl.SHA2.Core.fst.checked \
+	obj/Vale.Wrapper.X64.GCMdecryptOpt256.fst.checked \
+	obj/Vale.AES.X64.GCMdecryptOpt.fst.checked \
+	obj/Vale.AES.X64.GCMencryptOpt.fst.checked \
+	obj/Vale.AES.PPC64LE.GCMencrypt.fst.checked \
+	obj/EverCrypt_Hash_Incremental.krml \
+	obj/Test.Vectors.Chacha20Poly1305.fst.checked \
+
+# If the target ($@) is in MEMHOGS, wrap with LOCK. Note this relies on
+# lazy evaluation of WRAP.
+WRAP=$(if $(filter $@,$(MEMHOGS)),$(LOCK),)
+endif
+
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM)
 #
@@ -220,6 +260,7 @@ endif
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
   @echo "$(subst ",\",$1)" > $3.cmd; \
+  $(WRAP) \
   $(RUNLIM) \
   $(TIME) -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
@@ -236,7 +277,7 @@ run-with-log = \
     false; \
   fi
 else
-run-with-log = $(RUNLIM) $1
+run-with-log = $(WRAP) $(RUNLIM) $1
 endif
 
 

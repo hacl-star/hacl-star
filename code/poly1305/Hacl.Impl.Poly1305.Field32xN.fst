@@ -18,7 +18,7 @@ module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50 --using_facts_from '* -FStar.Seq'"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 inline_for_extraction noextract
 let felem (w:lanes) = lbuffer (uint64xN w) 5ul

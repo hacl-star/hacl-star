@@ -637,6 +637,8 @@ let update_sub_get_block_lemma_k #a w blocksize zero len b_v j k =
     len;
   };
 
+  assert_spinoff (j / blocksize * blocksize >= 0);
+  
   calc (==) {
     Seq.index b_p k;
     (==) { }
@@ -808,8 +810,6 @@ let update_sub_get_last_lemma #a w blocksize zero len b_v j =
   Classical.forall_intro aux;
   eq_intro b plain
 
-
-#set-options "--using_facts_from '* -FStar.Seq.Properties.slice_slice'"
 
 val chacha20_map_blocks_vec_equiv_pre_k0:
     #w:lanes

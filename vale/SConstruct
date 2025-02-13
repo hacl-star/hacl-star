@@ -261,6 +261,7 @@ def fstar_default_args_nosmtencoding(relative=True):
   + (' --cache_off' if record_hints else ' --cache_checked_modules')
   + ' --cache_dir ' + cache_dir
   + ' --use_extracted_interfaces true'
+  + ' --ext context_pruning'
   )
 
 def fstar_default_args(relative=True):

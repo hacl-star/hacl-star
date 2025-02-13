@@ -10,7 +10,7 @@ open Hacl.Spec.Poly1305.Vec
 include Hacl.Spec.Poly1305.Field32xN
 
 
-#set-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 val lemma_prime: unit -> Lemma (pow2 130 % prime = 5)
 let lemma_prime () =
