@@ -470,7 +470,7 @@ hints:
 	$(call run-with-log,\
 	  $(FSTAR) $(FSTAR_FLAGS) \
 	    --hint_dir hints \
-	    $< \
+	    -c $< -o $@ \
 	    && \
 	    touch -c $@ \
 	  ,[VERIFY] $(notdir $*),$(call to-obj-dir,$@))
@@ -561,8 +561,7 @@ obj/%.ml: CODEGEN=OCaml
 
 obj/%.ml:
 	$(call run-with-log,\
-	  $(FSTAR) $(notdir $(subst .checked,,$<)) --codegen $(CODEGEN) \
-	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
+	  $(FSTAR) $< --codegen $(CODEGEN) \
 	  ,[EXTRACT-ML] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale:
@@ -648,7 +647,7 @@ obj/%.krml:
 	$(call run-with-log,\
 	  $(FSTAR) --codegen krml \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	    $(notdir $(subst .checked,,$<)) && \
+	    $< && \
 	  touch -c $@ \
 	  ,[EXTRACT-KRML] $*,$@)
 
