@@ -19,11 +19,9 @@ module BSeq = Lib.ByteSequence
 module Lemmas = Hacl.Spec.FFDHE.Lemmas
 
 module BN = Hacl.Bignum
-module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
 module SB = Hacl.Spec.Bignum
 module SM = Hacl.Spec.Bignum.Montgomery
-module SE = Hacl.Spec.Bignum.Exponentiation
 module SD = Hacl.Spec.Bignum.Definitions
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

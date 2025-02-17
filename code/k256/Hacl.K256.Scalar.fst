@@ -13,8 +13,6 @@ module LSeq = Lib.Sequence
 
 module S = Spec.K256
 module KL = Hacl.Spec.K256.Scalar.Lemmas
-module SG = Hacl.Spec.K256.GLV
-module SGL = Hacl.Spec.K256.GLV.Lemmas
 
 module BD = Hacl.Bignum.Definitions
 module BN = Hacl.Bignum

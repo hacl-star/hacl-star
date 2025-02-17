@@ -15,7 +15,6 @@ open Hacl.Impl.SHA2.Generic
 
 module ST = FStar.HyperStack.ST
 module Spec = Spec.Agile.Hash
-module SpecVec = Hacl.Spec.SHA2.Vec
 
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

@@ -9,7 +9,6 @@ open Spec.Hash.Definitions
 friend Spec.Agile.Hash
 
 open FStar.Mul
-module Loops = Lib.LoopCombinators
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 

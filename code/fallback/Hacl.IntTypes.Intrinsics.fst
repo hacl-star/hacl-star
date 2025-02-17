@@ -2,7 +2,6 @@ module Hacl.IntTypes.Intrinsics
 
 open FStar.HyperStack.All
 open FStar.HyperStack
-module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer

@@ -11,7 +11,6 @@ open Vale.X64.Print_s
 
 open Vale.Def.PossiblyMonad
 
-module L = FStar.List.Tot
 
 (* See fsti *)
 type location : eqtype =

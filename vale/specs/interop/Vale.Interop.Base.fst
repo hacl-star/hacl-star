@@ -8,10 +8,8 @@ module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 include Vale.Arch.Heap
 module BS = Vale.X64.Machine_Semantics_s
-module BV = LowStar.BufferView
 module HS = FStar.HyperStack
 module MS = Vale.X64.Machine_s
-module P = Vale.Def.Prop_s
 module HS = FStar.HyperStack
 module W = Vale.Def.Words_s
 module L = FStar.List.Tot

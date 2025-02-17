@@ -9,7 +9,6 @@ open Lib.Buffer
 
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
-module LSeq = Lib.Sequence
 
 module HMAC = Hacl.HMAC
 module S = Spec.HMAC_DRBG

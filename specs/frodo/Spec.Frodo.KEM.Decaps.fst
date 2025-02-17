@@ -15,7 +15,6 @@ open Spec.Frodo.Sample
 
 module LSeq = Lib.Sequence
 module Matrix = Spec.Matrix
-module KG = Spec.Frodo.KEM.KeyGen
 module FL = Spec.Frodo.Lemmas
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

@@ -36,7 +36,6 @@ unfold let my_finish = finish
 (* Shadows init and finish *)
 open Spec.Agile.Hash
 
-module L = Spec.Hash.Lemmas
 
 let mod_mod (a: hash_alg): Lemma (block_length a % block_length a == 0) = allow_inversion hash_alg
 

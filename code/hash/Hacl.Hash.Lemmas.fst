@@ -1,9 +1,6 @@
 module Hacl.Hash.Lemmas
 
 module S = FStar.Seq
-module U8 = FStar.UInt8
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
 
 (** Two sequence lemmas required for pad, among others. *)
 

@@ -3,9 +3,7 @@ open FStar.Mul
 
 module List = FStar.List.Tot.Base
 module HS = FStar.Monotonic.HyperStack
-module HH = FStar.Monotonic.HyperHeap
 module MB = LowStar.Monotonic.Buffer
-module M = LowStar.Modifies
 module DV = LowStar.BufferView.Down
 
 open Vale.Def.Opaque_s

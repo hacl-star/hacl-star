@@ -20,7 +20,6 @@ module NTup = Lib.NTuple
 module Constants = Spec.SHA2.Constants
 module Spec = Hacl.Spec.SHA2
 module SpecVec = Hacl.Spec.SHA2.Vec
-module VecTranspose = Lib.IntVector.Transpose
 module LSeq = Lib.Sequence
 module HD = Hacl.Hash.Definitions
 

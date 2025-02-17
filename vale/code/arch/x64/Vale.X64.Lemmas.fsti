@@ -8,7 +8,6 @@ open Vale.X64.State
 open Vale.X64.StateLemmas
 open Vale.X64.Bytes_Code_s
 module BS = Vale.X64.Machine_Semantics_s
-module Map16 = Vale.Lib.Map16
 unfold let code = BS.code
 unfold let codes = BS.codes
 unfold let ocmp = BS.ocmp

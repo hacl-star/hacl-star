@@ -20,7 +20,6 @@ module S = Spec.K256
 module SL = Spec.K256.Lemmas
 module SG = Hacl.Spec.K256.GLV
 module SGL = Hacl.Spec.K256.GLV.Lemmas
-module PML = Hacl.Spec.K256.ECSM.Lemmas
 module PM = Hacl.Impl.K256.PointMul
 
 open Hacl.K256.Field

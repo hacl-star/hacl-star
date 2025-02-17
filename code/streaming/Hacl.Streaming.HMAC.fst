@@ -8,10 +8,8 @@ open LowStar.BufferOps
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
-module M = LowStar.Modifies
 module G = FStar.Ghost
 module S = FStar.Seq
-module D = Hacl.Hash.Definitions
 
 open Hacl.Agile.Hash
 open Hacl.Streaming.Interface

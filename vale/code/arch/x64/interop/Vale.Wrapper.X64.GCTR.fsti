@@ -3,9 +3,6 @@ module Vale.Wrapper.X64.GCTR
 open Vale.X64.CPU_Features_s
 open FStar.HyperStack.ST
 module B = LowStar.Buffer
-module HS = FStar.HyperStack
-module DV = LowStar.BufferView.Down
-module UV = LowStar.BufferView.Up
 open FStar.Mul
 open Vale.Def.Words_s
 open Vale.Def.Words.Seq_s

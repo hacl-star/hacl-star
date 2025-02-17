@@ -10,7 +10,6 @@ open Lib.Buffer
 open Hacl.Bignum.Definitions
 
 module B = LowStar.Buffer
-module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 module S = Hacl.Spec.Bignum.MontArithmetic
@@ -19,7 +18,6 @@ module BB = Hacl.Bignum.Base
 module BL = Hacl.Bignum.Lib
 
 module ME = Hacl.Bignum.MontExponentiation
-module BE = Hacl.Bignum.Exponentiation
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 module BI = Hacl.Bignum.ModInv

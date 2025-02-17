@@ -10,16 +10,12 @@ open Lib.Buffer
 
 module B = Lib.Buffer
 module ST = FStar.HyperStack.ST
-module BSeq = Lib.ByteSequence
-module LSeq = Lib.Sequence
 
 module CD = Hacl.Spec.Curve25519.Field64.Definition
 module CC = Hacl.Spec.Curve25519.Field64.Core
 
 module BN = Hacl.Bignum
-module BD = Hacl.Bignum.Definitions
 module SB = Hacl.Spec.Bignum
-module SD = Hacl.Spec.Bignum.Definitions
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

@@ -3,7 +3,6 @@ module Hacl.Hash.PadFinish
 open Lib.IntTypes
 
 module Cast = FStar.Int.Cast.Full
-module Constants = Spec.SHA2.Constants
 module Helpers = Spec.Hash.Definitions
 module Math = FStar.Math.Lemmas
 module Helpers = Spec.Hash.Definitions
@@ -15,8 +14,6 @@ module U128=FStar.UInt128
 module M = LowStar.Modifies
 module S = FStar.Seq
 module B = LowStar.Buffer
-module G = FStar.Ghost
-module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open LowStar.BufferOps

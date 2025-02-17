@@ -2,7 +2,6 @@ module EverCrypt.Curve25519
 
 /// A multiplexed frontend for Curve25519.
 
-module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.ST
 

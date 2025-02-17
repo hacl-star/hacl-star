@@ -6,13 +6,11 @@ open Vale.SHA.SHA_helpers
 open Vale.X64.MemoryAdapters
 open Vale.Interop.Base
 module B = LowStar.Buffer
-module IB = LowStar.ImmutableBuffer
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 open FStar.Mul
 open Vale.AsLowStar.MemoryHelpers
-module BF = Vale.Arch.BufferFriend
 
 val lemma_seq_nat8_le_seq_quad32_to_bytes_uint32
   (b:buf_t TUInt8 TUInt128)

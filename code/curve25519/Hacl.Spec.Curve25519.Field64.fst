@@ -12,8 +12,6 @@ module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 module CC = Hacl.Spec.Curve25519.Field64.Core
 
 module SD = Hacl.Spec.Bignum.Definitions
-module SB = Hacl.Spec.Bignum
-module SL = Hacl.Spec.Bignum.Lib
 
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

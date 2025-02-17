@@ -4,7 +4,6 @@ open FStar.Mul
 
 open Spec.K256.PointOps
 
-module LM = Lib.NatMod
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 

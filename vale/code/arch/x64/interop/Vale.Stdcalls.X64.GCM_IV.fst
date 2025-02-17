@@ -1,24 +1,18 @@
 module Vale.Stdcalls.X64.GCM_IV
 
 open FStar.HyperStack.ST
-module B = LowStar.Buffer
-module HS = FStar.HyperStack
 open FStar.Mul
 
-module DV = LowStar.BufferView.Down
-module UV = LowStar.BufferView.Up
 open Vale.Def.Types_s
 
 open Vale.Interop.Base
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
-module LSig = Vale.AsLowStar.LowStarSig
 module ME = Vale.X64.Memory
 module V = Vale.X64.Decls
 module IA = Vale.Interop.Assumptions
 module W = Vale.AsLowStar.Wrapper
 open Vale.X64.MemoryAdapters
-module VS = Vale.X64.State
 module MS = Vale.X64.Machine_s
 
 module GC = Vale.AES.X64.GCMencryptOpt

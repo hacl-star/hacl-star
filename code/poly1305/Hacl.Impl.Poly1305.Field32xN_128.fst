@@ -11,7 +11,6 @@ include Hacl.Spec.Poly1305.Field32xN
 open Hacl.Spec.Poly1305.Field32xN.Lemmas
 
 module Vec = Hacl.Spec.Poly1305.Vec
-module ST = FStar.HyperStack.ST
 
 open Hacl.Impl.Poly1305.Field32xN
 

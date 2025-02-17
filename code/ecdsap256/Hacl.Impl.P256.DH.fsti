@@ -2,7 +2,6 @@ module Hacl.Impl.P256.DH
 
 open FStar.HyperStack.All
 open FStar.HyperStack
-module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer

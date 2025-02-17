@@ -5,7 +5,6 @@ open Lib.Sequence
 open Lib.IntTypes
 open Lib.IntVector
 
-module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
@@ -48,7 +47,6 @@ open Lib.Buffer
 open FStar.HyperStack
 open FStar.HyperStack.ST
 module B = Lib.Buffer
-module ST = FStar.HyperStack.ST
 
 
 inline_for_extraction

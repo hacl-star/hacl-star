@@ -5,15 +5,11 @@ val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
 #reset-options "--z3rlimit 50"
 
 open FStar.HyperStack.ST
-module HS = FStar.HyperStack
-module B = LowStar.Buffer
-module DV = LowStar.BufferView.Down
 open Vale.Def.Types_s
 
 open Vale.Interop.Base
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
-module LSig = Vale.AsLowStar.LowStarSig
 module ME = Vale.X64.Memory
 module V = Vale.X64.Decls
 module IA = Vale.Interop.Assumptions
@@ -23,7 +19,6 @@ module VS = Vale.X64.State
 module MS = Vale.X64.Machine_s
 open Vale.AsLowStar.MemoryHelpers
 
-module FU = Vale.Curve25519.X64.FastUtil
 module FH = Vale.Curve25519.X64.FastHybrid
 module FW = Vale.Curve25519.X64.FastWide
 

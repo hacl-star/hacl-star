@@ -7,7 +7,6 @@ open Vale.AsLowStar.MemoryHelpers
 open Vale.Poly1305.Spec_s
 module LSig = Vale.AsLowStar.LowStarSig
 open Vale.X64.MemoryAdapters
-module V = Vale.X64.Decls
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 #set-options "--z3cliopt smt.arith.nl=true"

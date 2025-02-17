@@ -7,7 +7,6 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module ST = FStar.HyperStack.ST
 module S = Spec.FFDHE
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

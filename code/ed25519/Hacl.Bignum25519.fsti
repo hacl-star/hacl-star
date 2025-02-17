@@ -1,6 +1,5 @@
 module Hacl.Bignum25519
 
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 
 open Lib.IntTypes

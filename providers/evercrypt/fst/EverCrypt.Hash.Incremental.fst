@@ -6,7 +6,6 @@ open FStar.Mul
 // (otherwise interleaving issues may bite).
 module B = LowStar.Buffer
 module S = FStar.Seq
-module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module G = FStar.Ghost
 module U32 = FStar.UInt32

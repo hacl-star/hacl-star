@@ -6,7 +6,6 @@ module IB = LowStar.ImmutableBuffer
 module MB = LowStar.Monotonic.Buffer
 module DV = LowStar.BufferView.Down
 module W = Vale.Def.Words_s
-module L = FStar.List.Tot
 
 [@__reduce__]
 let base_typ_as_type (t:base_typ) : eqtype =

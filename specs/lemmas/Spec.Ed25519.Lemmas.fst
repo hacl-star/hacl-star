@@ -5,7 +5,6 @@ open FStar.Mul
 module Fermat = FStar.Math.Fermat
 module Euclid = FStar.Math.Euclid
 
-module LE = Lib.Exponentiation
 module LM = Lib.NatMod
 
 open Spec.Curve25519

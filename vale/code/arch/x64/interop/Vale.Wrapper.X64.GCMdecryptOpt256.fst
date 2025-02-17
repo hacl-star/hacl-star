@@ -1,10 +1,11 @@
 module Vale.Wrapper.X64.GCMdecryptOpt256
 
+module UV = LowStar.BufferView.Up
+module HS = FStar.HyperStack
 open FStar.Mul
 open Vale.Stdcalls.X64.GCMdecryptOpt
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters
-module V = Vale.X64.Decls
 open Vale.SHA.Simplify_Sha
 open Vale.AES.Gcm_simplify
 open Vale.AES.GCM_helpers

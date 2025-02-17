@@ -188,7 +188,6 @@ let lowstarize_hex (uniq: gensym) (s: string): Tac (gensym * option sigelt * ter
 
 // Dependency analysis bug: does not go inside quotations (#1496)
 
-module Whatever = C.String
 
 noextract
 let lowstarize_string (s: string): Tac term =

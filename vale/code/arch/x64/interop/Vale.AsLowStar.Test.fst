@@ -6,7 +6,6 @@ module IA = Vale.Interop.Assumptions
 module V = Vale.X64.Decls
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
-module LSig = Vale.AsLowStar.LowStarSig
 module W = Vale.AsLowStar.Wrapper
 module VS = Vale.X64.State
 module MS = Vale.X64.Machine_s
@@ -133,10 +132,8 @@ let lowstar_Memcpy_normal_t //: normal lowstar_Memcpy_t
 
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
-module MB = LowStar.Monotonic.Buffer
 open FStar.HyperStack.ST
 
-module M = Vale.X64.Memory
 
 let test (x:b64) =
   assert (V.buffer_length (as_vale_buffer x) == (B.length x * view_n TUInt8) / view_n TUInt64);

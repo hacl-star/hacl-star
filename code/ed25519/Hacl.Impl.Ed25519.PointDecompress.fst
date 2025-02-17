@@ -12,7 +12,6 @@ open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
 
-module SC = Spec.Curve25519
 module SE = Spec.Ed25519
 
 #set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"

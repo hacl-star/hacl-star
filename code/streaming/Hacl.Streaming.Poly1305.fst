@@ -1,12 +1,7 @@
 module Hacl.Streaming.Poly1305
 
-module HS = FStar.HyperStack
 module B = LowStar.Buffer
-module G = FStar.Ghost
 module S = FStar.Seq
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
-module F = Hacl.Streaming.Functor
 module I = Hacl.Streaming.Interface
 module P = Hacl.Impl.Poly1305
 module F32xN = Hacl.Spec.Poly1305.Field32xN

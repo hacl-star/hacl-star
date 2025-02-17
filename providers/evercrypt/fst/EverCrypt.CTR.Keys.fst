@@ -7,9 +7,7 @@ module EverCrypt.CTR.Keys
 module S = FStar.Seq
 module G = FStar.Ghost
 
-module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
-module MB = LowStar.Monotonic.Buffer
 module B = LowStar.Buffer
 
 open FStar.HyperStack.ST

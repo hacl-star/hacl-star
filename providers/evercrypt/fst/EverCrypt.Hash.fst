@@ -15,8 +15,6 @@ open LowStar.BufferOps
 open FStar.Integers
 open C.Failure
 
-module U64 = FStar.UInt64
-module U32 = FStar.UInt32
 
 // Allow *just* the alg type to be inverted, so that the entire module can run
 // with ifuel 0

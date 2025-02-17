@@ -5,22 +5,16 @@ val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
 #reset-options "--z3rlimit 50"
 
 open FStar.HyperStack.ST
-module HS = FStar.HyperStack
-module B = LowStar.Buffer
-module IB = LowStar.ImmutableBuffer
-module DV = LowStar.BufferView.Down
 open Vale.Def.Types_s
 
 open Vale.Interop.Base
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
-module LSig = Vale.AsLowStar.LowStarSig
 module ME = Vale.X64.Memory
 module V = Vale.X64.Decls
 module IA = Vale.Interop.Assumptions
 module W = Vale.AsLowStar.Wrapper
 open Vale.X64.MemoryAdapters
-module VS = Vale.X64.State
 module MS = Vale.X64.Machine_s
 
 module SH = Vale.SHA.X64
@@ -82,7 +76,6 @@ let sha_post : VSig.vale_post dom =
         (as_vale_buffer ctx_b) (as_vale_buffer in_b) (UInt64.v num_val) (as_vale_immbuffer k_b)
         va_s1 f
 
-module VS = Vale.X64.State
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 

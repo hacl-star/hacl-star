@@ -23,7 +23,6 @@ module LB = Lib.ByteSequence
 
 module FP = Spec.Frodo.Params
 module S = Spec.Frodo.KEM.Encaps
-module M = Spec.Matrix
 module KG = Hacl.Impl.Frodo.KEM.KeyGen
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"

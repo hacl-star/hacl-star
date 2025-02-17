@@ -12,7 +12,6 @@ open Hacl.Spec.Bignum.Exponentiation
 module S = Spec.RSAPSS
 module BB = Hacl.Spec.Bignum.Base
 module SM = Hacl.Spec.Bignum.Montgomery
-module BSeq = Lib.ByteSequence
 module Hash = Spec.Agile.Hash
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"

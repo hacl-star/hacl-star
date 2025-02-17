@@ -53,8 +53,6 @@ let mov_mov_elim_ph = {
   input_hint = 2;
 }
 
-module T = Vale.Def.Types_s
-module H = Vale.Arch.Heap
 
 #push-options "--initial_fuel 2 --max_fuel 8 --initial_ifuel 1 --max_ifuel 2 --query_stats"
 let lemma_mov_mov_is_mov (i1 i2:ins) (s:machine_state) :

@@ -4,8 +4,6 @@ open Vale.X64.CPU_Features_s
 open FStar.HyperStack.ST
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
-module BV = LowStar.BufferView
-module HS = FStar.HyperStack
 module BF = Vale.Arch.BufferFriend
 open FStar.Mul
 open Vale.SHA.SHA_helpers

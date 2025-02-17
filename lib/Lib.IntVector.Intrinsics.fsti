@@ -1,6 +1,5 @@
 module Lib.IntVector.Intrinsics
 
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes

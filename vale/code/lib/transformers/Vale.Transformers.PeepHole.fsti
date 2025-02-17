@@ -30,7 +30,6 @@ open Vale.X64.Machine_Semantics_s
 open Vale.X64.Machine_s
 open Vale.X64.Print_s
 
-module L = FStar.List.Tot
 
 open Vale.Transformers.InstructionReorder // open so that we don't
                                           // need to redefine things

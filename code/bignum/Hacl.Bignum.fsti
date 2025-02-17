@@ -11,8 +11,6 @@ open Hacl.Bignum.Base
 open Hacl.Bignum.Definitions
 
 module S = Hacl.Spec.Bignum
-module ST = FStar.HyperStack.ST
-module Loops = Lib.LoopCombinators
 
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
