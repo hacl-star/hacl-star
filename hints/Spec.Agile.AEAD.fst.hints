@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "85ec16b7b16585ac009391bf2486e5ca"
+      "de85d42b9e9e132554921b3180c3eefa"
     ],
     [
       "Spec.Agile.AEAD.cipher_alg_of_supported_alg",
@@ -26,7 +26,7 @@
         "typing_Spec.Agile.AEAD.is_supported_alg"
       ],
       0,
-      "375ba84d106d9012db7a573e13c477c9"
+      "ff57f8dde1a3c85f2928677560ec274b"
     ],
     [
       "Spec.Agile.AEAD.key_length",
@@ -66,7 +66,7 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "fea6c506b84cd212643699ef22cf2e8a"
+      "6aab9cfdf7e1c7c09e8831233f9380d6"
     ],
     [
       "Spec.Agile.AEAD.tag_length",
@@ -85,7 +85,7 @@
         "fuel_guarded_inversion_Spec.Agile.AEAD.alg"
       ],
       0,
-      "37406350a697ceca693bdefd581d9325"
+      "f98efb9b0d945420353b2630447f77f0"
     ],
     [
       "Spec.Agile.AEAD.iv_length",
@@ -110,7 +110,7 @@
         "typing_Spec.Agile.AEAD.is_supported_alg"
       ],
       0,
-      "08dd0b6d5c11442fe102c28ed8d3cac9"
+      "b78a929b8fc61a0308458527cad95551"
     ],
     [
       "Spec.Agile.AEAD.max_length",
@@ -138,7 +138,7 @@
         "typing_Prims.pow2", "typing_Spec.Agile.AEAD.uu___is_AES256_GCM"
       ],
       0,
-      "045a32717be852440f8ef0286eaef5d6"
+      "928f9306dfa7b358c0e9c5ac282f47e6"
     ],
     [
       "Spec.Agile.AEAD.lbytes",
@@ -147,7 +147,7 @@
       1,
       [ "@query" ],
       0,
-      "a4a3752b56c7343ae14736265c9f7e92"
+      "f8227c7a70de12ac554a811751385c6f"
     ],
     [
       "Spec.Agile.AEAD.vale_alg_of_alg",
@@ -166,7 +166,7 @@
         "refinement_interpretation_Tm_refine_5171614844d45d48a27a076e659221d2"
       ],
       0,
-      "2faa5ea3b9481dec98b227570cbf4cc7"
+      "8a22d2e6d9515eed3c9d483ca70c8b52"
     ],
     [
       "Spec.Agile.AEAD.vale_alg_of_alg",
@@ -175,7 +175,7 @@
       0,
       [ "@query", "assumption_Spec.Agile.AEAD.alg__uu___haseq" ],
       0,
-      "8004c870482fa4549c01b10689a5f870"
+      "4c23ec3b83cb30f8e10162dc910f2bc8"
     ],
     [
       "Spec.Agile.AEAD.gcm_encrypt_tag_length",
@@ -254,7 +254,7 @@
         "typing_Vale.Def.Words_s.nat32", "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "ee39bf0e654c3439b411ac06e3b24cde"
+      "dc84ffd333614ea70fc87cf6b83b9e11"
     ],
     [
       "Spec.Agile.AEAD.gcm_encrypt_cipher_length",
@@ -317,7 +317,7 @@
         "typing_Vale.Def.Words_s.nat32", "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "12c4c3baaaf2209c0058f7d55e182feb"
+      "695d9d6d54e2015848d7ac9c40f18b74"
     ],
     [
       "Spec.Agile.AEAD.encrypt",
@@ -357,9 +357,8 @@
         "equality_tok_Spec.Agile.Cipher.CHACHA20@tok",
         "equality_tok_Vale.AES.AES_common_s.AES_128@tok",
         "equality_tok_Vale.AES.AES_common_s.AES_256@tok",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.sec_int_t",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.sec_int_t", "equation_Lib.Sequence.length",
         "equation_Prims.nat", "equation_Spec.AES.key_size",
         "equation_Spec.Agile.AEAD.ad",
         "equation_Spec.Agile.AEAD.cipher_alg_of_supported_alg",
@@ -411,7 +410,7 @@
         "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "eaca2e1f1ce7a64fdfa717a0e2453ddf"
+      "449c90246cdaa67dae2595b0bc4f5c37"
     ],
     [
       "Spec.Agile.AEAD.gcm_decrypt_cipher_length",
@@ -479,7 +478,7 @@
         "typing_Vale.Def.Words_s.nat32", "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "4300fdb9e4750dae093cab80c6b84ee2"
+      "f156f84763a8bbd32f2a63aee6c48417"
     ],
     [
       "Spec.Agile.AEAD.decrypt",
@@ -581,7 +580,7 @@
         "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "1a0d3da6a9e44db824bb387328aa2e10"
+      "437caac1010df89724230d64fed4845d"
     ],
     [
       "Spec.Agile.AEAD.correctness",
@@ -601,7 +600,7 @@
         "typing_Spec.Agile.AEAD.encrypt"
       ],
       0,
-      "1e78c5e0da0e87c339932bcbefe322b3"
+      "424b7b9a69f1321ea47602fee103760e"
     ]
   ]
 ]
