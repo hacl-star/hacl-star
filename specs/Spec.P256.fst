@@ -6,7 +6,6 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 open Spec.Hash.Definitions
-module M = Lib.NatMod
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module PL = Spec.P256.Lemmas

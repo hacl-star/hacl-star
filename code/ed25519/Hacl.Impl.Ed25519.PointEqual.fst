@@ -12,7 +12,6 @@ open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
 module F56 = Hacl.Impl.BignumQ.Mul
-module S51 = Hacl.Spec.Curve25519.Field51.Definition
 
 module SC = Spec.Curve25519
 

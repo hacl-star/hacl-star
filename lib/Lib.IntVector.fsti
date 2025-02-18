@@ -340,7 +340,6 @@ inline_for_extraction
 let ( <<<| ) #t #w = vec_rotate_left #t #w
 
 module BSeq = Lib.ByteSequence
-module LSeq = Lib.Sequence
 
 inline_for_extraction
 val vec_from_bytes_le: vt:v_inttype -> w:width -> b:lseq uint8 (numbytes vt * w) -> vec_t vt w
@@ -374,8 +373,6 @@ val vec_to_bytes_be_lemma: #vt:v_inttype -> #w:width -> v:vec_t vt w ->
 open Lib.Buffer
 open FStar.HyperStack
 open FStar.HyperStack.ST
-module B = Lib.Buffer
-module ST = FStar.HyperStack.ST
 
 inline_for_extraction
 val vec_load_le:

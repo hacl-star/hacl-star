@@ -2,18 +2,12 @@ module Vale.AsLowStar.ValeSig
 open FStar.Mul
 open Vale.Arch.HeapImpl
 open Vale.Interop.Base
-module B = LowStar.Buffer
-module BS = Vale.X64.Machine_Semantics_s
-module BV = LowStar.BufferView
-module HS = FStar.HyperStack
 module ME = Vale.X64.Memory
 module MS = Vale.X64.Machine_s
-module IA = Vale.Interop.Assumptions
 module V = Vale.X64.Decls
 module VS = Vale.X64.State
 module IX64 = Vale.Interop.X64
 module List = FStar.List.Tot
-module Map16 = Vale.Lib.Map16
 open Vale.X64.MemoryAdapters
 
 [@__reduce__]

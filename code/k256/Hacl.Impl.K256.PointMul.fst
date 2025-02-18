@@ -8,7 +8,6 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
 
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation

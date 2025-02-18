@@ -8,9 +8,7 @@ open Lib.IntVector
 open Lib.LoopCombinators
 
 open Spec.Hash.Definitions
-module Constants = Spec.SHA2.Constants
 module Spec = Hacl.Spec.SHA2
-module LSeq = Lib.Sequence
 module VecTranspose = Lib.IntVector.Transpose
 
 

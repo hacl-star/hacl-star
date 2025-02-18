@@ -12,7 +12,6 @@ open Lib.IntVector
 
 module Spec = Hacl.Spec.Chacha20.Vec
 module VecTranspose = Lib.IntVector.Transpose
-module LSeq = Lib.Sequence
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 

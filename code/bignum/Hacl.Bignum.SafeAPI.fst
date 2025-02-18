@@ -11,9 +11,7 @@ open Hacl.Bignum.Definitions
 module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
 module HS = FStar.HyperStack
-module LSeq = Lib.Sequence
 
-module E = Hacl.Spec.Exponentiation.Lemmas
 
 module BL = Hacl.Bignum.Lib
 module BB = Hacl.Bignum.Base
@@ -26,7 +24,6 @@ module BC = Hacl.Bignum.Convert
 module BI = Hacl.Bignum.ModInv
 
 module SL = Hacl.Spec.Bignum.Lib
-module SD = Hacl.Spec.Bignum.Definitions
 module SE = Hacl.Spec.Bignum.Exponentiation
 module SM = Hacl.Spec.Bignum.Montgomery
 module SC = Hacl.Spec.Bignum.Convert

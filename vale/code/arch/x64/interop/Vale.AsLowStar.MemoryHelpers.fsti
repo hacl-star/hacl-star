@@ -7,11 +7,8 @@ module DV = LowStar.BufferView.Down
 module UV = LowStar.BufferView.Up
 module HS = FStar.HyperStack
 module ME = Vale.X64.Memory
-module MES = Vale.X64.Memory_Sems
 module SI = Vale.X64.Stack_i
 module VSS = Vale.X64.Stack_Sems
-module MS = Vale.X64.Machine_s
-module IA = Vale.Interop.Assumptions
 module V = Vale.X64.Decls
 module VS = Vale.X64.State
 module IX64 = Vale.Interop.X64
@@ -20,7 +17,6 @@ module LSig = Vale.AsLowStar.LowStarSig
 module SL = Vale.X64.StateLemmas
 module VL = Vale.X64.Lemmas
 module ST = FStar.HyperStack.ST
-module I = Vale.Interop
 open Vale.Arch.Heap
 open Vale.Arch.HeapImpl
 open FStar.Mul

@@ -4,14 +4,10 @@ open FStar.Mul
 open Lib.NatMod
 open Lib.Sequence
 
-module Loops = Lib.LoopCombinators
-module LSeq = Lib.Sequence
 
 module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
 
 module M = Hacl.Spec.Montgomery.Lemmas
-module AM = Hacl.Spec.AlmostMontgomery.Lemmas
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

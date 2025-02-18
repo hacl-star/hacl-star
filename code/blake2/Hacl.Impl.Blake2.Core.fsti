@@ -1,5 +1,4 @@
 module Hacl.Impl.Blake2.Core
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.HyperStack.All
 open FStar.Mul

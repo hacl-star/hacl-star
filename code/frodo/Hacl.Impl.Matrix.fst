@@ -12,12 +12,9 @@ open Lib.ByteBuffer
 
 module HS  = FStar.HyperStack
 module ST  = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
 module Loops = Lib.LoopCombinators
 
 module M   = Spec.Matrix
-module Lemmas = Spec.Frodo.Lemmas
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

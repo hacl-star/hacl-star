@@ -10,7 +10,6 @@ open Hacl.Bignum.Definitions
 
 include Hacl.Spec.Bignum.Base
 
-module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"

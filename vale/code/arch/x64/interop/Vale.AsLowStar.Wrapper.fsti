@@ -1,24 +1,12 @@
 module Vale.AsLowStar.Wrapper
 open Vale.X64.MemoryAdapters
 open Vale.Interop.Base
-module B = LowStar.Buffer
 module BS = Vale.X64.Machine_Semantics_s
-module UV = LowStar.BufferView.Up
-module DV = LowStar.BufferView.Down
-module HS = FStar.HyperStack
-module ME = Vale.X64.Memory
-module SI = Vale.X64.Stack_i
 module MS = Vale.X64.Machine_s
-module IA = Vale.Interop.Assumptions
-module I = Vale.Interop
 module V = Vale.X64.Decls
-module VS = Vale.X64.State
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
-module SL = Vale.X64.StateLemmas
-module VL = Vale.X64.Lemmas
-module ST = FStar.HyperStack.ST
 open FStar.Mul
 open FStar.Calc
 

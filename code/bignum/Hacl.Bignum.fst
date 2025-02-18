@@ -1,4 +1,5 @@
 module Hacl.Bignum
+module ST = FStar.HyperStack.ST
 
 friend Hacl.Spec.Bignum
 

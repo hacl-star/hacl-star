@@ -16,7 +16,6 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module B = Lib.Buffer
-module S = Hacl.Spec.Curve25519.Field64.Definition
 module P = Spec.Curve25519
 
 module FA = Vale.Wrapper.X64.Fadd

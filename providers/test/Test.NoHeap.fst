@@ -1,7 +1,7 @@
 module Test.NoHeap
 
+module H = EverCrypt.Hash
 module B = LowStar.Buffer
-module L = Test.Lowstarize
 module U32 = FStar.UInt32
 
 open FStar.HyperStack.ST

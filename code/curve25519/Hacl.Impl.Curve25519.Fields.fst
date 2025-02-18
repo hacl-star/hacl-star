@@ -9,11 +9,9 @@ open Lib.Buffer
 
 include Hacl.Impl.Curve25519.Fields.Core
 
-module ST = FStar.HyperStack.ST
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-module P = Spec.Curve25519
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 

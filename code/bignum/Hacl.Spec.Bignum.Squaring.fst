@@ -11,7 +11,6 @@ open Hacl.Spec.Bignum.Base
 open Hacl.Spec.Lib
 
 module SM = Hacl.Spec.Bignum.Multiplication
-module SA = Hacl.Spec.Bignum.Addition
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

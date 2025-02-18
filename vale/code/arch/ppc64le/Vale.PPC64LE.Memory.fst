@@ -6,16 +6,13 @@ open Vale.Arch.HeapImpl
 open Vale.Arch.Heap
 open Vale.Interop.Base
 module IB = Vale.Interop.Base
-module I = Vale.Interop
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
-module MB = LowStar.Monotonic.Buffer
 module M = LowStar.Modifies
 open LowStar.ModifiesPat
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 open Vale.Lib.BufferViewHelpers
-module H = FStar.Heap
 module S = Vale.Arch.MachineHeap_s
 
 #reset-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"

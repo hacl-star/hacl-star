@@ -10,11 +10,8 @@ friend Lib.LoopCombinators
 
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
-module U32 = FStar.UInt32
 module ST = FStar.HyperStack.ST
-module HS = FStar.HyperStack
 module Seq = Lib.Sequence
-module ByteSeq = Lib.ByteSequence
 
 #reset-options "--z3rlimit 350 --max_fuel 0 --max_ifuel 0"
 

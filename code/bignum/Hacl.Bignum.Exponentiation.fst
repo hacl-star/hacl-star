@@ -23,7 +23,6 @@ module AE = Hacl.Bignum.AlmostMontExponentiation
 module E = Hacl.Spec.Exponentiation.Lemmas
 module M = Hacl.Spec.Montgomery.Lemmas
 module SE = Hacl.Spec.Bignum.MontExponentiation
-module S = Hacl.Spec.Bignum.Exponentiation
 
 friend Hacl.Spec.Bignum.Exponentiation
 friend Hacl.Bignum.Montgomery

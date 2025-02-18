@@ -1,6 +1,5 @@
 module Test.NoHeap
 
-module H = EverCrypt.Hash
 module B = LowStar.Buffer
 module L = Test.Lowstarize
 

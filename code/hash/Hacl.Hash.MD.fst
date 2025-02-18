@@ -2,7 +2,6 @@ module Hacl.Hash.MD
 
 (** The Merkle-Damgård construction. *)
 
-module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module U128 = FStar.UInt128
@@ -17,8 +16,6 @@ open Hacl.Hash.Definitions
 open Hacl.Hash.Lemmas
 open Spec.Hash.Definitions
 open FStar.Mul
-module HI = Spec.Hash.Incremental
-module AH = Spec.Agile.Hash
 
 (** Auxiliary helpers *)
 

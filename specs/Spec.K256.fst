@@ -5,7 +5,6 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module M = Lib.NatMod
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module KL = Spec.K256.Lemmas

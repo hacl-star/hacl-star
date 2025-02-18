@@ -7,14 +7,11 @@ module S = FStar.Seq
 module LS = Lib.Sequence
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-module U128 = FStar.UInt128
 module I = Hacl.Streaming.Interface
 module ST = FStar.HyperStack.ST
 
 open FStar.Mul
 
-module Loops = Lib.LoopCombinators
-module T = Hacl.Streaming.Types
 
 /// Opening a bunch of modules for Blake2
 /// =====================================

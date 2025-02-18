@@ -1,7 +1,6 @@
 module Vale.Poly1305.Equiv
 open FStar.Mul
 
-module BSeq = Lib.ByteSequence
 
 // REVIEW: S and V use different smtencoding flags,
 // so some equalities between S and V definitions aren't as obvious to Z3 as we might want.

@@ -5,11 +5,9 @@ open Hacl.Hash.Definitions
 open FStar.Mul
 
 module B = LowStar.Buffer
-module S = FStar.Seq
 module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 
-module LB = Lib.Buffer
 
 friend Spec.Agile.Hash
 
@@ -185,7 +183,6 @@ open Hacl.Spec.SHA3.Vec.Common
 open Hacl.Impl.SHA3.Vec
 open Hacl.Spec.SHA3.Equiv
 
-module S = Spec.SHA3
 module V = Hacl.Spec.SHA3.Vec
 
 val squeeze: (let m = M32 in

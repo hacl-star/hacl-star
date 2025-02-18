@@ -4,9 +4,7 @@ module HI = EverCrypt.Hash.Incremental
 module S = Hacl.Streaming.Functor
 
 module ST = FStar.HyperStack.ST
-module M = LowStar.Modifies
 
-module MP = LowStar.ModifiesPat
 
 module B = LowStar.Buffer
 module G = FStar.Ghost

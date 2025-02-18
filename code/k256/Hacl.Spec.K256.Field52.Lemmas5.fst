@@ -3,7 +3,6 @@ module Hacl.Spec.K256.Field52.Lemmas5
 open FStar.Mul
 open Lib.IntTypes
 
-module S = Spec.K256
 
 include Hacl.Spec.K256.Field52.Definitions
 include Hacl.Spec.K256.Field52

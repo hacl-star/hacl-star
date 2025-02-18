@@ -1,7 +1,6 @@
 module Lib.IntVector
 
 open FStar.Mul
-module Ints = Lib.IntTypes
 open Lib.IntVector.Intrinsics
 
 #set-options "--admit_smt_queries true"

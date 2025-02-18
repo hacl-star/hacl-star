@@ -31,13 +31,8 @@ module Hacl.Streaming.Spec
 #set-options "--max_fuel 0 --max_ifuel 0 \
   --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2' --z3rlimit 50"
 
-module ST = FStar.HyperStack.ST
-module HS = FStar.HyperStack
-module B = LowStar.Buffer
-module G = FStar.Ghost
 module S = FStar.Seq
 module U32 = FStar.UInt32
-module U64 = FStar.UInt64
 
 open Hacl.Streaming.Interface
 open FStar.HyperStack.ST

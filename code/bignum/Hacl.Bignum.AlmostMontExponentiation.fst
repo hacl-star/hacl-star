@@ -28,7 +28,6 @@ module A = Hacl.Spec.AlmostMontgomery.Lemmas
 module M = Hacl.Spec.Montgomery.Lemmas
 module ME = Hacl.Spec.Bignum.MontExponentiation
 
-module S = Hacl.Spec.Bignum.AlmostMontExponentiation
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

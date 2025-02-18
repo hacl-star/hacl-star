@@ -12,7 +12,6 @@ open Hacl.Impl.Poly1305.Field32xN_128
 open Hacl.Impl.Poly1305.Field32xN_256
 open Hacl.Impl.Poly1305.Field32xN
 
-module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 

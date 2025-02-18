@@ -2,9 +2,7 @@ module Hacl.Spec.K256.ECSM.Lemmas
 
 open FStar.Mul
 
-module M = Lib.NatMod
 module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
 
 module S = Spec.K256
 module LS = Spec.K256.Lemmas

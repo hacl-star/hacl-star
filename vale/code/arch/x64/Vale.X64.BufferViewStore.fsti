@@ -5,13 +5,11 @@ open Vale.Interop
 module MB = LowStar.Monotonic.Buffer
 module DV = LowStar.BufferView.Down
 module UV = LowStar.BufferView.Up
-module HS = FStar.HyperStack
 open Vale.Lib.BufferViewHelpers
 open FStar.Mul
 
 open Vale.X64.Machine_s
 open Vale.X64.Machine_Semantics_s
-module ME = Vale.X64.Memory
 module IB = Vale.Interop.Base
 
 val bv_upd_update_heap64:

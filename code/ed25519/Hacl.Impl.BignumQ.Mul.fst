@@ -1,6 +1,5 @@
 module Hacl.Impl.BignumQ.Mul
 
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 open FStar.Mul
 

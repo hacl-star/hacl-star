@@ -8,7 +8,6 @@ open Spec.Hash.Definitions
 open Lib.IntTypes
 open Lib.Buffer
 
-module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module LSeq = Lib.Sequence
 

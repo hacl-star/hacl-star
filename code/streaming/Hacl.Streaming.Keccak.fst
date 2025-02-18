@@ -4,15 +4,12 @@ open FStar.HyperStack.ST
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module G = FStar.Ghost
 module S = FStar.Seq
 module U32 = FStar.UInt32
-module U64 = FStar.UInt64
 module F = Hacl.Streaming.Functor
 
-module ST = FStar.HyperStack.ST
 
 open LowStar.BufferOps
 open FStar.Mul

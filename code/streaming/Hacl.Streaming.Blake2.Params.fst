@@ -6,7 +6,6 @@ open LowStar.BufferOps
 
 module B = LowStar.Buffer
 module ST = FStar.HyperStack.ST
-module HS = FStar.HyperStack
 
 let _align = ()
 

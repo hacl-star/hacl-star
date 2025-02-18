@@ -1,6 +1,5 @@
 module Hacl.Impl.Ed25519.Ladder
 
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 open FStar.Mul
 
@@ -9,7 +8,6 @@ open Lib.Buffer
 
 open Hacl.Bignum25519
 
-module BSeq = Lib.ByteSequence
 module F51 = Hacl.Impl.Ed25519.Field51
 
 module S = Spec.Ed25519

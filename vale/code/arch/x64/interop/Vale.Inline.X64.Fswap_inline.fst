@@ -2,15 +2,12 @@ module Vale.Inline.X64.Fswap_inline
 
 open FStar.Mul
 open FStar.HyperStack.ST
-module HS = FStar.HyperStack
-module B = LowStar.Buffer
 module DV = LowStar.BufferView.Down
 open Vale.Def.Types_s
 
 open Vale.Interop.Base
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
-module LSig = Vale.AsLowStar.LowStarSig
 module ME = Vale.X64.Memory
 module V = Vale.X64.Decls
 module IA = Vale.Interop.Assumptions
