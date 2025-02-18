@@ -398,7 +398,7 @@ endif
 
 %.dump:
 	$(call run-with-log,\
-	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
+	  $(FSTAR) --dump_module $(basename $(notdir $*)) \
 	    --print_implicits --print_universes --print_effect_args --print_full_names \
 	    --print_bound_var_types --ugly --admit_smt_queries true \
 	    --hint_dir hints/ \
