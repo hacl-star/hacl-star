@@ -739,6 +739,10 @@ TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 # it's `-add-include 'Foo:"bar.h"'` (include added to Foo.h) and
 # `-add-include 'Foo.c:"bar.h"'` (include added to Foo.c). Note how the former
 # doesn't have the extension while the latter does.
+# Note: the syntax got worse, now Foo.h:"bar.h" means the INTERNAL header internal/Foo.h includes
+# bar.h
+# Note: we would like to maintain the invariant (as of Feb 2025) that we NEVER include libintvector.h from a
+# public header. See https://github.com/python/cpython/issues/130213
 INTRINSIC_FLAGS = \
   -add-include 'Hacl_P256.c:"lib_intrinsics.h"' \
   \
@@ -757,13 +761,14 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_MAC_Poly1305_Simd256:"libintvector.h"' \
   \
   -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_Types:"libintvector.h"'
+  -add-include 'Hacl_Streaming_Types:"libintvector.h"' \
+  -add-include 'Vale.h:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_P256:"lib_intrinsics.h"' \
   -add-include 'Hacl_Bignum:"lib_intrinsics.h"' \
-  -add-include 'Hacl_Bignum_Base:"lib_intrinsics.h"' \
+  -add-include 'Hacl_Bignum_Base.h:"lib_intrinsics.h"' \
   -add-include 'Hacl_K256_ECDSA:"lib_intrinsics.h"'
 
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.

@@ -30,18 +30,7 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "../Hacl_Spec.h"
-
-#define Spec_Cipher_Expansion_Hacl_CHACHA20 0
-#define Spec_Cipher_Expansion_Vale_AES128 1
-#define Spec_Cipher_Expansion_Vale_AES256 2
-
-typedef uint8_t Spec_Cipher_Expansion_impl;
 
 #define Spec_Frodo_Params_SHAKE128 0
 #define Spec_Frodo_Params_AES128 1

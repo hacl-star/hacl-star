@@ -23,26 +23,14 @@
  */
 
 
-#include "EverCrypt_AEAD.h"
+#include "internal/EverCrypt_AEAD.h"
 
 #include "Hacl_Spec.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_Chacha20Poly1305.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "internal/Vale.h"
-#include "internal/Hacl_Spec.h"
 #include "config.h"
-
-/**
-Both encryption and decryption require a state that holds the key.
-The state may be reused as many times as desired.
-*/
-typedef struct EverCrypt_AEAD_state_s_s
-{
-  Spec_Cipher_Expansion_impl impl;
-  uint8_t *ek;
-}
-EverCrypt_AEAD_state_s;
 
 /**
 Both encryption and decryption require a state that holds the key.

@@ -30,13 +30,7 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "../Hacl_MAC_Poly1305_Simd128.h"
-#include "libintvector.h"
 
 void Hacl_MAC_Poly1305_Simd128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, uint8_t *b);
 
@@ -55,6 +49,15 @@ Hacl_MAC_Poly1305_Simd128_poly1305_finish(
   uint8_t *key,
   Lib_IntVector_Intrinsics_vec128 *ctx
 );
+
+typedef struct Hacl_MAC_Poly1305_Simd128_state_t_s
+{
+  Lib_IntVector_Intrinsics_vec128 *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+  uint8_t *p_key;
+}
+Hacl_MAC_Poly1305_Simd128_state_t;
 
 #if defined(__cplusplus)
 }

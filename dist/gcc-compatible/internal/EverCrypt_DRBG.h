@@ -23,41 +23,56 @@
  */
 
 
-#ifndef __internal_Hacl_Krmllib_H
-#define __internal_Hacl_Krmllib_H
+#ifndef __internal_EverCrypt_DRBG_H
+#define __internal_EverCrypt_DRBG_H
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#include "../Hacl_Krmllib.h"
+#include "Hacl_HMAC_DRBG.h"
+#include "../EverCrypt_DRBG.h"
 
-static KRML_NOINLINE uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b);
+typedef struct EverCrypt_DRBG_state_s_s
+{
+  EverCrypt_DRBG_state_s_tags tag;
+  union {
+    Hacl_HMAC_DRBG_state case_SHA1_s;
+    Hacl_HMAC_DRBG_state case_SHA2_256_s;
+    Hacl_HMAC_DRBG_state case_SHA2_384_s;
+    Hacl_HMAC_DRBG_state case_SHA2_512_s;
+  }
+  ;
+}
+EverCrypt_DRBG_state_s;
 
-static KRML_NOINLINE uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b);
+bool
+EverCrypt_DRBG_uu___is_SHA1_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_DRBG_state_s projectee
+);
 
-static KRML_NOINLINE uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
+bool
+EverCrypt_DRBG_uu___is_SHA2_256_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_DRBG_state_s projectee
+);
 
-static KRML_NOINLINE uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b);
+bool
+EverCrypt_DRBG_uu___is_SHA2_384_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_DRBG_state_s projectee
+);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_logor(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
-
-static inline FStar_UInt128_uint128 load128_be(uint8_t *x0);
+bool
+EverCrypt_DRBG_uu___is_SHA2_512_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_DRBG_state_s projectee
+);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Krmllib_H_DEFINED
+#define __internal_EverCrypt_DRBG_H_DEFINED
 #endif

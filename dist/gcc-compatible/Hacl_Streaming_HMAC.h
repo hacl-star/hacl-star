@@ -54,6 +54,23 @@ extern "C" {
 
 typedef uint8_t Hacl_Agile_Hash_impl;
 
+#define Hacl_Agile_Hash_MD5_s 0
+#define Hacl_Agile_Hash_SHA1_s 1
+#define Hacl_Agile_Hash_SHA2_224_s 2
+#define Hacl_Agile_Hash_SHA2_256_s 3
+#define Hacl_Agile_Hash_SHA2_384_s 4
+#define Hacl_Agile_Hash_SHA2_512_s 5
+#define Hacl_Agile_Hash_SHA3_224_s 6
+#define Hacl_Agile_Hash_SHA3_256_s 7
+#define Hacl_Agile_Hash_SHA3_384_s 8
+#define Hacl_Agile_Hash_SHA3_512_s 9
+#define Hacl_Agile_Hash_Blake2S_s 10
+#define Hacl_Agile_Hash_Blake2S_128_s 11
+#define Hacl_Agile_Hash_Blake2B_s 12
+#define Hacl_Agile_Hash_Blake2B_256_s 13
+
+typedef uint8_t Hacl_Agile_Hash_state_s_tags;
+
 typedef struct Hacl_Agile_Hash_state_s_s Hacl_Agile_Hash_state_s;
 
 typedef struct Hacl_Streaming_HMAC_Definitions_index_s
@@ -86,13 +103,7 @@ Hacl_Agile_Hash_state_s
 Hacl_Streaming_HMAC_Definitions_index
 Hacl_Streaming_HMAC_index_of_state(Hacl_Streaming_HMAC_Definitions_two_state s);
 
-typedef struct Hacl_Streaming_HMAC_agile_state_s
-{
-  Hacl_Streaming_HMAC_Definitions_two_state block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Streaming_HMAC_agile_state;
+typedef struct Hacl_Streaming_HMAC_agile_state_s Hacl_Streaming_HMAC_agile_state;
 
 Hacl_Streaming_Types_error_code
 Hacl_Streaming_HMAC_malloc_(
