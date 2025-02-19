@@ -23,41 +23,49 @@
  */
 
 
-#ifndef __internal_Hacl_Krmllib_H
-#define __internal_Hacl_Krmllib_H
+#ifndef __internal_Hacl_Streaming_HMAC_H
+#define __internal_Hacl_Streaming_HMAC_H
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#include "../Hacl_Krmllib.h"
+#include "../Hacl_Streaming_HMAC.h"
 
-static KRML_NOINLINE uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b);
+typedef struct Hacl_Agile_Hash_state_s_s
+{
+  Hacl_Agile_Hash_state_s_tags tag;
+  union {
+    uint32_t *case_MD5_s;
+    uint32_t *case_SHA1_s;
+    uint32_t *case_SHA2_224_s;
+    uint32_t *case_SHA2_256_s;
+    uint64_t *case_SHA2_384_s;
+    uint64_t *case_SHA2_512_s;
+    uint64_t *case_SHA3_224_s;
+    uint64_t *case_SHA3_256_s;
+    uint64_t *case_SHA3_384_s;
+    uint64_t *case_SHA3_512_s;
+    uint32_t *case_Blake2S_s;
+    Lib_IntVector_Intrinsics_vec128 *case_Blake2S_128_s;
+    uint64_t *case_Blake2B_s;
+    Lib_IntVector_Intrinsics_vec256 *case_Blake2B_256_s;
+  }
+  ;
+}
+Hacl_Agile_Hash_state_s;
 
-static KRML_NOINLINE uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b);
-
-static KRML_NOINLINE uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
-
-static KRML_NOINLINE uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_logor(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
-
-static inline FStar_UInt128_uint128 load128_be(uint8_t *x0);
+typedef struct Hacl_Streaming_HMAC_agile_state_s
+{
+  Hacl_Streaming_HMAC_Definitions_two_state block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_HMAC_agile_state;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Krmllib_H_DEFINED
+#define __internal_Hacl_Streaming_HMAC_H_DEFINED
 #endif

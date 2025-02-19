@@ -30,17 +30,21 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "internal/Hacl_Hash_SHA3.h"
 #include "../Hacl_MAC_Poly1305.h"
 
 void Hacl_MAC_Poly1305_poly1305_init(uint64_t *ctx, uint8_t *key);
 
 void Hacl_MAC_Poly1305_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx);
+
+typedef struct Hacl_MAC_Poly1305_state_t_s
+{
+  uint64_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+  uint8_t *p_key;
+}
+Hacl_MAC_Poly1305_state_t;
 
 typedef struct FStar_Pervasives_Native_option___uint8_t__s
 {

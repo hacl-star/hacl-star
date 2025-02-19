@@ -30,11 +30,6 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_MD5.h"
 

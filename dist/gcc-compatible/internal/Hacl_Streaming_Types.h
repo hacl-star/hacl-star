@@ -30,13 +30,23 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "../Hacl_Streaming_Types.h"
-#include "libintvector.h"
+
+typedef struct Hacl_Streaming_MD_state_32_s
+{
+  uint32_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_MD_state_32;
+
+typedef struct Hacl_Streaming_MD_state_64_s
+{
+  uint64_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_MD_state_64;
 
 #define Hacl_Streaming_Types_None 0
 #define Hacl_Streaming_Types_Some 1

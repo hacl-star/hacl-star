@@ -30,14 +30,40 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "../EverCrypt_Hash.h"
 
+typedef struct EverCrypt_Hash_state_s_s
+{
+  EverCrypt_Hash_state_s_tags tag;
+  union {
+    uint32_t *case_MD5_s;
+    uint32_t *case_SHA1_s;
+    uint32_t *case_SHA2_224_s;
+    uint32_t *case_SHA2_256_s;
+    uint64_t *case_SHA2_384_s;
+    uint64_t *case_SHA2_512_s;
+    uint64_t *case_SHA3_224_s;
+    uint64_t *case_SHA3_256_s;
+    uint64_t *case_SHA3_384_s;
+    uint64_t *case_SHA3_512_s;
+    uint32_t *case_Blake2S_s;
+    Lib_IntVector_Intrinsics_vec128 *case_Blake2S_128_s;
+    uint64_t *case_Blake2B_s;
+    Lib_IntVector_Intrinsics_vec256 *case_Blake2B_256_s;
+  }
+  ;
+}
+EverCrypt_Hash_state_s;
+
 void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
+
+typedef struct EverCrypt_Hash_Incremental_state_t_s
+{
+  EverCrypt_Hash_state_s *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+EverCrypt_Hash_Incremental_state_t;
 
 void EverCrypt_Hash_Incremental_hash_256(uint8_t *output, uint8_t *input, uint32_t input_len);
 

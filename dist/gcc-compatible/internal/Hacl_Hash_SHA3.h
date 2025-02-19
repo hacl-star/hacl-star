@@ -30,11 +30,6 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_SHA3.h"
 
@@ -61,6 +56,14 @@ Hacl_Hash_SHA3_update_last_sha3(
   uint8_t *input,
   uint32_t input_len
 );
+
+typedef struct Hacl_Hash_SHA3_state_t_s
+{
+  Hacl_Hash_SHA3_hash_buf block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Hash_SHA3_state_t;
 
 #define FStar_Pervasives_Native_None 0
 #define FStar_Pervasives_Native_Some 1
