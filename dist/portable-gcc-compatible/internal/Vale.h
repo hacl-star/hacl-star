@@ -53,12 +53,6 @@ extern uint64_t sha256_update(uint32_t *x0, uint8_t *x1, uint64_t x2, uint32_t *
 
 /* SNIPPET_END: sha256_update */
 
-/* SNIPPET_START: x64_poly1305 */
-
-extern uint64_t x64_poly1305(uint8_t *x0, uint8_t *x1, uint64_t x2, uint64_t x3);
-
-/* SNIPPET_END: x64_poly1305 */
-
 /* SNIPPET_START: check_aesni */
 
 extern uint64_t check_aesni(void);
@@ -310,6 +304,12 @@ extern uint64_t fmul_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
 /* SNIPPET_END: fsub_e */
+
+/* SNIPPET_START: x64_poly1305 */
+
+extern uint64_t x64_poly1305(uint8_t *x0, uint8_t *x1, uint64_t x2, uint64_t x3);
+
+/* SNIPPET_END: x64_poly1305 */
 
 #if defined(__cplusplus)
 }
