@@ -76,7 +76,7 @@
 #endif
 
 #ifndef KRML_MAYBE_UNUSED
-#  if defined(__GNUC__)
+#  if defined(__GNUC__) || defined(__clang__)
 #    define KRML_MAYBE_UNUSED __attribute__((unused))
 #  else
 #    define KRML_MAYBE_UNUSED
@@ -84,7 +84,7 @@
 #endif
 
 #ifndef KRML_ATTRIBUTE_TARGET
-#  if defined(__GNUC__)
+#  if defined(__GNUC__) || defined(__clang__)
 #    define KRML_ATTRIBUTE_TARGET(x) __attribute__((target(x)))
 #  else
 #    define KRML_ATTRIBUTE_TARGET(x)
@@ -92,10 +92,10 @@
 #endif
 
 #ifndef KRML_NOINLINE
-#  if defined(_MSC_VER)
-#    define KRML_NOINLINE __declspec(noinline)
-#  elif defined (__GNUC__)
+#  if defined (__GNUC__) || defined (__clang__)
 #    define KRML_NOINLINE __attribute__((noinline,unused))
+#  elif defined(_MSC_VER)
+#    define KRML_NOINLINE __declspec(noinline)
 #  elif defined (__SUNPRO_C)
 #    define KRML_NOINLINE __attribute__((noinline))
 #  else
