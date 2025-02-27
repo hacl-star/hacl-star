@@ -540,6 +540,15 @@ Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_Simd256_malloc_with_key(void)
   return buf;
 }
 
+void
+Hacl_Hash_Blake2b_Simd256_copy(
+  Lib_IntVector_Intrinsics_vec256 *src,
+  Lib_IntVector_Intrinsics_vec256 *dst
+)
+{
+  memcpy(dst, src, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+}
+
 typedef struct
 option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256____s
 {
@@ -1335,7 +1344,7 @@ void Hacl_Hash_Blake2b_Simd256_free(Hacl_Hash_Blake2b_Simd256_state_t *state)
   Copying. This preserves all parameters.
 */
 Hacl_Hash_Blake2b_Simd256_state_t
-*Hacl_Hash_Blake2b_Simd256_copy(Hacl_Hash_Blake2b_Simd256_state_t *state)
+*Hacl_Hash_Blake2b_Simd256_copy0(Hacl_Hash_Blake2b_Simd256_state_t *state)
 {
   Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
   Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state0 = scrut.block_state;

@@ -1370,7 +1370,7 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
         KRML_EABORT(Lib_IntVector_Intrinsics_vec128 *,
           "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+    Hacl_Hash_Blake2s_Simd128_copy(p_src, p_dst);
     return;
   }
   if (scrut.tag == Hacl_Agile_Hash_Blake2B_s)
@@ -1404,7 +1404,7 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
         KRML_EABORT(Lib_IntVector_Intrinsics_vec256 *,
           "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+    Hacl_Hash_Blake2b_Simd256_copy(p_src, p_dst);
     return;
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",

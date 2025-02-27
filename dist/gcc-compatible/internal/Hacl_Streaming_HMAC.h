@@ -31,7 +31,7 @@ extern "C" {
 #endif
 
 #include "../Hacl_Streaming_HMAC.h"
-#include "libintvector.h"
+#include "libintvector-shim.h"
 
 #define Hacl_Agile_Hash_MD5_s 0
 #define Hacl_Agile_Hash_SHA1_s 1

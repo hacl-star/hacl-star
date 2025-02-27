@@ -31,6 +31,7 @@ extern "C" {
 #endif
 
 #include "libintvector.h"
+#include <inttypes.h>
 
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 

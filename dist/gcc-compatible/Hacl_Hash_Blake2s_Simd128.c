@@ -532,6 +532,15 @@ Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_Simd128_malloc_with_key(void)
   return buf;
 }
 
+void
+Hacl_Hash_Blake2s_Simd128_copy(
+  Lib_IntVector_Intrinsics_vec128 *src,
+  Lib_IntVector_Intrinsics_vec128 *dst
+)
+{
+  memcpy(dst, src, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+}
+
 typedef struct
 option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128____s
 {
@@ -1290,7 +1299,7 @@ void Hacl_Hash_Blake2s_Simd128_free(Hacl_Hash_Blake2s_Simd128_state_t *state)
   Copying. This preserves all parameters.
 */
 Hacl_Hash_Blake2s_Simd128_state_t
-*Hacl_Hash_Blake2s_Simd128_copy(Hacl_Hash_Blake2s_Simd128_state_t *state)
+*Hacl_Hash_Blake2s_Simd128_copy0(Hacl_Hash_Blake2s_Simd128_state_t *state)
 {
   Hacl_Hash_Blake2s_Simd128_state_t scrut = *state;
   Hacl_Streaming_Blake2_Types_block_state_blake2s_128 block_state0 = scrut.block_state;

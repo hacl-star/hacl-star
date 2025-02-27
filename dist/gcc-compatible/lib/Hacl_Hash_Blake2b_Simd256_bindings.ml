@@ -59,8 +59,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_Simd256_free =
       foreign "Hacl_Hash_Blake2b_Simd256_free"
         ((ptr hacl_Hash_Blake2b_Simd256_state_t) @-> (returning void))
-    let hacl_Hash_Blake2b_Simd256_copy =
-      foreign "Hacl_Hash_Blake2b_Simd256_copy"
+    let hacl_Hash_Blake2b_Simd256_copy0 =
+      foreign "Hacl_Hash_Blake2b_Simd256_copy0"
         ((ptr hacl_Hash_Blake2b_Simd256_state_t) @->
            (returning (ptr hacl_Hash_Blake2b_Simd256_state_t)))
     let hacl_Hash_Blake2b_Simd256_hash_with_key =

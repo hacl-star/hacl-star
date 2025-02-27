@@ -79,6 +79,12 @@ Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32(
 
 Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_Simd256_malloc_with_key(void);
 
+void
+Hacl_Hash_Blake2b_Simd256_copy(
+  Lib_IntVector_Intrinsics_vec256 *src,
+  Lib_IntVector_Intrinsics_vec256 *dst
+);
+
 typedef struct Hacl_Hash_Blake2b_Simd256_state_t_s
 {
   Hacl_Streaming_Blake2_Types_block_state_blake2b_256 block_state;

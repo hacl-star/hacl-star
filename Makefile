@@ -738,7 +738,7 @@ TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 # Note: due to backwards-compat, the syntax for the option is not super great...
 # it's `-add-include 'Foo:"bar.h"'` (include added to Foo.h) and
 # `-add-include 'Foo.c:"bar.h"'` (include added to Foo.c). Note how the former
-# doesn't have the extension while the latter does.
+# doesn't have the file extension while the latter does.
 # Note: the syntax got worse, now Foo.h:"bar.h" means the INTERNAL header internal/Foo.h includes
 # bar.h
 # Note: we would like to maintain the invariant (as of Feb 2025) that we NEVER include libintvector.h from a
@@ -763,8 +763,9 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_Hash_SHA3_Simd256.h:"libintvector.h"' \
   -add-include 'Hacl_Streaming_Types.h:"libintvector.h"' \
   -add-include 'Vale.h:"libintvector.h"' \
+  -add-include 'Vale.h:<inttypes.h>' \
   -add-include 'EverCrypt_Hash.h:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_HMAC.h:"libintvector.h"'
+  -add-include 'Hacl_Streaming_HMAC.h:"libintvector-shim.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \

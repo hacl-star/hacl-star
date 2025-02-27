@@ -34,3 +34,11 @@ val finish: finish_st (|Blake2S, M128|)
 
 inline_for_extraction noextract
 val hash: hash_st Blake2S
+
+module B = LowStar.Buffer
+open FStar.HyperStack.ST
+
+val copy (src dst: state (| Spec.Agile.Hash.Blake2S, Hacl.Impl.Blake2.Core.M128 |)): Stack unit
+  (requires (fun h0 -> B.(live h0 src /\ live h0 dst /\ loc_disjoint (loc_buffer src) (loc_buffer dst))))
+  (ensures (fun h0 _ h1 ->
+    B.(modifies (loc_buffer dst) h0 h1 /\ as_seq h1 dst `Seq.equal` as_seq h0 src)))

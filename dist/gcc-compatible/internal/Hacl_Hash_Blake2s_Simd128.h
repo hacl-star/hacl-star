@@ -79,6 +79,12 @@ Hacl_Hash_Blake2s_Simd128_load_state128s_from_state32(
 
 Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_Simd128_malloc_with_key(void);
 
+void
+Hacl_Hash_Blake2s_Simd128_copy(
+  Lib_IntVector_Intrinsics_vec128 *src,
+  Lib_IntVector_Intrinsics_vec128 *dst
+);
+
 typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s
 {
   Hacl_Streaming_Blake2_Types_block_state_blake2s_128 block_state;
