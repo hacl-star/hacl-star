@@ -113,7 +113,7 @@ Hacl_Streaming_HMAC_update(
   uint32_t chunk_len
 );
 
-void
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_HMAC_digest(
   Hacl_Streaming_HMAC_agile_state *state,
   uint8_t *output,

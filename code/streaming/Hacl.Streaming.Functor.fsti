@@ -494,6 +494,7 @@ let digest_st
 /// desired. See EverCrypt.Hash.Incremental for an example. Alternatively, we
 /// could provide a finish that relies on a heap allocation of abstract state
 /// and does not need to be specialized.
+/// 20250227 JP: bit the bullet, did it, see digest_heap below
 inline_for_extraction noextract
 val digest:
   #index:Type0 ->
@@ -515,6 +516,54 @@ val digest_erased:
   t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
   digest_st c i t t'
 
+inline_for_extraction noextract
+let digest_heap_st
+  #index
+  (c: block index)
+  (i: index)
+  (t: Type0 { t == c.state.s i })
+  (t':Type0 { t' == optional_key i c.km c.key }) =
+  s:state c i t t' ->
+  dst:B.buffer uint8 ->
+  l:c.output_length_t { B.length dst == c.output_length i l } ->
+  ST Hacl.Streaming.Types.error_code
+    (requires fun h0 ->
+      invariant c i h0 s /\
+      B.live h0 dst /\
+      B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
+    (ensures fun h0 s' h1 ->
+      let open Hacl.Streaming.Types in
+      match s' with
+      | Success ->
+          invariant c i h1 s /\
+          seen c i h0 s == seen c i h1 s /\
+          reveal_key c i h1 s == reveal_key c i h0 s /\
+          footprint c i h0 s == footprint c i h1 s /\
+          B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
+          seen_bounded c i h0 s;
+          S.equal (B.as_seq h1 dst) (c.spec_s i (reveal_key c i h0 s) (seen c i h0 s) l)) /\
+          preserves_freeable c i s h0 h1
+      | OutOfMemory ->
+          B.(modifies loc_none h0 h1)
+      | _ -> False)
+
+inline_for_extraction noextract
+val digest_heap:
+  #index:Type0 ->
+  c:block index ->
+  i:index ->
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
+  digest_heap_st c i t t'
+
+inline_for_extraction noextract
+val digest_heap_erased:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index ->
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
+  digest_heap_st c i t t'
 
 inline_for_extraction noextract
 let free_st

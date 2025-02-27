@@ -470,17 +470,23 @@ let copy #a s_src s_dst =
       let p_dst = Blake2S_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 16ul
   | Blake2S_128_s s p_src ->
-      [@inline_let] let s_dst: state (Blake2S_128 s) = s_dst in
-      let p_dst = Blake2S_128_s?.p !*s_dst in
-      Hacl.Hash.Blake2s_128.copy p_src p_dst
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        [@inline_let] let s_dst: state (Blake2S_128 s) = s_dst in
+        let p_dst = Blake2S_128_s?.p !*s_dst in
+        Hacl.Hash.Blake2s_128.copy p_src p_dst
+      else
+        false_elim ()
   | Blake2B_s p_src ->
       [@inline_let] let s_dst: state Blake2B_32 = s_dst in
       let p_dst = Blake2B_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 16ul
   | Blake2B_256_s s p_src ->
-      [@inline_let] let s_dst: state (Blake2B_256 s) = s_dst in
-      let p_dst = Blake2B_256_s?.p !*s_dst in
-      Hacl.Hash.Blake2b_256.copy p_src p_dst
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        [@inline_let] let s_dst: state (Blake2B_256 s) = s_dst in
+        let p_dst = Blake2B_256_s?.p !*s_dst in
+        Hacl.Hash.Blake2b_256.copy p_src p_dst
+      else
+        false_elim ()
 
 let hash i dst input input_len =
   match i with
