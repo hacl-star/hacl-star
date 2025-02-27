@@ -37,20 +37,7 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 
-typedef struct Hacl_Hash_SHA3_hash_buf_s
-{
-  Spec_Hash_Definitions_hash_alg fst;
-  uint64_t *snd;
-}
-Hacl_Hash_SHA3_hash_buf;
-
-typedef struct Hacl_Hash_SHA3_state_t_s
-{
-  Hacl_Hash_SHA3_hash_buf block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Hash_SHA3_state_t;
+typedef struct Hacl_Hash_SHA3_state_t_s Hacl_Hash_SHA3_state_t;
 
 Spec_Hash_Definitions_hash_alg Hacl_Hash_SHA3_get_alg(Hacl_Hash_SHA3_state_t *s);
 

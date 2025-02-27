@@ -16,15 +16,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let (hacl_MAC_Poly1305_state_t :
       [ `hacl_MAC_Poly1305_state_t ] structure typ) =
       structure "Hacl_MAC_Poly1305_state_t_s"
-    let hacl_MAC_Poly1305_state_t_block_state =
-      field hacl_MAC_Poly1305_state_t "block_state" (ptr uint64_t)
-    let hacl_MAC_Poly1305_state_t_buf =
-      field hacl_MAC_Poly1305_state_t "buf" (ptr uint8_t)
-    let hacl_MAC_Poly1305_state_t_total_len =
-      field hacl_MAC_Poly1305_state_t "total_len" uint64_t
-    let hacl_MAC_Poly1305_state_t_p_key =
-      field hacl_MAC_Poly1305_state_t "p_key" (ptr uint8_t)
-    let _ = seal hacl_MAC_Poly1305_state_t
     let hacl_MAC_Poly1305_malloc =
       foreign "Hacl_MAC_Poly1305_malloc"
         (ocaml_bytes @-> (returning (ptr hacl_MAC_Poly1305_state_t)))

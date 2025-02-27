@@ -700,6 +700,14 @@ void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
   Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
+typedef struct option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____s
+{
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
+  Hacl_Streaming_Blake2_Types_block_state_blake2b_32 v;
+}
+option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t___;
+
 static Hacl_Hash_Blake2b_state_t
 *malloc_raw(Hacl_Hash_Blake2b_index kk, Hacl_Hash_Blake2b_params_and_key key)
 {
@@ -710,13 +718,13 @@ static Hacl_Hash_Blake2b_state_t
   }
   uint8_t *buf1 = buf;
   uint64_t *wv0 = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
-  Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32 block_state;
+  option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t___ block_state;
   if (wv0 == NULL)
   {
     block_state =
       (
-        (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32){
-          .tag = Hacl_Streaming_Blake2_Types_None
+        (option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t___){
+          .tag = FStar_Pervasives_Native_None
         }
       );
   }
@@ -728,8 +736,8 @@ static Hacl_Hash_Blake2b_state_t
       KRML_HOST_FREE(wv0);
       block_state =
         (
-          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32){
-            .tag = Hacl_Streaming_Blake2_Types_None
+          (option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t___){
+            .tag = FStar_Pervasives_Native_None
           }
         );
     }
@@ -737,8 +745,8 @@ static Hacl_Hash_Blake2b_state_t
     {
       block_state =
         (
-          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32){
-            .tag = Hacl_Streaming_Blake2_Types_Some,
+          (option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t___){
+            .tag = FStar_Pervasives_Native_Some,
             .v = {
               .fst = kk.key_length,
               .snd = kk.digest_length,
@@ -749,12 +757,12 @@ static Hacl_Hash_Blake2b_state_t
         );
     }
   }
-  if (block_state.tag == Hacl_Streaming_Blake2_Types_None)
+  if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == Hacl_Streaming_Blake2_Types_Some)
+  if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Streaming_Blake2_Types_block_state_blake2b_32 block_state1 = block_state.v;
     Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
@@ -1501,13 +1509,13 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *sta
   }
   memcpy(buf, buf0, 128U * sizeof (uint8_t));
   uint64_t *wv0 = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
-  Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32 block_state;
+  option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t___ block_state;
   if (wv0 == NULL)
   {
     block_state =
       (
-        (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32){
-          .tag = Hacl_Streaming_Blake2_Types_None
+        (option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t___){
+          .tag = FStar_Pervasives_Native_None
         }
       );
   }
@@ -1519,8 +1527,8 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *sta
       KRML_HOST_FREE(wv0);
       block_state =
         (
-          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32){
-            .tag = Hacl_Streaming_Blake2_Types_None
+          (option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t___){
+            .tag = FStar_Pervasives_Native_None
           }
         );
     }
@@ -1528,8 +1536,8 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *sta
     {
       block_state =
         (
-          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32){
-            .tag = Hacl_Streaming_Blake2_Types_Some,
+          (option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t___){
+            .tag = FStar_Pervasives_Native_Some,
             .v = {
               .fst = i.key_length,
               .snd = i.digest_length,
@@ -1540,12 +1548,12 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *sta
         );
     }
   }
-  if (block_state.tag == Hacl_Streaming_Blake2_Types_None)
+  if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf);
     return NULL;
   }
-  if (block_state.tag == Hacl_Streaming_Blake2_Types_Some)
+  if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Streaming_Blake2_Types_block_state_blake2b_32 block_state1 = block_state.v;
     uint64_t *src_b = block_state0.f3.snd;

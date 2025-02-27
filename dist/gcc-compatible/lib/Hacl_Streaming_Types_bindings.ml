@@ -7,25 +7,11 @@ module Bindings(F:Cstubs.FOREIGN) =
     let (hacl_Streaming_MD_state_32 :
       [ `hacl_Streaming_MD_state_32 ] structure typ) =
       structure "Hacl_Streaming_MD_state_32_s"
-    let hacl_Streaming_MD_state_32_block_state =
-      field hacl_Streaming_MD_state_32 "block_state" (ptr uint32_t)
-    let hacl_Streaming_MD_state_32_buf =
-      field hacl_Streaming_MD_state_32 "buf" (ptr uint8_t)
-    let hacl_Streaming_MD_state_32_total_len =
-      field hacl_Streaming_MD_state_32 "total_len" uint64_t
-    let _ = seal hacl_Streaming_MD_state_32
     type hacl_Streaming_MD_state_64 =
       [ `hacl_Streaming_MD_state_64 ] structure
     let (hacl_Streaming_MD_state_64 :
       [ `hacl_Streaming_MD_state_64 ] structure typ) =
       structure "Hacl_Streaming_MD_state_64_s"
-    let hacl_Streaming_MD_state_64_block_state =
-      field hacl_Streaming_MD_state_64 "block_state" (ptr uint64_t)
-    let hacl_Streaming_MD_state_64_buf =
-      field hacl_Streaming_MD_state_64 "buf" (ptr uint8_t)
-    let hacl_Streaming_MD_state_64_total_len =
-      field hacl_Streaming_MD_state_64 "total_len" uint64_t
-    let _ = seal hacl_Streaming_MD_state_64
     type k____uint64_t___uint64_t_ = [ `k____uint64_t___uint64_t_ ] structure
     let (k____uint64_t___uint64_t_ :
       [ `k____uint64_t___uint64_t_ ] structure typ) =
@@ -40,41 +26,11 @@ module Bindings(F:Cstubs.FOREIGN) =
     let (hacl_Streaming_Blake2_Types_block_state_blake2b_32 :
       [ `hacl_Streaming_Blake2_Types_block_state_blake2b_32 ] structure typ)
       = structure "Hacl_Streaming_Blake2_Types_block_state_blake2b_32_s"
-    let hacl_Streaming_Blake2_Types_block_state_blake2b_32_fst =
-      field hacl_Streaming_Blake2_Types_block_state_blake2b_32 "fst" uint8_t
-    let hacl_Streaming_Blake2_Types_block_state_blake2b_32_snd =
-      field hacl_Streaming_Blake2_Types_block_state_blake2b_32 "snd" uint8_t
-    let hacl_Streaming_Blake2_Types_block_state_blake2b_32_thd =
-      field hacl_Streaming_Blake2_Types_block_state_blake2b_32 "thd" bool
-    let hacl_Streaming_Blake2_Types_block_state_blake2b_32_f3 =
-      field hacl_Streaming_Blake2_Types_block_state_blake2b_32 "f3"
-        k____uint64_t___uint64_t_
-    let _ = seal hacl_Streaming_Blake2_Types_block_state_blake2b_32
-    type hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_tags =
-      Unsigned.UInt8.t
-    let hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_tags =
-      typedef uint8_t
-        "Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_tags"
-    let hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_tags_Hacl_Streaming_Blake2_Types_None
-      = Unsigned.UInt8.of_int 0
-    let hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_tags_Hacl_Streaming_Blake2_Types_Some
-      = Unsigned.UInt8.of_int 1
-    type hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32 =
-      [ `hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32 ]
-        structure
-    let (hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32 :
-      [ `hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32 ]
-        structure typ)
-      =
-      structure
-        "Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_s"
-    let hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_tag =
-      field hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32 "tag"
-        hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_tags
-    let hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_v =
-      field hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32 "v"
-        hacl_Streaming_Blake2_Types_block_state_blake2b_32
-    let _ = seal hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32
+    type hacl_Streaming_Blake2_Types_block_state_blake2b_256 =
+      [ `hacl_Streaming_Blake2_Types_block_state_blake2b_256 ] structure
+    let (hacl_Streaming_Blake2_Types_block_state_blake2b_256 :
+      [ `hacl_Streaming_Blake2_Types_block_state_blake2b_256 ] structure typ)
+      = structure "Hacl_Streaming_Blake2_Types_block_state_blake2b_256_s"
     type k____uint32_t___uint32_t_ = [ `k____uint32_t___uint32_t_ ] structure
     let (k____uint32_t___uint32_t_ :
       [ `k____uint32_t___uint32_t_ ] structure typ) =
@@ -89,32 +45,11 @@ module Bindings(F:Cstubs.FOREIGN) =
     let (hacl_Streaming_Blake2_Types_block_state_blake2s_32 :
       [ `hacl_Streaming_Blake2_Types_block_state_blake2s_32 ] structure typ)
       = structure "Hacl_Streaming_Blake2_Types_block_state_blake2s_32_s"
-    let hacl_Streaming_Blake2_Types_block_state_blake2s_32_fst =
-      field hacl_Streaming_Blake2_Types_block_state_blake2s_32 "fst" uint8_t
-    let hacl_Streaming_Blake2_Types_block_state_blake2s_32_snd =
-      field hacl_Streaming_Blake2_Types_block_state_blake2s_32 "snd" uint8_t
-    let hacl_Streaming_Blake2_Types_block_state_blake2s_32_thd =
-      field hacl_Streaming_Blake2_Types_block_state_blake2s_32 "thd" bool
-    let hacl_Streaming_Blake2_Types_block_state_blake2s_32_f3 =
-      field hacl_Streaming_Blake2_Types_block_state_blake2s_32 "f3"
-        k____uint32_t___uint32_t_
-    let _ = seal hacl_Streaming_Blake2_Types_block_state_blake2s_32
-    type hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32 =
-      [ `hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32 ]
-        structure
-    let (hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32 :
-      [ `hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32 ]
-        structure typ)
-      =
-      structure
-        "Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32_s"
-    let hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32_tag =
-      field hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32 "tag"
-        hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_tags
-    let hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32_v =
-      field hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32 "v"
-        hacl_Streaming_Blake2_Types_block_state_blake2s_32
-    let _ = seal hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32
+    type hacl_Streaming_Blake2_Types_block_state_blake2s_128 =
+      [ `hacl_Streaming_Blake2_Types_block_state_blake2s_128 ] structure
+    let (hacl_Streaming_Blake2_Types_block_state_blake2s_128 :
+      [ `hacl_Streaming_Blake2_Types_block_state_blake2s_128 ] structure typ)
+      = structure "Hacl_Streaming_Blake2_Types_block_state_blake2s_128_s"
     type hacl_Streaming_Types_error_code = Unsigned.UInt8.t
     let hacl_Streaming_Types_error_code =
       typedef uint8_t "Hacl_Streaming_Types_error_code"
