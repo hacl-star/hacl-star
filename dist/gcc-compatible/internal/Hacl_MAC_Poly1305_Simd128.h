@@ -31,6 +31,7 @@ extern "C" {
 #endif
 
 #include "../Hacl_MAC_Poly1305_Simd128.h"
+#include "libintvector.h"
 
 void Hacl_MAC_Poly1305_Simd128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, uint8_t *b);
 

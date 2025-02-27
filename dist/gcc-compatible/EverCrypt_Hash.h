@@ -38,25 +38,6 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "EverCrypt_Error.h"
 
-#define EverCrypt_Hash_MD5_s 0
-#define EverCrypt_Hash_SHA1_s 1
-#define EverCrypt_Hash_SHA2_224_s 2
-#define EverCrypt_Hash_SHA2_256_s 3
-#define EverCrypt_Hash_SHA2_384_s 4
-#define EverCrypt_Hash_SHA2_512_s 5
-#define EverCrypt_Hash_SHA3_224_s 6
-#define EverCrypt_Hash_SHA3_256_s 7
-#define EverCrypt_Hash_SHA3_384_s 8
-#define EverCrypt_Hash_SHA3_512_s 9
-#define EverCrypt_Hash_Blake2S_s 10
-#define EverCrypt_Hash_Blake2S_128_s 11
-#define EverCrypt_Hash_Blake2B_s 12
-#define EverCrypt_Hash_Blake2B_256_s 13
-
-typedef uint8_t EverCrypt_Hash_state_s_tags;
-
-typedef struct EverCrypt_Hash_state_s_s EverCrypt_Hash_state_s;
-
 uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 typedef struct EverCrypt_Hash_Incremental_state_t_s EverCrypt_Hash_Incremental_state_t;

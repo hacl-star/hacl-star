@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_SHA2_Types.h"
-#include "libintvector.h"
 
 void
 Hacl_Hash_SHA3_Simd256_absorb_inner_256(

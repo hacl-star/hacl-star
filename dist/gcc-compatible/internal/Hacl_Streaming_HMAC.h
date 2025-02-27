@@ -34,7 +34,7 @@ extern "C" {
 
 typedef struct Hacl_Agile_Hash_state_s_s
 {
-  Hacl_Agile_Hash_state_s_tags tag;
+  state_s_tags tag;
   union {
     uint32_t *case_MD5_s;
     uint32_t *case_SHA1_s;

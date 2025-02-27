@@ -1061,7 +1061,7 @@ Hacl_Hash_Blake2b_Simd256_update(
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ acc = block_state1.f3;
+      Hacl_Streaming_Blake2_Types_two_vec256 acc = block_state1.f3;
       Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
       Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
       uint32_t nb = 1U;
@@ -1086,7 +1086,7 @@ Hacl_Hash_Blake2b_Simd256_update(
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ acc = block_state1.f3;
+    Hacl_Streaming_Blake2_Types_two_vec256 acc = block_state1.f3;
     Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
     Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
     uint32_t nb = data1_len / 128U;
@@ -1154,7 +1154,7 @@ Hacl_Hash_Blake2b_Simd256_update(
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ acc = block_state1.f3;
+      Hacl_Streaming_Blake2_Types_two_vec256 acc = block_state1.f3;
       Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
       Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
       uint32_t nb = 1U;
@@ -1180,7 +1180,7 @@ Hacl_Hash_Blake2b_Simd256_update(
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ acc = block_state1.f3;
+    Hacl_Streaming_Blake2_Types_two_vec256 acc = block_state1.f3;
     Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
     Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
     uint32_t nb = data1_len / 128U;
@@ -1263,8 +1263,7 @@ uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, u
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-  acc0 = tmp_block_state.f3;
+  Hacl_Streaming_Blake2_Types_two_vec256 acc0 = tmp_block_state.f3;
   Lib_IntVector_Intrinsics_vec256 *wv1 = acc0.fst;
   Lib_IntVector_Intrinsics_vec256 *hash0 = acc0.snd;
   uint32_t nb = 0U;
@@ -1275,8 +1274,7 @@ uint8_t Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *s, u
     buf_multi,
     nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-  acc = tmp_block_state.f3;
+  Hacl_Streaming_Blake2_Types_two_vec256 acc = tmp_block_state.f3;
   bool last_node1 = tmp_block_state.thd;
   Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
   Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;

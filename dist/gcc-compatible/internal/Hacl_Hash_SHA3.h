@@ -59,7 +59,7 @@ Hacl_Hash_SHA3_update_last_sha3(
 
 typedef struct Hacl_Hash_SHA3_state_t_s
 {
-  Hacl_Hash_SHA3_hash_buf block_state;
+  hash_buf block_state;
   uint8_t *buf;
   uint64_t total_len;
 }

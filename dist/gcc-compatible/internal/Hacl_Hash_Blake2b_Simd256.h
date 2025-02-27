@@ -32,6 +32,7 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_Blake2b_Simd256.h"
+#include "libintvector.h"
 
 void
 Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);

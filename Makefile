@@ -750,18 +750,18 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_Chacha20_Vec128.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec128.c:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_Blake2s_Simd128:"libintvector.h"' \
-  -add-include 'Hacl_MAC_Poly1305_Simd128:"libintvector.h"' \
+  -add-include 'Hacl_Hash_Blake2s_Simd128.h:"libintvector.h"' \
+  -add-include 'Hacl_MAC_Poly1305_Simd128.h:"libintvector.h"' \
   \
   -add-include 'Hacl_AEAD_Chacha20Poly1305_Simd256.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec256.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_Blake2b_Simd256:"libintvector.h"' \
-  -add-include 'Hacl_MAC_Poly1305_Simd256:"libintvector.h"' \
+  -add-include 'Hacl_Hash_Blake2b_Simd256.h:"libintvector.h"' \
+  -add-include 'Hacl_MAC_Poly1305_Simd256.h:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_Types:"libintvector.h"' \
+  -add-include 'Hacl_Hash_SHA3_Simd256.h:"libintvector.h"' \
+  -add-include 'Hacl_Streaming_Types.h:"libintvector.h"' \
   -add-include 'Vale.h:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.

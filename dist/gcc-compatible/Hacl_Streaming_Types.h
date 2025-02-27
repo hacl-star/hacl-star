@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "libintvector.h"
-
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2
@@ -66,12 +64,6 @@ typedef struct K____uint64_t___uint64_t__s
 K____uint64_t___uint64_t_;
 
 typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2b_32_s
-{
-  uint8_t fst;
-  uint8_t snd;
-  bool thd;
-  K____uint64_t___uint64_t_ f3;
-}
 Hacl_Streaming_Blake2_Types_block_state_blake2b_32;
 
 #define Hacl_Streaming_Blake2_Types_None 0
@@ -86,20 +78,7 @@ typedef struct Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32_s
 }
 Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32;
 
-typedef struct K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256__s
-{
-  Lib_IntVector_Intrinsics_vec256 *fst;
-  Lib_IntVector_Intrinsics_vec256 *snd;
-}
-K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_;
-
 typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2b_256_s
-{
-  uint8_t fst;
-  uint8_t snd;
-  bool thd;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ f3;
-}
 Hacl_Streaming_Blake2_Types_block_state_blake2b_256;
 
 typedef struct Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256_s
@@ -109,20 +88,7 @@ typedef struct Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256_s
 }
 Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256;
 
-typedef struct K____uint32_t___uint32_t__s
-{
-  uint32_t *fst;
-  uint32_t *snd;
-}
-K____uint32_t___uint32_t_;
-
 typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2s_32_s
-{
-  uint8_t fst;
-  uint8_t snd;
-  bool thd;
-  K____uint32_t___uint32_t_ f3;
-}
 Hacl_Streaming_Blake2_Types_block_state_blake2s_32;
 
 typedef struct Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32_s
@@ -132,20 +98,7 @@ typedef struct Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32_s
 }
 Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32;
 
-typedef struct K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128__s
-{
-  Lib_IntVector_Intrinsics_vec128 *fst;
-  Lib_IntVector_Intrinsics_vec128 *snd;
-}
-K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_;
-
 typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2s_128_s
-{
-  uint8_t fst;
-  uint8_t snd;
-  bool thd;
-  K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_ f3;
-}
 Hacl_Streaming_Blake2_Types_block_state_blake2s_128;
 
 typedef struct Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128_s

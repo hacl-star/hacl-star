@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Hash_Blake2b.h"
-#include "libintvector.h"
 
 #define HACL_HASH_BLAKE2S_SIMD128_BLOCK_BYTES (64U)
 

@@ -19,15 +19,12 @@ module Bindings(F:Cstubs.FOREIGN) =
         (spec_Hash_Definitions_hash_alg @->
            ((ptr uint64_t) @->
               (ocaml_bytes @-> (uint32_t @-> (returning void)))))
-    type hacl_Hash_SHA3_hash_buf = [ `hacl_Hash_SHA3_hash_buf ] structure
-    let (hacl_Hash_SHA3_hash_buf :
-      [ `hacl_Hash_SHA3_hash_buf ] structure typ) =
+    type hash_buf = [ `hash_buf ] structure
+    let (hash_buf : [ `hash_buf ] structure typ) =
       structure "Hacl_Hash_SHA3_hash_buf_s"
-    let hacl_Hash_SHA3_hash_buf_fst =
-      field hacl_Hash_SHA3_hash_buf "fst" spec_Hash_Definitions_hash_alg
-    let hacl_Hash_SHA3_hash_buf_snd =
-      field hacl_Hash_SHA3_hash_buf "snd" (ptr uint64_t)
-    let _ = seal hacl_Hash_SHA3_hash_buf
+    let hash_buf_fst = field hash_buf "fst" spec_Hash_Definitions_hash_alg
+    let hash_buf_snd = field hash_buf "snd" (ptr uint64_t)
+    let _ = seal hash_buf
     type hacl_Hash_SHA3_state_t = [ `hacl_Hash_SHA3_state_t ] structure
     let (hacl_Hash_SHA3_state_t : [ `hacl_Hash_SHA3_state_t ] structure typ)
       = structure "Hacl_Hash_SHA3_state_t_s"

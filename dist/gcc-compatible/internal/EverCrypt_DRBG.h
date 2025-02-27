@@ -35,7 +35,7 @@ extern "C" {
 
 typedef struct EverCrypt_DRBG_state_s_s
 {
-  EverCrypt_DRBG_state_s_tags tag;
+  state_s_tags tag;
   union {
     Hacl_HMAC_DRBG_state case_SHA1_s;
     Hacl_HMAC_DRBG_state case_SHA2_256_s;

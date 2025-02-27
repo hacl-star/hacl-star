@@ -8,6 +8,16 @@ module Bindings(F:Cstubs.FOREIGN) =
     module Hacl_Hash_Blake2b_applied =
       (Hacl_Hash_Blake2b_bindings.Bindings)(Hacl_Hash_Blake2b_stubs)
     open Hacl_Hash_Blake2b_applied
+    type hacl_Hash_Blake2b_Simd256_block_state_t =
+      hacl_Streaming_Blake2_Types_block_state_blake2b_256
+    let hacl_Hash_Blake2b_Simd256_block_state_t =
+      typedef hacl_Streaming_Blake2_Types_block_state_blake2b_256
+        "Hacl_Hash_Blake2b_Simd256_block_state_t"
+    type hacl_Hash_Blake2b_Simd256_optional_block_state_t =
+      hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256
+    let hacl_Hash_Blake2b_Simd256_optional_block_state_t =
+      typedef hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256
+        "Hacl_Hash_Blake2b_Simd256_optional_block_state_t"
     type hacl_Hash_Blake2b_Simd256_state_t =
       [ `hacl_Hash_Blake2b_Simd256_state_t ] structure
     let (hacl_Hash_Blake2b_Simd256_state_t :

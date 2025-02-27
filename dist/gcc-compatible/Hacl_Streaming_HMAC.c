@@ -112,61 +112,78 @@ static Spec_Hash_Definitions_hash_alg alg_of_impl(Hacl_Agile_Hash_impl i)
   }
 }
 
+#define MD5_s 0
+#define SHA1_s 1
+#define SHA2_224_s 2
+#define SHA2_256_s 3
+#define SHA2_384_s 4
+#define SHA2_512_s 5
+#define SHA3_224_s 6
+#define SHA3_256_s 7
+#define SHA3_384_s 8
+#define SHA3_512_s 9
+#define Blake2S_s 10
+#define Blake2S_128_s 11
+#define Blake2B_s 12
+#define Blake2B_256_s 13
+
+typedef uint8_t state_s_tags;
+
 static Hacl_Agile_Hash_impl impl_of_state_s(Hacl_Agile_Hash_state_s s)
 {
-  if (s.tag == Hacl_Agile_Hash_MD5_s)
+  if (s.tag == MD5_s)
   {
     return Hacl_Agile_Hash_MD5;
   }
-  if (s.tag == Hacl_Agile_Hash_SHA1_s)
+  if (s.tag == SHA1_s)
   {
     return Hacl_Agile_Hash_SHA1;
   }
-  if (s.tag == Hacl_Agile_Hash_SHA2_224_s)
+  if (s.tag == SHA2_224_s)
   {
     return Hacl_Agile_Hash_SHA2_224;
   }
-  if (s.tag == Hacl_Agile_Hash_SHA2_256_s)
+  if (s.tag == SHA2_256_s)
   {
     return Hacl_Agile_Hash_SHA2_256;
   }
-  if (s.tag == Hacl_Agile_Hash_SHA2_384_s)
+  if (s.tag == SHA2_384_s)
   {
     return Hacl_Agile_Hash_SHA2_384;
   }
-  if (s.tag == Hacl_Agile_Hash_SHA2_512_s)
+  if (s.tag == SHA2_512_s)
   {
     return Hacl_Agile_Hash_SHA2_512;
   }
-  if (s.tag == Hacl_Agile_Hash_SHA3_224_s)
+  if (s.tag == SHA3_224_s)
   {
     return Hacl_Agile_Hash_SHA3_224;
   }
-  if (s.tag == Hacl_Agile_Hash_SHA3_256_s)
+  if (s.tag == SHA3_256_s)
   {
     return Hacl_Agile_Hash_SHA3_256;
   }
-  if (s.tag == Hacl_Agile_Hash_SHA3_384_s)
+  if (s.tag == SHA3_384_s)
   {
     return Hacl_Agile_Hash_SHA3_384;
   }
-  if (s.tag == Hacl_Agile_Hash_SHA3_512_s)
+  if (s.tag == SHA3_512_s)
   {
     return Hacl_Agile_Hash_SHA3_512;
   }
-  if (s.tag == Hacl_Agile_Hash_Blake2S_s)
+  if (s.tag == Blake2S_s)
   {
     return Hacl_Agile_Hash_Blake2S_32;
   }
-  if (s.tag == Hacl_Agile_Hash_Blake2S_128_s)
+  if (s.tag == Blake2S_128_s)
   {
     return Hacl_Agile_Hash_Blake2S_128;
   }
-  if (s.tag == Hacl_Agile_Hash_Blake2B_s)
+  if (s.tag == Blake2B_s)
   {
     return Hacl_Agile_Hash_Blake2B_32;
   }
-  if (s.tag == Hacl_Agile_Hash_Blake2B_256_s)
+  if (s.tag == Blake2B_256_s)
   {
     return Hacl_Agile_Hash_Blake2B_256;
   }
@@ -198,8 +215,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          = ((Hacl_Agile_Hash_state_s){ .tag = Hacl_Agile_Hash_MD5_s, { .case_MD5_s = s1 } });
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = s1 } });
         }
         if (st == NULL)
         {
@@ -220,8 +236,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          = ((Hacl_Agile_Hash_state_s){ .tag = Hacl_Agile_Hash_SHA1_s, { .case_SHA1_s = s1 } });
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = s1 } });
         }
         if (st == NULL)
         {
@@ -242,14 +257,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_SHA2_224_s,
-                { .case_SHA2_224_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = s1 } });
         }
         if (st == NULL)
         {
@@ -270,14 +278,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_SHA2_256_s,
-                { .case_SHA2_256_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = s1 } });
         }
         if (st == NULL)
         {
@@ -298,14 +299,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_SHA2_384_s,
-                { .case_SHA2_384_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = s1 } });
         }
         if (st == NULL)
         {
@@ -326,14 +320,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_SHA2_512_s,
-                { .case_SHA2_512_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = s1 } });
         }
         if (st == NULL)
         {
@@ -354,14 +341,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_SHA3_224_s,
-                { .case_SHA3_224_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = s1 } });
         }
         if (st == NULL)
         {
@@ -382,14 +362,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_SHA3_256_s,
-                { .case_SHA3_256_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = s1 } });
         }
         if (st == NULL)
         {
@@ -410,14 +383,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_SHA3_384_s,
-                { .case_SHA3_384_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = s1 } });
         }
         if (st == NULL)
         {
@@ -438,14 +404,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_SHA3_512_s,
-                { .case_SHA3_512_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = s1 } });
         }
         if (st == NULL)
         {
@@ -466,14 +425,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_Blake2S_s,
-                { .case_Blake2S_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = s1 } });
         }
         if (st == NULL)
         {
@@ -494,14 +446,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_Blake2S_128_s,
-                { .case_Blake2S_128_s = s }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_128_s, { .case_Blake2S_128_s = s } });
         }
         if (st == NULL)
         {
@@ -530,14 +475,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_Blake2B_s,
-                { .case_Blake2B_s = s1 }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = s1 } });
         }
         if (st == NULL)
         {
@@ -558,14 +496,7 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
         *st = (Hacl_Agile_Hash_state_s *)KRML_HOST_MALLOC(sizeof (Hacl_Agile_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
-            (
-              (Hacl_Agile_Hash_state_s){
-                .tag = Hacl_Agile_Hash_Blake2B_256_s,
-                { .case_Blake2B_256_s = s }
-              }
-            );
+          st[0U] = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_256_s, { .case_Blake2B_256_s = s } });
         }
         if (st == NULL)
         {
@@ -593,73 +524,73 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
 static void init(Hacl_Agile_Hash_state_s *s)
 {
   Hacl_Agile_Hash_state_s scrut = *s;
-  if (scrut.tag == Hacl_Agile_Hash_MD5_s)
+  if (scrut.tag == MD5_s)
   {
     uint32_t *p1 = scrut.case_MD5_s;
     Hacl_Hash_MD5_init(p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA1_s)
+  if (scrut.tag == SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
     Hacl_Hash_SHA1_init(p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_224_s)
+  if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
     Hacl_Hash_SHA2_sha224_init(p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_256_s)
+  if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
     Hacl_Hash_SHA2_sha256_init(p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_384_s)
+  if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
     Hacl_Hash_SHA2_sha384_init(p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_512_s)
+  if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
     Hacl_Hash_SHA2_sha512_init(p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_224_s)
+  if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
     Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_224, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_256_s)
+  if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
     Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_256, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_384_s)
+  if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
     Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_384, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_512_s)
+  if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
     Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_512, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_s)
+  if (scrut.tag == Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
     Hacl_Hash_Blake2s_init(p1, 0U, 32U);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_128_s)
+  if (scrut.tag == Blake2S_128_s)
   {
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
@@ -670,13 +601,13 @@ static void init(Hacl_Agile_Hash_state_s *s)
     return;
     #endif
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_s)
+  if (scrut.tag == Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
     Hacl_Hash_Blake2b_init(p1, 0U, 64U);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_256_s)
+  if (scrut.tag == Blake2B_256_s)
   {
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     #if HACL_CAN_COMPILE_VEC256
@@ -698,77 +629,77 @@ static void
 update_multi(Hacl_Agile_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint32_t len)
 {
   Hacl_Agile_Hash_state_s scrut = *s;
-  if (scrut.tag == Hacl_Agile_Hash_MD5_s)
+  if (scrut.tag == MD5_s)
   {
     uint32_t *p1 = scrut.case_MD5_s;
     uint32_t n = len / 64U;
     Hacl_Hash_MD5_update_multi(p1, blocks, n);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA1_s)
+  if (scrut.tag == SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
     uint32_t n = len / 64U;
     Hacl_Hash_SHA1_update_multi(p1, blocks, n);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_224_s)
+  if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
     uint32_t n = len / 64U;
     Hacl_Hash_SHA2_sha224_update_nblocks(n * 64U, blocks, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_256_s)
+  if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
     uint32_t n = len / 64U;
     Hacl_Hash_SHA2_sha256_update_nblocks(n * 64U, blocks, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_384_s)
+  if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
     uint32_t n = len / 128U;
     Hacl_Hash_SHA2_sha384_update_nblocks(n * 128U, blocks, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_512_s)
+  if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
     uint32_t n = len / 128U;
     Hacl_Hash_SHA2_sha512_update_nblocks(n * 128U, blocks, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_224_s)
+  if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
     uint32_t n = len / 144U;
     Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_224, p1, blocks, n);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_256_s)
+  if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
     uint32_t n = len / 136U;
     Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_256, p1, blocks, n);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_384_s)
+  if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
     uint32_t n = len / 104U;
     Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_384, p1, blocks, n);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_512_s)
+  if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
     uint32_t n = len / 72U;
     Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_512, p1, blocks, n);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_s)
+  if (scrut.tag == Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
     uint32_t n = len / 64U;
@@ -776,7 +707,7 @@ update_multi(Hacl_Agile_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint
     Hacl_Hash_Blake2s_update_multi(n * 64U, wv, p1, prevlen, blocks, n);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_128_s)
+  if (scrut.tag == Blake2S_128_s)
   {
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
@@ -789,7 +720,7 @@ update_multi(Hacl_Agile_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint
     return;
     #endif
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_s)
+  if (scrut.tag == Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
     uint32_t n = len / 128U;
@@ -802,7 +733,7 @@ update_multi(Hacl_Agile_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint
       n);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_256_s)
+  if (scrut.tag == Blake2B_256_s)
   {
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     #if HACL_CAN_COMPILE_VEC256
@@ -831,31 +762,31 @@ static void
 update_last(Hacl_Agile_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_t last_len)
 {
   Hacl_Agile_Hash_state_s scrut = *s;
-  if (scrut.tag == Hacl_Agile_Hash_MD5_s)
+  if (scrut.tag == MD5_s)
   {
     uint32_t *p1 = scrut.case_MD5_s;
     Hacl_Hash_MD5_update_last(p1, prev_len, last, last_len);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA1_s)
+  if (scrut.tag == SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
     Hacl_Hash_SHA1_update_last(p1, prev_len, last, last_len);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_224_s)
+  if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
     Hacl_Hash_SHA2_sha224_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_256_s)
+  if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
     Hacl_Hash_SHA2_sha256_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_384_s)
+  if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
     Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(prev_len),
@@ -865,7 +796,7 @@ update_last(Hacl_Agile_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32
       p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_512_s)
+  if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
     Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(prev_len),
@@ -875,38 +806,38 @@ update_last(Hacl_Agile_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32
       p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_224_s)
+  if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_224, p1, last, last_len);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_256_s)
+  if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_256, p1, last, last_len);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_384_s)
+  if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_384, p1, last, last_len);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_512_s)
+  if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
     Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_512, p1, last, last_len);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_s)
+  if (scrut.tag == Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
     uint32_t wv[16U] = { 0U };
     Hacl_Hash_Blake2s_update_last(last_len, wv, p1, false, prev_len, last_len, last);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_128_s)
+  if (scrut.tag == Blake2S_128_s)
   {
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
@@ -918,7 +849,7 @@ update_last(Hacl_Agile_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32
     return;
     #endif
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_s)
+  if (scrut.tag == Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
     uint64_t wv[16U] = { 0U };
@@ -931,7 +862,7 @@ update_last(Hacl_Agile_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32
       last);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_256_s)
+  if (scrut.tag == Blake2B_256_s)
   {
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     #if HACL_CAN_COMPILE_VEC256
@@ -959,43 +890,43 @@ update_last(Hacl_Agile_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32
 static void finish(Hacl_Agile_Hash_state_s *s, uint8_t *dst)
 {
   Hacl_Agile_Hash_state_s scrut = *s;
-  if (scrut.tag == Hacl_Agile_Hash_MD5_s)
+  if (scrut.tag == MD5_s)
   {
     uint32_t *p1 = scrut.case_MD5_s;
     Hacl_Hash_MD5_finish(p1, dst);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA1_s)
+  if (scrut.tag == SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
     Hacl_Hash_SHA1_finish(p1, dst);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_224_s)
+  if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
     Hacl_Hash_SHA2_sha224_finish(p1, dst);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_256_s)
+  if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
     Hacl_Hash_SHA2_sha256_finish(p1, dst);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_384_s)
+  if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
     Hacl_Hash_SHA2_sha384_finish(p1, dst);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_512_s)
+  if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
     Hacl_Hash_SHA2_sha512_finish(p1, dst);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_224_s)
+  if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
     uint32_t remOut = 28U;
@@ -1009,7 +940,7 @@ static void finish(Hacl_Agile_Hash_state_s *s, uint8_t *dst)
     memcpy(dst + 28U - remOut, hbuf, remOut * sizeof (uint8_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_256_s)
+  if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
     uint32_t remOut = 32U;
@@ -1023,7 +954,7 @@ static void finish(Hacl_Agile_Hash_state_s *s, uint8_t *dst)
     memcpy(dst + 32U - remOut, hbuf, remOut * sizeof (uint8_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_384_s)
+  if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
     uint32_t remOut = 48U;
@@ -1037,7 +968,7 @@ static void finish(Hacl_Agile_Hash_state_s *s, uint8_t *dst)
     memcpy(dst + 48U - remOut, hbuf, remOut * sizeof (uint8_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_512_s)
+  if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
     uint32_t remOut = 64U;
@@ -1051,13 +982,13 @@ static void finish(Hacl_Agile_Hash_state_s *s, uint8_t *dst)
     memcpy(dst + 64U - remOut, hbuf, remOut * sizeof (uint8_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_s)
+  if (scrut.tag == Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
     Hacl_Hash_Blake2s_finish(32U, dst, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_128_s)
+  if (scrut.tag == Blake2S_128_s)
   {
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
@@ -1068,13 +999,13 @@ static void finish(Hacl_Agile_Hash_state_s *s, uint8_t *dst)
     return;
     #endif
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_s)
+  if (scrut.tag == Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
     Hacl_Hash_Blake2b_finish(64U, dst, p1);
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_256_s)
+  if (scrut.tag == Blake2B_256_s)
   {
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     #if HACL_CAN_COMPILE_VEC256
@@ -1095,72 +1026,72 @@ static void finish(Hacl_Agile_Hash_state_s *s, uint8_t *dst)
 static void free_(Hacl_Agile_Hash_state_s *s)
 {
   Hacl_Agile_Hash_state_s scrut = *s;
-  if (scrut.tag == Hacl_Agile_Hash_MD5_s)
+  if (scrut.tag == MD5_s)
   {
     uint32_t *p1 = scrut.case_MD5_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_SHA1_s)
+  else if (scrut.tag == SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_SHA2_224_s)
+  else if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_SHA2_256_s)
+  else if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_SHA2_384_s)
+  else if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_SHA2_512_s)
+  else if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_SHA3_224_s)
+  else if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_SHA3_256_s)
+  else if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_SHA3_384_s)
+  else if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_SHA3_512_s)
+  else if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_Blake2S_s)
+  else if (scrut.tag == Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_Blake2S_128_s)
+  else if (scrut.tag == Blake2S_128_s)
   {
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     KRML_ALIGNED_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_Blake2B_s)
+  else if (scrut.tag == Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
     KRML_HOST_FREE(p1);
   }
-  else if (scrut.tag == Hacl_Agile_Hash_Blake2B_256_s)
+  else if (scrut.tag == Blake2B_256_s)
   {
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     KRML_ALIGNED_FREE(p1);
@@ -1179,12 +1110,12 @@ static void free_(Hacl_Agile_Hash_state_s *s)
 static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
 {
   Hacl_Agile_Hash_state_s scrut = *s_src;
-  if (scrut.tag == Hacl_Agile_Hash_MD5_s)
+  if (scrut.tag == MD5_s)
   {
     uint32_t *p_src = scrut.case_MD5_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint32_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_MD5_s)
+    if (x1.tag == MD5_s)
     {
       p_dst = x1.case_MD5_s;
     }
@@ -1195,12 +1126,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 4U * sizeof (uint32_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA1_s)
+  if (scrut.tag == SHA1_s)
   {
     uint32_t *p_src = scrut.case_SHA1_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint32_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_SHA1_s)
+    if (x1.tag == SHA1_s)
     {
       p_dst = x1.case_SHA1_s;
     }
@@ -1211,12 +1142,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 5U * sizeof (uint32_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_224_s)
+  if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p_src = scrut.case_SHA2_224_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint32_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_SHA2_224_s)
+    if (x1.tag == SHA2_224_s)
     {
       p_dst = x1.case_SHA2_224_s;
     }
@@ -1227,12 +1158,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 8U * sizeof (uint32_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_256_s)
+  if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p_src = scrut.case_SHA2_256_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint32_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_SHA2_256_s)
+    if (x1.tag == SHA2_256_s)
     {
       p_dst = x1.case_SHA2_256_s;
     }
@@ -1243,12 +1174,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 8U * sizeof (uint32_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_384_s)
+  if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p_src = scrut.case_SHA2_384_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint64_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_SHA2_384_s)
+    if (x1.tag == SHA2_384_s)
     {
       p_dst = x1.case_SHA2_384_s;
     }
@@ -1259,12 +1190,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 8U * sizeof (uint64_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA2_512_s)
+  if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p_src = scrut.case_SHA2_512_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint64_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_SHA2_512_s)
+    if (x1.tag == SHA2_512_s)
     {
       p_dst = x1.case_SHA2_512_s;
     }
@@ -1275,12 +1206,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 8U * sizeof (uint64_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_224_s)
+  if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p_src = scrut.case_SHA3_224_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint64_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_SHA3_224_s)
+    if (x1.tag == SHA3_224_s)
     {
       p_dst = x1.case_SHA3_224_s;
     }
@@ -1291,12 +1222,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 25U * sizeof (uint64_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_256_s)
+  if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p_src = scrut.case_SHA3_256_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint64_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_SHA3_256_s)
+    if (x1.tag == SHA3_256_s)
     {
       p_dst = x1.case_SHA3_256_s;
     }
@@ -1307,12 +1238,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 25U * sizeof (uint64_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_384_s)
+  if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p_src = scrut.case_SHA3_384_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint64_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_SHA3_384_s)
+    if (x1.tag == SHA3_384_s)
     {
       p_dst = x1.case_SHA3_384_s;
     }
@@ -1323,12 +1254,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 25U * sizeof (uint64_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_SHA3_512_s)
+  if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p_src = scrut.case_SHA3_512_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint64_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_SHA3_512_s)
+    if (x1.tag == SHA3_512_s)
     {
       p_dst = x1.case_SHA3_512_s;
     }
@@ -1339,12 +1270,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 25U * sizeof (uint64_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_s)
+  if (scrut.tag == Blake2S_s)
   {
     uint32_t *p_src = scrut.case_Blake2S_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint32_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_Blake2S_s)
+    if (x1.tag == Blake2S_s)
     {
       p_dst = x1.case_Blake2S_s;
     }
@@ -1355,12 +1286,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 16U * sizeof (uint32_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2S_128_s)
+  if (scrut.tag == Blake2S_128_s)
   {
     Lib_IntVector_Intrinsics_vec128 *p_src = scrut.case_Blake2S_128_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     Lib_IntVector_Intrinsics_vec128 *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_Blake2S_128_s)
+    if (x1.tag == Blake2S_128_s)
     {
       p_dst = x1.case_Blake2S_128_s;
     }
@@ -1373,12 +1304,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_s)
+  if (scrut.tag == Blake2B_s)
   {
     uint64_t *p_src = scrut.case_Blake2B_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     uint64_t *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_Blake2B_s)
+    if (x1.tag == Blake2B_s)
     {
       p_dst = x1.case_Blake2B_s;
     }
@@ -1389,12 +1320,12 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
     memcpy(p_dst, p_src, 16U * sizeof (uint64_t));
     return;
   }
-  if (scrut.tag == Hacl_Agile_Hash_Blake2B_256_s)
+  if (scrut.tag == Blake2B_256_s)
   {
     Lib_IntVector_Intrinsics_vec256 *p_src = scrut.case_Blake2B_256_s;
     Hacl_Agile_Hash_state_s x1 = *s_dst;
     Lib_IntVector_Intrinsics_vec256 *p_dst;
-    if (x1.tag == Hacl_Agile_Hash_Blake2B_256_s)
+    if (x1.tag == Blake2B_256_s)
     {
       p_dst = x1.case_Blake2B_256_s;
     }
@@ -2355,123 +2286,63 @@ Hacl_Streaming_HMAC_digest(
   {
     case Hacl_Agile_Hash_MD5:
       {
-        s0 = ((Hacl_Agile_Hash_state_s){ .tag = Hacl_Agile_Hash_MD5_s, { .case_MD5_s = buf0 } });
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = buf0 } });
         break;
       }
     case Hacl_Agile_Hash_SHA1:
       {
-        s0 = ((Hacl_Agile_Hash_state_s){ .tag = Hacl_Agile_Hash_SHA1_s, { .case_SHA1_s = buf1 } });
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = buf1 } });
         break;
       }
     case Hacl_Agile_Hash_SHA2_224:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA2_224_s,
-              { .case_SHA2_224_s = buf2 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = buf2 } });
         break;
       }
     case Hacl_Agile_Hash_SHA2_256:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA2_256_s,
-              { .case_SHA2_256_s = buf3 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = buf3 } });
         break;
       }
     case Hacl_Agile_Hash_SHA2_384:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA2_384_s,
-              { .case_SHA2_384_s = buf4 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = buf4 } });
         break;
       }
     case Hacl_Agile_Hash_SHA2_512:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA2_512_s,
-              { .case_SHA2_512_s = buf5 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = buf5 } });
         break;
       }
     case Hacl_Agile_Hash_SHA3_224:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA3_224_s,
-              { .case_SHA3_224_s = buf6 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = buf6 } });
         break;
       }
     case Hacl_Agile_Hash_SHA3_256:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA3_256_s,
-              { .case_SHA3_256_s = buf7 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = buf7 } });
         break;
       }
     case Hacl_Agile_Hash_SHA3_384:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA3_384_s,
-              { .case_SHA3_384_s = buf8 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = buf8 } });
         break;
       }
     case Hacl_Agile_Hash_SHA3_512:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA3_512_s,
-              { .case_SHA3_512_s = buf9 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = buf9 } });
         break;
       }
     case Hacl_Agile_Hash_Blake2S_32:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_Blake2S_s,
-              { .case_Blake2S_s = buf10 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = buf10 } });
         break;
       }
     case Hacl_Agile_Hash_Blake2S_128:
       {
         #if HACL_CAN_COMPILE_VEC128
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_Blake2S_128_s,
-              { .case_Blake2S_128_s = buf11 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_128_s, { .case_Blake2S_128_s = buf11 } });
         #else
         s0 =
           KRML_EABORT(Hacl_Agile_Hash_state_s,
@@ -2481,25 +2352,13 @@ Hacl_Streaming_HMAC_digest(
       }
     case Hacl_Agile_Hash_Blake2B_32:
       {
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_Blake2B_s,
-              { .case_Blake2B_s = buf12 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = buf12 } });
         break;
       }
     case Hacl_Agile_Hash_Blake2B_256:
       {
         #if HACL_CAN_COMPILE_VEC256
-        s0 =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_Blake2B_256_s,
-              { .case_Blake2B_256_s = buf13 }
-            }
-          );
+        s0 = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_256_s, { .case_Blake2B_256_s = buf13 } });
         #else
         s0 =
           KRML_EABORT(Hacl_Agile_Hash_state_s,
@@ -2533,123 +2392,63 @@ Hacl_Streaming_HMAC_digest(
   {
     case Hacl_Agile_Hash_MD5:
       {
-        s = ((Hacl_Agile_Hash_state_s){ .tag = Hacl_Agile_Hash_MD5_s, { .case_MD5_s = buf14 } });
+        s = ((Hacl_Agile_Hash_state_s){ .tag = MD5_s, { .case_MD5_s = buf14 } });
         break;
       }
     case Hacl_Agile_Hash_SHA1:
       {
-        s = ((Hacl_Agile_Hash_state_s){ .tag = Hacl_Agile_Hash_SHA1_s, { .case_SHA1_s = buf15 } });
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA1_s, { .case_SHA1_s = buf15 } });
         break;
       }
     case Hacl_Agile_Hash_SHA2_224:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA2_224_s,
-              { .case_SHA2_224_s = buf16 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_224_s, { .case_SHA2_224_s = buf16 } });
         break;
       }
     case Hacl_Agile_Hash_SHA2_256:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA2_256_s,
-              { .case_SHA2_256_s = buf17 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_256_s, { .case_SHA2_256_s = buf17 } });
         break;
       }
     case Hacl_Agile_Hash_SHA2_384:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA2_384_s,
-              { .case_SHA2_384_s = buf18 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_384_s, { .case_SHA2_384_s = buf18 } });
         break;
       }
     case Hacl_Agile_Hash_SHA2_512:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA2_512_s,
-              { .case_SHA2_512_s = buf19 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA2_512_s, { .case_SHA2_512_s = buf19 } });
         break;
       }
     case Hacl_Agile_Hash_SHA3_224:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA3_224_s,
-              { .case_SHA3_224_s = buf20 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_224_s, { .case_SHA3_224_s = buf20 } });
         break;
       }
     case Hacl_Agile_Hash_SHA3_256:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA3_256_s,
-              { .case_SHA3_256_s = buf21 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_256_s, { .case_SHA3_256_s = buf21 } });
         break;
       }
     case Hacl_Agile_Hash_SHA3_384:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA3_384_s,
-              { .case_SHA3_384_s = buf22 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_384_s, { .case_SHA3_384_s = buf22 } });
         break;
       }
     case Hacl_Agile_Hash_SHA3_512:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_SHA3_512_s,
-              { .case_SHA3_512_s = buf23 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = SHA3_512_s, { .case_SHA3_512_s = buf23 } });
         break;
       }
     case Hacl_Agile_Hash_Blake2S_32:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_Blake2S_s,
-              { .case_Blake2S_s = buf24 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_s, { .case_Blake2S_s = buf24 } });
         break;
       }
     case Hacl_Agile_Hash_Blake2S_128:
       {
         #if HACL_CAN_COMPILE_VEC128
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_Blake2S_128_s,
-              { .case_Blake2S_128_s = buf25 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2S_128_s, { .case_Blake2S_128_s = buf25 } });
         #else
         s =
           KRML_EABORT(Hacl_Agile_Hash_state_s,
@@ -2659,25 +2458,13 @@ Hacl_Streaming_HMAC_digest(
       }
     case Hacl_Agile_Hash_Blake2B_32:
       {
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_Blake2B_s,
-              { .case_Blake2B_s = buf26 }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_s, { .case_Blake2B_s = buf26 } });
         break;
       }
     case Hacl_Agile_Hash_Blake2B_256:
       {
         #if HACL_CAN_COMPILE_VEC256
-        s =
-          (
-            (Hacl_Agile_Hash_state_s){
-              .tag = Hacl_Agile_Hash_Blake2B_256_s,
-              { .case_Blake2B_256_s = buf }
-            }
-          );
+        s = ((Hacl_Agile_Hash_state_s){ .tag = Blake2B_256_s, { .case_Blake2B_256_s = buf } });
         #else
         s =
           KRML_EABORT(Hacl_Agile_Hash_state_s,

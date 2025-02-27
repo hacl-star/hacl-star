@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#include "Hacl_Spec.h"
+#include "internal/Hacl_Spec.h"
 #include "../EverCrypt_AEAD.h"
 
 /**

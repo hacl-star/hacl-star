@@ -32,9 +32,9 @@ extern "C" {
 
 #include "../EverCrypt_Hash.h"
 
-typedef struct EverCrypt_Hash_state_s_s
+typedef struct state_s_s
 {
-  EverCrypt_Hash_state_s_tags tag;
+  state_s_tags tag;
   union {
     uint32_t *case_MD5_s;
     uint32_t *case_SHA1_s;
@@ -53,13 +53,13 @@ typedef struct EverCrypt_Hash_state_s_s
   }
   ;
 }
-EverCrypt_Hash_state_s;
+state_s;
 
 void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
 typedef struct EverCrypt_Hash_Incremental_state_t_s
 {
-  EverCrypt_Hash_state_s *block_state;
+  state_s *block_state;
   uint8_t *buf;
   uint64_t total_len;
 }

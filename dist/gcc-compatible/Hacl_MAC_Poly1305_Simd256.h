@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "libintvector.h"
 
 typedef struct Hacl_MAC_Poly1305_Simd256_state_t_s Hacl_MAC_Poly1305_Simd256_state_t;
 
