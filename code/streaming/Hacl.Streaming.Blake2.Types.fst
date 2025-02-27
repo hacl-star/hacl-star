@@ -33,9 +33,6 @@ let two_vec256 = Core.(state_p Spec.Blake2B M256 & state_p Spec.Blake2B M256)
 [@ CAbstractStruct ]
 let block_state_blake2b_32 (kk: G.erased (Common.index Spec.Blake2B)) =
   Common.s Spec.Blake2B kk Core.M32
-private
-let optional_block_state_blake2b_32 (kk: G.erased (Common.index Spec.Blake2B)) =
-  option (block_state_blake2b_32 kk)
 
 [@ CAbstractStruct ]
 let block_state_blake2b_256 (kk: G.erased (Common.index Spec.Blake2B)) =
@@ -43,16 +40,10 @@ let block_state_blake2b_256 (kk: G.erased (Common.index Spec.Blake2B)) =
   let open Common in
   let open Hacl.Streaming.Blake2.Params in
   singleton (kk.key_length) & singleton (kk.digest_length) & singleton_b (kk.last_node) & two_vec256
-private
-let optional_block_state_blake2b_256 (kk: G.erased (Common.index Spec.Blake2B)) =
-  option (block_state_blake2b_256 kk)
 
 [@ CAbstractStruct ]
 let block_state_blake2s_32 (kk: G.erased (Common.index Spec.Blake2S)) =
   Common.s Spec.Blake2S kk Core.M32
-private
-let optional_block_state_blake2s_32 (kk: G.erased (Common.index Spec.Blake2S)) =
-  option (block_state_blake2s_32 kk)
 
 [@ CAbstractStruct ]
 let block_state_blake2s_128 (kk: G.erased (Common.index Spec.Blake2S)) =
@@ -60,6 +51,3 @@ let block_state_blake2s_128 (kk: G.erased (Common.index Spec.Blake2S)) =
   let open Common in
   let open Hacl.Streaming.Blake2.Params in
   singleton (kk.key_length) & singleton (kk.digest_length) & singleton_b (kk.last_node) & two_vec128
-private
-let optional_block_state_blake2s_128 (kk: G.erased (Common.index Spec.Blake2S)) =
-  option (block_state_blake2s_128 kk)

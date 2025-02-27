@@ -13,11 +13,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2s_Simd128_block_state_t =
       typedef hacl_Streaming_Blake2_Types_block_state_blake2s_128
         "Hacl_Hash_Blake2s_Simd128_block_state_t"
-    type hacl_Hash_Blake2s_Simd128_optional_block_state_t =
-      hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128
-    let hacl_Hash_Blake2s_Simd128_optional_block_state_t =
-      typedef hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128
-        "Hacl_Hash_Blake2s_Simd128_optional_block_state_t"
     type hacl_Hash_Blake2s_Simd128_state_t =
       [ `hacl_Hash_Blake2s_Simd128_state_t ] structure
     let (hacl_Hash_Blake2s_Simd128_state_t :

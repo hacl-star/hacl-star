@@ -31,10 +31,28 @@ extern "C" {
 #endif
 
 #include "../Hacl_Streaming_HMAC.h"
+#include "libintvector.h"
+
+#define Hacl_Agile_Hash_MD5_s 0
+#define Hacl_Agile_Hash_SHA1_s 1
+#define Hacl_Agile_Hash_SHA2_224_s 2
+#define Hacl_Agile_Hash_SHA2_256_s 3
+#define Hacl_Agile_Hash_SHA2_384_s 4
+#define Hacl_Agile_Hash_SHA2_512_s 5
+#define Hacl_Agile_Hash_SHA3_224_s 6
+#define Hacl_Agile_Hash_SHA3_256_s 7
+#define Hacl_Agile_Hash_SHA3_384_s 8
+#define Hacl_Agile_Hash_SHA3_512_s 9
+#define Hacl_Agile_Hash_Blake2S_s 10
+#define Hacl_Agile_Hash_Blake2S_128_s 11
+#define Hacl_Agile_Hash_Blake2B_s 12
+#define Hacl_Agile_Hash_Blake2B_256_s 13
+
+typedef uint8_t Hacl_Agile_Hash_state_s_tags;
 
 typedef struct Hacl_Agile_Hash_state_s_s
 {
-  state_s_tags tag;
+  Hacl_Agile_Hash_state_s_tags tag;
   union {
     uint32_t *case_MD5_s;
     uint32_t *case_SHA1_s;

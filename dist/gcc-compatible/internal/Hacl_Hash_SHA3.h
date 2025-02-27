@@ -57,19 +57,20 @@ Hacl_Hash_SHA3_update_last_sha3(
   uint32_t input_len
 );
 
+typedef struct Hacl_Hash_SHA3_hash_buf_s
+{
+  Spec_Hash_Definitions_hash_alg fst;
+  uint64_t *snd;
+}
+Hacl_Hash_SHA3_hash_buf;
+
 typedef struct Hacl_Hash_SHA3_state_t_s
 {
-  hash_buf block_state;
+  Hacl_Hash_SHA3_hash_buf block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
 Hacl_Hash_SHA3_state_t;
-
-#define FStar_Pervasives_Native_None 0
-#define FStar_Pervasives_Native_Some 1
-
-typedef uint8_t
-FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags;
 
 #if defined(__cplusplus)
 }

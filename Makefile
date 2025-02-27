@@ -762,7 +762,9 @@ INTRINSIC_FLAGS = \
   \
   -add-include 'Hacl_Hash_SHA3_Simd256.h:"libintvector.h"' \
   -add-include 'Hacl_Streaming_Types.h:"libintvector.h"' \
-  -add-include 'Vale.h:"libintvector.h"'
+  -add-include 'Vale.h:"libintvector.h"' \
+  -add-include 'EverCrypt_Hash.h:"libintvector.h"' \
+  -add-include 'Hacl_Streaming_HMAC.h:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \

@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#include "internal/Hacl_Hash_SHA3.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "../Hacl_MAC_Poly1305.h"
 
 void Hacl_MAC_Poly1305_poly1305_init(uint64_t *ctx, uint8_t *key);
@@ -48,7 +48,8 @@ Hacl_MAC_Poly1305_state_t;
 
 typedef struct FStar_Pervasives_Native_option___uint8_t__s
 {
-  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
   uint8_t *v;
 }
 FStar_Pervasives_Native_option___uint8_t_;

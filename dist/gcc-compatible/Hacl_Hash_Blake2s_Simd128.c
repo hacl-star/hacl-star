@@ -532,6 +532,15 @@ Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_Simd128_malloc_with_key(void)
   return buf;
 }
 
+typedef struct
+option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128____s
+{
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
+  Hacl_Streaming_Blake2_Types_block_state_blake2s_128 v;
+}
+option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___;
+
 static Hacl_Hash_Blake2s_Simd128_state_t
 *malloc_raw(Hacl_Hash_Blake2b_index kk, Hacl_Hash_Blake2b_params_and_key key)
 {
@@ -549,13 +558,14 @@ static Hacl_Hash_Blake2s_Simd128_state_t
   {
     memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   }
-  Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128 block_state;
+  option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___
+  block_state;
   if (wv0 == NULL)
   {
     block_state =
       (
-        (Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128){
-          .tag = Hacl_Streaming_Blake2_Types_None
+        (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+          .tag = FStar_Pervasives_Native_None
         }
       );
   }
@@ -574,8 +584,8 @@ static Hacl_Hash_Blake2s_Simd128_state_t
       KRML_ALIGNED_FREE(wv0);
       block_state =
         (
-          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128){
-            .tag = Hacl_Streaming_Blake2_Types_None
+          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+            .tag = FStar_Pervasives_Native_None
           }
         );
     }
@@ -583,8 +593,8 @@ static Hacl_Hash_Blake2s_Simd128_state_t
     {
       block_state =
         (
-          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128){
-            .tag = Hacl_Streaming_Blake2_Types_Some,
+          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+            .tag = FStar_Pervasives_Native_Some,
             .v = {
               .fst = kk.key_length,
               .snd = kk.digest_length,
@@ -595,12 +605,12 @@ static Hacl_Hash_Blake2s_Simd128_state_t
         );
     }
   }
-  if (block_state.tag == Hacl_Streaming_Blake2_Types_None)
+  if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == Hacl_Streaming_Blake2_Types_Some)
+  if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Streaming_Blake2_Types_block_state_blake2s_128 block_state1 = block_state.v;
     Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
@@ -1304,13 +1314,14 @@ Hacl_Hash_Blake2s_Simd128_state_t
   {
     memset(wv0, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   }
-  Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128 block_state;
+  option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___
+  block_state;
   if (wv0 == NULL)
   {
     block_state =
       (
-        (Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128){
-          .tag = Hacl_Streaming_Blake2_Types_None
+        (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+          .tag = FStar_Pervasives_Native_None
         }
       );
   }
@@ -1329,8 +1340,8 @@ Hacl_Hash_Blake2s_Simd128_state_t
       KRML_ALIGNED_FREE(wv0);
       block_state =
         (
-          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128){
-            .tag = Hacl_Streaming_Blake2_Types_None
+          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+            .tag = FStar_Pervasives_Native_None
           }
         );
     }
@@ -1338,8 +1349,8 @@ Hacl_Hash_Blake2s_Simd128_state_t
     {
       block_state =
         (
-          (Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128){
-            .tag = Hacl_Streaming_Blake2_Types_Some,
+          (option___uint8_t___uint8_t___bool_____Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec128___){
+            .tag = FStar_Pervasives_Native_Some,
             .v = {
               .fst = i.key_length,
               .snd = i.digest_length,
@@ -1350,12 +1361,12 @@ Hacl_Hash_Blake2s_Simd128_state_t
         );
     }
   }
-  if (block_state.tag == Hacl_Streaming_Blake2_Types_None)
+  if (block_state.tag == FStar_Pervasives_Native_None)
   {
     KRML_HOST_FREE(buf);
     return NULL;
   }
-  if (block_state.tag == Hacl_Streaming_Blake2_Types_Some)
+  if (block_state.tag == FStar_Pervasives_Native_Some)
   {
     Hacl_Streaming_Blake2_Types_block_state_blake2s_128 block_state1 = block_state.v;
     Lib_IntVector_Intrinsics_vec128 *src_b = block_state0.f3.snd;

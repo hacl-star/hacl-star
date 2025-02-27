@@ -27,6 +27,7 @@
 
 #include "Hacl_Streaming_Types.h"
 #include "internal/Hacl_Streaming_Types.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 
 const
 uint32_t
@@ -622,30 +623,24 @@ static void squeeze(uint64_t *s, uint32_t rateInBytes, uint32_t outputByteLen, u
   memcpy(b + outputByteLen - remOut, hbuf, remOut * sizeof (uint8_t));
 }
 
-typedef struct hash_buf_s
-{
-  Spec_Hash_Definitions_hash_alg fst;
-  uint64_t *snd;
-}
-hash_buf;
-
 typedef struct hash_buf2_s
 {
-  hash_buf fst;
-  hash_buf snd;
+  Hacl_Hash_SHA3_hash_buf fst;
+  Hacl_Hash_SHA3_hash_buf snd;
 }
 hash_buf2;
 
 Spec_Hash_Definitions_hash_alg Hacl_Hash_SHA3_get_alg(Hacl_Hash_SHA3_state_t *s)
 {
-  hash_buf block_state = (*s).block_state;
+  Hacl_Hash_SHA3_hash_buf block_state = (*s).block_state;
   return block_state.fst;
 }
 
 typedef struct option___Spec_Hash_Definitions_hash_alg____uint64_t___s
 {
-  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
-  hash_buf v;
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
+  Hacl_Hash_SHA3_hash_buf v;
 }
 option___Spec_Hash_Definitions_hash_alg____uint64_t__;
 
@@ -686,7 +681,7 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
   }
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
-    hash_buf block_state1 = block_state.v;
+    Hacl_Hash_SHA3_hash_buf block_state1 = block_state.v;
     Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
@@ -734,7 +729,7 @@ void Hacl_Hash_SHA3_free(Hacl_Hash_SHA3_state_t *state)
 {
   Hacl_Hash_SHA3_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
-  hash_buf block_state = scrut.block_state;
+  Hacl_Hash_SHA3_hash_buf block_state = scrut.block_state;
   uint64_t *s = block_state.snd;
   KRML_HOST_FREE(s);
   KRML_HOST_FREE(buf);
@@ -744,7 +739,7 @@ void Hacl_Hash_SHA3_free(Hacl_Hash_SHA3_state_t *state)
 Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
 {
   Hacl_Hash_SHA3_state_t scrut0 = *state;
-  hash_buf block_state0 = scrut0.block_state;
+  Hacl_Hash_SHA3_hash_buf block_state0 = scrut0.block_state;
   uint8_t *buf0 = scrut0.buf;
   uint64_t total_len0 = scrut0.total_len;
   Spec_Hash_Definitions_hash_alg i = block_state0.fst;
@@ -783,7 +778,7 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
   }
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
-    hash_buf block_state1 = block_state.v;
+    Hacl_Hash_SHA3_hash_buf block_state1 = block_state.v;
     hash_buf2 scrut = { .fst = block_state0, .snd = block_state1 };
     uint64_t *s_dst = scrut.snd.snd;
     uint64_t *s_src = scrut.fst.snd;
@@ -832,7 +827,7 @@ void Hacl_Hash_SHA3_reset(Hacl_Hash_SHA3_state_t *state)
 {
   Hacl_Hash_SHA3_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
-  hash_buf block_state = scrut.block_state;
+  Hacl_Hash_SHA3_hash_buf block_state = scrut.block_state;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
   KRML_MAYBE_UNUSED_VAR(i);
   Spec_Hash_Definitions_hash_alg a1 = block_state.fst;
@@ -847,7 +842,7 @@ Hacl_Streaming_Types_error_code
 Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t chunk_len)
 {
   Hacl_Hash_SHA3_state_t s = *state;
-  hash_buf block_state = s.block_state;
+  Hacl_Hash_SHA3_hash_buf block_state = s.block_state;
   uint64_t total_len = s.total_len;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
   if ((uint64_t)chunk_len > 0xFFFFFFFFFFFFFFFFULL - total_len)
@@ -866,7 +861,7 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
   if (chunk_len <= block_len(i) - sz)
   {
     Hacl_Hash_SHA3_state_t s1 = *state;
-    hash_buf block_state1 = s1.block_state;
+    Hacl_Hash_SHA3_hash_buf block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -888,7 +883,7 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
   else if (sz == 0U)
   {
     Hacl_Hash_SHA3_state_t s1 = *state;
-    hash_buf block_state1 = s1.block_state;
+    Hacl_Hash_SHA3_hash_buf block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -941,7 +936,7 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
     Hacl_Hash_SHA3_state_t s1 = *state;
-    hash_buf block_state10 = s1.block_state;
+    Hacl_Hash_SHA3_hash_buf block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
     uint32_t sz10;
@@ -966,7 +961,7 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
         }
       );
     Hacl_Hash_SHA3_state_t s10 = *state;
-    hash_buf block_state1 = s10.block_state;
+    Hacl_Hash_SHA3_hash_buf block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
     uint32_t sz1;
@@ -1031,7 +1026,7 @@ digest_(
 )
 {
   Hacl_Hash_SHA3_state_t scrut0 = *state;
-  hash_buf block_state = scrut0.block_state;
+  Hacl_Hash_SHA3_hash_buf block_state = scrut0.block_state;
   uint8_t *buf_ = scrut0.buf;
   uint64_t total_len = scrut0.total_len;
   uint32_t r;
@@ -1045,7 +1040,7 @@ digest_(
   }
   uint8_t *buf_1 = buf_;
   uint64_t buf[25U] = { 0U };
-  hash_buf tmp_block_state = { .fst = a, .snd = buf };
+  Hacl_Hash_SHA3_hash_buf tmp_block_state = { .fst = a, .snd = buf };
   hash_buf2 scrut = { .fst = block_state, .snd = tmp_block_state };
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;

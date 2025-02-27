@@ -35,21 +35,11 @@ let blake2s_32 =
 let block_state_t (kk: G.erased (Common.index Spec.Blake2S)) =
   Hacl.Streaming.Blake2.Types.block_state_blake2s_32 kk
 
-let super_hack () =
-  let open FStar.Tactics in
-  let optional_state = [ "Hacl"; "Streaming"; "Blake2"; "Types"; "optional_block_state_blake2s_32"] in
-  let optional_state = FStar.Tactics.pack_fv optional_state in
-  let optional_state = pack (Tv_FVar optional_state) in
-  let fv = pack_fv (cur_module () `FStar.List.Tot.append` [ "optional_state" ]) in
-  let t: term = pack Tv_Unknown in
-  let se = pack_sigelt (Sg_Let false [ pack_lb ({ lb_fv = fv; lb_us = []; lb_typ = t; lb_def = optional_state }) ]) in
-  let se = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se in
-  [ se ]
-
-%splice[optional_state] (super_hack ())
-
-let optional_block_state_t (kk: G.erased (Common.index Spec.Blake2S)) =
-  optional_state kk
+// Doing this would result in a public type which would contain an incomplete struct. Let this be
+// inserted somewhere in this file as a private abbreviation (with a bad auto-generated name), but
+// at least that sees the complete struct definition in scope.
+(* let optional_block_state_t (kk: G.erased (Common.index Spec.Blake2S)) = *)
+(*   option (block_state_t kk) *)
 
 let state_t (kk: G.erased (Common.index Spec.Blake2S)) =
   F.state_s blake2s_32 kk (Common.s Spec.Blake2S kk Core.M32) (Common.blake_key Spec.Blake2S kk)

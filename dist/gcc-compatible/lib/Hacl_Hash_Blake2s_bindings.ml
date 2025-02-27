@@ -34,11 +34,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2s_block_state_t =
       typedef hacl_Streaming_Blake2_Types_block_state_blake2s_32
         "Hacl_Hash_Blake2s_block_state_t"
-    type hacl_Hash_Blake2s_optional_block_state_t =
-      hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32
-    let hacl_Hash_Blake2s_optional_block_state_t =
-      typedef hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32
-        "Hacl_Hash_Blake2s_optional_block_state_t"
     type hacl_Hash_Blake2s_state_t = [ `hacl_Hash_Blake2s_state_t ] structure
     let (hacl_Hash_Blake2s_state_t :
       [ `hacl_Hash_Blake2s_state_t ] structure typ) =

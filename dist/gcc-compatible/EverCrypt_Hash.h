@@ -38,6 +38,8 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "EverCrypt_Error.h"
 
+typedef struct EverCrypt_Hash_state_s_s EverCrypt_Hash_state_s;
+
 uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 typedef struct EverCrypt_Hash_Incremental_state_t_s EverCrypt_Hash_Incremental_state_t;

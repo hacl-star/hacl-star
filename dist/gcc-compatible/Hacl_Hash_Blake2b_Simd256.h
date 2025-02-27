@@ -51,9 +51,6 @@ extern "C" {
 typedef Hacl_Streaming_Blake2_Types_block_state_blake2b_256
 Hacl_Hash_Blake2b_Simd256_block_state_t;
 
-typedef Hacl_Streaming_Blake2_Types_optional_block_state_blake2b_256
-Hacl_Hash_Blake2b_Simd256_optional_block_state_t;
-
 typedef struct Hacl_Hash_Blake2b_Simd256_state_t_s Hacl_Hash_Blake2b_Simd256_state_t;
 
 /**

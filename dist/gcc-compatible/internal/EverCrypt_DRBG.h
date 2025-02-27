@@ -33,9 +33,16 @@ extern "C" {
 #include "Hacl_HMAC_DRBG.h"
 #include "../EverCrypt_DRBG.h"
 
+#define EverCrypt_DRBG_SHA1_s 0
+#define EverCrypt_DRBG_SHA2_256_s 1
+#define EverCrypt_DRBG_SHA2_384_s 2
+#define EverCrypt_DRBG_SHA2_512_s 3
+
+typedef uint8_t EverCrypt_DRBG_state_s_tags;
+
 typedef struct EverCrypt_DRBG_state_s_s
 {
-  state_s_tags tag;
+  EverCrypt_DRBG_state_s_tags tag;
   union {
     Hacl_HMAC_DRBG_state case_SHA1_s;
     Hacl_HMAC_DRBG_state case_SHA2_256_s;
