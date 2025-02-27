@@ -743,6 +743,7 @@ TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 # bar.h
 # Note: we would like to maintain the invariant (as of Feb 2025) that we NEVER include libintvector.h from a
 # public header. See https://github.com/python/cpython/issues/130213
+# FIXME: Sha3_Simd256 does *not* have an internal header so we can't enforce the invariant here
 INTRINSIC_FLAGS = \
   -add-include 'Hacl_P256.c:"lib_intrinsics.h"' \
   \
@@ -760,7 +761,7 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_Hash_Blake2b_Simd256.h:"libintvector.h"' \
   -add-include 'Hacl_MAC_Poly1305_Simd256.h:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_SHA3_Simd256.h:"libintvector.h"' \
+  -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"' \
   -add-include 'Hacl_Streaming_Types.h:"libintvector.h"' \
   -add-include 'Vale.h:"libintvector.h"' \
   -add-include 'Vale.h:<inttypes.h>' \
