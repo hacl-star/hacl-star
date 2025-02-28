@@ -25,6 +25,9 @@
 
 #include "internal/Hacl_Frodo_KEM.h"
 
+#include "Lib_RandomBuffer_System.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA3.h"
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Krmllib.h"
 

@@ -5,7 +5,6 @@ open FStar.Mul
 open Spec.Curve25519
 open Spec.Ed25519.PointOps
 
-module LM = Lib.NatMod
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 

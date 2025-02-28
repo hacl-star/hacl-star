@@ -26,7 +26,7 @@ friend Lib.LoopCombinators
 let _: squash (inversion field_spec) = allow_inversion field_spec
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --record_options"
 
 inline_for_extraction noextract
 let get_acc #s (ctx:poly1305_ctx s) : Stack (felem s)
@@ -132,7 +132,7 @@ let ctx_inv_zeros #s ctx h =
   precomp_inv_zeros #s precomp_b h
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --record_options"
 
 inline_for_extraction noextract
 val poly1305_encode_block:
@@ -184,6 +184,7 @@ val poly1305_encode_last:
     felem_fits h1 f (1, 1, 1, 1, 1) /\
     (feval h1 f).[0] == S.encode (v len) (as_seq h0 b))
 
+#push-options "--z3rlimit 500 --split_queries always"
 let poly1305_encode_last #s f len b =
   push_frame();
   let tmp = create 16ul (u8 0) in
@@ -198,7 +199,7 @@ let poly1305_encode_last #s f len b =
   lemma_feval_is_fas_nat h1 f;
   set_bit f (len *! 8ul);
   pop_frame()
-
+#pop-options
 
 inline_for_extraction noextract
 val poly1305_encode_r:
@@ -250,6 +251,7 @@ val update1:
     (feval h1 acc).[0] == S.poly1305_update1
       (feval h0 (gsub p 0ul 5ul)).[0] 16 (as_seq h0 b) (feval h0 acc).[0])
 
+#restart-solver
 let update1 #s pre b acc =
   push_frame ();
   let e = create (nlimb s) (limb_zero s) in
@@ -604,6 +606,7 @@ let poly1305_finish #s tag key ctx =
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
   uints64_to_bytes_le tag f30 f31
 
+#restart-solver
 noextract
 [@ Meta.Attribute.specialize ]
 let poly1305_mac #s output input input_len key =

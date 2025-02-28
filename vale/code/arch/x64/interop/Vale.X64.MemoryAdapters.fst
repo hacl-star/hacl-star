@@ -1,13 +1,11 @@
 module Vale.X64.MemoryAdapters
 
+module Map16 = Vale.Lib.Map16
 open FStar.Mul
 open Vale.Interop.Base
-module HS = FStar.HyperStack
 module ME = Vale.X64.Memory
 module IB = Vale.Interop.Base
 module VS = Vale.X64.State
-module T = FStar.Tactics
-module B = LowStar.Buffer
 module DV = LowStar.BufferView.Down
 open Vale.Arch.HeapImpl
 open Vale.Arch.Heap
@@ -50,7 +48,6 @@ let create_initial_vale_full_heap ih mt =
 
 let buffer_addr_is_nat64 (#t:base_typ) (x:ME.buffer t) (s:VS.vale_state) = ()
 
-module V = Vale.X64.Decls
 friend Vale.X64.Decls
 
 let code_equiv = ()

@@ -25,6 +25,8 @@
 
 #include "Hacl_Bignum256.h"
 
+#include "Hacl_Krmllib.h"
+#include "Hacl_Bignum.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"
@@ -1170,7 +1172,10 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum256_mont_ctx_init(uint64_
     (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *)KRML_HOST_MALLOC(sizeof (
         Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
       ));
-  buf[0U] = res;
+  if (buf != NULL)
+  {
+    buf[0U] = res;
+  }
   return buf;
 }
 

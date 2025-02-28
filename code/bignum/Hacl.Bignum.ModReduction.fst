@@ -17,7 +17,6 @@ module BN = Hacl.Bignum
 module AM = Hacl.Bignum.AlmostMontgomery
 module BM = Hacl.Bignum.Montgomery
 module SM = Hacl.Spec.Bignum.Montgomery
-module BD = Hacl.Spec.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

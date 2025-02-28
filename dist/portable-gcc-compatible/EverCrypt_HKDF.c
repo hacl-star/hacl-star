@@ -25,6 +25,7 @@
 
 #include "EverCrypt_HKDF.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "internal/EverCrypt_HMAC.h"
 
 /* SNIPPET_START: expand_sha1 */

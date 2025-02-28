@@ -11,7 +11,6 @@ open Lib.ByteBuffer
 open Hacl.Bignum.Definitions
 
 module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
 
 module S = Hacl.Spec.Bignum.Convert
 

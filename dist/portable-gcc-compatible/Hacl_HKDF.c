@@ -25,6 +25,8 @@
 
 #include "Hacl_HKDF.h"
 
+#include "Hacl_HMAC.h"
+
 /* SNIPPET_START: Hacl_HKDF_expand_sha2_256 */
 
 /**

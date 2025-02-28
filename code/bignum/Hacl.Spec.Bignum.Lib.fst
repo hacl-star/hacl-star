@@ -7,9 +7,7 @@ open Lib.Sequence
 
 open Hacl.Spec.Bignum.Definitions
 
-module BSeq = Lib.ByteSequence
 module Loops = Lib.LoopCombinators
-module BB = Hacl.Spec.Bignum.Base
 
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

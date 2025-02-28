@@ -6,7 +6,6 @@ module IA = Vale.Interop.Assumptions
 module V = Vale.X64.Decls
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
-module LSig = Vale.AsLowStar.LowStarSig
 module W = Vale.AsLowStar.Wrapper
 module VS = Vale.X64.State
 module MS = Vale.X64.Machine_s
@@ -37,7 +36,7 @@ assume val pre : VSig.vale_pre dom
 assume val post : VSig.vale_post dom
 assume val v: VSig.vale_sig_stdcall pre post
 assume val c: V.va_code
-
+#set-options "--fuel 4"
 [@__reduce__]
 let call_c_t = IX64.as_lowstar_sig_t_weak_stdcall c dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
 
@@ -75,7 +74,7 @@ let vm_post : VSig.vale_post  vm_dom =
       VM.va_ens_Memcpy c va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) va_s1 f
 
 module VS = Vale.X64.State
-#reset-options "--print_effect_args --z3rlimit 200"
+#set-options "--z3rlimit 200"
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -109,6 +108,7 @@ let vm_lemma = as_t #(VSig.vale_sig_stdcall vm_pre vm_post) vm_lemma'
 
 let code_Memcpy = VM.va_code_Memcpy IA.win
 
+#restart-solver
 (* Here's the type expected for the memcpy wrapper *)
 [@__reduce__]
 let lowstar_Memcpy_t =
@@ -132,10 +132,8 @@ let lowstar_Memcpy_normal_t //: normal lowstar_Memcpy_t
 
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
-module MB = LowStar.Monotonic.Buffer
 open FStar.HyperStack.ST
 
-module M = Vale.X64.Memory
 
 let test (x:b64) =
   assert (V.buffer_length (as_vale_buffer x) == (B.length x * view_n TUInt8) / view_n TUInt64);
@@ -145,7 +143,6 @@ let itest (x:ib64) =
   assert (V.buffer_length (as_vale_immbuffer x) == B.length x / 8)
 
 module T = FStar.Tactics
-#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 module LBV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 
@@ -244,12 +241,14 @@ let lowstar_aesni_t =
     _
     (W.mk_prediction code_aesni aesni_dom [] (aesni_lemma code_aesni IA.win))
 
+#push-options "--fuel 3"
 (* And here's the check_aesni wrapper itself *)
 let lowstar_aesni : lowstar_aesni_t  =
   IX64.wrap_weak_stdcall
     (coerce code_aesni)
     aesni_dom
     (W.mk_prediction code_aesni aesni_dom [] (aesni_lemma code_aesni IA.win))
+#pop-options
 
 let lowstar_aesni_normal_t //: normal lowstar_aesni_t
   = as_normal_t #lowstar_aesni_t lowstar_aesni
@@ -374,6 +373,7 @@ let ta_lemma = as_t #(VSig.vale_sig_stdcall ta_pre ta_post) ta_lemma'
 
 let code_ta = TA.va_code_Test IA.win
 
+#push-options "--fuel 3"
 (* Here's the type expected for the check_aesni wrapper *)
 [@__reduce__]
 let lowstar_ta_t =
@@ -391,6 +391,7 @@ let lowstar_ta : lowstar_ta_t  =
     (coerce code_ta)
     ta_dom
     (W.mk_prediction code_ta ta_dom [] (ta_lemma code_ta IA.win))
+#pop-options
 
 let lowstar_ta_normal_t //: normal lowstar_ta_t
   = as_normal_t #lowstar_ta_t lowstar_ta

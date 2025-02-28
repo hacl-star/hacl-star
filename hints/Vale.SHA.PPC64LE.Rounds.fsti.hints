@@ -1,5 +1,5 @@
 [
-  "GÙ–\rLóºÚMÂ. ¨AìQ",
+  "47d9960d4cf3bada4dc22e20a841ec51",
   [
     [
       "Vale.SHA.PPC64LE.Rounds.va_lemma_Loop_rounds_0_15",
@@ -8,13 +8,8 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "FStar.Ghost_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.List.Tot.Base_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128",
         "equality_tok_Vale.Arch.HeapTypes_s.Secret@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
@@ -31,12 +26,10 @@
         "equation_Vale.PPC64LE.Memory.buffer128",
         "equation_Vale.SHA.PPC64LE.SHA_helpers.block_w",
         "equation_Vale.SHA.PPC64LE.SHA_helpers.hash256",
-        "equation_Vale.SHA.PPC64LE.SHA_helpers.k_reqs",
         "equation_Vale.SHA.PPC64LE.SHA_helpers.quads_to_block_be",
         "equation_Vale.SHA.PPC64LE.SHA_helpers.repeat_range_vale",
+        "equation_Vale.SHA.PPC64LE.SHA_helpers.size_block_w_256",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
-        "function_token_typing_Vale.Arch.HeapImpl.vale_heap",
-        "function_token_typing_Vale.Def.Words_s.nat32",
         "function_token_typing_Vale.PPC64LE.State.same_heap_types",
         "int_inversion", "int_typing", "kinding_Vale.Def.Words_s.four@tok",
         "lemma_FStar.Seq.Base.lemma_init_len",
@@ -50,6 +43,7 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5a08e3b8375ab4709082ea34995550e6",
         "refinement_interpretation_Tm_refine_697708a075ea6ff9c66e6f901d44e72e",
         "refinement_interpretation_Tm_refine_6c6633917f79a67f4eaac4ed70320fc6",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
@@ -59,15 +53,17 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_full_heap__item__vf_heaplets",
-        "typing_Vale.Lib.Map16.sel",
+        "typing_Vale.Arch.HeapImpl.vale_heap",
+        "typing_Vale.Def.Words_s.nat32", "typing_Vale.Lib.Map16.sel",
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__ms_heap",
         "typing_Vale.PPC64LE.Memory.buffer_as_seq",
         "typing_Vale.SHA.PPC64LE.SHA_helpers.quads_to_block_be",
         "typing_Vale.SHA.PPC64LE.SHA_helpers.repeat_range_vale",
+        "typing_Vale.SHA.PPC64LE.SHA_helpers.word",
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "27a41e1179bd539d3921ec282dafc667"
+      "bf9d24d8761afe86a8cf54b3dd5877d6"
     ],
     [
       "Vale.SHA.PPC64LE.Rounds.va_wp_Loop_rounds_0_15",
@@ -76,13 +72,8 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "FStar.Ghost_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.List.Tot.Base_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128",
         "equality_tok_Vale.Arch.HeapTypes_s.Secret@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
@@ -101,10 +92,7 @@
         "equation_Vale.SHA.PPC64LE.SHA_helpers.repeat_range_vale",
         "equation_Vale.SHA.PPC64LE.SHA_helpers.size_block_w_256",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
-        "function_token_typing_Vale.Arch.HeapImpl.vale_heap",
-        "function_token_typing_Vale.Def.Words_s.nat32",
         "function_token_typing_Vale.PPC64LE.State.same_heap_types",
-        "function_token_typing_Vale.SHA.PPC64LE.SHA_helpers.word",
         "int_inversion", "int_typing", "kinding_Vale.Def.Words_s.four@tok",
         "lemma_FStar.Seq.Base.lemma_init_len",
         "lemma_FStar.Seq.Base.lemma_len_slice",
@@ -126,14 +114,16 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_full_heap__item__vf_heaplets",
-        "typing_Vale.Lib.Map16.sel",
+        "typing_Vale.Arch.HeapImpl.vale_heap",
+        "typing_Vale.Def.Words_s.nat32", "typing_Vale.Lib.Map16.sel",
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__ms_heap",
         "typing_Vale.PPC64LE.Memory.buffer_as_seq",
         "typing_Vale.SHA.PPC64LE.SHA_helpers.repeat_range_vale",
+        "typing_Vale.SHA.PPC64LE.SHA_helpers.word",
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "935f83d6b5c25dc1b117a4aaa07dc1bd"
+      "5665edbb09a278e10e0440da151a6653"
     ],
     [
       "Vale.SHA.PPC64LE.Rounds.va_quick_Loop_rounds_0_15",
@@ -145,7 +135,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "0ce26c11ca9a2e6170fff50db4bb7049"
+      "367a0380c02fffed2cc81276bedc68ff"
     ],
     [
       "Vale.SHA.PPC64LE.Rounds.va_lemma_Loop_rounds_16_47",
@@ -164,7 +154,7 @@
         "refinement_interpretation_Tm_refine_dbe0a814395dd45197dd2b50fdf08081"
       ],
       0,
-      "d9128ce6bb50ae6955e01e7316c7b944"
+      "f0d4155247a30cf9ce2cddfbce246ff4"
     ],
     [
       "Vale.SHA.PPC64LE.Rounds.va_wp_Loop_rounds_16_47",
@@ -179,7 +169,7 @@
         "refinement_interpretation_Tm_refine_dbe0a814395dd45197dd2b50fdf08081"
       ],
       0,
-      "e4434d660cffdbf354555f4f04283b03"
+      "02006530f1cf3a8189b56c7b242d9cae"
     ],
     [
       "Vale.SHA.PPC64LE.Rounds.va_quick_Loop_rounds_16_47",
@@ -191,7 +181,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "b916772f5692c8e551559b4e0f3c4b97"
+      "34cbe4004edf8c32a3aab911a06ee361"
     ],
     [
       "Vale.SHA.PPC64LE.Rounds.va_lemma_Loop_rounds_48_63",
@@ -209,7 +199,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "fd2f1c22e47174f6431416fb7abc4cca"
+      "ad6fcf859f7a918a354e04286c8968c9"
     ],
     [
       "Vale.SHA.PPC64LE.Rounds.va_wp_Loop_rounds_48_63",
@@ -226,7 +216,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "71751bc1db88aa922bd768e6a72fd4ef"
+      "a9047b17001a184a7a75e79945707e88"
     ],
     [
       "Vale.SHA.PPC64LE.Rounds.va_quick_Loop_rounds_48_63",
@@ -238,7 +228,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "8ebde097fc26548ce0721992fee562f0"
+      "cfc2fbc8172d5103c3ca57030f16bb17"
     ]
   ]
 ]

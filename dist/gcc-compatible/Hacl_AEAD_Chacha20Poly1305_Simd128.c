@@ -25,6 +25,7 @@
 
 #include "Hacl_AEAD_Chacha20Poly1305_Simd128.h"
 
+#include "Hacl_Chacha20_Vec128.h"
 #include "internal/Hacl_MAC_Poly1305_Simd128.h"
 #include "internal/Hacl_Krmllib.h"
 #include "libintvector.h"

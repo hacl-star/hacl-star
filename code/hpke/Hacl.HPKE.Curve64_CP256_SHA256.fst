@@ -4,7 +4,6 @@ open Hacl.Meta.HPKE
 
 module IDH = Hacl.HPKE.Interface.DH
 module IHK = Hacl.HPKE.Interface.HKDF
-module IHash = Hacl.HPKE.Interface.Hash
 module IAEAD = Hacl.HPKE.Interface.AEAD
 
 friend Hacl.Meta.HPKE

@@ -25,6 +25,10 @@
 
 #include "EverCrypt_AEAD.h"
 
+#include "Hacl_Spec.h"
+#include "EverCrypt_Error.h"
+#include "EverCrypt_Chacha20Poly1305.h"
+#include "EverCrypt_AutoConfig2.h"
 #include "internal/Vale.h"
 #include "internal/Hacl_Spec.h"
 #include "config.h"
@@ -103,7 +107,10 @@ create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
   EverCrypt_AEAD_state_s
   *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
-  p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek });
+  if (p != NULL)
+  {
+    p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek });
+  }
   memcpy(ek, k, 32U * sizeof (uint8_t));
   dst[0U] = p;
   return EverCrypt_Error_Success;
@@ -133,7 +140,10 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     aes128_keyhash_init(keys_b, hkeys_b);
     EverCrypt_AEAD_state_s
     *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
-    p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek });
+    if (p != NULL)
+    {
+      p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek });
+    }
     *dst = p;
     return EverCrypt_Error_Success;
   }
@@ -167,7 +177,10 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     aes256_keyhash_init(keys_b, hkeys_b);
     EverCrypt_AEAD_state_s
     *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
-    p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek });
+    if (p != NULL)
+    {
+      p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek });
+    }
     *dst = p;
     return EverCrypt_Error_Success;
   }

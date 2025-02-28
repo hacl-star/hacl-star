@@ -25,6 +25,8 @@
 
 #include "Hacl_SHA2_Vec256.h"
 
+#include "Hacl_SHA2_Types.h"
+#include "Hacl_Krmllib.h"
 #include "internal/Hacl_SHA2_Types.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"

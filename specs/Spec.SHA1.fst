@@ -1,7 +1,6 @@
 module Spec.SHA1
 
 open Lib.IntTypes
-module H = Spec.Hash.Definitions
 module Seq = FStar.Seq
 
 open Spec.Hash.Definitions

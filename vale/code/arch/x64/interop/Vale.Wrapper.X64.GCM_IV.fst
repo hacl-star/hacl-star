@@ -1,10 +1,12 @@
 module Vale.Wrapper.X64.GCM_IV
 
+module UV = LowStar.BufferView.Up
+module HS = FStar.HyperStack
+module DV = LowStar.BufferView.Down
 open FStar.Mul
 open Vale.Stdcalls.X64.GCM_IV
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters
-module V = Vale.X64.Decls
 open Vale.SHA.Simplify_Sha
 open Vale.AES.Gcm_simplify
 open Vale.AES.GCM_helpers

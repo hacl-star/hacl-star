@@ -8,15 +8,12 @@ open FStar.HyperStack.ST
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-module HS = FStar.HyperStack
-module B = LowStar.Buffer
 module G = FStar.Ghost
 module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module F = Hacl.Streaming.Functor
 
-module ST = FStar.HyperStack.ST
 
 open LowStar.BufferOps
 open FStar.Mul
@@ -127,7 +124,7 @@ let hacl_md (a:alg)// : block unit =
       Spec.Hash.Incremental.hash_is_hash_incremental' a input ())
 
     (* index_of_state *)
-    (fun _ _ -> ())
+    (fun _ _ _ -> ())
 
     (* init *)
     (fun _ _ _ s ->
@@ -191,7 +188,12 @@ let hacl_sha2_256 = hacl_md SHA2_256
 
 let state_32 = F.state_s hacl_sha2_256 () ((state_t SHA2_256).s ()) (G.erased unit)
 
+let optional_state_32 = option state_32
+
 inline_for_extraction noextract
 let hacl_sha2_512 = hacl_md SHA2_512
 
 let state_64 = F.state_s hacl_sha2_512 () ((state_t SHA2_512).s ()) (G.erased unit)
+
+let optional_state_64 = option state_64
+

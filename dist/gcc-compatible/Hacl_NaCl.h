@@ -35,10 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Salsa20.h"
-#include "Hacl_MAC_Poly1305.h"
-#include "Hacl_Curve25519_51.h"
-
 /**
 Encrypt a message with a key and nonce.
 

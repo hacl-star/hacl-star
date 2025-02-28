@@ -1,5 +1,7 @@
 module Vale.Wrapper.X64.AEShash
 
+module UV = LowStar.BufferView.Up
+module DV = LowStar.BufferView.Down
 open FStar.Mul
 open Vale.Stdcalls.X64.AesHash
 open Vale.AsLowStar.MemoryHelpers

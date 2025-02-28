@@ -3,6 +3,7 @@
   cargo,
   dotnet-runtime,
   fetchFromGitHub,
+  flock,
   fstar,
   fstar-scripts,
   git,
@@ -121,6 +122,7 @@
         runlim
         rustc
         cargo
+        flock
       ]
       ++ (with ocamlPackages; [
         ocaml

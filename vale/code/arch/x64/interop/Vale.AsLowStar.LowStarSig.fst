@@ -15,7 +15,6 @@ module V = Vale.X64.Decls
 module VS = Vale.X64.State
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
-module Map16 = Vale.Lib.Map16
 open FStar.Mul
 
 [@__reduce__]

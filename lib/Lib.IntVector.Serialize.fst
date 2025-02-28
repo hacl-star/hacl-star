@@ -1,4 +1,5 @@
 module Lib.IntVector.Serialize
+module ST = FStar.HyperStack.ST
 
 // the proofs are the same as in Lib.ByteSequence and Lib.ByteBuffer
 

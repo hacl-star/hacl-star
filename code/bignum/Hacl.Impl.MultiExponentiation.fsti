@@ -7,7 +7,6 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module ST = FStar.HyperStack.ST
 module S = Lib.Exponentiation
 module BD = Hacl.Bignum.Definitions
 

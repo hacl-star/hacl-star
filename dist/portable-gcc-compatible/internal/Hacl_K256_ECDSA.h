@@ -35,10 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_K256_PrecompTable.h"
-#include "internal/Hacl_Bignum_K256.h"
-#include "internal/Hacl_Bignum_Base.h"
 #include "../Hacl_K256_ECDSA.h"
 #include "lib_intrinsics.h"
 

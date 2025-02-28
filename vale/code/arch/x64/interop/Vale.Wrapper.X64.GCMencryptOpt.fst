@@ -3,11 +3,12 @@ module Vale.Wrapper.X64.GCMencryptOpt
 #reset-options "--z3rlimit 50"
 let z3rlimit_hack x = ()
 
+module UV = LowStar.BufferView.Up
+module HS = FStar.HyperStack
 open FStar.Mul
 open Vale.Stdcalls.X64.GCMencryptOpt
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters
-module V = Vale.X64.Decls
 open Vale.SHA.Simplify_Sha
 open Vale.AES.Gcm_simplify
 open Vale.AES.GCM_helpers

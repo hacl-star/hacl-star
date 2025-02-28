@@ -7,7 +7,6 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module ST = FStar.HyperStack.ST
 
 module S = Spec.K256
 module SG = Hacl.Spec.K256.GLV

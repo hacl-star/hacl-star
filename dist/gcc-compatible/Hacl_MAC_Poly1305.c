@@ -25,6 +25,11 @@
 
 #include "internal/Hacl_MAC_Poly1305.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "internal/Hacl_Streaming_Types.h"
+#include "internal/Hacl_Hash_SHA3.h"
+
 void Hacl_MAC_Poly1305_poly1305_init(uint64_t *ctx, uint8_t *key)
 {
   uint64_t *acc = ctx;
@@ -443,30 +448,115 @@ void Hacl_MAC_Poly1305_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx
 Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(16U, sizeof (uint8_t));
+  if (buf == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf;
   uint64_t *r1 = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-  uint64_t *block_state = r1;
-  Hacl_MAC_Poly1305_poly1305_init(block_state, key);
-  uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
-  memcpy(k_, key, 32U * sizeof (uint8_t));
-  uint8_t *k_0 = k_;
-  Hacl_MAC_Poly1305_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_0 };
-  Hacl_MAC_Poly1305_state_t
-  *p = (Hacl_MAC_Poly1305_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_MAC_Poly1305_state_t));
-  p[0U] = s;
-  return p;
+  Hacl_Streaming_Types_optional_64 block_state;
+  if (r1 == NULL)
+  {
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_None });
+  }
+  else
+  {
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_Some, .v = r1 });
+  }
+  if (block_state.tag == Hacl_Streaming_Types_None)
+  {
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
+  if (block_state.tag == Hacl_Streaming_Types_Some)
+  {
+    uint64_t *block_state1 = block_state.v;
+    uint8_t *b = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
+    FStar_Pervasives_Native_option___uint8_t_ k_;
+    if (b == NULL)
+    {
+      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_None });
+    }
+    else
+    {
+      k_ =
+        ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+    }
+    FStar_Pervasives_Native_option___uint8_t_ k_0;
+    if (k_.tag == FStar_Pervasives_Native_None)
+    {
+      KRML_HOST_FREE(block_state1);
+      KRML_HOST_FREE(buf1);
+      k_0 = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_None });
+    }
+    else if (k_.tag == FStar_Pervasives_Native_Some)
+    {
+      uint8_t *k_1 = k_.v;
+      memcpy(k_1, key, 32U * sizeof (uint8_t));
+      k_0 =
+        (
+          (FStar_Pervasives_Native_option___uint8_t_){
+            .tag = FStar_Pervasives_Native_Some,
+            .v = k_1
+          }
+        );
+    }
+    else
+    {
+      k_0 =
+        KRML_EABORT(FStar_Pervasives_Native_option___uint8_t_,
+          "unreachable (pattern matches are exhaustive in F*)");
+    }
+    if (k_0.tag == FStar_Pervasives_Native_None)
+    {
+      return NULL;
+    }
+    if (k_0.tag == FStar_Pervasives_Native_Some)
+    {
+      uint8_t *k_1 = k_0.v;
+      Hacl_MAC_Poly1305_state_t
+      s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U, .p_key = k_1 };
+      Hacl_MAC_Poly1305_state_t
+      *p = (Hacl_MAC_Poly1305_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_MAC_Poly1305_state_t));
+      if (p != NULL)
+      {
+        p[0U] = s;
+      }
+      if (p == NULL)
+      {
+        KRML_HOST_FREE(k_1);
+        KRML_HOST_FREE(block_state1);
+        KRML_HOST_FREE(buf1);
+        return NULL;
+      }
+      Hacl_MAC_Poly1305_poly1305_init(block_state1, key);
+      return p;
+    }
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "unreachable (pattern matches are exhaustive in F*)");
+    KRML_HOST_EXIT(255U);
+  }
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 void Hacl_MAC_Poly1305_reset(Hacl_MAC_Poly1305_state_t *state, uint8_t *key)
 {
-  uint64_t *block_state = (*state).block_state;
-  uint8_t *k_ = (*state).p_key;
+  Hacl_MAC_Poly1305_state_t scrut = *state;
+  uint8_t *k_ = scrut.p_key;
+  uint8_t *buf = scrut.buf;
+  uint64_t *block_state = scrut.block_state;
   Hacl_MAC_Poly1305_poly1305_init(block_state, key);
   memcpy(k_, key, 32U * sizeof (uint8_t));
   uint8_t *k_1 = k_;
-  uint64_t total_len = (uint64_t)0U;
-  state->total_len = total_len;
-  state->p_key = k_1;
+  Hacl_MAC_Poly1305_state_t
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_1 };
+  state[0U] = tmp;
 }
 
 /**
@@ -475,8 +565,8 @@ void Hacl_MAC_Poly1305_reset(Hacl_MAC_Poly1305_state_t *state, uint8_t *key)
 Hacl_Streaming_Types_error_code
 Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint32_t chunk_len)
 {
-  uint64_t *block_state = (*state).block_state;
-  uint64_t total_len = (*state).total_len;
+  Hacl_MAC_Poly1305_state_t s = *state;
+  uint64_t total_len = s.total_len;
   if ((uint64_t)chunk_len > 0xffffffffULL - total_len)
   {
     return Hacl_Streaming_Types_MaximumLengthExceeded;
@@ -492,9 +582,11 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
   }
   if (chunk_len <= 16U - sz)
   {
-    uint8_t *buf = (*state).buf;
-    uint64_t total_len1 = (*state).total_len;
-    uint8_t *k_1 = (*state).p_key;
+    Hacl_MAC_Poly1305_state_t s1 = *state;
+    uint64_t *block_state1 = s1.block_state;
+    uint8_t *buf = s1.buf;
+    uint64_t total_len1 = s1.total_len;
+    uint8_t *k_1 = s1.p_key;
     uint32_t sz1;
     if (total_len1 % (uint64_t)16U == 0ULL && total_len1 > 0ULL)
     {
@@ -507,14 +599,24 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-    state->total_len = total_len2;
-    state->p_key = k_1;
+    *state
+    =
+      (
+        (Hacl_MAC_Poly1305_state_t){
+          .block_state = block_state1,
+          .buf = buf,
+          .total_len = total_len2,
+          .p_key = k_1
+        }
+      );
   }
   else if (sz == 0U)
   {
-    uint8_t *buf = (*state).buf;
-    uint64_t total_len1 = (*state).total_len;
-    uint8_t *k_1 = (*state).p_key;
+    Hacl_MAC_Poly1305_state_t s1 = *state;
+    uint64_t *block_state1 = s1.block_state;
+    uint8_t *buf = s1.buf;
+    uint64_t total_len1 = s1.total_len;
+    uint8_t *k_1 = s1.p_key;
     uint32_t sz1;
     if (total_len1 % (uint64_t)16U == 0ULL && total_len1 > 0ULL)
     {
@@ -526,7 +628,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     }
     if (!(sz1 == 0U))
     {
-      poly1305_update(block_state, 16U, buf);
+      poly1305_update(block_state1, 16U, buf);
     }
     uint32_t ite;
     if ((uint64_t)chunk_len % (uint64_t)16U == 0ULL && (uint64_t)chunk_len > 0ULL)
@@ -542,20 +644,30 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    poly1305_update(block_state, data1_len, data1);
+    poly1305_update(block_state1, data1_len, data1);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    state->total_len = total_len1 + (uint64_t)chunk_len;
-    state->p_key = k_1;
+    *state
+    =
+      (
+        (Hacl_MAC_Poly1305_state_t){
+          .block_state = block_state1,
+          .buf = buf,
+          .total_len = total_len1 + (uint64_t)chunk_len,
+          .p_key = k_1
+        }
+      );
   }
   else
   {
     uint32_t diff = 16U - sz;
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
-    uint8_t *buf = (*state).buf;
-    uint64_t total_len10 = (*state).total_len;
-    uint8_t *k_1 = (*state).p_key;
+    Hacl_MAC_Poly1305_state_t s1 = *state;
+    uint64_t *block_state10 = s1.block_state;
+    uint8_t *buf0 = s1.buf;
+    uint64_t total_len10 = s1.total_len;
+    uint8_t *k_1 = s1.p_key;
     uint32_t sz10;
     if (total_len10 % (uint64_t)16U == 0ULL && total_len10 > 0ULL)
     {
@@ -565,14 +677,24 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     {
       sz10 = (uint32_t)(total_len10 % (uint64_t)16U);
     }
-    uint8_t *buf2 = buf + sz10;
+    uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    state->total_len = total_len2;
-    state->p_key = k_1;
-    uint8_t *buf0 = (*state).buf;
-    uint64_t total_len1 = (*state).total_len;
-    uint8_t *k_10 = (*state).p_key;
+    *state
+    =
+      (
+        (Hacl_MAC_Poly1305_state_t){
+          .block_state = block_state10,
+          .buf = buf0,
+          .total_len = total_len2,
+          .p_key = k_1
+        }
+      );
+    Hacl_MAC_Poly1305_state_t s10 = *state;
+    uint64_t *block_state1 = s10.block_state;
+    uint8_t *buf = s10.buf;
+    uint64_t total_len1 = s10.total_len;
+    uint8_t *k_10 = s10.p_key;
     uint32_t sz1;
     if (total_len1 % (uint64_t)16U == 0ULL && total_len1 > 0ULL)
     {
@@ -584,7 +706,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     }
     if (!(sz1 == 0U))
     {
-      poly1305_update(block_state, 16U, buf0);
+      poly1305_update(block_state1, 16U, buf);
     }
     uint32_t ite;
     if
@@ -601,21 +723,30 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    poly1305_update(block_state, data1_len, data1);
-    uint8_t *dst = buf0;
+    poly1305_update(block_state1, data1_len, data1);
+    uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    state->total_len = total_len1 + (uint64_t)(chunk_len - diff);
-    state->p_key = k_10;
+    *state
+    =
+      (
+        (Hacl_MAC_Poly1305_state_t){
+          .block_state = block_state1,
+          .buf = buf,
+          .total_len = total_len1 + (uint64_t)(chunk_len - diff),
+          .p_key = k_10
+        }
+      );
   }
   return Hacl_Streaming_Types_Success;
 }
 
 void Hacl_MAC_Poly1305_digest(Hacl_MAC_Poly1305_state_t *state, uint8_t *output)
 {
-  uint64_t *block_state = (*state).block_state;
-  uint8_t *buf_ = (*state).buf;
-  uint64_t total_len = (*state).total_len;
-  uint8_t *k_ = (*state).p_key;
+  Hacl_MAC_Poly1305_state_t scrut = *state;
+  uint64_t *block_state = scrut.block_state;
+  uint8_t *buf_ = scrut.buf;
+  uint64_t total_len = scrut.total_len;
+  uint8_t *k_ = scrut.p_key;
   uint32_t r;
   if (total_len % (uint64_t)16U == 0ULL && total_len > 0ULL)
   {
@@ -629,7 +760,6 @@ void Hacl_MAC_Poly1305_digest(Hacl_MAC_Poly1305_state_t *state, uint8_t *output)
   uint64_t r1[25U] = { 0U };
   uint64_t *tmp_block_state = r1;
   memcpy(tmp_block_state, block_state, 25U * sizeof (uint64_t));
-  uint8_t *buf_multi = buf_1;
   uint32_t ite;
   if (r % 16U == 0U && r > 0U)
   {
@@ -640,6 +770,7 @@ void Hacl_MAC_Poly1305_digest(Hacl_MAC_Poly1305_state_t *state, uint8_t *output)
     ite = r % 16U;
   }
   uint8_t *buf_last = buf_1 + r - ite;
+  uint8_t *buf_multi = buf_1;
   poly1305_update(tmp_block_state, 0U, buf_multi);
   poly1305_update(tmp_block_state, r, buf_last);
   uint64_t tmp[25U] = { 0U };

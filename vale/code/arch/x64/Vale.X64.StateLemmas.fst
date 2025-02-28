@@ -3,12 +3,8 @@ open FStar.Mul
 open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.State
-module BS = Vale.X64.Machine_Semantics_s
 module MS = Vale.X64.Memory_Sems
-module ME = Vale.X64.Memory
-module VST = Vale.X64.Stack_i
 module VSS = Vale.X64.Stack_Sems
-module F = FStar.FunctionalExtensionality
 friend Vale.X64.Memory
 
 let same_heap_types = ()

@@ -7,13 +7,11 @@ module S = FStar.Seq
 module LS = Lib.Sequence
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-module U128 = FStar.UInt128
 module I = Hacl.Streaming.Interface
 module ST = FStar.HyperStack.ST
 
 open FStar.Mul
 
-module Loops = Lib.LoopCombinators
 
 /// Opening a bunch of modules for Blake2
 /// =====================================
@@ -41,7 +39,7 @@ open Hacl.Impl.Blake2.Generic
 /// An instance of the stateful type class for blake2
 /// =================================================
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 inline_for_extraction noextract
 let alg = Spec.alg
@@ -135,9 +133,19 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful (index a) =
       i.key_length, i.digest_length, i.last_node, wv, b)
     (* create_in *)
     (fun i r ->
-      let wv = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
-      let b = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
-      i.key_length, i.digest_length, i.last_node, wv, b)
+      let h0 = ST.get () in
+      let wv = I.fallible_malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
+      if B.is_null wv then
+        None
+      else
+        let b = I.fallible_malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
+        if B.is_null b then (
+          B.free wv;
+          let h3 = ST.get () in
+          B.(modifies_only_not_unused_in loc_none h0 h3);
+          None
+        ) else
+          Some (i.key_length, i.digest_length, i.last_node, (wv, b)))
     (* free *)
     (fun _ acc ->
       match acc with _, _, _, wv, b ->
@@ -261,33 +269,42 @@ let stateful_key (a : alg):
       if i.key_length = 0uy then
         let h0 = ST.get () in
         let p = P.create_in a i r in
-        let s = B.null #uint8 in
-        let s = p, s in
-        let h1 = ST.get () in
-        assert (key_footprint #a #i h1 s == P.footprint h1 p);
-        s
+        match p with
+        | None -> None
+        | Some p ->
+          let s = B.null #uint8 in
+          let s = p, s in
+          let h1 = ST.get () in
+          assert (key_footprint #a #i h1 s == P.footprint h1 p);
+          Some s
       else
         let h0 = ST.get () in
         let p = P.create_in a i r in
-        let h01 = ST.get () in
-        let s_ = B.malloc r (Lib.IntTypes.u8 0) (FStar.Int.Cast.uint8_to_uint32 (i.key_length)) in
-        let s = p, s_ in
-        let h1 = ST.get () in
-        P.frame_invariant #a B.loc_none p h01 h1;
-        assert B.(key_footprint #a #i h1 s == P.footprint h1 p `loc_union` (loc_addr_of_buffer (s_ <: B.buffer uint8)));
-        assert (key_invariant #a #i h1 s);
-        assert B.(modifies loc_none h0 h01);
-        assert B.(modifies loc_none h01 h1);
-        assert B.(fresh_loc (key_footprint #a #i h1 s) h0 h1);
-        assert B.(loc_includes (loc_region_only true r) (key_footprint #a #i h1 s));
-        assert (key_freeable #a #i h1 s);
-        s)
+        match p with
+        | None -> None
+        | Some p ->
+          let h01 = ST.get () in
+          let s_ = B.malloc r (Lib.IntTypes.u8 0) (FStar.Int.Cast.uint8_to_uint32 (i.key_length)) in
+          if B.is_null s_ then
+            None
+          else
+            let s = p, s_ in
+            let h1 = ST.get () in
+            P.frame_invariant #a B.loc_none p h01 h1;
+            assert B.(key_footprint #a #i h1 s == P.footprint h1 p `loc_union` (loc_addr_of_buffer (s_ <: B.buffer uint8)));
+            assert (key_invariant #a #i h1 s);
+            assert B.(modifies loc_none h0 h01);
+            assert B.(modifies loc_none h01 h1);
+            assert B.(fresh_loc (key_footprint #a #i h1 s) h0 h1);
+            assert B.(loc_includes (loc_region_only true r) (key_footprint #a #i h1 s));
+            assert (key_freeable #a #i h1 s);
+            Some s)
 
     (* free *)
-    (fun (i: G.erased (index a)) (s: params_and_key a i) ->
+    (fun (i: index a) (s: params_and_key a i) ->
       let p, s = s in
       let kk = (P.get_params p).key_length in
-      assert (kk = (G.reveal i).key_length);
+      assert (kk = i.key_length);
       P.free #a p;
       if kk = 0uy then () else B.free (s <: B.buffer uint8))
 
@@ -295,7 +312,7 @@ let stateful_key (a : alg):
     (fun i (s_src': params_and_key a i) (s_dst': params_and_key a i) ->
       let p_src, s_src = s_src' in
       let kk = (P.get_params p_src).key_length in
-      assert (kk = (G.reveal i).key_length);
+      assert (kk = i.key_length);
       let p_dst, s_dst = s_dst' in
       let h0 = ST.get () in
       if kk <> 0uy then begin
@@ -693,7 +710,7 @@ let blake2 (a : alg)
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
     (fun i (p, k) input _ ->
       spec_is_incremental a p i.last_node k input) (* spec_is_incremental *)
-    (fun _ (kk, nn, last_node, _, _) -> { key_length = kk; digest_length = nn; last_node }) (* index_of_state *)
+    (fun _ (kk, nn, last_node, _) _ -> { key_length = kk; digest_length = nn; last_node }) (* index_of_state *)
 
     (* init *)
     (fun i k' buf_ acc ->

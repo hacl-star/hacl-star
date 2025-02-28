@@ -25,6 +25,8 @@
 
 #include "Hacl_HKDF.h"
 
+#include "Hacl_HMAC.h"
+
 /**
 Expand pseudorandom key to desired length.
 

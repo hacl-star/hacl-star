@@ -1,6 +1,5 @@
 module Hacl.Spec.Bignum
 
-module Loops = Lib.LoopCombinators
 
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"

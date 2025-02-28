@@ -6,7 +6,6 @@ open LowStar.BufferOps
 
 module B = LowStar.Buffer
 module ST = FStar.HyperStack.ST
-module HS = FStar.HyperStack
 
 let _align = ()
 
@@ -67,19 +66,39 @@ let alloca a i =
 #push-options "--z3rlimit 20"
 let create_in a i r =
   let open Core in
-  let salt: buffer uint8 = B.malloc r (u8 0) (salt_len a) in
-  let personal: buffer uint8 = B.malloc r (u8 0) (personal_len a) in
-  let p = {
-    digest_length = i.digest_length;
-    key_length = i.key_length;
-    fanout = u8 1;
-    depth = u8 1;
-    leaf_length = u32 0;
-    node_offset = u64 0;
-    node_depth = u8 0;
-    inner_length = u8 0;
-    salt; personal }
-  in B.malloc r p 1ul
+  let open Hacl.Streaming.Interface in
+  let h0 = ST.get () in
+  let salt: buffer uint8 = fallible_malloc r (u8 0) (salt_len a) in
+  if B.is_null salt then
+    None
+  else
+    let personal: buffer uint8 = fallible_malloc r (u8 0) (personal_len a) in
+    if B.is_null personal then (
+      B.free salt;
+      let h1 = ST.get () in
+      B.(modifies_only_not_unused_in loc_none h0 h1);
+      None
+    ) else
+      let p = {
+        digest_length = i.digest_length;
+        key_length = i.key_length;
+        fanout = u8 1;
+        depth = u8 1;
+        leaf_length = u32 0;
+        node_offset = u64 0;
+        node_depth = u8 0;
+        inner_length = u8 0;
+        salt; personal }
+      in
+      let r = fallible_malloc r p 1ul in
+      if B.is_null r then (
+        B.free salt;
+        B.free personal;
+        let h1 = ST.get () in
+        B.(modifies_only_not_unused_in loc_none h0 h1);
+        None
+      ) else
+        Some r
 
 let free #a s =
   let p = B.index s 0ul in

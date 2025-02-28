@@ -25,6 +25,8 @@
 
 #include "internal/Hacl_P256.h"
 
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA2.h"
 #include "internal/Hacl_P256_PrecompTable.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum_Base.h"

@@ -30,28 +30,22 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Hash_Blake2s_finish"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint32_t) @-> (returning void))))
     type hacl_Hash_Blake2s_block_state_t =
-      [ `hacl_Hash_Blake2s_block_state_t ] structure
-    let (hacl_Hash_Blake2s_block_state_t :
-      [ `hacl_Hash_Blake2s_block_state_t ] structure typ) =
-      structure "Hacl_Hash_Blake2s_block_state_t_s"
-    let hacl_Hash_Blake2s_block_state_t_fst =
-      field hacl_Hash_Blake2s_block_state_t "fst" uint8_t
-    let hacl_Hash_Blake2s_block_state_t_snd =
-      field hacl_Hash_Blake2s_block_state_t "snd" uint8_t
-    let hacl_Hash_Blake2s_block_state_t_thd =
-      field hacl_Hash_Blake2s_block_state_t "thd" bool
-    let hacl_Hash_Blake2s_block_state_t_f3 =
-      field hacl_Hash_Blake2s_block_state_t "f3" (ptr uint32_t)
-    let hacl_Hash_Blake2s_block_state_t_f4 =
-      field hacl_Hash_Blake2s_block_state_t "f4" (ptr uint32_t)
-    let _ = seal hacl_Hash_Blake2s_block_state_t
+      hacl_Streaming_Blake2_Types_block_state_blake2s_32
+    let hacl_Hash_Blake2s_block_state_t =
+      typedef hacl_Streaming_Blake2_Types_block_state_blake2s_32
+        "Hacl_Hash_Blake2s_block_state_t"
+    type hacl_Hash_Blake2s_optional_block_state_t =
+      hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32
+    let hacl_Hash_Blake2s_optional_block_state_t =
+      typedef hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32
+        "Hacl_Hash_Blake2s_optional_block_state_t"
     type hacl_Hash_Blake2s_state_t = [ `hacl_Hash_Blake2s_state_t ] structure
     let (hacl_Hash_Blake2s_state_t :
       [ `hacl_Hash_Blake2s_state_t ] structure typ) =
       structure "Hacl_Hash_Blake2s_state_t_s"
     let hacl_Hash_Blake2s_state_t_block_state =
       field hacl_Hash_Blake2s_state_t "block_state"
-        hacl_Hash_Blake2s_block_state_t
+        hacl_Streaming_Blake2_Types_block_state_blake2s_32
     let hacl_Hash_Blake2s_state_t_buf =
       field hacl_Hash_Blake2s_state_t "buf" (ptr uint8_t)
     let hacl_Hash_Blake2s_state_t_total_len =

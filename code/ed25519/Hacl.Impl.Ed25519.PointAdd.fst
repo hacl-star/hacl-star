@@ -1,6 +1,5 @@
 module Hacl.Impl.Ed25519.PointAdd
 
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 
 open Lib.IntTypes

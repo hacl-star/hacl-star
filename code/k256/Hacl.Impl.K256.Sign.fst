@@ -11,7 +11,6 @@ module ST = FStar.HyperStack.ST
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-module FI = Hacl.Impl.K256.Finv
 module QI = Hacl.Impl.K256.Qinv
 
 module S = Spec.K256
@@ -21,7 +20,6 @@ open Hacl.K256.Scalar
 open Hacl.Impl.K256.Point
 open Hacl.Impl.K256.PointMul
 
-module BL = Hacl.Spec.K256.Field52.Lemmas
 module BB = Hacl.Bignum.Base
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

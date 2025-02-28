@@ -8,7 +8,6 @@ open Lib.Sequence
 open Lib.Buffer
 open Lib.ByteBuffer
 
-module ST = FStar.HyperStack.ST
 module Spec = Spec.Chacha20
 
 

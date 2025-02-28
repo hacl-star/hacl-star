@@ -20,7 +20,6 @@ module SE = Hacl.Spec.Bignum.Exponentiation
 
 module BN = Hacl.Bignum
 module BE = Hacl.Bignum.Exponentiation
-module BM = Hacl.Bignum.Montgomery
 
 module S = Spec.RSAPSS
 module LS = Hacl.Spec.RSAPSS

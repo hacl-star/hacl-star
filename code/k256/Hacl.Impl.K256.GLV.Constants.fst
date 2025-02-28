@@ -11,7 +11,6 @@ module ST = FStar.HyperStack.ST
 
 module S = Spec.K256
 module SG = Hacl.Spec.K256.GLV
-module SGL = Hacl.Spec.K256.GLV.Lemmas
 
 open Hacl.K256.Field
 open Hacl.K256.Scalar

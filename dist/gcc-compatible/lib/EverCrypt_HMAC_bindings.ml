@@ -11,9 +11,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     type everCrypt_HMAC_supported_alg = spec_Hash_Definitions_hash_alg
     let everCrypt_HMAC_supported_alg =
       typedef spec_Hash_Definitions_hash_alg "EverCrypt_HMAC_supported_alg"
-    let everCrypt_HMAC_hash_256 =
-      foreign "EverCrypt_HMAC_hash_256"
-        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
     let everCrypt_HMAC_compute_sha1 =
       foreign "EverCrypt_HMAC_compute_sha1"
         (ocaml_bytes @->

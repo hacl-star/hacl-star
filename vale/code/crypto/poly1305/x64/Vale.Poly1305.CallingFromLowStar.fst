@@ -203,7 +203,7 @@ let lemma_block (h1:HS.mem) (inp_b:B.buffer UInt8.t) (len:nat) (i:nat) : Lemma
     == {}
     block_fun text i;
   }
-
+#restart-solver
 let lemma_block_extra (h1:HS.mem) (inp_b:B.buffer UInt8.t) (len:nat) : Lemma
   (requires B.length inp_b = 8 * PU.readable_words len /\ len % 16 > 0)
   (ensures (
@@ -227,6 +227,7 @@ let lemma_block_extra (h1:HS.mem) (inp_b:B.buffer UInt8.t) (len:nat) : Lemma
   let inp_ssb = slice inp_sb 0 len in
   let inp_mem = PU.seqTo128 (PS.uint64_to_nat_seq (UV.as_seq h1 (UV.mk_buffer inp_db Vale.Interop.Views.up_view64))) in
   let j1 = i * size_block in
+  assert_spinoff (j1 >= 0);
   let j2 = i * size_block + size_block in
   let text = BF.to_bytes inp_sb in
   let block = slice text j1 j2 in

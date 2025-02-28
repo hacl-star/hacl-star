@@ -4,7 +4,6 @@ open FStar.HyperStack.ST
 module B = LowStar.Buffer
 module DV = LowStar.BufferView.Down
 module UV = LowStar.BufferView.Up
-module HS = FStar.HyperStack
 open FStar.Mul
 open Vale.Poly1305.Util
 open Vale.Poly1305.Math

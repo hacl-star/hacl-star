@@ -1,6 +1,5 @@
 module Hacl.HMAC.Blake2s_128
 
-module B = LowStar.Buffer
 module D = Hacl.Hash.Definitions
 
 open Spec.Agile.HMAC

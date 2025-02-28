@@ -15,8 +15,6 @@ open LowStar.BufferOps
 open FStar.Integers
 open C.Failure
 
-module U64 = FStar.UInt64
-module U32 = FStar.UInt32
 
 // Allow *just* the alg type to be inverted, so that the entire module can run
 // with ifuel 0
@@ -256,46 +254,138 @@ let alloca a =
   in
   B.alloca s 1ul
 
+inline_for_extraction noextract
+let scalar_impl_of_alg (a: alg): impl =
+  match a with
+  | MD5 -> (| MD5, () |)
+  | SHA1 -> (| SHA1, () |)
+  | SHA2_224 -> (| SHA2_224, () |)
+  | SHA2_256 -> (| SHA2_256, () |)
+  | SHA2_384 -> (| SHA2_384, () |)
+  | SHA2_512 -> (| SHA2_512, () |)
+  | SHA3_224 -> (| SHA3_224, () |)
+  | SHA3_256 -> (| SHA3_256, () |)
+  | SHA3_384 -> (| SHA3_384, () |)
+  | SHA3_512 -> (| SHA3_512, () |)
+  | Blake2S -> (| Blake2S, Hacl.Impl.Blake2.Core.M32 |)
+  | Blake2B -> (| Blake2B, Hacl.Impl.Blake2.Core.M32 |)
+
+inline_for_extraction noextract
+val malloc_helper (#a: alg) (r: HS.rid) (init: impl_word (scalar_impl_of_alg a))
+  (mk: (b:Hacl.Hash.Definitions.state (scalar_impl_of_alg a)) -> Stack (state_s a)
+    (requires fun h0 -> True)
+    (ensures fun h0 s h1 -> impl_of_state s == scalar_impl_of_alg a /\ h0 == h1 /\ p s == b)
+  ):
+  FStar.HyperStack.ST.ST (B.buffer (state_s a))
+  (requires (fun _ ->
+    HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    if B.g_is_null s then
+      B.(modifies loc_none h0 h1)
+    else
+      B.length s == 1 /\
+      invariant s h1 /\
+      M.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint s h1) h0 h1 /\
+      M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
+      freeable h1 s))
+
+let malloc_helper #a r init mk =
+  let open Hacl.Streaming.Interface in
+  let h0 = ST.get () in
+  let s = fallible_malloc r init (impl_state_len (scalar_impl_of_alg a)) in
+    if B.is_null s then
+    B.null
+  else
+    let s: Hacl.Hash.Definitions.state (scalar_impl_of_alg a) = s in
+    let st = fallible_malloc r (mk s) 1ul in
+    if B.is_null st then (
+      B.free s;
+      let h1 = ST.get () in
+      B.(modifies_only_not_unused_in loc_none h0 h1);
+      B.null
+    ) else
+      let h1 = ST.get () in
+      st
+
+val malloc_: a:alg -> r:HS.rid -> ST (B.buffer (state_s a))
+  (requires (fun _ ->
+    HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    if B.g_is_null s then
+      B.(modifies loc_none h0 h1)
+    else
+      B.length s == 1 /\
+      invariant s h1 /\
+      M.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint s h1) h0 h1 /\
+      M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
+      freeable h1 s))
+
+let malloc_ a r =
+  let h0 = ST.get () in
+  let open Hacl.Streaming.Interface in
+  // NOTE: the helper was a PAIN to write but hopefully it'll make maintenance better
+  match a with
+  | MD5 -> malloc_helper r 0ul (fun x -> MD5_s x)
+  | SHA1 -> malloc_helper r 0ul (fun x -> SHA1_s x)
+  | SHA2_224 -> malloc_helper r 0ul (fun x -> SHA2_224_s x)
+  | SHA2_256 -> malloc_helper r 0ul (fun x -> SHA2_256_s x)
+  | SHA2_384 -> malloc_helper r 0UL (fun x -> SHA2_384_s x)
+  | SHA2_512 -> malloc_helper r 0UL (fun x -> SHA2_512_s x)
+  | SHA3_224 -> malloc_helper r 0UL (fun x -> SHA3_224_s x)
+  | SHA3_256 -> malloc_helper r 0UL (fun x -> SHA3_256_s x)
+  | SHA3_384 -> malloc_helper r 0UL (fun x -> SHA3_384_s x)
+  | SHA3_512 -> malloc_helper r 0UL (fun x -> SHA3_512_s x)
+  | Blake2S ->
+      // As usual, to prevent linking errors (missing symbols) on systems that
+      // do not have this implementation available.
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
+        if vec128 then
+          let s = Hacl.Blake2s_128.malloc_with_key r in
+          if B.is_null s then
+            B.null
+          else
+            let st = fallible_malloc r (Blake2S_128_s () s) 1ul in
+            if B.is_null st then (
+              B.free s;
+              let h1 = ST.get () in
+              B.(modifies_only_not_unused_in loc_none h0 h1);
+              B.null
+            ) else
+              st
+        else
+          malloc_helper r 0ul (fun x -> Blake2S_s x)
+      else
+        malloc_helper r 0ul (fun x -> Blake2S_s x)
+  | Blake2B ->
+      // As usual, to prevent linking errors (missing symbols) on systems that
+      // do not have this implementation available.
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
+        if vec256 then
+          let s = Hacl.Blake2b_256.malloc_with_key r in
+          if B.is_null s then
+            B.null
+          else
+            let st = fallible_malloc r (Blake2B_256_s () s) 1ul in
+            if B.is_null st then (
+              B.free s;
+              let h1 = ST.get () in
+              B.(modifies_only_not_unused_in loc_none h0 h1);
+              B.null
+            ) else
+              st
+        else
+          malloc_helper r 0UL (fun x -> Blake2B_s x)
+      else
+        malloc_helper r 0UL (fun x -> Blake2B_s x)
+
 [@@strict_on_arguments [0]]
 let create_in a r =
-  let h0 = ST.get () in
-  let s: state_s a =
-    match a with
-    | MD5 -> MD5_s (B.malloc r 0ul 4ul)
-    | SHA1 -> SHA1_s (B.malloc r 0ul 5ul)
-    | SHA2_224 -> SHA2_224_s (B.malloc r 0ul 8ul)
-    | SHA2_256 -> SHA2_256_s (B.malloc r 0ul 8ul)
-    | SHA2_384 -> SHA2_384_s (B.malloc r 0UL 8ul)
-    | SHA2_512 -> SHA2_512_s (B.malloc r 0UL 8ul)
-    | SHA3_224 -> SHA3_224_s (B.malloc r 0UL 25ul)
-    | SHA3_256 -> SHA3_256_s (B.malloc r 0UL 25ul)
-    | SHA3_384 -> SHA3_384_s (B.malloc r 0UL 25ul)
-    | SHA3_512 -> SHA3_512_s (B.malloc r 0UL 25ul)
-    | Blake2S ->
-        if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-          let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
-          // Slightly frustrating duplication of the else-branch because we
-          // can't compile this using the if-and return optimization of krml.
-          if vec128 then
-            Blake2S_128_s () (Hacl.Blake2s_128.malloc_with_key r)
-          else
-            Blake2S_s (B.malloc r 0ul 16ul)
-        else
-          Blake2S_s (B.malloc r 0ul 16ul)
-    | Blake2B ->
-        if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-          let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
-          if vec256 then
-            Blake2B_256_s () (Hacl.Blake2b_256.malloc_with_key r)
-          else
-            Blake2B_s (B.malloc r 0uL 16ul)
-        else
-          Blake2B_s (B.malloc r 0uL 16ul)
-  in
-  B.malloc r s 1ul
-
-let create a =
-  create_in a HS.root
+  let s = malloc_ a r in
+  if B.is_null s then None else Some s
 
 #push-options "--ifuel 1"
 

@@ -4,7 +4,6 @@ open FStar.Mul
 open Vale.Interop.Base
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
-module LSig = Vale.AsLowStar.LowStarSig
 module V = Vale.X64.Decls
 module IA = Vale.Interop.Assumptions
 module W = Vale.AsLowStar.Wrapper

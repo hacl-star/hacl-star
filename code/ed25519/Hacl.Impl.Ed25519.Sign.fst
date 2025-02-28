@@ -11,9 +11,7 @@ module ST = FStar.HyperStack.ST
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-module F51 = Hacl.Impl.Ed25519.Field51
 module F56 = Hacl.Impl.BignumQ.Mul
-module S56 = Hacl.Spec.BignumQ.Definitions
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

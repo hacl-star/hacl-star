@@ -1,7 +1,6 @@
 module Hacl.Hash.SHA2
 
 module ST = FStar.HyperStack.ST
-module HS = FStar.HyperStack
 
 module B = LowStar.Buffer
 

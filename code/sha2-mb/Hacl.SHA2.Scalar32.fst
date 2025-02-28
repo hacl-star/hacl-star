@@ -12,7 +12,6 @@ open Lib.MultiBuffer
 open Spec.Hash.Definitions
 open Spec.Agile.Hash
 open Hacl.Spec.SHA2.Vec
-module SpecVec = Hacl.Spec.SHA2.Vec
 open Hacl.Impl.SHA2.Generic
 
 // This module only contains internal helpers that are in support of either the

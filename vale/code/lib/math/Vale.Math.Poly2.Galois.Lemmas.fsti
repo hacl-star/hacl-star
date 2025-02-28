@@ -1,8 +1,6 @@
 module Vale.Math.Poly2.Galois.Lemmas
 open FStar.Mul
-module I = Lib.IntTypes
 module G = Spec.GaloisField
-module P = Vale.Math.Poly2_s
 open Vale.Math.Poly2_s
 open Vale.Math.Poly2
 open Vale.Math.Poly2.Galois

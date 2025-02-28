@@ -5,6 +5,10 @@ module Bindings(F:Cstubs.FOREIGN) =
     module Hacl_Streaming_Types_applied =
       (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
     open Hacl_Streaming_Types_applied
+    let hacl_Hash_SHA3_init_ =
+      foreign "Hacl_Hash_SHA3_init_"
+        (spec_Hash_Definitions_hash_alg @->
+           ((ptr uint64_t) @-> (returning void)))
     let hacl_Hash_SHA3_update_multi_sha3 =
       foreign "Hacl_Hash_SHA3_update_multi_sha3"
         (spec_Hash_Definitions_hash_alg @->

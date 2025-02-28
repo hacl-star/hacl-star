@@ -7,17 +7,14 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 
-module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module SPT = Hacl.Spec.PrecompBaseTable
 module SPT256 = Hacl.Spec.PrecompBaseTable256
 module SPTK = Hacl.Spec.K256.PrecompTable
 
 module S = Spec.K256
-module SL = Spec.K256.Lemmas
 
 open Hacl.Impl.K256.Point
 include Hacl.Impl.K256.Group

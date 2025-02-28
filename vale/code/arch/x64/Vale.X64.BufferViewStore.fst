@@ -3,8 +3,6 @@ module Vale.X64.BufferViewStore
 open FStar.Mul
 open Vale.Interop.Views
 open Vale.Interop
-module MB = LowStar.Monotonic.Buffer
-module HS = FStar.HyperStack
 open Vale.Lib.BufferViewHelpers
 open Vale.Def.Types_s
 open Vale.Def.Words_s

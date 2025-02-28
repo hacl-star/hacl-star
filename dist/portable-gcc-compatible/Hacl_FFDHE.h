@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Spec.h"
-#include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_FFDHE_ffdhe_len */
 

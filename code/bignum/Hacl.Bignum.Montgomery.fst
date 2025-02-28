@@ -16,7 +16,6 @@ module LSeq = Lib.Sequence
 module B = LowStar.Buffer
 
 module S = Hacl.Spec.Bignum.Montgomery
-module SB = Hacl.Spec.Bignum
 module BN = Hacl.Bignum
 
 friend Hacl.Spec.Bignum.Montgomery

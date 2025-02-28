@@ -1,5 +1,5 @@
 [
-  "Eo–ÒÌAañ—$ÔgÉ¿U¢",
+  "456fd0f1ed416196d124ef6783c055a2",
   [
     [
       "Spec.Cipher.Expansion.cipher_alg_of_impl",
@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_Spec.Cipher.Expansion.impl"
       ],
       0,
-      "3d3e402314557bcacd0082e7f556512b"
+      "6dfae9671b56af9d733f5a7754861e9e"
     ],
     [
       "Spec.Cipher.Expansion.vale_alg_of_cipher_alg",
@@ -34,7 +34,7 @@
         "refinement_interpretation_Tm_refine_177c69f55dbc44094b230a6a570a50b1"
       ],
       0,
-      "a4d9533e4463e8e1e7564ed061bda4c7"
+      "8c11784befa8c4224c4971ea30c318c1"
     ],
     [
       "Spec.Cipher.Expansion.vale_xkey_length",
@@ -44,33 +44,21 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Agile.Cipher.AES128",
         "constructor_distinct_Spec.Agile.Cipher.AES256",
         "disc_equation_Spec.Agile.Cipher.AES128",
         "disc_equation_Spec.Agile.Cipher.AES256",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Agile.Cipher.AES128@tok",
-        "equality_tok_Spec.Agile.Cipher.AES256@tok",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Chacha20.size_key",
-        "equation_Spec.Cipher.Expansion.vale_cipher_alg",
-        "equation_Spec.GaloisField.gf", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.GaloisField.GF_t",
+        "equality_tok_Spec.Agile.Cipher.AES256@tok", "equation_Prims.nat",
+        "equation_Spec.Cipher.Expansion.vale_cipher_alg", "int_typing",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_177c69f55dbc44094b230a6a570a50b1",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.Chacha20.size_key",
-        "typing_Spec.GaloisField.__proj__GF__item__t"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d99704add26208271e16d49927bff064"
+      "43cc0897c2c197fad0f3880892a24aca"
     ],
     [
       "Spec.Cipher.Expansion.vale_aes_expansion",
@@ -161,7 +149,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE", "unit_typing"
       ],
       0,
-      "cf7db576095ae2bd15de8c0c0bf222d7"
+      "8a62cf2f7297b467948038a1e8406f90"
     ],
     [
       "Spec.Cipher.Expansion.uu___0",
@@ -170,7 +158,7 @@
       0,
       [ "@query" ],
       0,
-      "c79595287b93456ca1719f382119c3f9"
+      "8b544ca1012cb9e72983071b67a03ce5"
     ],
     [
       "Spec.Cipher.Expansion.uu___1",
@@ -179,7 +167,7 @@
       0,
       [ "@query" ],
       0,
-      "767fba16f115ecc36fbb8e598fb4ae70"
+      "64f6d1587935602b8503598de3c0bf7b"
     ],
     [
       "Spec.Cipher.Expansion.xkey_length",
@@ -189,33 +177,21 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Spec.Agile.Cipher.AES128",
         "disc_equation_Spec.Agile.Cipher.AES256",
-        "disc_equation_Spec.Agile.Cipher.CHACHA20",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Prims.squash", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Chacha20.size_key",
-        "equation_Spec.Cipher.Expansion.uu___0",
-        "equation_Spec.GaloisField.gf",
+        "disc_equation_Spec.Agile.Cipher.CHACHA20", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_Spec.Cipher.Expansion.uu___0",
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
-        "function_token_typing_Spec.Cipher.Expansion.uu___0",
-        "inversion-interp", "lemma_FStar.UInt.pow2_values",
+        "function_token_typing_Spec.Cipher.Expansion.uu___0", "int_typing",
+        "inversion-interp", "lemma_FStar.Int.pow2_values",
         "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.Chacha20.size_key",
-        "typing_Spec.GaloisField.__proj__GF__item__t"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "37238dd7da79aebc3da2505a1d427659"
+      "80945705e5ba35527ce38073d7080eb6"
     ],
     [
       "Spec.Cipher.Expansion.concrete_xkey_length",
@@ -225,45 +201,33 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Cipher.Expansion.Vale_AES128",
         "constructor_distinct_Spec.Cipher.Expansion.Vale_AES256",
         "disc_equation_Spec.Cipher.Expansion.Hacl_CHACHA20",
         "disc_equation_Spec.Cipher.Expansion.Vale_AES128",
         "disc_equation_Spec.Cipher.Expansion.Vale_AES256",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Cipher.Expansion.Vale_AES128@tok",
         "equality_tok_Spec.Cipher.Expansion.Vale_AES256@tok",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "equation_Prims.squash",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.Chacha20.size_key",
         "equation_Spec.Cipher.Expansion.cipher_alg_of_impl",
         "equation_Spec.Cipher.Expansion.uu___1",
         "equation_Spec.Cipher.Expansion.vale_cipher_alg",
-        "equation_Spec.GaloisField.gf",
         "fuel_guarded_inversion_Spec.Cipher.Expansion.impl",
-        "function_token_typing_Spec.Cipher.Expansion.uu___1",
-        "inversion-interp", "lemma_FStar.UInt.pow2_values",
+        "function_token_typing_Spec.Cipher.Expansion.uu___1", "int_typing",
+        "inversion-interp", "lemma_FStar.Int.pow2_values",
         "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_177c69f55dbc44094b230a6a570a50b1",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.Chacha20.size_key",
         "typing_Spec.Cipher.Expansion.vale_xkey_length",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Spec.Agile.Cipher.AES128@tok",
         "typing_tok_Spec.Agile.Cipher.AES256@tok"
       ],
       0,
-      "2843cb356527d450db02be162f43aef4"
+      "a7781b0d89e00afda451cfba41621889"
     ],
     [
       "Spec.Cipher.Expansion.concrete_expand",
@@ -304,7 +268,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "5ddd0b021346512376aa1564c44e7d68"
+      "1204cabe43d0b90dc504084d55564abc"
     ]
   ]
 ]

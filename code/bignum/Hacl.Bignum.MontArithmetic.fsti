@@ -15,7 +15,6 @@ module ST = FStar.HyperStack.ST
 
 module Euclid = FStar.Math.Euclid
 module S = Hacl.Spec.Bignum.MontArithmetic
-module BE = Hacl.Bignum.Exponentiation
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 

@@ -13,7 +13,6 @@ open Lib.IntVector
 open Hacl.Impl.Chacha20.Core32xN
 module Spec = Hacl.Spec.Chacha20.Vec
 module Chacha20Equiv = Hacl.Spec.Chacha20.Equiv
-module Loop = Lib.LoopCombinators
 
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200 --record_options"

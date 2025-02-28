@@ -18,7 +18,6 @@ open Hacl.Frodo.Random
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
-module M = Spec.Matrix
 
 module FP = Spec.Frodo.Params
 module S = Spec.Frodo.KEM.KeyGen

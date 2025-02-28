@@ -11,12 +11,9 @@ module IB = LowStar.ImmutableBuffer
 module CB = LowStar.ConstBuffer
 module LMB = LowStar.Monotonic.Buffer
 
-module U32 = FStar.UInt32
-module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 
 module Seq = Lib.Sequence
-module ByteSeq = Lib.ByteSequence
 module Loop = Lib.LoopCombinators
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"

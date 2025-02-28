@@ -8,9 +8,6 @@ open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.LoopCombinators
 
-module ST = FStar.HyperStack.ST
-module Seq = Lib.Sequence
-module Loops = Lib.LoopCombinators
 module Spec = Spec.Blake2
 
 /// We need to unfold manually the definition of the sigma table. This definition

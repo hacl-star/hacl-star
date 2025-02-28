@@ -25,6 +25,7 @@
 
 #include "Hacl_Frodo1344.h"
 
+#include "Hacl_Hash_SHA3.h"
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Frodo_KEM.h"
 #include "lib_memzero0.h"
