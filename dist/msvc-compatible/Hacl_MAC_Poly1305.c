@@ -28,7 +28,7 @@
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 #include "internal/Hacl_Streaming_Types.h"
-#include "internal/Hacl_Hash_SHA3.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 
 void Hacl_MAC_Poly1305_poly1305_init(uint64_t *ctx, uint8_t *key)
 {

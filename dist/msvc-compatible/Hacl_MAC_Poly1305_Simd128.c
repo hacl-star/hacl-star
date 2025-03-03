@@ -27,7 +27,7 @@
 
 #include "Hacl_Streaming_Types.h"
 #include "internal/Hacl_MAC_Poly1305.h"
-#include "internal/Hacl_Hash_SHA3.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 
 void Hacl_MAC_Poly1305_Simd128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, uint8_t *b)
 {
@@ -1307,7 +1307,8 @@ Hacl_MAC_Poly1305_Simd128_poly1305_finish(
 
 typedef struct option___Lib_IntVector_Intrinsics_vec128__s
 {
-  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
   Lib_IntVector_Intrinsics_vec128 *v;
 }
 option___Lib_IntVector_Intrinsics_vec128_;

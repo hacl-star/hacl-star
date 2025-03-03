@@ -23,36 +23,36 @@
  */
 
 
-#ifndef __internal_EverCrypt_Hash_H
-#define __internal_EverCrypt_Hash_H
+#ifndef __internal_Hacl_Streaming_HMAC_H
+#define __internal_Hacl_Streaming_HMAC_H
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#include "../EverCrypt_Hash.h"
-#include "libintvector.h"
+#include "../Hacl_Streaming_HMAC.h"
+#include "libintvector-shim.h"
 
-#define EverCrypt_Hash_MD5_s 0
-#define EverCrypt_Hash_SHA1_s 1
-#define EverCrypt_Hash_SHA2_224_s 2
-#define EverCrypt_Hash_SHA2_256_s 3
-#define EverCrypt_Hash_SHA2_384_s 4
-#define EverCrypt_Hash_SHA2_512_s 5
-#define EverCrypt_Hash_SHA3_224_s 6
-#define EverCrypt_Hash_SHA3_256_s 7
-#define EverCrypt_Hash_SHA3_384_s 8
-#define EverCrypt_Hash_SHA3_512_s 9
-#define EverCrypt_Hash_Blake2S_s 10
-#define EverCrypt_Hash_Blake2S_128_s 11
-#define EverCrypt_Hash_Blake2B_s 12
-#define EverCrypt_Hash_Blake2B_256_s 13
+#define Hacl_Agile_Hash_MD5_s 0
+#define Hacl_Agile_Hash_SHA1_s 1
+#define Hacl_Agile_Hash_SHA2_224_s 2
+#define Hacl_Agile_Hash_SHA2_256_s 3
+#define Hacl_Agile_Hash_SHA2_384_s 4
+#define Hacl_Agile_Hash_SHA2_512_s 5
+#define Hacl_Agile_Hash_SHA3_224_s 6
+#define Hacl_Agile_Hash_SHA3_256_s 7
+#define Hacl_Agile_Hash_SHA3_384_s 8
+#define Hacl_Agile_Hash_SHA3_512_s 9
+#define Hacl_Agile_Hash_Blake2S_s 10
+#define Hacl_Agile_Hash_Blake2S_128_s 11
+#define Hacl_Agile_Hash_Blake2B_s 12
+#define Hacl_Agile_Hash_Blake2B_256_s 13
 
-typedef uint8_t EverCrypt_Hash_state_s_tags;
+typedef uint8_t Hacl_Agile_Hash_state_s_tags;
 
-typedef struct EverCrypt_Hash_state_s_s
+typedef struct Hacl_Agile_Hash_state_s_s
 {
-  EverCrypt_Hash_state_s_tags tag;
+  Hacl_Agile_Hash_state_s_tags tag;
   union {
     uint32_t *case_MD5_s;
     uint32_t *case_SHA1_s;
@@ -71,23 +71,19 @@ typedef struct EverCrypt_Hash_state_s_s
   }
   ;
 }
-EverCrypt_Hash_state_s;
+Hacl_Agile_Hash_state_s;
 
-void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
-
-typedef struct EverCrypt_Hash_Incremental_state_t_s
+typedef struct Hacl_Streaming_HMAC_agile_state_s
 {
-  EverCrypt_Hash_state_s *block_state;
+  Hacl_Streaming_HMAC_Definitions_two_state block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-EverCrypt_Hash_Incremental_state_t;
-
-void EverCrypt_Hash_Incremental_hash_256(uint8_t *output, uint8_t *input, uint32_t input_len);
+Hacl_Streaming_HMAC_agile_state;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_EverCrypt_Hash_H_DEFINED
+#define __internal_Hacl_Streaming_HMAC_H_DEFINED
 #endif
