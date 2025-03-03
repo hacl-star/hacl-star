@@ -324,7 +324,9 @@ let update_multi #a s prevlen blocks len =
   | Blake2S_128_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
         let n = len / block_len Blake2S in
-        let _ = Hacl.Hash.Blake2s_128.update_multi p prevlen blocks n in
+        // no_inline version otherwise this module (NOT compiled with -mavx,
+        // -mavx2, etc.) tries to stack-allocate a Lib.IntVector.vec128
+        let _ = Hacl.Hash.Blake2s_128.update_multi_no_inline p prevlen blocks n in
         ()
       else LowStar.Ignore.ignore p
   | Blake2B_s p ->
@@ -336,7 +338,8 @@ let update_multi #a s prevlen blocks len =
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
         [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
         let n = len / block_len Blake2B in
-        let _ = Hacl.Hash.Blake2b_256.update_multi p prevlen blocks n in
+        // Same
+        let _ = Hacl.Hash.Blake2b_256.update_multi_no_inline p prevlen blocks n in
         ()
       else LowStar.Ignore.ignore p
 
@@ -364,13 +367,13 @@ let update_last #a s prev_len last last_len =
       Hacl.Hash.Blake2s_32.update_last p prev_len last last_len
   | Blake2S_128_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-        Hacl.Hash.Blake2s_128.update_last p prev_len last last_len
+        Hacl.Hash.Blake2s_128.update_last_no_inline p prev_len last last_len
       else LowStar.Ignore.ignore p
   | Blake2B_s p ->
       Hacl.Hash.Blake2b_32.update_last p (cast prev_len) last last_len
   | Blake2B_256_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-        Hacl.Hash.Blake2b_256.update_last p (cast prev_len) last last_len
+        Hacl.Hash.Blake2b_256.update_last_no_inline p (cast prev_len) last last_len
       else LowStar.Ignore.ignore p
 
 let finish #a s dst =

@@ -533,6 +533,30 @@ Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_Simd128_malloc_with_key(void)
 }
 
 void
+Hacl_Hash_Blake2s_Simd128_update_multi_no_inline(
+  Lib_IntVector_Intrinsics_vec128 *s,
+  uint64_t ev,
+  uint8_t *blocks,
+  uint32_t n
+)
+{
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
+  Hacl_Hash_Blake2s_Simd128_update_multi(n * 64U, wv, s, ev, blocks, n);
+}
+
+void
+Hacl_Hash_Blake2s_Simd128_update_last_no_inline(
+  Lib_IntVector_Intrinsics_vec128 *s,
+  uint64_t prev,
+  uint8_t *input,
+  uint32_t input_len
+)
+{
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
+  Hacl_Hash_Blake2s_Simd128_update_last(input_len, wv, s, false, prev, input_len, input);
+}
+
+void
 Hacl_Hash_Blake2s_Simd128_copy(
   Lib_IntVector_Intrinsics_vec128 *src,
   Lib_IntVector_Intrinsics_vec128 *dst

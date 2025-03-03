@@ -26,8 +26,12 @@ val init: init_st (|Blake2S, M128|)
 inline_for_extraction noextract
 val update_multi: update_multi_st (|Blake2S, M128|)
 
+let update_multi_no_inline: update_multi_st (|Blake2S, M128|) = update_multi
+
 inline_for_extraction noextract
 val update_last: update_last_st (|Blake2S, M128|)
+
+let update_last_no_inline: update_last_st (|Blake2S, M128|) = update_last
 
 inline_for_extraction noextract
 val finish: finish_st (|Blake2S, M128|)

@@ -24,4 +24,12 @@
 typedef struct __vec128 Lib_IntVector_Intrinsics_vec128;
 typedef struct __vec256 Lib_IntVector_Intrinsics_vec256;
 
+/* If a module includes this header, it almost certainly has #ifdef HACL_CAN_COMPILE_XXX all over
+ * the place, so bring that into scope too via config.h */
+#if defined(__has_include)
+#if __has_include("config.h")
+#include "config.h"
+#endif
+#endif
+
 #define HACL_INTRINSICS_SHIMMED
