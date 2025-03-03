@@ -74,22 +74,9 @@ typedef Hacl_Streaming_Blake2_Types_block_state_blake2s_32 Hacl_Hash_Blake2s_blo
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_block_state_t */
 
-/* SNIPPET_START: Hacl_Hash_Blake2s_optional_block_state_t */
-
-typedef Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_32
-Hacl_Hash_Blake2s_optional_block_state_t;
-
-/* SNIPPET_END: Hacl_Hash_Blake2s_optional_block_state_t */
-
 /* SNIPPET_START: Hacl_Hash_Blake2s_state_t */
 
-typedef struct Hacl_Hash_Blake2s_state_t_s
-{
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Hash_Blake2s_state_t;
+typedef struct Hacl_Hash_Blake2s_state_t_s Hacl_Hash_Blake2s_state_t;
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_state_t */
 

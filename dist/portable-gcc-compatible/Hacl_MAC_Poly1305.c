@@ -28,7 +28,7 @@
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 #include "internal/Hacl_Streaming_Types.h"
-#include "internal/Hacl_Hash_SHA3.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 
 /* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_init */
 

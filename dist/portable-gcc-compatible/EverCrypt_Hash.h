@@ -52,13 +52,7 @@ uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_state_t */
 
-typedef struct EverCrypt_Hash_Incremental_state_t_s
-{
-  EverCrypt_Hash_state_s *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-EverCrypt_Hash_Incremental_state_t;
+typedef struct EverCrypt_Hash_Incremental_state_t_s EverCrypt_Hash_Incremental_state_t;
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_state_t */
 

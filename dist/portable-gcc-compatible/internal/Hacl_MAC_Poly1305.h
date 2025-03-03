@@ -30,12 +30,7 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
-#include "internal/Hacl_Hash_SHA3.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "../Hacl_MAC_Poly1305.h"
 
 /* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_init */
@@ -50,11 +45,25 @@ void Hacl_MAC_Poly1305_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx
 
 /* SNIPPET_END: Hacl_MAC_Poly1305_poly1305_finish */
 
+/* SNIPPET_START: Hacl_MAC_Poly1305_state_t */
+
+typedef struct Hacl_MAC_Poly1305_state_t_s
+{
+  uint64_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+  uint8_t *p_key;
+}
+Hacl_MAC_Poly1305_state_t;
+
+/* SNIPPET_END: Hacl_MAC_Poly1305_state_t */
+
 /* SNIPPET_START: FStar_Pervasives_Native_option___uint8_t_ */
 
 typedef struct FStar_Pervasives_Native_option___uint8_t__s
 {
-  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
+  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
+  tag;
   uint8_t *v;
 }
 FStar_Pervasives_Native_option___uint8_t_;

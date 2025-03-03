@@ -30,11 +30,6 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 /* SNIPPET_START: Hacl_Impl_FFDHE_Constants_ffdhe_g2 */
 
 static const uint8_t Hacl_Impl_FFDHE_Constants_ffdhe_g2[1U] = { 0x02U };
