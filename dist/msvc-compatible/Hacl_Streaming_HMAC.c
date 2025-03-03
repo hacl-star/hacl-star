@@ -781,8 +781,7 @@ update_multi(Hacl_Agile_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
     uint32_t n = len / 64U;
-    KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
-    Hacl_Hash_Blake2s_Simd128_update_multi(n * 64U, wv, p1, prevlen, blocks, n);
+    Hacl_Hash_Blake2s_Simd128_update_multi_no_inline(p1, prevlen, blocks, n);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);
@@ -807,10 +806,7 @@ update_multi(Hacl_Agile_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     #if HACL_CAN_COMPILE_VEC256
     uint32_t n = len / 128U;
-    KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv[4U] KRML_POST_ALIGN(32) = { 0U };
-    Hacl_Hash_Blake2b_Simd256_update_multi(n * 128U,
-      wv,
-      p1,
+    Hacl_Hash_Blake2b_Simd256_update_multi_no_inline(p1,
       FStar_UInt128_uint64_to_uint128(prevlen),
       blocks,
       n);
@@ -910,8 +906,7 @@ update_last(Hacl_Agile_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32
   {
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
-    KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
-    Hacl_Hash_Blake2s_Simd128_update_last(last_len, wv, p1, false, prev_len, last_len, last);
+    Hacl_Hash_Blake2s_Simd128_update_last_no_inline(p1, prev_len, last, last_len);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);
@@ -935,14 +930,10 @@ update_last(Hacl_Agile_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32
   {
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     #if HACL_CAN_COMPILE_VEC256
-    KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv[4U] KRML_POST_ALIGN(32) = { 0U };
-    Hacl_Hash_Blake2b_Simd256_update_last(last_len,
-      wv,
-      p1,
-      false,
+    Hacl_Hash_Blake2b_Simd256_update_last_no_inline(p1,
       FStar_UInt128_uint64_to_uint128(prev_len),
-      last_len,
-      last);
+      last,
+      last_len);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);

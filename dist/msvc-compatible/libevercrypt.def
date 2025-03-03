@@ -42,6 +42,8 @@ EXPORTS
   Hacl_Hash_Blake2b_Simd256_load_state256b_from_state32
   Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32
   Hacl_Hash_Blake2b_Simd256_malloc_with_key
+  Hacl_Hash_Blake2b_Simd256_update_multi_no_inline
+  Hacl_Hash_Blake2b_Simd256_update_last_no_inline
   Hacl_Hash_Blake2b_Simd256_copy
   Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key
   Hacl_Hash_Blake2b_Simd256_malloc_with_key0
@@ -63,6 +65,8 @@ EXPORTS
   Hacl_Hash_Blake2s_Simd128_store_state128s_to_state32
   Hacl_Hash_Blake2s_Simd128_load_state128s_from_state32
   Hacl_Hash_Blake2s_Simd128_malloc_with_key
+  Hacl_Hash_Blake2s_Simd128_update_multi_no_inline
+  Hacl_Hash_Blake2s_Simd128_update_last_no_inline
   Hacl_Hash_Blake2s_Simd128_copy
   Hacl_Hash_Blake2s_Simd128_malloc_with_params_and_key
   Hacl_Hash_Blake2s_Simd128_malloc_with_key0
