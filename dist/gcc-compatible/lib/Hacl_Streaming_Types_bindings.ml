@@ -26,11 +26,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let (hacl_Streaming_Blake2_Types_block_state_blake2b_32 :
       [ `hacl_Streaming_Blake2_Types_block_state_blake2b_32 ] structure typ)
       = structure "Hacl_Streaming_Blake2_Types_block_state_blake2b_32_s"
-    type hacl_Streaming_Blake2_Types_block_state_blake2b_256 =
-      [ `hacl_Streaming_Blake2_Types_block_state_blake2b_256 ] structure
-    let (hacl_Streaming_Blake2_Types_block_state_blake2b_256 :
-      [ `hacl_Streaming_Blake2_Types_block_state_blake2b_256 ] structure typ)
-      = structure "Hacl_Streaming_Blake2_Types_block_state_blake2b_256_s"
     type k____uint32_t___uint32_t_ = [ `k____uint32_t___uint32_t_ ] structure
     let (k____uint32_t___uint32_t_ :
       [ `k____uint32_t___uint32_t_ ] structure typ) =
@@ -45,11 +40,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let (hacl_Streaming_Blake2_Types_block_state_blake2s_32 :
       [ `hacl_Streaming_Blake2_Types_block_state_blake2s_32 ] structure typ)
       = structure "Hacl_Streaming_Blake2_Types_block_state_blake2s_32_s"
-    type hacl_Streaming_Blake2_Types_block_state_blake2s_128 =
-      [ `hacl_Streaming_Blake2_Types_block_state_blake2s_128 ] structure
-    let (hacl_Streaming_Blake2_Types_block_state_blake2s_128 :
-      [ `hacl_Streaming_Blake2_Types_block_state_blake2s_128 ] structure typ)
-      = structure "Hacl_Streaming_Blake2_Types_block_state_blake2s_128_s"
     type hacl_Streaming_Types_error_code = Unsigned.UInt8.t
     let hacl_Streaming_Types_error_code =
       typedef uint8_t "Hacl_Streaming_Types_error_code"

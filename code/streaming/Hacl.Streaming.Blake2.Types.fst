@@ -24,30 +24,15 @@ module Spec = Spec.Blake2
 //    because they appear in the vectorized states below, but they end up with the wrong visibility by
 //    default... should monomorphic instances be generated as private?
 
-private
-let two_vec128 = Core.(state_p Spec.Blake2S M128 & state_p Spec.Blake2S M128)
-
-private
-let two_vec256 = Core.(state_p Spec.Blake2B M256 & state_p Spec.Blake2B M256)
-
 [@ CAbstractStruct ]
 let block_state_blake2b_32 (kk: G.erased (Common.index Spec.Blake2B)) =
   Common.s Spec.Blake2B kk Core.M32
 
 [@ CAbstractStruct ]
-let block_state_blake2b_256 (kk: G.erased (Common.index Spec.Blake2B)) =
-  // Make sure two_vec256 is actually used!
-  let open Common in
-  let open Hacl.Streaming.Blake2.Params in
-  singleton (kk.key_length) & singleton (kk.digest_length) & singleton_b (kk.last_node) & two_vec256
-
-[@ CAbstractStruct ]
 let block_state_blake2s_32 (kk: G.erased (Common.index Spec.Blake2S)) =
   Common.s Spec.Blake2S kk Core.M32
 
-[@ CAbstractStruct ]
-let block_state_blake2s_128 (kk: G.erased (Common.index Spec.Blake2S)) =
-  // Make sure two_vec128 is actually used!
-  let open Common in
-  let open Hacl.Streaming.Blake2.Params in
-  singleton (kk.key_length) & singleton (kk.digest_length) & singleton_b (kk.last_node) & two_vec128
+
+// These now in separate headers to avoid a regular algorithm (e.g. SHA1) including a header that contains references to vec128.
+include Hacl.Streaming.Blake2.Types.Simd128
+include Hacl.Streaming.Blake2.Types.Simd256
