@@ -692,7 +692,7 @@ typedef struct option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t____s
 {
   FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
   tag;
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 v;
+  Hacl_Hash_Blake2s_block_state_t v;
 }
 option___uint8_t___uint8_t___bool_____uint32_t_____uint32_t___;
 
@@ -752,7 +752,7 @@ static Hacl_Hash_Blake2s_state_t
   }
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
-    Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state1 = block_state.v;
+    Hacl_Hash_Blake2s_block_state_t block_state1 = block_state.v;
     Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
@@ -966,7 +966,7 @@ Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc(void)
 
 static Hacl_Hash_Blake2b_index index_of_state(Hacl_Hash_Blake2s_state_t *s)
 {
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state = (*s).block_state;
+  Hacl_Hash_Blake2s_block_state_t block_state = (*s).block_state;
   bool last_node = block_state.thd;
   uint8_t nn = block_state.snd;
   uint8_t kk1 = block_state.fst;
@@ -978,7 +978,7 @@ static void reset_raw(Hacl_Hash_Blake2s_state_t *state, Hacl_Hash_Blake2b_params
 {
   Hacl_Hash_Blake2s_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state = scrut.block_state;
+  Hacl_Hash_Blake2s_block_state_t block_state = scrut.block_state;
   bool last_node0 = block_state.thd;
   uint8_t nn0 = block_state.snd;
   uint8_t kk10 = block_state.fst;
@@ -1168,7 +1168,7 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
   if (chunk_len <= 64U - sz)
   {
     Hacl_Hash_Blake2s_state_t s1 = *state;
-    Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state1 = s1.block_state;
+    Hacl_Hash_Blake2s_block_state_t block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -1196,7 +1196,7 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
   else if (sz == 0U)
   {
     Hacl_Hash_Blake2s_state_t s1 = *state;
-    Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state1 = s1.block_state;
+    Hacl_Hash_Blake2s_block_state_t block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -1254,7 +1254,7 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
     Hacl_Hash_Blake2s_state_t s1 = *state;
-    Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state10 = s1.block_state;
+    Hacl_Hash_Blake2s_block_state_t block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
     uint32_t sz10;
@@ -1279,7 +1279,7 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
         }
       );
     Hacl_Hash_Blake2s_state_t s10 = *state;
-    Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state1 = s10.block_state;
+    Hacl_Hash_Blake2s_block_state_t block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
     uint32_t sz1;
@@ -1348,14 +1348,14 @@ to see how many bytes were actually written.
 */
 uint8_t Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *s, uint8_t *dst)
 {
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state0 = (*s).block_state;
+  Hacl_Hash_Blake2s_block_state_t block_state0 = (*s).block_state;
   bool last_node0 = block_state0.thd;
   uint8_t nn0 = block_state0.snd;
   uint8_t kk0 = block_state0.fst;
   Hacl_Hash_Blake2b_index
   i1 = { .key_length = kk0, .digest_length = nn0, .last_node = last_node0 };
   Hacl_Hash_Blake2s_state_t scrut = *s;
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state = scrut.block_state;
+  Hacl_Hash_Blake2s_block_state_t block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
   uint32_t r;
@@ -1370,7 +1370,7 @@ uint8_t Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *s, uint8_t *dst)
   uint8_t *buf_1 = buf_;
   uint32_t wv0[16U] = { 0U };
   uint32_t b[16U] = { 0U };
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32
+  Hacl_Hash_Blake2s_block_state_t
   tmp_block_state =
     {
       .fst = i1.key_length,
@@ -1406,7 +1406,7 @@ uint8_t Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *s, uint8_t *dst)
   Hacl_Hash_Blake2s_update_last(r, wv, hash, last_node1, prev_len_last, r, buf_last);
   uint8_t nn1 = tmp_block_state.snd;
   Hacl_Hash_Blake2s_finish((uint32_t)nn1, dst, tmp_block_state.f3.snd);
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state1 = (*s).block_state;
+  Hacl_Hash_Blake2s_block_state_t block_state1 = (*s).block_state;
   bool last_node = block_state1.thd;
   uint8_t nn = block_state1.snd;
   uint8_t kk = block_state1.fst;
@@ -1416,7 +1416,7 @@ uint8_t Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *s, uint8_t *dst)
 
 Hacl_Hash_Blake2b_index Hacl_Hash_Blake2s_info(Hacl_Hash_Blake2s_state_t *s)
 {
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state = (*s).block_state;
+  Hacl_Hash_Blake2s_block_state_t block_state = (*s).block_state;
   bool last_node = block_state.thd;
   uint8_t nn = block_state.snd;
   uint8_t kk = block_state.fst;
@@ -1431,7 +1431,7 @@ void Hacl_Hash_Blake2s_free(Hacl_Hash_Blake2s_state_t *state)
 {
   Hacl_Hash_Blake2s_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state = scrut.block_state;
+  Hacl_Hash_Blake2s_block_state_t block_state = scrut.block_state;
   uint32_t *b = block_state.f3.snd;
   uint32_t *wv = block_state.f3.fst;
   KRML_HOST_FREE(wv);
@@ -1446,7 +1446,7 @@ void Hacl_Hash_Blake2s_free(Hacl_Hash_Blake2s_state_t *state)
 Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_copy(Hacl_Hash_Blake2s_state_t *state)
 {
   Hacl_Hash_Blake2s_state_t scrut = *state;
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state0 = scrut.block_state;
+  Hacl_Hash_Blake2s_block_state_t block_state0 = scrut.block_state;
   uint8_t *buf0 = scrut.buf;
   uint64_t total_len0 = scrut.total_len;
   bool last_node = block_state0.thd;
@@ -1506,7 +1506,7 @@ Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_copy(Hacl_Hash_Blake2s_state_t *sta
   }
   if (block_state.tag == FStar_Pervasives_Native_Some)
   {
-    Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state1 = block_state.v;
+    Hacl_Hash_Blake2s_block_state_t block_state1 = block_state.v;
     uint32_t *src_b = block_state0.f3.snd;
     uint32_t *dst_b = block_state1.f3.snd;
     memcpy(dst_b, src_b, 16U * sizeof (uint32_t));

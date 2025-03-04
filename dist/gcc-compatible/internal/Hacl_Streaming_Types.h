@@ -53,31 +53,6 @@ typedef struct Hacl_Streaming_MD_state_64_s
 }
 Hacl_Streaming_MD_state_64;
 
-typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2b_32_s
-{
-  uint8_t fst;
-  uint8_t snd;
-  bool thd;
-  K____uint64_t___uint64_t_ f3;
-}
-Hacl_Streaming_Blake2_Types_block_state_blake2b_32;
-
-typedef struct K____uint32_t___uint32_t__s
-{
-  uint32_t *fst;
-  uint32_t *snd;
-}
-K____uint32_t___uint32_t_;
-
-typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2s_32_s
-{
-  uint8_t fst;
-  uint8_t snd;
-  bool thd;
-  K____uint32_t___uint32_t_ f3;
-}
-Hacl_Streaming_Blake2_Types_block_state_blake2s_32;
-
 #define Hacl_Streaming_Types_None 0
 #define Hacl_Streaming_Types_Some 1
 
@@ -98,6 +73,13 @@ typedef struct Hacl_Streaming_Types_optional_64_s
 Hacl_Streaming_Types_optional_64;
 
 typedef Hacl_Streaming_Types_optional_32_tags Hacl_Streaming_Types_optional_unit;
+
+typedef struct Hacl_Streaming_Types_two_pointers_s
+{
+  uint64_t *fst;
+  uint64_t *snd;
+}
+Hacl_Streaming_Types_two_pointers;
 
 #if defined(__cplusplus)
 }

@@ -31,9 +31,9 @@ let blake2s_32 =
   Common.blake2 Spec.Blake2S Core.M32 Blake2s32.inline_init_with_params Blake2s32.update_multi
          Blake2s32.update_last Blake2s32.finish
 
-/// Type abbreviations - makes Karamel use pretty names in the generated code
+[@ CAbstractStruct ]
 let block_state_t (kk: G.erased (Common.index Spec.Blake2S)) =
-  Hacl.Streaming.Blake2.Types.block_state_blake2s_32 kk
+  Common.s Spec.Blake2S kk Core.M32
 
 // Doing this would result in a public type which would contain an incomplete struct. Let this be
 // inserted somewhere in this file as a private abbreviation (with a bad auto-generated name), but

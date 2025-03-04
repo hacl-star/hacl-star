@@ -12,34 +12,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let (hacl_Streaming_MD_state_64 :
       [ `hacl_Streaming_MD_state_64 ] structure typ) =
       structure "Hacl_Streaming_MD_state_64_s"
-    type k____uint64_t___uint64_t_ = [ `k____uint64_t___uint64_t_ ] structure
-    let (k____uint64_t___uint64_t_ :
-      [ `k____uint64_t___uint64_t_ ] structure typ) =
-      structure "K____uint64_t___uint64_t__s"
-    let k____uint64_t___uint64_t__fst =
-      field k____uint64_t___uint64_t_ "fst" (ptr uint64_t)
-    let k____uint64_t___uint64_t__snd =
-      field k____uint64_t___uint64_t_ "snd" (ptr uint64_t)
-    let _ = seal k____uint64_t___uint64_t_
-    type hacl_Streaming_Blake2_Types_block_state_blake2b_32 =
-      [ `hacl_Streaming_Blake2_Types_block_state_blake2b_32 ] structure
-    let (hacl_Streaming_Blake2_Types_block_state_blake2b_32 :
-      [ `hacl_Streaming_Blake2_Types_block_state_blake2b_32 ] structure typ)
-      = structure "Hacl_Streaming_Blake2_Types_block_state_blake2b_32_s"
-    type k____uint32_t___uint32_t_ = [ `k____uint32_t___uint32_t_ ] structure
-    let (k____uint32_t___uint32_t_ :
-      [ `k____uint32_t___uint32_t_ ] structure typ) =
-      structure "K____uint32_t___uint32_t__s"
-    let k____uint32_t___uint32_t__fst =
-      field k____uint32_t___uint32_t_ "fst" (ptr uint32_t)
-    let k____uint32_t___uint32_t__snd =
-      field k____uint32_t___uint32_t_ "snd" (ptr uint32_t)
-    let _ = seal k____uint32_t___uint32_t_
-    type hacl_Streaming_Blake2_Types_block_state_blake2s_32 =
-      [ `hacl_Streaming_Blake2_Types_block_state_blake2s_32 ] structure
-    let (hacl_Streaming_Blake2_Types_block_state_blake2s_32 :
-      [ `hacl_Streaming_Blake2_Types_block_state_blake2s_32 ] structure typ)
-      = structure "Hacl_Streaming_Blake2_Types_block_state_blake2s_32_s"
     type hacl_Streaming_Types_error_code = Unsigned.UInt8.t
     let hacl_Streaming_Types_error_code =
       typedef uint8_t "Hacl_Streaming_Types_error_code"
@@ -87,9 +59,16 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_Types_optional_unit =
       typedef hacl_Streaming_Types_optional_32_tags
         "Hacl_Streaming_Types_optional_unit"
-    type hacl_Streaming_Types_two_pointers = k____uint64_t___uint64_t_
-    let hacl_Streaming_Types_two_pointers =
-      typedef k____uint64_t___uint64_t_ "Hacl_Streaming_Types_two_pointers"
+    type hacl_Streaming_Types_two_pointers =
+      [ `hacl_Streaming_Types_two_pointers ] structure
+    let (hacl_Streaming_Types_two_pointers :
+      [ `hacl_Streaming_Types_two_pointers ] structure typ) =
+      structure "Hacl_Streaming_Types_two_pointers_s"
+    let hacl_Streaming_Types_two_pointers_fst =
+      field hacl_Streaming_Types_two_pointers "fst" (ptr uint64_t)
+    let hacl_Streaming_Types_two_pointers_snd =
+      field hacl_Streaming_Types_two_pointers "snd" (ptr uint64_t)
+    let _ = seal hacl_Streaming_Types_two_pointers
     type spec_Hash_Definitions_hash_alg = Unsigned.UInt8.t
     let spec_Hash_Definitions_hash_alg =
       typedef uint8_t "Spec_Hash_Definitions_hash_alg"

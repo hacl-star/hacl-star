@@ -26,14 +26,20 @@ open FStar.HyperStack.ST
 [@ CMacro ] let salt_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.salt_length Spec.Blake2B)
 [@ CMacro ] let personal_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.personal_length Spec.Blake2B)
 
+private
+let two_2b_256 = Core.(state_p Spec.Blake2B M256 & state_p Spec.Blake2B M256)
+
+[@ CAbstractStruct ]
+let block_state_t (kk: G.erased (Common.index Spec.Blake2B)) =
+  // Make sure two_vec256 is actually used!
+  let open Common in
+  let open Hacl.Streaming.Blake2.Params in
+  singleton (kk.key_length) & singleton (kk.digest_length) & singleton_b (kk.last_node) & two_2b_256
+
 inline_for_extraction noextract
 let blake2b_256 =
   Common.blake2 Spec.Blake2B Core.M256 Blake2b256.inline_init_with_params Blake2b256.update_multi
          Blake2b256.update_last Blake2b256.finish
-
-/// Type abbreviations - makes Karamel use pretty names in the generated code
-let block_state_t (kk: G.erased (Common.index Spec.Blake2B)) =
-  Hacl.Streaming.Blake2.Types.block_state_blake2b_256 kk
 
 // Doing this would result in a public type which would contain an incomplete struct. Let this be
 // inserted somewhere in this file as a private abbreviation (with a bad auto-generated name), but

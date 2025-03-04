@@ -70,7 +70,7 @@ Hacl_Hash_Blake2b_index;
 
 #define HACL_HASH_BLAKE2B_PERSONAL_BYTES (16U)
 
-typedef Hacl_Streaming_Blake2_Types_block_state_blake2b_32 Hacl_Hash_Blake2b_block_state_t;
+typedef struct Hacl_Hash_Blake2b_block_state_t_s Hacl_Hash_Blake2b_block_state_t;
 
 typedef struct Hacl_Hash_Blake2b_state_t_s Hacl_Hash_Blake2b_state_t;
 

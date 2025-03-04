@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Streaming_Blake2_Types_Simd128.h"
 #include "../Hacl_Hash_Blake2s_Simd128.h"
 #include "libintvector.h"
 
@@ -106,9 +105,25 @@ Hacl_Hash_Blake2s_Simd128_copy(
   Lib_IntVector_Intrinsics_vec128 *dst
 );
 
+typedef struct Hacl_Hash_Blake2s_Simd128_two_2s_128_s
+{
+  Lib_IntVector_Intrinsics_vec128 *fst;
+  Lib_IntVector_Intrinsics_vec128 *snd;
+}
+Hacl_Hash_Blake2s_Simd128_two_2s_128;
+
+typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
+{
+  uint8_t fst;
+  uint8_t snd;
+  bool thd;
+  Hacl_Hash_Blake2s_Simd128_two_2s_128 f3;
+}
+Hacl_Hash_Blake2s_Simd128_block_state_t;
+
 typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s
 {
-  Hacl_Streaming_Blake2_Types_Simd128_block_state_blake2s_128 block_state;
+  Hacl_Hash_Blake2s_Simd128_block_state_t block_state;
   uint8_t *buf;
   uint64_t total_len;
 }

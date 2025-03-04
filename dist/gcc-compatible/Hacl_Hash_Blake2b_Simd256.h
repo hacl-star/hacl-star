@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Streaming_Blake2_Types_Simd256.h"
 #include "Hacl_Hash_Blake2b.h"
 
 #define HACL_HASH_BLAKE2B_SIMD256_BLOCK_BYTES (128U)
@@ -49,7 +48,7 @@ extern "C" {
 
 #define HACL_HASH_BLAKE2B_SIMD256_PERSONAL_BYTES (16U)
 
-typedef Hacl_Streaming_Blake2_Types_Simd256_block_state_blake2b_256
+typedef struct Hacl_Hash_Blake2b_Simd256_block_state_t_s
 Hacl_Hash_Blake2b_Simd256_block_state_t;
 
 typedef struct Hacl_Hash_Blake2b_Simd256_state_t_s Hacl_Hash_Blake2b_Simd256_state_t;

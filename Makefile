@@ -762,8 +762,6 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_MAC_Poly1305_Simd256.h:"libintvector.h"' \
   \
   -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_Blake2_Types_Simd128.h:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_Blake2_Types_Simd256.h:"libintvector.h"' \
   -add-include 'Vale.h:"libintvector.h"' \
   -add-include 'Vale.h:<inttypes.h>' \
   -add-include 'EverCrypt_Hash.h:"libintvector.h"' \
