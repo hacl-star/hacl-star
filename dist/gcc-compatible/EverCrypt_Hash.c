@@ -541,8 +541,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
 
 typedef struct option___EverCrypt_Hash_state_s__s
 {
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
+  Hacl_Streaming_Types_optional tag;
   EverCrypt_Hash_state_s *v;
 }
 option___EverCrypt_Hash_state_s_;
@@ -552,9 +551,9 @@ static option___EverCrypt_Hash_state_s_ create_in(Spec_Hash_Definitions_hash_alg
   EverCrypt_Hash_state_s *s = malloc_(a);
   if (s == NULL)
   {
-    return ((option___EverCrypt_Hash_state_s_){ .tag = FStar_Pervasives_Native_None });
+    return ((option___EverCrypt_Hash_state_s_){ .tag = Hacl_Streaming_Types_None });
   }
-  return ((option___EverCrypt_Hash_state_s_){ .tag = FStar_Pervasives_Native_Some, .v = s });
+  return ((option___EverCrypt_Hash_state_s_){ .tag = Hacl_Streaming_Types_Some, .v = s });
 }
 
 static void init(EverCrypt_Hash_state_s *s)
@@ -1599,15 +1598,15 @@ EverCrypt_Hash_Incremental_state_t
   }
   uint8_t *buf1 = buf;
   option___EverCrypt_Hash_state_s_ block_state = create_in(a);
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     EverCrypt_Hash_state_s *block_state1 = block_state.v;
-    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
+    Hacl_Streaming_Types_optional k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
       case Hacl_Streaming_Types_None:

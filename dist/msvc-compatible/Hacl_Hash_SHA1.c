@@ -225,7 +225,7 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_malloc(void)
   if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     uint32_t *block_state1 = block_state.v;
-    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
+    Hacl_Streaming_Types_optional k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
       case Hacl_Streaming_Types_None:
@@ -525,7 +525,7 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_copy(Hacl_Streaming_MD_state_32 *stat
   {
     uint32_t *block_state1 = block_state.v;
     memcpy(block_state1, block_state0, 5U * sizeof (uint32_t));
-    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
+    Hacl_Streaming_Types_optional k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
       case Hacl_Streaming_Types_None:

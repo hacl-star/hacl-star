@@ -37,6 +37,32 @@ extern "C" {
 
 #include "../Hacl_Streaming_Types.h"
 
+#define Hacl_Streaming_Types_None 0
+#define Hacl_Streaming_Types_Some 1
+
+typedef uint8_t Hacl_Streaming_Types_optional;
+
+typedef struct Hacl_Streaming_Types_optional_32_s
+{
+  Hacl_Streaming_Types_optional tag;
+  uint32_t *v;
+}
+Hacl_Streaming_Types_optional_32;
+
+typedef struct Hacl_Streaming_Types_optional_64_s
+{
+  Hacl_Streaming_Types_optional tag;
+  uint64_t *v;
+}
+Hacl_Streaming_Types_optional_64;
+
+typedef struct Hacl_Streaming_Types_two_pointers_s
+{
+  uint64_t *fst;
+  uint64_t *snd;
+}
+Hacl_Streaming_Types_two_pointers;
+
 typedef struct Hacl_Streaming_MD_state_32_s
 {
   uint32_t *block_state;
@@ -52,34 +78,6 @@ typedef struct Hacl_Streaming_MD_state_64_s
   uint64_t total_len;
 }
 Hacl_Streaming_MD_state_64;
-
-#define Hacl_Streaming_Types_None 0
-#define Hacl_Streaming_Types_Some 1
-
-typedef uint8_t Hacl_Streaming_Types_optional_32_tags;
-
-typedef struct Hacl_Streaming_Types_optional_32_s
-{
-  Hacl_Streaming_Types_optional_32_tags tag;
-  uint32_t *v;
-}
-Hacl_Streaming_Types_optional_32;
-
-typedef struct Hacl_Streaming_Types_optional_64_s
-{
-  Hacl_Streaming_Types_optional_32_tags tag;
-  uint64_t *v;
-}
-Hacl_Streaming_Types_optional_64;
-
-typedef Hacl_Streaming_Types_optional_32_tags Hacl_Streaming_Types_optional_unit;
-
-typedef struct Hacl_Streaming_Types_two_pointers_s
-{
-  uint64_t *fst;
-  uint64_t *snd;
-}
-Hacl_Streaming_Types_two_pointers;
 
 #if defined(__cplusplus)
 }

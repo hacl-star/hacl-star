@@ -36,33 +36,33 @@ module Bindings(F:Cstubs.FOREIGN) =
     type hacl_Agile_Hash_state_s_tags = Unsigned.UInt8.t
     let hacl_Agile_Hash_state_s_tags =
       typedef uint8_t "Hacl_Agile_Hash_state_s_tags"
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_MD5_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_MD5_a =
       Unsigned.UInt8.of_int 0
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA1_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA1_a =
       Unsigned.UInt8.of_int 1
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA2_224_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA2_224_a =
       Unsigned.UInt8.of_int 2
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA2_256_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA2_256_a =
       Unsigned.UInt8.of_int 3
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA2_384_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA2_384_a =
       Unsigned.UInt8.of_int 4
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA2_512_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA2_512_a =
       Unsigned.UInt8.of_int 5
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA3_224_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA3_224_a =
       Unsigned.UInt8.of_int 6
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA3_256_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA3_256_a =
       Unsigned.UInt8.of_int 7
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA3_384_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA3_384_a =
       Unsigned.UInt8.of_int 8
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA3_512_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_SHA3_512_a =
       Unsigned.UInt8.of_int 9
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_Blake2S_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_Blake2S_a =
       Unsigned.UInt8.of_int 10
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_Blake2S_128_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_Blake2S_128_a =
       Unsigned.UInt8.of_int 11
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_Blake2B_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_Blake2B_a =
       Unsigned.UInt8.of_int 12
-    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_Blake2B_256_s =
+    let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_Blake2B_256_a =
       Unsigned.UInt8.of_int 13
     type hacl_Agile_Hash_state_s = [ `hacl_Agile_Hash_state_s ] structure
     let (hacl_Agile_Hash_state_s :

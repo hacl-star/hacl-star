@@ -30,23 +30,28 @@
 extern "C" {
 #endif
 
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
 #include "../Hacl_Streaming_HMAC.h"
 #include "libintvector-shim.h"
 
-#define Hacl_Agile_Hash_MD5_s 0
-#define Hacl_Agile_Hash_SHA1_s 1
-#define Hacl_Agile_Hash_SHA2_224_s 2
-#define Hacl_Agile_Hash_SHA2_256_s 3
-#define Hacl_Agile_Hash_SHA2_384_s 4
-#define Hacl_Agile_Hash_SHA2_512_s 5
-#define Hacl_Agile_Hash_SHA3_224_s 6
-#define Hacl_Agile_Hash_SHA3_256_s 7
-#define Hacl_Agile_Hash_SHA3_384_s 8
-#define Hacl_Agile_Hash_SHA3_512_s 9
-#define Hacl_Agile_Hash_Blake2S_s 10
-#define Hacl_Agile_Hash_Blake2S_128_s 11
-#define Hacl_Agile_Hash_Blake2B_s 12
-#define Hacl_Agile_Hash_Blake2B_256_s 13
+#define Hacl_Agile_Hash_MD5_a 0
+#define Hacl_Agile_Hash_SHA1_a 1
+#define Hacl_Agile_Hash_SHA2_224_a 2
+#define Hacl_Agile_Hash_SHA2_256_a 3
+#define Hacl_Agile_Hash_SHA2_384_a 4
+#define Hacl_Agile_Hash_SHA2_512_a 5
+#define Hacl_Agile_Hash_SHA3_224_a 6
+#define Hacl_Agile_Hash_SHA3_256_a 7
+#define Hacl_Agile_Hash_SHA3_384_a 8
+#define Hacl_Agile_Hash_SHA3_512_a 9
+#define Hacl_Agile_Hash_Blake2S_a 10
+#define Hacl_Agile_Hash_Blake2S_128_a 11
+#define Hacl_Agile_Hash_Blake2B_a 12
+#define Hacl_Agile_Hash_Blake2B_256_a 13
 
 typedef uint8_t Hacl_Agile_Hash_state_s_tags;
 
@@ -54,20 +59,20 @@ typedef struct Hacl_Agile_Hash_state_s_s
 {
   Hacl_Agile_Hash_state_s_tags tag;
   union {
-    uint32_t *case_MD5_s;
-    uint32_t *case_SHA1_s;
-    uint32_t *case_SHA2_224_s;
-    uint32_t *case_SHA2_256_s;
-    uint64_t *case_SHA2_384_s;
-    uint64_t *case_SHA2_512_s;
-    uint64_t *case_SHA3_224_s;
-    uint64_t *case_SHA3_256_s;
-    uint64_t *case_SHA3_384_s;
-    uint64_t *case_SHA3_512_s;
-    uint32_t *case_Blake2S_s;
-    Lib_IntVector_Intrinsics_vec128 *case_Blake2S_128_s;
-    uint64_t *case_Blake2B_s;
-    Lib_IntVector_Intrinsics_vec256 *case_Blake2B_256_s;
+    uint32_t *case_MD5_a;
+    uint32_t *case_SHA1_a;
+    uint32_t *case_SHA2_224_a;
+    uint32_t *case_SHA2_256_a;
+    uint64_t *case_SHA2_384_a;
+    uint64_t *case_SHA2_512_a;
+    uint64_t *case_SHA3_224_a;
+    uint64_t *case_SHA3_256_a;
+    uint64_t *case_SHA3_384_a;
+    uint64_t *case_SHA3_512_a;
+    uint32_t *case_Blake2S_a;
+    Lib_IntVector_Intrinsics_vec128 *case_Blake2S_128_a;
+    uint64_t *case_Blake2B_a;
+    Lib_IntVector_Intrinsics_vec256 *case_Blake2B_256_a;
   }
   ;
 }

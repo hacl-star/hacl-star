@@ -30,7 +30,12 @@
 extern "C" {
 #endif
 
-#include "Hacl_Streaming_Types.h"
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
+#include "internal/Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_Blake2b.h"
 
 typedef struct Hacl_Hash_Blake2b_params_and_key_s
@@ -65,19 +70,22 @@ Hacl_Hash_Blake2b_update_last(
 
 void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
+typedef struct Hacl_Hash_Blake2b_block_state_t_s
+{
+  uint8_t fst;
+  uint8_t snd;
+  bool thd;
+  Hacl_Streaming_Types_two_pointers f3;
+}
+Hacl_Hash_Blake2b_block_state_t;
+
 typedef struct Hacl_Hash_Blake2b_state_t_s
 {
-  Hacl_Streaming_Blake2_Types_block_state_blake2b_32 block_state;
+  Hacl_Hash_Blake2b_block_state_t block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
 Hacl_Hash_Blake2b_state_t;
-
-#define FStar_Pervasives_Native_None 0
-#define FStar_Pervasives_Native_Some 1
-
-typedef uint8_t
-FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags;
 
 #if defined(__cplusplus)
 }

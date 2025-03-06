@@ -52,10 +52,6 @@ extern "C" {
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
-typedef struct Hacl_Streaming_MD_state_32_s Hacl_Streaming_MD_state_32;
-
-typedef struct Hacl_Streaming_MD_state_64_s Hacl_Streaming_MD_state_64;
-
 #define Hacl_Streaming_Types_Success 0
 #define Hacl_Streaming_Types_InvalidAlgorithm 1
 #define Hacl_Streaming_Types_InvalidLength 2
@@ -63,6 +59,10 @@ typedef struct Hacl_Streaming_MD_state_64_s Hacl_Streaming_MD_state_64;
 #define Hacl_Streaming_Types_OutOfMemory 4
 
 typedef uint8_t Hacl_Streaming_Types_error_code;
+
+typedef struct Hacl_Streaming_MD_state_32_s Hacl_Streaming_MD_state_32;
+
+typedef struct Hacl_Streaming_MD_state_64_s Hacl_Streaming_MD_state_64;
 
 #if defined(__cplusplus)
 }
