@@ -56,6 +56,15 @@ Hacl_MAC_Poly1305_Simd256_poly1305_finish(
   Lib_IntVector_Intrinsics_vec256 *ctx
 );
 
+typedef struct Hacl_MAC_Poly1305_Simd256_state_t_s
+{
+  Lib_IntVector_Intrinsics_vec256 *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+  uint8_t *p_key;
+}
+Hacl_MAC_Poly1305_Simd256_state_t;
+
 #if defined(__cplusplus)
 }
 #endif

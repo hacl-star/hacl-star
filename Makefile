@@ -738,7 +738,12 @@ TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 # Note: due to backwards-compat, the syntax for the option is not super great...
 # it's `-add-include 'Foo:"bar.h"'` (include added to Foo.h) and
 # `-add-include 'Foo.c:"bar.h"'` (include added to Foo.c). Note how the former
-# doesn't have the extension while the latter does.
+# doesn't have the file extension while the latter does.
+# Note: the syntax got worse, now Foo.h:"bar.h" means the INTERNAL header internal/Foo.h includes
+# bar.h
+# Note: we would like to maintain the invariant (as of Feb 2025) that we NEVER include libintvector.h from a
+# public header. See https://github.com/python/cpython/issues/130213
+# FIXME: Sha3_Simd256 does *not* have an internal header so we can't enforce the invariant here
 INTRINSIC_FLAGS = \
   -add-include 'Hacl_P256.c:"lib_intrinsics.h"' \
   \
@@ -746,24 +751,27 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_Chacha20_Vec128.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec128.c:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_Blake2s_Simd128:"libintvector.h"' \
-  -add-include 'Hacl_MAC_Poly1305_Simd128:"libintvector.h"' \
+  -add-include 'Hacl_Hash_Blake2s_Simd128.h:"libintvector.h"' \
+  -add-include 'Hacl_MAC_Poly1305_Simd128.h:"libintvector.h"' \
   \
   -add-include 'Hacl_AEAD_Chacha20Poly1305_Simd256.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec256.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_Blake2b_Simd256:"libintvector.h"' \
-  -add-include 'Hacl_MAC_Poly1305_Simd256:"libintvector.h"' \
+  -add-include 'Hacl_Hash_Blake2b_Simd256.h:"libintvector.h"' \
+  -add-include 'Hacl_MAC_Poly1305_Simd256.h:"libintvector.h"' \
   \
   -add-include 'Hacl_Hash_SHA3_Simd256:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_Types:"libintvector.h"'
+  -add-include 'Vale.h:"libintvector.h"' \
+  -add-include 'Vale.h:<inttypes.h>' \
+  -add-include 'EverCrypt_Hash.h:"libintvector.h"' \
+  -add-include 'Hacl_Streaming_HMAC.h:"libintvector-shim.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_P256:"lib_intrinsics.h"' \
   -add-include 'Hacl_Bignum:"lib_intrinsics.h"' \
-  -add-include 'Hacl_Bignum_Base:"lib_intrinsics.h"' \
+  -add-include 'Hacl_Bignum_Base.h:"lib_intrinsics.h"' \
   -add-include 'Hacl_K256_ECDSA:"lib_intrinsics.h"'
 
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.

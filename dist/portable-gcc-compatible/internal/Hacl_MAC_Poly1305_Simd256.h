@@ -30,11 +30,6 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "../Hacl_MAC_Poly1305_Simd256.h"
 #include "libintvector.h"
 
@@ -71,6 +66,19 @@ Hacl_MAC_Poly1305_Simd256_poly1305_finish(
 );
 
 /* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_poly1305_finish */
+
+/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_state_t */
+
+typedef struct Hacl_MAC_Poly1305_Simd256_state_t_s
+{
+  Lib_IntVector_Intrinsics_vec256 *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+  uint8_t *p_key;
+}
+Hacl_MAC_Poly1305_Simd256_state_t;
+
+/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_state_t */
 
 #if defined(__cplusplus)
 }

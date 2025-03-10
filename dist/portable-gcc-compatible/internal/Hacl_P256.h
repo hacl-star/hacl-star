@@ -30,13 +30,7 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "../Hacl_P256.h"
-#include "lib_intrinsics.h"
 
 /* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_i */
 

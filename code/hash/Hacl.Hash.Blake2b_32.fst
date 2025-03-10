@@ -10,7 +10,7 @@ open Lib.Buffer
 
 friend Spec.Agile.Hash
 
-let malloc = BlB32.malloc_with_key
+let malloc = BlB32.malloc_internal_state_with_key
 
 let alloca () =
   let h0 = ST.get() in

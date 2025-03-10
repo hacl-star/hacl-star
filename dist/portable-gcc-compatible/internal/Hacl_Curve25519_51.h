@@ -30,11 +30,6 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "../Hacl_Curve25519_51.h"
 
 /* SNIPPET_START: Hacl_Curve25519_51_fsquare_times */

@@ -46,5 +46,5 @@ let store_state128s_to_state32: Core.store_state_st Spec.Blake2S Core.M128 =
 let load_state128s_from_state32: Core.load_state_st Spec.Blake2S Core.M128  =
   Core.load_state_from_state32 #Spec.Blake2S #Core.M128
 
-let malloc_with_key : Impl.blake2_malloc_st Spec.Blake2S Core.M128 =
+let malloc_internal_state_with_key : Impl.blake2_malloc_st Spec.Blake2S Core.M128 =
   Impl.blake2_malloc Spec.Blake2S Core.M128

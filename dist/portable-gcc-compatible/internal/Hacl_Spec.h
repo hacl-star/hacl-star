@@ -30,11 +30,6 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "krml/internal/types.h"
-#include "krml/lowstar_endianness.h"
-#include "krml/internal/target.h"
-
 #include "../Hacl_Spec.h"
 
 /* SNIPPET_START: Spec_Cipher_Expansion_impl */

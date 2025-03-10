@@ -1,6 +1,6 @@
 module Hacl.Streaming.Blake2s_128
 
-// Blake2s_128 is hand-written, other files generated with:
+// Blake2 b thirty two is hand-written, other files generated with:
 // sed 's/2S/2S/g;s/2s/2s/g;' Hacl.Streaming.Blake2s_128.fst > Hacl.Streaming.Blake2s_128.fst; sed 's/128/128/g' Hacl.Streaming.Blake2s_128.fst > Hacl.Streaming.Blake2s_128.fst; sed 's/128/256/g' Hacl.Streaming.Blake2s_128.fst > Hacl.Streaming.Blake2s_256.fst
 
 module HS = FStar.HyperStack
@@ -26,16 +26,27 @@ open FStar.HyperStack.ST
 [@ CMacro ] let salt_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.salt_length Spec.Blake2S)
 [@ CMacro ] let personal_bytes = Lib.IntTypes.size (Spec.Blake2.Definitions.personal_length Spec.Blake2S)
 
+/// Type abbreviations - makes Karamel use pretty names in the generated code
+private
+let two_2s_128 = Core.(state_p Spec.Blake2S M128 & state_p Spec.Blake2S M128)
+
+[@ CAbstractStruct ]
+let block_state_t (kk: G.erased (Common.index Spec.Blake2S)) =
+  // Make sure two_vec128 is actually used!
+  let open Common in
+  let open Hacl.Streaming.Blake2.Params in
+  singleton (kk.key_length) & singleton (kk.digest_length) & singleton_b (kk.last_node) & two_2s_128
+
 inline_for_extraction noextract
 let blake2s_128 =
   Common.blake2 Spec.Blake2S Core.M128 Blake2s128.inline_init_with_params Blake2s128.update_multi
          Blake2s128.update_last Blake2s128.finish
 
-/// Type abbreviations - makes Karamel use pretty names in the generated code
-let block_state_t (kk: G.erased (Common.index Spec.Blake2S)) =
-  Hacl.Streaming.Blake2.Types.block_state_blake2s_128 kk
-let optional_block_state_t (kk: G.erased (Common.index Spec.Blake2S)) =
-  Hacl.Streaming.Blake2.Types.optional_block_state_blake2s_128 kk
+// Doing this would result in a public type which would contain an incomplete struct. Let this be
+// inserted somewhere in this file as a private abbreviation (with a bad auto-generated name), but
+// at least that sees the complete struct definition in scope.
+(* let optional_block_state_t (kk: G.erased (Common.index Spec.Blake2S)) = *)
+(*   option (block_state_t kk) *)
 
 let state_t (kk: G.erased (Common.index Spec.Blake2S)) =
   F.state_s blake2s_128 kk (Common.s Spec.Blake2S kk Core.M128) (Common.blake_key Spec.Blake2S kk)

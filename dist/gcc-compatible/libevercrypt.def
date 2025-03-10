@@ -41,9 +41,12 @@ EXPORTS
   Hacl_Hash_Blake2b_Simd256_finish
   Hacl_Hash_Blake2b_Simd256_load_state256b_from_state32
   Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32
-  Hacl_Hash_Blake2b_Simd256_malloc_with_key
+  Hacl_Hash_Blake2b_Simd256_malloc_internal_state_with_key
+  Hacl_Hash_Blake2b_Simd256_update_multi_no_inline
+  Hacl_Hash_Blake2b_Simd256_update_last_no_inline
+  Hacl_Hash_Blake2b_Simd256_copy_internal_state
   Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key
-  Hacl_Hash_Blake2b_Simd256_malloc_with_key0
+  Hacl_Hash_Blake2b_Simd256_malloc_with_key
   Hacl_Hash_Blake2b_Simd256_malloc
   Hacl_Hash_Blake2b_Simd256_reset_with_key_and_params
   Hacl_Hash_Blake2b_Simd256_reset_with_key
@@ -61,9 +64,12 @@ EXPORTS
   Hacl_Hash_Blake2s_Simd128_finish
   Hacl_Hash_Blake2s_Simd128_store_state128s_to_state32
   Hacl_Hash_Blake2s_Simd128_load_state128s_from_state32
-  Hacl_Hash_Blake2s_Simd128_malloc_with_key
+  Hacl_Hash_Blake2s_Simd128_malloc_internal_state_with_key
+  Hacl_Hash_Blake2s_Simd128_update_multi_no_inline
+  Hacl_Hash_Blake2s_Simd128_update_last_no_inline
+  Hacl_Hash_Blake2s_Simd128_copy_internal_state
   Hacl_Hash_Blake2s_Simd128_malloc_with_params_and_key
-  Hacl_Hash_Blake2s_Simd128_malloc_with_key0
+  Hacl_Hash_Blake2s_Simd128_malloc_with_key
   Hacl_Hash_Blake2s_Simd128_malloc
   Hacl_Hash_Blake2s_Simd128_reset_with_key_and_params
   Hacl_Hash_Blake2s_Simd128_reset_with_key
@@ -721,11 +727,11 @@ EXPORTS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase
   Hacl_HPKE_Curve51_CP32_SHA256_openBase
+  EverCrypt_Poly1305_mac
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
-  EverCrypt_Poly1305_mac
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA512_sealBase

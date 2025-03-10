@@ -15,13 +15,13 @@ type error_code =
 // appear *before* their actual uses) and iii) make sure these are not
 // eliminated.
 
-/// Part iii) is achieved via bundling (this file in on the left-hand side).
+// Part iii) is achieved via bundling (this file in on the left-hand side).
 
 // This is a good place to put monomorphizations in because this file appears
 // *before* all streaming instances.
 
+let optional = option unit
 let optional_32 = option (LowStar.Buffer.buffer UInt32.t)
 let optional_64 = option (LowStar.Buffer.buffer UInt64.t)
-let optional_unit = option unit
 
 let two_pointers = LowStar.Buffer.(buffer UInt64.t & buffer UInt64.t)

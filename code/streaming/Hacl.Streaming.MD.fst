@@ -186,14 +186,12 @@ let hacl_md (a:alg)// : block unit =
 inline_for_extraction noextract
 let hacl_sha2_256 = hacl_md SHA2_256
 
+[@ CAbstractStruct ]
 let state_32 = F.state_s hacl_sha2_256 () ((state_t SHA2_256).s ()) (G.erased unit)
-
-let optional_state_32 = option state_32
 
 inline_for_extraction noextract
 let hacl_sha2_512 = hacl_md SHA2_512
 
+[@ CAbstractStruct ]
 let state_64 = F.state_s hacl_sha2_512 () ((state_t SHA2_512).s ()) (G.erased unit)
-
-let optional_state_64 = option state_64
 

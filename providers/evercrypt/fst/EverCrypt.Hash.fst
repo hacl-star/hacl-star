@@ -343,7 +343,7 @@ let malloc_ a r =
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
         let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
         if vec128 then
-          let s = Hacl.Blake2s_128.malloc_with_key r in
+          let s = Hacl.Blake2s_128.malloc_internal_state_with_key r in
           if B.is_null s then
             B.null
           else
@@ -365,7 +365,7 @@ let malloc_ a r =
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
         let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
         if vec256 then
-          let s = Hacl.Blake2b_256.malloc_with_key r in
+          let s = Hacl.Blake2b_256.malloc_internal_state_with_key r in
           if B.is_null s then
             B.null
           else

@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Hash_Blake2b.h"
-#include "libintvector.h"
 
 #define HACL_HASH_BLAKE2S_SIMD128_BLOCK_BYTES (64U)
 
@@ -49,19 +48,10 @@ extern "C" {
 
 #define HACL_HASH_BLAKE2S_SIMD128_PERSONAL_BYTES (8U)
 
-typedef Hacl_Streaming_Blake2_Types_block_state_blake2s_128
+typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
 Hacl_Hash_Blake2s_Simd128_block_state_t;
 
-typedef Hacl_Streaming_Blake2_Types_optional_block_state_blake2s_128
-Hacl_Hash_Blake2s_Simd128_optional_block_state_t;
-
-typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s
-{
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_128 block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Hash_Blake2s_Simd128_state_t;
+typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s Hacl_Hash_Blake2s_Simd128_state_t;
 
 /**
  General-purpose allocation function that gives control over all
@@ -174,7 +164,7 @@ void Hacl_Hash_Blake2s_Simd128_free(Hacl_Hash_Blake2s_Simd128_state_t *state);
   Copying. This preserves all parameters.
 */
 Hacl_Hash_Blake2s_Simd128_state_t
-*Hacl_Hash_Blake2s_Simd128_copy(Hacl_Hash_Blake2s_Simd128_state_t *state);
+*Hacl_Hash_Blake2s_Simd128_copy0(Hacl_Hash_Blake2s_Simd128_state_t *state);
 
 /**
 Write the BLAKE2s digest of message `input` using key `key` into `output`.
