@@ -24,8 +24,8 @@ module Bindings(F:Cstubs.FOREIGN) =
            (bool @->
               (ocaml_bytes @->
                  (returning (ptr hacl_Hash_Blake2s_Simd128_state_t)))))
-    let hacl_Hash_Blake2s_Simd128_malloc_with_key0 =
-      foreign "Hacl_Hash_Blake2s_Simd128_malloc_with_key0"
+    let hacl_Hash_Blake2s_Simd128_malloc_with_key =
+      foreign "Hacl_Hash_Blake2s_Simd128_malloc_with_key"
         (ocaml_bytes @->
            (uint8_t @-> (returning (ptr hacl_Hash_Blake2s_Simd128_state_t))))
     let hacl_Hash_Blake2s_Simd128_malloc =
@@ -59,8 +59,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2s_Simd128_free =
       foreign "Hacl_Hash_Blake2s_Simd128_free"
         ((ptr hacl_Hash_Blake2s_Simd128_state_t) @-> (returning void))
-    let hacl_Hash_Blake2s_Simd128_copy0 =
-      foreign "Hacl_Hash_Blake2s_Simd128_copy0"
+    let hacl_Hash_Blake2s_Simd128_copy =
+      foreign "Hacl_Hash_Blake2s_Simd128_copy"
         ((ptr hacl_Hash_Blake2s_Simd128_state_t) @->
            (returning (ptr hacl_Hash_Blake2s_Simd128_state_t)))
     let hacl_Hash_Blake2s_Simd128_hash_with_key =

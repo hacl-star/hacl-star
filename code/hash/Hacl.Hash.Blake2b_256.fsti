@@ -42,7 +42,7 @@ val hash: hash_st Blake2B
 module B = LowStar.Buffer
 open FStar.HyperStack.ST
 
-val copy (src dst: state (| Spec.Agile.Hash.Blake2B, Hacl.Impl.Blake2.Core.M256 |)): Stack unit
+val copy_internal_state (src dst: state (| Spec.Agile.Hash.Blake2B, Hacl.Impl.Blake2.Core.M256 |)): Stack unit
   (requires (fun h0 -> B.(live h0 src /\ live h0 dst /\ loc_disjoint (loc_buffer src) (loc_buffer dst))))
   (ensures (fun h0 _ h1 ->
     B.(modifies (loc_buffer dst) h0 h1 /\ as_seq h1 dst `Seq.equal` as_seq h0 src)))

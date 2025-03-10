@@ -231,7 +231,7 @@ let malloc_ a r =
       // As usual, to prevent linking errors (missing symbols) on systems that
       // do not have this implementation available.
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-        let s = Hacl.Blake2s_128.malloc_with_key r in
+        let s = Hacl.Blake2s_128.malloc_internal_state_with_key r in
         if B.is_null s then
           B.null
         else
@@ -250,7 +250,7 @@ let malloc_ a r =
       // As usual, to prevent linking errors (missing symbols) on systems that
       // do not have this implementation available.
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-        let s = Hacl.Blake2b_256.malloc_with_key r in
+        let s = Hacl.Blake2b_256.malloc_internal_state_with_key r in
         if B.is_null s then
           B.null
         else
@@ -478,7 +478,7 @@ let copy #a s_src s_dst =
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
         [@inline_let] let s_dst: state (Blake2S_128 s) = s_dst in
         let p_dst = Blake2S_128_a?.p !*s_dst in
-        Hacl.Hash.Blake2s_128.copy p_src p_dst
+        Hacl.Hash.Blake2s_128.copy_internal_state p_src p_dst
       else
         false_elim ()
   | Blake2B_a p_src ->
@@ -489,7 +489,7 @@ let copy #a s_src s_dst =
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
         [@inline_let] let s_dst: state (Blake2B_256 s) = s_dst in
         let p_dst = Blake2B_256_a?.p !*s_dst in
-        Hacl.Hash.Blake2b_256.copy p_src p_dst
+        Hacl.Hash.Blake2b_256.copy_internal_state p_src p_dst
       else
         false_elim ()
 

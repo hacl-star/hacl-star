@@ -39,5 +39,5 @@ let update : Impl.blake2_update_st Spec.Blake2B Core.M32 =
 let finish : Impl.blake2_finish_st Spec.Blake2B Core.M32 =
   Impl.blake2_finish #Spec.Blake2B #Core.M32
 
-let malloc_with_key : Impl.blake2_malloc_st Spec.Blake2B Core.M32 =
+let malloc_internal_state_with_key : Impl.blake2_malloc_st Spec.Blake2B Core.M32 =
   Impl.blake2_malloc Spec.Blake2B Core.M32

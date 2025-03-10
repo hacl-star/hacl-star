@@ -10,7 +10,7 @@ open Lib.Buffer
 
 friend Spec.Agile.Hash
 
-let malloc = BlB256.malloc_with_key
+let malloc = BlB256.malloc_internal_state_with_key
 
 let alloca () =
   let h0 = ST.get() in
@@ -39,7 +39,7 @@ let finish s dst = BlB256.finish (hash_len Blake2B) dst s
 
 let hash output input input_len = Hacl.Streaming.Blake2b_256.hash_with_key output 64ul input input_len (null #MUT uint8) 0ul
 
-let copy src dst =
+let copy_internal_state src dst =
   calc (==) {
     B.length src;
   (==) {}
