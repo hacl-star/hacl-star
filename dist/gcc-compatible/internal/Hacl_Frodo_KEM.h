@@ -26,6 +26,7 @@
 #ifndef __internal_Hacl_Frodo_KEM_H
 #define __internal_Hacl_Frodo_KEM_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

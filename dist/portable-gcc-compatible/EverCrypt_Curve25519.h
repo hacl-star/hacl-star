@@ -26,6 +26,7 @@
 #ifndef __EverCrypt_Curve25519_H
 #define __EverCrypt_Curve25519_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

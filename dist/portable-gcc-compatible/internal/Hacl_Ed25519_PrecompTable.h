@@ -26,9 +26,15 @@
 #ifndef __internal_Hacl_Ed25519_PrecompTable_H
 #define __internal_Hacl_Ed25519_PrecompTable_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 /* SNIPPET_START: Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w4 */
 

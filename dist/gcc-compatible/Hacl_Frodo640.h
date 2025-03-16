@@ -26,6 +26,7 @@
 #ifndef __Hacl_Frodo640_H
 #define __Hacl_Frodo640_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

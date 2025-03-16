@@ -26,6 +26,7 @@
 #ifndef __Hacl_IntTypes_Intrinsics_H
 #define __Hacl_IntTypes_Intrinsics_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

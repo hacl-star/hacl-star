@@ -26,6 +26,7 @@
 #ifndef __Hacl_HMAC_Blake2s_128_H
 #define __Hacl_HMAC_Blake2s_128_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

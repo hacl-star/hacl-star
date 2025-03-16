@@ -26,6 +26,7 @@
 #ifndef __Hacl_Spec_H
 #define __Hacl_Spec_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

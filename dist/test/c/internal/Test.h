@@ -26,6 +26,7 @@
 #ifndef __internal_Test_H
 #define __internal_Test_H
 
+
 #include "krml/internal/compat.h"
 
 #include "../Test.h"
@@ -50,6 +51,16 @@
 #define Spec_Hash_Definitions_Shake256 13
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
+
+typedef struct EverCrypt_Hash_state_s_s EverCrypt_Hash_state_s;
+
+typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
+{
+  EverCrypt_Hash_state_s *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
 
 typedef struct Test_Lowstarize_lbuffer__uint8_t_s
 {

@@ -26,6 +26,7 @@
 #ifndef __internal_Hacl_Hash_Blake2s_Simd128_H
 #define __internal_Hacl_Hash_Blake2s_Simd128_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

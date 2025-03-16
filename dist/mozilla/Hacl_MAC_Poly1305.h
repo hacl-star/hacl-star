@@ -26,6 +26,7 @@
 #ifndef __Hacl_MAC_Poly1305_H
 #define __Hacl_MAC_Poly1305_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

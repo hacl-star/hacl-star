@@ -26,6 +26,7 @@
 #ifndef __EverCrypt_Error_H
 #define __EverCrypt_Error_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

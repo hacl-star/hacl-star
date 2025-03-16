@@ -26,6 +26,7 @@
 #ifndef __Hacl_Hash_Blake2b_Simd256_H
 #define __Hacl_Hash_Blake2b_Simd256_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -70,7 +71,7 @@ extern "C" {
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_block_state_t */
 
-typedef Hacl_Streaming_Blake2_Types_block_state_blake2b_256
+typedef struct Hacl_Hash_Blake2b_Simd256_block_state_t_s
 Hacl_Hash_Blake2b_Simd256_block_state_t;
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_block_state_t */
@@ -107,7 +108,7 @@ Hacl_Hash_Blake2b_Simd256_state_t
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key */
 
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_malloc_with_key0 */
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_malloc_with_key */
 
 /**
  Specialized allocation function that picks default values for all
@@ -121,9 +122,9 @@ The caller must satisfy the following requirements.
 
 */
 Hacl_Hash_Blake2b_Simd256_state_t
-*Hacl_Hash_Blake2b_Simd256_malloc_with_key0(uint8_t *k, uint8_t kk);
+*Hacl_Hash_Blake2b_Simd256_malloc_with_key(uint8_t *k, uint8_t kk);
 
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_malloc_with_key0 */
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_malloc_with_key */
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_malloc */
 
@@ -228,15 +229,15 @@ void Hacl_Hash_Blake2b_Simd256_free(Hacl_Hash_Blake2b_Simd256_state_t *state);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_free */
 
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_copy0 */
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_copy */
 
 /**
   Copying. This preserves all parameters.
 */
 Hacl_Hash_Blake2b_Simd256_state_t
-*Hacl_Hash_Blake2b_Simd256_copy0(Hacl_Hash_Blake2b_Simd256_state_t *state);
+*Hacl_Hash_Blake2b_Simd256_copy(Hacl_Hash_Blake2b_Simd256_state_t *state);
 
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_copy0 */
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_copy */
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_hash_with_key */
 

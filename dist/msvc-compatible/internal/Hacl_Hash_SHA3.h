@@ -26,6 +26,7 @@
 #ifndef __internal_Hacl_Hash_SHA3_H
 #define __internal_Hacl_Hash_SHA3_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

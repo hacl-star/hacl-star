@@ -26,6 +26,7 @@
 #ifndef __EverCrypt_HMAC_H
 #define __EverCrypt_HMAC_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

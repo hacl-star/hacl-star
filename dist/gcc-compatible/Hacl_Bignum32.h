@@ -26,6 +26,7 @@
 #ifndef __Hacl_Bignum32_H
 #define __Hacl_Bignum32_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

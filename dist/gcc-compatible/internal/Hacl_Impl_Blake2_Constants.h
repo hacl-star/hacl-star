@@ -26,6 +26,7 @@
 #ifndef __internal_Hacl_Impl_Blake2_Constants_H
 #define __internal_Hacl_Impl_Blake2_Constants_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

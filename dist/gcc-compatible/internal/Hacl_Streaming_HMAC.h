@@ -26,6 +26,7 @@
 #ifndef __internal_Hacl_Streaming_HMAC_H
 #define __internal_Hacl_Streaming_HMAC_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

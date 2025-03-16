@@ -26,9 +26,15 @@
 #ifndef __internal_EverCrypt_DRBG_H
 #define __internal_EverCrypt_DRBG_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 #include "Hacl_HMAC_DRBG.h"
 #include "../EverCrypt_DRBG.h"

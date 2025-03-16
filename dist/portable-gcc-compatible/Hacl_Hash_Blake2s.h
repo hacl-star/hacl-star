@@ -26,6 +26,7 @@
 #ifndef __Hacl_Hash_Blake2s_H
 #define __Hacl_Hash_Blake2s_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -70,7 +71,7 @@ extern "C" {
 
 /* SNIPPET_START: Hacl_Hash_Blake2s_block_state_t */
 
-typedef Hacl_Streaming_Blake2_Types_block_state_blake2s_32 Hacl_Hash_Blake2s_block_state_t;
+typedef struct Hacl_Hash_Blake2s_block_state_t_s Hacl_Hash_Blake2s_block_state_t;
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_block_state_t */
 

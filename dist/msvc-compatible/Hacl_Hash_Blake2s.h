@@ -26,6 +26,7 @@
 #ifndef __Hacl_Hash_Blake2s_H
 #define __Hacl_Hash_Blake2s_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

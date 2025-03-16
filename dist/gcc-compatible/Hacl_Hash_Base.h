@@ -26,6 +26,7 @@
 #ifndef __Hacl_Hash_Base_H
 #define __Hacl_Hash_Base_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

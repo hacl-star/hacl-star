@@ -26,6 +26,7 @@
 #ifndef __Hacl_NaCl_H
 #define __Hacl_NaCl_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

@@ -26,6 +26,7 @@
 #ifndef __Hacl_Salsa20_H
 #define __Hacl_Salsa20_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

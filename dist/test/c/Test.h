@@ -26,12 +26,16 @@
 #ifndef __Test_H
 #define __Test_H
 
+
 #include "krml/internal/compat.h"
 
 #include "internal/Hacl_Hash_SHA2.h"
 #include "krmllib.h"
 #include "libintvector.h"
 #include "clients/krmlrenamings.h"
+
+typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
+Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
 
 exit_code main(void);
 

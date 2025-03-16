@@ -26,6 +26,7 @@
 #ifndef __internal_Hacl_P256_PrecompTable_H
 #define __internal_Hacl_P256_PrecompTable_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

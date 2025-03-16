@@ -26,6 +26,7 @@
 #ifndef __internal_Hacl_Ed25519_H
 #define __internal_Hacl_Ed25519_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

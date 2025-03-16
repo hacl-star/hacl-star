@@ -26,9 +26,15 @@
 #ifndef __internal_EverCrypt_Hash_H
 #define __internal_EverCrypt_Hash_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 #include "../EverCrypt_Hash.h"
 #include "libintvector.h"

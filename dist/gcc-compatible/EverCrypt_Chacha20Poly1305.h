@@ -26,6 +26,7 @@
 #ifndef __EverCrypt_Chacha20Poly1305_H
 #define __EverCrypt_Chacha20Poly1305_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

@@ -26,9 +26,15 @@
 #ifndef __internal_Hacl_MAC_Poly1305_Simd128_H
 #define __internal_Hacl_MAC_Poly1305_Simd128_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 #include "../Hacl_MAC_Poly1305_Simd128.h"
 #include "libintvector.h"

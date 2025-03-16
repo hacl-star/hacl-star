@@ -57,8 +57,6 @@ extern void EverCrypt_AutoConfig2_disable_shaext(void);
 
 extern void EverCrypt_AutoConfig2_disable_aesni(void);
 
-typedef struct state_s_s state_s;
-
 extern void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,
@@ -126,7 +124,7 @@ static bool is_supported_alg(alg a)
 
 typedef uint8_t error_code;
 
-typedef struct state_s0_s state_s0;
+typedef struct state_s_s state_s;
 
 /**
 Create the required AEAD state for the algorithm.
@@ -144,7 +142,7 @@ Note: The caller must free the AEAD state by calling `EverCrypt_AEAD_free`.
   `EverCrypt_Error_UnsupportedAlgorithm` in case of a bad algorithm identifier.
   (See `EverCrypt_Error.h`.)
 */
-extern error_code EverCrypt_AEAD_create_in(alg a, state_s0 **dst, uint8_t *k);
+extern error_code EverCrypt_AEAD_create_in(alg a, state_s **dst, uint8_t *k);
 
 /**
 Encrypt and authenticate a message (`plain`) with associated data (`ad`).
@@ -167,7 +165,7 @@ Encrypt and authenticate a message (`plain`) with associated data (`ad`).
 */
 extern error_code
 EverCrypt_AEAD_encrypt(
-  state_s0 *s,
+  state_s *s,
   uint8_t *iv,
   uint32_t iv_len,
   uint8_t *ad,
@@ -211,7 +209,7 @@ Verify the authenticity of `ad` || `cipher` and decrypt `cipher` into `dst`.
 */
 extern error_code
 EverCrypt_AEAD_decrypt(
-  state_s0 *s,
+  state_s *s,
   uint8_t *iv,
   uint32_t iv_len,
   uint8_t *ad,
@@ -225,27 +223,22 @@ EverCrypt_AEAD_decrypt(
 extern void
 TestLib_compare_and_print(Prims_string uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
-typedef struct state_s___EverCrypt_Hash_state_s_____s
-{
-  state_s *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-state_s___EverCrypt_Hash_state_s____;
-
 /**
 Allocate initial state for the agile hash. The argument `a` stands for the
 choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
 efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
 before. The state is to be freed by calling `free`.
 */
-extern state_s___EverCrypt_Hash_state_s____
+extern Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
 *EverCrypt_Hash_Incremental_malloc(Spec_Hash_Definitions_hash_alg a);
 
 /**
 Reset an existing state to the initial hash state with empty data.
 */
-extern void EverCrypt_Hash_Incremental_reset(state_s___EverCrypt_Hash_state_s____ *state);
+extern void
+EverCrypt_Hash_Incremental_reset(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *state
+);
 
 /**
 Feed an arbitrary amount of data into the hash. This function returns
@@ -256,7 +249,7 @@ algorithm. Both limits are unlikely to be attained in practice.
 */
 extern error_code
 EverCrypt_Hash_Incremental_update(
-  state_s___EverCrypt_Hash_state_s____ *state,
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *state,
   uint8_t *chunk,
   uint32_t chunk_len
 );
@@ -270,12 +263,18 @@ a call to `digest`, meaning the user may feed more data into the hash via
 therefore does not invalidate the client-held state.)
 */
 extern void
-EverCrypt_Hash_Incremental_digest(state_s___EverCrypt_Hash_state_s____ *state, uint8_t *output);
+EverCrypt_Hash_Incremental_digest(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *state,
+  uint8_t *output
+);
 
 /**
 Free a state previously allocated with `create_in`.
 */
-extern void EverCrypt_Hash_Incremental_free(state_s___EverCrypt_Hash_state_s____ *state);
+extern void
+EverCrypt_Hash_Incremental_free(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *state
+);
 
 /**
 Hash `input`, of len `input_len`, into `output`, an array whose length is determined by
@@ -6832,7 +6831,7 @@ static void test_incremental_api(void)
 {
   uint8_t b1[4U] = { 0x00U, 0x01U, 0x02U, 0x04U };
   uint8_t b2[4U] = { 0x05U, 0x06U, 0x07U, 0x08U };
-  state_s___EverCrypt_Hash_state_s____
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
   *st = EverCrypt_Hash_Incremental_malloc(Spec_Hash_Definitions_SHA2_256);
   if (st == NULL)
   {
@@ -6877,9 +6876,9 @@ static void Test_Hash_main(void)
   test_incremental_api();
 }
 
-typedef struct state_s1_s state_s1;
+typedef struct state_s0_s state_s0;
 
-extern state_s1 *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg a);
+extern state_s0 *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg a);
 
 /**
 Instantiate the DRBG.
@@ -6892,7 +6891,7 @@ Instantiate the DRBG.
 */
 extern bool
 EverCrypt_DRBG_instantiate(
-  state_s1 *st,
+  state_s0 *st,
   uint8_t *personalization_string,
   uint32_t personalization_string_len
 );
@@ -6907,7 +6906,7 @@ Reseed the DRBG.
 @return True if and only if reseed was successful.
 */
 extern bool
-EverCrypt_DRBG_reseed(state_s1 *st, uint8_t *additional_input, uint32_t additional_input_len);
+EverCrypt_DRBG_reseed(state_s0 *st, uint8_t *additional_input, uint32_t additional_input_len);
 
 /**
 Generate output.
@@ -6923,7 +6922,7 @@ Generate output.
 extern bool
 EverCrypt_DRBG_generate(
   uint8_t *output,
-  state_s1 *st,
+  state_s0 *st,
   uint32_t n,
   uint8_t *additional_input,
   uint32_t additional_input_len
@@ -6934,7 +6933,7 @@ Uninstantiate and free the DRBG.
 
 @param st Pointer to DRBG state.
 */
-extern void EverCrypt_DRBG_uninstantiate(state_s1 *st);
+extern void EverCrypt_DRBG_uninstantiate(state_s0 *st);
 
 extern void
 EverCrypt_Cipher_chacha20(
@@ -8988,7 +8987,7 @@ test_aead_st(
   }
   else
   {
-    state_s0 *st = NULL;
+    state_s *st = NULL;
     error_code e = EverCrypt_AEAD_create_in(alg0, &st, key);
     switch (e)
     {
@@ -8998,7 +8997,7 @@ test_aead_st(
         }
       case Success:
         {
-          state_s0 *st1 = st;
+          state_s *st1 = st;
           uint32_t plaintext_blen;
           if (plaintext_len == 0U)
           {
@@ -9238,7 +9237,7 @@ test_one_hmac_drbg(
     KRML_CHECK_SIZE(sizeof (uint8_t), returned_bits_len);
     uint8_t output[returned_bits_len];
     memset(output, 0U, returned_bits_len * sizeof (uint8_t));
-    state_s1 *st = EverCrypt_DRBG_create_in(a);
+    state_s0 *st = EverCrypt_DRBG_create_in(a);
     bool ok = EverCrypt_DRBG_instantiate(st, personalization_string, personalization_string_len);
     if (ok)
     {

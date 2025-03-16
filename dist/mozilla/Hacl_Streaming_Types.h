@@ -26,6 +26,7 @@
 #ifndef __Hacl_Streaming_Types_H
 #define __Hacl_Streaming_Types_H
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
