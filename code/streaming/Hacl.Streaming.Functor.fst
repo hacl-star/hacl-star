@@ -452,7 +452,7 @@ let copy #index c i t t' state r =
   let uu__ = !*state in
   let State _ _ _ _ k0 = uu__ in
 
-  let i = c.index_of_state i block_state0 in
+  let i = c.index_of_state i block_state0 k0 in
 
   (**) let h0 = ST.get () in
 
