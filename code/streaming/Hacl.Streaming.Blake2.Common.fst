@@ -145,7 +145,7 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful (index a) =
           B.(modifies_only_not_unused_in loc_none h0 h3);
           None
         ) else
-          Some (i.key_length, i.digest_length, i.last_node, (wv, b)))
+          Some (i.key_length, i.digest_length, i.last_node, wv, b))
     (* free *)
     (fun _ acc ->
       match acc with _, _, _, wv, b ->
@@ -710,7 +710,7 @@ let blake2 (a : alg)
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
     (fun i (p, k) input _ ->
       spec_is_incremental a p i.last_node k input) (* spec_is_incremental *)
-    (fun _ (kk, nn, last_node, _) _ -> { key_length = kk; digest_length = nn; last_node }) (* index_of_state *)
+    (fun _ (kk, nn, last_node, _, _) _ -> { key_length = kk; digest_length = nn; last_node }) (* index_of_state *)
 
     (* init *)
     (fun i k' buf_ acc ->
