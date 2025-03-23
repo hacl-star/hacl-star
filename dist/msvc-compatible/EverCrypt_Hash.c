@@ -391,7 +391,8 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         bool vec128 = EverCrypt_AutoConfig2_has_vec128();
         if (vec128)
         {
-          Lib_IntVector_Intrinsics_vec128 *s = Hacl_Hash_Blake2s_Simd128_malloc_with_key();
+          Lib_IntVector_Intrinsics_vec128
+          *s = Hacl_Hash_Blake2s_Simd128_malloc_internal_state_with_key();
           if (s == NULL)
           {
             return NULL;
@@ -464,7 +465,8 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         bool vec256 = EverCrypt_AutoConfig2_has_vec256();
         if (vec256)
         {
-          Lib_IntVector_Intrinsics_vec256 *s = Hacl_Hash_Blake2b_Simd256_malloc_with_key();
+          Lib_IntVector_Intrinsics_vec256
+          *s = Hacl_Hash_Blake2b_Simd256_malloc_internal_state_with_key();
           if (s == NULL)
           {
             return NULL;

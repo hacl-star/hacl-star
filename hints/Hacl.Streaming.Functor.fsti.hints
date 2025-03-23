@@ -1,5 +1,5 @@
 [
-  "aa7f0511aaa2cd9cf28632a885402094",
+  "65074b9aecd4afdb73ff283c49015238",
   [
     [
       "Hacl.Streaming.Functor.invariant",
@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e"
       ],
       0,
-      "3e719f1e9cbcacbd9b549715dcbbe9e4"
+      "da0057168831aee65f3b989e61c9a145"
     ],
     [
       "Hacl.Streaming.Functor.index_of_state",
@@ -28,7 +28,7 @@
         "refinement_interpretation_Tm_refine_eed61e872c76c9d08d9c5e037b1dc22d"
       ],
       0,
-      "c8e336415c2e7a77667929d62624af7c"
+      "741fca13e3a7ec0468ef8e4e17b26689"
     ],
     [
       "Hacl.Streaming.Functor.seen_length",
@@ -41,7 +41,7 @@
         "refinement_interpretation_Tm_refine_eed61e872c76c9d08d9c5e037b1dc22d"
       ],
       0,
-      "a5262dc83a499e1837af6b649c1129e3"
+      "e94ec0fd18d9e474527cea789f8170c6"
     ],
     [
       "Hacl.Streaming.Functor.malloc_st",
@@ -54,7 +54,7 @@
         "refinement_interpretation_Tm_refine_a997f7fc0ee9057c4f6335ecd3b55d00"
       ],
       0,
-      "3d94d099342963fe2b552203339ed41f"
+      "17fe19395c6a2108339e67c109a4dd3a"
     ],
     [
       "Hacl.Streaming.Functor.copy_st",
@@ -67,7 +67,7 @@
         "refinement_interpretation_Tm_refine_a997f7fc0ee9057c4f6335ecd3b55d00"
       ],
       0,
-      "35b27c48db1ea0f8e5d971189d6f3e8e"
+      "acef775065c765db7b26a34ae331aeda"
     ],
     [
       "Hacl.Streaming.Functor.alloca_st",
@@ -80,7 +80,7 @@
         "refinement_interpretation_Tm_refine_a997f7fc0ee9057c4f6335ecd3b55d00"
       ],
       0,
-      "41336b56b4812088c912e5c3cb8e7ce5"
+      "36fc5fc32a735d0419775eb376e39c03"
     ],
     [
       "Hacl.Streaming.Functor.reset_st",
@@ -93,7 +93,7 @@
         "refinement_interpretation_Tm_refine_eed61e872c76c9d08d9c5e037b1dc22d"
       ],
       0,
-      "0b292f1c72dad4c03f9ed44b549de0cd"
+      "bcc1444bc0c199c4a49a52aa8196e7ac"
     ],
     [
       "Hacl.Streaming.Functor.update_pre",
@@ -102,7 +102,7 @@
       0,
       [ "@query" ],
       0,
-      "9463b091ae82c8db3b7df7cb025b84aa"
+      "05679af1a84db573e6b0afcd397be5a8"
     ],
     [
       "Hacl.Streaming.Functor.update_st",
@@ -115,7 +115,7 @@
         "refinement_interpretation_Tm_refine_a997f7fc0ee9057c4f6335ecd3b55d00"
       ],
       0,
-      "902833b72fb903e4d578f680e7c63e6d"
+      "6b70b8b50d107f95bcaaf796142a27d1"
     ],
     [
       "Hacl.Streaming.Functor.digest_st",
@@ -132,7 +132,24 @@
         "refinement_interpretation_Tm_refine_dad2225e9a5809c25cc11ca06929af8f"
       ],
       0,
-      "b2007a3a69595b1815383193bfd8c687"
+      "77d0dc2a7d60eea968cc149a798e1d6c"
+    ],
+    [
+      "Hacl.Streaming.Functor.digest_heap_st",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Streaming.Functor.uint8",
+        "equation_Hacl.Streaming.Interface.uint8",
+        "fuel_guarded_inversion_Hacl.Streaming.Interface.block",
+        "refinement_interpretation_Tm_refine_02951fd03552320d928a2182ed63fa53",
+        "refinement_interpretation_Tm_refine_a997f7fc0ee9057c4f6335ecd3b55d00",
+        "refinement_interpretation_Tm_refine_dad2225e9a5809c25cc11ca06929af8f"
+      ],
+      0,
+      "99fb8aaff8a0f4f5fde70bafeb673be8"
     ],
     [
       "Hacl.Streaming.Functor.free_st",
@@ -145,7 +162,7 @@
         "refinement_interpretation_Tm_refine_a997f7fc0ee9057c4f6335ecd3b55d00"
       ],
       0,
-      "3d153e1611854b947aee41fc5e68ae9d"
+      "19cd052b2c8433bc6b574fccb34f1d29"
     ]
   ]
 ]

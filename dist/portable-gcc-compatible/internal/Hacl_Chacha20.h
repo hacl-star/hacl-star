@@ -30,6 +30,11 @@
 extern "C" {
 #endif
 
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
 #include "../Hacl_Chacha20.h"
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_Vec_chacha20_constants */

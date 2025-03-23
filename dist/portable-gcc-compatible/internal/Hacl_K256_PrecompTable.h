@@ -30,6 +30,11 @@
 extern "C" {
 #endif
 
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
 /* SNIPPET_START: Hacl_K256_PrecompTable_precomp_basepoint_table_w4 */
 
 static const

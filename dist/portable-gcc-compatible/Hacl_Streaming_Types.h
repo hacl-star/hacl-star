@@ -56,57 +56,6 @@ extern "C" {
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
-/* SNIPPET_START: Hacl_Streaming_MD_state_32 */
-
-typedef struct Hacl_Streaming_MD_state_32_s Hacl_Streaming_MD_state_32;
-
-/* SNIPPET_END: Hacl_Streaming_MD_state_32 */
-
-/* SNIPPET_START: Hacl_Streaming_MD_state_64 */
-
-typedef struct Hacl_Streaming_MD_state_64_s Hacl_Streaming_MD_state_64;
-
-/* SNIPPET_END: Hacl_Streaming_MD_state_64 */
-
-/* SNIPPET_START: K____uint64_t___uint64_t_ */
-
-typedef struct K____uint64_t___uint64_t__s
-{
-  uint64_t *fst;
-  uint64_t *snd;
-}
-K____uint64_t___uint64_t_;
-
-/* SNIPPET_END: K____uint64_t___uint64_t_ */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_Types_block_state_blake2b_32 */
-
-typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2b_32_s
-Hacl_Streaming_Blake2_Types_block_state_blake2b_32;
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_Types_block_state_blake2b_32 */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_Types_block_state_blake2b_256 */
-
-typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2b_256_s
-Hacl_Streaming_Blake2_Types_block_state_blake2b_256;
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_Types_block_state_blake2b_256 */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_Types_block_state_blake2s_32 */
-
-typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2s_32_s
-Hacl_Streaming_Blake2_Types_block_state_blake2s_32;
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_Types_block_state_blake2s_32 */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_Types_block_state_blake2s_128 */
-
-typedef struct Hacl_Streaming_Blake2_Types_block_state_blake2s_128_s
-Hacl_Streaming_Blake2_Types_block_state_blake2s_128;
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_Types_block_state_blake2s_128 */
-
 /* SNIPPET_START: Hacl_Streaming_Types_error_code */
 
 #define Hacl_Streaming_Types_Success 0
@@ -119,11 +68,17 @@ Hacl_Streaming_Blake2_Types_block_state_blake2s_128;
 
 typedef uint8_t Hacl_Streaming_Types_error_code;
 
-/* SNIPPET_START: Hacl_Streaming_Types_two_pointers */
+/* SNIPPET_START: Hacl_Streaming_MD_state_32 */
 
-typedef K____uint64_t___uint64_t_ Hacl_Streaming_Types_two_pointers;
+typedef struct Hacl_Streaming_MD_state_32_s Hacl_Streaming_MD_state_32;
 
-/* SNIPPET_END: Hacl_Streaming_Types_two_pointers */
+/* SNIPPET_END: Hacl_Streaming_MD_state_32 */
+
+/* SNIPPET_START: Hacl_Streaming_MD_state_64 */
+
+typedef struct Hacl_Streaming_MD_state_64_s Hacl_Streaming_MD_state_64;
+
+/* SNIPPET_END: Hacl_Streaming_MD_state_64 */
 
 #if defined(__cplusplus)
 }

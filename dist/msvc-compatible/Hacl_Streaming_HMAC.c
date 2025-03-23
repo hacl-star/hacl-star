@@ -485,7 +485,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
     case Hacl_Agile_Hash_Blake2S_128:
       {
         #if HACL_CAN_COMPILE_VEC128
-        Lib_IntVector_Intrinsics_vec128 *s = Hacl_Hash_Blake2s_Simd128_malloc_with_key();
+        Lib_IntVector_Intrinsics_vec128
+        *s = Hacl_Hash_Blake2s_Simd128_malloc_internal_state_with_key();
         if (s == NULL)
         {
           return NULL;
@@ -549,7 +550,8 @@ static Hacl_Agile_Hash_state_s *malloc_(Hacl_Agile_Hash_impl a)
     case Hacl_Agile_Hash_Blake2B_256:
       {
         #if HACL_CAN_COMPILE_VEC256
-        Lib_IntVector_Intrinsics_vec256 *s = Hacl_Hash_Blake2b_Simd256_malloc_with_key();
+        Lib_IntVector_Intrinsics_vec256
+        *s = Hacl_Hash_Blake2b_Simd256_malloc_internal_state_with_key();
         if (s == NULL)
         {
           return NULL;
@@ -1363,7 +1365,7 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
         KRML_EABORT(Lib_IntVector_Intrinsics_vec128 *,
           "unreachable (pattern matches are exhaustive in F*)");
     }
-    Hacl_Hash_Blake2s_Simd128_copy(p_src, p_dst);
+    Hacl_Hash_Blake2s_Simd128_copy_internal_state(p_src, p_dst);
     return;
     #else
     return;
@@ -1402,7 +1404,7 @@ static void copy(Hacl_Agile_Hash_state_s *s_src, Hacl_Agile_Hash_state_s *s_dst)
         KRML_EABORT(Lib_IntVector_Intrinsics_vec256 *,
           "unreachable (pattern matches are exhaustive in F*)");
     }
-    Hacl_Hash_Blake2b_Simd256_copy(p_src, p_dst);
+    Hacl_Hash_Blake2b_Simd256_copy_internal_state(p_src, p_dst);
     return;
     #else
     return;
