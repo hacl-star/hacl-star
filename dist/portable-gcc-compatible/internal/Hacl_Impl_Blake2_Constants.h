@@ -30,6 +30,11 @@
 extern "C" {
 #endif
 
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
 /* SNIPPET_START: Hacl_Hash_Blake2b_sigmaTable */
 
 static const

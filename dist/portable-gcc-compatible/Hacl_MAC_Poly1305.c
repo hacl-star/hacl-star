@@ -28,7 +28,6 @@
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 #include "internal/Hacl_Streaming_Types.h"
-#include "internal/Hacl_Hash_Blake2b.h"
 
 /* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_init */
 
@@ -489,31 +488,25 @@ Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
     FStar_Pervasives_Native_option___uint8_t_ k_;
     if (b == NULL)
     {
-      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_None });
+      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_None });
     }
     else
     {
-      k_ =
-        ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_Some, .v = b });
     }
     FStar_Pervasives_Native_option___uint8_t_ k_0;
-    if (k_.tag == FStar_Pervasives_Native_None)
+    if (k_.tag == Hacl_Streaming_Types_None)
     {
       KRML_HOST_FREE(block_state1);
       KRML_HOST_FREE(buf1);
-      k_0 = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_None });
+      k_0 = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_None });
     }
-    else if (k_.tag == FStar_Pervasives_Native_Some)
+    else if (k_.tag == Hacl_Streaming_Types_Some)
     {
       uint8_t *k_1 = k_.v;
       memcpy(k_1, key, 32U * sizeof (uint8_t));
       k_0 =
-        (
-          (FStar_Pervasives_Native_option___uint8_t_){
-            .tag = FStar_Pervasives_Native_Some,
-            .v = k_1
-          }
-        );
+        ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_Some, .v = k_1 });
     }
     else
     {
@@ -521,11 +514,11 @@ Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
         KRML_EABORT(FStar_Pervasives_Native_option___uint8_t_,
           "unreachable (pattern matches are exhaustive in F*)");
     }
-    if (k_0.tag == FStar_Pervasives_Native_None)
+    if (k_0.tag == Hacl_Streaming_Types_None)
     {
       return NULL;
     }
-    if (k_0.tag == FStar_Pervasives_Native_Some)
+    if (k_0.tag == Hacl_Streaming_Types_Some)
     {
       uint8_t *k_1 = k_0.v;
       Hacl_MAC_Poly1305_state_t

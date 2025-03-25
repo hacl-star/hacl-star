@@ -30,7 +30,11 @@
 extern "C" {
 #endif
 
-#include "Hacl_Streaming_Types.h"
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
 #include "../Hacl_Hash_Blake2s.h"
 
 /* SNIPPET_START: Hacl_Hash_Blake2s_init */
@@ -74,11 +78,35 @@ void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_finish */
 
+/* SNIPPET_START: K____uint32_t___uint32_t_ */
+
+typedef struct K____uint32_t___uint32_t__s
+{
+  uint32_t *fst;
+  uint32_t *snd;
+}
+K____uint32_t___uint32_t_;
+
+/* SNIPPET_END: K____uint32_t___uint32_t_ */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_block_state_t */
+
+typedef struct Hacl_Hash_Blake2s_block_state_t_s
+{
+  uint8_t fst;
+  uint8_t snd;
+  bool thd;
+  K____uint32_t___uint32_t_ f3;
+}
+Hacl_Hash_Blake2s_block_state_t;
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_block_state_t */
+
 /* SNIPPET_START: Hacl_Hash_Blake2s_state_t */
 
 typedef struct Hacl_Hash_Blake2s_state_t_s
 {
-  Hacl_Streaming_Blake2_Types_block_state_blake2s_32 block_state;
+  Hacl_Hash_Blake2s_block_state_t block_state;
   uint8_t *buf;
   uint64_t total_len;
 }

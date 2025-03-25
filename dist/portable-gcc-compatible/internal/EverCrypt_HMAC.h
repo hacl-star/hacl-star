@@ -30,6 +30,11 @@
 extern "C" {
 #endif
 
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
 #include "../EverCrypt_HMAC.h"
 
 /* SNIPPET_START: EverCrypt_HMAC_compute_sha1 */

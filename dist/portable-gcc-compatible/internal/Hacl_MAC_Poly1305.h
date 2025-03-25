@@ -30,7 +30,12 @@
 extern "C" {
 #endif
 
-#include "internal/Hacl_Hash_Blake2b.h"
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
+#include "internal/Hacl_Streaming_Types.h"
 #include "../Hacl_MAC_Poly1305.h"
 
 /* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_init */
@@ -62,8 +67,7 @@ Hacl_MAC_Poly1305_state_t;
 
 typedef struct FStar_Pervasives_Native_option___uint8_t__s
 {
-  FStar_Pervasives_Native_option___uint8_t___uint8_t___bool_____uint64_t_____uint64_t____tags
-  tag;
+  Hacl_Streaming_Types_optional tag;
   uint8_t *v;
 }
 FStar_Pervasives_Native_option___uint8_t_;
