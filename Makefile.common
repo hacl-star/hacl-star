@@ -194,7 +194,7 @@ HMAC_BUNDLE=-bundle Hacl.HMAC= \
 # Note: Hacl_Hash_SHA2 is legacy SHA2 here, will eventually go away, there's a proper
 # bundle in STREAMING_BUNDLE, below
 HASH_BUNDLE= \
-  -bundle Hacl.Streaming.Blake2.Types+Hacl.Streaming.Types=Hacl.Streaming.MD,Spec.Hash.Definitions[rename=Hacl_Streaming_Types] \
+  -bundle Hacl.Streaming.Types+Hacl.Streaming.MD=Spec.Hash.Definitions[rename=Hacl_Streaming_Types] \
   -bundle Hacl.Streaming.MD5=Hacl.Hash.MD5,Hacl.Hash.Core.MD5[rename=Hacl_Hash_MD5,rename-prefix] \
   -bundle Hacl.Streaming.SHA1=Hacl.Hash.SHA1,Hacl.Hash.Core.SHA1[rename=Hacl_Hash_SHA1,rename-prefix] \
   -bundle Hacl.Impl.SHA2.Types=[rename=Hacl_SHA2_Types] \

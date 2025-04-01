@@ -60,27 +60,14 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Hash_Blake2b_finish"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
     type hacl_Hash_Blake2b_block_state_t =
-      hacl_Streaming_Blake2_Types_block_state_blake2b_32
-    let hacl_Hash_Blake2b_block_state_t =
-      typedef hacl_Streaming_Blake2_Types_block_state_blake2b_32
-        "Hacl_Hash_Blake2b_block_state_t"
-    type hacl_Hash_Blake2b_optional_block_state_t =
-      hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32
-    let hacl_Hash_Blake2b_optional_block_state_t =
-      typedef hacl_Streaming_Blake2_Types_optional_block_state_blake2b_32
-        "Hacl_Hash_Blake2b_optional_block_state_t"
+      [ `hacl_Hash_Blake2b_block_state_t ] structure
+    let (hacl_Hash_Blake2b_block_state_t :
+      [ `hacl_Hash_Blake2b_block_state_t ] structure typ) =
+      structure "Hacl_Hash_Blake2b_block_state_t_s"
     type hacl_Hash_Blake2b_state_t = [ `hacl_Hash_Blake2b_state_t ] structure
     let (hacl_Hash_Blake2b_state_t :
       [ `hacl_Hash_Blake2b_state_t ] structure typ) =
       structure "Hacl_Hash_Blake2b_state_t_s"
-    let hacl_Hash_Blake2b_state_t_block_state =
-      field hacl_Hash_Blake2b_state_t "block_state"
-        hacl_Streaming_Blake2_Types_block_state_blake2b_32
-    let hacl_Hash_Blake2b_state_t_buf =
-      field hacl_Hash_Blake2b_state_t "buf" (ptr uint8_t)
-    let hacl_Hash_Blake2b_state_t_total_len =
-      field hacl_Hash_Blake2b_state_t "total_len" uint64_t
-    let _ = seal hacl_Hash_Blake2b_state_t
     let hacl_Hash_Blake2b_malloc_with_params_and_key =
       foreign "Hacl_Hash_Blake2b_malloc_with_params_and_key"
         ((ptr hacl_Hash_Blake2b_blake2_params) @->

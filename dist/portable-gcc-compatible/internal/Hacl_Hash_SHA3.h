@@ -86,15 +86,28 @@ Hacl_Hash_SHA3_update_last_sha3(
 
 /* SNIPPET_END: Hacl_Hash_SHA3_update_last_sha3 */
 
-/* SNIPPET_START: FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags */
+/* SNIPPET_START: Hacl_Hash_SHA3_hash_buf */
 
-#define FStar_Pervasives_Native_None 0
-#define FStar_Pervasives_Native_Some 1
+typedef struct Hacl_Hash_SHA3_hash_buf_s
+{
+  Spec_Hash_Definitions_hash_alg fst;
+  uint64_t *snd;
+}
+Hacl_Hash_SHA3_hash_buf;
 
-/* SNIPPET_END: FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags */
+/* SNIPPET_END: Hacl_Hash_SHA3_hash_buf */
 
-typedef uint8_t
-FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags;
+/* SNIPPET_START: Hacl_Hash_SHA3_state_t */
+
+typedef struct Hacl_Hash_SHA3_state_t_s
+{
+  Hacl_Hash_SHA3_hash_buf block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Hash_SHA3_state_t;
+
+/* SNIPPET_END: Hacl_Hash_SHA3_state_t */
 
 #if defined(__cplusplus)
 }

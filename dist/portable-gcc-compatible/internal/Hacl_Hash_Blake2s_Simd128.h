@@ -105,11 +105,82 @@ Hacl_Hash_Blake2s_Simd128_load_state128s_from_state32(
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_load_state128s_from_state32 */
 
-/* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_malloc_with_key */
+/* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_malloc_internal_state_with_key */
 
-Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_Simd128_malloc_with_key(void);
+Lib_IntVector_Intrinsics_vec128
+*Hacl_Hash_Blake2s_Simd128_malloc_internal_state_with_key(void);
 
-/* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_malloc_with_key */
+/* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_malloc_internal_state_with_key */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_update_multi_no_inline */
+
+void
+Hacl_Hash_Blake2s_Simd128_update_multi_no_inline(
+  Lib_IntVector_Intrinsics_vec128 *s,
+  uint64_t ev,
+  uint8_t *blocks,
+  uint32_t n
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_update_multi_no_inline */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_update_last_no_inline */
+
+void
+Hacl_Hash_Blake2s_Simd128_update_last_no_inline(
+  Lib_IntVector_Intrinsics_vec128 *s,
+  uint64_t prev,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_update_last_no_inline */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_copy_internal_state */
+
+void
+Hacl_Hash_Blake2s_Simd128_copy_internal_state(
+  Lib_IntVector_Intrinsics_vec128 *src,
+  Lib_IntVector_Intrinsics_vec128 *dst
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_copy_internal_state */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_two_2s_128 */
+
+typedef struct Hacl_Hash_Blake2s_Simd128_two_2s_128_s
+{
+  Lib_IntVector_Intrinsics_vec128 *fst;
+  Lib_IntVector_Intrinsics_vec128 *snd;
+}
+Hacl_Hash_Blake2s_Simd128_two_2s_128;
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_two_2s_128 */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_block_state_t */
+
+typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
+{
+  uint8_t fst;
+  uint8_t snd;
+  bool thd;
+  Hacl_Hash_Blake2s_Simd128_two_2s_128 f3;
+}
+Hacl_Hash_Blake2s_Simd128_block_state_t;
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_block_state_t */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_state_t */
+
+typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s
+{
+  Hacl_Hash_Blake2s_Simd128_block_state_t block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Hash_Blake2s_Simd128_state_t;
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_state_t */
 
 #if defined(__cplusplus)
 }

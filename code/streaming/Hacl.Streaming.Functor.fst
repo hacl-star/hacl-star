@@ -2022,6 +2022,166 @@ let digest_erased #index c i t t' state output digest_length =
   let i = index_of_state #index c i t t' state in
   digest #index c i t t' state output digest_length
 
+#restart-solver
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
+let digest_heap #index c i t t' state output l =
+  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
+  [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
+  [@inline_let] let _ = c.update_multi_associative i in
+  [@inline_let] let _ = allow_inversion key_management in
+
+  let open LowStar.BufferOps in
+  let h0 = ST.get () in
+  let State block_state buf_ total_len seen k' = !*state in
+
+  let h1 = ST.get () in
+  c.state.frame_invariant #i B.loc_none block_state h0 h1;
+  stateful_frame_preserves_freeable #index #c.state #i B.loc_none block_state h0 h1;
+  optional_frame #_ #i #c.km #c.key B.loc_none k' h0 h1;
+
+  let r = rest c i total_len in
+
+  let buf_ = B.sub buf_ 0ul r in
+
+  let tmp_block_state = c.state.create_in i HS.root in
+  match tmp_block_state with
+  | None ->
+      let h8 = ST.get () in
+      (**) B.(modifies_only_not_unused_in loc_none h0 h8);
+      Hacl.Streaming.Types.OutOfMemory
+  | Some tmp_block_state ->
+
+  let h2 = ST.get () in
+  (**) assert (B.fresh_loc (c.state.footprint #i h2 tmp_block_state) h0 h2);
+  (**) B.loc_unused_in_not_unused_in_disjoint h2;
+  (**) B.loc_unused_in_not_unused_in_disjoint h1;
+  (**) B.(modifies_only_not_unused_in loc_none h1 h2);
+  (**) assert B.(modifies loc_none h0 h2);
+  (**) c.state.frame_invariant #i B.loc_none block_state h1 h2;
+
+  assert (B.(loc_disjoint (c.state.footprint #i h2 tmp_block_state) (c.state.footprint #i h1 block_state)));
+  B.modifies_only_not_unused_in B.loc_none h1 h2;
+  c.state.frame_invariant #i B.loc_none block_state h1 h2;
+  stateful_frame_preserves_freeable #index #c.state #i B.loc_none block_state h1 h2;
+  optional_frame #_ #i #c.km #c.key B.loc_none k' h1 h2;
+
+  c.state.copy i block_state tmp_block_state;
+
+  let h3 = ST.get () in
+  c.state.frame_invariant #i (c.state.footprint #i h2 tmp_block_state) block_state h2 h3;
+  stateful_frame_preserves_freeable #index #c.state #i (c.state.footprint #i h2 tmp_block_state) block_state h2 h3;
+  optional_frame #_ #i #c.km #c.key (c.state.footprint #i h2 tmp_block_state) k' h2 h3;
+
+  // Process as many blocks as possible (but leave at least one block for update_last)
+  let prev_len = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 r) in
+  // The data length to give to update_last
+
+  [@inline_let]
+  let r_last = rest_finish c i r in
+  // The data length to process with update_multi before calling update_last
+  [@inline_let]
+  let r_multi = U32.(r -^ r_last) in
+  // Split the buffer according to the computed lengths
+  let buf_last = B.sub buf_ r_multi (Ghost.hide r_last) in
+  let buf_multi = B.sub buf_ 0ul r_multi in
+
+  [@inline_let]
+  let state_is_block = c.block_len i = c.blocks_state_len i in
+  assert(state_is_block ==> U32.v r_multi = 0);
+  assert(state_is_block ==> r_last = r);
+
+  // This will get simplified and will allow some simplifications in the generated code.
+  // In particular, it should allow to simplify a bit update_multi
+  [@inline_let] let r_multi = if state_is_block then 0ul else r_multi in
+  [@inline_let] let r_last = if state_is_block then r else r_last in
+
+  c.update_multi (G.hide i) tmp_block_state prev_len buf_multi r_multi;
+
+  let h4 = get () in
+  optional_frame #_ #i #c.km #c.key (c.state.footprint #i h3 tmp_block_state) k' h3 h4;
+
+  // Functional correctness
+  digest_process_begin_functional_correctness #index c i t t' state output l h0 h4 tmp_block_state;
+  split_at_last_finish c i (all_seen c i h0 state);
+
+  // Process the remaining data
+  assert(UInt32.v r_last <= UInt32.v (Block?.block_len c (Ghost.reveal (Ghost.hide i))));
+  let prev_len_last = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 r_last) in
+  begin
+  // Proving: prev_len_last % block_len = 0
+  assert(U64.v prev_len_last = U64.v prev_len + U32.v r_multi);
+
+  Math.Lemmas.modulo_distributivity (U64.v prev_len) (U32.v r_multi) (U32.v (c.block_len i));
+  Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
+  assert(U64.v prev_len_last % U32.v (c.block_len i) = 0)
+  end;
+  c.update_last (G.hide i) tmp_block_state prev_len_last buf_last r_last;
+
+  let h5 = ST.get () in
+  c.state.frame_invariant #i (c.state.footprint #i h3 tmp_block_state) block_state h3 h5;
+  stateful_frame_preserves_freeable #index #c.state #i (c.state.footprint #i h3 tmp_block_state) block_state h3 h5;
+  optional_frame #_ #i #c.km #c.key (c.state.footprint #i h3 tmp_block_state) k' h3 h5;
+
+  c.finish (G.hide i) k' tmp_block_state output l;
+
+  let h6 = ST.get () in
+  begin
+    let r = r_last in
+    let all_seen = all_seen c i h0 state in
+    let blocks_state_length = U32.v (c.blocks_state_len i) in
+    let block_length = U32.v (c.block_len i) in
+
+    let n = fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem block_length (S.length all_seen)) in
+    let blocks, rest_ = Lib.UpdateMulti.split_at_last_lazy block_length all_seen in
+    let k = optional_reveal #_ #i #c.km #c.key h0 k' in
+
+    Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
+    assert(0 % U32.v (c.block_len i) = 0);
+
+    assert(B.as_seq h3 buf_last == rest_);
+
+    calc (S.equal) {
+      B.as_seq h6 output;
+    (S.equal) { }
+      c.finish_s i k (c.state.v i h5 tmp_block_state) l;
+    (S.equal) { }
+      c.finish_s i k (
+        c.update_last_s i (c.state.v i h4 tmp_block_state) (n * block_length)
+          (B.as_seq h4 buf_last)) l;
+    (S.equal) { }
+      c.finish_s i k (
+        c.update_last_s i (c.state.v i h4 tmp_block_state) (n * block_length)
+          rest_) l;
+    (S.equal) { }
+      c.finish_s i k (
+        c.update_last_s i
+          (c.update_multi_s i (c.init_s i k) 0 (S.slice all_seen 0 (n * block_length)))
+          (n * block_length)
+          rest_) l;
+    (S.equal) { c.spec_is_incremental i k seen l }
+      c.spec_s i k seen l;
+    }
+  end;
+
+  c.state.frame_invariant #i B.(loc_buffer output `loc_union` c.state.footprint #i h5 tmp_block_state) block_state h5 h6;
+  stateful_frame_preserves_freeable #index #c.state #i B.(loc_buffer output `loc_union` c.state.footprint #i h5 tmp_block_state) block_state h5 h6;
+  optional_frame #_ #i #c.km #c.key B.(loc_buffer output `loc_union` c.state.footprint #i h5 tmp_block_state) k' h5 h6;
+
+  // pop_frame ();
+
+  let h7 = ST.get () in
+  // c.state.frame_invariant #i B.(loc_region_only false (HS.get_tip h6)) block_state h6 h7;
+  // stateful_frame_preserves_freeable #index #c.state #i B.(loc_region_only false (HS.get_tip h6)) block_state h6 h7;
+  // optional_frame #_ #i #c.km #c.key B.(loc_region_only false (HS.get_tip h6)) k' h6 h7;
+  assert (seen_h c i h7 state `S.equal` (G.reveal seen));
+
+  Hacl.Streaming.Types.Success
+#pop-options
+
+let digest_heap_erased #index c i t t' state output digest_length =
+  let i = index_of_state #index c i t t' state in
+  digest_heap #index c i t t' state output digest_length
+
 let free #index c i t t' state =
   let _ = allow_inversion key_management in
   let i = index_of_state c i t t' state in

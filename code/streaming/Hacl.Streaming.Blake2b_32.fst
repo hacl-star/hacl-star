@@ -1,6 +1,6 @@
 module Hacl.Streaming.Blake2b_32
 
-// Blake2b_32 is hand-written, other files generated with:
+// Blake2 b thirty two is hand-written, other files generated with:
 // sed 's/2B/2S/g;s/2b/2s/g;' Hacl.Streaming.Blake2b_32.fst > Hacl.Streaming.Blake2s_32.fst; sed 's/32/128/g' Hacl.Streaming.Blake2s_32.fst > Hacl.Streaming.Blake2s_128.fst; sed 's/32/256/g' Hacl.Streaming.Blake2b_32.fst > Hacl.Streaming.Blake2b_256.fst
 
 module HS = FStar.HyperStack
@@ -31,11 +31,15 @@ let blake2b_32 =
   Common.blake2 Spec.Blake2B Core.M32 Blake2b32.inline_init_with_params Blake2b32.update_multi
          Blake2b32.update_last Blake2b32.finish
 
-/// Type abbreviations - makes Karamel use pretty names in the generated code
+[@ CAbstractStruct ]
 let block_state_t (kk: G.erased (Common.index Spec.Blake2B)) =
-  Hacl.Streaming.Blake2.Types.block_state_blake2b_32 kk
-let optional_block_state_t (kk: G.erased (Common.index Spec.Blake2B)) =
-  Hacl.Streaming.Blake2.Types.optional_block_state_blake2b_32 kk
+  Common.s Spec.Blake2B kk Core.M32
+
+// Doing this would result in a public type which would contain an incomplete struct. Let this be
+// inserted somewhere in this file as a private abbreviation (with a bad auto-generated name), but
+// at least that sees the complete struct definition in scope.
+(* let optional_block_state_t (kk: G.erased (Common.index Spec.Blake2B)) = *)
+(*   option (block_state_t kk) *)
 
 let state_t (kk: G.erased (Common.index Spec.Blake2B)) =
   F.state_s blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)

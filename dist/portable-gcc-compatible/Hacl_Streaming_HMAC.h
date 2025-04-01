@@ -116,13 +116,7 @@ Hacl_Streaming_HMAC_index_of_state(Hacl_Streaming_HMAC_Definitions_two_state s);
 
 /* SNIPPET_START: Hacl_Streaming_HMAC_agile_state */
 
-typedef struct Hacl_Streaming_HMAC_agile_state_s
-{
-  Hacl_Streaming_HMAC_Definitions_two_state block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Streaming_HMAC_agile_state;
+typedef struct Hacl_Streaming_HMAC_agile_state_s Hacl_Streaming_HMAC_agile_state;
 
 /* SNIPPET_END: Hacl_Streaming_HMAC_agile_state */
 
@@ -169,7 +163,7 @@ Hacl_Streaming_HMAC_update(
 
 /* SNIPPET_START: Hacl_Streaming_HMAC_digest */
 
-void
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_HMAC_digest(
   Hacl_Streaming_HMAC_agile_state *state,
   uint8_t *output,

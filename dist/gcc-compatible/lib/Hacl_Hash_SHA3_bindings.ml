@@ -31,13 +31,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     type hacl_Hash_SHA3_state_t = [ `hacl_Hash_SHA3_state_t ] structure
     let (hacl_Hash_SHA3_state_t : [ `hacl_Hash_SHA3_state_t ] structure typ)
       = structure "Hacl_Hash_SHA3_state_t_s"
-    let hacl_Hash_SHA3_state_t_block_state =
-      field hacl_Hash_SHA3_state_t "block_state" hacl_Hash_SHA3_hash_buf
-    let hacl_Hash_SHA3_state_t_buf =
-      field hacl_Hash_SHA3_state_t "buf" (ptr uint8_t)
-    let hacl_Hash_SHA3_state_t_total_len =
-      field hacl_Hash_SHA3_state_t "total_len" uint64_t
-    let _ = seal hacl_Hash_SHA3_state_t
     let hacl_Hash_SHA3_get_alg =
       foreign "Hacl_Hash_SHA3_get_alg"
         ((ptr hacl_Hash_SHA3_state_t) @->

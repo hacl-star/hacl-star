@@ -26,8 +26,8 @@
 #include "internal/Hacl_MAC_Poly1305_Simd128.h"
 
 #include "Hacl_Streaming_Types.h"
+#include "internal/Hacl_Streaming_Types.h"
 #include "internal/Hacl_MAC_Poly1305.h"
-#include "internal/Hacl_Hash_SHA3.h"
 
 /* SNIPPET_START: Hacl_MAC_Poly1305_Simd128_load_acc2 */
 
@@ -1329,7 +1329,7 @@ Hacl_MAC_Poly1305_Simd128_poly1305_finish(
 
 typedef struct option___Lib_IntVector_Intrinsics_vec128__s
 {
-  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
+  Hacl_Streaming_Types_optional tag;
   Lib_IntVector_Intrinsics_vec128 *v;
 }
 option___Lib_IntVector_Intrinsics_vec128_;
@@ -1357,51 +1357,44 @@ Hacl_MAC_Poly1305_Simd128_state_t *Hacl_MAC_Poly1305_Simd128_malloc(uint8_t *key
   option___Lib_IntVector_Intrinsics_vec128_ block_state;
   if (r1 == NULL)
   {
-    block_state =
-      ((option___Lib_IntVector_Intrinsics_vec128_){ .tag = FStar_Pervasives_Native_None });
+    block_state = ((option___Lib_IntVector_Intrinsics_vec128_){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
     block_state =
-      ((option___Lib_IntVector_Intrinsics_vec128_){ .tag = FStar_Pervasives_Native_Some, .v = r1 });
+      ((option___Lib_IntVector_Intrinsics_vec128_){ .tag = Hacl_Streaming_Types_Some, .v = r1 });
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     Lib_IntVector_Intrinsics_vec128 *block_state1 = block_state.v;
     uint8_t *b = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
     FStar_Pervasives_Native_option___uint8_t_ k_;
     if (b == NULL)
     {
-      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_None });
+      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_None });
     }
     else
     {
-      k_ =
-        ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_Some, .v = b });
+      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_Some, .v = b });
     }
     FStar_Pervasives_Native_option___uint8_t_ k_0;
-    if (k_.tag == FStar_Pervasives_Native_None)
+    if (k_.tag == Hacl_Streaming_Types_None)
     {
       KRML_ALIGNED_FREE(block_state1);
       KRML_HOST_FREE(buf1);
-      k_0 = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = FStar_Pervasives_Native_None });
+      k_0 = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_None });
     }
-    else if (k_.tag == FStar_Pervasives_Native_Some)
+    else if (k_.tag == Hacl_Streaming_Types_Some)
     {
       uint8_t *k_1 = k_.v;
       memcpy(k_1, key, 32U * sizeof (uint8_t));
       k_0 =
-        (
-          (FStar_Pervasives_Native_option___uint8_t_){
-            .tag = FStar_Pervasives_Native_Some,
-            .v = k_1
-          }
-        );
+        ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_Some, .v = k_1 });
     }
     else
     {
@@ -1409,11 +1402,11 @@ Hacl_MAC_Poly1305_Simd128_state_t *Hacl_MAC_Poly1305_Simd128_malloc(uint8_t *key
         KRML_EABORT(FStar_Pervasives_Native_option___uint8_t_,
           "unreachable (pattern matches are exhaustive in F*)");
     }
-    if (k_0.tag == FStar_Pervasives_Native_None)
+    if (k_0.tag == Hacl_Streaming_Types_None)
     {
       return NULL;
     }
-    if (k_0.tag == FStar_Pervasives_Native_Some)
+    if (k_0.tag == Hacl_Streaming_Types_Some)
     {
       uint8_t *k_1 = k_0.v;
       Hacl_MAC_Poly1305_Simd128_state_t

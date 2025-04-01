@@ -687,7 +687,7 @@ Spec_Hash_Definitions_hash_alg Hacl_Hash_SHA3_get_alg(Hacl_Hash_SHA3_state_t *s)
 
 typedef struct option___Spec_Hash_Definitions_hash_alg____uint64_t___s
 {
-  FStar_Pervasives_Native_option___Spec_Hash_Definitions_hash_alg____uint64_t___tags tag;
+  Hacl_Streaming_Types_optional tag;
   Hacl_Hash_SHA3_hash_buf v;
 }
 option___Spec_Hash_Definitions_hash_alg____uint64_t__;
@@ -710,31 +710,27 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
   if (s == NULL)
   {
     block_state =
-      (
-        (option___Spec_Hash_Definitions_hash_alg____uint64_t__){
-          .tag = FStar_Pervasives_Native_None
-        }
-      );
+      ((option___Spec_Hash_Definitions_hash_alg____uint64_t__){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
     block_state =
       (
         (option___Spec_Hash_Definitions_hash_alg____uint64_t__){
-          .tag = FStar_Pervasives_Native_Some,
+          .tag = Hacl_Streaming_Types_Some,
           .v = { .fst = a, .snd = s }
         }
       );
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf1);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     Hacl_Hash_SHA3_hash_buf block_state1 = block_state.v;
-    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
+    Hacl_Streaming_Types_optional k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
       case Hacl_Streaming_Types_None:
@@ -815,35 +811,31 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
   if (s == NULL)
   {
     block_state =
-      (
-        (option___Spec_Hash_Definitions_hash_alg____uint64_t__){
-          .tag = FStar_Pervasives_Native_None
-        }
-      );
+      ((option___Spec_Hash_Definitions_hash_alg____uint64_t__){ .tag = Hacl_Streaming_Types_None });
   }
   else
   {
     block_state =
       (
         (option___Spec_Hash_Definitions_hash_alg____uint64_t__){
-          .tag = FStar_Pervasives_Native_Some,
+          .tag = Hacl_Streaming_Types_Some,
           .v = { .fst = i, .snd = s }
         }
       );
   }
-  if (block_state.tag == FStar_Pervasives_Native_None)
+  if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf);
     return NULL;
   }
-  if (block_state.tag == FStar_Pervasives_Native_Some)
+  if (block_state.tag == Hacl_Streaming_Types_Some)
   {
     Hacl_Hash_SHA3_hash_buf block_state1 = block_state.v;
     hash_buf2 scrut = { .fst = block_state0, .snd = block_state1 };
     uint64_t *s_dst = scrut.snd.snd;
     uint64_t *s_src = scrut.fst.snd;
     memcpy(s_dst, s_src, 25U * sizeof (uint64_t));
-    Hacl_Streaming_Types_optional_unit k_ = Hacl_Streaming_Types_Some;
+    Hacl_Streaming_Types_optional k_ = Hacl_Streaming_Types_Some;
     switch (k_)
     {
       case Hacl_Streaming_Types_None:
