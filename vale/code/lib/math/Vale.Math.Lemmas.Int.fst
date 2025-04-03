@@ -94,6 +94,7 @@ let lemma_mod_sub_distr (a:int) (b:int) (n:pos) =
   // (a - b) % n == (a - (b % n) - (b / n) * n) % n
   lemma_mod_plus (a - (b % n)) (-(b / n)) n
 
+#push-options "--retry 3"
 let rec lemma_mod_mul_distr_l (a:int) (b:int) (n:pos) =
   if b = 0 then
   (
@@ -120,6 +121,7 @@ let rec lemma_mod_mul_distr_l (a:int) (b:int) (n:pos) =
     // (a * b + a) % n = ((a % n) * b + a) % n
     mod_add_both (a * b + a) ((a % n) * b + a) (-a) n
   )
+#pop-options
 
 let lemma_mod_mul_distr_r (a:int) (b:int) (n:pos) = lemma_mod_mul_distr_l b a n
 let lemma_div_exact (a:int) (n:pos) = lemma_div_mod a n

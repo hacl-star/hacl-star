@@ -73,6 +73,7 @@ let check_if_consumes_fixed_time_outs_implicit
   | IOpFlagsCf -> true
   | IOpFlagsOf -> true
 
+#push-options "--z3rlimit 20"
 let rec check_if_consumes_fixed_time_outs
     (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args)
     (ts:analysis_taints) (t_out:taint)
@@ -96,6 +97,8 @@ let rec check_if_consumes_fixed_time_outs
     let b' = check_if_consumes_fixed_time_outs_implicit i ts t_out in
     let b'' = check_if_consumes_fixed_time_outs outs args (coerce oprs) ts t_out in
     b' && b''
+  | _ -> false_elim ()
+#pop-options
 
 #restart-solver
 #reset-options "--z3rlimit 300"
