@@ -366,11 +366,22 @@ let malloc #index c i t t' key r =
             (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
             (**) assert (B.fresh_loc (c.state.footprint #i h5 block_state) h0 h5);
 
+            // HACL-rs: Moved the initialisation earlier to avoid a move from block_state into
+            // the functor state
+            c.init (G.hide i) key buf block_state;
+            (**) let h6 = ST.get () in
+            (**) assert (B.fresh_loc (c.state.footprint #i h6 block_state) h0 h6);
+            (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h6);
+            (**) optional_frame (B.loc_union (c.state.footprint #i h6 block_state) (B.loc_buffer buf)) k' h5 h6;
+            (**) c.update_multi_zero i (c.state.v i h6 block_state) 0;
+            (**) B.modifies_only_not_unused_in B.loc_none h0 h6;
+            (**) assert (c.state.v i h6 block_state == c.init_s i (optional_reveal h5 k'));
+
             [@inline_let] let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
             let s = State block_state buf total_len (G.hide S.empty) k' in
-            (**) assert (B.fresh_loc (footprint_s c i h5 s) h0 h5);
+            (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
 
-            (**) B.loc_unused_in_not_unused_in_disjoint h5;
+            (**) B.loc_unused_in_not_unused_in_disjoint h6;
             let p = fallible_malloc r s 1ul in
             if B.is_null p then begin
               begin match c.km with
@@ -389,25 +400,16 @@ let malloc #index c i t t' key r =
               (**) B.(modifies_only_not_unused_in loc_none h0 h8);
               B.null
             end else
-              (**) let h6 = ST.get () in
-              (**) B.(modifies_only_not_unused_in loc_none h5 h6);
-              (**) B.(modifies_only_not_unused_in loc_none h0 h6);
-              (**) c.key.frame_invariant B.loc_none key h5 h6;
-              (**) c.state.frame_invariant B.loc_none block_state h5 h6;
-              (**) optional_frame B.loc_none k' h5 h6;
-              (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h6);
-              (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
-              (**) c.state.frame_freeable B.loc_none block_state h5 h6;
-              (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
-
-              c.init (G.hide i) key buf block_state;
               (**) let h7 = ST.get () in
-              (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
-              (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
-              (**) optional_frame (B.loc_union (c.state.footprint #i h7 block_state) (B.loc_buffer buf)) k' h6 h7;
-              (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
-              (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
-              (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
+              (**) B.(modifies_only_not_unused_in loc_none h6 h7);
+              (**) B.(modifies_only_not_unused_in loc_none h0 h7);
+              (**) c.key.frame_invariant B.loc_none key h6 h7;
+              (**) c.state.frame_invariant B.loc_none block_state h6 h7;
+              (**) optional_frame B.loc_none k' h6 h7;
+              (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h7);
+              (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h7);
+              (**) c.state.frame_freeable B.loc_none block_state h6 h7;
+              (**) assert (optional_reveal h6 k' == optional_reveal h7 k');
 
               (**) let h8 = ST.get () in
               (**) assert (U64.v total_len <= U64.v (c.max_input_len i));
