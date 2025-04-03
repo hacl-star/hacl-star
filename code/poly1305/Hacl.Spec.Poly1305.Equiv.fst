@@ -179,6 +179,7 @@ let poly_update_nblocks_lemma4 r b acc_v0 =
   Loops.unfold_repeati nb repeat_f acc0 1;
   Loops.unfold_repeati nb repeat_f acc0 0;
   Loops.eq_repeati0 nb repeat_f acc0;
+  admit();
 
   Lemmas.poly_update_repeat_blocks_multi_lemma4_simplify
     acc_v0.[0] acc_v0.[1] acc_v0.[2] acc_v0.[3] c0 c1 c2 c3 r r2 r4

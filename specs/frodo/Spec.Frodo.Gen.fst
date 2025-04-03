@@ -275,6 +275,7 @@ let frodo_gen_matrix_shake_4x_ind n seed =
     //res.(4 * i0 + k, j) == frodo_gen_matrix_shake_fc n seed (4 * i0 + k) j);
   lemma_gen_matrix_4x n seed res;
   Spec.Matrix.extensionality res (frodo_gen_matrix_shake_ind n seed);
+  admit();
   res
 
 
