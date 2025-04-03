@@ -313,6 +313,9 @@ let malloc #index c i t t' key r =
         (**) B.(modifies_only_not_unused_in loc_none h0 h8);
         B.null
     | Some block_state ->
+        // HACL-rs: this seems to help with mutability inference
+        let block_state = block_state in
+
         (**) let h2 = ST.get () in
         (**) assert (B.fresh_loc (c.state.footprint #i h2 block_state) h0 h2);
         (**) B.loc_unused_in_not_unused_in_disjoint h2;
@@ -481,6 +484,9 @@ let copy #index c i t t' state r =
         (**) B.(modifies_only_not_unused_in loc_none h0 h8);
         B.null
     | Some block_state ->
+        // HACL-rs: this seems to help with mutability inference
+        let block_state = block_state in
+
         (**) let h2 = ST.get () in
         (**) assert (B.fresh_loc (c.state.footprint #i h2 block_state) h0 h2);
         (**) B.loc_unused_in_not_unused_in_disjoint h2;
