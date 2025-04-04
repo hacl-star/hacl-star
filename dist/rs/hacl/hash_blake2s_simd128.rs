@@ -626,6 +626,43 @@ pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[lib::intvector_intrinsi
     lib::memzero0::memzero::<u8>(&mut b, 32u32)
 }
 
+pub(crate) fn malloc_internal_state_with_key() -> Box<[lib::intvector_intrinsics::vec128]>
+{
+    let buf: Box<[lib::intvector_intrinsics::vec128]> =
+        vec![lib::intvector_intrinsics::vec128_zero; 4usize].into_boxed_slice();
+    buf
+}
+
+pub(crate) fn update_multi_no_inline(
+    s: &mut [lib::intvector_intrinsics::vec128],
+    ev: u64,
+    blocks: &[u8],
+    n: u32
+)
+{
+    let mut wv: [lib::intvector_intrinsics::vec128; 4] =
+        [lib::intvector_intrinsics::vec128_zero; 4usize];
+    crate::hash_blake2s_simd128::update_multi(n.wrapping_mul(64u32), &mut wv, s, ev, blocks, n)
+}
+
+pub(crate) fn update_last_no_inline(
+    s: &mut [lib::intvector_intrinsics::vec128],
+    prev: u64,
+    input: &[u8],
+    input_len: u32
+)
+{
+    let mut wv: [lib::intvector_intrinsics::vec128; 4] =
+        [lib::intvector_intrinsics::vec128_zero; 4usize];
+    crate::hash_blake2s_simd128::update_last(input_len, &mut wv, s, false, prev, input_len, input)
+}
+
+pub(crate) fn copy_internal_state(
+    src: &[lib::intvector_intrinsics::vec128],
+    dst: &mut [lib::intvector_intrinsics::vec128]
+)
+{ (dst[0usize..4usize]).copy_from_slice(&src[0usize..4usize]) }
+
 pub const block_bytes: u32 = 64u32;
 
 pub const out_bytes: u32 = 32u32;
@@ -637,7 +674,8 @@ pub const salt_bytes: u32 = 8u32;
 pub const personal_bytes: u32 = 8u32;
 
 #[derive(PartialEq, Clone)]
-pub struct block_state_t
+pub(crate) struct
+__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
 {
     pub fst: u8,
     pub snd: u8,
@@ -649,9 +687,22 @@ pub struct block_state_t
 #[derive(PartialEq, Clone)]
 pub struct state_t
 {
-    pub block_state: crate::hash_blake2s_simd128::block_state_t,
+    pub block_state:
+    crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·,
     pub buf: Box<[u8]>,
     pub total_len: u64
+}
+
+#[derive(PartialEq, Clone)]
+enum
+option__·uint8_t···uint8_t···bool····Lib_IntVector_Intrinsics_vec128·····Lib_IntVector_Intrinsics_vec128··
+{
+    None,
+    Some
+    {
+        v:
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    }
 }
 
 fn malloc_raw <'a>(
@@ -661,144 +712,225 @@ fn malloc_raw <'a>(
     Box<[crate::hash_blake2s_simd128::state_t]>
 {
     let mut buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
+    let buf1: &mut [u8] = &mut buf;
     let wv: Box<[lib::intvector_intrinsics::vec128]> =
         vec![lib::intvector_intrinsics::vec128_zero; 4usize].into_boxed_slice();
-    let b: Box<[lib::intvector_intrinsics::vec128]> =
-        vec![lib::intvector_intrinsics::vec128_zero; 4usize].into_boxed_slice();
-    let mut block_state: crate::hash_blake2s_simd128::block_state_t =
-        crate::hash_blake2s_simd128::block_state_t
-        { fst: kk.key_length, snd: kk.digest_length, thd: kk.last_node, f3: wv, f4: b };
-    let p: &[crate::hash_blake2b::blake2_params] = key.fst;
-    let kk1: u8 = (p[0usize]).key_length;
-    let nn: u8 = (p[0usize]).digest_length;
+    let
+    block_state:
+    crate::hash_blake2s_simd128::option__·uint8_t···uint8_t···bool····Lib_IntVector_Intrinsics_vec128·····Lib_IntVector_Intrinsics_vec128··
+    =
+        {
+            let b: Box<[lib::intvector_intrinsics::vec128]> =
+                vec![lib::intvector_intrinsics::vec128_zero; 4usize].into_boxed_slice();
+            crate::hash_blake2s_simd128::option__·uint8_t···uint8_t···bool····Lib_IntVector_Intrinsics_vec128·····Lib_IntVector_Intrinsics_vec128··::Some
+            {
+                v:
+                crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+                { fst: kk.key_length, snd: kk.digest_length, thd: kk.last_node, f3: wv, f4: b }
+            }
+        };
     match block_state
     {
-        crate::hash_blake2s_simd128::block_state_t { thd: last_node, .. } =>
+        crate::hash_blake2s_simd128::option__·uint8_t···uint8_t···bool····Lib_IntVector_Intrinsics_vec128·····Lib_IntVector_Intrinsics_vec128··::None
+        => { [].into() },
+        crate::hash_blake2s_simd128::option__·uint8_t···uint8_t···bool····Lib_IntVector_Intrinsics_vec128·····Lib_IntVector_Intrinsics_vec128··::Some
+        { v: block_state1 }
+        =>
           {
-              let i: crate::hash_blake2b::index =
-                  crate::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node };
-              let h: &mut [lib::intvector_intrinsics::vec128] = &mut block_state.f4;
-              let kk2: u32 = i.key_length as u32;
-              let k·: &[u8] = key.snd;
-              if kk2 != 0u32
+              let
+              mut
+              block_state2:
+              crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+              =
+                  block_state1;
+              let k·: crate::streaming_types::optional = crate::streaming_types::optional::Some;
+              match k·
               {
-                  let sub_b: (&mut [u8], &mut [u8]) = buf.split_at_mut(kk2 as usize);
-                  (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
-                      &vec![0u8; 64u32.wrapping_sub(kk2) as usize].into_boxed_slice()
-                  );
-                  ((&mut buf)[0usize..kk2 as usize]).copy_from_slice(&k·[0usize..kk2 as usize])
-              };
-              let pv: crate::hash_blake2b::blake2_params = p[0usize];
-              let mut tmp: [u32; 8] = [0u32; 8usize];
-              let
-              r0:
-              (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
-              =
-                  h.split_at_mut(0usize);
-              let
-              r1:
-              (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
-              =
-                  r0.1.split_at_mut(1usize);
-              let
-              r2:
-              (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
-              =
-                  r1.1.split_at_mut(1usize);
-              let
-              r3:
-              (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
-              =
-                  r2.1.split_at_mut(1usize);
-              let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
-              let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
-              let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
-              let iv3: u32 = (&crate::impl_blake2_constants::ivTable_S)[3usize];
-              let iv4: u32 = (&crate::impl_blake2_constants::ivTable_S)[4usize];
-              let iv5: u32 = (&crate::impl_blake2_constants::ivTable_S)[5usize];
-              let iv6: u32 = (&crate::impl_blake2_constants::ivTable_S)[6usize];
-              let iv7: u32 = (&crate::impl_blake2_constants::ivTable_S)[7usize];
-              r3.0[0usize] = lib::intvector_intrinsics::vec128_load32s(iv0, iv1, iv2, iv3);
-              r3.1[0usize] = lib::intvector_intrinsics::vec128_load32s(iv4, iv5, iv6, iv7);
-              let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
-              krml::unroll_for!(
-                  2,
-                  "i0",
-                  0u32,
-                  1u32,
-                  {
-                      let bj: &[u8] = &pv.salt[i0.wrapping_mul(4u32) as usize..];
-                      let u: u32 = lowstar::endianness::load32_le(bj);
-                      let r4: u32 = u;
-                      let x: u32 = r4;
-                      let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
-                      os.1[i0 as usize] = x
-                  }
-              );
-              let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
-              krml::unroll_for!(
-                  2,
-                  "i0",
-                  0u32,
-                  1u32,
-                  {
-                      let bj: &[u8] = &pv.personal[i0.wrapping_mul(4u32) as usize..];
-                      let u: u32 = lowstar::endianness::load32_le(bj);
-                      let r4: u32 = u;
-                      let x: u32 = r4;
-                      let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
-                      os.1[i0 as usize] = x
-                  }
-              );
-              (&mut tmp)[0usize] =
-                  pv.digest_length as u32
-                  ^
-                  ((pv.key_length as u32).wrapping_shl(8u32)
-                  ^
-                  ((pv.fanout as u32).wrapping_shl(16u32) ^ (pv.depth as u32).wrapping_shl(24u32)));
-              (&mut tmp)[1usize] = pv.leaf_length;
-              (&mut tmp)[2usize] = pv.node_offset as u32;
-              (&mut tmp)[3usize] =
-                  pv.node_offset.wrapping_shr(32u32) as u32
-                  ^
-                  ((pv.node_depth as u32).wrapping_shl(16u32)
-                  ^
-                  (pv.inner_length as u32).wrapping_shl(24u32));
-              let tmp0: u32 = (&tmp)[0usize];
-              let tmp1: u32 = (&tmp)[1usize];
-              let tmp2: u32 = (&tmp)[2usize];
-              let tmp3: u32 = (&tmp)[3usize];
-              let tmp4: u32 = (&tmp)[4usize];
-              let tmp5: u32 = (&tmp)[5usize];
-              let tmp6: u32 = (&tmp)[6usize];
-              let tmp7: u32 = (&tmp)[7usize];
-              let iv0·: u32 = iv0 ^ tmp0;
-              let iv1·: u32 = iv1 ^ tmp1;
-              let iv2·: u32 = iv2 ^ tmp2;
-              let iv3·: u32 = iv3 ^ tmp3;
-              let iv4·: u32 = iv4 ^ tmp4;
-              let iv5·: u32 = iv5 ^ tmp5;
-              let iv6·: u32 = iv6 ^ tmp6;
-              let iv7·: u32 = iv7 ^ tmp7;
-              r1.0[0usize] = lib::intvector_intrinsics::vec128_load32s(iv0·, iv1·, iv2·, iv3·);
-              r2.0[0usize] = lib::intvector_intrinsics::vec128_load32s(iv4·, iv5·, iv6·, iv7·)
-          }
-    };
-    let kk10: u8 = kk.key_length;
-    let ite: u32 = if kk10 != 0u8 { 64u32 } else { 0u32 };
-    let s: crate::hash_blake2s_simd128::state_t =
-        crate::hash_blake2s_simd128::state_t { block_state, buf, total_len: ite as u64 };
-    let p0: Box<[crate::hash_blake2s_simd128::state_t]> = vec![s].into_boxed_slice();
-    p0
+                  crate::streaming_types::optional::None => [].into(),
+                  crate::streaming_types::optional::Some =>
+                    {
+                        let p: &[crate::hash_blake2b::blake2_params] = key.fst;
+                        let kk1: u8 = (p[0usize]).key_length;
+                        let nn: u8 = (p[0usize]).digest_length;
+                        match block_state2
+                        {
+                            crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+                            { thd: last_node, .. }
+                            =>
+                              {
+                                  let i: crate::hash_blake2b::index =
+                                      crate::hash_blake2b::index
+                                      { key_length: kk1, digest_length: nn, last_node };
+                                  let h: &mut [lib::intvector_intrinsics::vec128] =
+                                      &mut block_state2.f4;
+                                  let kk2: u32 = i.key_length as u32;
+                                  let k·2: &[u8] = key.snd;
+                                  if kk2 != 0u32
+                                  {
+                                      let sub_b: (&mut [u8], &mut [u8]) =
+                                          buf1.split_at_mut(kk2 as usize);
+                                      (sub_b.1[0usize..64u32.wrapping_sub(kk2) as usize]).copy_from_slice(
+                                          &vec![0u8; 64u32.wrapping_sub(kk2) as usize].into_boxed_slice(
+
+                                          )
+                                      );
+                                      (buf1[0usize..kk2 as usize]).copy_from_slice(
+                                          &k·2[0usize..kk2 as usize]
+                                      )
+                                  };
+                                  let pv: crate::hash_blake2b::blake2_params = p[0usize];
+                                  let mut tmp: [u32; 8] = [0u32; 8usize];
+                                  let
+                                  r0:
+                                  (&mut [lib::intvector_intrinsics::vec128],
+                                  &mut [lib::intvector_intrinsics::vec128])
+                                  =
+                                      h.split_at_mut(0usize);
+                                  let
+                                  r1:
+                                  (&mut [lib::intvector_intrinsics::vec128],
+                                  &mut [lib::intvector_intrinsics::vec128])
+                                  =
+                                      r0.1.split_at_mut(1usize);
+                                  let
+                                  r2:
+                                  (&mut [lib::intvector_intrinsics::vec128],
+                                  &mut [lib::intvector_intrinsics::vec128])
+                                  =
+                                      r1.1.split_at_mut(1usize);
+                                  let
+                                  r3:
+                                  (&mut [lib::intvector_intrinsics::vec128],
+                                  &mut [lib::intvector_intrinsics::vec128])
+                                  =
+                                      r2.1.split_at_mut(1usize);
+                                  let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
+                                  let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
+                                  let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
+                                  let iv3: u32 = (&crate::impl_blake2_constants::ivTable_S)[3usize];
+                                  let iv4: u32 = (&crate::impl_blake2_constants::ivTable_S)[4usize];
+                                  let iv5: u32 = (&crate::impl_blake2_constants::ivTable_S)[5usize];
+                                  let iv6: u32 = (&crate::impl_blake2_constants::ivTable_S)[6usize];
+                                  let iv7: u32 = (&crate::impl_blake2_constants::ivTable_S)[7usize];
+                                  r3.0[0usize] =
+                                      lib::intvector_intrinsics::vec128_load32s(iv0, iv1, iv2, iv3);
+                                  r3.1[0usize] =
+                                      lib::intvector_intrinsics::vec128_load32s(iv4, iv5, iv6, iv7);
+                                  let uu____0: (&mut [u32], &mut [u32]) = tmp.split_at_mut(4usize);
+                                  krml::unroll_for!(
+                                      2,
+                                      "i0",
+                                      0u32,
+                                      1u32,
+                                      {
+                                          let bj: &[u8] =
+                                              &pv.salt[i0.wrapping_mul(4u32) as usize..];
+                                          let u: u32 = lowstar::endianness::load32_le(bj);
+                                          let r4: u32 = u;
+                                          let x: u32 = r4;
+                                          let os: (&mut [u32], &mut [u32]) =
+                                              uu____0.1.split_at_mut(0usize);
+                                          os.1[i0 as usize] = x
+                                      }
+                                  );
+                                  let uu____1: (&mut [u32], &mut [u32]) =
+                                      uu____0.1.split_at_mut(2usize);
+                                  krml::unroll_for!(
+                                      2,
+                                      "i0",
+                                      0u32,
+                                      1u32,
+                                      {
+                                          let bj: &[u8] =
+                                              &pv.personal[i0.wrapping_mul(4u32) as usize..];
+                                          let u: u32 = lowstar::endianness::load32_le(bj);
+                                          let r4: u32 = u;
+                                          let x: u32 = r4;
+                                          let os: (&mut [u32], &mut [u32]) =
+                                              uu____1.1.split_at_mut(0usize);
+                                          os.1[i0 as usize] = x
+                                      }
+                                  );
+                                  (&mut tmp)[0usize] =
+                                      pv.digest_length as u32
+                                      ^
+                                      ((pv.key_length as u32).wrapping_shl(8u32)
+                                      ^
+                                      ((pv.fanout as u32).wrapping_shl(16u32)
+                                      ^
+                                      (pv.depth as u32).wrapping_shl(24u32)));
+                                  (&mut tmp)[1usize] = pv.leaf_length;
+                                  (&mut tmp)[2usize] = pv.node_offset as u32;
+                                  (&mut tmp)[3usize] =
+                                      pv.node_offset.wrapping_shr(32u32) as u32
+                                      ^
+                                      ((pv.node_depth as u32).wrapping_shl(16u32)
+                                      ^
+                                      (pv.inner_length as u32).wrapping_shl(24u32));
+                                  let tmp0: u32 = (&tmp)[0usize];
+                                  let tmp1: u32 = (&tmp)[1usize];
+                                  let tmp2: u32 = (&tmp)[2usize];
+                                  let tmp3: u32 = (&tmp)[3usize];
+                                  let tmp4: u32 = (&tmp)[4usize];
+                                  let tmp5: u32 = (&tmp)[5usize];
+                                  let tmp6: u32 = (&tmp)[6usize];
+                                  let tmp7: u32 = (&tmp)[7usize];
+                                  let iv0·: u32 = iv0 ^ tmp0;
+                                  let iv1·: u32 = iv1 ^ tmp1;
+                                  let iv2·: u32 = iv2 ^ tmp2;
+                                  let iv3·: u32 = iv3 ^ tmp3;
+                                  let iv4·: u32 = iv4 ^ tmp4;
+                                  let iv5·: u32 = iv5 ^ tmp5;
+                                  let iv6·: u32 = iv6 ^ tmp6;
+                                  let iv7·: u32 = iv7 ^ tmp7;
+                                  r1.0[0usize] =
+                                      lib::intvector_intrinsics::vec128_load32s(
+                                          iv0·,
+                                          iv1·,
+                                          iv2·,
+                                          iv3·
+                                      );
+                                  r2.0[0usize] =
+                                      lib::intvector_intrinsics::vec128_load32s(
+                                          iv4·,
+                                          iv5·,
+                                          iv6·,
+                                          iv7·
+                                      )
+                              }
+                        };
+                        let kk10: u8 = kk.key_length;
+                        let ite: u32 = if kk10 != 0u8 { 64u32 } else { 0u32 };
+                        let s: crate::hash_blake2s_simd128::state_t =
+                            crate::hash_blake2s_simd128::state_t
+                            {
+                                block_state: block_state2,
+                                buf: (*buf1).into(),
+                                total_len: ite as u64
+                            };
+                        let p0: Box<[crate::hash_blake2s_simd128::state_t]> =
+                            vec![s].into_boxed_slice();
+                        p0
+                    },
+                  _ => panic!("Precondition of the function most likely violated")
+              }
+          },
+        _ => panic!("Incomplete pattern matching")
+    }
 }
 
 fn index_of_state(s: &[crate::hash_blake2s_simd128::state_t]) -> crate::hash_blake2b::index
 {
-    let block_state: &crate::hash_blake2s_simd128::block_state_t = &(s[0usize]).block_state;
+    let
+    block_state:
+    &crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    =
+        &(s[0usize]).block_state;
     match *block_state
     {
-        crate::hash_blake2s_simd128::block_state_t { fst: kk1, snd: nn, thd: last_node, .. } =>
-          crate::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+        { fst: kk1, snd: nn, thd: last_node, .. }
+        => crate::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
     }
 }
 
@@ -807,21 +939,28 @@ fn reset_raw <'a>(
     key: crate::hash_blake2b::params_and_key <'a>
 )
 {
-    let block_state: &mut crate::hash_blake2s_simd128::block_state_t =
+    let
+    block_state:
+    &mut
+    crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    =
         &mut (state[0usize]).block_state;
     let buf: &mut [u8] = &mut (state[0usize]).buf;
     let i: crate::hash_blake2b::index =
         match *block_state
         {
-            crate::hash_blake2s_simd128::block_state_t { fst: kk1, snd: nn, thd: last_node, .. } =>
-              crate::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
+            crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+            { fst: kk1, snd: nn, thd: last_node, .. }
+            => crate::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
         };
     let p: &[crate::hash_blake2b::blake2_params] = key.fst;
     let kk1: u8 = (p[0usize]).key_length;
     let nn: u8 = (p[0usize]).digest_length;
     match *block_state
     {
-        crate::hash_blake2s_simd128::block_state_t { thd: last_node, .. } =>
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+        { thd: last_node, .. }
+        =>
           {
               let i1: crate::hash_blake2b::index =
                   crate::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node };
@@ -1013,7 +1152,11 @@ pub fn
 update0(state: &mut [crate::hash_blake2s_simd128::state_t], chunk: &[u8], chunk_len: u32) ->
     crate::streaming_types::error_code
 {
-    let block_state: &mut crate::hash_blake2s_simd128::block_state_t =
+    let
+    block_state:
+    &mut
+    crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    =
         &mut (state[0usize]).block_state;
     let total_len: u64 = (state[0usize]).total_len;
     if chunk_len as u64 > 0xffffffffffffffffu64.wrapping_sub(total_len)
@@ -1053,7 +1196,7 @@ update0(state: &mut [crate::hash_blake2s_simd128::state_t], chunk: &[u8], chunk_
                 let prevlen: u64 = total_len1.wrapping_sub(sz1 as u64);
                 match *block_state
                 {
-                    crate::hash_blake2s_simd128::block_state_t
+                    crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
                     { f3: ref mut wv, f4: ref mut hash, .. }
                     =>
                       {
@@ -1081,7 +1224,7 @@ update0(state: &mut [crate::hash_blake2s_simd128::state_t], chunk: &[u8], chunk_
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
             match *block_state
             {
-                crate::hash_blake2s_simd128::block_state_t
+                crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
                 { f3: ref mut wv, f4: ref mut hash, .. }
                 =>
                   {
@@ -1130,7 +1273,7 @@ update0(state: &mut [crate::hash_blake2s_simd128::state_t], chunk: &[u8], chunk_
                 let prevlen: u64 = total_len10.wrapping_sub(sz10 as u64);
                 match *block_state
                 {
-                    crate::hash_blake2s_simd128::block_state_t
+                    crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
                     { f3: ref mut wv, f4: ref mut hash, .. }
                     =>
                       {
@@ -1161,7 +1304,7 @@ update0(state: &mut [crate::hash_blake2s_simd128::state_t], chunk: &[u8], chunk_
             let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
             match *block_state
             {
-                crate::hash_blake2s_simd128::block_state_t
+                crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
                 { f3: ref mut wv, f4: ref mut hash, .. }
                 =>
                   {
@@ -1202,14 +1345,23 @@ pub fn
 digest(s: &[crate::hash_blake2s_simd128::state_t], dst: &mut [u8]) ->
     u8
 {
-    let block_state: &crate::hash_blake2s_simd128::block_state_t = &(s[0usize]).block_state;
+    let
+    block_state:
+    &crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    =
+        &(s[0usize]).block_state;
     let i1: crate::hash_blake2b::index =
         match *block_state
         {
-            crate::hash_blake2s_simd128::block_state_t { fst: kk, snd: nn, thd: last_node, .. } =>
-              crate::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
+            crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+            { fst: kk, snd: nn, thd: last_node, .. }
+            => crate::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
         };
-    let block_state0: &crate::hash_blake2s_simd128::block_state_t = &(s[0usize]).block_state;
+    let
+    block_state0:
+    &crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    =
+        &(s[0usize]).block_state;
     let buf_: &[u8] = &(s[0usize]).buf;
     let total_len: u64 = (s[0usize]).total_len;
     let r: u32 =
@@ -1222,8 +1374,12 @@ digest(s: &[crate::hash_blake2s_simd128::state_t], dst: &mut [u8]) ->
         [lib::intvector_intrinsics::vec128_zero; 4usize];
     let b: [lib::intvector_intrinsics::vec128; 4] =
         [lib::intvector_intrinsics::vec128_zero; 4usize];
-    let mut tmp_block_state: crate::hash_blake2s_simd128::block_state_t =
-        crate::hash_blake2s_simd128::block_state_t
+    let
+    mut
+    tmp_block_state:
+    crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    =
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
         {
             fst: i1.key_length,
             snd: i1.digest_length,
@@ -1233,11 +1389,14 @@ digest(s: &[crate::hash_blake2s_simd128::state_t], dst: &mut [u8]) ->
         };
     match *block_state0
     {
-        crate::hash_blake2s_simd128::block_state_t { f4: ref src_b, .. } =>
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+        { f4: ref src_b, .. }
+        =>
           match tmp_block_state
           {
-              crate::hash_blake2s_simd128::block_state_t { f4: ref mut dst_b, .. } =>
-                (dst_b[0usize..4usize]).copy_from_slice(&src_b[0usize..4usize])
+              crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+              { f4: ref mut dst_b, .. }
+              => (dst_b[0usize..4usize]).copy_from_slice(&src_b[0usize..4usize])
           }
     };
     let prev_len: u64 = total_len.wrapping_sub(r as u64);
@@ -1247,7 +1406,9 @@ digest(s: &[crate::hash_blake2s_simd128::state_t], dst: &mut [u8]) ->
     let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
     match tmp_block_state
     {
-        crate::hash_blake2s_simd128::block_state_t { f3: ref mut wv0, f4: ref mut hash, .. } =>
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+        { f3: ref mut wv0, f4: ref mut hash, .. }
+        =>
           {
               let nb: u32 = 0u32;
               crate::hash_blake2s_simd128::update_multi(0u32, wv0, hash, prev_len, buf_last.0, nb)
@@ -1256,7 +1417,7 @@ digest(s: &[crate::hash_blake2s_simd128::state_t], dst: &mut [u8]) ->
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
     match tmp_block_state
     {
-        crate::hash_blake2s_simd128::block_state_t
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
         { thd: last_node, f3: ref mut wv0, f4: ref mut hash, .. }
         =>
           crate::hash_blake2s_simd128::update_last(
@@ -1271,24 +1432,35 @@ digest(s: &[crate::hash_blake2s_simd128::state_t], dst: &mut [u8]) ->
     };
     match tmp_block_state
     {
-        crate::hash_blake2s_simd128::block_state_t { snd: nn, .. } =>
-          crate::hash_blake2s_simd128::finish(nn as u32, dst, &tmp_block_state.f4)
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+        { snd: nn, .. }
+        => crate::hash_blake2s_simd128::finish(nn as u32, dst, &tmp_block_state.f4)
     };
-    let block_state1: &crate::hash_blake2s_simd128::block_state_t = &(s[0usize]).block_state;
+    let
+    block_state1:
+    &crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    =
+        &(s[0usize]).block_state;
     match *block_state1
     {
-        crate::hash_blake2s_simd128::block_state_t { fst: kk, snd: nn, thd: last_node, .. } =>
-          crate::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+        { fst: kk, snd: nn, thd: last_node, .. }
+        => crate::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
     }.digest_length
 }
 
 pub fn info(s: &[crate::hash_blake2s_simd128::state_t]) -> crate::hash_blake2b::index
 {
-    let block_state: &crate::hash_blake2s_simd128::block_state_t = &(s[0usize]).block_state;
+    let
+    block_state:
+    &crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    =
+        &(s[0usize]).block_state;
     match *block_state
     {
-        crate::hash_blake2s_simd128::block_state_t { fst: kk, snd: nn, thd: last_node, .. } =>
-          crate::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
+        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+        { fst: kk, snd: nn, thd: last_node, .. }
+        => crate::hash_blake2b::index { key_length: kk, digest_length: nn, last_node }
     }
 }
 
@@ -1299,37 +1471,82 @@ pub fn
 copy(state: &[crate::hash_blake2s_simd128::state_t]) ->
     Box<[crate::hash_blake2s_simd128::state_t]>
 {
-    let block_state0: &crate::hash_blake2s_simd128::block_state_t = &(state[0usize]).block_state;
+    let
+    block_state0:
+    &crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+    =
+        &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
     let total_len0: u64 = (state[0usize]).total_len;
     let i: crate::hash_blake2b::index =
         match *block_state0
         {
-            crate::hash_blake2s_simd128::block_state_t { fst: kk1, snd: nn, thd: last_node, .. } =>
-              crate::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
+            crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+            { fst: kk1, snd: nn, thd: last_node, .. }
+            => crate::hash_blake2b::index { key_length: kk1, digest_length: nn, last_node }
         };
     let mut buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
     let wv: Box<[lib::intvector_intrinsics::vec128]> =
         vec![lib::intvector_intrinsics::vec128_zero; 4usize].into_boxed_slice();
-    let b: Box<[lib::intvector_intrinsics::vec128]> =
-        vec![lib::intvector_intrinsics::vec128_zero; 4usize].into_boxed_slice();
-    let mut block_state: crate::hash_blake2s_simd128::block_state_t =
-        crate::hash_blake2s_simd128::block_state_t
-        { fst: i.key_length, snd: i.digest_length, thd: i.last_node, f3: wv, f4: b };
-    match *block_state0
+    let
+    block_state:
+    crate::hash_blake2s_simd128::option__·uint8_t···uint8_t···bool····Lib_IntVector_Intrinsics_vec128·····Lib_IntVector_Intrinsics_vec128··
+    =
+        {
+            let b: Box<[lib::intvector_intrinsics::vec128]> =
+                vec![lib::intvector_intrinsics::vec128_zero; 4usize].into_boxed_slice();
+            crate::hash_blake2s_simd128::option__·uint8_t···uint8_t···bool····Lib_IntVector_Intrinsics_vec128·····Lib_IntVector_Intrinsics_vec128··::Some
+            {
+                v:
+                crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+                { fst: i.key_length, snd: i.digest_length, thd: i.last_node, f3: wv, f4: b }
+            }
+        };
+    match block_state
     {
-        crate::hash_blake2s_simd128::block_state_t { f4: ref src_b, .. } =>
-          match block_state
+        crate::hash_blake2s_simd128::option__·uint8_t···uint8_t···bool····Lib_IntVector_Intrinsics_vec128·····Lib_IntVector_Intrinsics_vec128··::None
+        => { [].into() },
+        crate::hash_blake2s_simd128::option__·uint8_t···uint8_t···bool····Lib_IntVector_Intrinsics_vec128·····Lib_IntVector_Intrinsics_vec128··::Some
+        { v: block_state1 }
+        =>
           {
-              crate::hash_blake2s_simd128::block_state_t { f4: ref mut dst_b, .. } =>
-                (dst_b[0usize..4usize]).copy_from_slice(&src_b[0usize..4usize])
-          }
-    };
-    let s: crate::hash_blake2s_simd128::state_t =
-        crate::hash_blake2s_simd128::state_t { block_state, buf, total_len: total_len0 };
-    let p: Box<[crate::hash_blake2s_simd128::state_t]> = vec![s].into_boxed_slice();
-    p
+              let
+              mut
+              block_state2:
+              crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+              =
+                  block_state1;
+              match *block_state0
+              {
+                  crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+                  { f4: ref src_b, .. }
+                  =>
+                    match block_state2
+                    {
+                        crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
+                        { f4: ref mut dst_b, .. }
+                        => (dst_b[0usize..4usize]).copy_from_slice(&src_b[0usize..4usize])
+                    }
+              };
+              let k·: crate::streaming_types::optional = crate::streaming_types::optional::Some;
+              match k·
+              {
+                  crate::streaming_types::optional::None => [].into(),
+                  crate::streaming_types::optional::Some =>
+                    {
+                        let s: crate::hash_blake2s_simd128::state_t =
+                            crate::hash_blake2s_simd128::state_t
+                            { block_state: block_state2, buf, total_len: total_len0 };
+                        let p: Box<[crate::hash_blake2s_simd128::state_t]> =
+                            vec![s].into_boxed_slice();
+                        p
+                    },
+                  _ => panic!("Precondition of the function most likely violated")
+              }
+          },
+        _ => panic!("Incomplete pattern matching")
+    }
 }
 
 /**

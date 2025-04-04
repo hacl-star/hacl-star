@@ -222,6 +222,12 @@ fn hash_len(a: crate::streaming_types::hash_alg) -> u32
     }
 }
 
+pub(crate) fn init_(a: crate::streaming_types::hash_alg, s: &mut [u64])
+{
+    lowstar::ignore::ignore::<crate::streaming_types::hash_alg>(a);
+    (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize])
+}
+
 pub(crate) fn update_multi_sha3(
     a: crate::streaming_types::hash_alg,
     s: &mut [u64],
@@ -665,8 +671,154 @@ pub(crate) fn update_last_sha3(
     }
 }
 
+fn squeeze(s: &mut [u64], rateInBytes: u32, outputByteLen: u32, b: &mut [u8])
+{
+    for i in 0u32..outputByteLen.wrapping_div(rateInBytes)
+    {
+        let mut hbuf: [u8; 256] = [0u8; 256usize];
+        let mut ws: [u64; 32] = [0u64; 32usize];
+        ((&mut ws)[0usize..25usize]).copy_from_slice(&s[0usize..25usize]);
+        krml::unroll_for!(
+            32,
+            "i0",
+            0u32,
+            1u32,
+            lowstar::endianness::store64_le(
+                &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
+                (&ws)[i0 as usize]
+            )
+        );
+        let b0: &mut [u8] = b;
+        (b0[i.wrapping_mul(rateInBytes) as usize..i.wrapping_mul(rateInBytes) as usize
+        +
+        rateInBytes as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..rateInBytes as usize]);
+        krml::unroll_for!(
+            24,
+            "i0",
+            0u32,
+            1u32,
+            {
+                let mut _C: [u64; 5] = [0u64; 5usize];
+                krml::unroll_for!(
+                    5,
+                    "i1",
+                    0u32,
+                    1u32,
+                    (&mut _C)[i1 as usize] =
+                        s[i1.wrapping_add(0u32) as usize]
+                        ^
+                        (s[i1.wrapping_add(5u32) as usize]
+                        ^
+                        (s[i1.wrapping_add(10u32) as usize]
+                        ^
+                        (s[i1.wrapping_add(15u32) as usize] ^ s[i1.wrapping_add(20u32) as usize])))
+                );
+                krml::unroll_for!(
+                    5,
+                    "i1",
+                    0u32,
+                    1u32,
+                    {
+                        let uu____0: u64 = (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
+                        let _D: u64 =
+                            (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize]
+                            ^
+                            (uu____0.wrapping_shl(1u32) | uu____0.wrapping_shr(63u32));
+                        krml::unroll_for!(
+                            5,
+                            "i2",
+                            0u32,
+                            1u32,
+                            s[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] ^= _D
+                        )
+                    }
+                );
+                let x: u64 = s[1usize];
+                let mut current: [u64; 1] = [x; 1usize];
+                krml::unroll_for!(
+                    24,
+                    "i1",
+                    0u32,
+                    1u32,
+                    {
+                        let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
+                        let r: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
+                        let temp: u64 = s[_Y as usize];
+                        let uu____1: u64 = (&current)[0usize];
+                        s[_Y as usize] =
+                            uu____1.wrapping_shl(r) | uu____1.wrapping_shr(64u32.wrapping_sub(r));
+                        (&mut current)[0usize] = temp
+                    }
+                );
+                krml::unroll_for!(
+                    5,
+                    "i1",
+                    0u32,
+                    1u32,
+                    {
+                        let v0: u64 =
+                            s[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            ^
+                            ! s[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            &
+                            s[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                        let v1: u64 =
+                            s[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            ^
+                            ! s[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            &
+                            s[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                        let v2: u64 =
+                            s[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            ^
+                            ! s[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            &
+                            s[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                        let v3: u64 =
+                            s[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            ^
+                            ! s[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            &
+                            s[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                        let v4: u64 =
+                            s[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            ^
+                            ! s[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
+                            &
+                            s[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
+                        s[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v0;
+                        s[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v1;
+                        s[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v2;
+                        s[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v3;
+                        s[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
+                    }
+                );
+                let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
+                s[0usize] ^= c
+            }
+        )
+    };
+    let remOut: u32 = outputByteLen.wrapping_rem(rateInBytes);
+    let mut hbuf: [u8; 256] = [0u8; 256usize];
+    let mut ws: [u64; 32] = [0u64; 32usize];
+    ((&mut ws)[0usize..25usize]).copy_from_slice(&s[0usize..25usize]);
+    krml::unroll_for!(
+        32,
+        "i",
+        0u32,
+        1u32,
+        lowstar::endianness::store64_le(
+            &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
+            (&ws)[i as usize]
+        )
+    );
+    (b[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut) as usize
+    +
+    remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize])
+}
+
 #[derive(PartialEq, Clone)]
-pub struct hash_buf
+pub(crate) struct hash_buf
 { pub fst: crate::streaming_types::hash_alg, pub snd: Box<[u64]> }
 
 #[derive(PartialEq, Clone)]
@@ -679,18 +831,56 @@ pub fn get_alg(s: &[crate::hash_sha3::state_t]) -> crate::streaming_types::hash_
     block_state.fst
 }
 
+#[derive(PartialEq, Clone)]
+enum option__·Spec_Hash_Definitions_hash_alg····uint64_t··
+{
+    None,
+    Some { v: crate::hash_sha3::hash_buf }
+}
+
 pub fn malloc(a: crate::streaming_types::hash_alg) -> Box<[crate::hash_sha3::state_t]>
 {
     let buf: Box<[u8]> = vec![0u8; crate::hash_sha3::block_len(a) as usize].into_boxed_slice();
-    let buf0: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
-    let mut block_state: crate::hash_sha3::hash_buf =
-        crate::hash_sha3::hash_buf { fst: a, snd: buf0 };
-    let s: &mut [u64] = &mut block_state.snd;
-    (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    let s0: crate::hash_sha3::state_t =
-        crate::hash_sha3::state_t { block_state, buf, total_len: 0u32 as u64 };
-    let p: Box<[crate::hash_sha3::state_t]> = vec![s0].into_boxed_slice();
-    p
+    let buf1: &[u8] = &buf;
+    let s: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
+    let
+    block_state: crate::hash_sha3::option__·Spec_Hash_Definitions_hash_alg····uint64_t··
+    =
+        crate::hash_sha3::option__·Spec_Hash_Definitions_hash_alg····uint64_t··::Some
+        { v: crate::hash_sha3::hash_buf { fst: a, snd: s } };
+    match block_state
+    {
+        crate::hash_sha3::option__·Spec_Hash_Definitions_hash_alg····uint64_t··::None =>
+          { [].into() },
+        crate::hash_sha3::option__·Spec_Hash_Definitions_hash_alg····uint64_t··::Some
+        { v: block_state1 }
+        =>
+          {
+              let mut block_state2: crate::hash_sha3::hash_buf = block_state1;
+              let k·: crate::streaming_types::optional = crate::streaming_types::optional::Some;
+              match k·
+              {
+                  crate::streaming_types::optional::None => [].into(),
+                  crate::streaming_types::optional::Some =>
+                    {
+                        let a1: crate::streaming_types::hash_alg = block_state2.fst;
+                        let s0: &mut [u64] = &mut block_state2.snd;
+                        crate::hash_sha3::init_(a1, s0);
+                        let s1: crate::hash_sha3::state_t =
+                            crate::hash_sha3::state_t
+                            {
+                                block_state: block_state2,
+                                buf: (*buf1).into(),
+                                total_len: 0u32 as u64
+                            };
+                        let p: Box<[crate::hash_sha3::state_t]> = vec![s1].into_boxed_slice();
+                        p
+                    },
+                  _ => panic!("Precondition of the function most likely violated")
+              }
+          },
+        _ => panic!("Incomplete pattern matching")
+    }
 }
 
 pub fn copy(state: &[crate::hash_sha3::state_t]) -> Box<[crate::hash_sha3::state_t]>
@@ -703,23 +893,49 @@ pub fn copy(state: &[crate::hash_sha3::state_t]) -> Box<[crate::hash_sha3::state
     ((&mut buf)[0usize..crate::hash_sha3::block_len(i) as usize]).copy_from_slice(
         &buf0[0usize..crate::hash_sha3::block_len(i) as usize]
     );
-    let buf1: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
-    let mut block_state: crate::hash_sha3::hash_buf =
-        crate::hash_sha3::hash_buf { fst: i, snd: buf1 };
-    let s_src: &[u64] = &block_state0.snd;
-    let s_dst: &mut [u64] = &mut block_state.snd;
-    (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
-    let s: crate::hash_sha3::state_t =
-        crate::hash_sha3::state_t { block_state, buf, total_len: total_len0 };
-    let p: Box<[crate::hash_sha3::state_t]> = vec![s].into_boxed_slice();
-    p
+    let s: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();
+    let
+    block_state: crate::hash_sha3::option__·Spec_Hash_Definitions_hash_alg····uint64_t··
+    =
+        crate::hash_sha3::option__·Spec_Hash_Definitions_hash_alg····uint64_t··::Some
+        { v: crate::hash_sha3::hash_buf { fst: i, snd: s } };
+    match block_state
+    {
+        crate::hash_sha3::option__·Spec_Hash_Definitions_hash_alg····uint64_t··::None =>
+          { [].into() },
+        crate::hash_sha3::option__·Spec_Hash_Definitions_hash_alg····uint64_t··::Some
+        { v: block_state1 }
+        =>
+          {
+              let mut block_state2: crate::hash_sha3::hash_buf = block_state1;
+              let s_src: &[u64] = &block_state0.snd;
+              let s_dst: &mut [u64] = &mut block_state2.snd;
+              (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
+              let k·: crate::streaming_types::optional = crate::streaming_types::optional::Some;
+              match k·
+              {
+                  crate::streaming_types::optional::None => [].into(),
+                  crate::streaming_types::optional::Some =>
+                    {
+                        let s0: crate::hash_sha3::state_t =
+                            crate::hash_sha3::state_t
+                            { block_state: block_state2, buf, total_len: total_len0 };
+                        let p: Box<[crate::hash_sha3::state_t]> = vec![s0].into_boxed_slice();
+                        p
+                    },
+                  _ => panic!("Precondition of the function most likely violated")
+              }
+          },
+        _ => panic!("Incomplete pattern matching")
+    }
 }
 
 pub fn reset(state: &mut [crate::hash_sha3::state_t])
 {
     let block_state: &mut crate::hash_sha3::hash_buf = &mut (state[0usize]).block_state;
+    let a1: crate::streaming_types::hash_alg = block_state.fst;
     let s: &mut [u64] = &mut block_state.snd;
-    (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
+    crate::hash_sha3::init_(a1, s);
     let total_len: u64 = 0u32 as u64;
     (state[0usize]).total_len = total_len
 }
@@ -937,331 +1153,23 @@ fn digest_(
     crate::hash_sha3::update_last_sha3(a10, s0, buf_last.1, r);
     let a11: crate::streaming_types::hash_alg = tmp_block_state.fst;
     let s1: &mut [u64] = &mut tmp_block_state.snd;
-    if
-    a11 == crate::streaming_types::hash_alg::Shake128
-    ||
-    a11 == crate::streaming_types::hash_alg::Shake256
-    {
-        for i in 0u32..l.wrapping_div(crate::hash_sha3::block_len(a11))
+    let sw: bool =
+        match a11
         {
-            let mut hbuf: [u8; 256] = [0u8; 256usize];
-            let mut ws: [u64; 32] = [0u64; 32usize];
-            ((&mut ws)[0usize..25usize]).copy_from_slice(&s1[0usize..25usize]);
-            krml::unroll_for!(
-                32,
-                "i0",
-                0u32,
-                1u32,
-                lowstar::endianness::store64_le(
-                    &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
-                    (&ws)[i0 as usize]
-                )
-            );
-            let b0: &mut [u8] = output;
-            let uu____0: (&[u8], &[u8]) = hbuf.split_at(0usize);
-            (b0[i.wrapping_mul(crate::hash_sha3::block_len(a11)) as usize..i.wrapping_mul(
-                crate::hash_sha3::block_len(a11)
-            )
-            as
-            usize
-            +
-            crate::hash_sha3::block_len(a11) as usize]).copy_from_slice(
-                &uu____0.1[0usize..crate::hash_sha3::block_len(a11) as usize]
-            );
-            krml::unroll_for!(
-                24,
-                "i0",
-                0u32,
-                1u32,
-                {
-                    let mut _C: [u64; 5] = [0u64; 5usize];
-                    krml::unroll_for!(
-                        5,
-                        "i1",
-                        0u32,
-                        1u32,
-                        (&mut _C)[i1 as usize] =
-                            s1[i1.wrapping_add(0u32) as usize]
-                            ^
-                            (s1[i1.wrapping_add(5u32) as usize]
-                            ^
-                            (s1[i1.wrapping_add(10u32) as usize]
-                            ^
-                            (s1[i1.wrapping_add(15u32) as usize]
-                            ^
-                            s1[i1.wrapping_add(20u32) as usize])))
-                    );
-                    krml::unroll_for!(
-                        5,
-                        "i1",
-                        0u32,
-                        1u32,
-                        {
-                            let uu____1: u64 =
-                                (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
-                            let _D: u64 =
-                                (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize]
-                                ^
-                                (uu____1.wrapping_shl(1u32) | uu____1.wrapping_shr(63u32));
-                            krml::unroll_for!(
-                                5,
-                                "i2",
-                                0u32,
-                                1u32,
-                                s1[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] ^= _D
-                            )
-                        }
-                    );
-                    let x: u64 = s1[1usize];
-                    let mut current: [u64; 1] = [x; 1usize];
-                    krml::unroll_for!(
-                        24,
-                        "i1",
-                        0u32,
-                        1u32,
-                        {
-                            let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
-                            let r1: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
-                            let temp: u64 = s1[_Y as usize];
-                            let uu____2: u64 = (&current)[0usize];
-                            s1[_Y as usize] =
-                                uu____2.wrapping_shl(r1)
-                                |
-                                uu____2.wrapping_shr(64u32.wrapping_sub(r1));
-                            (&mut current)[0usize] = temp
-                        }
-                    );
-                    krml::unroll_for!(
-                        5,
-                        "i1",
-                        0u32,
-                        1u32,
-                        {
-                            let v0: u64 =
-                                s1[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            let v1: u64 =
-                                s1[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            let v2: u64 =
-                                s1[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            let v3: u64 =
-                                s1[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            let v4: u64 =
-                                s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            s1[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v0;
-                            s1[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v1;
-                            s1[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v2;
-                            s1[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v3;
-                            s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
-                        }
-                    );
-                    let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
-                    s1[0usize] ^= c
-                }
-            )
+            crate::streaming_types::hash_alg::Shake128 => true,
+            crate::streaming_types::hash_alg::Shake256 => true,
+            _ => false
         };
-        let remOut: u32 = l.wrapping_rem(crate::hash_sha3::block_len(a11));
-        let mut hbuf: [u8; 256] = [0u8; 256usize];
-        let mut ws: [u64; 32] = [0u64; 32usize];
-        ((&mut ws)[0usize..25usize]).copy_from_slice(&s1[0usize..25usize]);
-        krml::unroll_for!(
-            32,
-            "i",
-            0u32,
-            1u32,
-            lowstar::endianness::store64_le(
-                &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
-                (&ws)[i as usize]
-            )
-        );
-        (output[l.wrapping_sub(remOut) as usize..l.wrapping_sub(remOut) as usize + remOut as usize]).copy_from_slice(
-            &(&(&hbuf)[0usize..])[0usize..remOut as usize]
-        )
-    }
+    if sw
+    { crate::hash_sha3::squeeze(s1, crate::hash_sha3::block_len(a11), l, output) }
     else
     {
-        for
-        i
-        in
-        0u32..(crate::hash_sha3::hash_len(a11)).wrapping_div(crate::hash_sha3::block_len(a11))
-        {
-            let mut hbuf: [u8; 256] = [0u8; 256usize];
-            let mut ws: [u64; 32] = [0u64; 32usize];
-            ((&mut ws)[0usize..25usize]).copy_from_slice(&s1[0usize..25usize]);
-            krml::unroll_for!(
-                32,
-                "i0",
-                0u32,
-                1u32,
-                lowstar::endianness::store64_le(
-                    &mut (&mut hbuf)[i0.wrapping_mul(8u32) as usize..],
-                    (&ws)[i0 as usize]
-                )
-            );
-            let b0: &mut [u8] = output;
-            let uu____3: (&[u8], &[u8]) = hbuf.split_at(0usize);
-            (b0[i.wrapping_mul(crate::hash_sha3::block_len(a11)) as usize..i.wrapping_mul(
-                crate::hash_sha3::block_len(a11)
-            )
-            as
-            usize
-            +
-            crate::hash_sha3::block_len(a11) as usize]).copy_from_slice(
-                &uu____3.1[0usize..crate::hash_sha3::block_len(a11) as usize]
-            );
-            krml::unroll_for!(
-                24,
-                "i0",
-                0u32,
-                1u32,
-                {
-                    let mut _C: [u64; 5] = [0u64; 5usize];
-                    krml::unroll_for!(
-                        5,
-                        "i1",
-                        0u32,
-                        1u32,
-                        (&mut _C)[i1 as usize] =
-                            s1[i1.wrapping_add(0u32) as usize]
-                            ^
-                            (s1[i1.wrapping_add(5u32) as usize]
-                            ^
-                            (s1[i1.wrapping_add(10u32) as usize]
-                            ^
-                            (s1[i1.wrapping_add(15u32) as usize]
-                            ^
-                            s1[i1.wrapping_add(20u32) as usize])))
-                    );
-                    krml::unroll_for!(
-                        5,
-                        "i1",
-                        0u32,
-                        1u32,
-                        {
-                            let uu____4: u64 =
-                                (&_C)[i1.wrapping_add(1u32).wrapping_rem(5u32) as usize];
-                            let _D: u64 =
-                                (&_C)[i1.wrapping_add(4u32).wrapping_rem(5u32) as usize]
-                                ^
-                                (uu____4.wrapping_shl(1u32) | uu____4.wrapping_shr(63u32));
-                            krml::unroll_for!(
-                                5,
-                                "i2",
-                                0u32,
-                                1u32,
-                                s1[i1.wrapping_add(5u32.wrapping_mul(i2)) as usize] ^= _D
-                            )
-                        }
-                    );
-                    let x: u64 = s1[1usize];
-                    let mut current: [u64; 1] = [x; 1usize];
-                    krml::unroll_for!(
-                        24,
-                        "i1",
-                        0u32,
-                        1u32,
-                        {
-                            let _Y: u32 = (&crate::hash_sha3::keccak_piln)[i1 as usize];
-                            let r1: u32 = (&crate::hash_sha3::keccak_rotc)[i1 as usize];
-                            let temp: u64 = s1[_Y as usize];
-                            let uu____5: u64 = (&current)[0usize];
-                            s1[_Y as usize] =
-                                uu____5.wrapping_shl(r1)
-                                |
-                                uu____5.wrapping_shr(64u32.wrapping_sub(r1));
-                            (&mut current)[0usize] = temp
-                        }
-                    );
-                    krml::unroll_for!(
-                        5,
-                        "i1",
-                        0u32,
-                        1u32,
-                        {
-                            let v0: u64 =
-                                s1[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            let v1: u64 =
-                                s1[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            let v2: u64 =
-                                s1[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            let v3: u64 =
-                                s1[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            let v4: u64 =
-                                s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                ^
-                                ! s1[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize]
-                                &
-                                s1[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize];
-                            s1[0u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v0;
-                            s1[1u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v1;
-                            s1[2u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v2;
-                            s1[3u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v3;
-                            s1[4u32.wrapping_add(5u32.wrapping_mul(i1)) as usize] = v4
-                        }
-                    );
-                    let c: u64 = (&crate::hash_sha3::keccak_rndc)[i0 as usize];
-                    s1[0usize] ^= c
-                }
-            )
-        };
-        let remOut: u32 =
-            (crate::hash_sha3::hash_len(a11)).wrapping_rem(crate::hash_sha3::block_len(a11));
-        let mut hbuf: [u8; 256] = [0u8; 256usize];
-        let mut ws: [u64; 32] = [0u64; 32usize];
-        ((&mut ws)[0usize..25usize]).copy_from_slice(&s1[0usize..25usize]);
-        krml::unroll_for!(
-            32,
-            "i",
-            0u32,
-            1u32,
-            lowstar::endianness::store64_le(
-                &mut (&mut hbuf)[i.wrapping_mul(8u32) as usize..],
-                (&ws)[i as usize]
-            )
-        );
-        let uu____6: (&[u8], &[u8]) = hbuf.split_at(0usize);
-        (output[(crate::hash_sha3::hash_len(a11)).wrapping_sub(remOut) as usize..(crate::hash_sha3::hash_len(
-            a11
-        )).wrapping_sub(remOut)
-        as
-        usize
-        +
-        remOut as usize]).copy_from_slice(&uu____6.1[0usize..remOut as usize])
+        crate::hash_sha3::squeeze(
+            s1,
+            crate::hash_sha3::block_len(a11),
+            crate::hash_sha3::hash_len(a11),
+            output
+        )
     }
 }
 
@@ -1281,7 +1189,7 @@ pub fn digest(state: &[crate::hash_sha3::state_t], output: &mut [u8]) ->
     }
 }
 
-pub fn squeeze(s: &[crate::hash_sha3::state_t], dst: &mut [u8], l: u32) ->
+pub fn squeeze0(s: &[crate::hash_sha3::state_t], dst: &mut [u8], l: u32) ->
     crate::streaming_types::error_code
 {
     let a1: crate::streaming_types::hash_alg = crate::hash_sha3::get_alg(s);

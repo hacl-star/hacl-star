@@ -575,10 +575,10 @@
         }
         =>
           {
-              (b0[0usize..28usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..28usize]);
-              (b1[0usize..28usize]).copy_from_slice(&(&(&hbuf)[32usize..])[0usize..28usize]);
-              (b2[0usize..28usize]).copy_from_slice(&(&(&hbuf)[64usize..])[0usize..28usize]);
-              (b3[0usize..28usize]).copy_from_slice(&(&(&hbuf)[96usize..])[0usize..28usize])
+              ((*b0)[0usize..28usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..28usize]);
+              ((*b1)[0usize..28usize]).copy_from_slice(&(&(&hbuf)[32usize..])[0usize..28usize]);
+              ((*b2)[0usize..28usize]).copy_from_slice(&(&(&hbuf)[64usize..])[0usize..28usize]);
+              ((*b3)[0usize..28usize]).copy_from_slice(&(&(&hbuf)[96usize..])[0usize..28usize])
           }
     }
 }
@@ -694,22 +694,22 @@ pub fn sha224_4(
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec128_load32_be(&b0[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec128_load32_be(&b1[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec128_load32_be(&b2[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec128_load32_be(&b0[16usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec128_load32_be(&b1[16usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec128_load32_be(&b2[16usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[16usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec128_load32_be(&b0[32usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec128_load32_be(&b1[32usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec128_load32_be(&b2[32usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[32usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec128_load32_be(&b0[48usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec128_load32_be(&b1[48usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec128_load32_be(&b2[48usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec128_load32_be(&b3[48usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b0)[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b1)[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b2)[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b3)[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b0)[16usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b1)[16usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b2)[16usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b3)[16usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b0)[32usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b1)[32usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b2)[32usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b3)[32usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b0)[48usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b1)[48usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b2)[48usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec128_load32_be(&(*b3)[48usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec128 = (&ws)[0usize];
@@ -1077,7 +1077,7 @@ pub fn sha224_4(
                   let last1: (&mut [u8], &mut [u8]) = last0.1.split_at_mut(128usize);
                   let last2: (&mut [u8], &mut [u8]) = last1.1.split_at_mut(128usize);
                   let last3: (&mut [u8], &mut [u8]) = last2.1.split_at_mut(128usize);
-                  (last1.0[0usize..len as usize]).copy_from_slice(&b0[0usize..len as usize]);
+                  (last1.0[0usize..len as usize]).copy_from_slice(&(*b0)[0usize..len as usize]);
                   last1.0[len as usize] = 0x80u8;
                   (last1.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
@@ -1086,7 +1086,7 @@ pub fn sha224_4(
                   let last11: (&mut [u8], &mut [u8]) = last01.1.split_at_mut(64usize);
                   let l00: &mut [u8] = last11.0;
                   let l01: &mut [u8] = last11.1;
-                  (last2.0[0usize..len as usize]).copy_from_slice(&b1[0usize..len as usize]);
+                  (last2.0[0usize..len as usize]).copy_from_slice(&(*b1)[0usize..len as usize]);
                   last2.0[len as usize] = 0x80u8;
                   (last2.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
@@ -1095,7 +1095,7 @@ pub fn sha224_4(
                   let last110: (&mut [u8], &mut [u8]) = last010.1.split_at_mut(64usize);
                   let l10: &mut [u8] = last110.0;
                   let l11: &mut [u8] = last110.1;
-                  (last3.0[0usize..len as usize]).copy_from_slice(&b2[0usize..len as usize]);
+                  (last3.0[0usize..len as usize]).copy_from_slice(&(*b2)[0usize..len as usize]);
                   last3.0[len as usize] = 0x80u8;
                   (last3.0[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
@@ -1104,7 +1104,7 @@ pub fn sha224_4(
                   let last111: (&mut [u8], &mut [u8]) = last011.1.split_at_mut(64usize);
                   let l20: &mut [u8] = last111.0;
                   let l21: &mut [u8] = last111.1;
-                  (last3.1[0usize..len as usize]).copy_from_slice(&b3[0usize..len as usize]);
+                  (last3.1[0usize..len as usize]).copy_from_slice(&(*b3)[0usize..len as usize]);
                   last3.1[len as usize] = 0x80u8;
                   (last3.1[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
                       &(&totlen_buf)[0usize..8usize]
@@ -1232,10 +1232,10 @@ pub fn sha224_4(
         }
         =>
           {
-              (b0[0usize..32usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..32usize]);
-              (b1[0usize..32usize]).copy_from_slice(&(&(&hbuf)[32usize..])[0usize..32usize]);
-              (b2[0usize..32usize]).copy_from_slice(&(&(&hbuf)[64usize..])[0usize..32usize]);
-              (b3[0usize..32usize]).copy_from_slice(&(&(&hbuf)[96usize..])[0usize..32usize])
+              ((*b0)[0usize..32usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..32usize]);
+              ((*b1)[0usize..32usize]).copy_from_slice(&(&(&hbuf)[32usize..])[0usize..32usize]);
+              ((*b2)[0usize..32usize]).copy_from_slice(&(&(&hbuf)[64usize..])[0usize..32usize]);
+              ((*b3)[0usize..32usize]).copy_from_slice(&(&(&hbuf)[96usize..])[0usize..32usize])
           }
     }
 }

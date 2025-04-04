@@ -1644,21 +1644,69 @@ pub struct state_t
     pub p_key: Box<[u8]>
 }
 
+#[derive(PartialEq)]
+enum option__·Lib_IntVector_Intrinsics_vec128· <'a>
+{
+    None,
+    Some { v: &'a mut [lib::intvector_intrinsics::vec128] }
+}
+
 pub fn malloc(key: &[u8]) -> Box<[crate::mac_poly1305_simd128::state_t]>
 {
     let buf: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
+    let buf1: &[u8] = &buf;
     let mut r1: Box<[lib::intvector_intrinsics::vec128]> =
         vec![lib::intvector_intrinsics::vec128_zero; 25usize].into_boxed_slice();
-    let block_state: &mut [lib::intvector_intrinsics::vec128] = &mut r1;
-    crate::mac_poly1305_simd128::poly1305_init(block_state, key);
-    let mut k·: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
-    ((&mut k·)[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
-    let k·0: &[u8] = &k·;
-    let s: crate::mac_poly1305_simd128::state_t =
-        crate::mac_poly1305_simd128::state_t
-        { block_state: (*block_state).into(), buf, total_len: 0u32 as u64, p_key: (*k·0).into() };
-    let p: Box<[crate::mac_poly1305_simd128::state_t]> = vec![s].into_boxed_slice();
-    p
+    let mut block_state: crate::mac_poly1305_simd128::option__·Lib_IntVector_Intrinsics_vec128· =
+        crate::mac_poly1305_simd128::option__·Lib_IntVector_Intrinsics_vec128·::Some
+        { v: &mut r1 };
+    match block_state
+    {
+        crate::mac_poly1305_simd128::option__·Lib_IntVector_Intrinsics_vec128·::None =>
+          { [].into() },
+        crate::mac_poly1305_simd128::option__·Lib_IntVector_Intrinsics_vec128·::Some
+        { v: ref mut block_state1 }
+        =>
+          {
+              let block_state2: &mut [lib::intvector_intrinsics::vec128] = *block_state1;
+              let mut b: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
+              let mut k·: crate::mac_poly1305::option__ uint8_t* =
+                  crate::mac_poly1305::option__ uint8_t*::Some { v: &mut b };
+              let k·0: crate::mac_poly1305::option__ uint8_t* =
+                  match k·
+                  {
+                      crate::mac_poly1305::option__ uint8_t*::None =>
+                        { crate::mac_poly1305::option__ uint8_t*::None },
+                      crate::mac_poly1305::option__ uint8_t*::Some { v: ref mut k·1 } =>
+                        {
+                            ((*k·1)[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
+                            crate::mac_poly1305::option__ uint8_t*::Some { v: *k·1 }
+                        },
+                      _ => panic!("Incomplete pattern matching")
+                  };
+              match k·0
+              {
+                  crate::mac_poly1305::option__ uint8_t*::None => [].into(),
+                  crate::mac_poly1305::option__ uint8_t*::Some { v: ref k·1 } =>
+                    {
+                        crate::mac_poly1305_simd128::poly1305_init(block_state2, key);
+                        let s: crate::mac_poly1305_simd128::state_t =
+                            crate::mac_poly1305_simd128::state_t
+                            {
+                                block_state: (*block_state2).into(),
+                                buf: (*buf1).into(),
+                                total_len: 0u32 as u64,
+                                p_key: (**k·1).into()
+                            };
+                        let p: Box<[crate::mac_poly1305_simd128::state_t]> =
+                            vec![s].into_boxed_slice();
+                        p
+                    },
+                  _ => panic!("Incomplete pattern matching")
+              }
+          },
+        _ => panic!("Incomplete pattern matching")
+    }
 }
 
 pub fn reset(state: &mut [crate::mac_poly1305_simd128::state_t], key: &[u8])

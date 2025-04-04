@@ -770,7 +770,7 @@ compute_sha3_224(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     +
     remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
-    ((&mut s)[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
+    crate::hash_sha3::init_(crate::streaming_types::hash_alg::SHA3_224, &mut s);
     let block_len: u32 = 144u32;
     let n_blocks: u32 = 28u32.wrapping_div(block_len);
     let rem: u32 = 28u32.wrapping_rem(block_len);
@@ -924,7 +924,7 @@ compute_sha3_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     +
     remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
-    ((&mut s)[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
+    crate::hash_sha3::init_(crate::streaming_types::hash_alg::SHA3_256, &mut s);
     let block_len: u32 = 136u32;
     let n_blocks: u32 = 32u32.wrapping_div(block_len);
     let rem: u32 = 32u32.wrapping_rem(block_len);
@@ -1078,7 +1078,7 @@ compute_sha3_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     +
     remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
-    ((&mut s)[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
+    crate::hash_sha3::init_(crate::streaming_types::hash_alg::SHA3_384, &mut s);
     let block_len: u32 = 104u32;
     let n_blocks: u32 = 48u32.wrapping_div(block_len);
     let rem: u32 = 48u32.wrapping_rem(block_len);
@@ -1232,7 +1232,7 @@ compute_sha3_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     +
     remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
     let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
-    ((&mut s)[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
+    crate::hash_sha3::init_(crate::streaming_types::hash_alg::SHA3_512, &mut s);
     let block_len: u32 = 72u32;
     let n_blocks: u32 = 64u32.wrapping_div(block_len);
     let rem: u32 = 64u32.wrapping_rem(block_len);

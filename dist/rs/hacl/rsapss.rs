@@ -550,33 +550,28 @@ new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
         let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let pkeyLen: u32 = nLen.wrapping_add(nLen).wrapping_add(eLen);
         let mut pkey: Box<[u64]> = vec![0u64; pkeyLen as usize].into_boxed_slice();
-        if false
-        { pkey }
-        else
-        {
-            let pkey1: &mut [u64] = &mut pkey;
-            let pkey2: &mut [u64] = pkey1;
-            let nbLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-            let ebLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-            let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-            let n: (&mut [u64], &mut [u64]) = pkey2.split_at_mut(0usize);
-            let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen1 as usize);
-            let e: (&mut [u64], &mut [u64]) =
-                r2.1.split_at_mut(nLen1.wrapping_add(nLen1) as usize - nLen1 as usize);
-            bignum::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
-            bignum::bignum::bn_precomp_r2_mod_n_u64(
-                modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
-                modBits.wrapping_sub(1u32),
-                r2.0,
-                e.0
-            );
-            bignum::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
-            let m0: u64 = crate::rsapss::check_modulus_u64(modBits, r2.0);
-            let m1: u64 = crate::rsapss::check_exponent_u64(eBits, e.1);
-            let m: u64 = m0 & m1;
-            let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
-            if b { (*pkey2).into() } else { [].into() }
-        }
+        let pkey1: &mut [u64] = &mut pkey;
+        let pkey2: &mut [u64] = pkey1;
+        let nbLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let ebLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let n: (&mut [u64], &mut [u64]) = pkey2.split_at_mut(0usize);
+        let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen1 as usize);
+        let e: (&mut [u64], &mut [u64]) =
+            r2.1.split_at_mut(nLen1.wrapping_add(nLen1) as usize - nLen1 as usize);
+        bignum::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
+        bignum::bignum::bn_precomp_r2_mod_n_u64(
+            modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
+            modBits.wrapping_sub(1u32),
+            r2.0,
+            e.0
+        );
+        bignum::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
+        let m0: u64 = crate::rsapss::check_modulus_u64(modBits, r2.0);
+        let m1: u64 = crate::rsapss::check_exponent_u64(eBits, e.1);
+        let m: u64 = m0 & m1;
+        let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
+        if b { (*pkey2).into() } else { [].into() }
     }
 }
 
@@ -628,42 +623,37 @@ new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8],
         let dLen: u32 = dBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let skeyLen: u32 = nLen.wrapping_add(nLen).wrapping_add(eLen).wrapping_add(dLen);
         let mut skey: Box<[u64]> = vec![0u64; skeyLen as usize].into_boxed_slice();
-        if false
-        { skey }
-        else
-        {
-            let skey1: &mut [u64] = &mut skey;
-            let skey2: &mut [u64] = skey1;
-            let dbLen: u32 = dBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-            let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-            let eLen1: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-            let pkeyLen: u32 = nLen1.wrapping_add(nLen1).wrapping_add(eLen1);
-            let pkey: (&mut [u64], &mut [u64]) = skey2.split_at_mut(0usize);
-            let d: (&mut [u64], &mut [u64]) = pkey.1.split_at_mut(pkeyLen as usize);
-            let nbLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-            let ebLen1: u32 = eBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-            let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-            let n: (&mut [u64], &mut [u64]) = d.0.split_at_mut(0usize);
-            let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
-            let e: (&mut [u64], &mut [u64]) =
-                r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
-            bignum::bignum_base::bn_from_bytes_be_uint64(nbLen1, nb, r2.0);
-            bignum::bignum::bn_precomp_r2_mod_n_u64(
-                modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
-                modBits.wrapping_sub(1u32),
-                r2.0,
-                e.0
-            );
-            bignum::bignum_base::bn_from_bytes_be_uint64(ebLen1, eb, e.1);
-            let m0: u64 = crate::rsapss::check_modulus_u64(modBits, r2.0);
-            let m1: u64 = crate::rsapss::check_exponent_u64(eBits, e.1);
-            let m: u64 = m0 & m1;
-            let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
-            bignum::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
-            let m10: u64 = crate::rsapss::check_exponent_u64(dBits, d.1);
-            let b0: bool = b && m10 == 0xFFFFFFFFFFFFFFFFu64;
-            if b0 { (*skey2).into() } else { [].into() }
-        }
+        let skey1: &mut [u64] = &mut skey;
+        let skey2: &mut [u64] = skey1;
+        let dbLen: u32 = dBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let eLen1: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let pkeyLen: u32 = nLen1.wrapping_add(nLen1).wrapping_add(eLen1);
+        let pkey: (&mut [u64], &mut [u64]) = skey2.split_at_mut(0usize);
+        let d: (&mut [u64], &mut [u64]) = pkey.1.split_at_mut(pkeyLen as usize);
+        let nbLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let ebLen1: u32 = eBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let n: (&mut [u64], &mut [u64]) = d.0.split_at_mut(0usize);
+        let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
+        let e: (&mut [u64], &mut [u64]) =
+            r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
+        bignum::bignum_base::bn_from_bytes_be_uint64(nbLen1, nb, r2.0);
+        bignum::bignum::bn_precomp_r2_mod_n_u64(
+            modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
+            modBits.wrapping_sub(1u32),
+            r2.0,
+            e.0
+        );
+        bignum::bignum_base::bn_from_bytes_be_uint64(ebLen1, eb, e.1);
+        let m0: u64 = crate::rsapss::check_modulus_u64(modBits, r2.0);
+        let m1: u64 = crate::rsapss::check_exponent_u64(eBits, e.1);
+        let m: u64 = m0 & m1;
+        let b: bool = m == 0xFFFFFFFFFFFFFFFFu64;
+        bignum::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
+        let m10: u64 = crate::rsapss::check_exponent_u64(dBits, d.1);
+        let b0: bool = b && m10 == 0xFFFFFFFFFFFFFFFFu64;
+        if b0 { (*skey2).into() } else { [].into() }
     }
 }
 

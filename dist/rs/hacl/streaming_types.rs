@@ -29,7 +29,29 @@ pub enum error_code
     Success,
     InvalidAlgorithm,
     InvalidLength,
-    MaximumLengthExceeded
+    MaximumLengthExceeded,
+    OutOfMemory
+}
+
+#[derive(PartialEq, Clone, Copy)]
+pub(crate) enum optional
+{
+    None,
+    Some
+}
+
+#[derive(PartialEq)]
+pub(crate) enum optional_32 <'a>
+{
+    None,
+    Some { v: &'a mut [u32] }
+}
+
+#[derive(PartialEq)]
+pub(crate) enum optional_64 <'a>
+{
+    None,
+    Some { v: &'a mut [u64] }
 }
 
 #[derive(PartialEq, Clone)]

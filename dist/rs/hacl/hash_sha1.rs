@@ -181,12 +181,38 @@ pub type state_t = crate::streaming_types::state_32;
 pub fn malloc() -> Box<[crate::streaming_types::state_32]>
 {
     let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
-    let mut block_state: Box<[u32]> = vec![0u32; 5usize].into_boxed_slice();
-    crate::hash_sha1::init(&mut block_state);
-    let s: crate::streaming_types::state_32 =
-        crate::streaming_types::state_32 { block_state, buf, total_len: 0u32 as u64 };
-    let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
-    p
+    let buf1: &[u8] = &buf;
+    let mut b: Box<[u32]> = vec![0u32; 5usize].into_boxed_slice();
+    let mut block_state: crate::streaming_types::optional_32 =
+        crate::streaming_types::optional_32::Some { v: &mut b };
+    match block_state
+    {
+        crate::streaming_types::optional_32::None => { [].into() },
+        crate::streaming_types::optional_32::Some { v: ref mut block_state1 } =>
+          {
+              let block_state2: &mut [u32] = *block_state1;
+              let k·: crate::streaming_types::optional = crate::streaming_types::optional::Some;
+              match k·
+              {
+                  crate::streaming_types::optional::None => [].into(),
+                  crate::streaming_types::optional::Some =>
+                    {
+                        crate::hash_sha1::init(block_state2);
+                        let s: crate::streaming_types::state_32 =
+                            crate::streaming_types::state_32
+                            {
+                                block_state: (*block_state2).into(),
+                                buf: (*buf1).into(),
+                                total_len: 0u32 as u64
+                            };
+                        let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
+                        p
+                    },
+                  _ => panic!("Precondition of the function most likely violated")
+              }
+          },
+        _ => panic!("Incomplete pattern matching")
+    }
 }
 
 pub fn reset(state: &mut [crate::streaming_types::state_32])
@@ -336,12 +362,33 @@ pub fn copy(state: &[crate::streaming_types::state_32]) ->
     let total_len0: u64 = (state[0usize]).total_len;
     let mut buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
-    let mut block_state: Box<[u32]> = vec![0u32; 5usize].into_boxed_slice();
-    ((&mut block_state)[0usize..5usize]).copy_from_slice(&block_state0[0usize..5usize]);
-    let s: crate::streaming_types::state_32 =
-        crate::streaming_types::state_32 { block_state, buf, total_len: total_len0 };
-    let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
-    p
+    let mut b: Box<[u32]> = vec![0u32; 5usize].into_boxed_slice();
+    let mut block_state: crate::streaming_types::optional_32 =
+        crate::streaming_types::optional_32::Some { v: &mut b };
+    match block_state
+    {
+        crate::streaming_types::optional_32::None => { [].into() },
+        crate::streaming_types::optional_32::Some { v: ref mut block_state1 } =>
+          {
+              let block_state2: &mut [u32] = *block_state1;
+              (block_state2[0usize..5usize]).copy_from_slice(&block_state0[0usize..5usize]);
+              let k·: crate::streaming_types::optional = crate::streaming_types::optional::Some;
+              match k·
+              {
+                  crate::streaming_types::optional::None => [].into(),
+                  crate::streaming_types::optional::Some =>
+                    {
+                        let s: crate::streaming_types::state_32 =
+                            crate::streaming_types::state_32
+                            { block_state: (*block_state2).into(), buf, total_len: total_len0 };
+                        let p: Box<[crate::streaming_types::state_32]> = vec![s].into_boxed_slice();
+                        p
+                    },
+                  _ => panic!("Precondition of the function most likely violated")
+              }
+          },
+        _ => panic!("Incomplete pattern matching")
+    }
 }
 
 pub fn hash(output: &mut [u8], input: &[u8], input_len: u32)

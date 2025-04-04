@@ -172,15 +172,10 @@ pub fn new_ffdhe_precomp_p(a: crate::spec::ffdhe_alg) -> Box<[u64]>
     let nLen: u32 =
         (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let mut res: Box<[u64]> = vec![0u64; nLen.wrapping_add(nLen) as usize].into_boxed_slice();
-    if false
-    { res }
-    else
-    {
-        let res1: &mut [u64] = &mut res;
-        let res2: &mut [u64] = res1;
-        crate::ffdhe::ffdhe_precomp_p(a, res2);
-        (*res2).into()
-    }
+    let res1: &mut [u64] = &mut res;
+    let res2: &mut [u64] = res1;
+    crate::ffdhe::ffdhe_precomp_p(a, res2);
+    (*res2).into()
 }
 
 pub fn ffdhe_secret_to_public_precomp(

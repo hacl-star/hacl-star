@@ -1338,30 +1338,25 @@ new_bn_from_bytes_be(len: u32, b: &[u8]) ->
             vec![0u64; len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32) as usize].into_boxed_slice(
 
             );
-        if false
-        { res }
-        else
+        let res1: &mut [u64] = &mut res;
+        let res2: &mut [u64] = res1;
+        let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
+        let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
+        ((&mut tmp)[tmpLen.wrapping_sub(len) as usize..tmpLen.wrapping_sub(len) as usize
+        +
+        len as usize]).copy_from_slice(&b[0usize..len as usize]);
+        for i in 0u32..bnLen
         {
-            let res1: &mut [u64] = &mut res;
-            let res2: &mut [u64] = res1;
-            let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-            let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
-            let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
-            ((&mut tmp)[tmpLen.wrapping_sub(len) as usize..tmpLen.wrapping_sub(len) as usize
-            +
-            len as usize]).copy_from_slice(&b[0usize..len as usize]);
-            for i in 0u32..bnLen
-            {
-                let u: u64 =
-                    lowstar::endianness::load64_be(
-                        &(&tmp)[bnLen.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
-                    );
-                let x: u64 = u;
-                let os: (&mut [u64], &mut [u64]) = res2.split_at_mut(0usize);
-                os.1[i as usize] = x
-            };
-            (*res2).into()
-        }
+            let u: u64 =
+                lowstar::endianness::load64_be(
+                    &(&tmp)[bnLen.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
+                );
+            let x: u64 = u;
+            let os: (&mut [u64], &mut [u64]) = res2.split_at_mut(0usize);
+            os.1[i as usize] = x
+        };
+        (*res2).into()
     }
 }
 
@@ -1388,27 +1383,22 @@ new_bn_from_bytes_le(len: u32, b: &[u8]) ->
             vec![0u64; len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32) as usize].into_boxed_slice(
 
             );
-        if false
-        { res }
-        else
+        let res1: &mut [u64] = &mut res;
+        let res2: &mut [u64] = res1;
+        let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
+        let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
+        ((&mut tmp)[0usize..len as usize]).copy_from_slice(&b[0usize..len as usize]);
+        for i in 0u32..len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32)
         {
-            let res1: &mut [u64] = &mut res;
-            let res2: &mut [u64] = res1;
-            let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-            let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
-            let mut tmp: Box<[u8]> = vec![0u8; tmpLen as usize].into_boxed_slice();
-            ((&mut tmp)[0usize..len as usize]).copy_from_slice(&b[0usize..len as usize]);
-            for i in 0u32..len.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32)
-            {
-                let bj: (&[u8], &[u8]) = tmp.split_at(i.wrapping_mul(8u32) as usize);
-                let u: u64 = lowstar::endianness::load64_le(bj.1);
-                let r1: u64 = u;
-                let x: u64 = r1;
-                let os: (&mut [u64], &mut [u64]) = res2.split_at_mut(0usize);
-                os.1[i as usize] = x
-            };
-            (*res2).into()
-        }
+            let bj: (&[u8], &[u8]) = tmp.split_at(i.wrapping_mul(8u32) as usize);
+            let u: u64 = lowstar::endianness::load64_le(bj.1);
+            let r1: u64 = u;
+            let x: u64 = r1;
+            let os: (&mut [u64], &mut [u64]) = res2.split_at_mut(0usize);
+            os.1[i as usize] = x
+        };
+        (*res2).into()
     }
 }
 

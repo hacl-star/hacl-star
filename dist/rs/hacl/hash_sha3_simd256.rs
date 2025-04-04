@@ -24,38 +24,38 @@ pub fn absorb_inner_256 <'a>(
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b0[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b1[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b2[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b3[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b0)[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b1)[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b2)[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b3)[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b0)[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b1)[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b2)[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b3)[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b0)[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b1)[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b2)[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b3)[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b0)[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b1)[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b2)[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b3)[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b0)[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b1)[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b2)[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b3)[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b0)[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b1)[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b2)[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b3)[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b0)[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b1)[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b2)[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b3)[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b0)[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b1)[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b2)[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b3)[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -543,23 +543,23 @@ pub fn shake128(
                   }
                   =>
                     {
-                        (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl0)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b00)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl1)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b10)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl2)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b20)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl3)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b30)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -605,17 +605,17 @@ pub fn shake128(
               }
               =>
                 {
-                    (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl0)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b00)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl1)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b10)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl2)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b20)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl3)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b30)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -634,10 +634,10 @@ pub fn shake128(
         }
         =>
           {
-              b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
-              b10[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
-              b20[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
-              b30[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8
+              (*b00)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
+              (*b10)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
+              (*b20)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
+              (*b30)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8
           }
     };
     let mut ws: [lib::intvector_intrinsics::vec256; 32] =
@@ -653,38 +653,38 @@ pub fn shake128(
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -945,10 +945,10 @@ pub fn shake128(
         }
         =>
           {
-              b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b11[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b21[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
+              (*b01)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b11)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b21)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b31)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
     crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
@@ -1206,22 +1206,30 @@ pub fn shake128(
             }
             =>
               {
-                  (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b01)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b11)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b21)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b31)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
@@ -1664,22 +1672,30 @@ pub fn shake128(
         }
         =>
           {
-              (b01[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
+              ((*b01)[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(
+                  remOut
+              )
               as
               usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-              (b11[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
+              ((*b11)[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(
+                  remOut
+              )
               as
               usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
-              (b21[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
+              ((*b21)[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(
+                  remOut
+              )
               as
               usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
-              (b31[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
+              ((*b31)[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(
+                  remOut
+              )
               as
               usize
               +
@@ -1758,23 +1774,23 @@ pub fn shake256(
                   }
                   =>
                     {
-                        (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl0)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b00)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl1)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b10)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl2)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b20)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl3)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b30)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -1820,17 +1836,17 @@ pub fn shake256(
               }
               =>
                 {
-                    (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl0)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b00)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl1)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b10)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl2)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b20)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl3)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b30)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -1849,10 +1865,10 @@ pub fn shake256(
         }
         =>
           {
-              b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
-              b10[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
-              b20[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
-              b30[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8
+              (*b00)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
+              (*b10)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
+              (*b20)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8;
+              (*b30)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x1Fu8
           }
     };
     let mut ws: [lib::intvector_intrinsics::vec256; 32] =
@@ -1868,38 +1884,38 @@ pub fn shake256(
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -2160,10 +2176,10 @@ pub fn shake256(
         }
         =>
           {
-              b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b11[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b21[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
+              (*b01)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b11)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b21)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b31)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
     crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
@@ -2421,22 +2437,30 @@ pub fn shake256(
             }
             =>
               {
-                  (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b01)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b11)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b21)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b31)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
@@ -2879,22 +2903,30 @@ pub fn shake256(
         }
         =>
           {
-              (b01[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
+              ((*b01)[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(
+                  remOut
+              )
               as
               usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-              (b11[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
+              ((*b11)[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(
+                  remOut
+              )
               as
               usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
-              (b21[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
+              ((*b21)[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(
+                  remOut
+              )
               as
               usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
-              (b31[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(remOut)
+              ((*b31)[outputByteLen.wrapping_sub(remOut) as usize..outputByteLen.wrapping_sub(
+                  remOut
+              )
               as
               usize
               +
@@ -2972,23 +3004,23 @@ pub fn sha3_224(
                   }
                   =>
                     {
-                        (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl0)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b00)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl1)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b10)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl2)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b20)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl3)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b30)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -3034,17 +3066,17 @@ pub fn sha3_224(
               }
               =>
                 {
-                    (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl0)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b00)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl1)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b10)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl2)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b20)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl3)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b30)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -3063,10 +3095,10 @@ pub fn sha3_224(
         }
         =>
           {
-              b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b10[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b20[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b30[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8
+              (*b00)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b10)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b20)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b30)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8
           }
     };
     let mut ws: [lib::intvector_intrinsics::vec256; 32] =
@@ -3082,38 +3114,38 @@ pub fn sha3_224(
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -3374,10 +3406,10 @@ pub fn sha3_224(
         }
         =>
           {
-              b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b11[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b21[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
+              (*b01)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b11)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b21)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b31)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
     crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
@@ -3635,22 +3667,30 @@ pub fn sha3_224(
             }
             =>
               {
-                  (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b01)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b11)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b21)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b31)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
@@ -4093,16 +4133,16 @@ pub fn sha3_224(
         }
         =>
           {
-              (b01[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
+              ((*b01)[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-              (b11[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
+              ((*b11)[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
-              (b21[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
+              ((*b21)[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
-              (b31[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
+              ((*b31)[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
           }
@@ -4178,23 +4218,23 @@ pub fn sha3_256(
                   }
                   =>
                     {
-                        (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl0)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b00)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl1)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b10)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl2)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b20)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl3)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b30)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -4240,17 +4280,17 @@ pub fn sha3_256(
               }
               =>
                 {
-                    (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl0)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b00)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl1)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b10)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl2)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b20)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl3)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b30)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -4269,10 +4309,10 @@ pub fn sha3_256(
         }
         =>
           {
-              b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b10[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b20[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b30[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8
+              (*b00)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b10)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b20)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b30)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8
           }
     };
     let mut ws: [lib::intvector_intrinsics::vec256; 32] =
@@ -4288,38 +4328,38 @@ pub fn sha3_256(
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -4580,10 +4620,10 @@ pub fn sha3_256(
         }
         =>
           {
-              b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b11[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b21[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
+              (*b01)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b11)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b21)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b31)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
     crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
@@ -4841,22 +4881,30 @@ pub fn sha3_256(
             }
             =>
               {
-                  (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b01)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b11)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b21)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b31)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
@@ -5299,16 +5347,16 @@ pub fn sha3_256(
         }
         =>
           {
-              (b01[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
+              ((*b01)[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-              (b11[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
+              ((*b11)[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
-              (b21[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
+              ((*b21)[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
-              (b31[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
+              ((*b31)[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
           }
@@ -5384,23 +5432,23 @@ pub fn sha3_384(
                   }
                   =>
                     {
-                        (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl0)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b00)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl1)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b10)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl2)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b20)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl3)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b30)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -5446,17 +5494,17 @@ pub fn sha3_384(
               }
               =>
                 {
-                    (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl0)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b00)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl1)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b10)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl2)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b20)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl3)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b30)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -5475,10 +5523,10 @@ pub fn sha3_384(
         }
         =>
           {
-              b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b10[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b20[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b30[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8
+              (*b00)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b10)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b20)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b30)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8
           }
     };
     let mut ws: [lib::intvector_intrinsics::vec256; 32] =
@@ -5494,38 +5542,38 @@ pub fn sha3_384(
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -5786,10 +5834,10 @@ pub fn sha3_384(
         }
         =>
           {
-              b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b11[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b21[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
+              (*b01)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b11)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b21)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b31)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
     crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
@@ -6047,22 +6095,30 @@ pub fn sha3_384(
             }
             =>
               {
-                  (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b01)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b11)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b21)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b31)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
@@ -6505,16 +6561,16 @@ pub fn sha3_384(
         }
         =>
           {
-              (b01[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
+              ((*b01)[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-              (b11[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
+              ((*b11)[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
-              (b21[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
+              ((*b21)[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
-              (b31[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
+              ((*b31)[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
           }
@@ -6590,23 +6646,23 @@ pub fn sha3_512(
                   }
                   =>
                     {
-                        (bl0[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b00[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl0)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b00)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl1[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b10[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl1)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b10)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl2[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b20[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl2)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b20)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         );
-                        (bl3[0usize..rateInBytes1 as usize]).copy_from_slice(
-                            &(&b30[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
+                        ((*bl3)[0usize..rateInBytes1 as usize]).copy_from_slice(
+                            &(&(*b30)[i.wrapping_mul(rateInBytes1) as usize..])[0usize..rateInBytes1
                             as
                             usize]
                         )
@@ -6652,17 +6708,17 @@ pub fn sha3_512(
               }
               =>
                 {
-                    (bl0[0usize..rem as usize]).copy_from_slice(
-                        &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl0)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b00)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl1[0usize..rem as usize]).copy_from_slice(
-                        &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl1)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b10)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl2[0usize..rem as usize]).copy_from_slice(
-                        &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl2)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b20)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     );
-                    (bl3[0usize..rem as usize]).copy_from_slice(
-                        &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
+                    ((*bl3)[0usize..rem as usize]).copy_from_slice(
+                        &(&(*b30)[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
                     )
                 }
           }
@@ -6681,10 +6737,10 @@ pub fn sha3_512(
         }
         =>
           {
-              b00[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b10[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b20[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
-              b30[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8
+              (*b00)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b10)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b20)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8;
+              (*b30)[inputByteLen.wrapping_rem(rateInBytes1) as usize] = 0x06u8
           }
     };
     let mut ws: [lib::intvector_intrinsics::vec256; 32] =
@@ -6700,38 +6756,38 @@ pub fn sha3_512(
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b00[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b10[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b20[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b30[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b00)[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b10)[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b20)[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b30)[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -6992,10 +7048,10 @@ pub fn sha3_512(
         }
         =>
           {
-              b01[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b11[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b21[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
-              b31[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
+              (*b01)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b11)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b21)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8;
+              (*b31)[rateInBytes1.wrapping_sub(1u32) as usize] = 0x80u8
           }
     };
     crate::hash_sha3_simd256::absorb_inner_256(rateInBytes1, b, &mut s);
@@ -7253,22 +7309,30 @@ pub fn sha3_512(
             }
             =>
               {
-                  (b01[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b01)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[0usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b11[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b11)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[256usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b21[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b21)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[512usize..])[0usize..rateInBytes1 as usize]
                   );
-                  (b31[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1) as usize
+                  ((*b31)[i.wrapping_mul(rateInBytes1) as usize..i.wrapping_mul(rateInBytes1)
+                  as
+                  usize
                   +
                   rateInBytes1 as usize]).copy_from_slice(
                       &(&(&hbuf)[768usize..])[0usize..rateInBytes1 as usize]
@@ -7711,16 +7775,16 @@ pub fn sha3_512(
         }
         =>
           {
-              (b01[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
+              ((*b01)[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-              (b11[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
+              ((*b11)[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[256usize..])[0usize..remOut as usize]);
-              (b21[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
+              ((*b21)[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[512usize..])[0usize..remOut as usize]);
-              (b31[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
+              ((*b31)[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
               +
               remOut as usize]).copy_from_slice(&(&(&hbuf)[768usize..])[0usize..remOut as usize])
           }
@@ -7800,16 +7864,16 @@ shake128_absorb_nblocks(
             }
             =>
               {
-                  (bl0[0usize..168usize]).copy_from_slice(
+                  ((*bl0)[0usize..168usize]).copy_from_slice(
                       &(&b00[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
                   );
-                  (bl1[0usize..168usize]).copy_from_slice(
+                  ((*bl1)[0usize..168usize]).copy_from_slice(
                       &(&b10[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
                   );
-                  (bl2[0usize..168usize]).copy_from_slice(
+                  ((*bl2)[0usize..168usize]).copy_from_slice(
                       &(&b20[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
                   );
-                  (bl3[0usize..168usize]).copy_from_slice(
+                  ((*bl3)[0usize..168usize]).copy_from_slice(
                       &(&b30[i.wrapping_mul(168u32) as usize..])[0usize..168usize]
                   )
               }
@@ -7875,16 +7939,16 @@ shake128_absorb_final(
         }
         =>
           {
-              (bl0[0usize..rem as usize]).copy_from_slice(
+              ((*bl0)[0usize..rem as usize]).copy_from_slice(
                   &(&b00[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
               );
-              (bl1[0usize..rem as usize]).copy_from_slice(
+              ((*bl1)[0usize..rem as usize]).copy_from_slice(
                   &(&b10[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
               );
-              (bl2[0usize..rem as usize]).copy_from_slice(
+              ((*bl2)[0usize..rem as usize]).copy_from_slice(
                   &(&b20[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
               );
-              (bl3[0usize..rem as usize]).copy_from_slice(
+              ((*bl3)[0usize..rem as usize]).copy_from_slice(
                   &(&b30[inputByteLen.wrapping_sub(rem) as usize..])[0usize..rem as usize]
               )
           }
@@ -7903,10 +7967,10 @@ shake128_absorb_final(
         }
         =>
           {
-              b01[inputByteLen.wrapping_rem(168u32) as usize] = 0x1Fu8;
-              b11[inputByteLen.wrapping_rem(168u32) as usize] = 0x1Fu8;
-              b21[inputByteLen.wrapping_rem(168u32) as usize] = 0x1Fu8;
-              b31[inputByteLen.wrapping_rem(168u32) as usize] = 0x1Fu8
+              (*b01)[inputByteLen.wrapping_rem(168u32) as usize] = 0x1Fu8;
+              (*b11)[inputByteLen.wrapping_rem(168u32) as usize] = 0x1Fu8;
+              (*b21)[inputByteLen.wrapping_rem(168u32) as usize] = 0x1Fu8;
+              (*b31)[inputByteLen.wrapping_rem(168u32) as usize] = 0x1Fu8
           }
     };
     let mut ws: [lib::intvector_intrinsics::vec256; 32] =
@@ -7922,38 +7986,38 @@ shake128_absorb_final(
         }
         =>
           {
-              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[0usize..]);
-              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[0usize..]);
-              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[0usize..]);
-              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[0usize..]);
-              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[32usize..]);
-              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[32usize..]);
-              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[32usize..]);
-              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[32usize..]);
-              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[64usize..]);
-              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[64usize..]);
-              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[64usize..]);
-              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[64usize..]);
-              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[96usize..]);
-              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[96usize..]);
-              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[96usize..]);
-              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[96usize..]);
-              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[128usize..]);
-              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[128usize..]);
-              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[128usize..]);
-              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[128usize..]);
-              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[160usize..]);
-              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[160usize..]);
-              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[160usize..]);
-              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[160usize..]);
-              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[192usize..]);
-              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[192usize..]);
-              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[192usize..]);
-              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[192usize..]);
-              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&b01[224usize..]);
-              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&b11[224usize..]);
-              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&b21[224usize..]);
-              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&b31[224usize..])
+              (&mut ws)[0usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b01)[0usize..]);
+              (&mut ws)[1usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b11)[0usize..]);
+              (&mut ws)[2usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b21)[0usize..]);
+              (&mut ws)[3usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b31)[0usize..]);
+              (&mut ws)[4usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b01)[32usize..]);
+              (&mut ws)[5usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b11)[32usize..]);
+              (&mut ws)[6usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b21)[32usize..]);
+              (&mut ws)[7usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b31)[32usize..]);
+              (&mut ws)[8usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b01)[64usize..]);
+              (&mut ws)[9usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b11)[64usize..]);
+              (&mut ws)[10usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b21)[64usize..]);
+              (&mut ws)[11usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b31)[64usize..]);
+              (&mut ws)[12usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b01)[96usize..]);
+              (&mut ws)[13usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b11)[96usize..]);
+              (&mut ws)[14usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b21)[96usize..]);
+              (&mut ws)[15usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b31)[96usize..]);
+              (&mut ws)[16usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b01)[128usize..]);
+              (&mut ws)[17usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b11)[128usize..]);
+              (&mut ws)[18usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b21)[128usize..]);
+              (&mut ws)[19usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b31)[128usize..]);
+              (&mut ws)[20usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b01)[160usize..]);
+              (&mut ws)[21usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b11)[160usize..]);
+              (&mut ws)[22usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b21)[160usize..]);
+              (&mut ws)[23usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b31)[160usize..]);
+              (&mut ws)[24usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b01)[192usize..]);
+              (&mut ws)[25usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b11)[192usize..]);
+              (&mut ws)[26usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b21)[192usize..]);
+              (&mut ws)[27usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b31)[192usize..]);
+              (&mut ws)[28usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b01)[224usize..]);
+              (&mut ws)[29usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b11)[224usize..]);
+              (&mut ws)[30usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b21)[224usize..]);
+              (&mut ws)[31usize] = lib::intvector_intrinsics::vec256_load64_le(&(*b31)[224usize..])
           }
     };
     let v0: lib::intvector_intrinsics::vec256 = (&ws)[0usize];
@@ -8214,10 +8278,10 @@ shake128_absorb_final(
         }
         =>
           {
-              b02[167usize] = 0x80u8;
-              b12[167usize] = 0x80u8;
-              b22[167usize] = 0x80u8;
-              b32[167usize] = 0x80u8
+              (*b02)[167usize] = 0x80u8;
+              (*b12)[167usize] = 0x80u8;
+              (*b22)[167usize] = 0x80u8;
+              (*b32)[167usize] = 0x80u8
           }
     };
     crate::hash_sha3_simd256::absorb_inner_256(168u32, b, state)
