@@ -11,6 +11,8 @@ open Vale.Curve25519.Fast_lemmas_internal
 
 open FStar.Math.Lemmas
 
+#push-options "--z3cliopt smt.arith.nl=false"
+
 let lemma_dbl_pow2_six (z0 z1 z2 z3 z4 z5:nat) :
   Lemma (2*pow2_six z0 z1 z2 z3 z4 z5 == pow2_six (2*z0) (2*z1) (2*z2) (2*z3) (2*z4) (2*z5))
   =
@@ -50,10 +52,21 @@ let lemma_sqr_part3
   (ensures pow2_nine d0 d1 d2 d3 d4 d5 d6 d7 c ==
            pow2_eight (mul_nats a0 a0) r8 ((mul_nats a1 a1) + r9) r10 ((mul_nats a2 a2) + r11) r12 ((mul_nats a3 a3) + r13) r14)
   =
-  ()
+  calc (==) {
+    pow2_nine d0 d1 d2 d3 d4 d5 d6 d7 c;
+    (==) { () }
+    pow2_eight (pow2_64 * a0_sqr_hi + a0_sqr_lo) r8 (pow2_64 * a1_sqr_hi + a1_sqr_lo + r9) r10 (pow2_64 * a2_sqr_hi + a2_sqr_lo + r11) r12 (pow2_64 * a3_sqr_hi + a3_sqr_lo + r13) r14;
+    (==) {
+      assert_norm (mul_nats a0 a0 == a0 * a0);
+      assert_norm (mul_nats a1 a1 == a1 * a1);
+      assert_norm (mul_nats a2 a2 == a2 * a2);
+      assert_norm (mul_nats a3 a3 == a3 * a3)
+    }
+    pow2_eight (mul_nats a0 a0) r8 ((mul_nats a1 a1) + r9) r10 ((mul_nats a2 a2) + r11) r12 ((mul_nats a3 a3) + r13) r14;
+  }
 #pop-options
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FastSqr_helpers FStar.Pervasives Prims Vale.Def.Words_s Vale.Curve25519.Fast_defs'"
+#push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FastSqr_helpers FStar.Pervasives Prims Vale.Def.Words_s Vale.Curve25519.Fast_defs'"
 let lemma_sqr (a:int) (a0 a1 a2 a3
                r8 r9 r10 r11 r12 r13 rax rcx
                r8' r9' r10' r11' r12' r13' r14'
@@ -161,3 +174,7 @@ let lemma_sqr (a:int) (a0 a1 a2 a3
 }
 *)
   ()
+
+#pop-options
+
+#pop-options
