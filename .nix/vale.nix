@@ -1,9 +1,9 @@
 {
-  dotnetPackages,
   fetchFromGitHub,
   fetchNuGet,
   fsharp,
   mono,
+  dotnet-runtime,
   scons,
   stdenv,
 }: let
@@ -63,7 +63,7 @@
         "runtimeOptions": {
           "framework": {
             "name": "Microsoft.NETCore.App",
-            "version": "6.0.0"
+            "version": "${dotnet-runtime.version}"
           }
         }
       }
