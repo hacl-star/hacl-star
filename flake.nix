@@ -33,7 +33,7 @@
       };
     in {
       packages = {
-        inherit hacl;
+        inherit hacl vale;
         default = hacl;
       };
     });
