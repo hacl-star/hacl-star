@@ -112,7 +112,58 @@ val fsum:
       F51.fevalh h1 out == F51.fevalh h0 a `SC.fadd` F51.fevalh h0 b
     )
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fsum_sa:
+    out:felem
+  -> a:felem
+  -> b:felem ->
+  Stack unit
+    (requires fun h -> live h a /\ live h b /\ live h out /\
+      eq_or_disjoint a b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
+      F51.felem_fits h a (1, 2, 1, 1, 1) /\
+      F51.felem_fits h b (1, 2, 1, 1, 1)
+    )
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (2, 4, 2, 2, 2) /\
+      F51.fevalh h1 out == F51.fevalh h0 a `SC.fadd` F51.fevalh h0 b
+    )
+
 val fdifference:
+    out:felem
+  -> a:felem
+  -> b:felem ->
+  Stack unit
+    (requires fun h -> live h a /\ live h b /\ live h out /\
+      eq_or_disjoint a b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
+      F51.felem_fits h a (1, 2, 1, 1, 1) /\
+      F51.felem_fits h b (1, 2, 1, 1, 1)
+    )
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (9, 10, 9, 9, 9) /\
+      F51.fevalh h1 out == F51.fevalh h0 a `SC.fsub` F51.fevalh h0 b
+    )
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fdifference_sa1:
+    out:felem
+  -> a:felem
+  -> b:felem ->
+  Stack unit
+    (requires fun h -> live h a /\ live h b /\ live h out /\
+      eq_or_disjoint a b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
+      F51.felem_fits h a (1, 2, 1, 1, 1) /\
+      F51.felem_fits h b (1, 2, 1, 1, 1)
+    )
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (9, 10, 9, 9, 9) /\
+      F51.fevalh h1 out == F51.fevalh h0 a `SC.fsub` F51.fevalh h0 b
+    )
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fdifference_sa2:
     out:felem
   -> a:felem
   -> b:felem ->
@@ -152,6 +203,22 @@ val fmul:
       F51.fevalh h1 out == SC.fmul (F51.fevalh h0 a) (F51.fevalh h0 b)
     )
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fmul_sa:
+    out:felem
+  -> a:felem
+  -> b:felem ->
+  Stack unit
+    (requires fun h -> live h out /\ live h a /\ live h b /\
+      F51.felem_fits h a (9, 10, 9, 9, 9) /\
+      F51.felem_fits h b (9, 10, 9, 9, 9)
+    )
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.mul_inv_t h1 out /\
+      F51.fevalh h1 out == SC.fmul (F51.fevalh h0 a) (F51.fevalh h0 b)
+    )
+
 val times_2:
     out:felem
   -> a:felem ->
@@ -161,6 +228,19 @@ val times_2:
       F51.felem_fits h1 out (2, 4, 2, 2, 2) /\
       F51.fevalh h1 out == 2 `SC.fmul` F51.fevalh h0 a
     )
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val times_2_sa:
+    out:felem
+  -> a:felem ->
+  Stack unit
+    (requires fun h -> live h out /\ live h a /\ F51.mul_inv_t h a)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (2, 4, 2, 2, 2) /\
+      F51.fevalh h1 out == 2 `SC.fmul` F51.fevalh h0 a
+    )
+
 
 val times_d:
     out:felem
@@ -187,6 +267,20 @@ val times_2d:
     )
 
 val fsquare:
+    out:felem
+  -> a:felem ->
+  Stack unit
+    (requires fun h -> live h out /\ live h a /\ eq_or_disjoint a out /\
+      F51.felem_fits h a (9, 10, 9, 9, 9)
+    )
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.mul_inv_t h1 out /\
+      F51.fevalh h1 out == F51.fevalh h0 a `SC.fmul` F51.fevalh h0 a
+    )
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fsquare_sa:
     out:felem
   -> a:felem ->
   Stack unit

@@ -56,7 +56,7 @@ let mul_mod ctx x y xy = fmul xy x y
 
 inline_for_extraction noextract
 val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_p256_prime_comm_monoid
-let sqr_mod ctx x xx = fsqr xx x
+let sqr_mod ctx x xx = fsqr_sa xx x
 
 
 inline_for_extraction noextract
@@ -119,37 +119,37 @@ val finv_30 (x30 x2 tmp1 tmp2 a:felem) : Stack unit
 let finv_30 x30 x2 tmp1 tmp2 a =
   let h0 = ST.get () in
   fsquare_times x2 a 1ul;
-  fmul x2 x2 a;
+  fmul_sa1 x2 x2 a;
   let h1 = ST.get () in
   assert (fmont_as_nat h1 x2 ==
     S.fmul (SI.fsquare_times (fmont_as_nat h0 a) 1) (fmont_as_nat h0 a));
 
   fsquare_times x30 x2 1ul;
-  fmul x30 x30 a;
+  fmul_sa1 x30 x30 a;
   let h2 = ST.get () in
   assert (fmont_as_nat h2 x30 == // x3
     S.fmul (SI.fsquare_times (fmont_as_nat h1 x2) 1) (fmont_as_nat h0 a));
 
   fsquare_times tmp1 x30 3ul;
-  fmul tmp1 tmp1 x30;
+  fmul_sa1 tmp1 tmp1 x30;
   let h3 = ST.get () in
   assert (fmont_as_nat h3 tmp1 == // x6
     S.fmul (SI.fsquare_times (fmont_as_nat h2 x30) 3) (fmont_as_nat h2 x30));
 
   fsquare_times tmp2 tmp1 6ul;
-  fmul tmp2 tmp2 tmp1;
+  fmul_sa1 tmp2 tmp2 tmp1;
   let h4 = ST.get () in
   assert (fmont_as_nat h4 tmp2 == // x12
     S.fmul (SI.fsquare_times (fmont_as_nat h3 tmp1) 6) (fmont_as_nat h3 tmp1));
 
   fsquare_times tmp1 tmp2 3ul;
-  fmul tmp1 tmp1 x30;
+  fmul_sa1 tmp1 tmp1 x30;
   let h5 = ST.get () in
   assert (fmont_as_nat h5 tmp1 == // x15
     S.fmul (SI.fsquare_times (fmont_as_nat h4 tmp2) 3) (fmont_as_nat h2 x30));
 
   fsquare_times x30 tmp1 15ul;
-  fmul x30 x30 tmp1;
+  fmul_sa1 x30 x30 tmp1;
   let h6 = ST.get () in
   assert (fmont_as_nat h6 x30 == // x30
     S.fmul (SI.fsquare_times (fmont_as_nat h5 tmp1) 15) (fmont_as_nat h5 tmp1))
@@ -178,31 +178,31 @@ val finv_256 (x256 x2 x30 a:felem) : Stack unit
 let finv_256 x256 x2 x30 a =
   let h0 = ST.get () in
   fsquare_times x256 x30 2ul;
-  fmul x256 x256 x2;
+  fmul_sa1 x256 x256 x2;
   let h1 = ST.get () in
   assert (fmont_as_nat h1 x256 == // x32
     S.fmul (SI.fsquare_times (fmont_as_nat h0 x30) 2) (fmont_as_nat h0 x2));
 
   fsquare_times x2 x256 32ul;
-  fmul x2 x2 a;
+  fmul_sa1 x2 x2 a;
   let h2 = ST.get () in
   assert (fmont_as_nat h2 x2 == // x64
     S.fmul (SI.fsquare_times (fmont_as_nat h1 x256) 32) (fmont_as_nat h0 a));
 
   fsquare_times_in_place x2 128ul;
-  fmul x2 x2 x256;
+  fmul_sa1 x2 x2 x256;
   let h3 = ST.get () in
   assert (fmont_as_nat h3 x2 == // x192
     S.fmul (SI.fsquare_times (fmont_as_nat h2 x2) 128) (fmont_as_nat h1 x256));
 
   fsquare_times_in_place x2 32ul;
-  fmul x2 x2 x256;
+  fmul_sa1 x2 x2 x256;
   let h4 = ST.get () in
   assert (fmont_as_nat h4 x2 == // x224
     S.fmul (SI.fsquare_times (fmont_as_nat h3 x2) 32) (fmont_as_nat h1 x256));
 
   fsquare_times_in_place x2 30ul;
-  fmul x2 x2 x30;
+  fmul_sa1 x2 x2 x30;
   let h5 = ST.get () in
   assert (fmont_as_nat h5 x2 == // x254
     S.fmul (SI.fsquare_times (fmont_as_nat h4 x2) 30) (fmont_as_nat h0 x30));
@@ -254,43 +254,43 @@ val fsqrt_254 (tmp2 tmp1 a:felem) : Stack unit
 let fsqrt_254 tmp2 tmp1 a =
   let h0 = ST.get () in
   fsquare_times tmp1 a 1ul;
-  fmul tmp1 tmp1 a;
+  fmul_sa1 tmp1 tmp1 a;
   let h1 = ST.get () in
   assert (fmont_as_nat h1 tmp1 == // x2
     S.fmul (SI.fsquare_times (fmont_as_nat h0 a) 1) (fmont_as_nat h0 a));
 
   fsquare_times tmp2 tmp1 2ul;
-  fmul tmp2 tmp2 tmp1;
+  fmul_sa1 tmp2 tmp2 tmp1;
   let h2 = ST.get () in
   assert (fmont_as_nat h2 tmp2 == // x4
     S.fmul (SI.fsquare_times (fmont_as_nat h1 tmp1) 2) (fmont_as_nat h1 tmp1));
 
   fsquare_times tmp1 tmp2 4ul;
-  fmul tmp1 tmp1 tmp2;
+  fmul_sa1 tmp1 tmp1 tmp2;
   let h3 = ST.get () in
   assert (fmont_as_nat h3 tmp1 == // x8
     S.fmul (SI.fsquare_times (fmont_as_nat h2 tmp2) 4) (fmont_as_nat h2 tmp2));
 
   fsquare_times tmp2 tmp1 8ul;
-  fmul tmp2 tmp2 tmp1;
+  fmul_sa1 tmp2 tmp2 tmp1;
   let h4 = ST.get () in
   assert (fmont_as_nat h4 tmp2 == // x16
     S.fmul (SI.fsquare_times (fmont_as_nat h3 tmp1) 8) (fmont_as_nat h3 tmp1));
 
   fsquare_times tmp1 tmp2 16ul;
-  fmul tmp1 tmp1 tmp2;
+  fmul_sa1 tmp1 tmp1 tmp2;
   let h5 = ST.get () in
   assert (fmont_as_nat h5 tmp1 == // x32
     S.fmul (SI.fsquare_times (fmont_as_nat h4 tmp2) 16) (fmont_as_nat h4 tmp2));
 
   fsquare_times tmp2 tmp1 32ul;
-  fmul tmp2 tmp2 a;
+  fmul_sa1 tmp2 tmp2 a;
   let h6 = ST.get () in
   assert (fmont_as_nat h6 tmp2 == // x64
     S.fmul (SI.fsquare_times (fmont_as_nat h5 tmp1) 32) (fmont_as_nat h0 a));
 
   fsquare_times_in_place tmp2 96ul;
-  fmul tmp2 tmp2 a;
+  fmul_sa1 tmp2 tmp2 a;
   let h7 = ST.get () in
   assert (fmont_as_nat h7 tmp2 == // x160
     S.fmul (SI.fsquare_times (fmont_as_nat h6 tmp2) 96) (fmont_as_nat h0 a));

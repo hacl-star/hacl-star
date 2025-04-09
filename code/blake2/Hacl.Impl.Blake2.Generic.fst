@@ -154,9 +154,13 @@ val blake2_mixing : #al:Spec.alg -> #m:m_spec -> wv:state_p al m -> x:row_p al m
 let blake2_mixing #al #m wv x y =
   let h0 = ST.get() in
   push_frame ();
+  [@inline_let]
   let a = 0ul in
+  [@inline_let]
   let b = 1ul in
+  [@inline_let]
   let c = 2ul in
+  [@inline_let]
   let d = 3ul in
   [@inline_let]
   let r0 = normalize_term (Lib.Sequence.index (Spec.rTable al) 0) in
@@ -951,6 +955,8 @@ let blake2_finish #al #ms nn output hash =
     Lib.Sequence.eq_intro (as_seq h1 full)
 	(Lib.Sequence.(as_seq h1 (gsub full 0ul (size_row al)) @|
 		       as_seq h1 (gsub full (size_row al) (size_row al))));
+    (* HACL-RS: Need to reinit split of full *)
+    LowStar.Ignore.ignore full;
     let final = sub full (size 0) nn in
     copy output final)
 

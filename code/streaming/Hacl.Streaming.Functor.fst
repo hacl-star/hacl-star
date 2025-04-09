@@ -266,7 +266,9 @@ let frame_key #index c i l s h0 h1 =
 
 let index_of_state #index c i t t' s =
   let open LowStar.BufferOps in
-  let State block_state _ _ _ k = !*s in
+  // HACL-RS
+  let uu__ = !*s in
+  let State block_state _ _ _ k = uu__ in
   allow_inversion key_management;
   c.index_of_state i block_state k
 
@@ -278,7 +280,7 @@ let seen_length #index c i t t' s =
 (* TODO: malloc and alloca have big portions of proofs in common, so it may
  * be possible to factorize them, but it is not clear how *)
 #restart-solver
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 600"
 let malloc #index c i t t' key r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -311,6 +313,9 @@ let malloc #index c i t t' key r =
         (**) B.(modifies_only_not_unused_in loc_none h0 h8);
         B.null
     | Some block_state ->
+        // HACL-rs: this seems to help with mutability inference
+        let block_state = block_state in
+
         (**) let h2 = ST.get () in
         (**) assert (B.fresh_loc (c.state.footprint #i h2 block_state) h0 h2);
         (**) B.loc_unused_in_not_unused_in_disjoint h2;
@@ -364,11 +369,22 @@ let malloc #index c i t t' key r =
             (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
             (**) assert (B.fresh_loc (c.state.footprint #i h5 block_state) h0 h5);
 
+            // HACL-rs: Moved the initialisation earlier to avoid a move from block_state into
+            // the functor state
+            c.init (G.hide i) key buf block_state;
+            (**) let h6 = ST.get () in
+            (**) assert (B.fresh_loc (c.state.footprint #i h6 block_state) h0 h6);
+            (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h6);
+            (**) optional_frame (B.loc_union (c.state.footprint #i h6 block_state) (B.loc_buffer buf)) k' h5 h6;
+            (**) c.update_multi_zero i (c.state.v i h6 block_state) 0;
+            (**) B.modifies_only_not_unused_in B.loc_none h0 h6;
+            (**) assert (c.state.v i h6 block_state == c.init_s i (optional_reveal h5 k'));
+
             [@inline_let] let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
             let s = State block_state buf total_len (G.hide S.empty) k' in
-            (**) assert (B.fresh_loc (footprint_s c i h5 s) h0 h5);
+            (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
 
-            (**) B.loc_unused_in_not_unused_in_disjoint h5;
+            (**) B.loc_unused_in_not_unused_in_disjoint h6;
             let p = fallible_malloc r s 1ul in
             if B.is_null p then begin
               begin match c.km with
@@ -387,25 +403,16 @@ let malloc #index c i t t' key r =
               (**) B.(modifies_only_not_unused_in loc_none h0 h8);
               B.null
             end else
-              (**) let h6 = ST.get () in
-              (**) B.(modifies_only_not_unused_in loc_none h5 h6);
-              (**) B.(modifies_only_not_unused_in loc_none h0 h6);
-              (**) c.key.frame_invariant B.loc_none key h5 h6;
-              (**) c.state.frame_invariant B.loc_none block_state h5 h6;
-              (**) optional_frame B.loc_none k' h5 h6;
-              (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h6);
-              (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
-              (**) c.state.frame_freeable B.loc_none block_state h5 h6;
-              (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
-
-              c.init (G.hide i) key buf block_state;
               (**) let h7 = ST.get () in
-              (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
-              (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
-              (**) optional_frame (B.loc_union (c.state.footprint #i h7 block_state) (B.loc_buffer buf)) k' h6 h7;
-              (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
-              (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
-              (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
+              (**) B.(modifies_only_not_unused_in loc_none h6 h7);
+              (**) B.(modifies_only_not_unused_in loc_none h0 h7);
+              (**) c.key.frame_invariant B.loc_none key h6 h7;
+              (**) c.state.frame_invariant B.loc_none block_state h6 h7;
+              (**) optional_frame B.loc_none k' h6 h7;
+              (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h7);
+              (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h7);
+              (**) c.state.frame_freeable B.loc_none block_state h6 h7;
+              (**) assert (optional_reveal h6 k' == optional_reveal h7 k');
 
               (**) let h8 = ST.get () in
               (**) assert (U64.v total_len <= U64.v (c.max_input_len i));
@@ -436,8 +443,20 @@ let copy #index c i t t' state r =
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
 
+  // HACL-RS
+  // let State block_state0 buf0 total_len0 seen0 k0 = !*state in
   // All source state is suffixed by 0.
-  let State block_state0 buf0 total_len0 seen0 k0 = !*state in
+  let uu__ = !*state in
+  let State block_state0 _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ buf0 _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ total_len0 _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ seen0 _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ _ k0 = uu__ in
+
   let i = c.index_of_state i block_state0 k0 in
 
   (**) let h0 = ST.get () in
@@ -465,6 +484,9 @@ let copy #index c i t t' state r =
         (**) B.(modifies_only_not_unused_in loc_none h0 h8);
         B.null
     | Some block_state ->
+        // HACL-rs: this seems to help with mutability inference
+        let block_state = block_state in
+
         (**) let h2 = ST.get () in
         (**) assert (B.fresh_loc (c.state.footprint #i h2 block_state) h0 h2);
         (**) B.loc_unused_in_not_unused_in_disjoint h2;
@@ -566,7 +588,7 @@ let copy #index c i t t' state r =
   end
 #pop-options
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 let alloca #index c i t t' k =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -590,15 +612,33 @@ let alloca #index c i t t' k =
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
   (**) c.key.frame_invariant B.loc_none k h1 h2;
 
+  c.init (G.hide i) k buf block_state;
+  (**) let h20 = ST.get () in
+  (**) B.loc_unused_in_not_unused_in_disjoint h20;
+  (**) assert (B.fresh_loc (c.state.footprint #i h20 block_state) h0 h20);
+  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h20);
+  (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.block_len c i));
+  (**) assert(0 % UInt32.v (Block?.block_len c i) = 0);
+  (**) c.update_multi_zero i (c.state.v i h20 block_state) 0;
+  (**) B.modifies_only_not_unused_in B.loc_none h0 h20;
+  (**) assert B.(modifies (c.state.footprint h2 block_state) h0 h20);
+  (**) c.key.frame_invariant (c.state.footprint #i h2 block_state) k h0 h20;
+  (**) assert (c.state.invariant h20 block_state);
+  // HACL-RS: reorder the operations to call init right after the creation of
+  // the block_state, and before the block_state is moved into the functor state
+  // (and thus not available anymore). This requires a slightly more subtle
+  // proof.
+  (**) assert (c.state.v i h20 block_state == c.init_s i (c.key.v i h20 k));
+
   let k': optional_key i c.km c.key =
     match c.km with
     | Runtime ->
         let k' = c.key.alloca i in
         (**) let h3 = ST.get () in
         (**) B.loc_unused_in_not_unused_in_disjoint h3;
-        (**) B.(modifies_only_not_unused_in loc_none h2 h3);
-        (**) c.key.frame_invariant B.loc_none k h2 h3;
-        (**) c.state.frame_invariant B.loc_none block_state h2 h3;
+        (**) B.(modifies_only_not_unused_in loc_none h20 h3);
+        (**) c.key.frame_invariant B.loc_none k h20 h3;
+        (**) c.state.frame_invariant B.loc_none block_state h20 h3;
         (**) assert (B.fresh_loc (c.key.footprint #i h3 k') h0 h3);
         (**) assert (c.key.invariant #i h3 k');
         (**) assert (c.key.invariant #i h3 k);
@@ -607,7 +647,7 @@ let alloca #index c i t t' k =
         (**) let h4 = ST.get () in
         (**) assert (B.fresh_loc (c.key.footprint #i h4 k') h0 h4);
         (**) B.loc_unused_in_not_unused_in_disjoint h4;
-        (**) B.(modifies_only_not_unused_in loc_none h2 h4);
+        (**) B.(modifies_only_not_unused_in loc_none h20 h4);
         (**) assert (c.key.invariant #i h4 k');
         (**) c.key.frame_invariant (c.key.footprint #i h3 k') k h3 h4;
         (**) c.state.frame_invariant (c.key.footprint #i h3 k') block_state h3 h4;
@@ -635,15 +675,6 @@ let alloca #index c i t t' k =
   (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
   (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
 
-  c.init (G.hide i) k buf block_state;
-  (**) let h7 = ST.get () in
-  (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
-  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
-  (**) optional_frame (B.loc_union (c.state.footprint #i h7 block_state) (B.loc_buffer buf)) k' h6 h7;
-  (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
-  (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
-  (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
-
   (**) let h8 = ST.get () in
   (**) assert (U64.v total_len <= U64.v (c.max_input_len i));
   (**) begin
@@ -670,9 +701,20 @@ let reset #index c i t t' state key =
 
   let open LowStar.BufferOps in
   (**) let h1 = ST.get () in
-  let State block_state buf _ _ k' = !*state in
+  // HACL-RS, see comment for digest
+  let uu__ = !*state in
+  let State block_state _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ buf _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ _ k' = uu__ in
+
+  // Previously:
+  // let State block_state buf _ _ k' = !*state in
+
   let i = c.index_of_state i block_state k' in
-  LowStar.Ignore.ignore i; // This is only used in types and proofs
+  // HACL-RS: This is now used to compute total_len below
+  // LowStar.Ignore.ignore i; // This is only used in types and proofs
   [@inline_let]
   let block_state: c.state.s i = block_state in
 
@@ -702,9 +744,14 @@ let reset #index c i t t' state key =
   (**) let h2 = ST.get () in
   (**) assert(preserves_freeable c i state h1 h2);
 
-  [@inline_let] let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
-  let tmp: state_s c i t t' = State block_state buf total_len (G.hide S.empty) k' in
-  B.upd state 0ul tmp;
+  let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
+  // HACL-RS: trigger the functional update pattern
+  let uu__ = !*state in
+  let State uu__block_state_ _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ uu__buf_ _ _ _ = uu__ in
+  let uu__: state_s c i t t' = State uu__block_state_ uu__buf_ total_len (G.hide S.empty) k' in
+  B.upd state 0ul uu__;
   (**) let h3 = ST.get () in
   (**) c.state.frame_invariant B.(loc_buffer state) block_state h2 h3;
   (**) c.key.frame_invariant B.(loc_buffer state) key h2 h3;
@@ -912,12 +959,15 @@ val update_small:
   s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
+  bs:c.state.s i -> // HACL-RS
   Stack unit
     (requires fun h0 ->
+      bs == (B.deref h0 s).block_state /\ // HACL-RS
       update_pre c i s data len h0 /\
       U32.v (c.init_input_len i) + S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\
       U32.v len <= U32.v (c.blocks_state_len i) - U32.v (rest c i (total_len_h c i h0 s)))
     (ensures fun h0 s' h1 ->
+      bs == (B.deref h1 s).block_state /\ // HACL-RS
       update_post c i s data len h0 h1))
 
 /// SH: The proof obligations for update_small have problem succeeding in command
@@ -1229,10 +1279,21 @@ let update_small_functional_correctness #index c i t t' p data len h0 h1 =
 #restart-solver
 #push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false --z3refresh \
   --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
-let update_small #index c i t t' p data len =
+let update_small #index c i t t' p data len bs =
   let open LowStar.BufferOps in
-  let s = !*p in
-  let State block_state buf total_len seen_ k' = s in
+  // HACL-RS:
+  // let s = !*p in
+  // let State block_state buf total_len seen_ k' = s in
+  [@inline_let] let block_state = bs in
+  let uu__ = !*p in
+  let State _ buf _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ total_len _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ _ seen_ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ _ _ k' = uu__ in
+
   [@inline_let]
   let block_state: c.state.s i = block_state in
 
@@ -1277,12 +1338,17 @@ let update_small #index c i t t' p data len =
 
   // SECOND STATEFUL OPERATION
   let total_len = add_len c i total_len len in
+  // HACL-RS: trigger the functional update pattern
+  let uu__ = !*p in
+  let State uu__block_state _ _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ uu__buf _ _ _ = uu__ in
   [@inline_let]
-  let tmp: state_s c i t t' =
-    State #index #c #i block_state buf total_len
+  let uu__: state_s c i t t' =
+    State #index #c #i uu__block_state uu__buf total_len
           (G.hide (G.reveal seen_ `S.append` (B.as_seq h0 data))) k'
   in
-  p *= tmp;
+  p *= uu__;
 
   // Memory reasoning.
   let h2 = ST.get () in
@@ -1421,25 +1487,39 @@ val update_empty_or_full_buf:
   s:state c i t t' ->
   data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
+  bs:c.state.s i -> // HACL-RS
   Stack unit
     (requires fun h0 ->
+      bs == (B.deref h0 s).block_state /\ // HACL-RS
       update_pre c i s data len h0 /\
       U32.v (c.init_input_len i) + S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\
       (rest c i (total_len_h c i h0 s) = 0ul \/
        rest c i (total_len_h c i h0 s) = c.blocks_state_len i) /\
        U32.v len > 0)
     (ensures fun h0 s' h1 ->
+      bs == (B.deref h1 s).block_state /\ // HACL-RS
       update_post c i s data len h0 h1))
 
 #push-options "--z3cliopt smt.arith.nl=false --z3rlimit 500"
-let update_empty_or_full_buf #index c i t t' p data len =
+let update_empty_or_full_buf #index c i t t' p data len bs =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.update_multi_associative i in
 
   let open LowStar.BufferOps in
-  let s = !*p in
-  let State block_state buf total_len seen k' = s in
+  // HACL-RS
+  // let s = !*p in
+  // let State block_state buf total_len seen k' = s in
+  [@inline_let] let block_state = bs in
+  let uu__ = !*p in
+  let State _ buf _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ total_len _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ _ seen _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ _ _ k' = uu__ in
+
   [@inline_let]
   let block_state: c.state.s i = block_state in
   let sz = rest c i total_len in
@@ -1520,22 +1600,26 @@ let update_empty_or_full_buf #index c i t t' p data len =
   optional_frame #_ #i #c.km #c.key (B.loc_buffer buf) k' h1 h2;
   stateful_frame_preserves_freeable #index #(Block?.state c) #i
                                     (B.loc_buffer dst)
-                                    (State?.block_state s) h1 h2;
+                                    block_state h1 h2;
   assert(preserves_freeable c i p h01 h2);
 
   [@inline_let]
   let total_len' = add_len c i total_len len in
+  let uu__ = !*p in
+  let State uu__block_state _ _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ uu__buf _ _ _ = uu__ in
   [@inline_let]
-  let tmp: state_s c i t t' = State #index #c #i block_state buf total_len'
+  let uu__: state_s c i t t' = State #index #c #i uu__block_state uu__buf total_len'
     (seen `S.append` B.as_seq h0 data) k'
   in
-  p *= tmp;
+  p *= uu__;
   let h3 = ST.get () in
   c.state.frame_invariant (B.loc_buffer p) block_state h2 h3;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
   stateful_frame_preserves_freeable #index #(Block?.state c) #i
                                     (B.loc_buffer p)
-                                    (State?.block_state s) h2 h3;
+                                    block_state h2 h3;
   assert(preserves_freeable c i p h2 h3);
   assert(preserves_freeable c i p h0 h3);
 
@@ -1559,14 +1643,17 @@ val update_round:
   s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
+  bs:c.state.s i -> // HACL-RS
   Stack unit
     (requires fun h0 ->
+      bs == (B.deref h0 s).block_state /\ // HACL-RS
       update_pre c i s data len h0 /\
       U32.v (c.init_input_len i) + S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\ (
       let r = rest c i (total_len_h c i h0 s) in
       U32.v len + U32.v r = U32.v (c.blocks_state_len i) /\
       r <> 0ul))
     (ensures fun h0 _ h1 ->
+      bs == (B.deref h1 s).block_state /\ // HACL-RS
       update_post c i s data len h0 h1 /\
       begin
       let blocks, rest = split_at_last_all_seen c i h0 s in
@@ -1576,15 +1663,15 @@ val update_round:
       S.length rest' = U32.v (c.blocks_state_len i)
       end))
 
-#push-options "--z3rlimit 200 --z3cliopt smt.arith.nl=false"
-let update_round #index c i t t' p data len =
+#push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false"
+let update_round #index c i t t' p data len bs =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.update_multi_associative i in
 
   let open LowStar.BufferOps in
   (**) let h0 = ST.get() in
-  update_small #index c i t t' p data len;
+  update_small #index c i t t' p data len bs;
   (**) let h1 = ST.get() in
   (**) split_at_last_small c i (all_seen c i h0 p) (B.as_seq h0 data);
   (**) begin // For some reason, the proof fails if we don't call those
@@ -1602,26 +1689,41 @@ let update_round #index c i t t' p data len =
 let update #index c i t t' state chunk chunk_len =
   let open LowStar.BufferOps in
   let s = !*state in
-  let State block_state buf_ total_len seen k' = s in
+  // HACL-RS: previously, was:
+  //   let State block_state buf_ total_len seen k' = s in
+  // See comment in let digest
+  let uu__ = !*state in
+  let State block_state _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ buf_ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ total_len _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ seen _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ _ k' = uu__ in
+
   allow_inversion key_management;
   let i = c.index_of_state i block_state k' in
+  let h0 = ST.get () in
+  assert (block_state == (B.deref h0 state).block_state);
 
   if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 chunk_len >^ c.max_input_len i -^ total_len) then
     Hacl.Streaming.Types.MaximumLengthExceeded
   else
     let sz = rest c i total_len in
     if chunk_len `U32.lte` (c.blocks_state_len i `U32.sub` sz) then
-      update_small c i t t' state chunk chunk_len
+      update_small c i t t' state chunk chunk_len block_state
     else if sz = 0ul then
-      update_empty_or_full_buf c i t t' state chunk chunk_len
+      update_empty_or_full_buf c i t t' state chunk chunk_len block_state
     else begin
       let h0 = ST.get () in
       let diff = c.blocks_state_len i `U32.sub` sz in
       let chunk1 = B.sub chunk 0ul diff in
       let chunk2 = B.sub chunk diff (chunk_len `U32.sub` diff) in
-      update_round c i t t' state chunk1 diff;
+      update_round c i t t' state chunk1 diff block_state;
       let h1 = ST.get () in
-      update_empty_or_full_buf c i t t' state chunk2 (chunk_len `U32.sub` diff);
+      update_empty_or_full_buf c i t t' state chunk2 (chunk_len `U32.sub` diff) block_state;
       let h2 = ST.get () in
       (
         let seen = G.reveal seen in
@@ -1769,7 +1871,20 @@ let digest #index c i t t' state output l =
 
   let open LowStar.BufferOps in
   let h0 = ST.get () in
-  let State block_state buf_ total_len seen k' = !*state in
+  // HACL-RS, previously was:
+  //   let State block_state buf_ total_len seen k' = !*state in
+  // This is made really awful by the fact that projectors don't work (known
+  // issue, reported by Son years ago, that we bump into here as well).
+  let uu__ = !*state in
+  let State block_state _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ buf_ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ total_len _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ seen _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ _ k' = uu__ in
 
   push_frame ();
   let h1 = ST.get () in
@@ -1807,8 +1922,9 @@ let digest #index c i t t' state output l =
   [@inline_let]
   let r_multi = U32.(r -^ r_last) in
   // Split the buffer according to the computed lengths
-  let buf_last = B.sub buf_ r_multi (Ghost.hide r_last) in
+  // HACL-RS: non-statically known indices, split left to right
   let buf_multi = B.sub buf_ 0ul r_multi in
+  let buf_last = B.sub buf_ r_multi (Ghost.hide r_last) in
 
   [@inline_let]
   let state_is_block = c.block_len i = c.blocks_state_len i in

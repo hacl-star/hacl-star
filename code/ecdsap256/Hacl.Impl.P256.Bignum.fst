@@ -143,6 +143,21 @@ let bn_sub4 res x y =
   assert (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y);
   c
 
+let bn_sub4_sa1 res x y =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  let c = bn_sub4 res x_copy y in
+  pop_frame ();
+  c
+
+let bn_sub4_sa2 res x y =
+  push_frame ();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  let c = bn_sub4 res x y_copy in
+  pop_frame ();
+  c
 
 [@CInline]
 let bn_sub_mod4 res n x y =

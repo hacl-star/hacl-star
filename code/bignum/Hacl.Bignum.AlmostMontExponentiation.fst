@@ -92,7 +92,9 @@ let bn_almost_mont_one #t k n mu ctx oneM =
   assert (linv n (as_seq h1 oneM));
   Math.Lemmas.small_mod (BD.bn_v (as_seq h1 oneM)) (BD.bn_v n);
   assert (BD.bn_v (as_seq h1 oneM) % BD.bn_v n ==
-    E.mont_one_ll (bits t) (v len) (BD.bn_v n) (v mu))
+    E.mont_one_ll (bits t) (v len) (BD.bn_v n) (v mu));
+  // HACL-RS
+  LowStar.Ignore.ignore ctx
 
 
 inline_for_extraction noextract
@@ -109,8 +111,27 @@ let bn_almost_mont_mul #t k n mu ctx aM bM resM =
   SA.bn_almost_mont_mul_lemma n mu (as_seq h0 aM) (as_seq h0 bM);
   A.almost_mont_mul_is_mont_mul_lemma (bits t) (v k.AM.bn.BN.len) (BD.bn_v n) (v mu) (bn_v h0 aM) (bn_v h0 bM);
   let ctx_n = sub ctx 0ul k.AM.bn.BN.len in
-  k.AM.mul ctx_n mu aM bM resM
+  k.AM.mul ctx_n mu aM bM resM;
+  // HACL-RS
+  LowStar.Ignore.ignore ctx
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val bn_almost_mont_mul_a:
+    #t:limb_t
+  -> k:AM.almost_mont t
+  -> n:Ghost.erased (BD.lbignum t (v k.AM.bn.BN.len))
+  -> mu:limb t{SM.bn_mont_pre n mu} ->
+  BE.lmul_st t k.AM.bn.BN.len (k.AM.bn.BN.len +! k.AM.bn.BN.len)
+    (mk_to_nat_mont_ll_comm_monoid t k.AM.bn.BN.len n mu)
+
+(* HACL-RS *)
+let bn_almost_mont_mul_a #t k n mu ctx aM bM resM =
+  push_frame ();
+  let aM_copy = create k.AM.bn.BN.len (uint #t #SEC 0) in
+  copy aM_copy aM;
+  bn_almost_mont_mul k n mu ctx aM_copy bM resM;
+  pop_frame ()
 
 inline_for_extraction noextract
 val bn_almost_mont_sqr:
@@ -127,7 +148,27 @@ let bn_almost_mont_sqr #t k n mu ctx aM resM =
   SA.bn_almost_mont_mul_lemma n mu (as_seq h0 aM) (as_seq h0 aM);
   A.almost_mont_mul_is_mont_mul_lemma (bits t) (v k.AM.bn.BN.len) (BD.bn_v n) (v mu) (bn_v h0 aM) (bn_v h0 aM);
   let ctx_n = sub ctx 0ul k.AM.bn.BN.len in
-  k.AM.sqr ctx_n mu aM resM
+  k.AM.sqr ctx_n mu aM resM;
+  // HACL-RS
+  LowStar.Ignore.ignore ctx
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val bn_almost_mont_sqr_a:
+    #t:limb_t
+  -> k:AM.almost_mont t
+  -> n:Ghost.erased (BD.lbignum t (v k.AM.bn.BN.len))
+  -> mu:limb t{SM.bn_mont_pre n mu} ->
+  BE.lsqr_st t k.AM.bn.BN.len (k.AM.bn.BN.len +! k.AM.bn.BN.len)
+    (mk_to_nat_mont_ll_comm_monoid t k.AM.bn.BN.len n mu)
+
+(* HACL-RS *)
+let bn_almost_mont_sqr_a #t k n mu ctx aM resM =
+  push_frame ();
+  let aM_copy = create k.AM.bn.BN.len (uint #t #SEC 0) in
+  copy aM_copy aM;
+  bn_almost_mont_sqr k n mu ctx aM_copy resM;
+  pop_frame ()
 
 
 inline_for_extraction noextract
@@ -140,8 +181,8 @@ let mk_bn_almost_mont_concrete_ops
 {
   BE.to = mk_to_nat_mont_ll_comm_monoid t k.AM.bn.BN.len n mu;
   BE.lone = bn_almost_mont_one k n mu;
-  BE.lmul = bn_almost_mont_mul k n mu;
-  BE.lsqr = bn_almost_mont_sqr k n mu;
+  BE.lmul = bn_almost_mont_mul_a k n mu;
+  BE.lsqr = bn_almost_mont_sqr_a k n mu;
 }
 
 ///////////////////////////////////////////////////////////////////////
