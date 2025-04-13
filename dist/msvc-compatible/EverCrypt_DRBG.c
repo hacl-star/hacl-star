@@ -261,8 +261,8 @@ instantiate_sha1(
   KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + nonce_len + personalization_string_len);
   uint8_t
   *seed_material =
-    (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-      * sizeof (uint8_t));
+    (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+        sizeof (uint8_t));
   memset(seed_material,
     0U,
     (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -352,8 +352,8 @@ instantiate_sha2_256(
   KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + nonce_len + personalization_string_len);
   uint8_t
   *seed_material =
-    (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-      * sizeof (uint8_t));
+    (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+        sizeof (uint8_t));
   memset(seed_material,
     0U,
     (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -443,8 +443,8 @@ instantiate_sha2_384(
   KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + nonce_len + personalization_string_len);
   uint8_t
   *seed_material =
-    (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-      * sizeof (uint8_t));
+    (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+        sizeof (uint8_t));
   memset(seed_material,
     0U,
     (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -534,8 +534,8 @@ instantiate_sha2_512(
   KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + nonce_len + personalization_string_len);
   uint8_t
   *seed_material =
-    (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-      * sizeof (uint8_t));
+    (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+        sizeof (uint8_t));
   memset(seed_material,
     0U,
     (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -932,9 +932,8 @@ generate_sha1(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -1147,9 +1146,8 @@ generate_sha2_256(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -1362,9 +1360,8 @@ generate_sha2_384(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -1577,9 +1574,8 @@ generate_sha2_512(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;

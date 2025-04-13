@@ -912,9 +912,8 @@ generate_sha1(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -1125,9 +1124,8 @@ generate_sha2_256(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -1338,9 +1336,8 @@ generate_sha2_384(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -1551,9 +1548,8 @@ generate_sha2_512(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;

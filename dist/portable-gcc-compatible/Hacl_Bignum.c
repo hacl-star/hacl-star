@@ -132,8 +132,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(
     for
     (uint32_t
       i = (aLen + aLen - (aLen + aLen2) - 1U) / 4U * 4U;
-      i
-      < aLen + aLen - (aLen + aLen2) - 1U;
+      i < aLen + aLen - (aLen + aLen2) - 1U;
       i++)
     {
       uint32_t t11 = a11[i];
@@ -258,8 +257,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
     for
     (uint32_t
       i = (aLen + aLen - (aLen + aLen2) - 1U) / 4U * 4U;
-      i
-      < aLen + aLen - (aLen + aLen2) - 1U;
+      i < aLen + aLen - (aLen + aLen2) - 1U;
       i++)
     {
       uint64_t t11 = a11[i];
@@ -359,8 +357,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32(
     for
     (uint32_t
       i = (aLen + aLen - (aLen + aLen2) - 1U) / 4U * 4U;
-      i
-      < aLen + aLen - (aLen + aLen2) - 1U;
+      i < aLen + aLen - (aLen + aLen2) - 1U;
       i++)
     {
       uint32_t t1 = a11[i];
@@ -460,8 +457,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
     for
     (uint32_t
       i = (aLen + aLen - (aLen + aLen2) - 1U) / 4U * 4U;
-      i
-      < aLen + aLen - (aLen + aLen2) - 1U;
+      i < aLen + aLen - (aLen + aLen2) - 1U;
       i++)
     {
       uint64_t t1 = a11[i];
