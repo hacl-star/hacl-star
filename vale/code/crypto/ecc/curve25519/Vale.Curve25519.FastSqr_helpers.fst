@@ -19,7 +19,7 @@ let lemma_dbl_pow2_six (z0 z1 z2 z3 z4 z5:nat) :
   ()
 
 
-#push-options "--z3rlimit 300 --fuel 0 --ifuel 0"
+#push-options "--z3rlimit 3000 --fuel 0 --ifuel 0"
 let lemma_sqr_part3
       (a:nat) (a0 a1 a2 a3:nat64)
       (a0_sqr_hi a0_sqr_lo
