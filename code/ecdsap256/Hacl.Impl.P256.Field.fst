@@ -51,7 +51,7 @@ let bn_is_lt_prime_mask4 f =
   push_frame ();
   let tmp = create_felem () in
   make_prime tmp;
-  let c = bn_sub4 tmp f tmp in
+  let c = bn_sub4_sa2 tmp f tmp in
   assert (if v c = 0 then as_nat h0 f >= S.prime else as_nat h0 f < S.prime);
   pop_frame ();
   u64 0 -. c
@@ -83,9 +83,29 @@ let fadd res x y =
   SM.fmont_add_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
+let fadd_sa1 res x y =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fadd res x_copy y;
+  pop_frame()
 
-let fdouble out x =
-  fadd out x x
+let fadd_sa2 res x y =
+  push_frame ();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  fadd res x y_copy;
+  pop_frame()
+
+
+let fdouble out x = fadd out x x
+
+let fdouble_sa out x =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fdouble out x_copy;
+  pop_frame ()
 
 
 [@CInline]
@@ -101,13 +121,29 @@ let fsub res x y =
   pop_frame ()
 
 
+let fsub_sa1 res x y =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fsub res x_copy y;
+  pop_frame()
+
+
+let fsub_sa2 res x y =
+  push_frame ();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  fsub res x y_copy;
+  pop_frame()
+
+
 [@CInline]
 let fnegate_conditional_vartime f is_negate =
   push_frame ();
   let zero = create_felem () in
   if is_negate then begin
     let h0 = ST.get () in
-    fsub f zero f;
+    fsub_sa2 f zero f;
     let h1 = ST.get () in
     assert (as_nat h1 f == (0 - as_nat h0 f) % S.prime);
     Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 1;
@@ -146,6 +182,20 @@ let fmul res x y =
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
+let fmul_sa1 res x y =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fmul res x_copy y;
+  pop_frame()
+
+let fmul_sa2 res x y =
+  push_frame ();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  fmul res x y_copy;
+  pop_frame()
+
 
 [@CInline]
 let fsqr res x =
@@ -159,6 +209,12 @@ let fsqr res x =
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
   pop_frame ()
 
+let fsqr_sa res x =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fsqr res x_copy;
+  pop_frame ()
 
 [@CInline]
 let from_mont res a =
@@ -173,6 +229,13 @@ let from_mont res a =
   mont_reduction res tmp;
   pop_frame ()
 
+
+let from_mont_sa res a =
+  push_frame();
+  let a_copy = create (size 4) (u64 0) in
+  copy a_copy a;
+  from_mont res a_copy;
+  pop_frame()
 
 [@CInline]
 let to_mont res a =
@@ -209,8 +272,14 @@ let fmul_by_b_coeff res x =
   fmul res b_coeff x;
   pop_frame ()
 
+let fmul_by_b_coeff_sa res x =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fmul_by_b_coeff res x_copy;
+  pop_frame()
 
 [@CInline]
 let fcube res x =
   fsqr res x;
-  fmul res res x
+  fmul_sa1 res res x
