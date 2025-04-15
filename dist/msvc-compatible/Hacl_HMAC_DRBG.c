@@ -196,8 +196,8 @@ Hacl_HMAC_DRBG_instantiate(
           entropy_input_len + nonce_len + personalization_string_len);
         uint8_t
         *seed_material =
-          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-            * sizeof (uint8_t));
+          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+              sizeof (uint8_t));
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -255,8 +255,8 @@ Hacl_HMAC_DRBG_instantiate(
           entropy_input_len + nonce_len + personalization_string_len);
         uint8_t
         *seed_material =
-          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-            * sizeof (uint8_t));
+          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+              sizeof (uint8_t));
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -314,8 +314,8 @@ Hacl_HMAC_DRBG_instantiate(
           entropy_input_len + nonce_len + personalization_string_len);
         uint8_t
         *seed_material =
-          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-            * sizeof (uint8_t));
+          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+              sizeof (uint8_t));
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -373,8 +373,8 @@ Hacl_HMAC_DRBG_instantiate(
           entropy_input_len + nonce_len + personalization_string_len);
         uint8_t
         *seed_material =
-          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-            * sizeof (uint8_t));
+          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+              sizeof (uint8_t));
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));

@@ -592,8 +592,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-    *state
-    =
+    *state =
       (
         (Hacl_MAC_Poly1305_state_t){
           .block_state = block_state1,
@@ -640,8 +639,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     poly1305_update(block_state1, data1_len, data1);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
+    *state =
       (
         (Hacl_MAC_Poly1305_state_t){
           .block_state = block_state1,
@@ -673,8 +671,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *state
-    =
+    *state =
       (
         (Hacl_MAC_Poly1305_state_t){
           .block_state = block_state10,
@@ -719,8 +716,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     poly1305_update(block_state1, data1_len, data1);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
+    *state =
       (
         (Hacl_MAC_Poly1305_state_t){
           .block_state = block_state1,

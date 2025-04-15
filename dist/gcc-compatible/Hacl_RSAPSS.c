@@ -797,8 +797,8 @@ Hacl_RSAPSS_rsapss_skey_sign(
   skey[2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U + (dBits - 1U) / 64U + 1U];
   memset(skey,
     0U,
-    (2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U + (dBits - 1U) / 64U + 1U)
-    * sizeof (uint64_t));
+    (2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U + (dBits - 1U) / 64U + 1U) *
+      sizeof (uint64_t));
   bool b = load_skey(modBits, eBits, dBits, nb, eb, db, skey);
   if (b)
   {

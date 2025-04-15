@@ -280,11 +280,9 @@ Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t k
     uint64_t x = r;
     os[i] = x;);
   tmp[0U] =
-    (uint64_t)nn1
-    ^
-      ((uint64_t)kk1
-      << 8U
-      ^ ((uint64_t)p.fanout << 16U ^ ((uint64_t)p.depth << 24U ^ (uint64_t)p.leaf_length << 32U)));
+    (uint64_t)nn1 ^
+      ((uint64_t)kk1 << 8U ^
+        ((uint64_t)p.fanout << 16U ^ ((uint64_t)p.depth << 24U ^ (uint64_t)p.leaf_length << 32U)));
   tmp[1U] = p.node_offset;
   tmp[2U] = (uint64_t)p.node_depth ^ (uint64_t)p.inner_length << 8U;
   tmp[3U] = 0ULL;
@@ -808,14 +806,10 @@ static Hacl_Hash_Blake2b_Simd256_state_t
             uint64_t x = r4;
             os[i0] = x;);
           tmp[0U] =
-            (uint64_t)nn1
-            ^
-              ((uint64_t)kk2
-              << 8U
-              ^
-                ((uint64_t)pv.fanout
-                << 16U
-                ^ ((uint64_t)pv.depth << 24U ^ (uint64_t)pv.leaf_length << 32U)));
+            (uint64_t)nn1 ^
+              ((uint64_t)kk2 << 8U ^
+                ((uint64_t)pv.fanout << 16U ^
+                  ((uint64_t)pv.depth << 24U ^ (uint64_t)pv.leaf_length << 32U)));
           tmp[1U] = pv.node_offset;
           tmp[2U] = (uint64_t)pv.node_depth ^ (uint64_t)pv.inner_length << 8U;
           tmp[3U] = 0ULL;
@@ -1018,11 +1012,9 @@ reset_raw(Hacl_Hash_Blake2b_Simd256_state_t *state, Hacl_Hash_Blake2b_params_and
     uint64_t x = r;
     os[i0] = x;);
   tmp[0U] =
-    (uint64_t)nn1
-    ^
-      ((uint64_t)kk2
-      << 8U
-      ^ ((uint64_t)pv.fanout << 16U ^ ((uint64_t)pv.depth << 24U ^ (uint64_t)pv.leaf_length << 32U)));
+    (uint64_t)nn1 ^
+      ((uint64_t)kk2 << 8U ^
+        ((uint64_t)pv.fanout << 16U ^ ((uint64_t)pv.depth << 24U ^ (uint64_t)pv.leaf_length << 32U)));
   tmp[1U] = pv.node_offset;
   tmp[2U] = (uint64_t)pv.node_depth ^ (uint64_t)pv.inner_length << 8U;
   tmp[3U] = 0ULL;
@@ -1173,8 +1165,7 @@ Hacl_Hash_Blake2b_Simd256_update(
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-    *state
-    =
+    *state =
       (
         (Hacl_Hash_Blake2b_Simd256_state_t){
           .block_state = block_state1,
@@ -1238,8 +1229,7 @@ Hacl_Hash_Blake2b_Simd256_update(
       nb);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
+    *state =
       (
         (Hacl_Hash_Blake2b_Simd256_state_t){
           .block_state = block_state1,
@@ -1269,8 +1259,7 @@ Hacl_Hash_Blake2b_Simd256_update(
     uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *state
-    =
+    *state =
       (
         (Hacl_Hash_Blake2b_Simd256_state_t){
           .block_state = block_state10,
@@ -1332,8 +1321,7 @@ Hacl_Hash_Blake2b_Simd256_update(
       nb);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
+    *state =
       (
         (Hacl_Hash_Blake2b_Simd256_state_t){
           .block_state = block_state1,
@@ -1700,14 +1688,10 @@ Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params(
     uint64_t x = r;
     os[i] = x;);
   tmp[0U] =
-    (uint64_t)nn
-    ^
-      ((uint64_t)kk
-      << 8U
-      ^
-        ((uint64_t)params.fanout
-        << 16U
-        ^ ((uint64_t)params.depth << 24U ^ (uint64_t)params.leaf_length << 32U)));
+    (uint64_t)nn ^
+      ((uint64_t)kk << 8U ^
+        ((uint64_t)params.fanout << 16U ^
+          ((uint64_t)params.depth << 24U ^ (uint64_t)params.leaf_length << 32U)));
   tmp[1U] = params.node_offset;
   tmp[2U] = (uint64_t)params.node_depth ^ (uint64_t)params.inner_length << 8U;
   tmp[3U] = 0ULL;
