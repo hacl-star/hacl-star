@@ -855,7 +855,7 @@ WASM_FLAGS	=\
   -bundle LowStar.* \
   -bundle Lib.RandomBuffer.System \
   -bundle Lib.Memzero \
-  -minimal -wasm -d wasm \
+  -minimal -wasm \
   ./test.js
 
 dist/wasm/Makefile.basic: VALE_ASMS =
