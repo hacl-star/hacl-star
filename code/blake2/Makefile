@@ -19,7 +19,7 @@ BLAKE2_BUNDLE= -bundle Hacl.Blake2b_32=Hacl.Impl.Blake2.\* \
   -bundle Hacl.Blake2b_256=Hacl.Impl.Blake2.\*
 
 
-dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^  $(BASE_FLAGS) $(BLAKE2_BUNDLE) \
 	  -funroll-loops 12 \
 	  -fbuiltin-uint128 \

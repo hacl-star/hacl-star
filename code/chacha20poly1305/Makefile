@@ -19,7 +19,7 @@ dist/libchachapoly.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
 # Note: POLY_BUNDLE is found in Makefile.common -- shared definition.
-dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^ -o libchachapoly.a $(BASE_FLAGS) \
 	  $(CHACHA20_BUNDLE) $(POLY_BUNDLE) $(CHACHAPOLY_BUNDLE) \
 	  -tmpdir dist \
