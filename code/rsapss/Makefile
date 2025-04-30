@@ -23,7 +23,7 @@ BIGNUM_BUNDLE= -bundle Hacl.Bignum.Base -static-header Hacl.Bignum.Base \
 	-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
 RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 
-dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^ -o librsapss.a $(BASE_FLAGS) $(SHA2_BUNDLE) $(BIGNUM_BUNDLE) $(RSAPSS_BUNDLE) \
 	-tmpdir dist \
 	-add-include '"lib_intrinsics.h"' \
