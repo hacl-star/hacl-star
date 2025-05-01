@@ -804,7 +804,7 @@ fn wrap_key(r#impl: crate::streaming_hmac::r#impl, output: &mut [u8], key: &[u8]
         { len }
         else
         { crate::streaming_hmac::hash_len(crate::streaming_hmac::alg_of_impl(r#impl)) };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if len <= crate::streaming_hmac::block_len(crate::streaming_hmac::alg_of_impl(r#impl))
     {
@@ -866,14 +866,14 @@ fn finish0(s: crate::streaming_hmac::two_state, dst: &mut [u8])
     }
 }
 
-pub fn s1(i: crate::streaming_hmac::index, s: crate::streaming_hmac::two_state) ->
+pub fn s1 <'a>(i: crate::streaming_hmac::index, s: crate::streaming_hmac::two_state) ->
     Box<[crate::streaming_hmac::state_s]>
 {
     lowstar::ignore::ignore::<crate::streaming_hmac::index>(i);
     s.snd
 }
 
-pub fn s2(i: crate::streaming_hmac::index, s: crate::streaming_hmac::two_state) ->
+pub fn s2 <'a>(i: crate::streaming_hmac::index, s: crate::streaming_hmac::two_state) ->
     Box<[crate::streaming_hmac::state_s]>
 {
     lowstar::ignore::ignore::<crate::streaming_hmac::index>(i);
@@ -1181,7 +1181,7 @@ pub fn update(state: &mut [crate::streaming_hmac::agile_state], chunk: &[u8], ch
                 );
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             match *block_state
             {
                 crate::streaming_hmac::two_state { snd: ref s11, .. } =>
@@ -1202,7 +1202,7 @@ pub fn update(state: &mut [crate::streaming_hmac::agile_state], chunk: &[u8], ch
                     )
                 )).wrapping_sub(sz);
             let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
+            let chunk2: (&[u8], &[u8]) = (chunk1.1).split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
@@ -1354,8 +1354,8 @@ pub fn update(state: &mut [crate::streaming_hmac::agile_state], chunk: &[u8], ch
                     )
                 );
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
-            let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data1: (&[u8], &[u8]) = (chunk2.1).split_at(0usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             match *block_state
             {
                 crate::streaming_hmac::two_state { snd: ref s11, .. } =>

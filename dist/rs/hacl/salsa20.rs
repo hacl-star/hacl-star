@@ -120,7 +120,7 @@
     );
     (&mut ctx)[0usize] = 0x61707865u32;
     let k0: (&[u32], &[u32]) = k32.split_at(0usize);
-    let k1: (&[u32], &[u32]) = k0.1.split_at(4usize);
+    let k1: (&[u32], &[u32]) = (k0.1).split_at(4usize);
     ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..4usize]);
     (&mut ctx)[5usize] = 0x3320646eu32;
     ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&n32)[0usize..2usize]);
@@ -181,7 +181,7 @@
     );
     (&mut ctx)[0usize] = 0x61707865u32;
     let k0: (&[u32], &[u32]) = k32.split_at(0usize);
-    let k1: (&[u32], &[u32]) = k0.1.split_at(4usize);
+    let k1: (&[u32], &[u32]) = (k0.1).split_at(4usize);
     ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..4usize]);
     (&mut ctx)[5usize] = 0x3320646eu32;
     ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&n32)[0usize..2usize]);
@@ -208,7 +208,7 @@
             0u32,
             1u32,
             {
-                let bj: (&[u8], &[u8]) = uu____1.1.split_at(i0.wrapping_mul(4u32) as usize);
+                let bj: (&[u8], &[u8]) = (uu____1.1).split_at(i0.wrapping_mul(4u32) as usize);
                 let u: u32 = lowstar::endianness::load32_le(bj.1);
                 let r: u32 = u;
                 let x: u32 = r;
@@ -331,7 +331,7 @@
     );
     (&mut ctx)[0usize] = 0x61707865u32;
     let k0: (&[u32], &[u32]) = k32.split_at(0usize);
-    let k1: (&[u32], &[u32]) = k0.1.split_at(4usize);
+    let k1: (&[u32], &[u32]) = (k0.1).split_at(4usize);
     ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..4usize]);
     (&mut ctx)[5usize] = 0x3320646eu32;
     ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&n32)[0usize..2usize]);
@@ -358,7 +358,7 @@
             0u32,
             1u32,
             {
-                let bj: (&[u8], &[u8]) = uu____1.1.split_at(i0.wrapping_mul(4u32) as usize);
+                let bj: (&[u8], &[u8]) = (uu____1.1).split_at(i0.wrapping_mul(4u32) as usize);
                 let u: u32 = lowstar::endianness::load32_le(bj.1);
                 let r: u32 = u;
                 let x: u32 = r;
@@ -473,7 +473,7 @@
         }
     );
     let k0: (&[u32], &[u32]) = k32.split_at(0usize);
-    let k1: (&[u32], &[u32]) = k0.1.split_at(4usize);
+    let k1: (&[u32], &[u32]) = (k0.1).split_at(4usize);
     (&mut ctx)[0usize] = 0x61707865u32;
     ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..4usize]);
     (&mut ctx)[5usize] = 0x3320646eu32;

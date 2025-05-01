@@ -4,13 +4,13 @@
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
 
-pub fn setupBaseS <'a>(
-    o_pkE: &'a mut [u8],
-    o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s <'a>,
-    skE: &'a [u8],
-    pkR: &'a [u8],
+pub fn setupBaseS(
+    o_pkE: &mut [u8],
+    o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s,
+    skE: &[u8],
+    pkR: &[u8],
     infolen: u32,
-    info: &'a [u8]
+    info: &[u8]
 ) ->
     u32
 {
@@ -55,10 +55,10 @@ pub fn setupBaseS <'a>(
                 uu____1.1[0usize] = 0x4bu8;
                 uu____1.1[1usize] = 0x45u8;
                 uu____1.1[2usize] = 0x4du8;
-                let uu____2: (&mut [u8], &mut [u8]) = uu____1.1.split_at_mut(3usize);
+                let uu____2: (&mut [u8], &mut [u8]) = (uu____1.1).split_at_mut(3usize);
                 uu____2.1[0usize] = 0u8;
                 uu____2.1[1usize] = 32u8;
-                let empty: (&[u8], &[u8]) = uu____2.0.split_at(0usize);
+                let empty: (&[u8], &[u8]) = (uu____2.0).split_at(0usize);
                 let label_eae_prk: [u8; 7] =
                     [0x65u8, 0x61u8, 0x65u8, 0x5fu8, 0x70u8, 0x72u8, 0x6bu8];
                 let len: u32 = 51u32;
@@ -122,19 +122,19 @@ pub fn setupBaseS <'a>(
         uu____5.1[1usize] = 0x50u8;
         uu____5.1[2usize] = 0x4bu8;
         uu____5.1[3usize] = 0x45u8;
-        let uu____6: (&mut [u8], &mut [u8]) = uu____5.1.split_at_mut(4usize);
+        let uu____6: (&mut [u8], &mut [u8]) = (uu____5.1).split_at_mut(4usize);
         uu____6.1[0usize] = 0u8;
         uu____6.1[1usize] = 32u8;
-        let uu____7: (&mut [u8], &mut [u8]) = uu____6.1.split_at_mut(2usize);
+        let uu____7: (&mut [u8], &mut [u8]) = (uu____6.1).split_at_mut(2usize);
         uu____7.1[0usize] = 0u8;
         uu____7.1[1usize] = 1u8;
-        let uu____8: (&mut [u8], &mut [u8]) = uu____7.1.split_at_mut(2usize);
+        let uu____8: (&mut [u8], &mut [u8]) = (uu____7.1).split_at_mut(2usize);
         uu____8.1[0usize] = 0u8;
         uu____8.1[1usize] = 3u8;
         let label_psk_id_hash: [u8; 11] =
             [0x70u8, 0x73u8, 0x6bu8, 0x5fu8, 0x69u8, 0x64u8, 0x5fu8, 0x68u8, 0x61u8, 0x73u8, 0x68u8];
         let mut o_psk_id_hash: [u8; 32] = [0u8; 32usize];
-        let empty: (&[u8], &[u8]) = uu____6.0.split_at(0usize);
+        let empty: (&[u8], &[u8]) = (uu____6.0).split_at(0usize);
         let len: u32 = 28u32;
         let mut tmp: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
         let uu____9: (&mut [u8], &mut [u8]) = tmp.split_at_mut(0usize);
@@ -276,12 +276,12 @@ pub fn setupBaseS <'a>(
     { res }
 }
 
-pub fn setupBaseR <'a>(
-    o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s <'a>,
-    enc: &'a [u8],
-    skR: &'a [u8],
+pub fn setupBaseR(
+    o_ctx: crate::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s,
+    enc: &[u8],
+    skR: &[u8],
     infolen: u32,
-    info: &'a [u8]
+    info: &[u8]
 ) ->
     u32
 {
@@ -329,10 +329,10 @@ pub fn setupBaseR <'a>(
                     uu____1.1[0usize] = 0x4bu8;
                     uu____1.1[1usize] = 0x45u8;
                     uu____1.1[2usize] = 0x4du8;
-                    let uu____2: (&mut [u8], &mut [u8]) = uu____1.1.split_at_mut(3usize);
+                    let uu____2: (&mut [u8], &mut [u8]) = (uu____1.1).split_at_mut(3usize);
                     uu____2.1[0usize] = 0u8;
                     uu____2.1[1usize] = 32u8;
-                    let empty: (&[u8], &[u8]) = uu____2.0.split_at(0usize);
+                    let empty: (&[u8], &[u8]) = (uu____2.0).split_at(0usize);
                     let label_eae_prk: [u8; 7] =
                         [0x65u8, 0x61u8, 0x65u8, 0x5fu8, 0x70u8, 0x72u8, 0x6bu8];
                     let len: u32 = 51u32;
@@ -396,20 +396,20 @@ pub fn setupBaseR <'a>(
             uu____5.1[1usize] = 0x50u8;
             uu____5.1[2usize] = 0x4bu8;
             uu____5.1[3usize] = 0x45u8;
-            let uu____6: (&mut [u8], &mut [u8]) = uu____5.1.split_at_mut(4usize);
+            let uu____6: (&mut [u8], &mut [u8]) = (uu____5.1).split_at_mut(4usize);
             uu____6.1[0usize] = 0u8;
             uu____6.1[1usize] = 32u8;
-            let uu____7: (&mut [u8], &mut [u8]) = uu____6.1.split_at_mut(2usize);
+            let uu____7: (&mut [u8], &mut [u8]) = (uu____6.1).split_at_mut(2usize);
             uu____7.1[0usize] = 0u8;
             uu____7.1[1usize] = 1u8;
-            let uu____8: (&mut [u8], &mut [u8]) = uu____7.1.split_at_mut(2usize);
+            let uu____8: (&mut [u8], &mut [u8]) = (uu____7.1).split_at_mut(2usize);
             uu____8.1[0usize] = 0u8;
             uu____8.1[1usize] = 3u8;
             let label_psk_id_hash: [u8; 11] =
                 [0x70u8, 0x73u8, 0x6bu8, 0x5fu8, 0x69u8, 0x64u8, 0x5fu8, 0x68u8, 0x61u8, 0x73u8,
                     0x68u8];
             let mut o_psk_id_hash: [u8; 32] = [0u8; 32usize];
-            let empty: (&[u8], &[u8]) = uu____6.0.split_at(0usize);
+            let empty: (&[u8], &[u8]) = (uu____6.0).split_at(0usize);
             let len: u32 = 28u32;
             let mut tmp: Box<[u8]> = vec![0u8; len as usize].into_boxed_slice();
             let uu____9: (&mut [u8], &mut [u8]) = tmp.split_at_mut(0usize);
@@ -602,7 +602,7 @@ pub fn sealBase(
             }
         );
         let cipher: (&mut [u8], &mut [u8]) = o_ct.split_at_mut(0usize);
-        let tag: (&mut [u8], &mut [u8]) = cipher.1.split_at_mut(plainlen as usize);
+        let tag: (&mut [u8], &mut [u8]) = (cipher.1).split_at_mut(plainlen as usize);
         crate::aead_chacha20poly1305_simd128::encrypt(
             tag.0,
             tag.1,
@@ -674,7 +674,7 @@ pub fn openBase(
             }
         );
         let cipher: (&[u8], &[u8]) = ct.split_at(0usize);
-        let tag: (&[u8], &[u8]) = cipher.1.split_at(ctlen.wrapping_sub(16u32) as usize);
+        let tag: (&[u8], &[u8]) = (cipher.1).split_at(ctlen.wrapping_sub(16u32) as usize);
         let res1: u32 =
             crate::aead_chacha20poly1305_simd128::decrypt(
                 o_pt,

@@ -55,7 +55,7 @@ pub(crate) const k384_512: [u64; 80] =
         0x28db77f523047d84u64, 0x32caab7b40c72493u64, 0x3c9ebe0a15c9bebcu64, 0x431d67c49c100d4cu64,
         0x4cc5d4becb3e42b6u64, 0x597f299cfc657e2au64, 0x5fcb6fab3ad6faecu64, 0x6c44198c4a475817u64];
 
-pub(crate) fn sha256_init(hash: &mut [u32])
+#[inline] pub(crate) fn sha256_init(hash: &mut [u32])
 {
     krml::unroll_for!(
         8,
@@ -212,7 +212,7 @@ pub(crate) fn sha256_init(hash: &mut [u32])
     )
 }
 
-pub(crate) fn sha256_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
+#[inline] pub(crate) fn sha256_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
 {
     let blocks: u32 = len.wrapping_div(64u32);
     for i in 0u32..blocks
@@ -223,7 +223,7 @@ pub(crate) fn sha256_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
     }
 }
 
-pub(crate) fn sha256_update_last(totlen: u64, len: u32, b: &[u8], hash: &mut [u32])
+#[inline] pub(crate) fn sha256_update_last(totlen: u64, len: u32, b: &[u8], hash: &mut [u32])
 {
     let blocks: u32 = if len.wrapping_add(8u32).wrapping_add(1u32) <= 64u32 { 1u32 } else { 2u32 };
     let fin: u32 = blocks.wrapping_mul(64u32);
@@ -238,7 +238,7 @@ pub(crate) fn sha256_update_last(totlen: u64, len: u32, b: &[u8], hash: &mut [u3
         &(&totlen_buf)[0usize..8usize]
     );
     let last0: (&[u8], &[u8]) = last.split_at(0usize);
-    let last1: (&[u8], &[u8]) = last0.1.split_at(64usize);
+    let last1: (&[u8], &[u8]) = (last0.1).split_at(64usize);
     let l0: &[u8] = last1.0;
     let l1: &[u8] = last1.1;
     let lb0: &[u8] = l0;
@@ -249,7 +249,7 @@ pub(crate) fn sha256_update_last(totlen: u64, len: u32, b: &[u8], hash: &mut [u3
     if blocks > 1u32 { crate::hash_sha2::sha256_update(last10, hash) }
 }
 
-pub(crate) fn sha256_finish(st: &[u32], h: &mut [u8])
+#[inline] pub(crate) fn sha256_finish(st: &[u32], h: &mut [u8])
 {
     let mut hbuf: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(
@@ -265,7 +265,7 @@ pub(crate) fn sha256_finish(st: &[u32], h: &mut [u8])
     (h[0usize..32usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..32usize])
 }
 
-pub(crate) fn sha224_init(hash: &mut [u32])
+#[inline] pub(crate) fn sha224_init(hash: &mut [u32])
 {
     krml::unroll_for!(
         8,
@@ -280,13 +280,13 @@ pub(crate) fn sha224_init(hash: &mut [u32])
     )
 }
 
-pub(crate) fn sha224_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
+#[inline] pub(crate) fn sha224_update_nblocks(len: u32, b: &[u8], st: &mut [u32])
 { crate::hash_sha2::sha256_update_nblocks(len, b, st) }
 
 pub(crate) fn sha224_update_last(totlen: u64, len: u32, b: &[u8], st: &mut [u32])
 { crate::hash_sha2::sha256_update_last(totlen, len, b, st) }
 
-pub(crate) fn sha224_finish(st: &[u32], h: &mut [u8])
+#[inline] pub(crate) fn sha224_finish(st: &[u32], h: &mut [u8])
 {
     let mut hbuf: [u8; 32] = [0u8; 32usize];
     krml::unroll_for!(
@@ -459,7 +459,7 @@ pub(crate) fn sha512_init(hash: &mut [u64])
     )
 }
 
-pub(crate) fn sha512_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
+#[inline] pub(crate) fn sha512_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
 {
     let blocks: u32 = len.wrapping_div(128u32);
     for i in 0u32..blocks
@@ -470,7 +470,7 @@ pub(crate) fn sha512_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
     }
 }
 
-pub(crate) fn sha512_update_last(
+#[inline] pub(crate) fn sha512_update_last(
     totlen: fstar::uint128::uint128,
     len: u32,
     b: &[u8],
@@ -491,7 +491,7 @@ pub(crate) fn sha512_update_last(
         &(&totlen_buf)[0usize..16usize]
     );
     let last0: (&[u8], &[u8]) = last.split_at(0usize);
-    let last1: (&[u8], &[u8]) = last0.1.split_at(128usize);
+    let last1: (&[u8], &[u8]) = (last0.1).split_at(128usize);
     let l0: &[u8] = last1.0;
     let l1: &[u8] = last1.1;
     let lb0: &[u8] = l0;
@@ -502,7 +502,7 @@ pub(crate) fn sha512_update_last(
     if blocks > 1u32 { crate::hash_sha2::sha512_update(last10, hash) }
 }
 
-pub(crate) fn sha512_finish(st: &[u64], h: &mut [u8])
+#[inline] pub(crate) fn sha512_finish(st: &[u64], h: &mut [u8])
 {
     let mut hbuf: [u8; 64] = [0u8; 64usize];
     krml::unroll_for!(
@@ -518,7 +518,7 @@ pub(crate) fn sha512_finish(st: &[u64], h: &mut [u8])
     (h[0usize..64usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..64usize])
 }
 
-pub(crate) fn sha384_init(hash: &mut [u64])
+#[inline] pub(crate) fn sha384_init(hash: &mut [u64])
 {
     krml::unroll_for!(
         8,
@@ -533,7 +533,7 @@ pub(crate) fn sha384_init(hash: &mut [u64])
     )
 }
 
-pub(crate) fn sha384_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
+#[inline] pub(crate) fn sha384_update_nblocks(len: u32, b: &[u8], st: &mut [u64])
 { crate::hash_sha2::sha512_update_nblocks(len, b, st) }
 
 pub(crate) fn sha384_update_last(
@@ -544,7 +544,7 @@ pub(crate) fn sha384_update_last(
 )
 { crate::hash_sha2::sha512_update_last(totlen, len, b, st) }
 
-pub(crate) fn sha384_finish(st: &[u64], h: &mut [u8])
+#[inline] pub(crate) fn sha384_finish(st: &[u64], h: &mut [u8])
 {
     let mut hbuf: [u8; 64] = [0u8; 64usize];
     krml::unroll_for!(
@@ -573,7 +573,8 @@ Allocate initial state for the SHA2_256 hash. The state is to be freed by
 calling `free_256`.
 */
 pub fn
-malloc_256() ->
+malloc_256
+<'a>() ->
     Box<[crate::streaming_types::state_32]>
 {
     let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
@@ -618,7 +619,8 @@ useful, for instance, if your control-flow diverges and you need to feed
 more (different) data into the hash in each branch.
 */
 pub fn
-copy_256(state: &[crate::streaming_types::state_32]) ->
+copy_256
+<'a>(state: &'a [crate::streaming_types::state_32]) ->
     Box<[crate::streaming_types::state_32]>
 {
     let block_state0: &[u32] = &(state[0usize]).block_state;
@@ -718,7 +720,7 @@ reset_256(state: &mut [crate::streaming_types::state_32])
             let data1_len: u32 = n_blocks.wrapping_mul(64u32);
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             crate::hash_sha2::sha256_update_nblocks(
                 data1_len.wrapping_div(64u32).wrapping_mul(64u32),
                 data2.0,
@@ -734,7 +736,7 @@ reset_256(state: &mut [crate::streaming_types::state_32])
         {
             let diff: u32 = 64u32.wrapping_sub(sz);
             let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
+            let chunk2: (&[u8], &[u8]) = (chunk1.1).split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
@@ -765,8 +767,8 @@ reset_256(state: &mut [crate::streaming_types::state_32])
             let n_blocks: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(64u32);
             let data1_len: u32 = n_blocks.wrapping_mul(64u32);
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
-            let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data1: (&[u8], &[u8]) = (chunk2.1).split_at(0usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             crate::hash_sha2::sha256_update_nblocks(
                 data1_len.wrapping_div(64u32).wrapping_mul(64u32),
                 data2.0,
@@ -815,10 +817,10 @@ digest_256(state: &[crate::streaming_types::state_32], output: &mut [u8])
     let buf_1: (&[u8], &[u8]) = buf_.split_at(0usize);
     let mut tmp_block_state: [u32; 8] = [0u32; 8usize];
     ((&mut tmp_block_state)[0usize..8usize]).copy_from_slice(&block_state[0usize..8usize]);
-    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
+    let buf_multi: (&[u8], &[u8]) = (buf_1.1).split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
-    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let buf_last: (&[u8], &[u8]) = (buf_multi.1).split_at(r.wrapping_sub(ite) as usize);
     crate::hash_sha2::sha256_update_nblocks(0u32, buf_last.0, &mut tmp_block_state);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
     crate::hash_sha2::sha256_update_last(
@@ -850,7 +852,7 @@ hash_256(output: &mut [u8], input: &[u8], input_len: u32)
     crate::hash_sha2::sha256_finish(&st, rb)
 }
 
-pub fn malloc_224() -> Box<[crate::streaming_types::state_32]>
+pub fn malloc_224 <'a>() -> Box<[crate::streaming_types::state_32]>
 {
     let buf: Box<[u8]> = vec![0u8; 64usize].into_boxed_slice();
     let buf1: &[u8] = &buf;
@@ -918,10 +920,10 @@ digest_224(state: &[crate::streaming_types::state_32], output: &mut [u8])
     let buf_1: (&[u8], &[u8]) = buf_.split_at(0usize);
     let mut tmp_block_state: [u32; 8] = [0u32; 8usize];
     ((&mut tmp_block_state)[0usize..8usize]).copy_from_slice(&block_state[0usize..8usize]);
-    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
+    let buf_multi: (&[u8], &[u8]) = (buf_1.1).split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
-    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let buf_last: (&[u8], &[u8]) = (buf_multi.1).split_at(r.wrapping_sub(ite) as usize);
     crate::hash_sha2::sha224_update_nblocks(0u32, buf_last.0, &mut tmp_block_state);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
     crate::hash_sha2::sha224_update_last(
@@ -953,7 +955,7 @@ hash_224(output: &mut [u8], input: &[u8], input_len: u32)
     crate::hash_sha2::sha224_finish(&st, rb)
 }
 
-pub fn malloc_512() -> Box<[crate::streaming_types::state_64]>
+pub fn malloc_512 <'a>() -> Box<[crate::streaming_types::state_64]>
 {
     let buf: Box<[u8]> = vec![0u8; 128usize].into_boxed_slice();
     let buf1: &[u8] = &buf;
@@ -997,7 +999,8 @@ useful, for instance, if your control-flow diverges and you need to feed
 more (different) data into the hash in each branch.
 */
 pub fn
-copy_512(state: &[crate::streaming_types::state_64]) ->
+copy_512
+<'a>(state: &'a [crate::streaming_types::state_64]) ->
     Box<[crate::streaming_types::state_64]>
 {
     let block_state0: &[u64] = &(state[0usize]).block_state;
@@ -1093,7 +1096,7 @@ pub fn reset_512(state: &mut [crate::streaming_types::state_64])
             let data1_len: u32 = n_blocks.wrapping_mul(128u32);
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             crate::hash_sha2::sha512_update_nblocks(
                 data1_len.wrapping_div(128u32).wrapping_mul(128u32),
                 data2.0,
@@ -1109,7 +1112,7 @@ pub fn reset_512(state: &mut [crate::streaming_types::state_64])
         {
             let diff: u32 = 128u32.wrapping_sub(sz);
             let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
+            let chunk2: (&[u8], &[u8]) = (chunk1.1).split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
@@ -1140,8 +1143,8 @@ pub fn reset_512(state: &mut [crate::streaming_types::state_64])
             let n_blocks: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(128u32);
             let data1_len: u32 = n_blocks.wrapping_mul(128u32);
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
-            let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data1: (&[u8], &[u8]) = (chunk2.1).split_at(0usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             crate::hash_sha2::sha512_update_nblocks(
                 data1_len.wrapping_div(128u32).wrapping_mul(128u32),
                 data2.0,
@@ -1190,10 +1193,10 @@ digest_512(state: &[crate::streaming_types::state_64], output: &mut [u8])
     let buf_1: (&[u8], &[u8]) = buf_.split_at(0usize);
     let mut tmp_block_state: [u64; 8] = [0u64; 8usize];
     ((&mut tmp_block_state)[0usize..8usize]).copy_from_slice(&block_state[0usize..8usize]);
-    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
+    let buf_multi: (&[u8], &[u8]) = (buf_1.1).split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(128u32) == 0u32 && r > 0u32 { 128u32 } else { r.wrapping_rem(128u32) };
-    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let buf_last: (&[u8], &[u8]) = (buf_multi.1).split_at(r.wrapping_sub(ite) as usize);
     crate::hash_sha2::sha512_update_nblocks(0u32, buf_last.0, &mut tmp_block_state);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
     crate::hash_sha2::sha512_update_last(
@@ -1228,7 +1231,7 @@ hash_512(output: &mut [u8], input: &[u8], input_len: u32)
     crate::hash_sha2::sha512_finish(&st, rb)
 }
 
-pub fn malloc_384() -> Box<[crate::streaming_types::state_64]>
+pub fn malloc_384 <'a>() -> Box<[crate::streaming_types::state_64]>
 {
     let buf: Box<[u8]> = vec![0u8; 128usize].into_boxed_slice();
     let buf1: &[u8] = &buf;
@@ -1296,10 +1299,10 @@ digest_384(state: &[crate::streaming_types::state_64], output: &mut [u8])
     let buf_1: (&[u8], &[u8]) = buf_.split_at(0usize);
     let mut tmp_block_state: [u64; 8] = [0u64; 8usize];
     ((&mut tmp_block_state)[0usize..8usize]).copy_from_slice(&block_state[0usize..8usize]);
-    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
+    let buf_multi: (&[u8], &[u8]) = (buf_1.1).split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(128u32) == 0u32 && r > 0u32 { 128u32 } else { r.wrapping_rem(128u32) };
-    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let buf_last: (&[u8], &[u8]) = (buf_multi.1).split_at(r.wrapping_sub(ite) as usize);
     crate::hash_sha2::sha384_update_nblocks(0u32, buf_last.0, &mut tmp_block_state);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
     crate::hash_sha2::sha384_update_last(

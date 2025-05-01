@@ -9,14 +9,14 @@
     let n: u32 = len.wrapping_div(16u32);
     let r: u32 = len.wrapping_rem(16u32);
     let blocks: (&[u8], &[u8]) = text.split_at(0usize);
-    let rem: (&[u8], &[u8]) = blocks.1.split_at(n.wrapping_mul(16u32) as usize);
+    let rem: (&[u8], &[u8]) = (blocks.1).split_at(n.wrapping_mul(16u32) as usize);
     let pre: (&mut [u64], &mut [u64]) = ctx.split_at_mut(5usize);
-    let acc: (&mut [u64], &mut [u64]) = pre.0.split_at_mut(0usize);
+    let acc: (&mut [u64], &mut [u64]) = (pre.0).split_at_mut(0usize);
     let nb: u32 = n.wrapping_mul(16u32).wrapping_div(16u32);
     let rem1: u32 = n.wrapping_mul(16u32).wrapping_rem(16u32);
     for i in 0u32..nb
     {
-        let block: (&[u8], &[u8]) = rem.0.split_at(i.wrapping_mul(16u32) as usize);
+        let block: (&[u8], &[u8]) = (rem.0).split_at(i.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
         let u: u64 = lowstar::endianness::load64_le(&block.1[0usize..]);
         let lo: u64 = u;
@@ -43,8 +43,8 @@
         let mask: u64 = b;
         let f41: u64 = (&e)[4usize];
         (&mut e)[4usize] = f41 | mask;
-        let r1: (&[u64], &[u64]) = pre.1.split_at(0usize);
-        let r5: (&[u64], &[u64]) = r1.1.split_at(5usize);
+        let r1: (&[u64], &[u64]) = (pre.1).split_at(0usize);
+        let r5: (&[u64], &[u64]) = (r1.1).split_at(5usize);
         let r0: u64 = r5.0[0usize];
         let r11: u64 = r5.0[1usize];
         let r2: u64 = r5.0[2usize];
@@ -136,7 +136,7 @@
     };
     if rem1 > 0u32
     {
-        let last: (&[u8], &[u8]) = rem.0.split_at(nb.wrapping_mul(16u32) as usize);
+        let last: (&[u8], &[u8]) = (rem.0).split_at(nb.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
         let mut tmp: [u8; 16] = [0u8; 16usize];
         ((&mut tmp)[0usize..rem1 as usize]).copy_from_slice(&last.1[0usize..rem1 as usize]);
@@ -165,8 +165,8 @@
         let mask: u64 = b;
         let fi: u64 = (&e)[rem1.wrapping_mul(8u32).wrapping_div(26u32) as usize];
         (&mut e)[rem1.wrapping_mul(8u32).wrapping_div(26u32) as usize] = fi | mask;
-        let r1: (&[u64], &[u64]) = pre.1.split_at(0usize);
-        let r5: (&[u64], &[u64]) = r1.1.split_at(5usize);
+        let r1: (&[u64], &[u64]) = (pre.1).split_at(0usize);
+        let r5: (&[u64], &[u64]) = (r1.1).split_at(5usize);
         let r0: u64 = r5.0[0usize];
         let r11: u64 = r5.0[1usize];
         let r2: u64 = r5.0[2usize];
@@ -260,8 +260,8 @@
     ((&mut tmp)[0usize..r as usize]).copy_from_slice(&rem.1[0usize..r as usize]);
     if r > 0u32
     {
-        let pre0: (&[u64], &[u64]) = pre.1.split_at(0usize);
-        let acc0: (&mut [u64], &mut [u64]) = acc.1.split_at_mut(0usize);
+        let pre0: (&[u64], &[u64]) = (pre.1).split_at(0usize);
+        let acc0: (&mut [u64], &mut [u64]) = (acc.1).split_at_mut(0usize);
         let mut e: [u64; 5] = [0u64; 5usize];
         let u: u64 = lowstar::endianness::load64_le(&(&tmp)[0usize..]);
         let lo: u64 = u;
@@ -288,8 +288,8 @@
         let mask: u64 = b;
         let f41: u64 = (&e)[4usize];
         (&mut e)[4usize] = f41 | mask;
-        let r1: (&[u64], &[u64]) = pre0.1.split_at(0usize);
-        let r5: (&[u64], &[u64]) = r1.1.split_at(5usize);
+        let r1: (&[u64], &[u64]) = (pre0.1).split_at(0usize);
+        let r5: (&[u64], &[u64]) = (r1.1).split_at(5usize);
         let r0: u64 = r5.0[0usize];
         let r11: u64 = r5.0[1usize];
         let r2: u64 = r5.0[2usize];
@@ -398,7 +398,7 @@
     lowstar::endianness::store64_le(&mut (&mut block)[0usize..], aadlen as u64);
     lowstar::endianness::store64_le(&mut (&mut block)[8usize..], mlen as u64);
     let pre: (&mut [u64], &mut [u64]) = ctx.split_at_mut(5usize);
-    let acc: (&mut [u64], &mut [u64]) = pre.0.split_at_mut(0usize);
+    let acc: (&mut [u64], &mut [u64]) = (pre.0).split_at_mut(0usize);
     let mut e: [u64; 5] = [0u64; 5usize];
     let u: u64 = lowstar::endianness::load64_le(&(&block)[0usize..]);
     let lo: u64 = u;
@@ -425,8 +425,8 @@
     let mask: u64 = b;
     let f41: u64 = (&e)[4usize];
     (&mut e)[4usize] = f41 | mask;
-    let r: (&[u64], &[u64]) = pre.1.split_at(0usize);
-    let r5: (&[u64], &[u64]) = r.1.split_at(5usize);
+    let r: (&[u64], &[u64]) = (pre.1).split_at(0usize);
+    let r5: (&[u64], &[u64]) = (r.1).split_at(5usize);
     let r0: u64 = r5.0[0usize];
     let r1: u64 = r5.0[1usize];
     let r2: u64 = r5.0[2usize];

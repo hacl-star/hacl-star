@@ -838,7 +838,7 @@ enum option__·Spec_Hash_Definitions_hash_alg····uint64_t··
     Some { v: crate::hash_sha3::hash_buf }
 }
 
-pub fn malloc(a: crate::streaming_types::hash_alg) -> Box<[crate::hash_sha3::state_t]>
+pub fn malloc <'a>(a: crate::streaming_types::hash_alg) -> Box<[crate::hash_sha3::state_t]>
 {
     let buf: Box<[u8]> = vec![0u8; crate::hash_sha3::block_len(a) as usize].into_boxed_slice();
     let buf1: &[u8] = &buf;
@@ -883,7 +883,7 @@ pub fn malloc(a: crate::streaming_types::hash_alg) -> Box<[crate::hash_sha3::sta
     }
 }
 
-pub fn copy(state: &[crate::hash_sha3::state_t]) -> Box<[crate::hash_sha3::state_t]>
+pub fn copy <'a>(state: &'a [crate::hash_sha3::state_t]) -> Box<[crate::hash_sha3::state_t]>
 {
     let block_state0: &crate::hash_sha3::hash_buf = &(state[0usize]).block_state;
     let buf0: &[u8] = &(state[0usize]).buf;
@@ -1011,7 +1011,7 @@ pub fn update(state: &mut [crate::hash_sha3::state_t], chunk: &[u8], chunk_len: 
             let data1_len: u32 = n_blocks.wrapping_mul(crate::hash_sha3::block_len(i));
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             let a1: crate::streaming_types::hash_alg = block_state.fst;
             let s1: &mut [u64] = &mut block_state.snd;
             crate::hash_sha3::update_multi_sha3(
@@ -1030,7 +1030,7 @@ pub fn update(state: &mut [crate::hash_sha3::state_t], chunk: &[u8], chunk_len: 
         {
             let diff: u32 = (crate::hash_sha3::block_len(i)).wrapping_sub(sz);
             let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
+            let chunk2: (&[u8], &[u8]) = (chunk1.1).split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
@@ -1090,8 +1090,8 @@ pub fn update(state: &mut [crate::hash_sha3::state_t], chunk: &[u8], chunk_len: 
                 );
             let data1_len: u32 = n_blocks.wrapping_mul(crate::hash_sha3::block_len(i));
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
-            let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data1: (&[u8], &[u8]) = (chunk2.1).split_at(0usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             let a1: crate::streaming_types::hash_alg = block_state.fst;
             let s1: &mut [u64] = &mut block_state.snd;
             crate::hash_sha3::update_multi_sha3(
@@ -1133,13 +1133,13 @@ fn digest_(
     let s_src: &[u64] = &block_state.snd;
     let s_dst: &mut [u64] = &mut tmp_block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
-    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
+    let buf_multi: (&[u8], &[u8]) = (buf_1.1).split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(crate::hash_sha3::block_len(a)) == 0u32 && r > 0u32
         { crate::hash_sha3::block_len(a) }
         else
         { r.wrapping_rem(crate::hash_sha3::block_len(a)) };
-    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let buf_last: (&[u8], &[u8]) = (buf_multi.1).split_at(r.wrapping_sub(ite) as usize);
     let a1: crate::streaming_types::hash_alg = tmp_block_state.fst;
     let s: &mut [u64] = &mut tmp_block_state.snd;
     crate::hash_sha3::update_multi_sha3(
@@ -2933,7 +2933,8 @@ pub fn sha3_512(output: &mut [u8], input: &[u8], inputByteLen: u32)
 Allocate state buffer of 200-bytes
 */
 pub fn
-state_malloc() ->
+state_malloc
+<'a>() ->
     Box<[u64]>
 {
     let buf: Box<[u64]> = vec![0u64; 25usize].into_boxed_slice();

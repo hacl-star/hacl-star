@@ -29,15 +29,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2s_finish =
       foreign "Hacl_Hash_Blake2s_finish"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint32_t) @-> (returning void))))
-    type k____uint32_t___uint32_t_ = [ `k____uint32_t___uint32_t_ ] structure
-    let (k____uint32_t___uint32_t_ :
-      [ `k____uint32_t___uint32_t_ ] structure typ) =
-      structure "K____uint32_t___uint32_t__s"
-    let k____uint32_t___uint32_t__fst =
-      field k____uint32_t___uint32_t_ "fst" (ptr uint32_t)
-    let k____uint32_t___uint32_t__snd =
-      field k____uint32_t___uint32_t_ "snd" (ptr uint32_t)
-    let _ = seal k____uint32_t___uint32_t_
     type hacl_Hash_Blake2s_block_state_t =
       [ `hacl_Hash_Blake2s_block_state_t ] structure
     let (hacl_Hash_Blake2s_block_state_t :

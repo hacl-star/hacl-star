@@ -17,11 +17,11 @@ pub fn crypto_kem_keypair(pk: &mut [u8], sk: &mut [u8]) -> u32
     let mut coins: [u8; 64] = [0u8; 64usize];
     crate::frodo_kem::randombytes_(64u32, &mut coins);
     let s: (&[u8], &[u8]) = coins.split_at(0usize);
-    let seed_se: (&[u8], &[u8]) = s.1.split_at(24usize);
-    let z: (&[u8], &[u8]) = seed_se.1.split_at(24usize);
+    let seed_se: (&[u8], &[u8]) = (s.1).split_at(24usize);
+    let z: (&[u8], &[u8]) = (seed_se.1).split_at(24usize);
     let seed_a: (&mut [u8], &mut [u8]) = pk.split_at_mut(0usize);
     crate::hash_sha3::shake256(seed_a.1, 16u32, z.1, 16u32);
-    let b_bytes: (&mut [u8], &mut [u8]) = seed_a.1.split_at_mut(16usize);
+    let b_bytes: (&mut [u8], &mut [u8]) = (seed_a.1).split_at_mut(16usize);
     let s_bytes: (&mut [u8], &mut [u8]) = sk.split_at_mut(15656usize);
     let mut s_matrix: [u16; 7808] = [0u16; 7808usize];
     let mut e_matrix: [u16; 7808] = [0u16; 7808usize];
@@ -48,7 +48,7 @@ pub fn crypto_kem_keypair(pk: &mut [u8], sk: &mut [u8]) -> u32
     lib::memzero0::memzero::<u16>(&mut s_matrix, 7808u32);
     lib::memzero0::memzero::<u16>(&mut e_matrix, 7808u32);
     let slen1: u32 = 31272u32;
-    let sk_p: (&mut [u8], &mut [u8]) = s_bytes.0.split_at_mut(0usize);
+    let sk_p: (&mut [u8], &mut [u8]) = (s_bytes.0).split_at_mut(0usize);
     (sk_p.1[0usize..24usize]).copy_from_slice(&seed_se.0[0usize..24usize]);
     (sk_p.1[24usize..24usize + 15632usize]).copy_from_slice(&pk[0usize..15632usize]);
     crate::hash_sha3::shake256(&mut sk[slen1 as usize..], 24u32, pk, 15632u32);
@@ -66,9 +66,9 @@ pub fn crypto_kem_enc(ct: &mut [u8], ss: &mut [u8], pk: &[u8]) -> u32
     ((&mut pkh_mu)[24usize..24usize + 24usize]).copy_from_slice(&(&coins)[0usize..24usize]);
     crate::hash_sha3::shake256(&mut seed_se_k, 48u32, &pkh_mu, 48u32);
     let seed_se: (&[u8], &[u8]) = seed_se_k.split_at(0usize);
-    let k: (&[u8], &[u8]) = seed_se.1.split_at(24usize);
+    let k: (&[u8], &[u8]) = (seed_se.1).split_at(24usize);
     let seed_a: (&[u8], &[u8]) = pk.split_at(0usize);
-    let b: (&[u8], &[u8]) = seed_a.1.split_at(16usize);
+    let b: (&[u8], &[u8]) = (seed_a.1).split_at(16usize);
     let mut sp_matrix: [u16; 7808] = [0u16; 7808usize];
     let mut ep_matrix: [u16; 7808] = [0u16; 7808usize];
     let mut epp_matrix: [u16; 64] = [0u16; 64usize];
@@ -82,7 +82,7 @@ pub fn crypto_kem_enc(ct: &mut [u8], ss: &mut [u8], pk: &[u8]) -> u32
     crate::frodo_kem::frodo_sample_matrix976(8u32, 976u32, &(&r)[15616usize..], &mut ep_matrix);
     crate::frodo_kem::frodo_sample_matrix976(8u32, 8u32, &(&r)[31232usize..], &mut epp_matrix);
     let c1: (&mut [u8], &mut [u8]) = ct.split_at_mut(0usize);
-    let c2: (&mut [u8], &mut [u8]) = c1.1.split_at_mut(15616usize);
+    let c2: (&mut [u8], &mut [u8]) = (c1.1).split_at_mut(15616usize);
     let mut bp_matrix: [u16; 7808] = [0u16; 7808usize];
     let mut a_matrix: [u16; 952576] = [0u16; 952576usize];
     crate::frodo_kem::frodo_gen_matrix(
@@ -126,7 +126,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &[u8], sk: &[u8]) -> u32
     let mut bp_matrix: [u16; 7808] = [0u16; 7808usize];
     let mut c_matrix: [u16; 64] = [0u16; 64usize];
     let c1: (&[u8], &[u8]) = ct.split_at(0usize);
-    let c2: (&[u8], &[u8]) = c1.1.split_at(15616usize);
+    let c2: (&[u8], &[u8]) = (c1.1).split_at(15616usize);
     crate::frodo_kem::frodo_unpack(8u32, 976u32, 16u32, c2.0, &mut bp_matrix);
     crate::frodo_kem::frodo_unpack(8u32, 8u32, 16u32, c2.1, &mut c_matrix);
     let mut mu_decode: [u8; 24] = [0u8; 24usize];
@@ -142,15 +142,15 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &[u8], sk: &[u8]) -> u32
     let mut seed_se_k: [u8; 48] = [0u8; 48usize];
     let pkh_mu_decode_len: u32 = 48u32;
     let mut pkh_mu_decode: Box<[u8]> = vec![0u8; pkh_mu_decode_len as usize].into_boxed_slice();
-    let pkh: (&[u8], &[u8]) = s_bytes.1.split_at(15616usize);
+    let pkh: (&[u8], &[u8]) = (s_bytes.1).split_at(15616usize);
     ((&mut pkh_mu_decode)[0usize..24usize]).copy_from_slice(&pkh.1[0usize..24usize]);
     ((&mut pkh_mu_decode)[24usize..24usize + 24usize]).copy_from_slice(
         &(&mu_decode)[0usize..24usize]
     );
     crate::hash_sha3::shake256(&mut seed_se_k, 48u32, &pkh_mu_decode, pkh_mu_decode_len);
     let seed_se: (&[u8], &[u8]) = seed_se_k.split_at(0usize);
-    let kp: (&[u8], &[u8]) = seed_se.1.split_at(24usize);
-    let s: (&[u8], &[u8]) = s_bytes.0.split_at(0usize);
+    let kp: (&[u8], &[u8]) = (seed_se.1).split_at(24usize);
+    let s: (&[u8], &[u8]) = (s_bytes.0).split_at(0usize);
     let mut bpp_matrix: [u16; 7808] = [0u16; 7808usize];
     let mut cp_matrix: [u16; 64] = [0u16; 64usize];
     let mut sp_matrix: [u16; 7808] = [0u16; 7808usize];
@@ -165,9 +165,9 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &[u8], sk: &[u8]) -> u32
     crate::frodo_kem::frodo_sample_matrix976(8u32, 976u32, &(&r)[0usize..], &mut sp_matrix);
     crate::frodo_kem::frodo_sample_matrix976(8u32, 976u32, &(&r)[15616usize..], &mut ep_matrix);
     crate::frodo_kem::frodo_sample_matrix976(8u32, 8u32, &(&r)[31232usize..], &mut epp_matrix);
-    let pk: (&[u8], &[u8]) = s.1.split_at(24usize);
-    let seed_a: (&[u8], &[u8]) = pk.1.split_at(0usize);
-    let b: (&[u8], &[u8]) = seed_a.1.split_at(16usize);
+    let pk: (&[u8], &[u8]) = (s.1).split_at(24usize);
+    let seed_a: (&[u8], &[u8]) = (pk.1).split_at(0usize);
+    let b: (&[u8], &[u8]) = (seed_a.1).split_at(16usize);
     let mut a_matrix: [u16; 952576] = [0u16; 952576usize];
     crate::frodo_kem::frodo_gen_matrix(
         crate::spec::frodo_gen_a::SHAKE128,

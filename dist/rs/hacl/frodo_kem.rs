@@ -162,15 +162,15 @@ pub(crate) fn shake128_4x(
     {
         let r0: (&mut [u8], &mut [u8]) = r.split_at_mut(0u32.wrapping_mul(n) as usize);
         let r1: (&mut [u8], &mut [u8]) =
-            r0.1.split_at_mut(2u32.wrapping_mul(n) as usize - 0u32.wrapping_mul(n) as usize);
+            (r0.1).split_at_mut(2u32.wrapping_mul(n) as usize - 0u32.wrapping_mul(n) as usize);
         let r2: (&mut [u8], &mut [u8]) =
-            r1.1.split_at_mut(4u32.wrapping_mul(n) as usize - 2u32.wrapping_mul(n) as usize);
+            (r1.1).split_at_mut(4u32.wrapping_mul(n) as usize - 2u32.wrapping_mul(n) as usize);
         let r3: (&mut [u8], &mut [u8]) =
-            r2.1.split_at_mut(6u32.wrapping_mul(n) as usize - 4u32.wrapping_mul(n) as usize);
+            (r2.1).split_at_mut(6u32.wrapping_mul(n) as usize - 4u32.wrapping_mul(n) as usize);
         let tmp_seed0: (&mut [u8], &mut [u8]) = tmp_seed.split_at_mut(0usize);
-        let tmp_seed1: (&mut [u8], &mut [u8]) = tmp_seed0.1.split_at_mut(18usize);
-        let tmp_seed2: (&mut [u8], &mut [u8]) = tmp_seed1.1.split_at_mut(18usize);
-        let tmp_seed3: (&mut [u8], &mut [u8]) = tmp_seed2.1.split_at_mut(18usize);
+        let tmp_seed1: (&mut [u8], &mut [u8]) = (tmp_seed0.1).split_at_mut(18usize);
+        let tmp_seed2: (&mut [u8], &mut [u8]) = (tmp_seed1.1).split_at_mut(18usize);
+        let tmp_seed3: (&mut [u8], &mut [u8]) = (tmp_seed2.1).split_at_mut(18usize);
         lowstar::endianness::store16_le(
             &mut tmp_seed1.0[0usize..],
             4u32.wrapping_mul(i).wrapping_add(0u32) as u16
@@ -201,10 +201,10 @@ pub(crate) fn shake128_4x(
         );
         for i0 in 0u32..n
         {
-            let resij0: (&[u8], &[u8]) = r1.0.split_at(i0.wrapping_mul(2u32) as usize);
-            let resij1: (&[u8], &[u8]) = r2.0.split_at(i0.wrapping_mul(2u32) as usize);
-            let resij2: (&[u8], &[u8]) = r3.0.split_at(i0.wrapping_mul(2u32) as usize);
-            let resij3: (&[u8], &[u8]) = r3.1.split_at(i0.wrapping_mul(2u32) as usize);
+            let resij0: (&[u8], &[u8]) = (r1.0).split_at(i0.wrapping_mul(2u32) as usize);
+            let resij1: (&[u8], &[u8]) = (r2.0).split_at(i0.wrapping_mul(2u32) as usize);
+            let resij2: (&[u8], &[u8]) = (r3.0).split_at(i0.wrapping_mul(2u32) as usize);
+            let resij3: (&[u8], &[u8]) = (r3.1).split_at(i0.wrapping_mul(2u32) as usize);
             let u: u16 = lowstar::endianness::load16_le(resij0.1);
             res[4u32.wrapping_mul(i).wrapping_add(0u32).wrapping_mul(n).wrapping_add(i0) as usize] =
                 u;

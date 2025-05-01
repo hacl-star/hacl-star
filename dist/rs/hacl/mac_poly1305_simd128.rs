@@ -103,7 +103,7 @@ pub(crate) fn fmul_r2_normalize(
     let r: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
         p.split_at(0usize);
     let r2: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-        r.1.split_at(10usize);
+        (r.1).split_at(10usize);
     let a0: lib::intvector_intrinsics::vec128 = out[0usize];
     let a1: lib::intvector_intrinsics::vec128 = out[1usize];
     let a2: lib::intvector_intrinsics::vec128 = out[2usize];
@@ -374,7 +374,7 @@ pub(crate) fn poly1305_init(ctx: &mut [lib::intvector_intrinsics::vec128], key: 
     let acc: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
         ctx.split_at_mut(0usize);
     let pre: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        acc.1.split_at_mut(5usize);
+        (acc.1).split_at_mut(5usize);
     let kr: (&[u8], &[u8]) = key.split_at(0usize);
     pre.0[0usize] = lib::intvector_intrinsics::vec128_zero;
     pre.0[1usize] = lib::intvector_intrinsics::vec128_zero;
@@ -390,15 +390,15 @@ pub(crate) fn poly1305_init(ctx: &mut [lib::intvector_intrinsics::vec128], key: 
     let lo1: u64 = lo & mask0;
     let hi1: u64 = hi & mask1;
     let r: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        pre.1.split_at_mut(0usize);
+        (pre.1).split_at_mut(0usize);
     let r5: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        r.1.split_at_mut(5usize);
+        (r.1).split_at_mut(5usize);
     let rn: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        r5.1.split_at_mut(5usize);
+        (r5.1).split_at_mut(5usize);
     let
     rn_5: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
     =
-        rn.1.split_at_mut(5usize);
+        (rn.1).split_at_mut(5usize);
     let r_vec0: lib::intvector_intrinsics::vec128 = lib::intvector_intrinsics::vec128_load64(lo1);
     let r_vec1: lib::intvector_intrinsics::vec128 = lib::intvector_intrinsics::vec128_load64(hi1);
     let f0: lib::intvector_intrinsics::vec128 =
@@ -635,21 +635,21 @@ fn poly1305_update(ctx: &mut [lib::intvector_intrinsics::vec128], len: u32, text
     let pre: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
         ctx.split_at_mut(5usize);
     let acc: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        pre.0.split_at_mut(0usize);
+        (pre.0).split_at_mut(0usize);
     let sz_block: u32 = 32u32;
     let len0: u32 = len.wrapping_div(sz_block).wrapping_mul(sz_block);
     let t0: (&[u8], &[u8]) = text.split_at(0usize);
     if len0 > 0u32
     {
         let bs: u32 = 32u32;
-        let text0: (&[u8], &[u8]) = t0.1.split_at(0usize);
+        let text0: (&[u8], &[u8]) = (t0.1).split_at(0usize);
         crate::mac_poly1305_simd128::load_acc2(acc.1, text0.1);
         let len1: u32 = len0.wrapping_sub(bs);
-        let text1: (&[u8], &[u8]) = text0.1.split_at(bs as usize);
+        let text1: (&[u8], &[u8]) = (text0.1).split_at(bs as usize);
         let nb: u32 = len1.wrapping_div(bs);
         for i in 0u32..nb
         {
-            let block: (&[u8], &[u8]) = text1.1.split_at(i.wrapping_mul(bs) as usize);
+            let block: (&[u8], &[u8]) = (text1.1).split_at(i.wrapping_mul(bs) as usize);
             let mut e: [lib::intvector_intrinsics::vec128; 5] =
                 [lib::intvector_intrinsics::vec128_zero; 5usize];
             let b1: lib::intvector_intrinsics::vec128 =
@@ -704,9 +704,9 @@ fn poly1305_update(ctx: &mut [lib::intvector_intrinsics::vec128], len: u32, text
             let f41: lib::intvector_intrinsics::vec128 = (&e)[4usize];
             (&mut e)[4usize] = lib::intvector_intrinsics::vec128_or(f41, mask);
             let rn: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-                pre.1.split_at(10usize);
+                (pre.1).split_at(10usize);
             let rn5: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-                rn.1.split_at(5usize);
+                (rn.1).split_at(5usize);
             let r0: lib::intvector_intrinsics::vec128 = rn5.0[0usize];
             let r1: lib::intvector_intrinsics::vec128 = rn5.0[1usize];
             let r2: lib::intvector_intrinsics::vec128 = rn5.0[2usize];
@@ -923,12 +923,12 @@ fn poly1305_update(ctx: &mut [lib::intvector_intrinsics::vec128], len: u32, text
         crate::mac_poly1305_simd128::fmul_r2_normalize(acc.1, pre.1)
     };
     let len1: u32 = len.wrapping_sub(len0);
-    let t1: (&[u8], &[u8]) = t0.1.split_at(len0 as usize);
+    let t1: (&[u8], &[u8]) = (t0.1).split_at(len0 as usize);
     let nb: u32 = len1.wrapping_div(16u32);
     let rem: u32 = len1.wrapping_rem(16u32);
     for i in 0u32..nb
     {
-        let block: (&[u8], &[u8]) = t1.1.split_at(i.wrapping_mul(16u32) as usize);
+        let block: (&[u8], &[u8]) = (t1.1).split_at(i.wrapping_mul(16u32) as usize);
         let mut e: [lib::intvector_intrinsics::vec128; 5] =
             [lib::intvector_intrinsics::vec128_zero; 5usize];
         let u: u64 = lowstar::endianness::load64_le(&block.1[0usize..]);
@@ -980,9 +980,9 @@ fn poly1305_update(ctx: &mut [lib::intvector_intrinsics::vec128], len: u32, text
         let f41: lib::intvector_intrinsics::vec128 = (&e)[4usize];
         (&mut e)[4usize] = lib::intvector_intrinsics::vec128_or(f41, mask);
         let r: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-            pre.1.split_at(0usize);
+            (pre.1).split_at(0usize);
         let r5: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-            r.1.split_at(5usize);
+            (r.1).split_at(5usize);
         let r0: lib::intvector_intrinsics::vec128 = r5.0[0usize];
         let r1: lib::intvector_intrinsics::vec128 = r5.0[1usize];
         let r2: lib::intvector_intrinsics::vec128 = r5.0[2usize];
@@ -1187,7 +1187,7 @@ fn poly1305_update(ctx: &mut [lib::intvector_intrinsics::vec128], len: u32, text
     };
     if rem > 0u32
     {
-        let last: (&[u8], &[u8]) = t1.1.split_at(nb.wrapping_mul(16u32) as usize);
+        let last: (&[u8], &[u8]) = (t1.1).split_at(nb.wrapping_mul(16u32) as usize);
         let mut e: [lib::intvector_intrinsics::vec128; 5] =
             [lib::intvector_intrinsics::vec128_zero; 5usize];
         let mut tmp: [u8; 16] = [0u8; 16usize];
@@ -1243,9 +1243,9 @@ fn poly1305_update(ctx: &mut [lib::intvector_intrinsics::vec128], len: u32, text
         (&mut e)[rem.wrapping_mul(8u32).wrapping_div(26u32) as usize] =
             lib::intvector_intrinsics::vec128_or(fi, mask);
         let r: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-            pre.1.split_at(0usize);
+            (pre.1).split_at(0usize);
         let r5: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-            r.1.split_at(5usize);
+            (r.1).split_at(5usize);
         let r0: lib::intvector_intrinsics::vec128 = r5.0[0usize];
         let r1: lib::intvector_intrinsics::vec128 = r5.0[1usize];
         let r2: lib::intvector_intrinsics::vec128 = r5.0[2usize];
@@ -1651,7 +1651,7 @@ enum option__·Lib_IntVector_Intrinsics_vec128· <'a>
     Some { v: &'a mut [lib::intvector_intrinsics::vec128] }
 }
 
-pub fn malloc(key: &[u8]) -> Box<[crate::mac_poly1305_simd128::state_t]>
+pub fn malloc <'a>(key: &'a [u8]) -> Box<[crate::mac_poly1305_simd128::state_t]>
 {
     let buf: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
     let buf1: &[u8] = &buf;
@@ -1775,7 +1775,7 @@ update(state: &mut [crate::mac_poly1305_simd128::state_t], chunk: &[u8], chunk_l
             let data1_len: u32 = n_blocks.wrapping_mul(32u32);
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             crate::mac_poly1305_simd128::poly1305_update(block_state, data1_len, data2.0);
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
@@ -1788,7 +1788,7 @@ update(state: &mut [crate::mac_poly1305_simd128::state_t], chunk: &[u8], chunk_l
         {
             let diff: u32 = 32u32.wrapping_sub(sz);
             let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
+            let chunk2: (&[u8], &[u8]) = (chunk1.1).split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let k·1: &[u8] = &(state[0usize]).p_key;
@@ -1825,8 +1825,8 @@ update(state: &mut [crate::mac_poly1305_simd128::state_t], chunk: &[u8], chunk_l
             let n_blocks: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(32u32);
             let data1_len: u32 = n_blocks.wrapping_mul(32u32);
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
-            let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data1: (&[u8], &[u8]) = (chunk2.1).split_at(0usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             crate::mac_poly1305_simd128::poly1305_update(block_state, data1_len, data2.0);
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
@@ -1856,10 +1856,10 @@ pub fn digest(state: &[crate::mac_poly1305_simd128::state_t], output: &mut [u8])
         [lib::intvector_intrinsics::vec128_zero; 25usize];
     let tmp_block_state: &mut [lib::intvector_intrinsics::vec128] = &mut r1;
     (tmp_block_state[0usize..25usize]).copy_from_slice(&block_state[0usize..25usize]);
-    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
+    let buf_multi: (&[u8], &[u8]) = (buf_1.1).split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(16u32) == 0u32 && r > 0u32 { 16u32 } else { r.wrapping_rem(16u32) };
-    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let buf_last: (&[u8], &[u8]) = (buf_multi.1).split_at(r.wrapping_sub(ite) as usize);
     let ite0: u32 =
         if r.wrapping_rem(16u32) == 0u32 && r > 0u32 { 16u32 } else { r.wrapping_rem(16u32) };
     crate::mac_poly1305_simd128::poly1305_update(tmp_block_state, r.wrapping_sub(ite0), buf_last.0);

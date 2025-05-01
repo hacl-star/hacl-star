@@ -148,8 +148,8 @@ pub fn
 mk_base_point(p: &mut [u64])
 {
     let gx: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
-    let gy: (&mut [u64], &mut [u64]) = gx.1.split_at_mut(5usize);
-    let gz: (&mut [u64], &mut [u64]) = gy.1.split_at_mut(5usize);
+    let gy: (&mut [u64], &mut [u64]) = (gx.1).split_at_mut(5usize);
+    let gz: (&mut [u64], &mut [u64]) = (gy.1).split_at_mut(5usize);
     gy.0[0usize] = 0x2815b16f81798u64;
     gy.0[1usize] = 0xdb2dce28d959fu64;
     gy.0[2usize] = 0xe870b07029bfcu64;
@@ -271,16 +271,16 @@ point_load(b: &[u8], out: &mut [u64])
 {
     let mut p_aff: [u64; 10] = [0u64; 10usize];
     let px: (&mut [u64], &mut [u64]) = p_aff.split_at_mut(0usize);
-    let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
+    let py: (&mut [u64], &mut [u64]) = (px.1).split_at_mut(5usize);
     let pxb: (&[u8], &[u8]) = b.split_at(0usize);
-    let pyb: (&[u8], &[u8]) = pxb.1.split_at(32usize);
+    let pyb: (&[u8], &[u8]) = (pxb.1).split_at(32usize);
     crate::bignum_k256::load_felem(py.0, pyb.0);
     crate::bignum_k256::load_felem(py.1, pyb.1);
-    let x: (&[u64], &[u64]) = py.0.split_at(0usize);
-    let y: (&[u64], &[u64]) = py.1.split_at(0usize);
+    let x: (&[u64], &[u64]) = (py.0).split_at(0usize);
+    let y: (&[u64], &[u64]) = (py.1).split_at(0usize);
     let x1: (&mut [u64], &mut [u64]) = out.split_at_mut(0usize);
-    let y1: (&mut [u64], &mut [u64]) = x1.1.split_at_mut(5usize);
-    let z1: (&mut [u64], &mut [u64]) = y1.1.split_at_mut(5usize);
+    let y1: (&mut [u64], &mut [u64]) = (x1.1).split_at_mut(5usize);
+    let z1: (&mut [u64], &mut [u64]) = (y1.1).split_at_mut(5usize);
     (y1.0[0usize..5usize]).copy_from_slice(&x.1[0usize..5usize]);
     (z1.0[0usize..5usize]).copy_from_slice(&y.1[0usize..5usize]);
     (z1.1[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);

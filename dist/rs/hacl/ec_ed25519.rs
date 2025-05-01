@@ -164,9 +164,9 @@ pub fn
 mk_base_point(p: &mut [u64])
 {
     let gx: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
-    let gy: (&mut [u64], &mut [u64]) = gx.1.split_at_mut(5usize);
-    let gz: (&mut [u64], &mut [u64]) = gy.1.split_at_mut(5usize);
-    let gt: (&mut [u64], &mut [u64]) = gz.1.split_at_mut(5usize);
+    let gy: (&mut [u64], &mut [u64]) = (gx.1).split_at_mut(5usize);
+    let gz: (&mut [u64], &mut [u64]) = (gy.1).split_at_mut(5usize);
+    let gt: (&mut [u64], &mut [u64]) = (gz.1).split_at_mut(5usize);
     gy.0[0usize] = 0x00062d608f25d51au64;
     gy.0[1usize] = 0x000412a4b4f6592au64;
     gy.0[2usize] = 0x00075b7171a4b31du64;

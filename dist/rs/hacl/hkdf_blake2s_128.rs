@@ -95,7 +95,7 @@ expand_blake2s_128(
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
-        let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
+        let block: (&mut [u8], &mut [u8]) = (output.1).split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
             &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )

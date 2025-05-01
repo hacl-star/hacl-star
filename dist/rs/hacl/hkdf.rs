@@ -88,7 +88,7 @@ expand_sha2_256(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
-        let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
+        let block: (&mut [u8], &mut [u8]) = (output.1).split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
             &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
@@ -192,7 +192,7 @@ expand_sha2_384(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
-        let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
+        let block: (&mut [u8], &mut [u8]) = (output.1).split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
             &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
@@ -296,7 +296,7 @@ expand_sha2_512(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen: u
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
-        let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
+        let block: (&mut [u8], &mut [u8]) = (output.1).split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
             &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
@@ -400,7 +400,7 @@ expand_blake2s_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
-        let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
+        let block: (&mut [u8], &mut [u8]) = (output.1).split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
             &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )
@@ -504,7 +504,7 @@ expand_blake2b_32(okm: &mut [u8], prk: &[u8], prklen: u32, info: &[u8], infolen:
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
-        let block: (&mut [u8], &mut [u8]) = output.1.split_at_mut(n.wrapping_mul(tlen) as usize);
+        let block: (&mut [u8], &mut [u8]) = (output.1).split_at_mut(n.wrapping_mul(tlen) as usize);
         (block.1[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]).copy_from_slice(
             &(&(&tag)[0usize..])[0usize..len.wrapping_sub(n.wrapping_mul(tlen)) as usize]
         )

@@ -59,15 +59,15 @@
             let
             r1: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                r0.1.split_at_mut(1usize);
+                (r0.1).split_at_mut(1usize);
             let
             r2: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                r1.1.split_at_mut(1usize);
+                (r1.1).split_at_mut(1usize);
             let
             r3: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                r2.1.split_at_mut(1usize);
+                (r2.1).split_at_mut(1usize);
             let s0: u32 =
                 (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(0u32) as usize];
             let s1: u32 =
@@ -129,35 +129,35 @@
                     (&m_w)[s15 as usize]
                 );
             let x: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-                r1.0.split_at(0usize);
+                (r1.0).split_at(0usize);
             let y: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-                r2.0.split_at(0usize);
+                (r2.0).split_at(0usize);
             let z: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-                r3.0.split_at(0usize);
+                (r3.0).split_at(0usize);
             let w: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-                r3.1.split_at(0usize);
+                (r3.1).split_at(0usize);
             let
             wv_a:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv3.0.split_at_mut(0usize);
+                (wv3.0).split_at_mut(0usize);
             let
             wv_b:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a.1.split_at_mut(1usize);
+                (wv_a.1).split_at_mut(1usize);
             wv_b.0[0usize] = lib::intvector_intrinsics::vec128_add32(wv_b.0[0usize], wv_b.1[0usize]);
             wv_b.0[0usize] = lib::intvector_intrinsics::vec128_add32(wv_b.0[0usize], x.1[0usize]);
             let
             wv_a0:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv3.1.split_at_mut(0usize);
+                (wv3.1).split_at_mut(0usize);
             let
             wv_b0:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b.0.split_at_mut(0usize);
+                (wv_b.0).split_at_mut(0usize);
             wv_a0.1[0usize] =
                 lib::intvector_intrinsics::vec128_xor(wv_a0.1[0usize], wv_b0.1[0usize]);
             wv_a0.1[0usize] =
@@ -166,24 +166,24 @@
             wv_a1:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b.1.split_at_mut(1usize);
+                (wv_b.1).split_at_mut(1usize);
             let
             wv_b1:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a0.1.split_at_mut(0usize);
+                (wv_a0.1).split_at_mut(0usize);
             wv_a1.1[0usize] =
                 lib::intvector_intrinsics::vec128_add32(wv_a1.1[0usize], wv_b1.1[0usize]);
             let
             wv_a2:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a1.0.split_at_mut(0usize);
+                (wv_a1.0).split_at_mut(0usize);
             let
             wv_b2:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a1.1.split_at_mut(0usize);
+                (wv_a1.1).split_at_mut(0usize);
             wv_a2.1[0usize] =
                 lib::intvector_intrinsics::vec128_xor(wv_a2.1[0usize], wv_b2.1[0usize]);
             wv_a2.1[0usize] =
@@ -192,12 +192,12 @@
             wv_a3:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b0.1.split_at_mut(0usize);
+                (wv_b0.1).split_at_mut(0usize);
             let
             wv_b3:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a2.1.split_at_mut(0usize);
+                (wv_a2.1).split_at_mut(0usize);
             wv_a3.1[0usize] =
                 lib::intvector_intrinsics::vec128_add32(wv_a3.1[0usize], wv_b3.1[0usize]);
             wv_a3.1[0usize] = lib::intvector_intrinsics::vec128_add32(wv_a3.1[0usize], y.1[0usize]);
@@ -205,12 +205,12 @@
             wv_a4:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b1.1.split_at_mut(0usize);
+                (wv_b1.1).split_at_mut(0usize);
             let
             wv_b4:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a3.1.split_at_mut(0usize);
+                (wv_a3.1).split_at_mut(0usize);
             wv_a4.1[0usize] =
                 lib::intvector_intrinsics::vec128_xor(wv_a4.1[0usize], wv_b4.1[0usize]);
             wv_a4.1[0usize] =
@@ -219,24 +219,24 @@
             wv_a5:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b2.1.split_at_mut(0usize);
+                (wv_b2.1).split_at_mut(0usize);
             let
             wv_b5:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a4.1.split_at_mut(0usize);
+                (wv_a4.1).split_at_mut(0usize);
             wv_a5.1[0usize] =
                 lib::intvector_intrinsics::vec128_add32(wv_a5.1[0usize], wv_b5.1[0usize]);
             let
             wv_a6:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b3.1.split_at_mut(0usize);
+                (wv_b3.1).split_at_mut(0usize);
             let
             wv_b6:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a5.1.split_at_mut(0usize);
+                (wv_a5.1).split_at_mut(0usize);
             wv_a6.1[0usize] =
                 lib::intvector_intrinsics::vec128_xor(wv_a6.1[0usize], wv_b6.1[0usize]);
             wv_a6.1[0usize] =
@@ -245,17 +245,17 @@
             r10:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a6.1.split_at_mut(0usize);
+                (wv_a6.1).split_at_mut(0usize);
             let
             r20:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b6.1.split_at_mut(0usize);
+                (wv_b6.1).split_at_mut(0usize);
             let
             r30:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b5.1.split_at_mut(0usize);
+                (wv_b5.1).split_at_mut(0usize);
             let v0: lib::intvector_intrinsics::vec128 = r10.1[0usize];
             let v1: lib::intvector_intrinsics::vec128 =
                 lib::intvector_intrinsics::vec128_rotate_right_lanes32(v0, 1u32);
@@ -272,12 +272,12 @@
             wv_a7:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b4.1.split_at_mut(0usize);
+                (wv_b4.1).split_at_mut(0usize);
             let
             wv_b7:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                r10.1.split_at_mut(0usize);
+                (r10.1).split_at_mut(0usize);
             wv_a7.1[0usize] =
                 lib::intvector_intrinsics::vec128_add32(wv_a7.1[0usize], wv_b7.1[0usize]);
             wv_a7.1[0usize] = lib::intvector_intrinsics::vec128_add32(wv_a7.1[0usize], z.1[0usize]);
@@ -285,12 +285,12 @@
             wv_a8:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                r30.1.split_at_mut(0usize);
+                (r30.1).split_at_mut(0usize);
             let
             wv_b8:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a7.1.split_at_mut(0usize);
+                (wv_a7.1).split_at_mut(0usize);
             wv_a8.1[0usize] =
                 lib::intvector_intrinsics::vec128_xor(wv_a8.1[0usize], wv_b8.1[0usize]);
             wv_a8.1[0usize] =
@@ -299,24 +299,24 @@
             wv_a9:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                r20.1.split_at_mut(0usize);
+                (r20.1).split_at_mut(0usize);
             let
             wv_b9:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a8.1.split_at_mut(0usize);
+                (wv_a8.1).split_at_mut(0usize);
             wv_a9.1[0usize] =
                 lib::intvector_intrinsics::vec128_add32(wv_a9.1[0usize], wv_b9.1[0usize]);
             let
             wv_a10:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b7.1.split_at_mut(0usize);
+                (wv_b7.1).split_at_mut(0usize);
             let
             wv_b10:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a9.1.split_at_mut(0usize);
+                (wv_a9.1).split_at_mut(0usize);
             wv_a10.1[0usize] =
                 lib::intvector_intrinsics::vec128_xor(wv_a10.1[0usize], wv_b10.1[0usize]);
             wv_a10.1[0usize] =
@@ -325,12 +325,12 @@
             wv_a11:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b8.1.split_at_mut(0usize);
+                (wv_b8.1).split_at_mut(0usize);
             let
             wv_b11:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a10.1.split_at_mut(0usize);
+                (wv_a10.1).split_at_mut(0usize);
             wv_a11.1[0usize] =
                 lib::intvector_intrinsics::vec128_add32(wv_a11.1[0usize], wv_b11.1[0usize]);
             wv_a11.1[0usize] =
@@ -339,11 +339,11 @@
             wv_a12:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b9.1.split_at_mut(0usize);
+                (wv_b9.1).split_at_mut(0usize);
             let
             wv_b12: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128])
             =
-                wv_a11.1.split_at(0usize);
+                (wv_a11.1).split_at(0usize);
             wv_a12.1[0usize] =
                 lib::intvector_intrinsics::vec128_xor(wv_a12.1[0usize], wv_b12.1[0usize]);
             wv_a12.1[0usize] =
@@ -352,24 +352,24 @@
             wv_a13:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b10.1.split_at_mut(0usize);
+                (wv_b10.1).split_at_mut(0usize);
             let
             wv_b13:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a12.1.split_at_mut(0usize);
+                (wv_a12.1).split_at_mut(0usize);
             wv_a13.1[0usize] =
                 lib::intvector_intrinsics::vec128_add32(wv_a13.1[0usize], wv_b13.1[0usize]);
             let
             wv_a14:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b11.1.split_at_mut(0usize);
+                (wv_b11.1).split_at_mut(0usize);
             let
             wv_b14:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a13.1.split_at_mut(0usize);
+                (wv_a13.1).split_at_mut(0usize);
             wv_a14.1[0usize] =
                 lib::intvector_intrinsics::vec128_xor(wv_a14.1[0usize], wv_b14.1[0usize]);
             wv_a14.1[0usize] =
@@ -378,17 +378,17 @@
             r11:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_a14.1.split_at_mut(0usize);
+                (wv_a14.1).split_at_mut(0usize);
             let
             r21:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b14.1.split_at_mut(0usize);
+                (wv_b14.1).split_at_mut(0usize);
             let
             r31:
             (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
             =
-                wv_b13.1.split_at_mut(0usize);
+                (wv_b13.1).split_at_mut(0usize);
             let v02: lib::intvector_intrinsics::vec128 = r11.1[0usize];
             let v12: lib::intvector_intrinsics::vec128 =
                 lib::intvector_intrinsics::vec128_rotate_right_lanes32(v02, 3u32);
@@ -406,15 +406,15 @@
     let s0: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
         hash.split_at_mut(0usize);
     let s1: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        s0.1.split_at_mut(1usize);
+        (s0.1).split_at_mut(1usize);
     let r0: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-        wv3.0.split_at(0usize);
+        (wv3.0).split_at(0usize);
     let r1: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-        r0.1.split_at(1usize);
+        (r0.1).split_at(1usize);
     let r2: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-        r1.1.split_at(1usize);
+        (r1.1).split_at(1usize);
     let r3: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-        wv3.1.split_at(0usize);
+        (wv3.1).split_at(0usize);
     s1.0[0usize] = lib::intvector_intrinsics::vec128_xor(s1.0[0usize], r1.0[0usize]);
     s1.0[0usize] = lib::intvector_intrinsics::vec128_xor(s1.0[0usize], r2.1[0usize]);
     s1.1[0usize] = lib::intvector_intrinsics::vec128_xor(s1.1[0usize], r2.0[0usize]);
@@ -443,11 +443,11 @@ pub(crate) fn init(hash: &mut [lib::intvector_intrinsics::vec128], kk: u32, nn: 
     let r0: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
         hash.split_at_mut(0usize);
     let r1: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        r0.1.split_at_mut(1usize);
+        (r0.1).split_at_mut(1usize);
     let r2: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        r1.1.split_at_mut(1usize);
+        (r1.1).split_at_mut(1usize);
     let r3: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        r2.1.split_at_mut(1usize);
+        (r2.1).split_at_mut(1usize);
     let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
     let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
     let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
@@ -469,11 +469,11 @@ pub(crate) fn init(hash: &mut [lib::intvector_intrinsics::vec128], kk: u32, nn: 
             let u: u32 = lowstar::endianness::load32_le(bj);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
-    let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
+    let uu____1: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(2usize);
     krml::unroll_for!(
         2,
         "i",
@@ -484,7 +484,7 @@ pub(crate) fn init(hash: &mut [lib::intvector_intrinsics::vec128], kk: u32, nn: 
             let u: u32 = lowstar::endianness::load32_le(bj);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (uu____1.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -497,7 +497,7 @@ pub(crate) fn init(hash: &mut [lib::intvector_intrinsics::vec128], kk: u32, nn: 
     (&mut tmp)[1usize] = p.leaf_length;
     (&mut tmp)[2usize] = p.node_offset as u32;
     (&mut tmp)[3usize] =
-        p.node_offset.wrapping_shr(32u32) as u32
+        (p.node_offset).wrapping_shr(32u32) as u32
         ^
         ((p.node_depth as u32).wrapping_shl(16u32) ^ (p.inner_length as u32).wrapping_shl(24u32));
     let tmp0: u32 = (&tmp)[0usize];
@@ -613,11 +613,11 @@ pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[lib::intvector_intrinsi
 {
     let mut b: [u8; 32] = [0u8; 32usize];
     let first: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
-    let second: (&mut [u8], &mut [u8]) = first.1.split_at_mut(16usize);
+    let second: (&mut [u8], &mut [u8]) = (first.1).split_at_mut(16usize);
     let row0: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
         hash.split_at(0usize);
     let row1: (&[lib::intvector_intrinsics::vec128], &[lib::intvector_intrinsics::vec128]) =
-        row0.1.split_at(1usize);
+        (row0.1).split_at(1usize);
     lib::intvector_intrinsics::vec128_store32_le(second.0, row1.0[0usize]);
     lib::intvector_intrinsics::vec128_store32_le(second.1, row1.1[0usize]);
     lowstar::ignore::ignore::<&[u8]>(&b);
@@ -626,7 +626,7 @@ pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[lib::intvector_intrinsi
     lib::memzero0::memzero::<u8>(&mut b, 32u32)
 }
 
-pub(crate) fn malloc_internal_state_with_key() -> Box<[lib::intvector_intrinsics::vec128]>
+pub(crate) fn malloc_internal_state_with_key <'a>() -> Box<[lib::intvector_intrinsics::vec128]>
 {
     let buf: Box<[lib::intvector_intrinsics::vec128]> =
         vec![lib::intvector_intrinsics::vec128_zero; 4usize].into_boxed_slice();
@@ -791,19 +791,19 @@ fn malloc_raw <'a>(
                                   (&mut [lib::intvector_intrinsics::vec128],
                                   &mut [lib::intvector_intrinsics::vec128])
                                   =
-                                      r0.1.split_at_mut(1usize);
+                                      (r0.1).split_at_mut(1usize);
                                   let
                                   r2:
                                   (&mut [lib::intvector_intrinsics::vec128],
                                   &mut [lib::intvector_intrinsics::vec128])
                                   =
-                                      r1.1.split_at_mut(1usize);
+                                      (r1.1).split_at_mut(1usize);
                                   let
                                   r3:
                                   (&mut [lib::intvector_intrinsics::vec128],
                                   &mut [lib::intvector_intrinsics::vec128])
                                   =
-                                      r2.1.split_at_mut(1usize);
+                                      (r2.1).split_at_mut(1usize);
                                   let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
                                   let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
                                   let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
@@ -829,12 +829,12 @@ fn malloc_raw <'a>(
                                           let r4: u32 = u;
                                           let x: u32 = r4;
                                           let os: (&mut [u32], &mut [u32]) =
-                                              uu____0.1.split_at_mut(0usize);
+                                              (uu____0.1).split_at_mut(0usize);
                                           os.1[i0 as usize] = x
                                       }
                                   );
                                   let uu____1: (&mut [u32], &mut [u32]) =
-                                      uu____0.1.split_at_mut(2usize);
+                                      (uu____0.1).split_at_mut(2usize);
                                   krml::unroll_for!(
                                       2,
                                       "i0",
@@ -847,7 +847,7 @@ fn malloc_raw <'a>(
                                           let r4: u32 = u;
                                           let x: u32 = r4;
                                           let os: (&mut [u32], &mut [u32]) =
-                                              uu____1.1.split_at_mut(0usize);
+                                              (uu____1.1).split_at_mut(0usize);
                                           os.1[i0 as usize] = x
                                       }
                                   );
@@ -862,7 +862,7 @@ fn malloc_raw <'a>(
                                   (&mut tmp)[1usize] = pv.leaf_length;
                                   (&mut tmp)[2usize] = pv.node_offset as u32;
                                   (&mut tmp)[3usize] =
-                                      pv.node_offset.wrapping_shr(32u32) as u32
+                                      (pv.node_offset).wrapping_shr(32u32) as u32
                                       ^
                                       ((pv.node_depth as u32).wrapping_shl(16u32)
                                       ^
@@ -934,9 +934,9 @@ fn index_of_state(s: &[crate::hash_blake2s_simd128::state_t]) -> crate::hash_bla
     }
 }
 
-fn reset_raw <'a>(
-    state: &'a mut [crate::hash_blake2s_simd128::state_t],
-    key: crate::hash_blake2b::params_and_key <'a>
+fn reset_raw(
+    state: &mut [crate::hash_blake2s_simd128::state_t],
+    key: crate::hash_blake2b::params_and_key
 )
 {
     let
@@ -986,17 +986,17 @@ fn reset_raw <'a>(
               r1:
               (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
               =
-                  r0.1.split_at_mut(1usize);
+                  (r0.1).split_at_mut(1usize);
               let
               r2:
               (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
               =
-                  r1.1.split_at_mut(1usize);
+                  (r1.1).split_at_mut(1usize);
               let
               r3:
               (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128])
               =
-                  r2.1.split_at_mut(1usize);
+                  (r2.1).split_at_mut(1usize);
               let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
               let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
               let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
@@ -1018,11 +1018,11 @@ fn reset_raw <'a>(
                       let u: u32 = lowstar::endianness::load32_le(bj);
                       let r: u32 = u;
                       let x: u32 = r;
-                      let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+                      let os: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(0usize);
                       os.1[i0 as usize] = x
                   }
               );
-              let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
+              let uu____1: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(2usize);
               krml::unroll_for!(
                   2,
                   "i0",
@@ -1033,7 +1033,7 @@ fn reset_raw <'a>(
                       let u: u32 = lowstar::endianness::load32_le(bj);
                       let r: u32 = u;
                       let x: u32 = r;
-                      let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+                      let os: (&mut [u32], &mut [u32]) = (uu____1.1).split_at_mut(0usize);
                       os.1[i0 as usize] = x
                   }
               );
@@ -1046,7 +1046,7 @@ fn reset_raw <'a>(
               (&mut tmp)[1usize] = pv.leaf_length;
               (&mut tmp)[2usize] = pv.node_offset as u32;
               (&mut tmp)[3usize] =
-                  pv.node_offset.wrapping_shr(32u32) as u32
+                  (pv.node_offset).wrapping_shr(32u32) as u32
                   ^
                   ((pv.node_depth as u32).wrapping_shl(16u32)
                   ^
@@ -1221,7 +1221,7 @@ update0(state: &mut [crate::hash_blake2s_simd128::state_t], chunk: &[u8], chunk_
             let data1_len: u32 = n_blocks.wrapping_mul(64u32);
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             match *block_state
             {
                 crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
@@ -1249,7 +1249,7 @@ update0(state: &mut [crate::hash_blake2s_simd128::state_t], chunk: &[u8], chunk_
         {
             let diff: u32 = 64u32.wrapping_sub(sz);
             let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
+            let chunk2: (&[u8], &[u8]) = (chunk1.1).split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
@@ -1300,8 +1300,8 @@ update0(state: &mut [crate::hash_blake2s_simd128::state_t], chunk: &[u8], chunk_
             let n_blocks: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(64u32);
             let data1_len: u32 = n_blocks.wrapping_mul(64u32);
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
-            let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data1: (&[u8], &[u8]) = (chunk2.1).split_at(0usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             match *block_state
             {
                 crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
@@ -1400,10 +1400,10 @@ digest(s: &[crate::hash_blake2s_simd128::state_t], dst: &mut [u8]) ->
           }
     };
     let prev_len: u64 = total_len.wrapping_sub(r as u64);
-    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
+    let buf_multi: (&[u8], &[u8]) = (buf_1.1).split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
-    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let buf_last: (&[u8], &[u8]) = (buf_multi.1).split_at(r.wrapping_sub(ite) as usize);
     match tmp_block_state
     {
         crate::hash_blake2s_simd128::__uint8_t_uint8_t_bool_·Lib_IntVector_Intrinsics_vec128·_·Lib_IntVector_Intrinsics_vec128·
@@ -1468,7 +1468,8 @@ pub fn info(s: &[crate::hash_blake2s_simd128::state_t]) -> crate::hash_blake2b::
 Copying. This preserves all parameters.
 */
 pub fn
-copy(state: &[crate::hash_blake2s_simd128::state_t]) ->
+copy
+<'a>(state: &'a [crate::hash_blake2s_simd128::state_t]) ->
     Box<[crate::hash_blake2s_simd128::state_t]>
 {
     let
@@ -1587,13 +1588,12 @@ parameters `params` into `output`. The `key` array must be of length
 `params.digest_length`.
 */
 pub fn
-hash_with_key_and_params
-<'a>(
-    output: &'a mut [u8],
-    input: &'a [u8],
+hash_with_key_and_params(
+    output: &mut [u8],
+    input: &[u8],
     input_len: u32,
-    params: crate::hash_blake2b::blake2_params <'a>,
-    key: &'a [u8]
+    params: crate::hash_blake2b::blake2_params,
+    key: &[u8]
 )
 {
     let mut b: [lib::intvector_intrinsics::vec128; 4] =
@@ -1604,11 +1604,11 @@ hash_with_key_and_params
     let r0: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
         b.split_at_mut(0usize);
     let r1: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        r0.1.split_at_mut(1usize);
+        (r0.1).split_at_mut(1usize);
     let r2: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        r1.1.split_at_mut(1usize);
+        (r1.1).split_at_mut(1usize);
     let r3: (&mut [lib::intvector_intrinsics::vec128], &mut [lib::intvector_intrinsics::vec128]) =
-        r2.1.split_at_mut(1usize);
+        (r2.1).split_at_mut(1usize);
     let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
     let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
     let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
@@ -1630,11 +1630,11 @@ hash_with_key_and_params
             let u: u32 = lowstar::endianness::load32_le(bj);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
-    let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
+    let uu____1: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(2usize);
     krml::unroll_for!(
         2,
         "i",
@@ -1645,7 +1645,7 @@ hash_with_key_and_params
             let u: u32 = lowstar::endianness::load32_le(bj);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (uu____1.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -1658,7 +1658,7 @@ hash_with_key_and_params
     (&mut tmp)[1usize] = params.leaf_length;
     (&mut tmp)[2usize] = params.node_offset as u32;
     (&mut tmp)[3usize] =
-        params.node_offset.wrapping_shr(32u32) as u32
+        (params.node_offset).wrapping_shr(32u32) as u32
         ^
         ((params.node_depth as u32).wrapping_shl(16u32)
         ^

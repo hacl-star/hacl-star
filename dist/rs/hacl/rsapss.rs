@@ -203,7 +203,7 @@
         let mut m1Hash0: Box<[u8]> = vec![0u8; hLen as usize].into_boxed_slice();
         let dbLen: u32 = emLen1.wrapping_sub(hLen).wrapping_sub(1u32);
         let maskedDB: (&[u8], &[u8]) = em.split_at(0usize);
-        let m1Hash: (&[u8], &[u8]) = maskedDB.1.split_at(dbLen as usize);
+        let m1Hash: (&[u8], &[u8]) = (maskedDB.1).split_at(dbLen as usize);
         let mut dbMask: Box<[u8]> = vec![0u8; dbLen as usize].into_boxed_slice();
         crate::rsapss::mgf_hash(a, hLen, m1Hash.1, dbLen, &mut dbMask);
         for i in 0u32..dbLen
@@ -222,7 +222,7 @@
         let mut pad2: Box<[u8]> = vec![0u8; padLen as usize].into_boxed_slice();
         (&mut pad2)[padLen.wrapping_sub(1u32) as usize] = 0x01u8;
         let pad: (&[u8], &[u8]) = dbMask.split_at(0usize);
-        let salt: (&[u8], &[u8]) = pad.1.split_at(padLen as usize);
+        let salt: (&[u8], &[u8]) = (pad.1).split_at(padLen as usize);
         let mut res: [u8; 1] = [255u8; 1usize];
         for i in 0u32..padLen
         {
@@ -261,9 +261,9 @@
     let ebLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
     let n: (&mut [u64], &mut [u64]) = pkey.split_at_mut(0usize);
-    let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen as usize);
+    let r2: (&mut [u64], &mut [u64]) = (n.1).split_at_mut(nLen as usize);
     let e: (&mut [u64], &mut [u64]) =
-        r2.1.split_at_mut(nLen.wrapping_add(nLen) as usize - nLen as usize);
+        (r2.1).split_at_mut(nLen.wrapping_add(nLen) as usize - nLen as usize);
     bignum::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
     bignum::bignum::bn_precomp_r2_mod_n_u64(
         modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
@@ -294,7 +294,7 @@
     let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
     let pkeyLen: u32 = nLen.wrapping_add(nLen).wrapping_add(eLen);
     let pkey: (&mut [u64], &mut [u64]) = skey.split_at_mut(0usize);
-    let d: (&mut [u64], &mut [u64]) = pkey.1.split_at_mut(pkeyLen as usize);
+    let d: (&mut [u64], &mut [u64]) = (pkey.1).split_at_mut(pkeyLen as usize);
     let b: bool = crate::rsapss::load_pkey(modBits, eBits, nb, eb, d.0);
     bignum::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
     let m1: u64 = crate::rsapss::check_exponent_u64(dBits, d.1);
@@ -358,11 +358,11 @@ rsapss_sign(
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let n: (&[u64], &[u64]) = skey.split_at(0usize);
-        let r2: (&[u64], &[u64]) = n.1.split_at(nLen2 as usize);
+        let r2: (&[u64], &[u64]) = (n.1).split_at(nLen2 as usize);
         let e: (&[u64], &[u64]) =
-            r2.1.split_at(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
+            (r2.1).split_at(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
         let d: (&[u64], &[u64]) =
-            e.1.split_at(
+            (e.1).split_at(
                 nLen2.wrapping_add(nLen2).wrapping_add(eLen) as usize
                 -
                 nLen2.wrapping_add(nLen2) as usize
@@ -460,9 +460,9 @@ rsapss_verify(
         bignum::bignum_base::bn_from_bytes_be_uint64(k, sgnt, &mut s);
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let n: (&[u64], &[u64]) = pkey.split_at(0usize);
-        let r2: (&[u64], &[u64]) = n.1.split_at(nLen2 as usize);
+        let r2: (&[u64], &[u64]) = (n.1).split_at(nLen2 as usize);
         let e: (&[u64], &[u64]) =
-            r2.1.split_at(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
+            (r2.1).split_at(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
         let mut acc: [u64; 1] = [0u64; 1usize];
         for i in 0u32..nLen2
         {
@@ -528,7 +528,8 @@ Load a public key from key parts.
 @return Returns an allocated public key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
 */
 pub fn
-new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
+new_rsapss_load_pkey
+<'a>(modBits: u32, eBits: u32, nb: &'a [u8], eb: &'a [u8]) ->
     Box<[u64]>
 {
     let ite: bool =
@@ -556,9 +557,9 @@ new_rsapss_load_pkey(modBits: u32, eBits: u32, nb: &[u8], eb: &[u8]) ->
         let ebLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let n: (&mut [u64], &mut [u64]) = pkey2.split_at_mut(0usize);
-        let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen1 as usize);
+        let r2: (&mut [u64], &mut [u64]) = (n.1).split_at_mut(nLen1 as usize);
         let e: (&mut [u64], &mut [u64]) =
-            r2.1.split_at_mut(nLen1.wrapping_add(nLen1) as usize - nLen1 as usize);
+            (r2.1).split_at_mut(nLen1.wrapping_add(nLen1) as usize - nLen1 as usize);
         bignum::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
         bignum::bignum::bn_precomp_r2_mod_n_u64(
             modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
@@ -588,7 +589,8 @@ Load a secret key from key parts.
 @return Returns an allocated secret key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
 */
 pub fn
-new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8], db: &[u8]) ->
+new_rsapss_load_skey
+<'a>(modBits: u32, eBits: u32, dBits: u32, nb: &'a [u8], eb: &'a [u8], db: &'a [u8]) ->
     Box<[u64]>
 {
     let ite: bool =
@@ -630,14 +632,14 @@ new_rsapss_load_skey(modBits: u32, eBits: u32, dBits: u32, nb: &[u8], eb: &[u8],
         let eLen1: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let pkeyLen: u32 = nLen1.wrapping_add(nLen1).wrapping_add(eLen1);
         let pkey: (&mut [u64], &mut [u64]) = skey2.split_at_mut(0usize);
-        let d: (&mut [u64], &mut [u64]) = pkey.1.split_at_mut(pkeyLen as usize);
+        let d: (&mut [u64], &mut [u64]) = (pkey.1).split_at_mut(pkeyLen as usize);
         let nbLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let ebLen1: u32 = eBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
-        let n: (&mut [u64], &mut [u64]) = d.0.split_at_mut(0usize);
-        let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
+        let n: (&mut [u64], &mut [u64]) = (d.0).split_at_mut(0usize);
+        let r2: (&mut [u64], &mut [u64]) = (n.1).split_at_mut(nLen2 as usize);
         let e: (&mut [u64], &mut [u64]) =
-            r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
+            (r2.1).split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
         bignum::bignum_base::bn_from_bytes_be_uint64(nbLen1, nb, r2.0);
         bignum::bignum::bn_precomp_r2_mod_n_u64(
             modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),

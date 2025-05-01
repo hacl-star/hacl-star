@@ -368,19 +368,19 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
                 {
                     let t1: u32 = a1.1[4u32.wrapping_mul(i) as usize];
                     let res_i: (&mut [u32], &mut [u32]) =
-                        res10.1.split_at_mut(4u32.wrapping_mul(i) as usize);
+                        (res10.1).split_at_mut(4u32.wrapping_mul(i) as usize);
                     (&mut c)[0usize] =
                         lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1);
                     let t10: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
-                    let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
+                    let res_i0: (&mut [u32], &mut [u32]) = (res_i.1).split_at_mut(1usize);
                     (&mut c)[0usize] =
                         lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t10, 0u32, res_i0.1);
                     let t11: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
-                    let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
+                    let res_i1: (&mut [u32], &mut [u32]) = (res_i0.1).split_at_mut(1usize);
                     (&mut c)[0usize] =
                         lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t11, 0u32, res_i1.1);
                     let t12: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
-                    let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
+                    let res_i2: (&mut [u32], &mut [u32]) = (res_i1.1).split_at_mut(1usize);
                     (&mut c)[0usize] =
                         lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t12, 0u32, res_i2.1)
                 };
@@ -390,7 +390,7 @@ mod_inv_prime_vartime(len: u32, n: &[u32], a: &[u32], res: &mut [u32]) ->
                 len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_mul(4u32)..len.wrapping_sub(1u32)
                 {
                     let t1: u32 = a1.1[i as usize];
-                    let res_i: (&mut [u32], &mut [u32]) = res10.1.split_at_mut(i as usize);
+                    let res_i: (&mut [u32], &mut [u32]) = (res10.1).split_at_mut(i as usize);
                     (&mut c)[0usize] =
                         lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1)
                 };
@@ -422,7 +422,8 @@ Heap-allocate and initialize a montgomery context.
     - `1 < n`
 */
 pub fn
-mont_ctx_init(len: u32, n: &[u32]) ->
+mont_ctx_init
+<'a>(len: u32, n: &'a [u32]) ->
     Box<[crate::bignum::bn_mont_ctx_u32]>
 {
     let mut r2: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
@@ -571,19 +572,19 @@ mod_inv_prime_vartime_precomp(k: &[crate::bignum::bn_mont_ctx_u32], a: &[u32], r
             {
                 let t1: u32 = a1.1[4u32.wrapping_mul(i) as usize];
                 let res_i: (&mut [u32], &mut [u32]) =
-                    res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
+                    (res1.1).split_at_mut(4u32.wrapping_mul(i) as usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1);
                 let t10: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
-                let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
+                let res_i0: (&mut [u32], &mut [u32]) = (res_i.1).split_at_mut(1usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t10, 0u32, res_i0.1);
                 let t11: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
-                let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
+                let res_i1: (&mut [u32], &mut [u32]) = (res_i0.1).split_at_mut(1usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t11, 0u32, res_i1.1);
                 let t12: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
-                let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
+                let res_i2: (&mut [u32], &mut [u32]) = (res_i1.1).split_at_mut(1usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t12, 0u32, res_i2.1)
             };
@@ -593,7 +594,7 @@ mod_inv_prime_vartime_precomp(k: &[crate::bignum::bn_mont_ctx_u32], a: &[u32], r
             len1.wrapping_sub(1u32).wrapping_div(4u32).wrapping_mul(4u32)..len1.wrapping_sub(1u32)
             {
                 let t1: u32 = a1.1[i as usize];
-                let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(i as usize);
+                let res_i: (&mut [u32], &mut [u32]) = (res1.1).split_at_mut(i as usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1)
             };
@@ -627,7 +628,8 @@ Load a bid-endian bignum from memory.
     value to avoid memory leaks.
 */
 pub fn
-new_bn_from_bytes_be(len: u32, b: &[u8]) ->
+new_bn_from_bytes_be
+<'a>(len: u32, b: &'a [u8]) ->
     Box<[u32]>
 {
     if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) > 1073741823u32
@@ -672,7 +674,8 @@ Load a little-endian bignum from memory.
     value to avoid memory leaks.
 */
 pub fn
-new_bn_from_bytes_le(len: u32, b: &[u8]) ->
+new_bn_from_bytes_le
+<'a>(len: u32, b: &'a [u8]) ->
     Box<[u32]>
 {
     if len == 0u32 || len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) > 1073741823u32

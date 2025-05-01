@@ -44,7 +44,7 @@
         1u32,
         {
             let x: u32 = wv3.1[i as usize] ^ (&mask)[i as usize];
-            let os: (&mut [u32], &mut [u32]) = wv3.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (wv3.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -57,9 +57,9 @@
             let start_idx: u32 = i.wrapping_rem(10u32).wrapping_mul(16u32);
             let mut m_st: [u32; 16] = [0u32; 16usize];
             let r0: (&mut [u32], &mut [u32]) = m_st.split_at_mut(0usize);
-            let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
-            let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
-            let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
+            let r1: (&mut [u32], &mut [u32]) = (r0.1).split_at_mut(4usize);
+            let r2: (&mut [u32], &mut [u32]) = (r1.1).split_at_mut(4usize);
+            let r3: (&mut [u32], &mut [u32]) = (r2.1).split_at_mut(4usize);
             let s0: u32 =
                 (&crate::impl_blake2_constants::sigmaTable)[start_idx.wrapping_add(0u32) as usize];
             let s1: u32 =
@@ -120,12 +120,12 @@
             r3.1[1usize] = uu____9;
             r3.1[2usize] = uu____10;
             r3.1[3usize] = uu____11;
-            let x: (&[u32], &[u32]) = r1.0.split_at(0usize);
-            let y: (&[u32], &[u32]) = r2.0.split_at(0usize);
-            let z: (&[u32], &[u32]) = r3.0.split_at(0usize);
-            let w: (&[u32], &[u32]) = r3.1.split_at(0usize);
-            let wv_a: (&mut [u32], &mut [u32]) = wv3.0.split_at_mut(0usize);
-            let wv_b: (&mut [u32], &mut [u32]) = wv_a.1.split_at_mut(4usize);
+            let x: (&[u32], &[u32]) = (r1.0).split_at(0usize);
+            let y: (&[u32], &[u32]) = (r2.0).split_at(0usize);
+            let z: (&[u32], &[u32]) = (r3.0).split_at(0usize);
+            let w: (&[u32], &[u32]) = (r3.1).split_at(0usize);
+            let wv_a: (&mut [u32], &mut [u32]) = (wv3.0).split_at_mut(0usize);
+            let wv_b: (&mut [u32], &mut [u32]) = (wv_a.1).split_at_mut(4usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -133,7 +133,7 @@
                 1u32,
                 {
                     let x1: u32 = (wv_b.0[i0 as usize]).wrapping_add(wv_b.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_b.0.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_b.0).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
@@ -144,12 +144,12 @@
                 1u32,
                 {
                     let x1: u32 = (wv_b.0[i0 as usize]).wrapping_add(x.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_b.0.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_b.0).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
-            let wv_a0: (&mut [u32], &mut [u32]) = wv3.1.split_at_mut(0usize);
-            let wv_b0: (&mut [u32], &mut [u32]) = wv_b.0.split_at_mut(0usize);
+            let wv_a0: (&mut [u32], &mut [u32]) = (wv3.1).split_at_mut(0usize);
+            let wv_b0: (&mut [u32], &mut [u32]) = (wv_b.0).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -157,7 +157,7 @@
                 1u32,
                 {
                     let x1: u32 = wv_a0.1[i0 as usize] ^ wv_b0.1[i0 as usize];
-                    let os: (&mut [u32], &mut [u32]) = wv_a0.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a0.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
@@ -174,8 +174,8 @@
                     os.1[i0 as usize] = x10
                 }
             );
-            let wv_a1: (&mut [u32], &mut [u32]) = wv_b.1.split_at_mut(4usize);
-            let wv_b1: (&mut [u32], &mut [u32]) = wv_a0.1.split_at_mut(0usize);
+            let wv_a1: (&mut [u32], &mut [u32]) = (wv_b.1).split_at_mut(4usize);
+            let wv_b1: (&mut [u32], &mut [u32]) = (wv_a0.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -183,12 +183,12 @@
                 1u32,
                 {
                     let x1: u32 = (wv_a1.1[i0 as usize]).wrapping_add(wv_b1.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a1.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a1.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
-            let wv_a2: (&mut [u32], &mut [u32]) = wv_a1.0.split_at_mut(0usize);
-            let wv_b2: (&mut [u32], &mut [u32]) = wv_a1.1.split_at_mut(0usize);
+            let wv_a2: (&mut [u32], &mut [u32]) = (wv_a1.0).split_at_mut(0usize);
+            let wv_b2: (&mut [u32], &mut [u32]) = (wv_a1.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -196,7 +196,7 @@
                 1u32,
                 {
                     let x1: u32 = wv_a2.1[i0 as usize] ^ wv_b2.1[i0 as usize];
-                    let os: (&mut [u32], &mut [u32]) = wv_a2.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a2.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
@@ -213,8 +213,8 @@
                     os.1[i0 as usize] = x10
                 }
             );
-            let wv_a3: (&mut [u32], &mut [u32]) = wv_b0.1.split_at_mut(0usize);
-            let wv_b3: (&mut [u32], &mut [u32]) = wv_a2.1.split_at_mut(0usize);
+            let wv_a3: (&mut [u32], &mut [u32]) = (wv_b0.1).split_at_mut(0usize);
+            let wv_b3: (&mut [u32], &mut [u32]) = (wv_a2.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -222,7 +222,7 @@
                 1u32,
                 {
                     let x1: u32 = (wv_a3.1[i0 as usize]).wrapping_add(wv_b3.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a3.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a3.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
@@ -233,12 +233,12 @@
                 1u32,
                 {
                     let x1: u32 = (wv_a3.1[i0 as usize]).wrapping_add(y.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a3.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a3.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
-            let wv_a4: (&mut [u32], &mut [u32]) = wv_b1.1.split_at_mut(0usize);
-            let wv_b4: (&mut [u32], &mut [u32]) = wv_a3.1.split_at_mut(0usize);
+            let wv_a4: (&mut [u32], &mut [u32]) = (wv_b1.1).split_at_mut(0usize);
+            let wv_b4: (&mut [u32], &mut [u32]) = (wv_a3.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -246,7 +246,7 @@
                 1u32,
                 {
                     let x1: u32 = wv_a4.1[i0 as usize] ^ wv_b4.1[i0 as usize];
-                    let os: (&mut [u32], &mut [u32]) = wv_a4.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a4.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
@@ -263,8 +263,8 @@
                     os.1[i0 as usize] = x10
                 }
             );
-            let wv_a5: (&mut [u32], &mut [u32]) = wv_b2.1.split_at_mut(0usize);
-            let wv_b5: (&mut [u32], &mut [u32]) = wv_a4.1.split_at_mut(0usize);
+            let wv_a5: (&mut [u32], &mut [u32]) = (wv_b2.1).split_at_mut(0usize);
+            let wv_b5: (&mut [u32], &mut [u32]) = (wv_a4.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -272,12 +272,12 @@
                 1u32,
                 {
                     let x1: u32 = (wv_a5.1[i0 as usize]).wrapping_add(wv_b5.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a5.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a5.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
-            let wv_a6: (&mut [u32], &mut [u32]) = wv_b3.1.split_at_mut(0usize);
-            let wv_b6: (&mut [u32], &mut [u32]) = wv_a5.1.split_at_mut(0usize);
+            let wv_a6: (&mut [u32], &mut [u32]) = (wv_b3.1).split_at_mut(0usize);
+            let wv_b6: (&mut [u32], &mut [u32]) = (wv_a5.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -285,7 +285,7 @@
                 1u32,
                 {
                     let x1: u32 = wv_a6.1[i0 as usize] ^ wv_b6.1[i0 as usize];
-                    let os: (&mut [u32], &mut [u32]) = wv_a6.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a6.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x1
                 }
             );
@@ -302,9 +302,9 @@
                     os.1[i0 as usize] = x10
                 }
             );
-            let r14: (&mut [u32], &mut [u32]) = wv_a6.1.split_at_mut(0usize);
-            let r20: (&mut [u32], &mut [u32]) = wv_b6.1.split_at_mut(0usize);
-            let r30: (&mut [u32], &mut [u32]) = wv_b5.1.split_at_mut(0usize);
+            let r14: (&mut [u32], &mut [u32]) = (wv_a6.1).split_at_mut(0usize);
+            let r20: (&mut [u32], &mut [u32]) = (wv_b6.1).split_at_mut(0usize);
+            let r30: (&mut [u32], &mut [u32]) = (wv_b5.1).split_at_mut(0usize);
             let r110: &mut [u32] = r14.1;
             let x0: u32 = r110[1usize];
             let x1: u32 = r110[2usize];
@@ -332,8 +332,8 @@
             r112[1usize] = x11;
             r112[2usize] = x21;
             r112[3usize] = x31;
-            let wv_a7: (&mut [u32], &mut [u32]) = wv_b4.1.split_at_mut(0usize);
-            let wv_b7: (&mut [u32], &mut [u32]) = r14.1.split_at_mut(0usize);
+            let wv_a7: (&mut [u32], &mut [u32]) = (wv_b4.1).split_at_mut(0usize);
+            let wv_b7: (&mut [u32], &mut [u32]) = (r14.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -341,7 +341,7 @@
                 1u32,
                 {
                     let x12: u32 = (wv_a7.1[i0 as usize]).wrapping_add(wv_b7.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a7.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a7.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
@@ -352,12 +352,12 @@
                 1u32,
                 {
                     let x12: u32 = (wv_a7.1[i0 as usize]).wrapping_add(z.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a7.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a7.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
-            let wv_a8: (&mut [u32], &mut [u32]) = r30.1.split_at_mut(0usize);
-            let wv_b8: (&mut [u32], &mut [u32]) = wv_a7.1.split_at_mut(0usize);
+            let wv_a8: (&mut [u32], &mut [u32]) = (r30.1).split_at_mut(0usize);
+            let wv_b8: (&mut [u32], &mut [u32]) = (wv_a7.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -365,7 +365,7 @@
                 1u32,
                 {
                     let x12: u32 = wv_a8.1[i0 as usize] ^ wv_b8.1[i0 as usize];
-                    let os: (&mut [u32], &mut [u32]) = wv_a8.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a8.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
@@ -382,8 +382,8 @@
                     os.1[i0 as usize] = x13
                 }
             );
-            let wv_a9: (&mut [u32], &mut [u32]) = r20.1.split_at_mut(0usize);
-            let wv_b9: (&mut [u32], &mut [u32]) = wv_a8.1.split_at_mut(0usize);
+            let wv_a9: (&mut [u32], &mut [u32]) = (r20.1).split_at_mut(0usize);
+            let wv_b9: (&mut [u32], &mut [u32]) = (wv_a8.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -391,12 +391,12 @@
                 1u32,
                 {
                     let x12: u32 = (wv_a9.1[i0 as usize]).wrapping_add(wv_b9.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a9.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a9.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
-            let wv_a10: (&mut [u32], &mut [u32]) = wv_b7.1.split_at_mut(0usize);
-            let wv_b10: (&mut [u32], &mut [u32]) = wv_a9.1.split_at_mut(0usize);
+            let wv_a10: (&mut [u32], &mut [u32]) = (wv_b7.1).split_at_mut(0usize);
+            let wv_b10: (&mut [u32], &mut [u32]) = (wv_a9.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -404,7 +404,7 @@
                 1u32,
                 {
                     let x12: u32 = wv_a10.1[i0 as usize] ^ wv_b10.1[i0 as usize];
-                    let os: (&mut [u32], &mut [u32]) = wv_a10.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a10.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
@@ -421,8 +421,8 @@
                     os.1[i0 as usize] = x13
                 }
             );
-            let wv_a11: (&mut [u32], &mut [u32]) = wv_b8.1.split_at_mut(0usize);
-            let wv_b11: (&mut [u32], &mut [u32]) = wv_a10.1.split_at_mut(0usize);
+            let wv_a11: (&mut [u32], &mut [u32]) = (wv_b8.1).split_at_mut(0usize);
+            let wv_b11: (&mut [u32], &mut [u32]) = (wv_a10.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -430,7 +430,7 @@
                 1u32,
                 {
                     let x12: u32 = (wv_a11.1[i0 as usize]).wrapping_add(wv_b11.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a11.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a11.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
@@ -441,12 +441,12 @@
                 1u32,
                 {
                     let x12: u32 = (wv_a11.1[i0 as usize]).wrapping_add(w.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a11.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a11.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
-            let wv_a12: (&mut [u32], &mut [u32]) = wv_b9.1.split_at_mut(0usize);
-            let wv_b12: (&[u32], &[u32]) = wv_a11.1.split_at(0usize);
+            let wv_a12: (&mut [u32], &mut [u32]) = (wv_b9.1).split_at_mut(0usize);
+            let wv_b12: (&[u32], &[u32]) = (wv_a11.1).split_at(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -454,7 +454,7 @@
                 1u32,
                 {
                     let x12: u32 = wv_a12.1[i0 as usize] ^ wv_b12.1[i0 as usize];
-                    let os: (&mut [u32], &mut [u32]) = wv_a12.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a12.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
@@ -471,8 +471,8 @@
                     os.1[i0 as usize] = x13
                 }
             );
-            let wv_a13: (&mut [u32], &mut [u32]) = wv_b10.1.split_at_mut(0usize);
-            let wv_b13: (&mut [u32], &mut [u32]) = wv_a12.1.split_at_mut(0usize);
+            let wv_a13: (&mut [u32], &mut [u32]) = (wv_b10.1).split_at_mut(0usize);
+            let wv_b13: (&mut [u32], &mut [u32]) = (wv_a12.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -480,12 +480,12 @@
                 1u32,
                 {
                     let x12: u32 = (wv_a13.1[i0 as usize]).wrapping_add(wv_b13.1[i0 as usize]);
-                    let os: (&mut [u32], &mut [u32]) = wv_a13.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a13.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
-            let wv_a14: (&mut [u32], &mut [u32]) = wv_b11.1.split_at_mut(0usize);
-            let wv_b14: (&mut [u32], &mut [u32]) = wv_a13.1.split_at_mut(0usize);
+            let wv_a14: (&mut [u32], &mut [u32]) = (wv_b11.1).split_at_mut(0usize);
+            let wv_b14: (&mut [u32], &mut [u32]) = (wv_a13.1).split_at_mut(0usize);
             krml::unroll_for!(
                 4,
                 "i0",
@@ -493,7 +493,7 @@
                 1u32,
                 {
                     let x12: u32 = wv_a14.1[i0 as usize] ^ wv_b14.1[i0 as usize];
-                    let os: (&mut [u32], &mut [u32]) = wv_a14.1.split_at_mut(0usize);
+                    let os: (&mut [u32], &mut [u32]) = (wv_a14.1).split_at_mut(0usize);
                     os.1[i0 as usize] = x12
                 }
             );
@@ -510,9 +510,9 @@
                     os.1[i0 as usize] = x13
                 }
             );
-            let r19: (&mut [u32], &mut [u32]) = wv_a14.1.split_at_mut(0usize);
-            let r21: (&mut [u32], &mut [u32]) = wv_b14.1.split_at_mut(0usize);
-            let r31: (&mut [u32], &mut [u32]) = wv_b13.1.split_at_mut(0usize);
+            let r19: (&mut [u32], &mut [u32]) = (wv_a14.1).split_at_mut(0usize);
+            let r21: (&mut [u32], &mut [u32]) = (wv_b14.1).split_at_mut(0usize);
+            let r31: (&mut [u32], &mut [u32]) = (wv_b13.1).split_at_mut(0usize);
             let r113: &mut [u32] = r19.1;
             let x02: u32 = r113[3usize];
             let x12: u32 = r113[0usize];
@@ -543,11 +543,11 @@
         }
     );
     let s0: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
-    let s1: (&mut [u32], &mut [u32]) = s0.1.split_at_mut(4usize);
-    let r0: (&[u32], &[u32]) = wv3.0.split_at(0usize);
-    let r1: (&[u32], &[u32]) = r0.1.split_at(4usize);
-    let r2: (&[u32], &[u32]) = r1.1.split_at(4usize);
-    let r3: (&[u32], &[u32]) = wv3.1.split_at(0usize);
+    let s1: (&mut [u32], &mut [u32]) = (s0.1).split_at_mut(4usize);
+    let r0: (&[u32], &[u32]) = (wv3.0).split_at(0usize);
+    let r1: (&[u32], &[u32]) = (r0.1).split_at(4usize);
+    let r2: (&[u32], &[u32]) = (r1.1).split_at(4usize);
+    let r3: (&[u32], &[u32]) = (wv3.1).split_at(0usize);
     krml::unroll_for!(
         4,
         "i",
@@ -555,7 +555,7 @@
         1u32,
         {
             let x: u32 = s1.0[i as usize] ^ r1.0[i as usize];
-            let os: (&mut [u32], &mut [u32]) = s1.0.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (s1.0).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -566,7 +566,7 @@
         1u32,
         {
             let x: u32 = s1.0[i as usize] ^ r2.1[i as usize];
-            let os: (&mut [u32], &mut [u32]) = s1.0.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (s1.0).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -577,7 +577,7 @@
         1u32,
         {
             let x: u32 = s1.1[i as usize] ^ r2.0[i as usize];
-            let os: (&mut [u32], &mut [u32]) = s1.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (s1.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -588,7 +588,7 @@
         1u32,
         {
             let x: u32 = s1.1[i as usize] ^ r3.1[i as usize];
-            let os: (&mut [u32], &mut [u32]) = s1.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (s1.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     )
@@ -614,9 +614,9 @@ pub(crate) fn init(hash: &mut [u32], kk: u32, nn: u32)
         };
     let mut tmp: [u32; 8] = [0u32; 8usize];
     let r0: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
-    let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
-    let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
-    let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
+    let r1: (&mut [u32], &mut [u32]) = (r0.1).split_at_mut(4usize);
+    let r2: (&mut [u32], &mut [u32]) = (r1.1).split_at_mut(4usize);
+    let r3: (&mut [u32], &mut [u32]) = (r2.1).split_at_mut(4usize);
     let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
     let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
     let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
@@ -644,11 +644,11 @@ pub(crate) fn init(hash: &mut [u32], kk: u32, nn: u32)
             let u: u32 = lowstar::endianness::load32_le(bj);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
-    let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
+    let uu____1: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(2usize);
     krml::unroll_for!(
         2,
         "i",
@@ -659,7 +659,7 @@ pub(crate) fn init(hash: &mut [u32], kk: u32, nn: u32)
             let u: u32 = lowstar::endianness::load32_le(bj);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (uu____1.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -672,7 +672,7 @@ pub(crate) fn init(hash: &mut [u32], kk: u32, nn: u32)
     (&mut tmp)[1usize] = p.leaf_length;
     (&mut tmp)[2usize] = p.node_offset as u32;
     (&mut tmp)[3usize] =
-        p.node_offset.wrapping_shr(32u32) as u32
+        (p.node_offset).wrapping_shr(32u32) as u32
         ^
         ((p.node_depth as u32).wrapping_shl(16u32) ^ (p.inner_length as u32).wrapping_shl(24u32));
     let tmp0: u32 = (&tmp)[0usize];
@@ -775,9 +775,9 @@ pub(crate) fn finish(nn: u32, output: &mut [u8], hash: &[u32])
 {
     let mut b: [u8; 32] = [0u8; 32usize];
     let first: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
-    let second: (&mut [u8], &mut [u8]) = first.1.split_at_mut(16usize);
+    let second: (&mut [u8], &mut [u8]) = (first.1).split_at_mut(16usize);
     let row0: (&[u32], &[u32]) = hash.split_at(0usize);
-    let row1: (&[u32], &[u32]) = row0.1.split_at(4usize);
+    let row1: (&[u32], &[u32]) = (row0.1).split_at(4usize);
     krml::unroll_for!(
         4,
         "i",
@@ -895,9 +895,9 @@ fn malloc_raw <'a>(
                                   let pv: crate::hash_blake2b::blake2_params = p[0usize];
                                   let mut tmp: [u32; 8] = [0u32; 8usize];
                                   let r0: (&mut [u32], &mut [u32]) = h.split_at_mut(0usize);
-                                  let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
-                                  let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
-                                  let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
+                                  let r1: (&mut [u32], &mut [u32]) = (r0.1).split_at_mut(4usize);
+                                  let r2: (&mut [u32], &mut [u32]) = (r1.1).split_at_mut(4usize);
+                                  let r3: (&mut [u32], &mut [u32]) = (r2.1).split_at_mut(4usize);
                                   let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
                                   let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
                                   let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
@@ -927,12 +927,12 @@ fn malloc_raw <'a>(
                                           let r4: u32 = u;
                                           let x: u32 = r4;
                                           let os: (&mut [u32], &mut [u32]) =
-                                              uu____0.1.split_at_mut(0usize);
+                                              (uu____0.1).split_at_mut(0usize);
                                           os.1[i0 as usize] = x
                                       }
                                   );
                                   let uu____1: (&mut [u32], &mut [u32]) =
-                                      uu____0.1.split_at_mut(2usize);
+                                      (uu____0.1).split_at_mut(2usize);
                                   krml::unroll_for!(
                                       2,
                                       "i0",
@@ -945,7 +945,7 @@ fn malloc_raw <'a>(
                                           let r4: u32 = u;
                                           let x: u32 = r4;
                                           let os: (&mut [u32], &mut [u32]) =
-                                              uu____1.1.split_at_mut(0usize);
+                                              (uu____1.1).split_at_mut(0usize);
                                           os.1[i0 as usize] = x
                                       }
                                   );
@@ -960,7 +960,7 @@ fn malloc_raw <'a>(
                                   (&mut tmp)[1usize] = pv.leaf_length;
                                   (&mut tmp)[2usize] = pv.node_offset as u32;
                                   (&mut tmp)[3usize] =
-                                      pv.node_offset.wrapping_shr(32u32) as u32
+                                      (pv.node_offset).wrapping_shr(32u32) as u32
                                       ^
                                       ((pv.node_depth as u32).wrapping_shl(16u32)
                                       ^
@@ -1020,9 +1020,9 @@ fn index_of_state(s: &[crate::hash_blake2s::state_t]) -> crate::hash_blake2b::in
     }
 }
 
-fn reset_raw <'a>(
-    state: &'a mut [crate::hash_blake2s::state_t],
-    key: crate::hash_blake2b::params_and_key <'a>
+fn reset_raw(
+    state: &mut [crate::hash_blake2s::state_t],
+    key: crate::hash_blake2b::params_and_key
 )
 {
     let block_state: &mut crate::hash_blake2s::block_state_t = &mut (state[0usize]).block_state;
@@ -1056,9 +1056,9 @@ fn reset_raw <'a>(
               let pv: crate::hash_blake2b::blake2_params = p[0usize];
               let mut tmp: [u32; 8] = [0u32; 8usize];
               let r0: (&mut [u32], &mut [u32]) = h.split_at_mut(0usize);
-              let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
-              let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
-              let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
+              let r1: (&mut [u32], &mut [u32]) = (r0.1).split_at_mut(4usize);
+              let r2: (&mut [u32], &mut [u32]) = (r1.1).split_at_mut(4usize);
+              let r3: (&mut [u32], &mut [u32]) = (r2.1).split_at_mut(4usize);
               let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
               let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
               let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
@@ -1086,11 +1086,11 @@ fn reset_raw <'a>(
                       let u: u32 = lowstar::endianness::load32_le(bj);
                       let r: u32 = u;
                       let x: u32 = r;
-                      let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+                      let os: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(0usize);
                       os.1[i0 as usize] = x
                   }
               );
-              let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
+              let uu____1: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(2usize);
               krml::unroll_for!(
                   2,
                   "i0",
@@ -1101,7 +1101,7 @@ fn reset_raw <'a>(
                       let u: u32 = lowstar::endianness::load32_le(bj);
                       let r: u32 = u;
                       let x: u32 = r;
-                      let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+                      let os: (&mut [u32], &mut [u32]) = (uu____1.1).split_at_mut(0usize);
                       os.1[i0 as usize] = x
                   }
               );
@@ -1114,7 +1114,7 @@ fn reset_raw <'a>(
               (&mut tmp)[1usize] = pv.leaf_length;
               (&mut tmp)[2usize] = pv.node_offset as u32;
               (&mut tmp)[3usize] =
-                  pv.node_offset.wrapping_shr(32u32) as u32
+                  (pv.node_offset).wrapping_shr(32u32) as u32
                   ^
                   ((pv.node_depth as u32).wrapping_shl(16u32)
                   ^
@@ -1275,7 +1275,7 @@ update0(state: &mut [crate::hash_blake2s::state_t], chunk: &[u8], chunk_len: u32
             let data1_len: u32 = n_blocks.wrapping_mul(64u32);
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             match *block_state
             {
                 crate::hash_blake2s::block_state_t { f3: ref mut wv, f4: ref mut hash, .. } =>
@@ -1301,7 +1301,7 @@ update0(state: &mut [crate::hash_blake2s::state_t], chunk: &[u8], chunk_len: u32
         {
             let diff: u32 = 64u32.wrapping_sub(sz);
             let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
+            let chunk2: (&[u8], &[u8]) = (chunk1.1).split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
@@ -1343,8 +1343,8 @@ update0(state: &mut [crate::hash_blake2s::state_t], chunk: &[u8], chunk_len: u32
             let n_blocks: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(64u32);
             let data1_len: u32 = n_blocks.wrapping_mul(64u32);
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
-            let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data1: (&[u8], &[u8]) = (chunk2.1).split_at(0usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             match *block_state
             {
                 crate::hash_blake2s::block_state_t { f3: ref mut wv, f4: ref mut hash, .. } =>
@@ -1423,10 +1423,10 @@ digest(s: &[crate::hash_blake2s::state_t], dst: &mut [u8]) ->
           }
     };
     let prev_len: u64 = total_len.wrapping_sub(r as u64);
-    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
+    let buf_multi: (&[u8], &[u8]) = (buf_1.1).split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
-    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let buf_last: (&[u8], &[u8]) = (buf_multi.1).split_at(r.wrapping_sub(ite) as usize);
     match tmp_block_state
     {
         crate::hash_blake2s::block_state_t { f3: ref mut wv0, f4: ref mut hash, .. } =>
@@ -1469,7 +1469,8 @@ pub fn info(s: &[crate::hash_blake2s::state_t]) -> crate::hash_blake2b::index
 Copying. This preserves all parameters.
 */
 pub fn
-copy(state: &[crate::hash_blake2s::state_t]) ->
+copy
+<'a>(state: &'a [crate::hash_blake2s::state_t]) ->
     Box<[crate::hash_blake2s::state_t]>
 {
     let block_state0: &crate::hash_blake2s::block_state_t = &(state[0usize]).block_state;
@@ -1570,22 +1571,21 @@ parameters `params` into `output`. The `key` array must be of length
 `params.digest_length`.
 */
 pub fn
-hash_with_key_and_params
-<'a>(
-    output: &'a mut [u8],
-    input: &'a [u8],
+hash_with_key_and_params(
+    output: &mut [u8],
+    input: &[u8],
     input_len: u32,
-    params: crate::hash_blake2b::blake2_params <'a>,
-    key: &'a [u8]
+    params: crate::hash_blake2b::blake2_params,
+    key: &[u8]
 )
 {
     let mut b: [u32; 16] = [0u32; 16usize];
     let mut b1: [u32; 16] = [0u32; 16usize];
     let mut tmp: [u32; 8] = [0u32; 8usize];
     let r0: (&mut [u32], &mut [u32]) = b.split_at_mut(0usize);
-    let r1: (&mut [u32], &mut [u32]) = r0.1.split_at_mut(4usize);
-    let r2: (&mut [u32], &mut [u32]) = r1.1.split_at_mut(4usize);
-    let r3: (&mut [u32], &mut [u32]) = r2.1.split_at_mut(4usize);
+    let r1: (&mut [u32], &mut [u32]) = (r0.1).split_at_mut(4usize);
+    let r2: (&mut [u32], &mut [u32]) = (r1.1).split_at_mut(4usize);
+    let r3: (&mut [u32], &mut [u32]) = (r2.1).split_at_mut(4usize);
     let iv0: u32 = (&crate::impl_blake2_constants::ivTable_S)[0usize];
     let iv1: u32 = (&crate::impl_blake2_constants::ivTable_S)[1usize];
     let iv2: u32 = (&crate::impl_blake2_constants::ivTable_S)[2usize];
@@ -1613,11 +1613,11 @@ hash_with_key_and_params
             let u: u32 = lowstar::endianness::load32_le(bj);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
-    let uu____1: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(2usize);
+    let uu____1: (&mut [u32], &mut [u32]) = (uu____0.1).split_at_mut(2usize);
     krml::unroll_for!(
         2,
         "i",
@@ -1628,7 +1628,7 @@ hash_with_key_and_params
             let u: u32 = lowstar::endianness::load32_le(bj);
             let r: u32 = u;
             let x: u32 = r;
-            let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+            let os: (&mut [u32], &mut [u32]) = (uu____1.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
     );
@@ -1641,7 +1641,7 @@ hash_with_key_and_params
     (&mut tmp)[1usize] = params.leaf_length;
     (&mut tmp)[2usize] = params.node_offset as u32;
     (&mut tmp)[3usize] =
-        params.node_offset.wrapping_shr(32u32) as u32
+        (params.node_offset).wrapping_shr(32u32) as u32
         ^
         ((params.node_depth as u32).wrapping_shl(16u32)
         ^

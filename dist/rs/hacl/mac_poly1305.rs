@@ -7,7 +7,7 @@
 pub(crate) fn poly1305_init(ctx: &mut [u64], key: &[u8])
 {
     let acc: (&mut [u64], &mut [u64]) = ctx.split_at_mut(0usize);
-    let pre: (&mut [u64], &mut [u64]) = acc.1.split_at_mut(5usize);
+    let pre: (&mut [u64], &mut [u64]) = (acc.1).split_at_mut(5usize);
     let kr: (&[u8], &[u8]) = key.split_at(0usize);
     pre.0[0usize] = 0u64;
     pre.0[1usize] = 0u64;
@@ -22,10 +22,10 @@ pub(crate) fn poly1305_init(ctx: &mut [u64], key: &[u8])
     let mask1: u64 = 0x0ffffffc0ffffffcu64;
     let lo1: u64 = lo & mask0;
     let hi1: u64 = hi & mask1;
-    let r: (&mut [u64], &mut [u64]) = pre.1.split_at_mut(0usize);
-    let r5: (&mut [u64], &mut [u64]) = r.1.split_at_mut(5usize);
-    let rn: (&mut [u64], &mut [u64]) = r5.1.split_at_mut(5usize);
-    let rn_5: (&mut [u64], &mut [u64]) = rn.1.split_at_mut(5usize);
+    let r: (&mut [u64], &mut [u64]) = (pre.1).split_at_mut(0usize);
+    let r5: (&mut [u64], &mut [u64]) = (r.1).split_at_mut(5usize);
+    let rn: (&mut [u64], &mut [u64]) = (r5.1).split_at_mut(5usize);
+    let rn_5: (&mut [u64], &mut [u64]) = (rn.1).split_at_mut(5usize);
     let r_vec0: u64 = lo1;
     let r_vec1: u64 = hi1;
     let f0: u64 = r_vec0 & 0x3ffffffu64;
@@ -68,7 +68,7 @@ pub(crate) fn poly1305_init(ctx: &mut [u64], key: &[u8])
 fn poly1305_update(ctx: &mut [u64], len: u32, text: &[u8])
 {
     let pre: (&mut [u64], &mut [u64]) = ctx.split_at_mut(5usize);
-    let acc: (&mut [u64], &mut [u64]) = pre.0.split_at_mut(0usize);
+    let acc: (&mut [u64], &mut [u64]) = (pre.0).split_at_mut(0usize);
     let nb: u32 = len.wrapping_div(16u32);
     let rem: u32 = len.wrapping_rem(16u32);
     for i in 0u32..nb
@@ -100,8 +100,8 @@ fn poly1305_update(ctx: &mut [u64], len: u32, text: &[u8])
         let mask: u64 = b;
         let f41: u64 = (&e)[4usize];
         (&mut e)[4usize] = f41 | mask;
-        let r: (&[u64], &[u64]) = pre.1.split_at(0usize);
-        let r5: (&[u64], &[u64]) = r.1.split_at(5usize);
+        let r: (&[u64], &[u64]) = (pre.1).split_at(0usize);
+        let r5: (&[u64], &[u64]) = (r.1).split_at(5usize);
         let r0: u64 = r5.0[0usize];
         let r1: u64 = r5.0[1usize];
         let r2: u64 = r5.0[2usize];
@@ -222,8 +222,8 @@ fn poly1305_update(ctx: &mut [u64], len: u32, text: &[u8])
         let mask: u64 = b;
         let fi: u64 = (&e)[rem.wrapping_mul(8u32).wrapping_div(26u32) as usize];
         (&mut e)[rem.wrapping_mul(8u32).wrapping_div(26u32) as usize] = fi | mask;
-        let r: (&[u64], &[u64]) = pre.1.split_at(0usize);
-        let r5: (&[u64], &[u64]) = r.1.split_at(5usize);
+        let r: (&[u64], &[u64]) = (pre.1).split_at(0usize);
+        let r5: (&[u64], &[u64]) = (r.1).split_at(5usize);
         let r0: u64 = r5.0[0usize];
         let r1: u64 = r5.0[1usize];
         let r2: u64 = r5.0[2usize];
@@ -429,7 +429,7 @@ pub(crate) enum option__·uint8_t· <'a>
     Some { v: &'a mut [u8] }
 }
 
-pub fn malloc(key: &[u8]) -> Box<[crate::mac_poly1305::state_t]>
+pub fn malloc <'a>(key: &'a [u8]) -> Box<[crate::mac_poly1305::state_t]>
 {
     let buf: Box<[u8]> = vec![0u8; 16usize].into_boxed_slice();
     let buf1: &[u8] = &buf;
@@ -547,7 +547,7 @@ update(state: &mut [crate::mac_poly1305::state_t], chunk: &[u8], chunk_len: u32)
             let data1_len: u32 = n_blocks.wrapping_mul(16u32);
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             crate::mac_poly1305::poly1305_update(block_state, data1_len, data2.0);
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
@@ -560,7 +560,7 @@ update(state: &mut [crate::mac_poly1305::state_t], chunk: &[u8], chunk_len: u32)
         {
             let diff: u32 = 16u32.wrapping_sub(sz);
             let chunk1: (&[u8], &[u8]) = chunk.split_at(0usize);
-            let chunk2: (&[u8], &[u8]) = chunk1.1.split_at(diff as usize);
+            let chunk2: (&[u8], &[u8]) = (chunk1.1).split_at(diff as usize);
             let buf: &mut [u8] = &mut (state[0usize]).buf;
             let total_len1: u64 = (state[0usize]).total_len;
             let k·1: &[u8] = &(state[0usize]).p_key;
@@ -596,8 +596,8 @@ update(state: &mut [crate::mac_poly1305::state_t], chunk: &[u8], chunk_len: u32)
             let n_blocks: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(16u32);
             let data1_len: u32 = n_blocks.wrapping_mul(16u32);
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
-            let data1: (&[u8], &[u8]) = chunk2.1.split_at(0usize);
-            let data2: (&[u8], &[u8]) = data1.1.split_at(data1_len as usize);
+            let data1: (&[u8], &[u8]) = (chunk2.1).split_at(0usize);
+            let data2: (&[u8], &[u8]) = (data1.1).split_at(data1_len as usize);
             crate::mac_poly1305::poly1305_update(block_state, data1_len, data2.0);
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
@@ -626,10 +626,10 @@ pub fn digest(state: &[crate::mac_poly1305::state_t], output: &mut [u8])
     let mut r1: [u64; 25] = [0u64; 25usize];
     let tmp_block_state: &mut [u64] = &mut r1;
     (tmp_block_state[0usize..25usize]).copy_from_slice(&block_state[0usize..25usize]);
-    let buf_multi: (&[u8], &[u8]) = buf_1.1.split_at(0usize);
+    let buf_multi: (&[u8], &[u8]) = (buf_1.1).split_at(0usize);
     let ite: u32 =
         if r.wrapping_rem(16u32) == 0u32 && r > 0u32 { 16u32 } else { r.wrapping_rem(16u32) };
-    let buf_last: (&[u8], &[u8]) = buf_multi.1.split_at(r.wrapping_sub(ite) as usize);
+    let buf_last: (&[u8], &[u8]) = (buf_multi.1).split_at(r.wrapping_sub(ite) as usize);
     crate::mac_poly1305::poly1305_update(tmp_block_state, 0u32, buf_last.0);
     crate::mac_poly1305::poly1305_update(tmp_block_state, r, buf_last.1);
     let mut tmp: [u64; 25] = [0u64; 25usize];

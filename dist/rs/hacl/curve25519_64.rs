@@ -87,41 +87,41 @@ const g25519: [u8; 32] =
 fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64])
 {
     let nq: (&mut [u64], &mut [u64]) = p01_tmp1.split_at_mut(0usize);
-    let nq_p1: (&mut [u64], &mut [u64]) = nq.1.split_at_mut(8usize);
-    let tmp1: (&mut [u64], &mut [u64]) = nq_p1.1.split_at_mut(8usize);
+    let nq_p1: (&mut [u64], &mut [u64]) = (nq.1).split_at_mut(8usize);
+    let tmp1: (&mut [u64], &mut [u64]) = (nq_p1.1).split_at_mut(8usize);
     let x1: (&mut [u64], &mut [u64]) = q.split_at_mut(0usize);
-    let x2: (&[u64], &[u64]) = nq_p1.0.split_at(0usize);
-    let z2: (&[u64], &[u64]) = x2.1.split_at(4usize);
-    let dc: (&mut [u64], &mut [u64]) = tmp1.1.split_at_mut(8usize);
-    let ab: (&mut [u64], &mut [u64]) = dc.0.split_at_mut(0usize);
-    let a: (&mut [u64], &mut [u64]) = ab.1.split_at_mut(0usize);
-    let b: (&mut [u64], &mut [u64]) = a.1.split_at_mut(4usize);
+    let x2: (&[u64], &[u64]) = (nq_p1.0).split_at(0usize);
+    let z2: (&[u64], &[u64]) = (x2.1).split_at(4usize);
+    let dc: (&mut [u64], &mut [u64]) = (tmp1.1).split_at_mut(8usize);
+    let ab: (&mut [u64], &mut [u64]) = (dc.0).split_at_mut(0usize);
+    let a: (&mut [u64], &mut [u64]) = (ab.1).split_at_mut(0usize);
+    let b: (&mut [u64], &mut [u64]) = (a.1).split_at_mut(4usize);
     crate::curve25519_64::fadd(b.0, z2.0, z2.1);
     crate::curve25519_64::fsub(b.1, z2.0, z2.1);
-    let ab1: (&mut [u64], &mut [u64]) = ab.1.split_at_mut(0usize);
-    let x3: (&mut [u64], &mut [u64]) = tmp1.0.split_at_mut(0usize);
-    let z31: (&mut [u64], &mut [u64]) = x3.1.split_at_mut(4usize);
-    let d: (&mut [u64], &mut [u64]) = dc.1.split_at_mut(0usize);
-    let c: (&mut [u64], &mut [u64]) = d.1.split_at_mut(4usize);
+    let ab1: (&mut [u64], &mut [u64]) = (ab.1).split_at_mut(0usize);
+    let x3: (&mut [u64], &mut [u64]) = (tmp1.0).split_at_mut(0usize);
+    let z31: (&mut [u64], &mut [u64]) = (x3.1).split_at_mut(4usize);
+    let d: (&mut [u64], &mut [u64]) = (dc.1).split_at_mut(0usize);
+    let c: (&mut [u64], &mut [u64]) = (d.1).split_at_mut(4usize);
     crate::curve25519_64::fadd(c.1, z31.0, z31.1);
     crate::curve25519_64::fsub(c.0, z31.0, z31.1);
     let mut f1_copy: [u64; 8] = [0u64; 8usize];
     ((&mut f1_copy)[0usize..8usize]).copy_from_slice(&dc.1[0usize..8usize]);
     crate::curve25519_64::fmul2(dc.1, &f1_copy, ab1.1, tmp2);
-    let d1: (&[u64], &[u64]) = dc.1.split_at(0usize);
-    let c1: (&[u64], &[u64]) = d1.1.split_at(4usize);
+    let d1: (&[u64], &[u64]) = (dc.1).split_at(0usize);
+    let c1: (&[u64], &[u64]) = (d1.1).split_at(4usize);
     crate::curve25519_64::fadd(z31.0, c1.0, c1.1);
     crate::curve25519_64::fsub(z31.1, c1.0, c1.1);
-    let ab2: (&mut [u64], &mut [u64]) = ab1.1.split_at_mut(0usize);
-    let dc1: (&mut [u64], &mut [u64]) = dc.1.split_at_mut(0usize);
+    let ab2: (&mut [u64], &mut [u64]) = (ab1.1).split_at_mut(0usize);
+    let dc1: (&mut [u64], &mut [u64]) = (dc.1).split_at_mut(0usize);
     crate::curve25519_64::fsqr2(dc1.1, ab2.1, tmp2);
     let mut f1_copy0: [u64; 8] = [0u64; 8usize];
     ((&mut f1_copy0)[0usize..8usize]).copy_from_slice(&tmp1.0[0usize..8usize]);
     crate::curve25519_64::fsqr2(tmp1.0, &f1_copy0, tmp2);
-    let a1: (&mut [u64], &mut [u64]) = ab2.1.split_at_mut(0usize);
-    let b1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(4usize);
-    let d0: (&mut [u64], &mut [u64]) = dc1.1.split_at_mut(0usize);
-    let c0: (&mut [u64], &mut [u64]) = d0.1.split_at_mut(4usize);
+    let a1: (&mut [u64], &mut [u64]) = (ab2.1).split_at_mut(0usize);
+    let b1: (&mut [u64], &mut [u64]) = (a1.1).split_at_mut(4usize);
+    let d0: (&mut [u64], &mut [u64]) = (dc1.1).split_at_mut(0usize);
+    let c0: (&mut [u64], &mut [u64]) = (d0.1).split_at_mut(4usize);
     b1.0[0usize] = c0.1[0usize];
     b1.0[1usize] = c0.1[1usize];
     b1.0[2usize] = c0.1[2usize];
@@ -133,10 +133,10 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64])
     let mut f1_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut f1_copy1)[0usize..4usize]).copy_from_slice(&b1.1[0usize..4usize]);
     crate::curve25519_64::fadd(b1.1, &f1_copy1, c0.0);
-    let ab3: (&mut [u64], &mut [u64]) = ab2.1.split_at_mut(0usize);
-    let dc2: (&[u64], &[u64]) = dc1.1.split_at(0usize);
+    let ab3: (&mut [u64], &mut [u64]) = (ab2.1).split_at_mut(0usize);
+    let dc2: (&[u64], &[u64]) = (dc1.1).split_at(0usize);
     crate::curve25519_64::fmul2(nq_p1.0, dc2.1, ab3.1, tmp2);
-    let z310: (&mut [u64], &mut [u64]) = tmp1.0.split_at_mut(4usize);
+    let z310: (&mut [u64], &mut [u64]) = (tmp1.0).split_at_mut(4usize);
     let mut f1_copy2: [u64; 4] = [0u64; 4usize];
     ((&mut f1_copy2)[0usize..4usize]).copy_from_slice(&z310.1[0usize..4usize]);
     crate::curve25519_64::fmul(z310.1, &f1_copy2, x1.1, tmp2)
@@ -145,18 +145,18 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64])
 fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64])
 {
     let x2: (&[u64], &[u64]) = nq.split_at(0usize);
-    let z2: (&[u64], &[u64]) = x2.1.split_at(4usize);
+    let z2: (&[u64], &[u64]) = (x2.1).split_at(4usize);
     let ab: (&mut [u64], &mut [u64]) = tmp1.split_at_mut(0usize);
-    let dc: (&mut [u64], &mut [u64]) = ab.1.split_at_mut(8usize);
-    let a: (&mut [u64], &mut [u64]) = dc.0.split_at_mut(0usize);
-    let b: (&mut [u64], &mut [u64]) = a.1.split_at_mut(4usize);
+    let dc: (&mut [u64], &mut [u64]) = (ab.1).split_at_mut(8usize);
+    let a: (&mut [u64], &mut [u64]) = (dc.0).split_at_mut(0usize);
+    let b: (&mut [u64], &mut [u64]) = (a.1).split_at_mut(4usize);
     crate::curve25519_64::fadd(b.0, z2.0, z2.1);
     crate::curve25519_64::fsub(b.1, z2.0, z2.1);
     crate::curve25519_64::fsqr2(dc.1, dc.0, tmp2);
-    let d: (&mut [u64], &mut [u64]) = dc.1.split_at_mut(0usize);
-    let c: (&mut [u64], &mut [u64]) = d.1.split_at_mut(4usize);
-    let a1: (&mut [u64], &mut [u64]) = dc.0.split_at_mut(0usize);
-    let b1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(4usize);
+    let d: (&mut [u64], &mut [u64]) = (dc.1).split_at_mut(0usize);
+    let c: (&mut [u64], &mut [u64]) = (d.1).split_at_mut(4usize);
+    let a1: (&mut [u64], &mut [u64]) = (dc.0).split_at_mut(0usize);
+    let b1: (&mut [u64], &mut [u64]) = (a1.1).split_at_mut(4usize);
     b1.0[0usize] = c.1[0usize];
     b1.0[1usize] = c.1[1usize];
     b1.0[2usize] = c.1[2usize];
@@ -168,8 +168,8 @@ fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64])
     let mut f1_copy: [u64; 4] = [0u64; 4usize];
     ((&mut f1_copy)[0usize..4usize]).copy_from_slice(&b1.1[0usize..4usize]);
     crate::curve25519_64::fadd(b1.1, &f1_copy, c.0);
-    let ab1: (&mut [u64], &mut [u64]) = dc.0.split_at_mut(0usize);
-    let dc1: (&[u64], &[u64]) = dc.1.split_at(0usize);
+    let ab1: (&mut [u64], &mut [u64]) = (dc.0).split_at_mut(0usize);
+    let dc1: (&[u64], &[u64]) = (dc.1).split_at(0usize);
     crate::curve25519_64::fmul2(nq, dc1.1, ab1.1, tmp2)
 }
 
@@ -178,11 +178,11 @@ fn montgomery_ladder(out: &mut [u64], key: &[u8], init: &mut [u64])
     let mut tmp2: [u64; 16] = [0u64; 16usize];
     let mut p01_tmp1_swap: [u64; 33] = [0u64; 33usize];
     let p01: (&mut [u64], &mut [u64]) = p01_tmp1_swap.split_at_mut(0usize);
-    let p03: (&mut [u64], &mut [u64]) = p01.1.split_at_mut(0usize);
-    let p11: (&mut [u64], &mut [u64]) = p03.1.split_at_mut(8usize);
+    let p03: (&mut [u64], &mut [u64]) = (p01.1).split_at_mut(0usize);
+    let p11: (&mut [u64], &mut [u64]) = (p03.1).split_at_mut(8usize);
     (p11.1[0usize..8usize]).copy_from_slice(&init[0usize..8usize]);
-    let x0: (&mut [u64], &mut [u64]) = p11.0.split_at_mut(0usize);
-    let z0: (&mut [u64], &mut [u64]) = x0.1.split_at_mut(4usize);
+    let x0: (&mut [u64], &mut [u64]) = (p11.0).split_at_mut(0usize);
+    let z0: (&mut [u64], &mut [u64]) = (x0.1).split_at_mut(4usize);
     z0.0[0usize] = 1u64;
     z0.0[1usize] = 0u64;
     z0.0[2usize] = 0u64;
@@ -191,20 +191,20 @@ fn montgomery_ladder(out: &mut [u64], key: &[u8], init: &mut [u64])
     z0.1[1usize] = 0u64;
     z0.1[2usize] = 0u64;
     z0.1[3usize] = 0u64;
-    let swap: (&mut [u64], &mut [u64]) = p01.1.split_at_mut(32usize);
-    let p01_tmp1: (&mut [u64], &mut [u64]) = swap.0.split_at_mut(0usize);
-    let nq: (&mut [u64], &mut [u64]) = p01_tmp1.1.split_at_mut(0usize);
-    let nq_p1: (&mut [u64], &mut [u64]) = nq.1.split_at_mut(8usize);
+    let swap: (&mut [u64], &mut [u64]) = (p01.1).split_at_mut(32usize);
+    let p01_tmp1: (&mut [u64], &mut [u64]) = (swap.0).split_at_mut(0usize);
+    let nq: (&mut [u64], &mut [u64]) = (p01_tmp1.1).split_at_mut(0usize);
+    let nq_p1: (&mut [u64], &mut [u64]) = (nq.1).split_at_mut(8usize);
     crate::curve25519_64::cswap2(1u64, nq_p1.0, nq_p1.1);
-    let p01_tmp11: (&mut [u64], &mut [u64]) = p01_tmp1.1.split_at_mut(0usize);
+    let p01_tmp11: (&mut [u64], &mut [u64]) = (p01_tmp1.1).split_at_mut(0usize);
     crate::curve25519_64::point_add_and_double(init, p01_tmp11.1, &mut tmp2);
     swap.1[0usize] = 1u64;
     for i in 0u32..251u32
     {
-        let p01_tmp12: (&mut [u64], &mut [u64]) = p01_tmp11.1.split_at_mut(0usize);
-        let swap1: (&mut [u64], &mut [u64]) = swap.1.split_at_mut(0usize);
-        let nq1: (&mut [u64], &mut [u64]) = p01_tmp12.1.split_at_mut(0usize);
-        let nq_p11: (&mut [u64], &mut [u64]) = nq1.1.split_at_mut(8usize);
+        let p01_tmp12: (&mut [u64], &mut [u64]) = (p01_tmp11.1).split_at_mut(0usize);
+        let swap1: (&mut [u64], &mut [u64]) = (swap.1).split_at_mut(0usize);
+        let nq1: (&mut [u64], &mut [u64]) = (p01_tmp12.1).split_at_mut(0usize);
+        let nq_p11: (&mut [u64], &mut [u64]) = (nq1.1).split_at_mut(8usize);
         let bit: u64 =
             ((key[253u32.wrapping_sub(i).wrapping_div(8u32) as usize]).wrapping_shr(
                 253u32.wrapping_sub(i).wrapping_rem(8u32)
@@ -219,17 +219,17 @@ fn montgomery_ladder(out: &mut [u64], key: &[u8], init: &mut [u64])
         swap1.1[0usize] = bit
     };
     let sw: u64 = swap.1[0usize];
-    let p01_tmp12: (&mut [u64], &mut [u64]) = p01_tmp11.1.split_at_mut(0usize);
-    let nq1: (&mut [u64], &mut [u64]) = p01_tmp12.1.split_at_mut(0usize);
-    let nq_p11: (&mut [u64], &mut [u64]) = nq1.1.split_at_mut(8usize);
+    let p01_tmp12: (&mut [u64], &mut [u64]) = (p01_tmp11.1).split_at_mut(0usize);
+    let nq1: (&mut [u64], &mut [u64]) = (p01_tmp12.1).split_at_mut(0usize);
+    let nq_p11: (&mut [u64], &mut [u64]) = (nq1.1).split_at_mut(8usize);
     crate::curve25519_64::cswap2(sw, nq_p11.0, nq_p11.1);
-    let p01_tmp10: (&mut [u64], &mut [u64]) = p01_tmp12.1.split_at_mut(0usize);
-    let nq0: (&mut [u64], &mut [u64]) = p01_tmp10.1.split_at_mut(0usize);
-    let tmp1: (&mut [u64], &mut [u64]) = nq0.1.split_at_mut(16usize);
+    let p01_tmp10: (&mut [u64], &mut [u64]) = (p01_tmp12.1).split_at_mut(0usize);
+    let nq0: (&mut [u64], &mut [u64]) = (p01_tmp10.1).split_at_mut(0usize);
+    let tmp1: (&mut [u64], &mut [u64]) = (nq0.1).split_at_mut(16usize);
     crate::curve25519_64::point_double(tmp1.0, tmp1.1, &mut tmp2);
     crate::curve25519_64::point_double(tmp1.0, tmp1.1, &mut tmp2);
     crate::curve25519_64::point_double(tmp1.0, tmp1.1, &mut tmp2);
-    let p010: (&[u64], &[u64]) = p01_tmp10.1.split_at(0usize);
+    let p010: (&[u64], &[u64]) = (p01_tmp10.1).split_at(0usize);
     (out[0usize..8usize]).copy_from_slice(&p010.1[0usize..8usize])
 }
 
@@ -248,8 +248,8 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64])
 {
     let mut t1: [u64; 16] = [0u64; 16usize];
     let a1: (&mut [u64], &mut [u64]) = t1.split_at_mut(0usize);
-    let b1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(4usize);
-    let t01: (&mut [u64], &mut [u64]) = b1.1.split_at_mut(8usize);
+    let b1: (&mut [u64], &mut [u64]) = (a1.1).split_at_mut(4usize);
+    let t01: (&mut [u64], &mut [u64]) = (b1.1).split_at_mut(8usize);
     let tmp1: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
     crate::curve25519_64::fsquare_times(b1.0, i, tmp1.1, 1u32);
     crate::curve25519_64::fsquare_times(t01.1, b1.0, tmp1.1, 2u32);
@@ -267,9 +267,9 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64])
     let mut f2_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut f2_copy1)[0usize..4usize]).copy_from_slice(&t01.0[0usize..4usize]);
     crate::curve25519_64::fmul(t01.0, t01.1, &mut f2_copy1, tmp);
-    let b10: (&mut [u64], &mut [u64]) = t01.0.split_at_mut(0usize);
-    let c1: (&mut [u64], &mut [u64]) = b10.1.split_at_mut(4usize);
-    let t010: (&mut [u64], &mut [u64]) = t01.1.split_at_mut(0usize);
+    let b10: (&mut [u64], &mut [u64]) = (t01.0).split_at_mut(0usize);
+    let c1: (&mut [u64], &mut [u64]) = (b10.1).split_at_mut(4usize);
+    let t010: (&mut [u64], &mut [u64]) = (t01.1).split_at_mut(0usize);
     let tmp10: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
     crate::curve25519_64::fsquare_times(t010.1, c1.0, tmp10.1, 10u32);
     crate::curve25519_64::fmul(c1.1, t010.1, c1.0, tmp);
@@ -288,9 +288,9 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64])
     let tmp13: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
     crate::curve25519_64::fsquare_times(t010.1, c1.0, tmp13.1, 50u32);
     crate::curve25519_64::fmul(c1.1, t010.1, c1.0, tmp);
-    let b11: (&mut [u64], &mut [u64]) = c1.0.split_at_mut(0usize);
-    let c10: (&mut [u64], &mut [u64]) = c1.1.split_at_mut(0usize);
-    let t011: (&mut [u64], &mut [u64]) = t010.1.split_at_mut(0usize);
+    let b11: (&mut [u64], &mut [u64]) = (c1.0).split_at_mut(0usize);
+    let c10: (&mut [u64], &mut [u64]) = (c1.1).split_at_mut(0usize);
+    let t011: (&mut [u64], &mut [u64]) = (t010.1).split_at_mut(0usize);
     let tmp14: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
     crate::curve25519_64::fsquare_times(t011.1, c10.1, tmp14.1, 100u32);
     let mut f1_copy0: [u64; 4] = [0u64; 4usize];
@@ -307,8 +307,8 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64])
     let mut i_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut i_copy1)[0usize..4usize]).copy_from_slice(&t011.1[0usize..4usize]);
     crate::curve25519_64::fsquare_times(t011.1, &i_copy1, tmp121.1, 5u32);
-    let a: (&mut [u64], &mut [u64]) = b1.0.split_at_mut(0usize);
-    let t0: (&[u64], &[u64]) = t011.1.split_at(0usize);
+    let a: (&mut [u64], &mut [u64]) = (b1.0).split_at_mut(0usize);
+    let t0: (&[u64], &[u64]) = (t011.1).split_at(0usize);
     crate::curve25519_64::fmul(o, t0.1, a.1, tmp)
 }
 
@@ -348,7 +348,7 @@ fn store_felem(b: &mut [u64], f: &mut [u64])
 fn encode_point(o: &mut [u8], i: &mut [u64])
 {
     let x: (&mut [u64], &mut [u64]) = i.split_at_mut(0usize);
-    let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(4usize);
+    let z: (&mut [u64], &mut [u64]) = (x.1).split_at_mut(4usize);
     let mut tmp: [u64; 4] = [0u64; 4usize];
     let mut u64s: [u64; 4] = [0u64; 4usize];
     let mut tmp_w: [u64; 16] = [0u64; 16usize];
@@ -399,7 +399,7 @@ scalarmult(out: &mut [u8], r#priv: &[u8], r#pub: &[u8])
     let tmp3: u64 = (&tmp)[3usize];
     (&mut tmp)[3usize] = tmp3 & 0x7fffffffffffffffu64;
     let x: (&mut [u64], &mut [u64]) = init.split_at_mut(0usize);
-    let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(4usize);
+    let z: (&mut [u64], &mut [u64]) = (x.1).split_at_mut(4usize);
     z.1[0usize] = 1u64;
     z.1[1usize] = 0u64;
     z.1[2usize] = 0u64;

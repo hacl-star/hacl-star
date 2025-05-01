@@ -892,7 +892,7 @@ generate(
               if max.wrapping_mul(20u32) < n
               {
                   let block: (&mut [u8], &mut [u8]) =
-                      out.1.split_at_mut(max.wrapping_mul(20u32) as usize);
+                      (out.1).split_at_mut(max.wrapping_mul(20u32) as usize);
                   crate::hmac::compute_sha1(v, k, 20u32, v, 20u32);
                   (block.1[0usize..n.wrapping_sub(max.wrapping_mul(20u32)) as usize]).copy_from_slice(
                       &(&v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(20u32)) as usize]
@@ -988,7 +988,7 @@ generate(
               if max.wrapping_mul(32u32) < n
               {
                   let block: (&mut [u8], &mut [u8]) =
-                      out.1.split_at_mut(max.wrapping_mul(32u32) as usize);
+                      (out.1).split_at_mut(max.wrapping_mul(32u32) as usize);
                   crate::hmac::compute_sha2_256(v, k, 32u32, v, 32u32);
                   (block.1[0usize..n.wrapping_sub(max.wrapping_mul(32u32)) as usize]).copy_from_slice(
                       &(&v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(32u32)) as usize]
@@ -1084,7 +1084,7 @@ generate(
               if max.wrapping_mul(48u32) < n
               {
                   let block: (&mut [u8], &mut [u8]) =
-                      out.1.split_at_mut(max.wrapping_mul(48u32) as usize);
+                      (out.1).split_at_mut(max.wrapping_mul(48u32) as usize);
                   crate::hmac::compute_sha2_384(v, k, 48u32, v, 48u32);
                   (block.1[0usize..n.wrapping_sub(max.wrapping_mul(48u32)) as usize]).copy_from_slice(
                       &(&v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(48u32)) as usize]
@@ -1180,7 +1180,7 @@ generate(
               if max.wrapping_mul(64u32) < n
               {
                   let block: (&mut [u8], &mut [u8]) =
-                      out.1.split_at_mut(max.wrapping_mul(64u32) as usize);
+                      (out.1).split_at_mut(max.wrapping_mul(64u32) as usize);
                   crate::hmac::compute_sha2_512(v, k, 64u32, v, 64u32);
                   (block.1[0usize..n.wrapping_sub(max.wrapping_mul(64u32)) as usize]).copy_from_slice(
                       &(&v[0usize..])[0usize..n.wrapping_sub(max.wrapping_mul(64u32)) as usize]

@@ -20,7 +20,7 @@ compute_md5(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32
     let mut key_block: [u8; 64] = [0x00u8; 64usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 16u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 64u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -61,7 +61,7 @@ compute_md5(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_md5::update_multi(&mut s, &ipad, 1u32);
         crate::hash_md5::update_multi(&mut s, rem0.0, n_blocks0);
         crate::hash_md5::update_last(
@@ -73,7 +73,7 @@ compute_md5(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32
     };
     let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hash_md5::finish(&s, dst1.1);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_md5::init(&mut s);
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 16u32.wrapping_div(block_len);
@@ -90,8 +90,8 @@ compute_md5(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u32
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_md5::update_multi(&mut s, &opad, 1u32);
     crate::hash_md5::update_multi(&mut s, rem0.0, n_blocks0);
     crate::hash_md5::update_last(
@@ -115,7 +115,7 @@ compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u3
     let mut key_block: [u8; 64] = [0x00u8; 64usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 20u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 64u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -157,7 +157,7 @@ compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u3
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_sha1::update_multi(&mut s, &ipad, 1u32);
         crate::hash_sha1::update_multi(&mut s, rem0.0, n_blocks0);
         crate::hash_sha1::update_last(
@@ -169,7 +169,7 @@ compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u3
     };
     let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hash_sha1::finish(&s, dst1.1);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_sha1::init(&mut s);
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 20u32.wrapping_div(block_len);
@@ -186,8 +186,8 @@ compute_sha1(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len: u3
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_sha1::update_multi(&mut s, &opad, 1u32);
     crate::hash_sha1::update_multi(&mut s, rem0.0, n_blocks0);
     crate::hash_sha1::update_last(
@@ -211,7 +211,7 @@ compute_sha2_224(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let mut key_block: [u8; 64] = [0x00u8; 64usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 28u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 64u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -264,7 +264,7 @@ compute_sha2_224(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_sha2::sha224_update_nblocks(64u32, &ipad, s);
         crate::hash_sha2::sha224_update_nblocks(n_blocks0.wrapping_mul(64u32), rem0.0, s);
         crate::hash_sha2::sha224_update_last(
@@ -276,7 +276,7 @@ compute_sha2_224(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     };
     let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hash_sha2::sha224_finish(s, dst1.1);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_sha2::sha224_init(s);
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 28u32.wrapping_div(block_len);
@@ -293,8 +293,8 @@ compute_sha2_224(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_sha2::sha224_update_nblocks(64u32, &opad, s);
     crate::hash_sha2::sha224_update_nblocks(n_blocks0.wrapping_mul(64u32), rem0.0, s);
     crate::hash_sha2::sha224_update_last(
@@ -318,7 +318,7 @@ compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let mut key_block: [u8; 64] = [0x00u8; 64usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 32u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 64u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -371,7 +371,7 @@ compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_sha2::sha256_update_nblocks(64u32, &ipad, s);
         crate::hash_sha2::sha256_update_nblocks(n_blocks0.wrapping_mul(64u32), rem0.0, s);
         crate::hash_sha2::sha256_update_last(
@@ -383,7 +383,7 @@ compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     };
     let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hash_sha2::sha256_finish(s, dst1.1);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_sha2::sha256_init(s);
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 32u32.wrapping_div(block_len);
@@ -400,8 +400,8 @@ compute_sha2_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_sha2::sha256_update_nblocks(64u32, &opad, s);
     crate::hash_sha2::sha256_update_nblocks(n_blocks0.wrapping_mul(64u32), rem0.0, s);
     crate::hash_sha2::sha256_update_last(
@@ -425,7 +425,7 @@ compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let mut key_block: [u8; 128] = [0x00u8; 128usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 128u32 { key_len } else { 48u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 128u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -488,7 +488,7 @@ compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_sha2::sha384_update_nblocks(128u32, &ipad, s);
         crate::hash_sha2::sha384_update_nblocks(n_blocks0.wrapping_mul(128u32), rem0.0, s);
         crate::hash_sha2::sha384_update_last(
@@ -506,7 +506,7 @@ compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     };
     let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hash_sha2::sha384_finish(s, dst1.1);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_sha2::sha384_init(s);
     let block_len: u32 = 128u32;
     let n_blocks: u32 = 48u32.wrapping_div(block_len);
@@ -523,8 +523,8 @@ compute_sha2_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_sha2::sha384_update_nblocks(128u32, &opad, s);
     crate::hash_sha2::sha384_update_nblocks(n_blocks0.wrapping_mul(128u32), rem0.0, s);
     crate::hash_sha2::sha384_update_last(
@@ -554,7 +554,7 @@ compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let mut key_block: [u8; 128] = [0x00u8; 128usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 128u32 { key_len } else { 64u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 128u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -617,7 +617,7 @@ compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_sha2::sha512_update_nblocks(128u32, &ipad, s);
         crate::hash_sha2::sha512_update_nblocks(n_blocks0.wrapping_mul(128u32), rem0.0, s);
         crate::hash_sha2::sha512_update_last(
@@ -635,7 +635,7 @@ compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     };
     let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hash_sha2::sha512_finish(s, dst1.1);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_sha2::sha512_init(s);
     let block_len: u32 = 128u32;
     let n_blocks: u32 = 64u32.wrapping_div(block_len);
@@ -652,8 +652,8 @@ compute_sha2_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_sha2::sha512_update_nblocks(128u32, &opad, s);
     crate::hash_sha2::sha512_update_nblocks(n_blocks0.wrapping_mul(128u32), rem0.0, s);
     crate::hash_sha2::sha512_update_last(
@@ -683,7 +683,7 @@ compute_sha3_224(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let mut key_block: [u8; 144] = [0x00u8; 144usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 144u32 { key_len } else { 28u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 144u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -731,7 +731,7 @@ compute_sha3_224(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_sha3::update_multi_sha3(
             crate::streaming_types::hash_alg::SHA3_224,
             &mut s,
@@ -769,7 +769,7 @@ compute_sha3_224(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     (dst1.1[28u32.wrapping_sub(remOut) as usize..28u32.wrapping_sub(remOut) as usize
     +
     remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_sha3::init_(crate::streaming_types::hash_alg::SHA3_224, &mut s);
     let block_len: u32 = 144u32;
     let n_blocks: u32 = 28u32.wrapping_div(block_len);
@@ -786,8 +786,8 @@ compute_sha3_224(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_sha3::update_multi_sha3(
         crate::streaming_types::hash_alg::SHA3_224,
         &mut s,
@@ -837,7 +837,7 @@ compute_sha3_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let mut key_block: [u8; 136] = [0x00u8; 136usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 136u32 { key_len } else { 32u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 136u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -885,7 +885,7 @@ compute_sha3_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_sha3::update_multi_sha3(
             crate::streaming_types::hash_alg::SHA3_256,
             &mut s,
@@ -923,7 +923,7 @@ compute_sha3_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     (dst1.1[32u32.wrapping_sub(remOut) as usize..32u32.wrapping_sub(remOut) as usize
     +
     remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_sha3::init_(crate::streaming_types::hash_alg::SHA3_256, &mut s);
     let block_len: u32 = 136u32;
     let n_blocks: u32 = 32u32.wrapping_div(block_len);
@@ -940,8 +940,8 @@ compute_sha3_256(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_sha3::update_multi_sha3(
         crate::streaming_types::hash_alg::SHA3_256,
         &mut s,
@@ -991,7 +991,7 @@ compute_sha3_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let mut key_block: [u8; 104] = [0x00u8; 104usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 104u32 { key_len } else { 48u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 104u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -1039,7 +1039,7 @@ compute_sha3_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_sha3::update_multi_sha3(
             crate::streaming_types::hash_alg::SHA3_384,
             &mut s,
@@ -1077,7 +1077,7 @@ compute_sha3_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     (dst1.1[48u32.wrapping_sub(remOut) as usize..48u32.wrapping_sub(remOut) as usize
     +
     remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_sha3::init_(crate::streaming_types::hash_alg::SHA3_384, &mut s);
     let block_len: u32 = 104u32;
     let n_blocks: u32 = 48u32.wrapping_div(block_len);
@@ -1094,8 +1094,8 @@ compute_sha3_384(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_sha3::update_multi_sha3(
         crate::streaming_types::hash_alg::SHA3_384,
         &mut s,
@@ -1145,7 +1145,7 @@ compute_sha3_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let mut key_block: [u8; 72] = [0x00u8; 72usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 72u32 { key_len } else { 64u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 72u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -1193,7 +1193,7 @@ compute_sha3_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         crate::hash_sha3::update_multi_sha3(
             crate::streaming_types::hash_alg::SHA3_512,
             &mut s,
@@ -1231,7 +1231,7 @@ compute_sha3_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     (dst1.1[64u32.wrapping_sub(remOut) as usize..64u32.wrapping_sub(remOut) as usize
     +
     remOut as usize]).copy_from_slice(&(&(&hbuf)[0usize..])[0usize..remOut as usize]);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_sha3::init_(crate::streaming_types::hash_alg::SHA3_512, &mut s);
     let block_len: u32 = 72u32;
     let n_blocks: u32 = 64u32.wrapping_div(block_len);
@@ -1248,8 +1248,8 @@ compute_sha3_512(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_len
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     crate::hash_sha3::update_multi_sha3(
         crate::streaming_types::hash_alg::SHA3_512,
         &mut s,
@@ -1299,7 +1299,7 @@ compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
     let mut key_block: [u8; 64] = [0x00u8; 64usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 64u32 { key_len } else { 32u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 64u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -1345,7 +1345,7 @@ compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         let mut wv: [u32; 16] = [0u32; 16usize];
         crate::hash_blake2s::update_multi(64u32, &mut wv, s0, 0u64, &ipad, 1u32);
         let mut wv0: [u32; 16] = [0u32; 16usize];
@@ -1370,7 +1370,7 @@ compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
     };
     let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hash_blake2s::finish(32u32, dst1.1, s0);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_blake2s::init(s0, 0u32, 32u32);
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 32u32.wrapping_div(block_len);
@@ -1387,8 +1387,8 @@ compute_blake2s_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     let mut wv: [u32; 16] = [0u32; 16usize];
     crate::hash_blake2s::update_multi(64u32, &mut wv, s0, 0u64, &opad, 1u32);
     let mut wv0: [u32; 16] = [0u32; 16usize];
@@ -1425,7 +1425,7 @@ compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
     let mut key_block: [u8; 128] = [0x00u8; 128usize];
     let nkey: (&mut [u8], &mut [u8]) = key_block.split_at_mut(0usize);
     let ite: u32 = if key_len <= 128u32 { key_len } else { 64u32 };
-    let zeroes: (&mut [u8], &mut [u8]) = nkey.1.split_at_mut(ite as usize);
+    let zeroes: (&mut [u8], &mut [u8]) = (nkey.1).split_at_mut(ite as usize);
     lowstar::ignore::ignore::<&[u8]>(zeroes.1);
     if key_len <= 128u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
@@ -1479,7 +1479,7 @@ compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
         let rem_len: u32 = scrut.snd;
         let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
         let full_blocks: (&[u8], &[u8]) = data.split_at(0usize);
-        let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+        let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
         let mut wv: [u64; 16] = [0u64; 16usize];
         crate::hash_blake2b::update_multi(
             128u32,
@@ -1514,7 +1514,7 @@ compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
     };
     let dst1: (&mut [u8], &mut [u8]) = ipad.split_at_mut(0usize);
     crate::hash_blake2b::finish(64u32, dst1.1, s0);
-    let hash1: (&[u8], &[u8]) = dst1.1.split_at(0usize);
+    let hash1: (&[u8], &[u8]) = (dst1.1).split_at(0usize);
     crate::hash_blake2b::init(s0, 0u32, 64u32);
     let block_len: u32 = 128u32;
     let n_blocks: u32 = 64u32.wrapping_div(block_len);
@@ -1531,8 +1531,8 @@ compute_blake2b_32(dst: &mut [u8], key: &[u8], key_len: u32, data: &[u8], data_l
     let n_blocks0: u32 = scrut.fst;
     let rem_len: u32 = scrut.snd;
     let full_blocks_len: u32 = n_blocks0.wrapping_mul(block_len);
-    let full_blocks: (&[u8], &[u8]) = hash1.1.split_at(0usize);
-    let rem0: (&[u8], &[u8]) = full_blocks.1.split_at(full_blocks_len as usize);
+    let full_blocks: (&[u8], &[u8]) = (hash1.1).split_at(0usize);
+    let rem0: (&[u8], &[u8]) = (full_blocks.1).split_at(full_blocks_len as usize);
     let mut wv: [u64; 16] = [0u64; 16usize];
     crate::hash_blake2b::update_multi(
         128u32,

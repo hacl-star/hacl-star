@@ -4,10 +4,10 @@
 #![allow(unused_assignments)]
 #![allow(unreachable_patterns)]
 
-pub fn absorb_inner_256 <'a>(
+pub fn absorb_inner_256(
     rateInBytes: u32,
-    b: crate::sha2_types::uint8_4p <'a>,
-    s: &'a mut [lib::intvector_intrinsics::vec256]
+    b: crate::sha2_types::uint8_4p,
+    s: &mut [lib::intvector_intrinsics::vec256]
 )
 {
     lowstar::ignore::ignore::<u32>(rateInBytes);
@@ -7795,7 +7795,8 @@ pub fn sha3_512(
 Allocate quadruple state buffer (200-bytes for each)
 */
 pub fn
-state_malloc() ->
+state_malloc
+<'a>() ->
     Box<[lib::intvector_intrinsics::vec256]>
 {
     let buf: Box<[lib::intvector_intrinsics::vec256]> =

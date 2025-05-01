@@ -22,7 +22,7 @@
     let nLen: u32 =
         (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let p_n: (&mut [u64], &mut [u64]) = p_r2_n.split_at_mut(0usize);
-    let r2_n: (&mut [u64], &mut [u64]) = p_n.1.split_at_mut(nLen as usize);
+    let r2_n: (&mut [u64], &mut [u64]) = (p_n.1).split_at_mut(nLen as usize);
     let sw: u32 =
         match a
         {
@@ -82,19 +82,19 @@
             {
                 let t1: u64 = a1.1[4u32.wrapping_mul(i) as usize];
                 let res_i: (&mut [u64], &mut [u64]) =
-                    res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
+                    (res1.1).split_at_mut(4u32.wrapping_mul(i) as usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1);
                 let t10: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
-                let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
+                let res_i0: (&mut [u64], &mut [u64]) = (res_i.1).split_at_mut(1usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t10, 0u64, res_i0.1);
                 let t11: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
-                let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
+                let res_i1: (&mut [u64], &mut [u64]) = (res_i0.1).split_at_mut(1usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t11, 0u64, res_i1.1);
                 let t12: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
-                let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
+                let res_i2: (&mut [u64], &mut [u64]) = (res_i1.1).split_at_mut(1usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t12, 0u64, res_i2.1)
             };
@@ -104,7 +104,7 @@
             nLen.wrapping_sub(1u32).wrapping_div(4u32).wrapping_mul(4u32)..nLen.wrapping_sub(1u32)
             {
                 let t1: u64 = a1.1[i as usize];
-                let res_i: (&mut [u64], &mut [u64]) = res1.1.split_at_mut(i as usize);
+                let res_i: (&mut [u64], &mut [u64]) = (res1.1).split_at_mut(i as usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u64((&c)[0usize], t1, 0u64, res_i.1)
             };
@@ -149,7 +149,7 @@
     let nLen: u32 =
         (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let p_n: (&[u64], &[u64]) = p_r2_n.split_at(0usize);
-    let r2_n: (&[u64], &[u64]) = p_n.1.split_at(nLen as usize);
+    let r2_n: (&[u64], &[u64]) = (p_n.1).split_at(nLen as usize);
     let mut res_n: Box<[u64]> = vec![0u64; nLen as usize].into_boxed_slice();
     let mu: u64 = bignum::bignum::mod_inv_uint64(r2_n.0[0usize]);
     bignum::bignum::bn_mod_exp_consttime_precomp_u64(
@@ -167,7 +167,7 @@
 
 pub fn ffdhe_len0(a: crate::spec::ffdhe_alg) -> u32 { crate::ffdhe::ffdhe_len(a) }
 
-pub fn new_ffdhe_precomp_p(a: crate::spec::ffdhe_alg) -> Box<[u64]>
+pub fn new_ffdhe_precomp_p <'a>(a: crate::spec::ffdhe_alg) -> Box<[u64]>
 {
     let nLen: u32 =
         (crate::ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);

@@ -56,13 +56,6 @@ typedef struct Hacl_Streaming_Types_optional_64_s
 }
 Hacl_Streaming_Types_optional_64;
 
-typedef struct Hacl_Streaming_Types_two_pointers_s
-{
-  uint64_t *fst;
-  uint64_t *snd;
-}
-Hacl_Streaming_Types_two_pointers;
-
 typedef struct Hacl_Streaming_MD_state_32_s
 {
   uint32_t *block_state;

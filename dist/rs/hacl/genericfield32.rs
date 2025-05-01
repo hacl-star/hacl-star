@@ -36,7 +36,8 @@ Heap-allocate and initialize a montgomery context.
   to avoid memory leaks.
 */
 pub fn
-field_init(len: u32, n: &[u32]) ->
+field_init
+<'a>(len: u32, n: &'a [u32]) ->
     Box<[bignum::bignum::bn_mont_ctx_u32]>
 {
     let mut r2: Box<[u32]> = vec![0u32; len as usize].into_boxed_slice();
@@ -209,7 +210,7 @@ exp_consttime(
         );
         let mut sw: [u32; 1] = [0u32; 1usize];
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
-        let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(len1 as usize);
+        let ctx_r2: (&[u32], &[u32]) = (ctx_n.1).split_at(len1 as usize);
         bignum::bignum::bn_from_mont_u32(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, resM);
         for i in 0u32..bBits
         {
@@ -224,9 +225,9 @@ exp_consttime(
                 resM[i0 as usize] ^= dummy;
                 (&mut aMc)[i0 as usize] = (&aMc)[i0 as usize] ^ dummy
             };
-            let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
+            let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
             bignum::bignum::bn_mont_mul_u32(len1, ctx_n0.1, uu____0.mu, &aMc, resM, &mut aMc);
-            let ctx_n1: (&[u32], &[u32]) = ctx_n0.1.split_at(0usize);
+            let ctx_n1: (&[u32], &[u32]) = (ctx_n0.1).split_at(0usize);
             bignum::bignum::bn_mont_sqr_u32(len1, ctx_n1.1, uu____0.mu, resM, resM);
             (&mut sw)[0usize] = bit
         };
@@ -254,9 +255,9 @@ exp_consttime(
             vec![0u32; 16u32.wrapping_mul(len1) as usize].into_boxed_slice();
         let mut tmp: Box<[u32]> = vec![0u32; len1 as usize].into_boxed_slice();
         let t0: (&mut [u32], &mut [u32]) = table.split_at_mut(0usize);
-        let t1: (&mut [u32], &mut [u32]) = t0.1.split_at_mut(len1 as usize);
+        let t1: (&mut [u32], &mut [u32]) = (t0.1).split_at_mut(len1 as usize);
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
-        let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(len1 as usize);
+        let ctx_r2: (&[u32], &[u32]) = (ctx_n.1).split_at(len1 as usize);
         bignum::bignum::bn_from_mont_u32(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len1 as usize]).copy_from_slice(&(&aMc)[0usize..len1 as usize]);
         lowstar::ignore::ignore::<&[u32]>(&table);
@@ -268,7 +269,7 @@ exp_consttime(
             {
                 let t11: (&[u32], &[u32]) =
                     table.split_at(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
-                let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
+                let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
                 bignum::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, t11.1, &mut tmp);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                     i
@@ -281,7 +282,7 @@ exp_consttime(
                     table.split_at(
                         2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
                     );
-                let ctx_n1: (&[u32], &[u32]) = ctx_n0.1.split_at(0usize);
+                let ctx_n1: (&[u32], &[u32]) = (ctx_n0.1).split_at(0usize);
                 bignum::bignum::bn_mont_mul_u32(len1, ctx_n1.1, uu____0.mu, &aMc, t2.1, &mut tmp);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                     i
@@ -297,7 +298,7 @@ exp_consttime(
             let i: u32 = bBits.wrapping_div(4u32).wrapping_mul(4u32);
             let bits_c: u32 = bignum::bignum_base::bn_get_bits_u32(bLen, b, i, 4u32);
             (resM[0usize..len1 as usize]).copy_from_slice(
-                &(&(&table)[0u32.wrapping_mul(len1) as usize..] as &[u32])[0usize..len1 as usize]
+                &(&(&table)[0u32.wrapping_mul(len1) as usize..])[0usize..len1 as usize]
             );
             krml::unroll_for!(
                 15,
@@ -319,8 +320,8 @@ exp_consttime(
         }
         else
         {
-            let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
-            let ctx_r20: (&[u32], &[u32]) = ctx_n0.1.split_at(len1 as usize);
+            let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
+            let ctx_r20: (&[u32], &[u32]) = (ctx_n0.1).split_at(len1 as usize);
             bignum::bignum::bn_from_mont_u32(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
         };
         let mut tmp0: Box<[u32]> = vec![0u32; len1 as usize].into_boxed_slice();
@@ -332,7 +333,7 @@ exp_consttime(
                 0u32,
                 1u32,
                 {
-                    let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
+                    let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
                     bignum::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, resM, resM)
                 }
             );
@@ -343,7 +344,7 @@ exp_consttime(
             let bits_l: u32 = bignum::bignum_base::bn_get_bits_u32(bLen, b, k2, 4u32);
             lowstar::ignore::ignore::<&[u32]>(&table);
             ((&mut tmp0)[0usize..len1 as usize]).copy_from_slice(
-                &(&(&table)[0u32.wrapping_mul(len1) as usize..] as &[u32])[0usize..len1 as usize]
+                &(&(&table)[0u32.wrapping_mul(len1) as usize..])[0usize..len1 as usize]
             );
             krml::unroll_for!(
                 15,
@@ -362,7 +363,7 @@ exp_consttime(
                     }
                 }
             );
-            let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
+            let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
             bignum::bignum::bn_mont_mul_u32(len1, ctx_n0.1, uu____0.mu, resM, &tmp0, resM)
         }
     }
@@ -407,7 +408,7 @@ exp_vartime(
             &(&uu____0.r2)[0usize..len1 as usize]
         );
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
-        let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(len1 as usize);
+        let ctx_r2: (&[u32], &[u32]) = (ctx_n.1).split_at(len1 as usize);
         bignum::bignum::bn_from_mont_u32(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, resM);
         for i in 0u32..bBits
         {
@@ -417,10 +418,10 @@ exp_vartime(
             let bit: u32 = tmp.wrapping_shr(j) & 1u32;
             if bit != 0u32
             {
-                let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
+                let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
                 bignum::bignum::bn_mont_mul_u32(len1, ctx_n0.1, uu____0.mu, resM, &aMc, resM)
             };
-            let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
+            let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
             bignum::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, &aMc, &mut aMc)
         }
     }
@@ -440,9 +441,9 @@ exp_vartime(
             vec![0u32; 16u32.wrapping_mul(len1) as usize].into_boxed_slice();
         let mut tmp: Box<[u32]> = vec![0u32; len1 as usize].into_boxed_slice();
         let t0: (&mut [u32], &mut [u32]) = table.split_at_mut(0usize);
-        let t1: (&mut [u32], &mut [u32]) = t0.1.split_at_mut(len1 as usize);
+        let t1: (&mut [u32], &mut [u32]) = (t0.1).split_at_mut(len1 as usize);
         let ctx_n: (&[u32], &[u32]) = ctx.split_at(0usize);
-        let ctx_r2: (&[u32], &[u32]) = ctx_n.1.split_at(len1 as usize);
+        let ctx_r2: (&[u32], &[u32]) = (ctx_n.1).split_at(len1 as usize);
         bignum::bignum::bn_from_mont_u32(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len1 as usize]).copy_from_slice(&(&aMc)[0usize..len1 as usize]);
         lowstar::ignore::ignore::<&[u32]>(&table);
@@ -454,7 +455,7 @@ exp_vartime(
             {
                 let t11: (&[u32], &[u32]) =
                     table.split_at(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
-                let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
+                let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
                 bignum::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, t11.1, &mut tmp);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                     i
@@ -467,7 +468,7 @@ exp_vartime(
                     table.split_at(
                         2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize
                     );
-                let ctx_n1: (&[u32], &[u32]) = ctx_n0.1.split_at(0usize);
+                let ctx_n1: (&[u32], &[u32]) = (ctx_n0.1).split_at(0usize);
                 bignum::bignum::bn_mont_mul_u32(len1, ctx_n1.1, uu____0.mu, &aMc, t2.1, &mut tmp);
                 ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                     i
@@ -488,8 +489,8 @@ exp_vartime(
         }
         else
         {
-            let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
-            let ctx_r20: (&[u32], &[u32]) = ctx_n0.1.split_at(len1 as usize);
+            let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
+            let ctx_r20: (&[u32], &[u32]) = (ctx_n0.1).split_at(len1 as usize);
             bignum::bignum::bn_from_mont_u32(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
         };
         let mut tmp0: Box<[u32]> = vec![0u32; len1 as usize].into_boxed_slice();
@@ -501,7 +502,7 @@ exp_vartime(
                 0u32,
                 1u32,
                 {
-                    let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
+                    let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
                     bignum::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, resM, resM)
                 }
             );
@@ -514,7 +515,7 @@ exp_vartime(
             let bits_l32: u32 = bits_l;
             let a_bits_l: (&[u32], &[u32]) = table.split_at(bits_l32.wrapping_mul(len1) as usize);
             ((&mut tmp0)[0usize..len1 as usize]).copy_from_slice(&a_bits_l.1[0usize..len1 as usize]);
-            let ctx_n0: (&[u32], &[u32]) = ctx_r2.1.split_at(0usize - len1 as usize);
+            let ctx_n0: (&[u32], &[u32]) = (ctx_r2.1).split_at(0usize - len1 as usize);
             bignum::bignum::bn_mont_mul_u32(len1, ctx_n0.1, uu____0.mu, resM, &tmp0, resM)
         }
     }
@@ -554,19 +555,19 @@ inverse(k: &[bignum::bignum::bn_mont_ctx_u32], aM: &[u32], aInvM: &mut [u32])
             {
                 let t1: u32 = a1[4u32.wrapping_mul(i) as usize];
                 let res_i: (&mut [u32], &mut [u32]) =
-                    res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
+                    (res1.1).split_at_mut(4u32.wrapping_mul(i) as usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1);
                 let t10: u32 = a1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
-                let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
+                let res_i0: (&mut [u32], &mut [u32]) = (res_i.1).split_at_mut(1usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t10, 0u32, res_i0.1);
                 let t11: u32 = a1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
-                let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
+                let res_i1: (&mut [u32], &mut [u32]) = (res_i0.1).split_at_mut(1usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t11, 0u32, res_i1.1);
                 let t12: u32 = a1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
-                let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
+                let res_i2: (&mut [u32], &mut [u32]) = (res_i1.1).split_at_mut(1usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t12, 0u32, res_i2.1)
             };
@@ -576,7 +577,7 @@ inverse(k: &[bignum::bignum::bn_mont_ctx_u32], aM: &[u32], aInvM: &mut [u32])
             len1.wrapping_sub(1u32).wrapping_div(4u32).wrapping_mul(4u32)..len1.wrapping_sub(1u32)
             {
                 let t1: u32 = a1[i as usize];
-                let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(i as usize);
+                let res_i: (&mut [u32], &mut [u32]) = (res1.1).split_at_mut(i as usize);
                 (&mut c)[0usize] =
                     lib::inttypes_intrinsics::sub_borrow_u32((&c)[0usize], t1, 0u32, res_i.1)
             };
@@ -586,5 +587,5 @@ inverse(k: &[bignum::bignum::bn_mont_ctx_u32], aM: &[u32], aInvM: &mut [u32])
         else
         { c0 };
     lowstar::ignore::ignore::<u32>(c);
-    crate::genericfield32::exp_vartime(k, aM, uu____0.len.wrapping_mul(32u32), &n2, aInvM)
+    crate::genericfield32::exp_vartime(k, aM, (uu____0.len).wrapping_mul(32u32), &n2, aInvM)
 }
