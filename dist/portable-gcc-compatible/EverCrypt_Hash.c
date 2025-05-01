@@ -157,8 +157,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA1_s, { .case_SHA1_s = s1 } });
+          st[0U] = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA1_s, { .case_SHA1_s = s1 } });
         }
         if (st == NULL)
         {
@@ -179,8 +178,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
+          st[0U] =
             (
               (EverCrypt_Hash_state_s){
                 .tag = EverCrypt_Hash_SHA2_224_s,
@@ -207,8 +205,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
+          st[0U] =
             (
               (EverCrypt_Hash_state_s){
                 .tag = EverCrypt_Hash_SHA2_256_s,
@@ -235,8 +232,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
+          st[0U] =
             (
               (EverCrypt_Hash_state_s){
                 .tag = EverCrypt_Hash_SHA2_384_s,
@@ -263,8 +259,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
+          st[0U] =
             (
               (EverCrypt_Hash_state_s){
                 .tag = EverCrypt_Hash_SHA2_512_s,
@@ -291,8 +286,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
+          st[0U] =
             (
               (EverCrypt_Hash_state_s){
                 .tag = EverCrypt_Hash_SHA3_224_s,
@@ -319,8 +313,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
+          st[0U] =
             (
               (EverCrypt_Hash_state_s){
                 .tag = EverCrypt_Hash_SHA3_256_s,
@@ -347,8 +340,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
+          st[0U] =
             (
               (EverCrypt_Hash_state_s){
                 .tag = EverCrypt_Hash_SHA3_384_s,
@@ -375,8 +367,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          =
+          st[0U] =
             (
               (EverCrypt_Hash_state_s){
                 .tag = EverCrypt_Hash_SHA3_512_s,
@@ -407,8 +398,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
           *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
           if (st != NULL)
           {
-            st[0U]
-            =
+            st[0U] =
               (
                 (EverCrypt_Hash_state_s){
                   .tag = EverCrypt_Hash_Blake2S_128_s,
@@ -433,8 +423,8 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = s1 } });
+          st[0U] =
+            ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = s1 } });
         }
         if (st == NULL)
         {
@@ -453,8 +443,8 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = s1 } });
+          st[0U] =
+            ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = s1 } });
         }
         if (st == NULL)
         {
@@ -481,8 +471,7 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
           *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
           if (st != NULL)
           {
-            st[0U]
-            =
+            st[0U] =
               (
                 (EverCrypt_Hash_state_s){
                   .tag = EverCrypt_Hash_Blake2B_256_s,
@@ -507,8 +496,8 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = s1 } });
+          st[0U] =
+            ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = s1 } });
         }
         if (st == NULL)
         {
@@ -527,8 +516,8 @@ static EverCrypt_Hash_state_s *malloc_(Spec_Hash_Definitions_hash_alg a)
         *st = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
         if (st != NULL)
         {
-          st[0U]
-          = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = s1 } });
+          st[0U] =
+            ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = s1 } });
         }
         if (st == NULL)
         {
@@ -1864,8 +1853,7 @@ EverCrypt_Hash_Incremental_update(
       uint8_t *buf2 = buf + sz1;
       memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
       uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-      *state
-      =
+      *state =
         (
           (EverCrypt_Hash_Incremental_state_t){
             .block_state = block_state1,
@@ -1911,8 +1899,7 @@ EverCrypt_Hash_Incremental_update(
       update_multi(block_state1, total_len1, data1, data1_len);
       uint8_t *dst = buf;
       memcpy(dst, data2, data2_len * sizeof (uint8_t));
-      *state
-      =
+      *state =
         (
           (EverCrypt_Hash_Incremental_state_t){
             .block_state = block_state1,
@@ -1942,8 +1929,7 @@ EverCrypt_Hash_Incremental_update(
       uint8_t *buf2 = buf0 + sz10;
       memcpy(buf2, chunk1, diff * sizeof (uint8_t));
       uint64_t total_len2 = total_len10 + (uint64_t)diff;
-      *state
-      =
+      *state =
         (
           (EverCrypt_Hash_Incremental_state_t){
             .block_state = block_state10,
@@ -1972,10 +1958,8 @@ EverCrypt_Hash_Incremental_update(
       uint32_t ite0;
       if
       (
-        (uint64_t)(chunk_len - diff)
-        % (uint64_t)block_len(i1)
-        == 0ULL
-        && (uint64_t)(chunk_len - diff) > 0ULL
+        (uint64_t)(chunk_len - diff) % (uint64_t)block_len(i1) == 0ULL &&
+          (uint64_t)(chunk_len - diff) > 0ULL
       )
       {
         ite0 = block_len(i1);
@@ -1992,8 +1976,7 @@ EverCrypt_Hash_Incremental_update(
       update_multi(block_state1, total_len1, data1, data1_len);
       uint8_t *dst = buf;
       memcpy(dst, data2, data2_len * sizeof (uint8_t));
-      *state
-      =
+      *state =
         (
           (EverCrypt_Hash_Incremental_state_t){
             .block_state = block_state1,

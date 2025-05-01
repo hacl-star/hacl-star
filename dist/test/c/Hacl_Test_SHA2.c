@@ -90,15 +90,14 @@ static inline void sha256_update(uint8_t *b, uint32_t *hash)
       uint32_t k_e_t = k_t;
       uint32_t
       t1 =
-        h02
-        + ((e0 << 26U | e0 >> 6U) ^ ((e0 << 21U | e0 >> 11U) ^ (e0 << 7U | e0 >> 25U)))
-        + ((e0 & f0) ^ (~e0 & g0))
+        h02 + ((e0 << 26U | e0 >> 6U) ^ ((e0 << 21U | e0 >> 11U) ^ (e0 << 7U | e0 >> 25U))) +
+          ((e0 & f0) ^ (~e0 & g0))
         + k_e_t
         + ws_t;
       uint32_t
       t2 =
-        ((a0 << 30U | a0 >> 2U) ^ ((a0 << 19U | a0 >> 13U) ^ (a0 << 10U | a0 >> 22U)))
-        + ((a0 & b0) ^ ((a0 & c0) ^ (b0 & c0)));
+        ((a0 << 30U | a0 >> 2U) ^ ((a0 << 19U | a0 >> 13U) ^ (a0 << 10U | a0 >> 22U))) +
+          ((a0 & b0) ^ ((a0 & c0) ^ (b0 & c0)));
       uint32_t a1 = t1 + t2;
       uint32_t b1 = a0;
       uint32_t c1 = b0;
@@ -290,15 +289,14 @@ static inline void sha512_update(uint8_t *b, uint64_t *hash)
       uint64_t k_e_t = k_t;
       uint64_t
       t1 =
-        h02
-        + ((e0 << 50U | e0 >> 14U) ^ ((e0 << 46U | e0 >> 18U) ^ (e0 << 23U | e0 >> 41U)))
-        + ((e0 & f0) ^ (~e0 & g0))
+        h02 + ((e0 << 50U | e0 >> 14U) ^ ((e0 << 46U | e0 >> 18U) ^ (e0 << 23U | e0 >> 41U))) +
+          ((e0 & f0) ^ (~e0 & g0))
         + k_e_t
         + ws_t;
       uint64_t
       t2 =
-        ((a0 << 36U | a0 >> 28U) ^ ((a0 << 30U | a0 >> 34U) ^ (a0 << 25U | a0 >> 39U)))
-        + ((a0 & b0) ^ ((a0 & c0) ^ (b0 & c0)));
+        ((a0 << 36U | a0 >> 28U) ^ ((a0 << 30U | a0 >> 34U) ^ (a0 << 25U | a0 >> 39U))) +
+          ((a0 & b0) ^ ((a0 & c0) ^ (b0 & c0)));
       uint64_t a1 = t1 + t2;
       uint64_t b1 = a0;
       uint64_t c1 = b0;

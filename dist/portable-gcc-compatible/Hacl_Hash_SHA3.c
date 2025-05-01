@@ -936,8 +936,7 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-    *state
-    =
+    *state =
       ((Hacl_Hash_SHA3_state_t){ .block_state = block_state1, .buf = buf, .total_len = total_len2 });
   }
   else if (sz == 0U)
@@ -980,8 +979,7 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     Hacl_Hash_SHA3_update_multi_sha3(a1, s2, data1, data1_len / block_len(a1));
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
+    *state =
       (
         (Hacl_Hash_SHA3_state_t){
           .block_state = block_state1,
@@ -1011,8 +1009,7 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *state
-    =
+    *state =
       (
         (Hacl_Hash_SHA3_state_t){
           .block_state = block_state10,
@@ -1042,10 +1039,8 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     uint32_t ite;
     if
     (
-      (uint64_t)(chunk_len - diff)
-      % (uint64_t)block_len(i)
-      == 0ULL
-      && (uint64_t)(chunk_len - diff) > 0ULL
+      (uint64_t)(chunk_len - diff) % (uint64_t)block_len(i) == 0ULL &&
+        (uint64_t)(chunk_len - diff) > 0ULL
     )
     {
       ite = block_len(i);
@@ -1064,8 +1059,7 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     Hacl_Hash_SHA3_update_multi_sha3(a1, s2, data1, data1_len / block_len(a1));
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
+    *state =
       (
         (Hacl_Hash_SHA3_state_t){
           .block_state = block_state1,
@@ -2564,9 +2558,7 @@ Hacl_Hash_SHA3_shake128_squeeze_nblocks(
         5U,
         1U,
         _C[i] =
-          state[i
-          + 0U]
-          ^ (state[i + 5U] ^ (state[i + 10U] ^ (state[i + 15U] ^ state[i + 20U]))););
+          state[i + 0U] ^ (state[i + 5U] ^ (state[i + 10U] ^ (state[i + 15U] ^ state[i + 20U]))););
       KRML_MAYBE_FOR5(i2,
         0U,
         5U,
