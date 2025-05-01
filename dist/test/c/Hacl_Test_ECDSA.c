@@ -5699,9 +5699,7 @@ static bool check_bound(uint8_t *b)
   uint64_t x41 = x4;
   bool
   r =
-    x11
-    < q4
-    || (x11 == q4 && (x21 < q3 || (x21 == q3 && (x31 < q2 || (x31 == q2 && x41 < q1)))));
+    x11 < q4 || (x11 == q4 && (x21 < q3 || (x21 == q3 && (x31 < q2 || (x31 == q2 && x41 < q1)))));
   bool r1 = x11 == zero && x21 == zero && x31 == zero && x41 == zero;
   return r && !r1;
 }
