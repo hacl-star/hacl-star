@@ -201,6 +201,7 @@ val squeeze: (let m = M32 in
 let squeeze s rateInBytes outputByteLen b =
   squeeze #M32 s rateInBytes outputByteLen b
 
+#push-options "--z3rlimit 100"
 let finish_keccak (a: keccak_alg): finish_st a = fun s dst l ->
   let open Lib.NTuple in
   let open Lib.MultiBuffer in
@@ -217,3 +218,4 @@ let finish_keccak (a: keccak_alg): finish_st a = fun s dst l ->
     Hacl.Spec.SHA3.Equiv.squeeze_s_lemma (B.as_seq h0 s) (v (block_len a))
       (v (hash_len a)) (as_seq_multi h0 (ntup1 dst))
   end
+#pop-options
