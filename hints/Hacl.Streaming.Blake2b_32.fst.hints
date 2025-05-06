@@ -62,29 +62,26 @@
     [
       "Hacl.Streaming.Blake2b_32.blake2b_32",
       1,
-      2,
-      1,
+      0,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
+        "Hacl.Impl.Blake2.Core_pretyping_738bced230d07a53885c00814ce7f1ee",
+        "Spec.Blake2.Definitions_pretyping_42af5dd2a20742f737f53bd166e23200",
         "constructor_distinct_Hacl.Impl.Blake2.Core.M32",
-        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2S@tok",
         "equation_Hacl.Impl.Blake2.Generic.is_valid_blake2_config",
-        "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+        "typing_tok_Hacl.Impl.Blake2.Core.M32@tok",
+        "typing_tok_Spec.Blake2.Definitions.Blake2S@tok"
       ],
       0,
-      "a53a061fbecf66ffa15638cfef636466"
+      "22f7ecbe6aeec93b1bbd004bff3ad61b"
     ],
     [
       "Hacl.Streaming.Blake2b_32.state_t",

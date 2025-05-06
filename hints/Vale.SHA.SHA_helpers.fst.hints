@@ -3143,13 +3143,12 @@
       "Vale.SHA.SHA_helpers.lemma_update_multi_quads",
       1,
       1,
-      0,
+      1,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
         "bool_typing", "equation_Prims.nat", "equation_Prims.squash",
         "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.Def.Words_s.nat32",
-        "function_token_typing_Vale.Def.Words_s.nat32", "int_inversion",
+        "equation_Vale.Def.Words_s.nat32", "int_inversion",
         "kinding_Vale.Def.Words_s.four@tok",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
@@ -3157,10 +3156,10 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_8117376fa751a9089be3b927d5831062",
-        "typing_FStar.Seq.Base.length"
+        "typing_FStar.Seq.Base.length", "typing_Vale.Def.Words_s.nat32"
       ],
       0,
-      "568a5f8f58de35f53e9e6608f22dc1a6"
+      "af351a2aa69ee704a50eea30bdd5033a"
     ],
     [
       "Vale.SHA.SHA_helpers.lemma_update_multi_quads",
@@ -3268,7 +3267,7 @@
       "Vale.SHA.SHA_helpers.lemma_le_bytes_to_hash_quads_part1",
       1,
       0,
-      0,
+      1,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
@@ -3283,7 +3282,7 @@
         "token_correspondence_Vale.Def.Types_s.le_seq_quad32_to_bytes_def"
       ],
       0,
-      "2f89ebe152843a52fc6f11aa760f03cd"
+      "cdb049c504edfc08dced2204ee54314c"
     ],
     [
       "Vale.SHA.SHA_helpers.lemma_le_bytes_to_hash_quads",
@@ -3388,7 +3387,7 @@
       "Vale.SHA.SHA_helpers.lemma_update_multi_opaque_vale_is_update_multi",
       1,
       0,
-      0,
+      1,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.squash",
         "equation_Vale.SHA.SHA_helpers.block_length",
@@ -3398,13 +3397,13 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "0f7c7f8748f654718dd9348b4989fc4c"
+      "5e398f5b841ffc8006c654064c363f9b"
     ],
     [
       "Vale.SHA.SHA_helpers.lemma_update_multi_opaque_vale_is_update_multi",
       2,
       0,
-      0,
+      1,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
@@ -3423,7 +3422,7 @@
         "token_correspondence_Vale.SHA.SHA_helpers.update_multi_opaque_aux"
       ],
       0,
-      "b99195d1b5b118d98a4b0fb6fd20d902"
+      "fada3450f4b78b382f372c169892084d"
     ]
   ]
 ]
