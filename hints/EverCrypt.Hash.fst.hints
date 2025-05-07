@@ -3749,24 +3749,10 @@
       "EverCrypt.Hash.prev_len_of_uint64",
       2,
       0,
+      1,
+      [ "@query" ],
       0,
-      [
-        "@MaxIFuel_assumption", "@query", "b2t_def",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_Prims.nat",
-        "equation_Spec.Hash.Incremental.Definitions.prev_length_t",
-        "int_inversion", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_0dd7d82d89ad57ee72279b3caed814b3",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_85fa9a0c1bbb99cdf2d74b81cf2c88fa",
-        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.UInt64.v", "unit_typing"
-      ],
-      0,
-      "e63b3a6cadbf5b22f9f132d0b94c5dce"
+      "a5b8b179f3c893d9097fe7363345cdc7"
     ],
     [
       "EverCrypt.Hash.update_last",

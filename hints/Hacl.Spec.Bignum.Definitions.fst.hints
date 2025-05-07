@@ -532,28 +532,17 @@
     [
       "Hacl.Spec.Bignum.Definitions.bn_eval_create1",
       1,
-      2,
+      0,
       0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Prims.pos",
-        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_typing",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "token_correspondence_Prims.pow2.fuel_instrumented",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "42a05ac8b10d812447a4c936df9aa997"
+      "1dfdc4afb3c0b69aff1aea2522874947"
     ],
     [
       "Hacl.Spec.Bignum.Definitions.bn_eval_create1",
@@ -772,7 +761,7 @@
     [
       "Hacl.Spec.Bignum.Definitions.bn_eval_split_i_aux",
       1,
-      2,
+      0,
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
@@ -781,21 +770,22 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ab730d3463c811070324de97c980a9fd"
+      "f9755dca0dff2547bde5d545f3141d46"
     ],
     [
       "Hacl.Spec.Bignum.Definitions.bn_eval_split_i_aux",
       2,
-      2,
+      0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "int_inversion", "primitive_Prims.op_Addition",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_inversion", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "67affd0d1b1d4e9b61fbc2c055a8bb8b"
+      "738eaccdaa33b1fdb4c8771f2f7dae38"
     ],
     [
       "Hacl.Spec.Bignum.Definitions.bn_eval_split_i",
