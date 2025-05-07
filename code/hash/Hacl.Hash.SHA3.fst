@@ -201,7 +201,7 @@ val squeeze: (let m = M32 in
 let squeeze s rateInBytes outputByteLen b =
   squeeze #M32 s rateInBytes outputByteLen b
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 let finish_keccak (a: keccak_alg): finish_st a = fun s dst l ->
   let open Lib.NTuple in
   let open Lib.MultiBuffer in
