@@ -99,6 +99,22 @@ val bn_add: #t:limb_t -> bn_add_st t
 
 
 inline_for_extraction noextract
+let bn_add_in_place_st (t:limb_t) =
+    aLen:size_t
+  -> bLen:size_t{v bLen <= v aLen}
+  -> b:lbignum t bLen
+  -> res:lbignum t aLen ->
+  Stack (carry t)
+  (requires fun h ->
+    live h b /\ live h res /\ disjoint b res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (c_out, as_seq h1 res) == S.bn_add (as_seq h0 res) (as_seq h0 b))
+
+inline_for_extraction noextract
+val bn_add_in_place: #t:limb_t -> bn_add_in_place_st t
+
+
+inline_for_extraction noextract
 let bn_sub_st (t:limb_t) =
     aLen:size_t
   -> a:lbignum t aLen

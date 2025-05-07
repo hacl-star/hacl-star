@@ -89,14 +89,14 @@ let point_add_step_2 p q tmp =
   let z2 = getz q in
   let t2 = gett q in
   times_2d tmp1 t1;  // tmp1 = 2 * d * t1
-  fmul tmp1 tmp1 t2; // tmp1 = tmp1 * t2 = c
+  fmul_sa tmp1 tmp1 t2; // tmp1 = tmp1 * t2 = c
 
   times_2 tmp2 z1;    // tmp2 = 2 * z1
-  fmul tmp2 tmp2 z2;  // tmp2 = tmp2 * z2 = d
+  fmul_sa tmp2 tmp2 z2;  // tmp2 = tmp2 * z2 = d
 
   fdifference tmp5 tmp4 tmp3; // tmp5 = e = b - a = tmp4 - tmp3
   fdifference tmp6 tmp2 tmp1; // tmp6 = f = d - c = tmp2 - tmp1
-  fsum tmp1 tmp2 tmp1;        // tmp1 = g = d + c = tmp2 + tmp1
+  fsum_sa tmp1 tmp1 tmp2;        // tmp1 = g = d + c = tmp2 + tmp1
   fsum tmp2 tmp4 tmp3         // tmp2 = h = b + a = tmp4 - tmp3
 
 
@@ -141,4 +141,23 @@ let point_add out p q =
   push_frame();
   let tmp = create 30ul (u64 0) in
   point_add_ out p q tmp;
+  pop_frame()
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val point_add_sa: out:point -> p:point -> q:point -> Stack unit
+  (requires fun h ->
+    live h out /\ live h p /\ live h q /\
+    eq_or_disjoint p out /\ eq_or_disjoint q out /\
+    F51.point_inv_t h p /\ F51.point_inv_t h q)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.point_inv_t h1 out /\
+    F51.point_eval h1 out == Spec.Ed25519.point_add (F51.point_eval h0 p) (F51.point_eval h0 q))
+
+(* HACL-RS *)
+let point_add_sa out p q =
+  push_frame();
+  let p_copy = create 20ul (u64 0) in
+  copy p_copy p;
+  point_add out p_copy q;
   pop_frame()

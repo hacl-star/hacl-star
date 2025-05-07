@@ -28,6 +28,9 @@ include Hacl.Spec.K256.Scalar
 [@CInline]
 let bn_add : BN.bn_add_st U64 = BN.bn_add
 
+[@CInline]
+let bn_add_sa : BN.bn_add_in_place_st U64 = BN.bn_add_in_place
+
 //inline_for_extraction noextract
 //let kn = BN.mk_runtime_bn U64 qnlimb
 
@@ -43,6 +46,15 @@ let add_mod4: BN.bn_add_mod_n_st U64 qnlimb =
 let sub_mod4: BN.bn_sub_mod_n_st U64 qnlimb =
   BN.bn_sub_mod_n qnlimb
 
+(* HACL-RS *)
+inline_for_extraction noextract
+let sub_mod4_a: BN.bn_sub_mod_n_st U64 qnlimb = fun n a b res ->
+  push_frame();
+  let b_copy = create qnlimb (u64 0) in
+  copy b_copy b;
+  sub_mod4 n a b_copy res;
+  pop_frame ()
+
 let mul4 (a:BD.lbignum U64 qnlimb) : BN.bn_karatsuba_mul_st U64 qnlimb a =
   BN.bn_mul qnlimb qnlimb a
 
@@ -55,7 +67,7 @@ instance kn: BN.bn U64 = {
   BN.add = add4;
   BN.sub = sub4;
   BN.add_mod_n = add_mod4;
-  BN.sub_mod_n = sub_mod4;
+  BN.sub_mod_n = sub_mod4_a;
   BN.mul = mul4;
   BN.sqr = sqr4
 }
@@ -229,6 +241,21 @@ let qadd out f1 f2 =
   pop_frame ()
 
 
+let qadd_sa1 out f1 f2 =
+  push_frame();
+  let f1_copy = create 4ul (u64 0) in
+  copy f1_copy f1;
+  qadd out f1_copy f2;
+  pop_frame ()
+
+let qadd_sa2 out f1 f2 =
+  push_frame();
+  let f2_copy = create 4ul (u64 0) in
+  copy f2_copy f2;
+  qadd out f1 f2_copy;
+  pop_frame ()
+
+
 val mul_pow2_256_minus_q_add:
     len:size_t
   -> resLen:size_t{2 + v len <= v resLen /\ 4 <= v resLen}
@@ -253,8 +280,8 @@ let mul_pow2_256_minus_q_add len resLen t01 a e res =
   let tmp = create (len +! 2ul) (u64 0) in
   BN.bn_mul len 2ul a t01 tmp;
   update_sub res 2ul len a;
-  let _ = bn_add resLen res (len +! 2ul) tmp res in
-  let c = bn_add resLen res 4ul e res in
+  let _ = bn_add_sa resLen (len +! 2ul) tmp res in
+  let c = bn_add_sa resLen 4ul e res in
   pop_frame ();
   c
 
@@ -277,12 +304,17 @@ let modq_before_final t01 a out =
   push_frame ();
   let m = create 7ul (u64 0) in
   let p = create 5ul (u64 0) in
-  let c0 = mul_pow2_256_minus_q_add 4ul 7ul t01 (sub a 4ul 4ul) (sub a 0ul 4ul) m in
-  let c1 = mul_pow2_256_minus_q_add 3ul 5ul t01 (sub m 4ul 3ul) (sub m 0ul 4ul) p in
-  let c2 = mul_pow2_256_minus_q_add 1ul 4ul t01 (sub p 4ul 1ul) (sub p 0ul 4ul) out in
+  let a0 = sub a 0ul 4ul in
+  let a1 = sub a 4ul 4ul in
+  let c0 = mul_pow2_256_minus_q_add 4ul 7ul t01 a1 a0 m in
+  let m0 = sub m 0ul 4ul in
+  let m1 = sub m 4ul 3ul in
+  let c1 = mul_pow2_256_minus_q_add 3ul 5ul t01 m1 m0 p in
+  let p0 = sub p 0ul 4ul in
+  let p1 = sub p 4ul 1ul in
+  let c2 = mul_pow2_256_minus_q_add 1ul 4ul t01 p1 p0 out in
   pop_frame ();
   c2
-
 
 val modq: out:qelem -> a:lbuffer uint64 (2ul *! qnlimb) -> Stack unit
   (requires fun h ->
@@ -324,6 +356,19 @@ let qmul out f1 f2 =
   modq out tmp;
   pop_frame ()
 
+let qmul_sa1 out f1 f2 =
+  push_frame();
+  let f1_copy = create 4ul (u64 0) in
+  copy f1_copy f1;
+  qmul out f1_copy f2;
+  pop_frame ()
+
+let qmul_sa2 out f1 f2 =
+  push_frame();
+  let f2_copy = create 4ul (u64 0) in
+  copy f2_copy f2;
+  qmul out f1 f2_copy;
+  pop_frame ()
 
 [@CInline]
 let qsqr out f =
@@ -336,6 +381,12 @@ let qsqr out f =
   modq out tmp;
   pop_frame ()
 
+let qsqr_sa out f =
+  push_frame();
+  let f_copy = create 4ul (u64 0) in
+  copy f_copy f;
+  qsqr out f_copy;
+  pop_frame ()
 
 [@CInline]
 let qnegate_conditional_vartime f is_negate =

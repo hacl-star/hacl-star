@@ -81,9 +81,17 @@ let point_add_and_double0 #s nq_p1 ab dc tmp2 =
   (* CAN RUN IN PARALLEL *)
   //fmul d d a;   // d = da = d * a
   //fmul c c b;   // c = cb = c * b
-  fmul2 dc dc ab tmp2;   // d|c = d*a|c*b
+  (* HACL-RS *)
+  fmul2_a dc dc ab tmp2;   // d|c = d*a|c*b
+
+  (* HACL-RS *)
+  let d : felem s = sub dc 0ul (nlimb s) in
+  let c : felem s = sub dc (nlimb s) (nlimb s) in
+
   fadd x3 d c;  // x3 = da + cb
   fsub z3 d c  // z3 = da - cb
+
+#restart-solver
 
 val point_add_and_double1:
     #s:field_spec
@@ -114,13 +122,9 @@ let point_add_and_double1 #s nq nq_p1 tmp1 tmp2 =
   let x3 = sub nq_p1 0ul (nlimb s) in
   let z3 = sub nq_p1 (nlimb s) (nlimb s) in
 
-  let a : felem s = sub tmp1 0ul (nlimb s) in
-  let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
-  let d : felem s = sub tmp1 (2ul *! nlimb s) (nlimb s) in
-  let c : felem s = sub tmp1 (3ul *! nlimb s) (nlimb s) in
-
   let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
   let dc : felem2 s = sub tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
+
   (* CAN RUN IN PARALLEL *)
   //fsqr d a;     // d = aa = a^2
   //fsqr c b;     // c = bb = b^2
@@ -128,13 +132,23 @@ let point_add_and_double1 #s nq nq_p1 tmp1 tmp2 =
   (* CAN RUN IN PARALLEL *)
   //fsqr x3 x3;   // x3 = (da + cb) ^ 2
   //fsqr z3 z3;   // z3 = (da - cb) ^ 2
-  fsqr2 nq_p1 nq_p1 tmp2;   // x3|z3 = x3*x3|z3*z3
+  (* HACL-RS *)
+  fsqr2_a nq_p1 nq_p1 tmp2;   // x3|z3 = x3*x3|z3*z3
+
+  let a : felem s = sub ab 0ul (nlimb s) in
+  let b : felem s = sub ab (nlimb s) (nlimb s) in
+  let d : felem s = sub dc 0ul (nlimb s) in
+  let c : felem s = sub dc (nlimb s) (nlimb s) in
+
 
   copy_felem a c;                           // a = bb
-  fsub c d c;   // c = e = aa - bb
+  fsub_a c d c;   // c = e = aa - bb
   assert_norm (121665 < pow2 17);
   fmul1 b c (u64 121665); // b = e * 121665
-  fadd b b d;   // b = (e * 121665) + aa
+  fadd_a b b d;   // b = (e * 121665) + aa
+
+  let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
+  let dc : felem2 s = sub tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
 
   (* CAN RUN IN PARALLEL *)
   //fmul x2 d a;  // x2 = aa * bb
@@ -177,17 +191,25 @@ let point_add_and_double #s q p01_tmp1 tmp2 =
   let z2 = sub nq (nlimb s) (nlimb s) in
   let z3 = sub nq_p1 (nlimb s) (nlimb s) in
 
-  let a : felem s = sub tmp1 0ul (nlimb s) in
-  let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
-  let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
   let dc : felem2 s = sub tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
+  let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
+  (* HACl-RS: Take sub of ab instead of tmp1 *)
+  let a : felem s = sub ab 0ul (nlimb s) in
+  let b : felem s = sub ab (nlimb s) (nlimb s) in
 
   fadd a x2 z2; // a = x2 + z2
   fsub b x2 z2; // b = x2 - z2
 
+  (* HACL-RS *)
+  let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
+
   point_add_and_double0 #s nq_p1 ab dc tmp2;
   point_add_and_double1 #s nq nq_p1 tmp1 tmp2;
-  fmul z3 z3 x1 tmp2; // z3 = x1 * (da - cb) ^ 2
+
+  (* HACL-RS *)
+  let z3 = sub nq_p1 (nlimb s) (nlimb s) in
+
+  fmul_a z3 z3 x1 tmp2; // z3 = x1 * (da - cb) ^ 2
   S.lemma_add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)
 #pop-options
 
@@ -210,20 +232,19 @@ let point_double #s nq tmp1 tmp2 =
   let x2 = sub nq 0ul (nlimb s) in
   let z2 = sub nq (nlimb s) (nlimb s) in
 
-  let a : felem s = sub tmp1 0ul (nlimb s) in
-  let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
-  let d : felem s = sub tmp1 (2ul *! nlimb s) (nlimb s) in
-  let c : felem s = sub tmp1 (3ul *! nlimb s) (nlimb s) in
-
   let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
   let dc : felem2 s = sub tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
+
+  let a : felem s = sub ab 0ul (nlimb s) in
+  let b : felem s = sub ab (nlimb s) (nlimb s) in
+
   let h0 = ST.get () in
-  assert (gsub nq 0ul (nlimb s) == x2);
-  assert (gsub nq (nlimb s) (nlimb s) == z2);
-  assert (gsub ab 0ul (nlimb s) == a);
-  assert (gsub ab (nlimb s) (nlimb s) == b);
-  assert (gsub dc 0ul (nlimb s) == d);
-  assert (gsub dc (nlimb s) (nlimb s) == c);
+  // assert (gsub nq 0ul (nlimb s) == x2);
+  // assert (gsub nq (nlimb s) (nlimb s) == z2);
+  // assert (gsub ab 0ul (nlimb s) == a);
+  // assert (gsub ab (nlimb s) (nlimb s) == b);
+  // assert (gsub dc 0ul (nlimb s) == d);
+  // assert (gsub dc (nlimb s) (nlimb s) == c);
 
   fadd a x2 z2; // a = x2 + z2
   fsub b x2 z2; // b = x2 - z2
@@ -232,11 +253,21 @@ let point_double #s nq tmp1 tmp2 =
   //fsqr d a;     // d = aa = a^2
   //fsqr c b;     // c = bb = b^2
   fsqr2 dc ab tmp2;     // d|c = aa | bb
+
+  let d : felem s = sub dc 0ul (nlimb s) in
+  let c : felem s = sub dc (nlimb s) (nlimb s) in
+  let a : felem s = sub ab 0ul (nlimb s) in
+  let b : felem s = sub ab (nlimb s) (nlimb s) in
+
   copy_felem a c;                           // a = bb
-  fsub c d c;   // c = e = aa - bb
+  fsub_a c d c;   // c = e = aa - bb
   assert_norm (121665 < pow2 17);
   fmul1 b c (u64 121665); // b = e * 121665
-  fadd b b d;   // b = (e * 121665) + aa
+  fadd_a b b d;   // b = (e * 121665) + aa
+
+  (* HACL-RS *)
+  let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
+  let dc : felem2 s = sub tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
 
   (* CAN RUN IN PARALLEL *)
   //fmul x2 d a;  // x2 = aa * bb

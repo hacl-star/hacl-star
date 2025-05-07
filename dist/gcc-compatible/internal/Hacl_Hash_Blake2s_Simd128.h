@@ -106,25 +106,21 @@ Hacl_Hash_Blake2s_Simd128_copy_internal_state(
   Lib_IntVector_Intrinsics_vec128 *dst
 );
 
-typedef struct Hacl_Hash_Blake2s_Simd128_two_2s_128_s
-{
-  Lib_IntVector_Intrinsics_vec128 *fst;
-  Lib_IntVector_Intrinsics_vec128 *snd;
-}
-Hacl_Hash_Blake2s_Simd128_two_2s_128;
-
-typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
+typedef struct
+K___uint8_t_uint8_t_bool__Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128__s
 {
   uint8_t fst;
   uint8_t snd;
   bool thd;
-  Hacl_Hash_Blake2s_Simd128_two_2s_128 f3;
+  Lib_IntVector_Intrinsics_vec128 *f3;
+  Lib_IntVector_Intrinsics_vec128 *f4;
 }
-Hacl_Hash_Blake2s_Simd128_block_state_t;
+K___uint8_t_uint8_t_bool__Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_;
 
 typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s
 {
-  Hacl_Hash_Blake2s_Simd128_block_state_t block_state;
+  K___uint8_t_uint8_t_bool__Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_
+  block_state;
   uint8_t *buf;
   uint64_t total_len;
 }

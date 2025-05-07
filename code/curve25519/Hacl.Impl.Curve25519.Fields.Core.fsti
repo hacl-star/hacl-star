@@ -150,6 +150,15 @@ let fadd_t (s:field_spec) (p: Type0) =
 [@ Meta.Attribute.specialize]
 val fadd: #s:field_spec -> fadd_t s True
 
+(* HACL-RS *)
+[@ Meta.Attribute.inline_ ]
+let fadd_a: #s:field_spec -> fadd_t s True = fun #s out f1 f2 ->
+  push_frame ();
+  let f1_copy = create (nlimb s) (limb_zero s) in
+  copy f1_copy f1;
+  fadd #s out f1_copy f2;
+  pop_frame ()
+
 let fsub_post (#s:field_spec) (h:mem) (out:felem s): Type0 =
   match s with
   | M51 -> f51_felem_fits h out (9, 10, 9, 9, 9)
@@ -173,6 +182,15 @@ let fsub_t (s:field_spec) (p: Type0) =
       feval h1 out == P.fsub (feval h0 f1) (feval h0 f2))
 [@ Meta.Attribute.specialize ]
 val fsub: #s:field_spec -> fsub_t s True
+
+(* HACL-RS *)
+[@ Meta.Attribute.inline_ ]
+let fsub_a: #s:field_spec -> fsub_t s True = fun #s out f1 f2 ->
+  push_frame ();
+  let f2_copy = create (nlimb s) (limb_zero s) in
+  copy f2_copy f2;
+  fsub #s out f1 f2_copy;
+  pop_frame ()
 
 let fmul_pre (#s:field_spec) (h:mem) (f1:felem s) (f2:felem s): Type0 =
   match s with
@@ -215,6 +233,15 @@ let fmul_t (s:field_spec) (p: Type0) =
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
 [@ Meta.Attribute.specialize ]
 val fmul: #s:field_spec -> fmul_t s True
+
+(* HACL-RS *)
+[@ Meta.Attribute.inline_ ]
+let fmul_a: #s:field_spec -> fmul_t s True = fun #s out f1 f2 tmp ->
+  push_frame ();
+  let f1_copy = create (nlimb s) (limb_zero s) in
+  copy f1_copy f1;
+  fmul #s out f1_copy f2 tmp;
+  pop_frame ()
 
 let fmul2_pre (#s:field_spec) (h:mem) (f1:felem2 s) (f2:felem2 s): Type0 =
   match s with
@@ -268,6 +295,15 @@ let fmul2_t (s:field_spec) (p: Type0) =
 
 [@ Meta.Attribute.specialize ]
 val fmul2: #s:field_spec -> fmul2_t s True
+
+(* HACL-RS *)
+[@ Meta.Attribute.inline_ ]
+let fmul2_a: #s:field_spec -> fmul2_t s True = fun #s out f1 f2 tmp ->
+  push_frame ();
+  let f1_copy = create  (nlimb s +. nlimb s) (limb_zero s)in
+  copy f1_copy f1;
+  fmul2 #s out f1_copy f2 tmp;
+  pop_frame ()
 
 let fmul1_pre (#s:field_spec) (h:mem) (f1:felem s) (f2:uint64): Type0 =
   match s with
@@ -358,6 +394,15 @@ let fsqr2_t (s:field_spec) (p: Type0) =
 
 [@ Meta.Attribute.specialize ]
 val fsqr2: #s:field_spec -> fsqr2_t s True
+
+(* HACL-RS *)
+[@ Meta.Attribute.inline_ ]
+let fsqr2_a: #s:field_spec -> fsqr2_t s True = fun #s out f1 tmp ->
+  push_frame ();
+  let f1_copy = create  (nlimb s +. nlimb s) (limb_zero s)in
+  copy f1_copy f1;
+  fsqr2 #s out f1_copy tmp;
+  pop_frame ()
 
 inline_for_extraction
 let cswap2_t (s:field_spec) (p: Type0) =
