@@ -2331,22 +2331,19 @@
     [
       "Vale.SHA.PPC64LE.SHA_helpers.translate_hash_update",
       1,
-      1,
+      0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.SEC",
         "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.add_mod",
         "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.mk_int",
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.sec_int_t", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.size_t", "equation_Lib.IntTypes.v",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Vale.Arch.Types.add_wrap_quad32",
+        "equation_Lib.IntTypes.v", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Arch.Types.add_wrap_quad32",
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words_s.nat32",
         "equation_Vale.SHA.PPC64LE.SHA_helpers.hash256",
@@ -2355,9 +2352,6 @@
         "equation_Vale.SHA.PPC64LE.SHA_helpers.vv",
         "equation_Vale.SHA.PPC64LE.SHA_helpers.word",
         "fuel_guarded_inversion_Vale.Def.Words_s.four",
-        "function_token_typing_Lib.IntTypes.size_t",
-        "function_token_typing_Prims.int",
-        "function_token_typing_Vale.Def.Words_s.nat32",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_eq_intro", "lemma_FStar.UInt32.uv_inv",
@@ -2370,12 +2364,14 @@
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
         "refinement_interpretation_Tm_refine_dbe0a814395dd45197dd2b50fdf08081",
         "refinement_interpretation_Tm_refine_edc8fb7e909853d860d4ab445ef31337",
-        "typing_FStar.UInt32.add_mod",
+        "typing_FStar.UInt32.add_mod", "typing_Prims.int",
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__hi3",
-        "typing_Vale.SHA.PPC64LE.SHA_helpers.nat32_to_word"
+        "typing_Vale.Def.Words_s.nat32",
+        "typing_Vale.SHA.PPC64LE.SHA_helpers.nat32_to_word",
+        "typing_Vale.SHA.PPC64LE.SHA_helpers.word"
       ],
       0,
-      "30bd2006475735463e9fddef6b26e711"
+      "1a6ba6547cd7fe63476dd9e228e92ea7"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.update_lemma",

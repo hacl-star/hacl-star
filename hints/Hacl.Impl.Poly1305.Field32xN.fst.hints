@@ -59,11 +59,11 @@
     [
       "Hacl.Impl.Poly1305.Field32xN.felem_wide_fits",
       1,
-      2,
-      1,
+      0,
+      0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "36b0cacaf910c145d38f7748742f7796"
+      "d779b7a0ebfb5a23b1c3ca1cc0cc1e21"
     ],
     [
       "Hacl.Impl.Poly1305.Field32xN.lemma_feval_is_fas_nat",
@@ -90,15 +90,15 @@
     [
       "Hacl.Impl.Poly1305.Field32xN.lemma_feval_is_fas_nat",
       2,
-      2,
-      1,
+      0,
+      0,
       [
         "@query", "equation_Hacl.Impl.Poly1305.Field32xN.fas_nat",
         "equation_Hacl.Impl.Poly1305.Field32xN.felem_less",
         "equation_Hacl.Impl.Poly1305.Field32xN.feval"
       ],
       0,
-      "de6fc05e6882dacd68133961f28fe0e2"
+      "38e9cedf593a27290527448385378ab8"
     ],
     [
       "Hacl.Impl.Poly1305.Field32xN.fmul_precomp_r_pre",
@@ -504,19 +504,18 @@
     [
       "Hacl.Impl.Poly1305.Field32xN.set_bit128",
       1,
-      2,
-      1,
+      0,
+      0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "equation_Prims.nat", "int_typing",
         "lemma_Hacl.Spec.Poly1305.Vec.lemma_pow2_128",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ec7ca8f020c5ce450e7663dd08543273"
+      "c34ee98a3f55e705a1e99ce615756f47"
     ],
     [
       "Hacl.Impl.Poly1305.Field32xN.set_bit128",
@@ -3073,7 +3072,7 @@
       "Hacl.Impl.Poly1305.Field32xN.load_precompute_r",
       2,
       2,
-      1,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
         "equation_Hacl.Impl.Poly1305.Field32xN.precomp_r",
@@ -3081,17 +3080,17 @@
         "equation_Hacl.Spec.Poly1305.Field32xN.uint64xN",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntVector.width",
         "equation_Prims.nat", "int_inversion",
-        "refinement_interpretation_Tm_refine_0277a1ccdec6900ec0829f595b4dcf2c",
         "refinement_interpretation_Tm_refine_05e4c0933138780179d8dc0d5538fee4",
         "refinement_interpretation_Tm_refine_1e9ba5c5f02af0d7253b5ea716c1b404",
+        "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_690b31dfb9a09c5c77e57fc7eb526e9f",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_a658c976a9118ef6c4559f187aff2181",
-        "refinement_interpretation_Tm_refine_b4ac66617e5d8594317df7dd672b9275",
-        "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8"
+        "refinement_interpretation_Tm_refine_b4ac66617e5d8594317df7dd672b9275"
       ],
       0,
-      "9896194eef8e5186ab812c9b61f1f36b"
+      "def57f7253bd928848539d8b1293f950"
     ],
     [
       "Hacl.Impl.Poly1305.Field32xN.load_felem1_le",

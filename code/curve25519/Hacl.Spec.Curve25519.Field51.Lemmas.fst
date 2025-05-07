@@ -13,7 +13,7 @@ open Hacl.Spec.Curve25519.Field51.Definition
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq -FStar.Tactics'"
+#reset-options "--using_facts_from '* -FStar.Seq -FStar.Tactics' --z3rlimit 50"
 
 val lemma_mod_sub_distr: a:int -> b:int -> n:pos ->
   Lemma ((a - b % n) % n = (a - b) % n)
@@ -745,6 +745,24 @@ let lemma_subtract_p f f' =
   then lemma_subtract_p5_0 f f'
   else lemma_subtract_p5_1 f f'
 
+let lemma_pow2_divmod_helper
+  (n e1 e2 : nat)
+  : Lemma
+      (requires e2 > e1)
+      (ensures (n % pow2 e1) * pow2 (e2 - e1)
+               + (n / pow2 e1) * pow2 e2 == n * pow2 (e2 - e1))
+= calc (==) {
+    ((n % pow2 e1) * pow2 (e2 - e1)) + (n / pow2 e1) * pow2 e2;
+    == { Math.Lemmas.euclidean_division_definition n (pow2 e1) }
+    ((n - (n / pow2 e1) * pow2 e1) * pow2 (e2 - e1)) + (n / pow2 e1) * pow2 e2;
+    == { Math.Lemmas.pow2_plus e1 (e2-e1) }
+    ((n - (n / pow2 e1) * pow2 e1) * pow2 (e2 - e1)) + (n / pow2 e1) * pow2 e1 * pow2 (e2 - e1);
+    == {}
+    ((n - (n / pow2 e1) * pow2 e1) + (n / pow2 e1) * pow2 e1) * pow2 (e2 - e1);
+    == {}
+    n * pow2 (e2 - e1);
+  }
+
 val lemma_store_felem2: f:felem5 ->
   Lemma (
     let (f0, f1, f2, f3, f4) = f in
@@ -753,16 +771,13 @@ val lemma_store_felem2: f:felem5 ->
     v f2 / pow2 26 * pow2 128 + (v f3 % pow2 39) * pow2 153 +
     v f3 / pow2 39 * pow2 192 + v f4 * pow2 204 ==
     v f0 + v f1 * pow2 51 + v f2 * pow2 102 + v f3 * pow2 153 + v f4 * pow2 204)
+
 let lemma_store_felem2 f =
   let (f0, f1, f2, f3, f4) = f in
-  assert_norm (pow2 64 = pow2 13 * pow2 51);
-  FStar.Math.Lemmas.euclidean_division_definition (v f1) (pow2 13);
-
-  assert_norm (pow2 128 = pow2 26 * pow2 102);
-  FStar.Math.Lemmas.euclidean_division_definition (v f2) (pow2 26);
-
-  assert_norm (pow2 192 = pow2 39 * pow2 153);
-  FStar.Math.Lemmas.euclidean_division_definition (v f3) (pow2 39)
+  lemma_pow2_divmod_helper (v f1) 13 64;
+  lemma_pow2_divmod_helper (v f2) 26 128;
+  lemma_pow2_divmod_helper (v f3) 39 192;
+  ()
 
 val lemma_store_felem1: f:felem5 ->
   Lemma (
@@ -772,6 +787,7 @@ val lemma_store_felem1: f:felem5 ->
     (v f2 / pow2 26 + (v f3 % pow2 39) * pow2 25) * pow2 128 +
     (v f3 / pow2 39 + v f4 * pow2 12) * pow2 192 ==
     v f0 + v f1 * pow2 51 + v f2 * pow2 102 + v f3 * pow2 153 + v f4 * pow2 204)
+
 let lemma_store_felem1 f =
   let (f0, f1, f2, f3, f4) = f in
   assert (
