@@ -19,7 +19,7 @@ dist/libpoly.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
 # Note: POLY_BUNDLE is found in Makefile.common -- shared definition.
-dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^ -o libpoly.a $(BASE_FLAGS) $(POLY_BUNDLE) \
 	  -tmpdir dist \
 	  -add-include '"libintvector.h"' \
