@@ -52,7 +52,7 @@ let point_add_1 t0 t1 t2 t3 t4 p q =
   fmul t2 z1 z2;
   fadd t3 x1 y1;
   fadd t4 x2 y2;
-  fmul t3 t3 t4;
+  fmul_sa1 t3 t3 t4;
   fadd t4 t0 t1
 
 
@@ -90,12 +90,12 @@ val point_add_2 (t1 t2 t3 t4 t5:felem) (p q:point) : Stack unit
 let point_add_2 t1 t2 t3 t4 t5 p q =
   let y1, z1 = gety p, getz p in
   let y2, z2 = gety q, getz q in
-  fsub t3 t3 t4;
+  fsub_sa1 t3 t3 t4;
   fadd t4 y1 z1;
   fadd t5 y2 z2;
-  fmul t4 t4 t5;
+  fmul_sa1 t4 t4 t5;
   fadd t5 t1 t2;
-  fsub t4 t4 t5
+  fsub_sa1 t4 t4 t5
 
 
 inline_for_extraction noextract
@@ -127,9 +127,9 @@ let point_add_3 x3 y3 t0 t2 p q =
   let x2, z2 = getx q, getz q in
   fadd x3 x1 z1;
   fadd y3 x2 z2;
-  fmul x3 x3 y3;
+  fmul_sa1 x3 x3 y3;
   fadd y3 t0 t2;
-  fsub y3 x3 y3
+  fsub_sa2 y3 x3 y3
 
 
 inline_for_extraction noextract
@@ -156,10 +156,10 @@ let point_add_4 x3 y3 z3 t1 t2 =
   fmul_by_b_coeff z3 t2;
   fsub x3 y3 z3;
   fdouble z3 x3;
-  fadd x3 x3 z3;
+  fadd_sa1 x3 x3 z3;
   fsub z3 t1 x3;
-  fadd x3 t1 x3;
-  fmul_by_b_coeff y3 y3
+  fadd_sa2 x3 t1 x3;
+  fmul_by_b_coeff_sa y3 y3
 
 
 inline_for_extraction noextract
@@ -185,9 +185,9 @@ val point_add_5 (x3 y3 z3 t0 t1 t2:felem) : Stack unit
 
 let point_add_5 x3 y3 z3 t0 t1 t2 =
   fdouble t1 t2;
-  fadd t2 t1 t2;
-  fsub y3 y3 t2;
-  fsub y3 y3 t0;
+  fadd_sa2 t2 t1 t2;
+  fsub_sa1 y3 y3 t2;
+  fsub_sa1 y3 y3 t0;
   fdouble t1 y3
 
 
@@ -219,10 +219,10 @@ val point_add_6 (x3 y3 z3 t0 t1 t2 t4:felem) : Stack unit
     fmont_as_nat h1 t2 == t2_s /\ fmont_as_nat h1 y3 == y3_s))
 
 let point_add_6 x3 y3 z3 t0 t1 t2 t4 =
-  fadd y3 t1 y3;
+  fadd_sa2 y3 t1 y3;
   fdouble t1 t0;
-  fadd t0 t1 t0;
-  fsub t0 t0 t2;
+  fadd_sa2 t0 t1 t0;
+  fsub_sa1 t0 t0 t2;
   fmul t1 t4 y3;
   fmul t2 t0 y3
 
@@ -259,12 +259,12 @@ val point_add_7 (x3 y3 z3 t0 t1 t2 t3 t4:felem) : Stack unit
 
 let point_add_7 x3 y3 z3 t0 t1 t2 t3 t4 =
   fmul y3 x3 z3;
-  fadd y3 y3 t2;
-  fmul x3 t3 x3;
-  fsub x3 x3 t1;
-  fmul z3 t4 z3;
+  fadd_sa1 y3 y3 t2;
+  fmul_sa2 x3 t3 x3;
+  fsub_sa1 x3 x3 t1;
+  fmul_sa2 z3 t4 z3;
   fmul t1 t3 t0;
-  fadd z3 z3 t1
+  fadd_sa1 z3 z3 t1
 
 
 inline_for_extraction noextract
@@ -304,4 +304,11 @@ let point_add res p q =
   let t1 = sub tmp 24ul 12ul in
   point_add_noalloc t0 t1 p q;
   copy res t1;
+  pop_frame ()
+
+let point_add_sa res p q =
+  push_frame ();
+  let p_copy = create 12ul (u64 0) in
+  copy p_copy p;
+  point_add res p_copy q;
   pop_frame ()

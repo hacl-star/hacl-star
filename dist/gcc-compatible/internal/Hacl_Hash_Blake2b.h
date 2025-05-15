@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_Blake2b.h"
 
 typedef struct Hacl_Hash_Blake2b_params_and_key_s
@@ -75,7 +74,8 @@ typedef struct Hacl_Hash_Blake2b_block_state_t_s
   uint8_t fst;
   uint8_t snd;
   bool thd;
-  Hacl_Streaming_Types_two_pointers f3;
+  uint64_t *f3;
+  uint64_t *f4;
 }
 Hacl_Hash_Blake2b_block_state_t;
 

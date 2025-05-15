@@ -29,8 +29,8 @@ static inline void sha256_init(uint32_t *hash)
 {
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint32_t *os = hash;
     uint32_t x = Hacl_Impl_SHA2_Generic_h256[i];
+    uint32_t *os = hash;
     os[i] = x;
   }
 }
@@ -131,8 +131,8 @@ static inline void sha256_update(uint8_t *b, uint32_t *hash)
   }
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint32_t *os = hash;
     uint32_t x = hash[i] + hash_old[i];
+    uint32_t *os = hash;
     os[i] = x;
   }
 }
@@ -198,8 +198,8 @@ static inline void sha224_init(uint32_t *hash)
 {
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint32_t *os = hash;
     uint32_t x = Hacl_Impl_SHA2_Generic_h224[i];
+    uint32_t *os = hash;
     os[i] = x;
   }
 }
@@ -228,8 +228,8 @@ static void sha512_init(uint64_t *hash)
 {
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint64_t *os = hash;
     uint64_t x = Hacl_Impl_SHA2_Generic_h512[i];
+    uint64_t *os = hash;
     os[i] = x;
   }
 }
@@ -330,8 +330,8 @@ static inline void sha512_update(uint8_t *b, uint64_t *hash)
   }
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint64_t *os = hash;
     uint64_t x = hash[i] + hash_old[i];
+    uint64_t *os = hash;
     os[i] = x;
   }
 }
@@ -397,8 +397,8 @@ static inline void sha384_init(uint64_t *hash)
 {
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint64_t *os = hash;
     uint64_t x = Hacl_Impl_SHA2_Generic_h384[i];
+    uint64_t *os = hash;
     os[i] = x;
   }
 }

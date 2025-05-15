@@ -82,7 +82,7 @@ let mul_modp_sqrt_m1 x =
   let sqrt_m1 = create 5ul (u64 0) in
   make_u64_5 sqrt_m1 x0 x1 x2 x3 x4;
   assert_norm (S51.as_nat5 (x0, x1, x2, x3, x4) == SE.modp_sqrt_m1);
-  fmul x x sqrt_m1;
+  fmul_sa x x sqrt_m1;
   pop_frame()
 
 
@@ -124,12 +124,12 @@ let recover_x_step_1 x2 y =
   make_one one;
   fsquare y2 y;     // y2 = y * y
   times_d dyy y2;   // dyy = d * y2
-  fsum dyy dyy one; // dyy = (d * y2) + one
+  fsum_sa dyy dyy one; // dyy = (d * y2) + one
   reduce_513 dyy;
   inverse dyyi dyy; // dyyi = modp_inv ((d * y2) + one)
 
   fdifference x2 y2 one; // x2 = y2 - one
-  fmul x2 x2 dyyi;       // x2 = (y2 - one) * dyyi
+  fmul_sa x2 x2 dyyi;       // x2 = (y2 - one) * dyyi
   reduce x2;
   pop_frame()
 
@@ -173,7 +173,7 @@ let recover_x_step_3 tmp =
   let t0  = sub tmp 10ul 5ul in
   Hacl.Impl.Ed25519.Pow2_252m2.pow2_252m2 x3 x2; // x3 = x2^((prime + 3) / 8)
   fsquare t0 x3;        // t0 = x3 * x3
-  fdifference t0 t0 x2; // t0 = t0 - x2
+  fdifference_sa1 t0 t0 x2; // t0 = t0 - x2
   reduce_513 t0;
   reduce t0;
   let t0_is_0 = is_0 t0 in
@@ -200,7 +200,7 @@ let recover_x_step_4 tmp =
   let x3  = sub tmp 5ul 5ul in
   let t0  = sub tmp 10ul 5ul in
   fsquare t0 x3;        // t0 = x3 * x3
-  fdifference t0 t0 x2; // t0 - x2
+  fdifference_sa1 t0 t0 x2; // t0 - x2
   reduce_513 t0;
   reduce t0;
   is_0 t0
@@ -243,7 +243,7 @@ let recover_x_step_5 x y sign tmp =
   if not (u64_to_UInt64 x0 =^ u64_to_UInt64 sign) then (
     let h0 = ST.get () in
     make_zero t0;
-    fdifference x3 t0 x3; // x3 = (-x) % prime
+    fdifference_sa2 x3 t0 x3; // x3 = (-x) % prime
     reduce_513 x3;
     reduce x3;
     (**) assert_norm (SC.prime % SC.prime = SC.zero % SC.prime);

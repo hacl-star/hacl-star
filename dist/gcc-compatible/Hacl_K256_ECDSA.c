@@ -32,34 +32,32 @@
 #include "internal/Hacl_Bignum_K256.h"
 #include "internal/Hacl_Bignum_Base.h"
 
-static inline uint64_t
-bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
+static inline uint64_t bn_add_sa(uint32_t aLen, uint32_t bLen, uint64_t *b, uint64_t *res)
 {
-  uint64_t *a0 = a;
   uint64_t *res0 = res;
   uint64_t c0 = 0ULL;
   for (uint32_t i = 0U; i < bLen / 4U; i++)
   {
-    uint64_t t1 = a0[4U * i];
+    uint64_t t1 = res0[4U * i];
     uint64_t t20 = b[4U * i];
     uint64_t *res_i0 = res0 + 4U * i;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, res_i0);
-    uint64_t t10 = a0[4U * i + 1U];
+    uint64_t t10 = res0[4U * i + 1U];
     uint64_t t21 = b[4U * i + 1U];
     uint64_t *res_i1 = res0 + 4U * i + 1U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, res_i1);
-    uint64_t t11 = a0[4U * i + 2U];
+    uint64_t t11 = res0[4U * i + 2U];
     uint64_t t22 = b[4U * i + 2U];
     uint64_t *res_i2 = res0 + 4U * i + 2U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, res_i2);
-    uint64_t t12 = a0[4U * i + 3U];
+    uint64_t t12 = res0[4U * i + 3U];
     uint64_t t2 = b[4U * i + 3U];
     uint64_t *res_i = res0 + 4U * i + 3U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, res_i);
   }
   for (uint32_t i = bLen / 4U * 4U; i < bLen; i++)
   {
-    uint64_t t1 = a0[i];
+    uint64_t t1 = res0[i];
     uint64_t t2 = b[i];
     uint64_t *res_i = res0 + i;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, res_i);
@@ -67,27 +65,26 @@ bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
   uint64_t c00 = c0;
   if (bLen < aLen)
   {
-    uint64_t *a1 = a + bLen;
     uint64_t *res1 = res + bLen;
     uint64_t c = c00;
     for (uint32_t i = 0U; i < (aLen - bLen) / 4U; i++)
     {
-      uint64_t t1 = a1[4U * i];
+      uint64_t t1 = res1[4U * i];
       uint64_t *res_i0 = res1 + 4U * i;
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, 0ULL, res_i0);
-      uint64_t t10 = a1[4U * i + 1U];
+      uint64_t t10 = res1[4U * i + 1U];
       uint64_t *res_i1 = res1 + 4U * i + 1U;
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, 0ULL, res_i1);
-      uint64_t t11 = a1[4U * i + 2U];
+      uint64_t t11 = res1[4U * i + 2U];
       uint64_t *res_i2 = res1 + 4U * i + 2U;
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, 0ULL, res_i2);
-      uint64_t t12 = a1[4U * i + 3U];
+      uint64_t t12 = res1[4U * i + 3U];
       uint64_t *res_i = res1 + 4U * i + 3U;
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, 0ULL, res_i);
     }
     for (uint32_t i = (aLen - bLen) / 4U * 4U; i < aLen - bLen; i++)
     {
-      uint64_t t1 = a1[i];
+      uint64_t t1 = res1[i];
       uint64_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, 0ULL, res_i);
     }
@@ -169,8 +166,8 @@ static void add_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x = (c2 & res[i]) | (~c2 & tmp[i]);
+    uint64_t *os = res;
     os[i] = x;);
 }
 
@@ -223,8 +220,8 @@ static void sub_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x = (c2 & tmp[i]) | (~c2 & res[i]);
+    uint64_t *os = res;
     os[i] = x;);
 }
 
@@ -263,8 +260,8 @@ static void sqr4(uint64_t *a, uint64_t *res)
     0U,
     4U,
     1U,
-    uint64_t *ab = a;
     uint64_t a_j = a[i0];
+    uint64_t *ab = a;
     uint64_t *res_j = res + i0;
     uint64_t c = 0ULL;
     for (uint32_t i = 0U; i < i0 / 4U; i++)
@@ -290,7 +287,12 @@ static void sqr4(uint64_t *a, uint64_t *res)
     }
     uint64_t r = c;
     res[i0 + i0] = r;);
-  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, res, res);
+  uint64_t a_copy0[8U] = { 0U };
+  uint64_t b_copy0[8U] = { 0U };
+  memcpy(a_copy0, res, 8U * sizeof (uint64_t));
+  memcpy(b_copy0, res, 8U * sizeof (uint64_t));
+  uint64_t r = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, a_copy0, b_copy0, res);
+  uint64_t c0 = r;
   KRML_MAYBE_UNUSED_VAR(c0);
   uint64_t tmp[8U] = { 0U };
   KRML_MAYBE_FOR4(i,
@@ -302,7 +304,12 @@ static void sqr4(uint64_t *a, uint64_t *res)
     uint64_t lo = FStar_UInt128_uint128_to_uint64(res1);
     tmp[2U * i] = lo;
     tmp[2U * i + 1U] = hi;);
-  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, tmp, res);
+  uint64_t a_copy[8U] = { 0U };
+  uint64_t b_copy[8U] = { 0U };
+  memcpy(a_copy, res, 8U * sizeof (uint64_t));
+  memcpy(b_copy, tmp, 8U * sizeof (uint64_t));
+  uint64_t r0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, a_copy, b_copy, res);
+  uint64_t c1 = r0;
   KRML_MAYBE_UNUSED_VAR(c1);
 }
 
@@ -341,9 +348,9 @@ static inline uint64_t load_qelem_check(uint64_t *f, uint8_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = f;
     uint64_t u = load64_be(b + (4U - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = f;
     os[i] = x;);
   uint64_t is_zero = is_qelem_zero(f);
   uint64_t acc = 0ULL;
@@ -364,9 +371,9 @@ static inline bool load_qelem_vartime(uint64_t *f, uint8_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = f;
     uint64_t u = load64_be(b + (4U - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = f;
     os[i] = x;);
   bool is_zero = is_qelem_zero_vartime(f);
   uint64_t a0 = f[0U];
@@ -410,8 +417,8 @@ static inline void modq_short(uint64_t *out, uint64_t *a)
     0U,
     4U,
     1U,
-    uint64_t *os = out;
     uint64_t x = (mask & out[i]) | (~mask & a[i]);
+    uint64_t *os = out;
     os[i] = x;);
 }
 
@@ -422,9 +429,9 @@ static inline void load_qelem_modq(uint64_t *f, uint8_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = f;
     uint64_t u = load64_be(b + (4U - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = f;
     os[i] = x;);
   memcpy(tmp, f, 4U * sizeof (uint64_t));
   modq_short(f, tmp);
@@ -492,8 +499,8 @@ mul_pow2_256_minus_q_add(
     uint64_t r = c;
     tmp[len + i0] = r;);
   memcpy(res + 2U, a, len * sizeof (uint64_t));
-  bn_add(resLen, res, len + 2U, tmp, res);
-  uint64_t c = bn_add(resLen, res, 4U, e, res);
+  bn_add_sa(resLen, len + 2U, tmp, res);
+  uint64_t c = bn_add_sa(resLen, 4U, e, res);
   return c;
 }
 
@@ -508,11 +515,17 @@ static inline void modq(uint64_t *out, uint64_t *a)
   uint64_t *t01 = tmp;
   uint64_t m[7U] = { 0U };
   uint64_t p[5U] = { 0U };
-  uint64_t c0 = mul_pow2_256_minus_q_add(4U, 7U, t01, a + 4U, a, m);
+  uint64_t *a0 = a;
+  uint64_t *a1 = a + 4U;
+  uint64_t c0 = mul_pow2_256_minus_q_add(4U, 7U, t01, a1, a0, m);
   KRML_MAYBE_UNUSED_VAR(c0);
-  uint64_t c10 = mul_pow2_256_minus_q_add(3U, 5U, t01, m + 4U, m, p);
+  uint64_t *m0 = m;
+  uint64_t *m1 = m + 4U;
+  uint64_t c10 = mul_pow2_256_minus_q_add(3U, 5U, t01, m1, m0, p);
   KRML_MAYBE_UNUSED_VAR(c10);
-  uint64_t c2 = mul_pow2_256_minus_q_add(1U, 4U, t01, p + 4U, p, r);
+  uint64_t *p0 = p;
+  uint64_t *p1 = p + 4U;
+  uint64_t c2 = mul_pow2_256_minus_q_add(1U, 4U, t01, p1, p0, r);
   uint64_t c00 = c2;
   uint64_t c1 = add4(r, tmp, out);
   uint64_t mask = 0ULL - (c00 + c1);
@@ -520,8 +533,8 @@ static inline void modq(uint64_t *out, uint64_t *a)
     0U,
     4U,
     1U,
-    uint64_t *os = out;
     uint64_t x = (mask & out[i]) | (~mask & r[i]);
+    uint64_t *os = out;
     os[i] = x;);
 }
 
@@ -549,7 +562,9 @@ static inline void qnegate_conditional_vartime(uint64_t *f, bool is_negate)
   uint64_t zero[4U] = { 0U };
   if (is_negate)
   {
-    sub_mod4(n, zero, f, f);
+    uint64_t b_copy[4U] = { 0U };
+    memcpy(b_copy, f, 4U * sizeof (uint64_t));
+    sub_mod4(n, zero, b_copy, f);
   }
 }
 
@@ -603,8 +618,8 @@ static inline void qmul_shift_384(uint64_t *res, uint64_t *a, uint64_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x = (mask & res[i]) | (~mask & res_b_padded[i]);
+    uint64_t *os = res;
     os[i] = x;);
 }
 
@@ -612,7 +627,9 @@ static inline void qsquare_times_in_place(uint64_t *out, uint32_t b)
 {
   for (uint32_t i = 0U; i < b; i++)
   {
-    qsqr(out, out);
+    uint64_t f_copy[4U] = { 0U };
+    memcpy(f_copy, out, 4U * sizeof (uint64_t));
+    qsqr(out, f_copy);
   }
 }
 
@@ -621,7 +638,9 @@ static inline void qsquare_times(uint64_t *out, uint64_t *a, uint32_t b)
   memcpy(out, a, 4U * sizeof (uint64_t));
   for (uint32_t i = 0U; i < b; i++)
   {
-    qsqr(out, out);
+    uint64_t f_copy[4U] = { 0U };
+    memcpy(f_copy, out, 4U * sizeof (uint64_t));
+    qsqr(out, f_copy);
   }
 }
 
@@ -645,68 +664,130 @@ static inline void qinv(uint64_t *out, uint64_t *f)
   uint64_t x8[4U] = { 0U };
   uint64_t x14[4U] = { 0U };
   qsquare_times(x6, x_1101, 2U);
-  qmul(x6, x6, x_1011);
+  uint64_t f1_copy0[4U] = { 0U };
+  memcpy(f1_copy0, x6, 4U * sizeof (uint64_t));
+  qmul(x6, f1_copy0, x_1011);
   qsquare_times(x8, x6, 2U);
-  qmul(x8, x8, x_11);
+  uint64_t f1_copy1[4U] = { 0U };
+  memcpy(f1_copy1, x8, 4U * sizeof (uint64_t));
+  qmul(x8, f1_copy1, x_11);
   qsquare_times(x14, x8, 6U);
-  qmul(x14, x14, x6);
+  uint64_t f1_copy2[4U] = { 0U };
+  memcpy(f1_copy2, x14, 4U * sizeof (uint64_t));
+  qmul(x14, f1_copy2, x6);
   uint64_t x56[4U] = { 0U };
   qsquare_times(out, x14, 14U);
-  qmul(out, out, x14);
+  uint64_t f1_copy[4U] = { 0U };
+  memcpy(f1_copy, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy, x14);
   qsquare_times(x56, out, 28U);
-  qmul(x56, x56, out);
+  uint64_t f1_copy3[4U] = { 0U };
+  memcpy(f1_copy3, x56, 4U * sizeof (uint64_t));
+  qmul(x56, f1_copy3, out);
   qsquare_times(out, x56, 56U);
-  qmul(out, out, x56);
+  uint64_t f1_copy4[4U] = { 0U };
+  memcpy(f1_copy4, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy4, x56);
   qsquare_times_in_place(out, 14U);
-  qmul(out, out, x14);
+  uint64_t f1_copy5[4U] = { 0U };
+  memcpy(f1_copy5, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy5, x14);
   qsquare_times_in_place(out, 3U);
-  qmul(out, out, x_101);
+  uint64_t f1_copy6[4U] = { 0U };
+  memcpy(f1_copy6, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy6, x_101);
   qsquare_times_in_place(out, 4U);
-  qmul(out, out, x_111);
+  uint64_t f1_copy7[4U] = { 0U };
+  memcpy(f1_copy7, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy7, x_111);
   qsquare_times_in_place(out, 4U);
-  qmul(out, out, x_101);
+  uint64_t f1_copy8[4U] = { 0U };
+  memcpy(f1_copy8, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy8, x_101);
   qsquare_times_in_place(out, 5U);
-  qmul(out, out, x_1011);
+  uint64_t f1_copy9[4U] = { 0U };
+  memcpy(f1_copy9, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy9, x_1011);
   qsquare_times_in_place(out, 4U);
-  qmul(out, out, x_1011);
+  uint64_t f1_copy10[4U] = { 0U };
+  memcpy(f1_copy10, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy10, x_1011);
   qsquare_times_in_place(out, 4U);
-  qmul(out, out, x_111);
+  uint64_t f1_copy11[4U] = { 0U };
+  memcpy(f1_copy11, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy11, x_111);
   qsquare_times_in_place(out, 5U);
-  qmul(out, out, x_111);
+  uint64_t f1_copy12[4U] = { 0U };
+  memcpy(f1_copy12, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy12, x_111);
   qsquare_times_in_place(out, 6U);
-  qmul(out, out, x_1101);
+  uint64_t f1_copy13[4U] = { 0U };
+  memcpy(f1_copy13, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy13, x_1101);
   qsquare_times_in_place(out, 4U);
-  qmul(out, out, x_101);
+  uint64_t f1_copy14[4U] = { 0U };
+  memcpy(f1_copy14, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy14, x_101);
   qsquare_times_in_place(out, 3U);
-  qmul(out, out, x_111);
+  uint64_t f1_copy15[4U] = { 0U };
+  memcpy(f1_copy15, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy15, x_111);
   qsquare_times_in_place(out, 5U);
-  qmul(out, out, x_1001);
+  uint64_t f1_copy16[4U] = { 0U };
+  memcpy(f1_copy16, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy16, x_1001);
   qsquare_times_in_place(out, 6U);
-  qmul(out, out, x_101);
+  uint64_t f1_copy17[4U] = { 0U };
+  memcpy(f1_copy17, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy17, x_101);
   qsquare_times_in_place(out, 10U);
-  qmul(out, out, x_111);
+  uint64_t f1_copy18[4U] = { 0U };
+  memcpy(f1_copy18, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy18, x_111);
   qsquare_times_in_place(out, 4U);
-  qmul(out, out, x_111);
+  uint64_t f1_copy19[4U] = { 0U };
+  memcpy(f1_copy19, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy19, x_111);
   qsquare_times_in_place(out, 9U);
-  qmul(out, out, x8);
+  uint64_t f1_copy20[4U] = { 0U };
+  memcpy(f1_copy20, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy20, x8);
   qsquare_times_in_place(out, 5U);
-  qmul(out, out, x_1001);
+  uint64_t f1_copy21[4U] = { 0U };
+  memcpy(f1_copy21, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy21, x_1001);
   qsquare_times_in_place(out, 6U);
-  qmul(out, out, x_1011);
+  uint64_t f1_copy22[4U] = { 0U };
+  memcpy(f1_copy22, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy22, x_1011);
   qsquare_times_in_place(out, 4U);
-  qmul(out, out, x_1101);
+  uint64_t f1_copy23[4U] = { 0U };
+  memcpy(f1_copy23, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy23, x_1101);
   qsquare_times_in_place(out, 5U);
-  qmul(out, out, x_11);
+  uint64_t f1_copy24[4U] = { 0U };
+  memcpy(f1_copy24, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy24, x_11);
   qsquare_times_in_place(out, 6U);
-  qmul(out, out, x_1101);
+  uint64_t f1_copy25[4U] = { 0U };
+  memcpy(f1_copy25, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy25, x_1101);
   qsquare_times_in_place(out, 10U);
-  qmul(out, out, x_1101);
+  uint64_t f1_copy26[4U] = { 0U };
+  memcpy(f1_copy26, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy26, x_1101);
   qsquare_times_in_place(out, 4U);
-  qmul(out, out, x_1001);
+  uint64_t f1_copy27[4U] = { 0U };
+  memcpy(f1_copy27, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy27, x_1001);
   qsquare_times_in_place(out, 6U);
-  qmul(out, out, f);
+  uint64_t f1_copy28[4U] = { 0U };
+  memcpy(f1_copy28, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy28, f);
   qsquare_times_in_place(out, 8U);
-  qmul(out, out, x6);
+  uint64_t f1_copy29[4U] = { 0U };
+  memcpy(f1_copy29, out, 4U * sizeof (uint64_t));
+  qmul(out, f1_copy29, x6);
 }
 
 void Hacl_Impl_K256_Point_make_point_at_inf(uint64_t *p)
@@ -731,8 +812,12 @@ static inline void to_aff_point(uint64_t *p_aff, uint64_t *p)
   Hacl_Impl_K256_Finv_finv(zinv, z1);
   Hacl_K256_Field_fmul(x, x1, zinv);
   Hacl_K256_Field_fmul(y, y1, zinv);
-  Hacl_K256_Field_fnormalize(x, x);
-  Hacl_K256_Field_fnormalize(y, y);
+  uint64_t f_copy[5U] = { 0U };
+  memcpy(f_copy, x, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize(x, f_copy);
+  uint64_t f_copy0[5U] = { 0U };
+  memcpy(f_copy0, y, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize(y, f_copy0);
 }
 
 static inline void to_aff_point_x(uint64_t *x, uint64_t *p)
@@ -742,7 +827,9 @@ static inline void to_aff_point_x(uint64_t *x, uint64_t *p)
   uint64_t zinv[5U] = { 0U };
   Hacl_Impl_K256_Finv_finv(zinv, z1);
   Hacl_K256_Field_fmul(x, x1, zinv);
-  Hacl_K256_Field_fnormalize(x, x);
+  uint64_t f_copy[5U] = { 0U };
+  memcpy(f_copy, x, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize(x, f_copy);
 }
 
 static inline bool is_on_curve_vartime(uint64_t *p)
@@ -757,12 +844,20 @@ static inline bool is_on_curve_vartime(uint64_t *p)
   b[3U] = 0ULL;
   b[4U] = 0ULL;
   Hacl_K256_Field_fsqr(y2_exp, x);
-  Hacl_K256_Field_fmul(y2_exp, y2_exp, x);
-  Hacl_K256_Field_fadd(y2_exp, y2_exp, b);
-  Hacl_K256_Field_fnormalize(y2_exp, y2_exp);
+  uint64_t f1_copy[5U] = { 0U };
+  memcpy(f1_copy, y2_exp, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(y2_exp, f1_copy, x);
+  uint64_t f1_copy0[5U] = { 0U };
+  memcpy(f1_copy0, y2_exp, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fadd(y2_exp, f1_copy0, b);
+  uint64_t f_copy0[5U] = { 0U };
+  memcpy(f_copy0, y2_exp, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize(y2_exp, f_copy0);
   uint64_t y2_comp[5U] = { 0U };
   Hacl_K256_Field_fsqr(y2_comp, y);
-  Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
+  uint64_t f_copy[5U] = { 0U };
+  memcpy(f_copy, y2_comp, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize(y2_comp, f_copy);
   bool res = Hacl_K256_Field_is_felem_eq_vartime(y2_exp, y2_comp);
   bool res0 = res;
   return res0;
@@ -806,14 +901,18 @@ void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p)
   oy[2U] = f2;
   oy[3U] = f3;
   oy[4U] = f4;
-  Hacl_K256_Field_fnormalize_weak(oy, oy);
+  uint64_t f_copy[5U] = { 0U };
+  memcpy(f_copy, oy, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(oy, f_copy);
 }
 
 static inline void point_negate_conditional_vartime(uint64_t *p, bool is_negate)
 {
   if (is_negate)
   {
-    Hacl_Impl_K256_Point_point_negate(p, p);
+    uint64_t p_copy[15U] = { 0U };
+    memcpy(p_copy, p, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_Point_point_negate(p, p_copy);
     return;
   }
 }
@@ -890,14 +989,24 @@ static inline bool aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_
   b[3U] = 0ULL;
   b[4U] = 0ULL;
   Hacl_K256_Field_fsqr(y2, x);
-  Hacl_K256_Field_fmul(y2, y2, x);
-  Hacl_K256_Field_fadd(y2, y2, b);
-  Hacl_K256_Field_fnormalize(y2, y2);
+  uint64_t f1_copy[5U] = { 0U };
+  memcpy(f1_copy, y2, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(y2, f1_copy, x);
+  uint64_t f1_copy0[5U] = { 0U };
+  memcpy(f1_copy0, y2, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fadd(y2, f1_copy0, b);
+  uint64_t f_copy0[5U] = { 0U };
+  memcpy(f_copy0, y2, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize(y2, f_copy0);
   Hacl_Impl_K256_Finv_fsqrt(y, y2);
-  Hacl_K256_Field_fnormalize(y, y);
+  uint64_t f_copy1[5U] = { 0U };
+  memcpy(f_copy1, y, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize(y, f_copy1);
   uint64_t y2_comp[5U] = { 0U };
   Hacl_K256_Field_fsqr(y2_comp, y);
-  Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
+  uint64_t f_copy[5U] = { 0U };
+  memcpy(f_copy, y2_comp, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize(y2_comp, f_copy);
   bool res = Hacl_K256_Field_is_felem_eq_vartime(y2, y2_comp);
   bool is_y_valid = res;
   bool is_y_valid0 = is_y_valid;
@@ -928,22 +1037,42 @@ void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p)
   Hacl_K256_Field_fsqr(yy, y1);
   Hacl_K256_Field_fsqr(zz, z1);
   Hacl_K256_Field_fmul_small_num(x3, x1, 2ULL);
-  Hacl_K256_Field_fmul(x3, x3, y1);
+  uint64_t f1_copy[5U] = { 0U };
+  memcpy(f1_copy, x3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(x3, f1_copy, y1);
   Hacl_K256_Field_fmul(tmp1, yy, y1);
   Hacl_K256_Field_fmul(z3, tmp1, z1);
-  Hacl_K256_Field_fmul_small_num(z3, z3, 8ULL);
-  Hacl_K256_Field_fnormalize_weak(z3, z3);
+  uint64_t f_copy[5U] = { 0U };
+  memcpy(f_copy, z3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul_small_num(z3, f_copy, 8ULL);
+  uint64_t f_copy1[5U] = { 0U };
+  memcpy(f_copy1, z3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(z3, f_copy1);
   Hacl_K256_Field_fmul_small_num(bzz3, zz, 21ULL);
-  Hacl_K256_Field_fnormalize_weak(bzz3, bzz3);
+  uint64_t f_copy0[5U] = { 0U };
+  memcpy(f_copy0, bzz3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(bzz3, f_copy0);
   Hacl_K256_Field_fmul_small_num(bzz9, bzz3, 3ULL);
-  Hacl_K256_Field_fsub(bzz9, yy, bzz9, 6ULL);
+  uint64_t f2_copy[5U] = { 0U };
+  memcpy(f2_copy, bzz9, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fsub(bzz9, yy, f2_copy, 6ULL);
   Hacl_K256_Field_fadd(tmp1, yy, bzz3);
-  Hacl_K256_Field_fmul(tmp1, bzz9, tmp1);
+  uint64_t f2_copy0[5U] = { 0U };
+  memcpy(f2_copy0, tmp1, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(tmp1, bzz9, f2_copy0);
   Hacl_K256_Field_fmul(y3, yy, zz);
-  Hacl_K256_Field_fmul(x3, x3, bzz9);
-  Hacl_K256_Field_fmul_small_num(y3, y3, 168ULL);
-  Hacl_K256_Field_fadd(y3, tmp1, y3);
-  Hacl_K256_Field_fnormalize_weak(y3, y3);
+  uint64_t f1_copy0[5U] = { 0U };
+  memcpy(f1_copy0, x3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(x3, f1_copy0, bzz9);
+  uint64_t f_copy2[5U] = { 0U };
+  memcpy(f_copy2, y3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul_small_num(y3, f_copy2, 168ULL);
+  uint64_t f2_copy1[5U] = { 0U };
+  memcpy(f2_copy1, y3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fadd(y3, tmp1, f2_copy1);
+  uint64_t f_copy3[5U] = { 0U };
+  memcpy(f_copy3, y3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(y3, f_copy3);
 }
 
 void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q)
@@ -972,40 +1101,76 @@ void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q)
   Hacl_K256_Field_fmul(zz, z1, z2);
   Hacl_K256_Field_fadd(xy_pairs, x1, y1);
   Hacl_K256_Field_fadd(tmp1, x2, y2);
-  Hacl_K256_Field_fmul(xy_pairs, xy_pairs, tmp1);
+  uint64_t f1_copy[5U] = { 0U };
+  memcpy(f1_copy, xy_pairs, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(xy_pairs, f1_copy, tmp1);
   Hacl_K256_Field_fadd(tmp1, xx, yy);
-  Hacl_K256_Field_fsub(xy_pairs, xy_pairs, tmp1, 4ULL);
+  uint64_t f1_copy0[5U] = { 0U };
+  memcpy(f1_copy0, xy_pairs, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fsub(xy_pairs, f1_copy0, tmp1, 4ULL);
   Hacl_K256_Field_fadd(yz_pairs, y1, z1);
   Hacl_K256_Field_fadd(tmp1, y2, z2);
-  Hacl_K256_Field_fmul(yz_pairs, yz_pairs, tmp1);
+  uint64_t f1_copy1[5U] = { 0U };
+  memcpy(f1_copy1, yz_pairs, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(yz_pairs, f1_copy1, tmp1);
   Hacl_K256_Field_fadd(tmp1, yy, zz);
-  Hacl_K256_Field_fsub(yz_pairs, yz_pairs, tmp1, 4ULL);
+  uint64_t f1_copy2[5U] = { 0U };
+  memcpy(f1_copy2, yz_pairs, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fsub(yz_pairs, f1_copy2, tmp1, 4ULL);
   Hacl_K256_Field_fadd(xz_pairs, x1, z1);
   Hacl_K256_Field_fadd(tmp1, x2, z2);
-  Hacl_K256_Field_fmul(xz_pairs, xz_pairs, tmp1);
+  uint64_t f1_copy3[5U] = { 0U };
+  memcpy(f1_copy3, xz_pairs, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(xz_pairs, f1_copy3, tmp1);
   Hacl_K256_Field_fadd(tmp1, xx, zz);
-  Hacl_K256_Field_fsub(xz_pairs, xz_pairs, tmp1, 4ULL);
+  uint64_t f1_copy4[5U] = { 0U };
+  memcpy(f1_copy4, xz_pairs, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fsub(xz_pairs, f1_copy4, tmp1, 4ULL);
   Hacl_K256_Field_fmul_small_num(tmp1, zz, 21ULL);
-  Hacl_K256_Field_fnormalize_weak(tmp1, tmp1);
+  uint64_t f_copy[5U] = { 0U };
+  memcpy(f_copy, tmp1, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(tmp1, f_copy);
   Hacl_K256_Field_fsub(yy_m_bzz3, yy, tmp1, 2ULL);
   Hacl_K256_Field_fadd(yy_p_bzz3, yy, tmp1);
   Hacl_K256_Field_fmul_small_num(x3, yz_pairs, 21ULL);
-  Hacl_K256_Field_fnormalize_weak(x3, x3);
+  uint64_t f_copy0[5U] = { 0U };
+  memcpy(f_copy0, x3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(x3, f_copy0);
   Hacl_K256_Field_fmul_small_num(z3, xx, 3ULL);
   Hacl_K256_Field_fmul_small_num(y3, z3, 21ULL);
-  Hacl_K256_Field_fnormalize_weak(y3, y3);
+  uint64_t f_copy1[5U] = { 0U };
+  memcpy(f_copy1, y3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(y3, f_copy1);
   Hacl_K256_Field_fmul(tmp1, xy_pairs, yy_m_bzz3);
-  Hacl_K256_Field_fmul(x3, x3, xz_pairs);
-  Hacl_K256_Field_fsub(x3, tmp1, x3, 2ULL);
-  Hacl_K256_Field_fnormalize_weak(x3, x3);
+  uint64_t f1_copy5[5U] = { 0U };
+  memcpy(f1_copy5, x3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(x3, f1_copy5, xz_pairs);
+  uint64_t f2_copy[5U] = { 0U };
+  memcpy(f2_copy, x3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fsub(x3, tmp1, f2_copy, 2ULL);
+  uint64_t f_copy2[5U] = { 0U };
+  memcpy(f_copy2, x3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(x3, f_copy2);
   Hacl_K256_Field_fmul(tmp1, yy_p_bzz3, yy_m_bzz3);
-  Hacl_K256_Field_fmul(y3, y3, xz_pairs);
-  Hacl_K256_Field_fadd(y3, tmp1, y3);
-  Hacl_K256_Field_fnormalize_weak(y3, y3);
+  uint64_t f1_copy6[5U] = { 0U };
+  memcpy(f1_copy6, y3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(y3, f1_copy6, xz_pairs);
+  uint64_t f2_copy0[5U] = { 0U };
+  memcpy(f2_copy0, y3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fadd(y3, tmp1, f2_copy0);
+  uint64_t f_copy3[5U] = { 0U };
+  memcpy(f_copy3, y3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(y3, f_copy3);
   Hacl_K256_Field_fmul(tmp1, yz_pairs, yy_p_bzz3);
-  Hacl_K256_Field_fmul(z3, z3, xy_pairs);
-  Hacl_K256_Field_fadd(z3, tmp1, z3);
-  Hacl_K256_Field_fnormalize_weak(z3, z3);
+  uint64_t f1_copy7[5U] = { 0U };
+  memcpy(f1_copy7, z3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(z3, f1_copy7, xy_pairs);
+  uint64_t f2_copy1[5U] = { 0U };
+  memcpy(f2_copy1, z3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fadd(z3, tmp1, f2_copy1);
+  uint64_t f_copy4[5U] = { 0U };
+  memcpy(f_copy4, z3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize_weak(z3, f_copy4);
 }
 
 static inline void scalar_split_lambda(uint64_t *r1, uint64_t *r2, uint64_t *k)
@@ -1030,13 +1195,19 @@ static inline void scalar_split_lambda(uint64_t *r1, uint64_t *r2, uint64_t *k)
   tmp2[1U] = 0x8a280ac50774346dULL;
   tmp2[2U] = 0xfffffffffffffffeULL;
   tmp2[3U] = 0xffffffffffffffffULL;
-  qmul(r1, r1, tmp1);
-  qmul(r2, r2, tmp2);
+  uint64_t f1_copy[4U] = { 0U };
+  memcpy(f1_copy, r1, 4U * sizeof (uint64_t));
+  qmul(r1, f1_copy, tmp1);
+  uint64_t f1_copy0[4U] = { 0U };
+  memcpy(f1_copy0, r2, 4U * sizeof (uint64_t));
+  qmul(r2, f1_copy0, tmp2);
   tmp1[0U] = 0xe0cfc810b51283cfULL;
   tmp1[1U] = 0xa880b9fc8ec739c2ULL;
   tmp1[2U] = 0x5ad9e3fd77ed9ba4ULL;
   tmp1[3U] = 0xac9c52b33fa3cf1fULL;
-  qadd(r2, r1, r2);
+  uint64_t f2_copy[4U] = { 0U };
+  memcpy(f2_copy, r2, 4U * sizeof (uint64_t));
+  qadd(r2, r1, f2_copy);
   qmul(tmp2, r2, tmp1);
   qadd(r1, k, tmp2);
 }
@@ -1077,7 +1248,9 @@ static inline void point_mul_lambda_inplace(uint64_t *res)
   beta[2U] = 0xc3434e99cf049ULL;
   beta[3U] = 0x7106e64479eaULL;
   beta[4U] = 0x7ae96a2b657cULL;
-  Hacl_K256_Field_fmul(rx, beta, rx);
+  uint64_t f2_copy[5U] = { 0U };
+  memcpy(f2_copy, rx, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(rx, beta, f2_copy);
 }
 
 typedef struct __bool_bool_s
@@ -1119,23 +1292,35 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
   uint64_t *t1 = table + 15U;
   Hacl_Impl_K256_Point_make_point_at_inf(t0);
   memcpy(t1, q, 15U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table);
   KRML_MAYBE_FOR7(i,
     0U,
     7U,
     1U,
     uint64_t *t11 = table + (i + 1U) * 15U;
-    Hacl_Impl_K256_PointDouble_point_double(tmp, t11);
+    uint64_t p_copy0[15U] = { 0U };
+    memcpy(p_copy0, t11, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointDouble_point_double(tmp, p_copy0);
     memcpy(table + (2U * i + 2U) * 15U, tmp, 15U * sizeof (uint64_t));
     uint64_t *t2 = table + (2U * i + 2U) * 15U;
-    Hacl_Impl_K256_PointAdd_point_add(tmp, q, t2);
+    uint64_t p_copy[15U] = { 0U };
+    memcpy(p_copy, q, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(tmp, p_copy, t2);
     memcpy(table + (2U * i + 3U) * 15U, tmp, 15U * sizeof (uint64_t)););
   Hacl_Impl_K256_Point_make_point_at_inf(out);
   uint64_t tmp0[15U] = { 0U };
   for (uint32_t i0 = 0U; i0 < 64U; i0++)
   {
-    KRML_MAYBE_FOR4(i, 0U, 4U, 1U, Hacl_Impl_K256_PointDouble_point_double(out, out););
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint64_t p_copy[15U] = { 0U };
+      memcpy(p_copy, out, 15U * sizeof (uint64_t));
+      Hacl_Impl_K256_PointDouble_point_double(out, p_copy););
     uint32_t k = 256U - 4U * i0 - 4U;
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar, k, 4U);
+    KRML_MAYBE_UNUSED_VAR(table);
     memcpy(tmp0, (uint64_t *)table, 15U * sizeof (uint64_t));
     KRML_MAYBE_FOR15(i1,
       0U,
@@ -1147,10 +1332,12 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
         0U,
         15U,
         1U,
-        uint64_t *os = tmp0;
         uint64_t x = (c & res_j[i]) | (~c & tmp0[i]);
+        uint64_t *os = tmp0;
         os[i] = x;););
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
+    uint64_t p_copy[15U] = { 0U };
+    memcpy(p_copy, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy, tmp0);
   }
 }
 
@@ -1167,8 +1354,8 @@ static inline void precomp_get_consttime(const uint64_t *table, uint64_t bits_l,
       0U,
       15U,
       1U,
-      uint64_t *os = tmp;
       uint64_t x = (c & res_j[i]) | (~c & tmp[i]);
+      uint64_t *os = tmp;
       os[i] = x;););
 }
 
@@ -1227,23 +1414,41 @@ static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
     0U,
     16U,
     1U,
-    KRML_MAYBE_FOR4(i0, 0U, 4U, 1U, Hacl_Impl_K256_PointDouble_point_double(out, out););
+    KRML_MAYBE_FOR4(i0,
+      0U,
+      4U,
+      1U,
+      uint64_t p_copy[15U] = { 0U };
+      memcpy(p_copy, out, 15U * sizeof (uint64_t));
+      Hacl_Impl_K256_PointDouble_point_double(out, p_copy););
     uint32_t k = 64U - 4U * i - 4U;
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r4, k, 4U);
+    KRML_HOST_IGNORE(Hacl_K256_PrecompTable_precomp_g_pow2_192_table_w4);
     precomp_get_consttime(Hacl_K256_PrecompTable_precomp_g_pow2_192_table_w4, bits_l, tmp);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp);
+    uint64_t p_copy[15U] = { 0U };
+    memcpy(p_copy, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy, tmp);
     uint32_t k0 = 64U - 4U * i - 4U;
     uint64_t bits_l0 = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r3, k0, 4U);
+    KRML_HOST_IGNORE(Hacl_K256_PrecompTable_precomp_g_pow2_128_table_w4);
     precomp_get_consttime(Hacl_K256_PrecompTable_precomp_g_pow2_128_table_w4, bits_l0, tmp);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp);
+    uint64_t p_copy0[15U] = { 0U };
+    memcpy(p_copy0, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy0, tmp);
     uint32_t k1 = 64U - 4U * i - 4U;
     uint64_t bits_l1 = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r2, k1, 4U);
+    KRML_HOST_IGNORE(Hacl_K256_PrecompTable_precomp_g_pow2_64_table_w4);
     precomp_get_consttime(Hacl_K256_PrecompTable_precomp_g_pow2_64_table_w4, bits_l1, tmp);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp);
+    uint64_t p_copy1[15U] = { 0U };
+    memcpy(p_copy1, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy1, tmp);
     uint32_t k2 = 64U - 4U * i - 4U;
     uint64_t bits_l2 = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r1, k2, 4U);
+    KRML_HOST_IGNORE(Hacl_K256_PrecompTable_precomp_basepoint_table_w4);
     precomp_get_consttime(Hacl_K256_PrecompTable_precomp_basepoint_table_w4, bits_l2, tmp);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp););
+    uint64_t p_copy2[15U] = { 0U };
+    memcpy(p_copy2, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy2, tmp););
 }
 
 static inline void
@@ -1271,15 +1476,20 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
   uint64_t *t1 = table2 + 15U;
   Hacl_Impl_K256_Point_make_point_at_inf(t0);
   memcpy(t1, q2, 15U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table2);
   KRML_MAYBE_FOR15(i,
     0U,
     15U,
     1U,
     uint64_t *t11 = table2 + (i + 1U) * 15U;
-    Hacl_Impl_K256_PointDouble_point_double(tmp, t11);
+    uint64_t p_copy0[15U] = { 0U };
+    memcpy(p_copy0, t11, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointDouble_point_double(tmp, p_copy0);
     memcpy(table2 + (2U * i + 2U) * 15U, tmp, 15U * sizeof (uint64_t));
     uint64_t *t2 = table2 + (2U * i + 2U) * 15U;
-    Hacl_Impl_K256_PointAdd_point_add(tmp, q2, t2);
+    uint64_t p_copy[15U] = { 0U };
+    memcpy(p_copy, q2, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(tmp, p_copy, t2);
     memcpy(table2 + (2U * i + 3U) * 15U, tmp, 15U * sizeof (uint64_t)););
   uint64_t tmp0[15U] = { 0U };
   uint32_t i0 = 255U;
@@ -1292,25 +1502,39 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
   uint32_t bits_l320 = (uint32_t)bits_c0;
   const uint64_t *a_bits_l0 = table2 + bits_l320 * 15U;
   memcpy(tmp0, (uint64_t *)a_bits_l0, 15U * sizeof (uint64_t));
-  Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
+  uint64_t p_copy[15U] = { 0U };
+  memcpy(p_copy, out, 15U * sizeof (uint64_t));
+  Hacl_Impl_K256_PointAdd_point_add(out, p_copy, tmp0);
   uint64_t tmp1[15U] = { 0U };
   for (uint32_t i = 0U; i < 51U; i++)
   {
-    KRML_MAYBE_FOR5(i2, 0U, 5U, 1U, Hacl_Impl_K256_PointDouble_point_double(out, out););
+    KRML_MAYBE_FOR5(i2,
+      0U,
+      5U,
+      1U,
+      uint64_t p_copy0[15U] = { 0U };
+      memcpy(p_copy0, out, 15U * sizeof (uint64_t));
+      Hacl_Impl_K256_PointDouble_point_double(out, p_copy0););
     uint32_t k = 255U - 5U * i - 5U;
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar2, k, 5U);
+    KRML_MAYBE_UNUSED_VAR(table2);
     uint32_t bits_l321 = (uint32_t)bits_l;
     const uint64_t *a_bits_l1 = table2 + bits_l321 * 15U;
     memcpy(tmp1, (uint64_t *)a_bits_l1, 15U * sizeof (uint64_t));
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp1);
+    uint64_t p_copy0[15U] = { 0U };
+    memcpy(p_copy0, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy0, tmp1);
     uint32_t k0 = 255U - 5U * i - 5U;
     uint64_t bits_l0 = Hacl_Bignum_Lib_bn_get_bits_u64(4U, scalar1, k0, 5U);
+    KRML_HOST_IGNORE(Hacl_K256_PrecompTable_precomp_basepoint_table_w5);
     uint32_t bits_l322 = (uint32_t)bits_l0;
     const
     uint64_t
     *a_bits_l2 = Hacl_K256_PrecompTable_precomp_basepoint_table_w5 + bits_l322 * 15U;
     memcpy(tmp1, (uint64_t *)a_bits_l2, 15U * sizeof (uint64_t));
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp1);
+    uint64_t p_copy1[15U] = { 0U };
+    memcpy(p_copy1, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy1, tmp1);
   }
 }
 
@@ -1334,15 +1558,20 @@ point_mul_g_double_split_lambda_table(
   uint64_t *t1 = table2 + 15U;
   Hacl_Impl_K256_Point_make_point_at_inf(t0);
   memcpy(t1, p2, 15U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table2);
   KRML_MAYBE_FOR15(i,
     0U,
     15U,
     1U,
     uint64_t *t11 = table2 + (i + 1U) * 15U;
-    Hacl_Impl_K256_PointDouble_point_double(tmp, t11);
+    uint64_t p_copy0[15U] = { 0U };
+    memcpy(p_copy0, t11, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointDouble_point_double(tmp, p_copy0);
     memcpy(table2 + (2U * i + 2U) * 15U, tmp, 15U * sizeof (uint64_t));
     uint64_t *t2 = table2 + (2U * i + 2U) * 15U;
-    Hacl_Impl_K256_PointAdd_point_add(tmp, p2, t2);
+    uint64_t p_copy[15U] = { 0U };
+    memcpy(p_copy, p2, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(tmp, p_copy, t2);
     memcpy(table2 + (2U * i + 3U) * 15U, tmp, 15U * sizeof (uint64_t)););
   uint64_t tmp0[15U] = { 0U };
   uint64_t tmp1[15U] = { 0U };
@@ -1361,7 +1590,9 @@ point_mul_g_double_split_lambda_table(
   memcpy(tmp1, (uint64_t *)a_bits_l0, 15U * sizeof (uint64_t));
   point_negate_conditional_vartime(tmp1, is_negate2);
   point_mul_lambda_inplace(tmp1);
-  Hacl_Impl_K256_PointAdd_point_add(out, out, tmp1);
+  uint64_t p_copy[15U] = { 0U };
+  memcpy(p_copy, out, 15U * sizeof (uint64_t));
+  Hacl_Impl_K256_PointAdd_point_add(out, p_copy, tmp1);
   uint64_t tmp10[15U] = { 0U };
   uint32_t i2 = 125U;
   uint64_t bits_c1 = Hacl_Bignum_Lib_bn_get_bits_u64(4U, r3, i2, 5U);
@@ -1376,29 +1607,46 @@ point_mul_g_double_split_lambda_table(
   memcpy(tmp10, (uint64_t *)a_bits_l2, 15U * sizeof (uint64_t));
   point_negate_conditional_vartime(tmp10, is_negate4);
   point_mul_lambda_inplace(tmp10);
-  Hacl_Impl_K256_PointAdd_point_add(tmp0, tmp0, tmp10);
-  Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
+  uint64_t p_copy0[15U] = { 0U };
+  memcpy(p_copy0, tmp0, 15U * sizeof (uint64_t));
+  Hacl_Impl_K256_PointAdd_point_add(tmp0, p_copy0, tmp10);
+  uint64_t p_copy1[15U] = { 0U };
+  memcpy(p_copy1, out, 15U * sizeof (uint64_t));
+  Hacl_Impl_K256_PointAdd_point_add(out, p_copy1, tmp0);
   uint64_t tmp2[15U] = { 0U };
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    KRML_MAYBE_FOR5(i4, 0U, 5U, 1U, Hacl_Impl_K256_PointDouble_point_double(out, out););
+    KRML_MAYBE_FOR5(i4,
+      0U,
+      5U,
+      1U,
+      uint64_t p_copy2[15U] = { 0U };
+      memcpy(p_copy2, out, 15U * sizeof (uint64_t));
+      Hacl_Impl_K256_PointDouble_point_double(out, p_copy2););
     uint32_t k = 125U - 5U * i - 5U;
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(4U, r4, k, 5U);
+    KRML_MAYBE_UNUSED_VAR(table2);
     uint32_t bits_l323 = (uint32_t)bits_l;
     const uint64_t *a_bits_l3 = table2 + bits_l323 * 15U;
     memcpy(tmp2, (uint64_t *)a_bits_l3, 15U * sizeof (uint64_t));
     point_negate_conditional_vartime(tmp2, is_negate4);
     point_mul_lambda_inplace(tmp2);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp2);
+    uint64_t p_copy2[15U] = { 0U };
+    memcpy(p_copy2, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy2, tmp2);
     uint32_t k0 = 125U - 5U * i - 5U;
     uint64_t bits_l0 = Hacl_Bignum_Lib_bn_get_bits_u64(4U, r3, k0, 5U);
+    KRML_MAYBE_UNUSED_VAR(table2);
     uint32_t bits_l324 = (uint32_t)bits_l0;
     const uint64_t *a_bits_l4 = table2 + bits_l324 * 15U;
     memcpy(tmp2, (uint64_t *)a_bits_l4, 15U * sizeof (uint64_t));
     point_negate_conditional_vartime(tmp2, is_negate3);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp2);
+    uint64_t p_copy3[15U] = { 0U };
+    memcpy(p_copy3, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy3, tmp2);
     uint32_t k1 = 125U - 5U * i - 5U;
     uint64_t bits_l1 = Hacl_Bignum_Lib_bn_get_bits_u64(4U, r2, k1, 5U);
+    KRML_HOST_IGNORE(Hacl_K256_PrecompTable_precomp_basepoint_table_w5);
     uint32_t bits_l325 = (uint32_t)bits_l1;
     const
     uint64_t
@@ -1406,16 +1654,21 @@ point_mul_g_double_split_lambda_table(
     memcpy(tmp2, (uint64_t *)a_bits_l5, 15U * sizeof (uint64_t));
     point_negate_conditional_vartime(tmp2, is_negate2);
     point_mul_lambda_inplace(tmp2);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp2);
+    uint64_t p_copy4[15U] = { 0U };
+    memcpy(p_copy4, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy4, tmp2);
     uint32_t k2 = 125U - 5U * i - 5U;
     uint64_t bits_l2 = Hacl_Bignum_Lib_bn_get_bits_u64(4U, r1, k2, 5U);
+    KRML_HOST_IGNORE(Hacl_K256_PrecompTable_precomp_basepoint_table_w5);
     uint32_t bits_l326 = (uint32_t)bits_l2;
     const
     uint64_t
     *a_bits_l6 = Hacl_K256_PrecompTable_precomp_basepoint_table_w5 + bits_l326 * 15U;
     memcpy(tmp2, (uint64_t *)a_bits_l6, 15U * sizeof (uint64_t));
     point_negate_conditional_vartime(tmp2, is_negate1);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp2);
+    uint64_t p_copy5[15U] = { 0U };
+    memcpy(p_copy5, out, 15U * sizeof (uint64_t));
+    Hacl_Impl_K256_PointAdd_point_add(out, p_copy5, tmp2);
   }
 }
 
@@ -1516,7 +1769,9 @@ static inline bool fmul_eq_vartime(uint64_t *r, uint64_t *z, uint64_t *x)
 {
   uint64_t tmp[5U] = { 0U };
   Hacl_K256_Field_fmul(tmp, r, z);
-  Hacl_K256_Field_fnormalize(tmp, tmp);
+  uint64_t f_copy[5U] = { 0U };
+  memcpy(f_copy, tmp, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fnormalize(tmp, f_copy);
   bool b = Hacl_K256_Field_is_felem_eq_vartime(tmp, x);
   return b;
 }
@@ -1569,9 +1824,9 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
     0U,
     4U,
     1U,
-    uint64_t *os = d_a;
     uint64_t uu____0 = oneq10[i];
     uint64_t x = uu____0 ^ (is_b_valid0 & (d_a[i] ^ uu____0));
+    uint64_t *os = d_a;
     os[i] = x;);
   uint64_t is_sk_valid = is_b_valid0;
   uint64_t is_b_valid = load_qelem_check(k_q, nonce);
@@ -1580,9 +1835,9 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
     0U,
     4U,
     1U,
-    uint64_t *os = k_q;
     uint64_t uu____1 = oneq1[i];
     uint64_t x = uu____1 ^ (is_b_valid & (k_q[i] ^ uu____1));
+    uint64_t *os = k_q;
     os[i] = x;);
   uint64_t is_nonce_valid = is_b_valid;
   uint64_t are_sk_nonce_valid = is_sk_valid & is_nonce_valid;
@@ -1598,8 +1853,12 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   load_qelem_modq(z, msgHash);
   qinv(kinv, k_q);
   qmul(s_q, r_q, d_a);
-  qadd(s_q, z, s_q);
-  qmul(s_q, kinv, s_q);
+  uint64_t f2_copy[4U] = { 0U };
+  memcpy(f2_copy, s_q, 4U * sizeof (uint64_t));
+  qadd(s_q, z, f2_copy);
+  uint64_t f2_copy0[4U] = { 0U };
+  memcpy(f2_copy0, s_q, 4U * sizeof (uint64_t));
+  qmul(s_q, kinv, f2_copy0);
   store_qelem(signature, r_q);
   store_qelem(signature + 32U, s_q);
   uint64_t is_r_zero = is_qelem_zero(r_q);
@@ -1702,7 +1961,9 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
       tmp_q[2U] = 0xffffffebaaedcULL;
       tmp_q[3U] = 0xfffffffffffffULL;
       tmp_q[4U] = 0xffffffffffffULL;
-      Hacl_K256_Field_fadd(tmp_q, r_fe, tmp_q);
+      uint64_t f2_copy[5U] = { 0U };
+      memcpy(f2_copy, tmp_q, 5U * sizeof (uint64_t));
+      Hacl_K256_Field_fadd(tmp_q, r_fe, f2_copy);
       return fmul_eq_vartime(tmp_q, z, tmp_x);
     }
     return false;
@@ -1948,8 +2209,8 @@ bool Hacl_K256_ECDSA_public_key_compressed_to_raw(uint8_t *pk_raw, uint8_t *pk)
 {
   uint64_t xa[5U] = { 0U };
   uint64_t ya[5U] = { 0U };
-  uint8_t *pk_xb = pk + 1U;
   bool b = aff_point_decompress_vartime(xa, ya, pk);
+  uint8_t *pk_xb = pk + 1U;
   if (b)
   {
     memcpy(pk_raw, pk_xb, 32U * sizeof (uint8_t));
@@ -2055,9 +2316,9 @@ bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key)
     0U,
     4U,
     1U,
-    uint64_t *os = sk;
     uint64_t uu____0 = oneq[i];
     uint64_t x = uu____0 ^ (is_b_valid & (sk[i] ^ uu____0));
+    uint64_t *os = sk;
     os[i] = x;);
   uint64_t is_sk_valid = is_b_valid;
   point_mul_g(pk, sk);
@@ -2090,9 +2351,9 @@ bool Hacl_K256_ECDSA_ecdh(uint8_t *shared_secret, uint8_t *their_pubkey, uint8_t
     0U,
     4U,
     1U,
-    uint64_t *os = sk;
     uint64_t uu____0 = oneq[i];
     uint64_t x = uu____0 ^ (is_b_valid & (sk[i] ^ uu____0));
+    uint64_t *os = sk;
     os[i] = x;);
   uint64_t is_sk_valid = is_b_valid;
   if (is_pk_valid)
