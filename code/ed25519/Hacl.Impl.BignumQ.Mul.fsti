@@ -76,7 +76,38 @@ val mul_modq:
     qelem_fits h1 z (1, 1, 1, 1, 1) /\
     as_nat h1 z == (as_nat h0 x * as_nat h0 y) % S.q)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val mul_modq_sa:
+    z:qelemB
+  -> x:qelemB
+  -> y:qelemB ->
+  Stack unit
+  (requires fun h -> live h z /\ live h x /\ live h y /\
+    qelem_fits h x (1, 1, 1, 1, 1) /\
+    qelem_fits h y (1, 1, 1, 1, 1) /\
+    as_nat h x < pow2 256 /\
+    as_nat h y < pow2 256)
+  (ensures  fun h0 _ h1 -> modifies (loc z) h0 h1 /\
+    qelem_fits h1 z (1, 1, 1, 1, 1) /\
+    as_nat h1 z == (as_nat h0 x * as_nat h0 y) % S.q)
+
 val add_modq:
+    z:qelemB
+  -> x:qelemB
+  -> y:qelemB ->
+  Stack unit
+  (requires fun h -> live h z /\ live h x /\ live h y /\
+    qelem_fits h x (1, 1, 1, 1, 1) /\
+    qelem_fits h y (1, 1, 1, 1, 1) /\
+    as_nat h x < S.q /\ as_nat h y < S.q)
+  (ensures fun h0 _ h1 -> modifies (loc z) h0 h1 /\
+    qelem_fits h1 z (1, 1, 1, 1, 1) /\
+    as_nat h1 z == (as_nat h0 x + as_nat h0 y) % S.q)
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val add_modq_sa:
     z:qelemB
   -> x:qelemB
   -> y:qelemB ->

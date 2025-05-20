@@ -1,5 +1,6 @@
 {
   bash,
+  cargo,
   dotnet-runtime,
   fetchFromGitHub,
   flock,
@@ -40,6 +41,8 @@
   hacl = stdenv.mkDerivation {
     name = "hacl-star";
 
+    # We filter source to avoid unnecessarily re-compiling, for instance on dist
+    # updates. These lists specify the allowed files.
     src = lib.cleanSourceWith {
       src = ./..;
       filter = path: type: let
@@ -48,6 +51,7 @@
         type
         == "directory"
         || lib.elem relPath [
+          # individual files to allow in the source
           ".gitignore"
           "Makefile"
           "Makefile.common"
@@ -59,9 +63,27 @@
           "dist/Makefile.tmpl"
           "dist/configure"
           "dist/package-mozilla.sh"
+          "Cargo.lock"
+          "Cargo.toml"
+          "dist/rs/bignum/Cargo.toml"
+          "dist/rs/fstar/Cargo.toml"
+          "dist/rs/fuzz/Cargo.toml"
+          "dist/rs/hacl/Cargo.toml"
+          "dist/rs/krml/Cargo.toml"
+          "dist/rs/lib/Cargo.toml"
+          "dist/rs/lowstar/Cargo.toml"
+          "dist/rs/Cargo.toml"
+          "dist/rs/Cargo.lock"
+          "dist/rs/bignum/lib.rs"
+          "dist/rs/fstar/lib.rs"
+          "dist/rs/hacl/lib.rs"
+          "dist/rs/krml/src/lib.rs"
+          "dist/rs/lib/lib.rs"
+          "dist/rs/lowstar/lib.rs"
           ".scripts/remove_stale_hints.sh"
         ]
         || lib.any (lib.flip lib.hasPrefix relPath) [
+          # prefixes of paths to allow in the source
           "code"
           "hints"
           "lib"
@@ -71,6 +93,13 @@
           "tests"
           "tools"
           "vale"
+          "dist/rs/krml"
+          "dist/rs/fstar"
+          "dist/rs/lib"
+          "dist/rs/fuzz"
+          "dist/rs/lowstar"
+          "dist/rs/hacl/test"
+          "dist/rs/bignum/test"
         ];
     };
 
@@ -93,6 +122,7 @@
         time
         runlim
         rustc
+        cargo
         flock
       ]
       ++ (with ocamlPackages; [

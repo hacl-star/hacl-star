@@ -44,8 +44,8 @@ let sign_compute_s r hs a s =
   push_frame ();
   let aq = create 5ul (u64 0) in
   Hacl.Impl.Load56.load_32_bytes aq a;
-  Hacl.Impl.BignumQ.Mul.mul_modq aq hs aq;
-  Hacl.Impl.BignumQ.Mul.add_modq aq r aq;
+  Hacl.Impl.BignumQ.Mul.mul_modq_sa aq hs aq;
+  Hacl.Impl.BignumQ.Mul.add_modq_sa aq r aq;
   assert_norm (0x100000000000000 == pow2 56);
   Hacl.Impl.Store56.store_56 s aq;
   pop_frame ()

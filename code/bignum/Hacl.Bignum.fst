@@ -20,6 +20,9 @@ let bn_sub_eq_len #t aLen a b res =
 let bn_add #t aLen a bLen b res =
   Hacl.Bignum.Addition.bn_add aLen a bLen b res
 
+let bn_add_in_place #t aLen bLen b res =
+  Hacl.Bignum.Addition.bn_add_in_place aLen bLen b res
+
 let bn_sub #t aLen a bLen b res =
   Hacl.Bignum.Addition.bn_sub aLen a bLen b res
 
@@ -104,6 +107,17 @@ let bn_add_mod_n_ (#t:limb_t) (len:size_t{v len > 0}) : bn_add_mod_n_st t len =
   | U32 -> bn_add_mod_n_u32 len
   | U64 -> bn_add_mod_n_u64 len
 
+(* HACL-RS *)
+inline_for_extraction noextract
+let bn_add_mod_n_a_ (#t:limb_t) (len:size_t{v len > 0}) : bn_add_mod_n_st t len =
+  fun n a b res -> push_frame ();
+  let a_copy = create len (uint #t 0) in
+  let b_copy = create len (uint #t 0) in
+  copy a_copy a;
+  copy b_copy b;
+  bn_add_mod_n_ #t len n a_copy b_copy res;
+  pop_frame ()
+
 let bn_sub_mod_n_u32 (len:size_t{v len > 0}) : bn_sub_mod_n_st U32 len = bn_sub_mod_n len
 let bn_sub_mod_n_u64 (len:size_t{v len > 0}) : bn_sub_mod_n_st U64 len = bn_sub_mod_n len
 
@@ -120,7 +134,7 @@ let mk_runtime_bn (t:limb_t) (len:meta_len t) : bn t = {
   len = len;
   add = Hacl.Bignum.Addition.bn_add_eq_len_u len;
   sub = Hacl.Bignum.Addition.bn_sub_eq_len_u len;
-  add_mod_n = bn_add_mod_n_ len;
+  add_mod_n = bn_add_mod_n_a_ len;
   sub_mod_n = bn_sub_mod_n_ len;
   mul = bn_karatsuba_mul len;
   sqr = bn_karatsuba_sqr len;

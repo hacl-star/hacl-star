@@ -38,9 +38,9 @@ static inline void sha224_init8(Lib_IntVector_Intrinsics_vec256 *hash)
     0U,
     8U,
     1U,
-    Lib_IntVector_Intrinsics_vec256 *os = hash;
     uint32_t hi = Hacl_Hash_SHA2_h224[i];
     Lib_IntVector_Intrinsics_vec256 x = Lib_IntVector_Intrinsics_vec256_load32(hi);
+    Lib_IntVector_Intrinsics_vec256 *os = hash;
     os[i] = x;);
 }
 
@@ -373,9 +373,9 @@ sha224_update8(Hacl_Hash_SHA2_uint8_8p b, Lib_IntVector_Intrinsics_vec256 *hash)
     0U,
     8U,
     1U,
-    Lib_IntVector_Intrinsics_vec256 *os = hash;
     Lib_IntVector_Intrinsics_vec256
     x = Lib_IntVector_Intrinsics_vec256_add32(hash[i], hash_old[i]);
+    Lib_IntVector_Intrinsics_vec256 *os = hash;
     os[i] = x;);
 }
 
@@ -787,9 +787,9 @@ static inline void sha256_init8(Lib_IntVector_Intrinsics_vec256 *hash)
     0U,
     8U,
     1U,
-    Lib_IntVector_Intrinsics_vec256 *os = hash;
     uint32_t hi = Hacl_Hash_SHA2_h256[i];
     Lib_IntVector_Intrinsics_vec256 x = Lib_IntVector_Intrinsics_vec256_load32(hi);
+    Lib_IntVector_Intrinsics_vec256 *os = hash;
     os[i] = x;);
 }
 
@@ -1122,9 +1122,9 @@ sha256_update8(Hacl_Hash_SHA2_uint8_8p b, Lib_IntVector_Intrinsics_vec256 *hash)
     0U,
     8U,
     1U,
-    Lib_IntVector_Intrinsics_vec256 *os = hash;
     Lib_IntVector_Intrinsics_vec256
     x = Lib_IntVector_Intrinsics_vec256_add32(hash[i], hash_old[i]);
+    Lib_IntVector_Intrinsics_vec256 *os = hash;
     os[i] = x;);
 }
 
@@ -1536,9 +1536,9 @@ static inline void sha384_init4(Lib_IntVector_Intrinsics_vec256 *hash)
     0U,
     8U,
     1U,
-    Lib_IntVector_Intrinsics_vec256 *os = hash;
     uint64_t hi = Hacl_Hash_SHA2_h384[i];
     Lib_IntVector_Intrinsics_vec256 x = Lib_IntVector_Intrinsics_vec256_load64(hi);
+    Lib_IntVector_Intrinsics_vec256 *os = hash;
     os[i] = x;);
 }
 
@@ -1771,9 +1771,9 @@ sha384_update4(Hacl_Hash_SHA2_uint8_4p b, Lib_IntVector_Intrinsics_vec256 *hash)
     0U,
     8U,
     1U,
-    Lib_IntVector_Intrinsics_vec256 *os = hash;
     Lib_IntVector_Intrinsics_vec256
     x = Lib_IntVector_Intrinsics_vec256_add64(hash[i], hash_old[i]);
+    Lib_IntVector_Intrinsics_vec256 *os = hash;
     os[i] = x;);
 }
 
@@ -1992,9 +1992,9 @@ static inline void sha512_init4(Lib_IntVector_Intrinsics_vec256 *hash)
     0U,
     8U,
     1U,
-    Lib_IntVector_Intrinsics_vec256 *os = hash;
     uint64_t hi = Hacl_Hash_SHA2_h512[i];
     Lib_IntVector_Intrinsics_vec256 x = Lib_IntVector_Intrinsics_vec256_load64(hi);
+    Lib_IntVector_Intrinsics_vec256 *os = hash;
     os[i] = x;);
 }
 
@@ -2227,9 +2227,9 @@ sha512_update4(Hacl_Hash_SHA2_uint8_4p b, Lib_IntVector_Intrinsics_vec256 *hash)
     0U,
     8U,
     1U,
-    Lib_IntVector_Intrinsics_vec256 *os = hash;
     Lib_IntVector_Intrinsics_vec256
     x = Lib_IntVector_Intrinsics_vec256_add64(hash[i], hash_old[i]);
+    Lib_IntVector_Intrinsics_vec256 *os = hash;
     os[i] = x;);
 }
 

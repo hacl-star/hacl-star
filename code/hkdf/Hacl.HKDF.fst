@@ -4,6 +4,7 @@ open FStar.Seq
 
 module B = Lib.Buffer
 module LB = LowStar.Buffer
+module S = FStar.Seq
 
 open Spec.Hash.Definitions
 open Spec.Agile.HKDF
@@ -55,9 +56,16 @@ let hmac_input_fits a =
   | SHA3_384 -> ()
   | SHA3_512 -> ()
 
-#push-options "--z3rlimit 300"
+#restart-solver
+#push-options "--z3rlimit 500"
+
+let coerce (#b #a:Type) (x:a{a == b}) : b = x
+
+let coerce_tag (a: fixed_len_alg) (i: nat { i <> 0 }) (s:S.seq uint8 { S.length s == hash_length a }): a_spec a i =
+  s
 
 let mk_expand a hmac okm prk prklen info infolen len =
+  let hinit = ST.get () in
   let tlen = Hash.Definitions.hash_len a in
   let n = len /. tlen in
 
@@ -74,21 +82,25 @@ let mk_expand a hmac okm prk prklen info infolen len =
 
   push_frame ();
   let text = B.create (tlen +! infolen +! 1ul) (u8 0) in
-  let text0: B.lbuffer uint8 (infolen +! 1ul) = B.sub text tlen (infolen +! 1ul) in
-  let tag = B.sub text 0ul tlen in
-  let ctr = B.sub text (tlen +! infolen) 1ul in
   B.copy (B.sub text tlen infolen) info;
+
+  let tag = B.create tlen (u8 0) in
   [@inline_let]
   let a_spec = a_spec a in
   [@inline_let]
   let refl h (i:size_nat{i <= v n}) : GTot (a_spec i) =
-    if i = 0 then FStar.Seq.empty #uint8 else B.as_seq h tag
+    if i = 0 then
+      FStar.Seq.empty #uint8
+    else begin
+      let t: FStar.Seq.(s:seq uint8 { length s == hash_length a }) = B.as_seq h tag in
+      coerce_tag a i t
+    end
   in
   [@inline_let]
   let footprint (i:size_nat{i <= v n}) :
     GTot LB.(l:loc{loc_disjoint l (B.loc output) /\
                    address_liveness_insensitive_locs `loc_includes` l}) =
-    LB.loc_union (B.loc tag) (B.loc ctr)
+    LB.loc_union (B.loc tag) (LB.loc_union (B.loc (gsub text 0ul tlen)) (B.loc (gsub text (tlen +! infolen) 1ul)))
   in
   [@inline_let]
   let spec h0 : GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq uint8 (v tlen)) =
@@ -96,7 +108,11 @@ let mk_expand a hmac okm prk prklen info infolen len =
   in
   let h0 = ST.get () in
   B.fill_blocks h0 tlen n output a_spec refl footprint spec (fun i ->
+    let ctr = B.sub text (tlen +! infolen) 1ul in
     ctr.(0ul) <- Lib.IntTypes.cast U8 PUB (i +! 1ul);
+    // HACL-RS
+    LowStar.Ignore.ignore text;
+    let text0: B.lbuffer uint8 (infolen +! 1ul) = B.sub text tlen (infolen +! 1ul) in
     let h1 = ST.get() in
     if i = 0ul then
       begin
@@ -112,6 +128,8 @@ let mk_expand a hmac okm prk prklen info infolen len =
       end
     else
       begin
+      copy (sub text 0ul tlen) tag;
+      let h1 = ST.get() in
       Seq.eq_intro
         (B.as_seq h1 text)
         (refl h1 (v i) @| B.as_seq h0 info @| Seq.create 1 (u8 (v i + 1)));
@@ -136,9 +154,14 @@ let mk_expand a hmac okm prk prklen info infolen len =
   );
 
   let h1 = ST.get () in
-  if n *! tlen <. len then
-    begin
+  if n *! tlen <. len then begin
+    let ctr = B.sub text (tlen +! infolen) 1ul in
     ctr.(0ul) <- Lib.IntTypes.cast U8 PUB (n +! 1ul);
+    // HACL-RS
+    LowStar.Ignore.ignore text;
+    let text0: B.lbuffer uint8 (infolen +! 1ul) = B.sub text tlen (infolen +! 1ul) in
+
+    begin
     let h2 = ST.get() in
     if n = 0ul then
       begin
@@ -149,24 +172,38 @@ let mk_expand a hmac okm prk prklen info infolen len =
       end
     else
       begin
+      copy (sub text 0ul tlen) tag;
+      let h2 = ST.get () in
       Seq.eq_intro
         (B.as_seq h2 text)
         (refl h1 (v n) @| B.as_seq h0 info @| Seq.create 1 (u8 (v n + 1)));
       hmac tag prk prklen text (tlen +! infolen +! 1ul)
       end;
     let block = B.sub okm (n *! tlen) (len -! (n *! tlen)) in
-    B.copy block (B.sub tag 0ul (len -! (n *! tlen)))
-  end;
+    B.copy block (B.sub tag 0ul (len -! (n *! tlen)));
 
-  let h4 = ST.get() in
-  assert (
-    let tag', output' =
-      Seq.generate_blocks (v tlen) (v n) (v n) a_spec (spec h0) (FStar.Seq.empty #uint8)
-    in
-    Seq.equal
-      (B.as_seq h4 okm)
-      (output' @| Seq.sub (B.as_seq h4 tag) 0 (v len - v n * v tlen)));
-  pop_frame ()
+    let h4 = ST.get() in
+    assert (
+      let tag', output' =
+        Seq.generate_blocks (v tlen) (v n) (v n) a_spec (spec h0) (FStar.Seq.empty #uint8)
+      in
+      Seq.equal
+        (B.as_seq h4 okm)
+        (output' @| Seq.sub (B.as_seq h4 tag) 0 (v len - v n * v tlen)));
+
+    pop_frame ()
+  end end else begin
+    let h4 = ST.get() in
+    assert (
+      let tag', output' =
+        Seq.generate_blocks (v tlen) (v n) (v n) a_spec (spec h0) (FStar.Seq.empty #uint8)
+      in
+      Seq.equal
+        (B.as_seq h4 okm)
+        (output' @| Seq.sub (B.as_seq h4 tag) 0 (v len - v n * v tlen)));
+
+    pop_frame ()
+  end
 
 let expand_sha2_256: expand_st SHA2_256 =
   mk_expand SHA2_256 Hacl.HMAC.compute_sha2_256
@@ -197,5 +234,3 @@ let expand_blake2b_32: expand_st Blake2B =
 
 let extract_blake2b_32: extract_st Blake2B =
   mk_extract Blake2B Hacl.HMAC.compute_blake2b_32
-
-

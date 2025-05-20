@@ -72,9 +72,9 @@ Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *
   memcpy(tmp + tmpLen - len, b, len * sizeof (uint8_t));
   for (uint32_t i = 0U; i < bnLen; i++)
   {
-    uint64_t *os = res;
     uint64_t u = load64_be(tmp + (bnLen - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = res;
     os[i] = x;
   }
 }
@@ -372,8 +372,8 @@ Hacl_Bignum_Multiplication_bn_sqr_u32(uint32_t aLen, uint32_t *a, uint32_t *res)
   memset(res, 0U, (aLen + aLen) * sizeof (uint32_t));
   for (uint32_t i0 = 0U; i0 < aLen; i0++)
   {
-    uint32_t *ab = a;
     uint32_t a_j = a[i0];
+    uint32_t *ab = a;
     uint32_t *res_j = res + i0;
     uint32_t c = 0U;
     for (uint32_t i = 0U; i < i0 / 4U; i++)
@@ -400,7 +400,16 @@ Hacl_Bignum_Multiplication_bn_sqr_u32(uint32_t aLen, uint32_t *a, uint32_t *res)
     uint32_t r = c;
     res[i0 + i0] = r;
   }
-  uint32_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, res, res, res);
+  KRML_CHECK_SIZE(sizeof (uint32_t), aLen + aLen);
+  uint32_t a_copy0[aLen + aLen];
+  memset(a_copy0, 0U, (aLen + aLen) * sizeof (uint32_t));
+  KRML_CHECK_SIZE(sizeof (uint32_t), aLen + aLen);
+  uint32_t b_copy0[aLen + aLen];
+  memset(b_copy0, 0U, (aLen + aLen) * sizeof (uint32_t));
+  memcpy(a_copy0, res, (aLen + aLen) * sizeof (uint32_t));
+  memcpy(b_copy0, res, (aLen + aLen) * sizeof (uint32_t));
+  uint32_t r = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, a_copy0, b_copy0, res);
+  uint32_t c0 = r;
   KRML_MAYBE_UNUSED_VAR(c0);
   KRML_CHECK_SIZE(sizeof (uint32_t), aLen + aLen);
   uint32_t tmp[aLen + aLen];
@@ -413,7 +422,16 @@ Hacl_Bignum_Multiplication_bn_sqr_u32(uint32_t aLen, uint32_t *a, uint32_t *res)
     tmp[2U * i] = lo;
     tmp[2U * i + 1U] = hi;
   }
-  uint32_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, res, tmp, res);
+  KRML_CHECK_SIZE(sizeof (uint32_t), aLen + aLen);
+  uint32_t a_copy[aLen + aLen];
+  memset(a_copy, 0U, (aLen + aLen) * sizeof (uint32_t));
+  KRML_CHECK_SIZE(sizeof (uint32_t), aLen + aLen);
+  uint32_t b_copy[aLen + aLen];
+  memset(b_copy, 0U, (aLen + aLen) * sizeof (uint32_t));
+  memcpy(a_copy, res, (aLen + aLen) * sizeof (uint32_t));
+  memcpy(b_copy, tmp, (aLen + aLen) * sizeof (uint32_t));
+  uint32_t r0 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, a_copy, b_copy, res);
+  uint32_t c1 = r0;
   KRML_MAYBE_UNUSED_VAR(c1);
 }
 
@@ -423,8 +441,8 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
   memset(res, 0U, (aLen + aLen) * sizeof (uint64_t));
   for (uint32_t i0 = 0U; i0 < aLen; i0++)
   {
-    uint64_t *ab = a;
     uint64_t a_j = a[i0];
+    uint64_t *ab = a;
     uint64_t *res_j = res + i0;
     uint64_t c = 0ULL;
     for (uint32_t i = 0U; i < i0 / 4U; i++)
@@ -451,7 +469,16 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
     uint64_t r = c;
     res[i0 + i0] = r;
   }
-  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, res, res, res);
+  KRML_CHECK_SIZE(sizeof (uint64_t), aLen + aLen);
+  uint64_t a_copy0[aLen + aLen];
+  memset(a_copy0, 0U, (aLen + aLen) * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), aLen + aLen);
+  uint64_t b_copy0[aLen + aLen];
+  memset(b_copy0, 0U, (aLen + aLen) * sizeof (uint64_t));
+  memcpy(a_copy0, res, (aLen + aLen) * sizeof (uint64_t));
+  memcpy(b_copy0, res, (aLen + aLen) * sizeof (uint64_t));
+  uint64_t r = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, a_copy0, b_copy0, res);
+  uint64_t c0 = r;
   KRML_MAYBE_UNUSED_VAR(c0);
   KRML_CHECK_SIZE(sizeof (uint64_t), aLen + aLen);
   uint64_t tmp[aLen + aLen];
@@ -464,7 +491,16 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
     tmp[2U * i] = lo;
     tmp[2U * i + 1U] = hi;
   }
-  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, res, tmp, res);
+  KRML_CHECK_SIZE(sizeof (uint64_t), aLen + aLen);
+  uint64_t a_copy[aLen + aLen];
+  memset(a_copy, 0U, (aLen + aLen) * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), aLen + aLen);
+  uint64_t b_copy[aLen + aLen];
+  memset(b_copy, 0U, (aLen + aLen) * sizeof (uint64_t));
+  memcpy(a_copy, res, (aLen + aLen) * sizeof (uint64_t));
+  memcpy(b_copy, tmp, (aLen + aLen) * sizeof (uint64_t));
+  uint64_t r0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, a_copy, b_copy, res);
+  uint64_t c1 = r0;
   KRML_MAYBE_UNUSED_VAR(c1);
 }
 

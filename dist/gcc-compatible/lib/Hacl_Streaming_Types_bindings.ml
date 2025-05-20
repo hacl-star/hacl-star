@@ -44,16 +44,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_Types_optional_64_v =
       field hacl_Streaming_Types_optional_64 "v" (ptr uint64_t)
     let _ = seal hacl_Streaming_Types_optional_64
-    type hacl_Streaming_Types_two_pointers =
-      [ `hacl_Streaming_Types_two_pointers ] structure
-    let (hacl_Streaming_Types_two_pointers :
-      [ `hacl_Streaming_Types_two_pointers ] structure typ) =
-      structure "Hacl_Streaming_Types_two_pointers_s"
-    let hacl_Streaming_Types_two_pointers_fst =
-      field hacl_Streaming_Types_two_pointers "fst" (ptr uint64_t)
-    let hacl_Streaming_Types_two_pointers_snd =
-      field hacl_Streaming_Types_two_pointers "snd" (ptr uint64_t)
-    let _ = seal hacl_Streaming_Types_two_pointers
     type hacl_Streaming_MD_state_32 =
       [ `hacl_Streaming_MD_state_32 ] structure
     let (hacl_Streaming_MD_state_32 :

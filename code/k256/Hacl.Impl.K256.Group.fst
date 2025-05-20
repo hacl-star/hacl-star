@@ -41,7 +41,7 @@ val point_add : BE.lmul_st U64 15ul 0ul mk_to_k256_comm_monoid
 let point_add ctx x y xy =
   let h0 = ST.get () in
   SL.to_aff_point_add_lemma (point_eval h0 x) (point_eval h0 y);
-  Hacl.Impl.K256.PointAdd.point_add xy x y
+  Hacl.Impl.K256.PointAdd.point_add_sa xy x y
 
 
 inline_for_extraction noextract
@@ -49,7 +49,7 @@ val point_double : BE.lsqr_st U64 15ul 0ul mk_to_k256_comm_monoid
 let point_double ctx x xx =
   let h0 = ST.get () in
   SL.to_aff_point_double_lemma (point_eval h0 x);
-  Hacl.Impl.K256.PointDouble.point_double xx x
+  Hacl.Impl.K256.PointDouble.point_double_sa xx x
 
 
 inline_for_extraction noextract

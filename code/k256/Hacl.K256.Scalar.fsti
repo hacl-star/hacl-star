@@ -154,6 +154,27 @@ val qadd (out f1 f2: qelem) : Stack unit
     qas_nat h1 out == S.qadd (qas_nat h0 f1) (qas_nat h0 f2) /\
     qe_lt_q h1 out)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val qadd_sa1 (out f1 f2: qelem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
+    qe_lt_q h f1 /\ qe_lt_q h f2)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qas_nat h1 out == S.qadd (qas_nat h0 f1) (qas_nat h0 f2) /\
+    qe_lt_q h1 out)
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val qadd_sa2 (out f1 f2: qelem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
+    qe_lt_q h f1 /\ qe_lt_q h f2)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qas_nat h1 out == S.qadd (qas_nat h0 f1) (qas_nat h0 f2) /\
+    qe_lt_q h1 out)
 
 val qmul (out f1 f2: qelem) : Stack unit
   (requires fun h ->
@@ -164,8 +185,40 @@ val qmul (out f1 f2: qelem) : Stack unit
     qas_nat h1 out == S.qmul (qas_nat h0 f1) (qas_nat h0 f2) /\
     qe_lt_q h1 out)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val qmul_sa1 (out f1 f2: qelem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
+    qe_lt_q h f1 /\ qe_lt_q h f2)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qas_nat h1 out == S.qmul (qas_nat h0 f1) (qas_nat h0 f2) /\
+    qe_lt_q h1 out)
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val qmul_sa2 (out f1 f2: qelem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
+    qe_lt_q h f1 /\ qe_lt_q h f2)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qas_nat h1 out == S.qmul (qas_nat h0 f1) (qas_nat h0 f2) /\
+    qe_lt_q h1 out)
+
 
 val qsqr (out f: qelem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ eq_or_disjoint out f /\
+    qe_lt_q h f)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qas_nat h1 out == S.qmul (qas_nat h0 f) (qas_nat h0 f) /\
+    qe_lt_q h1 out)
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val qsqr_sa (out f: qelem) : Stack unit
   (requires fun h ->
     live h out /\ live h f /\ eq_or_disjoint out f /\
     qe_lt_q h f)

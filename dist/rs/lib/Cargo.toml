@@ -1,0 +1,13 @@
+[package]
+name = "lib"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+fstar = { path = "../fstar" }
+
+[lib]
+name = "lib"
+path = "lib.rs"

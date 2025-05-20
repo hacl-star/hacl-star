@@ -30,8 +30,10 @@ let _align_fsti = ()
 
 let bn_field_get_len #t k =
   let open LowStar.BufferOps in
-  let k1 = !*k in
-  k1.len
+  // HACL-RS: see long comment in SafeAPI.fst
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
+  uu__k1.len
 
 
 let bn_field_check_modulus #t km n =
@@ -65,9 +67,10 @@ let bn_field_init #t len precomp_r2 r n =
 
 let bn_field_free #t k =
   let open LowStar.BufferOps in
-  let k1 = !*k in
-  let n : buffer (limb t) = k1.n in
-  let r2 : buffer (limb t) = k1.r2 in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
+  let n : buffer (limb t) = uu__k1.n in
+  let r2 : buffer (limb t) = uu__k1.r2 in
   B.free n;
   B.freeable_disjoint n r2;
   B.free r2;
@@ -76,77 +79,89 @@ let bn_field_free #t k =
 
 let bn_to_field #t km k a aM =
   let open LowStar.BufferOps in
-  let k1 = !*k in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
+  // Note that we are in luck here: krml can figure out that after inlining
+  // `to`, uu__k1 can still be inlined away. Should that have failed, we
+  // would've had to use the more general solution outlined below the long
+  // comment in SafeAPI.fst
   let h0 = ST.get () in
-  km.BM.to k1.n k1.mu k1.r2 a aM;
+  km.BM.to uu__k1.n uu__k1.mu uu__k1.r2 a aM;
   let h1 = ST.get () in
   assert (as_seq h1 aM == S.bn_to_field (as_pctx h0 k) (as_seq h0 a))
 
 
 let bn_from_field #t km k aM a =
   let open LowStar.BufferOps in
-  let k1 = !*k in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
   let h0 = ST.get () in
-  km.BM.from k1.n k1.mu aM a;
+  km.BM.from uu__k1.n uu__k1.mu aM a;
   let h1 = ST.get () in
   assert (as_seq h1 a == S.bn_from_field (as_pctx h0 k) (as_seq h0 aM))
 
 
 let bn_field_add #t km k aM bM cM =
   let open LowStar.BufferOps in
-  let k1 = !*k in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
   let h0 = ST.get () in
-  km.BM.bn.BN.add_mod_n k1.n aM bM cM;
+  km.BM.bn.BN.add_mod_n uu__k1.n aM bM cM;
   let h1 = ST.get () in
   assert (as_seq h1 cM == S.bn_field_add (as_pctx h0 k) (as_seq h0 aM) (as_seq h0 bM))
 
 
 let bn_field_sub #t km k aM bM cM =
   let open LowStar.BufferOps in
-  let k1 = !*k in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
   let h0 = ST.get () in
-  km.BM.bn.BN.sub_mod_n k1.n aM bM cM;
+  km.BM.bn.BN.sub_mod_n uu__k1.n aM bM cM;
   let h1 = ST.get () in
   assert (as_seq h1 cM == S.bn_field_sub (as_pctx h0 k) (as_seq h0 aM) (as_seq h0 bM))
 
 
 let bn_field_mul #t km k aM bM cM =
   let open LowStar.BufferOps in
-  let k1 = !*k in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
   let h0 = ST.get () in
-  km.BM.mul k1.n k1.mu aM bM cM;
+  km.BM.mul uu__k1.n uu__k1.mu aM bM cM;
   let h1 = ST.get () in
   assert (as_seq h1 cM == S.bn_field_mul (as_pctx h0 k) (as_seq h0 aM) (as_seq h0 bM))
 
 
 let bn_field_sqr #t km k aM cM =
   let open LowStar.BufferOps in
-  let k1 = !*k in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
   let h0 = ST.get () in
-  km.BM.sqr k1.n k1.mu aM cM;
+  km.BM.sqr uu__k1.n uu__k1.mu aM cM;
   let h1 = ST.get () in
   assert (as_seq h1 cM == S.bn_field_sqr (as_pctx h0 k) (as_seq h0 aM))
 
 
 let bn_field_one #t km k oneM =
   let open LowStar.BufferOps in
-  let k1 = !*k in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
   let h0 = ST.get () in
-  BM.bn_mont_one km.BM.bn.BN.len km.BM.from k1.n k1.mu k1.r2 oneM;
+  BM.bn_mont_one km.BM.bn.BN.len km.BM.from uu__k1.n uu__k1.mu uu__k1.r2 oneM;
   let h1 = ST.get () in
   assert (as_seq h1 oneM == S.bn_field_one (as_pctx h0 k))
 
 
 let bn_field_exp_consttime #t km k aM bBits b resM =
   let open LowStar.BufferOps in
-  let k1 = !*k in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
   push_frame ();
-  let aMc = create k1.len (uint #t #SEC 0) in
+  let aMc = create uu__k1.len (uint #t #SEC 0) in
   copy aMc aM;
-  ME.bn_exp_mont_consttime #t km k1.n k1.mu k1.r2 aMc bBits b resM;
+  ME.bn_exp_mont_consttime #t km uu__k1.n uu__k1.mu uu__k1.r2 aMc bBits b resM;
   let h0 = ST.get () in
   assert (bn_v h0 aM < bn_v_n h0 k);
-  BD.bn_eval_inj (v k1.len)
+  BD.bn_eval_inj (v uu__k1.len)
     (S.bn_field_exp_consttime (as_pctx h0 k) (as_seq h0 aM) (v bBits) (as_seq h0 b))
     (as_seq h0 resM);
   pop_frame ()
@@ -154,14 +169,15 @@ let bn_field_exp_consttime #t km k aM bBits b resM =
 
 let bn_field_exp_vartime #t km k aM bBits b resM =
   let open LowStar.BufferOps in
-  let k1 = !*k in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
   push_frame ();
-  let aMc = create k1.len (uint #t #SEC 0) in
+  let aMc = create uu__k1.len (uint #t #SEC 0) in
   copy aMc aM;
-  ME.bn_exp_mont_vartime #t km k1.n k1.mu k1.r2 aMc bBits b resM;
+  ME.bn_exp_mont_vartime #t km uu__k1.n uu__k1.mu uu__k1.r2 aMc bBits b resM;
   let h0 = ST.get () in
   assert (bn_v h0 aM < bn_v_n h0 k);
-  BD.bn_eval_inj (v k1.len)
+  BD.bn_eval_inj (v uu__k1.len)
     (S.bn_field_exp_vartime (as_pctx h0 k) (as_seq h0 aM) (v bBits) (as_seq h0 b))
     (as_seq h0 resM);
   pop_frame ()
@@ -169,10 +185,11 @@ let bn_field_exp_vartime #t km k aM bBits b resM =
 
 let bn_field_inv #t len bn_field_exp_vartime k aM aInvM =
   let open LowStar.BufferOps in
-  let k1 = !*k in
-  let len = k1.len in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = !*k in
+  let len = uu__k1.len in
   push_frame ();
   let n2 = create len (uint #t #SEC 0) in
-  BI.bn_mod_inv_prime_n2 len k1.n n2;
-  bn_field_exp_vartime k aM (k1.len *! size (bits t)) n2 aInvM;
+  BI.bn_mod_inv_prime_n2 len uu__k1.n n2;
+  bn_field_exp_vartime k aM (uu__k1.len *! size (bits t)) n2 aInvM;
   pop_frame ()

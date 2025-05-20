@@ -112,7 +112,9 @@ let stateful_keccak: stateful alg =
         Some (a, s))
     (* free: *) (fun _ (_, s) ->
       B.free s)
-    (* copy: *) (fun _ (a, s_src) (a', s_dst) ->
+    (* copy: *) (fun _ src dst ->
+      let a, s_src = src in
+      let a', s_dst = dst in
       B.blit s_src 0ul s_dst 0ul 25ul)
 
 noextract inline_for_extraction

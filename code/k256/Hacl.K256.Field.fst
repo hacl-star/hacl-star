@@ -1,4 +1,4 @@
-module Hacl.K256.Field
+ module Hacl.K256.Field
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -174,18 +174,52 @@ let copy_felem f1 f2 =
 let fmul_small_num out f num =
   make_u52_5 out (BI.mul15 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)) num)
 
+let fmul_small_num_sa out f num =
+  push_frame ();
+  let f_copy = create 5ul (u64 0) in
+  copy f_copy f;
+  fmul_small_num out f_copy num;
+  pop_frame ()
+
 [@CInline]
 let fadd out f1 f2 =
   make_u52_5 out (BI.add5
     (f1.(0ul), f1.(1ul), f1.(2ul), f1.(3ul), f1.(4ul))
     (f2.(0ul), f2.(1ul), f2.(2ul), f2.(3ul), f2.(4ul)))
 
+let fadd_sa1 out f1 f2 =
+  push_frame ();
+  let f1_copy = create 5ul (u64 0) in
+  copy f1_copy f1;
+  fadd out f1_copy f2;
+  pop_frame ()
+
+let fadd_sa2 out f1 f2 =
+  push_frame ();
+  let f2_copy = create 5ul (u64 0) in
+  copy f2_copy f2;
+  fadd out f1 f2_copy;
+  pop_frame ()
 
 [@CInline]
 let fsub out f1 f2 x =
   make_u52_5 out (BI.fsub5
     (f1.(0ul), f1.(1ul), f1.(2ul), f1.(3ul), f1.(4ul))
     (f2.(0ul), f2.(1ul), f2.(2ul), f2.(3ul), f2.(4ul)) x)
+
+let fsub_sa1 out f1 f2 x =
+  push_frame ();
+  let f1_copy = create 5ul (u64 0) in
+  copy f1_copy f1;
+  fsub out f1_copy f2 x;
+  pop_frame ()
+
+let fsub_sa2 out f1 f2 x =
+  push_frame ();
+  let f2_copy = create 5ul (u64 0) in
+  copy f2_copy f2;
+  fsub out f1 f2_copy x;
+  pop_frame ()
 
 
 [@CInline]
@@ -195,6 +229,20 @@ let fmul out f1 f2 =
   make_u52_5 out (BI.fmul5
     (f1.(0ul), f1.(1ul), f1.(2ul), f1.(3ul), f1.(4ul))
     (f2.(0ul), f2.(1ul), f2.(2ul), f2.(3ul), f2.(4ul)))
+
+let fmul_a out f1 f2 =
+  push_frame ();
+  let f1_copy = create nlimb (u64 0) in
+  copy f1_copy f1;
+  fmul out f1_copy f2;
+  pop_frame()
+
+let fmul_a2 out f1 f2 =
+  push_frame ();
+  let f2_copy = create nlimb (u64 0) in
+  copy f2_copy f2;
+  fmul out f1 f2_copy;
+  pop_frame()
 
 
 [@CInline]
@@ -208,10 +256,26 @@ let fsqr out f =
 let fnormalize_weak out f =
   make_u52_5 out (BI.normalize_weak5 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)))
 
+(* HACL-RS *)
+let fnormalize_weak_sa out f =
+  push_frame ();
+  let f_copy = create nlimb (u64 0) in
+  copy f_copy f;
+  fnormalize_weak out f_copy;
+  pop_frame ()
+
 
 [@CInline]
 let fnormalize out f =
   make_u52_5 out (BI.normalize5 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)))
+
+(* HACL-RS *)
+let fnormalize_a out f =
+  push_frame ();
+  let f_copy = create nlimb (u64 0) in
+  copy f_copy f;
+  fnormalize out f_copy;
+  pop_frame ()
 
 
 let fmul_3b_normalize_weak out f =
@@ -220,9 +284,16 @@ let fmul_3b_normalize_weak out f =
   let h1 = ST.get () in
   BL.fmul15_lemma (9,9,9,9,10) 21 (as_felem5 h0 f) (u64 21);
   assert (felem_fits5 (as_felem5 h1 out) (189,189,189,189,210));
-  fnormalize_weak out out;
+  fnormalize_weak_sa out out;
   BL.normalize_weak5_lemma (189,189,189,189,210) (as_felem5 h1 out)
 
+(* HACL-RS *)
+let fmul_3b_normalize_weak_sa out f =
+  push_frame ();
+  let f_copy = create nlimb (u64 0) in
+  copy f_copy f;
+  fmul_3b_normalize_weak out f_copy;
+  pop_frame ()
 
 let fmul_8_normalize_weak out f =
   let h0 = ST.get () in
@@ -230,8 +301,16 @@ let fmul_8_normalize_weak out f =
   let h1 = ST.get () in
   BL.fmul15_lemma (1,1,1,1,2) 8 (as_felem5 h0 f) (u64 8);
   assert (felem_fits5 (as_felem5 h1 out) (8,8,8,8,16));
-  fnormalize_weak out out;
+  fnormalize_weak_sa out out;
   BL.normalize_weak5_lemma (8,8,8,8,16) (as_felem5 h1 out)
+
+(* HACL-RS *)
+let fmul_8_normalize_weak_sa out f =
+  push_frame ();
+  let f_copy = create nlimb (u64 0) in
+  copy f_copy f;
+  fmul_8_normalize_weak out f_copy;
+  pop_frame ()
 
 
 [@CInline]
@@ -244,7 +323,7 @@ let fnegate_conditional_vartime f is_negate =
     assert (felem_fits5 (as_felem5 h1 f) (2,2,2,2,2));
     assert (as_nat h1 f == 2 * S.prime - as_nat h0 f);
     BL.normalize5_lemma (2,2,2,2,2) (as_felem5 h1 f);
-    fnormalize f f;
+    fnormalize_a f f;
     let h2 = ST.get () in
     assert (inv_fully_reduced h2 f);
     assert (as_nat h2 f == (2 * S.prime - as_nat h0 f) % S.prime);

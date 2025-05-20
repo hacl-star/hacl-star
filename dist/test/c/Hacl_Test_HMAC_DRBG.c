@@ -46,8 +46,8 @@ static inline void sha256_init(uint32_t *hash)
 {
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint32_t *os = hash;
     uint32_t x = Hacl_Impl_SHA2_Generic_h256[i];
+    uint32_t *os = hash;
     os[i] = x;
   }
 }
@@ -148,8 +148,8 @@ static inline void sha256_update(uint8_t *b, uint32_t *hash)
   }
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint32_t *os = hash;
     uint32_t x = hash[i] + hash_old[i];
+    uint32_t *os = hash;
     os[i] = x;
   }
 }
@@ -215,8 +215,8 @@ static void sha512_init(uint64_t *hash)
 {
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint64_t *os = hash;
     uint64_t x = Hacl_Impl_SHA2_Generic_h512[i];
+    uint64_t *os = hash;
     os[i] = x;
   }
 }
@@ -317,8 +317,8 @@ static inline void sha512_update(uint8_t *b, uint64_t *hash)
   }
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint64_t *os = hash;
     uint64_t x = hash[i] + hash_old[i];
+    uint64_t *os = hash;
     os[i] = x;
   }
 }
@@ -384,8 +384,8 @@ static inline void sha384_init(uint64_t *hash)
 {
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint64_t *os = hash;
     uint64_t x = Hacl_Impl_SHA2_Generic_h384[i];
+    uint64_t *os = hash;
     os[i] = x;
   }
 }
@@ -701,7 +701,6 @@ compute_sha1(uint8_t *dst, uint8_t *key, uint32_t key_len, uint8_t *data, uint32
     opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint32_t s[5U] = { 0x67452301U, 0xefcdab89U, 0x98badcfeU, 0x10325476U, 0xc3d2e1f0U };
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     update_last(s, 0ULL, ipad, 64U);
@@ -730,6 +729,7 @@ compute_sha1(uint8_t *dst, uint8_t *key, uint32_t key_len, uint8_t *data, uint32
     update_multi(s, full_blocks, n_blocks);
     update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   }
+  uint8_t *dst1 = ipad;
   finish(s, dst1);
   uint8_t *hash1 = ipad;
   init(s);
@@ -813,12 +813,11 @@ compute_sha2_256(
   uint32_t st[8U] = { 0U };
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint32_t *os = st;
     uint32_t x = Hacl_Impl_SHA2_Generic_h256[i];
+    uint32_t *os = st;
     os[i] = x;
   }
   uint32_t *s = st;
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     sha256_update_last(0ULL + (uint64_t)64U, 64U, ipad, s);
@@ -850,6 +849,7 @@ compute_sha2_256(
       rem,
       s);
   }
+  uint8_t *dst1 = ipad;
   sha256_finish(s, dst1);
   uint8_t *hash1 = ipad;
   sha256_init(s);
@@ -936,12 +936,11 @@ compute_sha2_384(
   uint64_t st[8U] = { 0U };
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint64_t *os = st;
     uint64_t x = Hacl_Impl_SHA2_Generic_h384[i];
+    uint64_t *os = st;
     os[i] = x;
   }
   uint64_t *s = st;
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(0ULL),
@@ -979,6 +978,7 @@ compute_sha2_384(
       rem,
       s);
   }
+  uint8_t *dst1 = ipad;
   sha384_finish(s, dst1);
   uint8_t *hash1 = ipad;
   sha384_init(s);
@@ -1067,12 +1067,11 @@ compute_sha2_512(
   uint64_t st[8U] = { 0U };
   for (uint32_t i = 0U; i < 8U; i++)
   {
-    uint64_t *os = st;
     uint64_t x = Hacl_Impl_SHA2_Generic_h512[i];
+    uint64_t *os = st;
     os[i] = x;
   }
   uint64_t *s = st;
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(0ULL),
@@ -1110,6 +1109,7 @@ compute_sha2_512(
       rem,
       s);
   }
+  uint8_t *dst1 = ipad;
   sha512_finish(s, dst1);
   uint8_t *hash1 = ipad;
   sha512_init(s);

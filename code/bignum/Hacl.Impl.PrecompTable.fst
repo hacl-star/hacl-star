@@ -477,6 +477,11 @@ let lprecomp_table_noalloc #a_t len ctx_len k ctx a table_len table tmp =
   [@inline_let]
   let nb = (table_len -! 2ul) /. 2ul in
 
+  // HACL-RS: end the scope of t0 and t1 and indicate to code-gen that these
+  // aliases are dead and from now on references to table "restart" as splits of
+  // the original variable table
+  LowStar.Ignore.ignore table;
+
   Lib.Loops.for 0ul nb inv
   (fun j ->
     lprecomp_table_f len ctx_len k ctx a table_len j table tmp)

@@ -91,7 +91,8 @@ let ecdsa_verify_finv p r_q =
   push_frame ();
   let x = create_felem () in
   to_aff_point_x x p;
-  qmod_short x x;
+  (* HACL-RS *)
+  qmod_short_sa x x;
   let res = bn_is_eq_vartime4 x r_q in
   pop_frame ();
   res
