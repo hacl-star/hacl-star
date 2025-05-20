@@ -84,6 +84,7 @@
 
     nativeBuildInputs =
       [
+        bash
         z3
         fstar
         python3
