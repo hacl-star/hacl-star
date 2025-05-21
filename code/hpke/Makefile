@@ -15,7 +15,7 @@ export CFLAGS
 dist/libhpke.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
-dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^ -o libhpke.a $(BASE_FLAGS) \
 	  $(HPKE_BUNDLE) \
 	  -tmpdir dist \

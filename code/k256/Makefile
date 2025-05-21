@@ -21,7 +21,7 @@ HASH_BUNDLE=-bundle Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Definitions=Hac
 STREAMING_BUNDLE=-bundle Hacl.Streaming.*
 BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*'
 
-dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^ -o libk256.a \
 	-bundle Lib.PrintBuffer= \
 	$(BASE_FLAGS) $(HASH_BUNDLE) $(STREAMING_BUNDLE) $(BLAKE2_BUNDLE) \
