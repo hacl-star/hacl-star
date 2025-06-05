@@ -8,16 +8,11 @@
 {
     let bn_zero: [u64; 4] = [0u64; 4usize];
     let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let uu____0: u64 = fstar::uint64::eq_mask(f[i as usize], (&bn_zero)[i as usize]);
             (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
         }
-    );
     let mask1: u64 = (&mask)[0usize];
     let res: u64 = mask1;
     res
@@ -32,16 +27,11 @@
 #[inline] fn bn_is_eq_mask4(a: &[u64], b: &[u64]) -> u64
 {
     let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let uu____0: u64 = fstar::uint64::eq_mask(a[i as usize], b[i as usize]);
             (&mut mask)[0usize] = uu____0 & (&mask)[0usize]
         }
-    );
     let mask1: u64 = (&mask)[0usize];
     mask1
 }
@@ -55,18 +45,13 @@
 #[inline] fn bn_cmovznz4(res: &mut [u64], cin: u64, x: &[u64], y: &[u64])
 {
     let mask: u64 = ! fstar::uint64::eq_mask(cin, 0u64);
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let uu____0: u64 = x[i as usize];
             let x1: u64 = uu____0 ^ mask & (y[i as usize] ^ uu____0);
             let os: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
             os.1[i as usize] = x1
         }
-    )
 }
 
 #[inline] fn bn_add_mod4(res: &mut [u64], n: &[u64], x: &[u64], y: &[u64])
@@ -116,17 +101,12 @@
     };
     let c10: u64 = (&c1)[0usize];
     let c2: u64 = c0.wrapping_sub(c10);
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let x1: u64 = c2 & res[i as usize] | ! c2 & (&tmp)[i as usize];
             let os: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
             os.1[i as usize] = x1
         }
-    )
 }
 
 #[inline] fn bn_sub4(res: &mut [u64], x: &[u64], y: &[u64]) -> u64
@@ -208,27 +188,18 @@
     let c10: u64 = (&c1)[0usize];
     lowstar::ignore::ignore::<u64>(c10);
     let c2: u64 = 0u64.wrapping_sub(c0);
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let x1: u64 = c2 & (&tmp)[i as usize] | ! c2 & res[i as usize];
             let os: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
             os.1[i as usize] = x1
         }
-    )
 }
 
 #[inline] fn bn_mul4(res: &mut [u64], x: &[u64], y: &[u64])
 {
     (res[0usize..8usize]).copy_from_slice(&[0u64; 8usize]);
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let bj: u64 = y[i as usize];
             let res_j: (&mut [u64], &mut [u64]) = res.split_at_mut(i as usize);
@@ -255,17 +226,12 @@
             let r: u64 = (&c)[0usize];
             res[4u32.wrapping_add(i) as usize] = r
         }
-    )
 }
 
 #[inline] fn bn_sqr4(res: &mut [u64], x: &[u64])
 {
     (res[0usize..8usize]).copy_from_slice(&[0u64; 8usize]);
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let a_j: u64 = x[i as usize];
             let ab: (&[u64], &[u64]) = x.split_at(0usize);
@@ -301,7 +267,6 @@
             let r: u64 = (&c)[0usize];
             res[i.wrapping_add(i) as usize] = r
         }
-    );
     let mut a_copy: [u64; 8] = [0u64; 8usize];
     let mut b_copy: [u64; 8] = [0u64; 8usize];
     ((&mut a_copy)[0usize..8usize]).copy_from_slice(&res[0usize..8usize]);
@@ -310,11 +275,7 @@
     let c0: u64 = r;
     lowstar::ignore::ignore::<u64>(c0);
     let mut tmp: [u64; 8] = [0u64; 8usize];
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let res1: fstar::uint128::uint128 =
                 fstar::uint128::mul_wide(x[i as usize], x[i as usize]);
@@ -324,7 +285,6 @@
             (&mut tmp)[2u32.wrapping_mul(i) as usize] = lo;
             (&mut tmp)[2u32.wrapping_mul(i).wrapping_add(1u32) as usize] = hi
         }
-    );
     let mut a_copy0: [u64; 8] = [0u64; 8usize];
     let mut b_copy0: [u64; 8] = [0u64; 8usize];
     ((&mut a_copy0)[0usize..8usize]).copy_from_slice(&res[0usize..8usize]);
@@ -338,25 +298,17 @@
 {
     let tmp: [u8; 32] = [0u8; 32usize];
     lowstar::ignore::ignore::<&[u8]>(&tmp);
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize) {
         lowstar::endianness::store64_be(
             &mut res[i.wrapping_mul(8u32) as usize..],
             f[4u32.wrapping_sub(i).wrapping_sub(1u32) as usize]
         )
-    )
+    }
 }
 
 #[inline] fn bn_from_bytes_be4(res: &mut [u64], b: &[u8])
 {
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let u: u64 =
                 lowstar::endianness::load64_be(
@@ -366,9 +318,7 @@
             let os: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
             os.1[i as usize] = x
         }
-    )
 }
-
 #[inline] fn bn2_to_bytes_be4(res: &mut [u8], x: &[u64], y: &[u64])
 {
     crate::p256::bn_to_bytes_be4(&mut res[0usize..], x);
@@ -494,11 +444,7 @@
     let mut n: [u64; 4] = [0u64; 4usize];
     crate::p256::make_prime(&mut n);
     let mut c0: [u64; 1] = [0u64; 1usize];
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let qj: u64 = 1u64.wrapping_mul(x[i as usize]);
             let res_j: (&mut [u64], &mut [u64]) = x.split_at_mut(i as usize);
@@ -529,7 +475,6 @@
             (&mut c0)[0usize] =
                 lib::inttypes_intrinsics::add_carry_u64((&c0)[0usize], c1, res_j0, resb.1)
         }
-    );
     (res[0usize..4usize]).copy_from_slice(&(&x[4usize..])[0usize..4usize]);
     let c00: u64 = (&c0)[0usize];
     let mut tmp: [u64; 4] = [0u64; 4usize];
@@ -557,17 +502,12 @@
     };
     let c1: u64 = (&c)[0usize];
     let c2: u64 = c00.wrapping_sub(c1);
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let x1: u64 = c2 & res[i as usize] | ! c2 & (&tmp)[i as usize];
             let os: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
             os.1[i as usize] = x1
         }
-    )
 }
 
 #[inline] fn fmul(res: &mut [u64], x: &[u64], y: &[u64])
@@ -639,92 +579,62 @@
     ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
     crate::p256::fmul(x2.0, &x_copy0, a);
     (tmp2.0[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
-    krml::unroll_for!(
-        3,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..3).step_by(1u32 as usize)
         {
             let mut x_copy1: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
             crate::p256::fsqr(tmp2.0, &x_copy1)
         }
-    );
     let mut x_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
     crate::p256::fmul(tmp2.0, &x_copy1, x2.0);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    krml::unroll_for!(
-        6,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..6).step_by(1u32 as usize)
         {
             let mut x_copy2: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
             crate::p256::fsqr(tmp2.1, &x_copy2)
         }
-    );
     let mut x_copy2: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
     crate::p256::fmul(tmp2.1, &x_copy2, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-    krml::unroll_for!(
-        3,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..3).step_by(1u32 as usize)
         {
             let mut x_copy3: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
             crate::p256::fsqr(tmp2.0, &x_copy3)
         }
-    );
     let mut x_copy3: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
     crate::p256::fmul(tmp2.0, &x_copy3, x2.0);
     (x2.0[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    krml::unroll_for!(
-        15,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..15).step_by(1u32 as usize)
         {
             let mut x_copy4: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
             crate::p256::fsqr(x2.0, &x_copy4)
         }
-    );
     let mut x_copy4: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
     crate::p256::fmul(x2.0, &x_copy4, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
-    krml::unroll_for!(
-        2,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..2).step_by(1u32 as usize)
         {
             let mut x_copy5: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
             crate::p256::fsqr(tmp2.0, &x_copy5)
         }
-    );
     let mut x_copy5: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
     crate::p256::fmul(tmp2.0, &x_copy5, tmp1.0);
     (tmp1.0[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    krml::unroll_for!(
-        32,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..32).step_by(1u32 as usize)
         {
             let mut x_copy6: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
             crate::p256::fsqr(tmp1.0, &x_copy6)
         }
-    );
     let mut x_copy6: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
     crate::p256::fmul(tmp1.0, &x_copy6, a);
@@ -737,45 +647,30 @@
     let mut x_copy7: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy7)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
     crate::p256::fmul(tmp1.0, &x_copy7, tmp2.0);
-    krml::unroll_for!(
-        32,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..32).step_by(1u32 as usize)
         {
             let mut x_copy8: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
             crate::p256::fsqr(tmp1.0, &x_copy8)
         }
-    );
     let mut x_copy8: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
     crate::p256::fmul(tmp1.0, &x_copy8, tmp2.0);
-    krml::unroll_for!(
-        30,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..30).step_by(1u32 as usize)
         {
             let mut x_copy9: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
             crate::p256::fsqr(tmp1.0, &x_copy9)
         }
-    );
     let mut x_copy9: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
     crate::p256::fmul(tmp1.0, &x_copy9, x2.0);
-    krml::unroll_for!(
-        2,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..2).step_by(1u32 as usize)
         {
             let mut x_copy10: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy10)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
             crate::p256::fsqr(tmp1.0, &x_copy10)
         }
-    );
     crate::p256::fmul(tmp2.0, tmp1.0, a);
     (res[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize])
 }
@@ -795,77 +690,52 @@
     ((&mut x_copy)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
     crate::p256::fmul(tmp2.0, &x_copy, a);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    krml::unroll_for!(
-        2,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..2).step_by(1u32 as usize)
         {
             let mut x_copy0: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
             crate::p256::fsqr(tmp2.1, &x_copy0)
         }
-    );
     let mut x_copy0: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
     crate::p256::fmul(tmp2.1, &x_copy0, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-    krml::unroll_for!(
-        4,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..4).step_by(1u32 as usize)
         {
             let mut x_copy1: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
             crate::p256::fsqr(tmp2.0, &x_copy1)
         }
-    );
     let mut x_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
     crate::p256::fmul(tmp2.0, &x_copy1, tmp2.1);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    krml::unroll_for!(
-        8,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..8).step_by(1u32 as usize)
         {
             let mut x_copy2: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
             crate::p256::fsqr(tmp2.1, &x_copy2)
         }
-    );
     let mut x_copy2: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
     crate::p256::fmul(tmp2.1, &x_copy2, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-    krml::unroll_for!(
-        16,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..16).step_by(1u32 as usize)
         {
             let mut x_copy3: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
             crate::p256::fsqr(tmp2.0, &x_copy3)
         }
-    );
     let mut x_copy3: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
     crate::p256::fmul(tmp2.0, &x_copy3, tmp2.1);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    krml::unroll_for!(
-        32,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..32).step_by(1u32 as usize)
         {
             let mut x_copy4: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
             crate::p256::fsqr(tmp2.1, &x_copy4)
         }
-    );
     let mut x_copy4: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
     crate::p256::fmul(tmp2.1, &x_copy4, a);
@@ -1295,11 +1165,7 @@
     crate::p256::make_point_at_inf(t1.0);
     (t1.1[0usize..12usize]).copy_from_slice(&p[0usize..12usize]);
     lowstar::ignore::ignore::<&[u64]>(&table);
-    krml::unroll_for!(
-        7,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..7).step_by(1u32 as usize)
         {
             let t11: (&[u64], &[u64]) =
                 table.split_at(i.wrapping_add(1u32).wrapping_mul(12u32) as usize);
@@ -1326,48 +1192,32 @@
             +
             12usize]).copy_from_slice(&(&tmp)[0usize..12usize])
         }
-    );
     crate::p256::make_point_at_inf(res);
     let mut tmp0: [u64; 12] = [0u64; 12usize];
     for i in 0u32..64u32
     {
-        krml::unroll_for!(
-            4,
-            "_i",
-            0u32,
-            1u32,
+        for _i in (0u32..4).step_by(1u32 as usize)
             {
                 let mut p_copy: [u64; 12] = [0u64; 12usize];
                 ((&mut p_copy)[0usize..12usize]).copy_from_slice(&res[0usize..12usize]);
                 crate::p256::point_double(res, &p_copy)
             }
-        );
         let k: u32 = 256u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, scalar, k, 4u32);
         lowstar::ignore::ignore::<&[u64]>(&table);
         ((&mut tmp0)[0usize..12usize]).copy_from_slice(&(&(&table)[0usize..])[0usize..12usize]);
-        krml::unroll_for!(
-            15,
-            "i0",
-            0u32,
-            1u32,
+        for i0 in (0u32..15).step_by(1u32 as usize)
             {
                 let c: u64 = fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
                 let res_j: (&[u64], &[u64]) =
                     table.split_at(i0.wrapping_add(1u32).wrapping_mul(12u32) as usize);
-                krml::unroll_for!(
-                    12,
-                    "i1",
-                    0u32,
-                    1u32,
+                for i1 in (0u32..12).step_by(1u32 as usize)
                     {
                         let x: u64 = c & res_j.1[i1 as usize] | ! c & (&tmp0)[i1 as usize];
                         let os: (&mut [u64], &mut [u64]) = tmp0.split_at_mut(0usize);
                         os.1[i1 as usize] = x
                     }
-                )
             }
-        );
         let mut p_copy: [u64; 12] = [0u64; 12usize];
         ((&mut p_copy)[0usize..12usize]).copy_from_slice(&res[0usize..12usize]);
         crate::p256::point_add(res, &p_copy, &tmp0)
@@ -1377,28 +1227,18 @@
 #[inline] fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64])
 {
     (tmp[0usize..12usize]).copy_from_slice(&(&table[0usize..])[0usize..12usize]);
-    krml::unroll_for!(
-        15,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..15).step_by(1u32 as usize)
         {
             let c: u64 = fstar::uint64::eq_mask(bits_l, i.wrapping_add(1u32) as u64);
             let res_j: (&[u64], &[u64]) =
                 table.split_at(i.wrapping_add(1u32).wrapping_mul(12u32) as usize);
-            krml::unroll_for!(
-                12,
-                "i0",
-                0u32,
-                1u32,
+            for i0 in (0u32..12).step_by(1u32 as usize)
                 {
                     let x: u64 = c & res_j.1[i0 as usize] | ! c & tmp[i0 as usize];
                     let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
                     os.1[i0 as usize] = x
                 }
-            )
         }
-    )
 }
 
 #[inline] fn point_mul_g(res: &mut [u64], scalar: &[u64])
@@ -1426,23 +1266,14 @@
     let r4: (&[u64], &[u64]) = (r3.1).split_at(1usize);
     crate::p256::make_point_at_inf(res);
     let mut tmp: [u64; 12] = [0u64; 12usize];
-    krml::unroll_for!(
-        16,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..16).step_by(1u32 as usize)
         {
-            krml::unroll_for!(
-                4,
-                "_i",
-                0u32,
-                1u32,
+            for _i in (0u32..4).step_by(1u32 as usize)
                 {
                     let mut p_copy: [u64; 12] = [0u64; 12usize];
                     ((&mut p_copy)[0usize..12usize]).copy_from_slice(&res[0usize..12usize]);
                     crate::p256::point_double(res, &p_copy)
                 }
-            );
             let k: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
             let bits_l: u64 = bignum::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
             lowstar::ignore::ignore::<&[u64]>(
@@ -1492,7 +1323,6 @@
             ((&mut p_copy2)[0usize..12usize]).copy_from_slice(&res[0usize..12usize]);
             crate::p256::point_add(res, &p_copy2, &tmp)
         }
-    );
     lowstar::ignore::ignore::<&[u64]>(&q1);
     lowstar::ignore::ignore::<&[u64]>(&q2);
     lowstar::ignore::ignore::<&[u64]>(&q3);
@@ -1510,11 +1340,7 @@
     crate::p256::make_point_at_inf(t1.0);
     (t1.1[0usize..12usize]).copy_from_slice(&q2[0usize..12usize]);
     lowstar::ignore::ignore::<&[u64]>(&table2);
-    krml::unroll_for!(
-        15,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..15).step_by(1u32 as usize)
         {
             let t11: (&[u64], &[u64]) =
                 table2.split_at(i.wrapping_add(1u32).wrapping_mul(12u32) as usize);
@@ -1543,7 +1369,6 @@
             +
             12usize]).copy_from_slice(&(&tmp)[0usize..12usize])
         }
-    );
     let mut tmp0: [u64; 12] = [0u64; 12usize];
     let i: u32 = 255u32;
     let bits_c: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, scalar1, i, 5u32);
@@ -1564,17 +1389,12 @@
     let mut tmp1: [u64; 12] = [0u64; 12usize];
     for i1 in 0u32..51u32
     {
-        krml::unroll_for!(
-            5,
-            "_i",
-            0u32,
-            1u32,
+        for _i in (0u32..5).step_by(1u32 as usize)
             {
                 let mut p_copy0: [u64; 12] = [0u64; 12usize];
                 ((&mut p_copy0)[0usize..12usize]).copy_from_slice(&res[0usize..12usize]);
                 crate::p256::point_double(res, &p_copy0)
             }
-        );
         let k: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
         let bits_l: u64 = bignum::bignum_base::bn_get_bits_u64(4u32, scalar2, k, 5u32);
         lowstar::ignore::ignore::<&[u64]>(&table2);
@@ -1640,11 +1460,7 @@
     let mut n: [u64; 4] = [0u64; 4usize];
     crate::p256::make_order(&mut n);
     let mut c0: [u64; 1] = [0u64; 1usize];
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let qj: u64 = 0xccd1c8aaee00bc4fu64.wrapping_mul(x[i as usize]);
             let res_j: (&mut [u64], &mut [u64]) = x.split_at_mut(i as usize);
@@ -1675,7 +1491,6 @@
             (&mut c0)[0usize] =
                 lib::inttypes_intrinsics::add_carry_u64((&c0)[0usize], c1, res_j0, resb.1)
         }
-    );
     (res[0usize..4usize]).copy_from_slice(&(&x[4usize..])[0usize..4usize]);
     let c00: u64 = (&c0)[0usize];
     let mut tmp: [u64; 4] = [0u64; 4usize];
@@ -1703,17 +1518,12 @@
     };
     let c1: u64 = (&c)[0usize];
     let c2: u64 = c00.wrapping_sub(c1);
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let x1: u64 = c2 & res[i as usize] | ! c2 & (&tmp)[i as usize];
             let os: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
             os.1[i as usize] = x1
         }
-    )
 }
 
 #[inline] fn from_qmont(res: &mut [u64], x: &[u64])
@@ -1749,18 +1559,13 @@
     (&mut oneq)[1usize] = 0u64;
     (&mut oneq)[2usize] = 0u64;
     (&mut oneq)[3usize] = 0u64;
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let uu____0: u64 = (&oneq)[i as usize];
             let x: u64 = uu____0 ^ is_b_valid & (pk.0[i as usize] ^ uu____0);
             let os: (&mut [u64], &mut [u64]) = (pk.0).split_at_mut(0usize);
             os.1[i as usize] = x
         }
-    );
     let is_sk_valid: u64 = is_b_valid;
     crate::p256::point_mul_g(pk.1, pk.0);
     crate::p256::point_store(public_key, pk.1);
@@ -1785,18 +1590,13 @@
     (&mut oneq)[1usize] = 0u64;
     (&mut oneq)[2usize] = 0u64;
     (&mut oneq)[3usize] = 0u64;
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let uu____0: u64 = (&oneq)[i as usize];
             let x: u64 = uu____0 ^ is_b_valid & (pk.0[i as usize] ^ uu____0);
             let os: (&mut [u64], &mut [u64]) = (pk.0).split_at_mut(0usize);
             os.1[i as usize] = x
         }
-    );
     let is_sk_valid: u64 = is_b_valid;
     let mut ss_proj: [u64; 12] = [0u64; 12usize];
     if is_pk_valid
@@ -1850,47 +1650,32 @@
     ((&mut y_copy)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
     crate::p256::qmul(x_11.0, x_101111.0, &y_copy);
     let mut tmp1: [u64; 4] = [0u64; 4usize];
-    krml::unroll_for!(
-        2,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..2).step_by(1u32 as usize)
         {
             let mut x_copy: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
             crate::p256::qsqr(x_11.0, &x_copy)
         }
-    );
     let mut x_copy: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
     crate::p256::qmul(x_11.0, &x_copy, x_101.0);
     ((&mut tmp1)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
-    krml::unroll_for!(
-        8,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..8).step_by(1u32 as usize)
         {
             let mut x_copy0: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy0)
         }
-    );
     let mut x_copy0: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy0, x_11.0);
     (x_11.0[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
-    krml::unroll_for!(
-        16,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..16).step_by(1u32 as usize)
         {
             let mut x_copy1: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
             crate::p256::qsqr(x_11.0, &x_copy1)
         }
-    );
     let mut x_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
     crate::p256::qmul(x_11.0, &x_copy1, &tmp1);
@@ -1904,381 +1689,246 @@
     let mut x_copy2: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy2, x_11.0);
-    krml::unroll_for!(
-        32,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..32).step_by(1u32 as usize)
         {
             let mut x_copy3: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy3)
         }
-    );
     let mut x_copy3: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy3, x_11.0);
-    krml::unroll_for!(
-        6,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..6).step_by(1u32 as usize)
         {
             let mut x_copy4: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy4)
         }
-    );
     let mut x_copy4: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy4, x_101111.1);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy5: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy5)
         }
-    );
     let mut x_copy5: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy5, x_1111.0);
-    krml::unroll_for!(
-        4,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..4).step_by(1u32 as usize)
         {
             let mut x_copy6: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy6)
         }
-    );
     let mut x_copy6: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy6, x_101.0);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy7: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy7)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy7)
         }
-    );
     let mut x_copy7: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy7)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy7, x_10101.0);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy8: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy8)
         }
-    );
     let mut x_copy8: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy8, x_101111.0);
-    krml::unroll_for!(
-        4,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..4).step_by(1u32 as usize)
         {
             let mut x_copy9: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy9)
         }
-    );
     let mut x_copy9: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy9, x_111.0);
-    krml::unroll_for!(
-        3,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..3).step_by(1u32 as usize)
         {
             let mut x_copy10: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy10)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy10)
         }
-    );
     let mut x_copy10: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy10)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy10, x_111.0);
-    krml::unroll_for!(
-        3,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..3).step_by(1u32 as usize)
         {
             let mut x_copy11: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy11)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy11)
         }
-    );
     let mut x_copy11: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy11)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy11, x_111.0);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy12: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy12)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy12)
         }
-    );
     let mut x_copy12: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy12)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy12, x_1111.0);
-    krml::unroll_for!(
-        9,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..9).step_by(1u32 as usize)
         {
             let mut x_copy13: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy13)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy13)
         }
-    );
     let mut x_copy13: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy13)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy13, x_101111.1);
-    krml::unroll_for!(
-        6,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..6).step_by(1u32 as usize)
         {
             let mut x_copy14: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy14)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy14)
         }
-    );
     let mut x_copy14: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy14)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy14, x_10101.0);
-    krml::unroll_for!(
-        2,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..2).step_by(1u32 as usize)
         {
             let mut x_copy15: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy15)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy15)
         }
-    );
     let mut x_copy15: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy15)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy15, r);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy16: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy16)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy16)
         }
-    );
     let mut x_copy16: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy16)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy16, r);
-    krml::unroll_for!(
-        6,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..6).step_by(1u32 as usize)
         {
             let mut x_copy17: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy17)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy17)
         }
-    );
     let mut x_copy17: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy17)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy17, x_10101.0);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy18: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy18)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy18)
         }
-    );
     let mut x_copy18: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy18)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy18, x_1111.0);
-    krml::unroll_for!(
-        4,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..4).step_by(1u32 as usize)
         {
             let mut x_copy19: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy19)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy19)
         }
-    );
     let mut x_copy19: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy19)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy19, x_1111.0);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy20: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy20)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy20)
         }
-    );
     let mut x_copy20: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy20)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy20, x_1111.0);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy21: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy21)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy21)
         }
-    );
     let mut x_copy21: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy21)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy21, x_111.0);
-    krml::unroll_for!(
-        3,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..3).step_by(1u32 as usize)
         {
             let mut x_copy22: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy22)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy22)
         }
-    );
     let mut x_copy22: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy22)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy22, x_101.0);
-    krml::unroll_for!(
-        10,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..10).step_by(1u32 as usize)
         {
             let mut x_copy23: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy23)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy23)
         }
-    );
     let mut x_copy23: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy23)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy23, x_101111.1);
-    krml::unroll_for!(
-        2,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..2).step_by(1u32 as usize)
         {
             let mut x_copy24: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy24)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy24)
         }
-    );
     let mut x_copy24: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy24)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy24, x_101.0);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy25: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy25)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy25)
         }
-    );
     let mut x_copy25: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy25)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy25, x_101.0);
-    krml::unroll_for!(
-        5,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..5).step_by(1u32 as usize)
         {
             let mut x_copy26: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy26)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy26)
         }
-    );
     let mut x_copy26: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy26)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy26, x_101.0);
-    krml::unroll_for!(
-        3,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..3).step_by(1u32 as usize)
         {
             let mut x_copy27: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy27)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy27)
         }
-    );
     let mut x_copy27: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy27)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy27, r);
-    krml::unroll_for!(
-        7,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..7).step_by(1u32 as usize)
         {
             let mut x_copy28: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy28)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy28)
         }
-    );
     let mut x_copy28: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy28)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy28, x_101111.0);
-    krml::unroll_for!(
-        6,
-        "_i",
-        0u32,
-        1u32,
+    for _i in (0u32..6).step_by(1u32 as usize)
         {
             let mut x_copy29: [u64; 4] = [0u64; 4usize];
             ((&mut x_copy29)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
             crate::p256::qsqr(&mut tmp1, &x_copy29)
         }
-    );
     let mut x_copy29: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy29)[0usize..4usize]).copy_from_slice(&(&tmp1)[0usize..4usize]);
     crate::p256::qmul(&mut tmp1, &x_copy29, x_10101.0);
@@ -2359,18 +2009,13 @@
     (&mut oneq)[1usize] = 0u64;
     (&mut oneq)[2usize] = 0u64;
     (&mut oneq)[3usize] = 0u64;
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let uu____0: u64 = (&oneq)[i as usize];
             let x: u64 = uu____0 ^ is_b_valid & (k_q.0[i as usize] ^ uu____0);
             let os: (&mut [u64], &mut [u64]) = (k_q.0).split_at_mut(0usize);
             os.1[i as usize] = x
         }
-    );
     let is_sk_valid: u64 = is_b_valid;
     crate::p256::bn_from_bytes_be4(k_q.1, nonce);
     let is_b_valid0: u64 = crate::p256::bn_is_lt_order_and_gt_zero_mask4(k_q.1);
@@ -2379,18 +2024,13 @@
     (&mut oneq0)[1usize] = 0u64;
     (&mut oneq0)[2usize] = 0u64;
     (&mut oneq0)[3usize] = 0u64;
-    krml::unroll_for!(
-        4,
-        "i",
-        0u32,
-        1u32,
+    for i in (0u32..4).step_by(1u32 as usize)
         {
             let uu____1: u64 = (&oneq0)[i as usize];
             let x: u64 = uu____1 ^ is_b_valid0 & (k_q.1[i as usize] ^ uu____1);
             let os: (&mut [u64], &mut [u64]) = (k_q.1).split_at_mut(0usize);
             os.1[i as usize] = x
         }
-    );
     let is_nonce_valid: u64 = is_b_valid0;
     let are_sk_nonce_valid: u64 = is_sk_valid & is_nonce_valid;
     let mut p: [u64; 12] = [0u64; 12usize];

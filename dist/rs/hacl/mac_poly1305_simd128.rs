@@ -1670,24 +1670,24 @@ pub fn malloc <'a>(key: &'a [u8]) -> Box<[crate::mac_poly1305_simd128::state_t]>
           {
               let block_state2: &mut [lib::intvector_intrinsics::vec128] = *block_state1;
               let mut b: Box<[u8]> = vec![0u8; 32usize].into_boxed_slice();
-              let mut k·: crate::mac_poly1305::option__ uint8_t* =
-                  crate::mac_poly1305::option__ uint8_t*::Some { v: &mut b };
-              let k·0: crate::mac_poly1305::option__ uint8_t* =
+              let mut k·: crate::mac_poly1305::option__·uint8_t· =
+                  crate::mac_poly1305::option__·uint8_t·::Some { v: &mut b };
+              let k·0: crate::mac_poly1305::option__·uint8_t· =
                   match k·
                   {
-                      crate::mac_poly1305::option__ uint8_t*::None =>
-                        { crate::mac_poly1305::option__ uint8_t*::None },
-                      crate::mac_poly1305::option__ uint8_t*::Some { v: ref mut k·1 } =>
+                      crate::mac_poly1305::option__·uint8_t·::None =>
+                        { crate::mac_poly1305::option__·uint8_t·::None },
+                      crate::mac_poly1305::option__·uint8_t·::Some { v: ref mut k·1 } =>
                         {
                             ((*k·1)[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
-                            crate::mac_poly1305::option__ uint8_t*::Some { v: *k·1 }
+                            crate::mac_poly1305::option__·uint8_t·::Some { v: *k·1 }
                         },
                       _ => panic!("Incomplete pattern matching")
                   };
               match k·0
               {
-                  crate::mac_poly1305::option__ uint8_t*::None => [].into(),
-                  crate::mac_poly1305::option__ uint8_t*::Some { v: ref k·1 } =>
+                  crate::mac_poly1305::option__·uint8_t·::None => [].into(),
+                  crate::mac_poly1305::option__·uint8_t·::Some { v: ref k·1 } =>
                     {
                         crate::mac_poly1305_simd128::poly1305_init(block_state2, key);
                         let s: crate::mac_poly1305_simd128::state_t =
