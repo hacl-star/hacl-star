@@ -18,7 +18,7 @@ dist/libbignum.a: dist/Makefile.basic
 BIGNUM_BUNDLE= -bundle Hacl.Bignum.Base -static-header Hacl.Bignum.Base \
 	-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
 
-dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^ -o libbignum.a $(BASE_FLAGS) $(BIGNUM_BUNDLE) \
 	-tmpdir dist \
 	-add-include '"lib_intrinsics.h"' \

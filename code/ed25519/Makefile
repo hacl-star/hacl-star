@@ -21,7 +21,7 @@ BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2
 CURVE_BUNDLE=-bundle Hacl.Impl.Curve25519.Field51[rename=Hacl_Bignum25519_51] -static-header Hacl.Impl.Curve25519.Field51 \
 	-bundle Hacl.Curve25519_51,Hacl.Impl.Curve25519.Field51,Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519]
 
-dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^ -o libed25519.a \
 	-bundle Lib.PrintBuffer= \
 	$(BASE_FLAGS) $(HASH_BUNDLE) $(STREAMING_BUNDLE) $(BLAKE2_BUNDLE) \

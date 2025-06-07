@@ -19,7 +19,7 @@ BIGNUM_BUNDLE= -bundle Hacl.Bignum.Base -static-header Hacl.Bignum.Base \
 	-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
 FFDHE_BUNDLE=-bundle Hacl.Impl.FFDHE.Constants -static-header Hacl.Impl.FFDHE.Constants -bundle Hacl.FFDHE=Hacl.Impl.FFDHE[rename=Hacl_FFDHE]
 
-dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^ -o libffdhe.a $(BASE_FLAGS) $(BIGNUM_BUNDLE) $(FFDHE_BUNDLE) \
 	-tmpdir dist \
 	-add-include '"lib_intrinsics.h"' \
