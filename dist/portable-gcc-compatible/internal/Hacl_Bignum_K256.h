@@ -155,11 +155,8 @@ static inline bool Hacl_K256_Field_load_felem_lt_prime_vartime(uint64_t *f, uint
   uint64_t f4 = f[4U];
   bool
   is_ge_p =
-    f0
-    >= 0xffffefffffc2fULL
-    && f1 == 0xfffffffffffffULL
-    && f2 == 0xfffffffffffffULL
-    && f3 == 0xfffffffffffffULL
+    f0 >= 0xffffefffffc2fULL && f1 == 0xfffffffffffffULL && f2 == 0xfffffffffffffULL &&
+      f3 == 0xfffffffffffffULL
     && f4 == 0xffffffffffffULL;
   return !is_ge_p;
 }

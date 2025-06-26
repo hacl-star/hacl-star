@@ -21,6 +21,13 @@ module U64 = FStar.UInt64
 open LowStar.BufferOps
 open FStar.Mul
 
+(* As far as I know, we are the only clients of LowStar.Monotonic.Buffer who
+ * care about catching potential allocation failures, meaning this abbreviation was
+ * never defined in the standard F* library -- should be done at some point, I
+ * guess. *)
+inline_for_extraction noextract
+let fallible_malloc #a = LowStar.Monotonic.Buffer.(mmalloc_partial #a #(LowStar.Buffer.trivial_preorder a))
+
 inline_for_extraction noextract
 let uint8 = Lib.IntTypes.uint8
 
@@ -97,18 +104,23 @@ type stateful (index: Type0) =
 
   create_in: (i:index ->
     r:HS.rid ->
-    ST (s i)
+    ST (option (s i))
     (requires (fun h0 ->
       HyperStack.ST.is_eternal_region r))
     (ensures (fun h0 s h1 ->
-      invariant #i h1 s /\
-      B.(modifies loc_none h0 h1) /\
-      B.fresh_loc (footprint #i h1 s) h0 h1 /\
-      B.(loc_includes (loc_region_only true r) (footprint #i h1 s)) /\
-      freeable #i h1 s))) ->
+      match s with
+      | None ->
+          // allocation failure, nothing meaningful to say
+          B.(modifies loc_none h0 h1)
+      | Some s ->
+          invariant #i h1 s /\
+          B.(modifies loc_none h0 h1) /\
+          B.fresh_loc (footprint #i h1 s) h0 h1 /\
+          B.(loc_includes (loc_region_only true r) (footprint #i h1 s)) /\
+          freeable #i h1 s))) ->
 
   free: (
-    i: G.erased index -> (
+    i: index -> (
     let i = G.reveal i in
     s:s i -> ST unit
     (requires fun h0 ->
@@ -118,8 +130,7 @@ type stateful (index: Type0) =
       B.(modifies (footprint #i h0 s) h0 h1)))) ->
 
   copy: (
-    i:G.erased index -> (
-    let i = G.reveal i in
+    i:index -> (
     s_src:s i ->
     s_dst:s i ->
     Stack unit
@@ -149,7 +160,7 @@ let stateful_buffer (a: Type) (l: UInt32.t { UInt32.v l > 0 }) (zero: a) (t: Typ
     (fun #_ l s h0 h1 -> ())
     (fun #_ l s h0 h1 -> ())
     (fun _ -> B.alloca zero l)
-    (fun _ r -> B.malloc r zero l)
+    (fun _ r -> let b = fallible_malloc r zero l in if B.is_null b then None else Some b)
     (fun _ s -> B.free s)
     (fun _ s_src s_dst -> B.blit s_src 0ul s_dst 0ul l)
 
@@ -166,7 +177,7 @@ let stateful_unused (t: Type0): stateful t =
     (fun #_ l s h0 h1 -> ())
     (fun #_ l s h0 h1 -> ())
     (fun _ -> ())
-    (fun _ r -> ())
+    (fun _ r -> Some ())
     (fun _ s -> ())
     (fun _ _ _ -> ())
 
@@ -336,8 +347,14 @@ type block (index: Type0) =
   // Stateful operations
   index_of_state: (i:G.erased index -> (
     let i = G.reveal i in
-    s: state.s i -> Stack index
-    (fun h0 -> state.invariant #i h0 s)
+    s: state.s i -> k: optional_key i km key -> Stack index
+    (fun h0 -> state.invariant #i h0 s /\ (
+      allow_inversion key_management;
+      match km with
+      | Erased -> True
+      | Runtime ->
+          key.invariant #i h0 k /\
+          B.(loc_disjoint (key.footprint #i h0 k) (state.footprint #i h0 s))))
     (fun h0 i' h1 -> h0 == h1 /\ i' == i))) ->
 
 

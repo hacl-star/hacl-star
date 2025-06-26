@@ -12,7 +12,6 @@ open Hacl.Impl.Salsa20.Core32
 
 module ST = FStar.HyperStack.ST
 module Spec = Spec.Salsa20
-module Loop = Lib.LoopCombinators
 module Salsa20 = Hacl.Impl.Salsa20
 
 

@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_blake2_params */
 
@@ -99,39 +98,15 @@ Hacl_Hash_Blake2b_index;
 
 /* SNIPPET_END: HACL_HASH_BLAKE2B_PERSONAL_BYTES */
 
-/* SNIPPET_START: K____uint64_t___uint64_t_ */
-
-typedef struct K____uint64_t___uint64_t__s
-{
-  uint64_t *fst;
-  uint64_t *snd;
-}
-K____uint64_t___uint64_t_;
-
-/* SNIPPET_END: K____uint64_t___uint64_t_ */
-
 /* SNIPPET_START: Hacl_Hash_Blake2b_block_state_t */
 
-typedef struct Hacl_Hash_Blake2b_block_state_t_s
-{
-  uint8_t fst;
-  uint8_t snd;
-  bool thd;
-  K____uint64_t___uint64_t_ f3;
-}
-Hacl_Hash_Blake2b_block_state_t;
+typedef struct Hacl_Hash_Blake2b_block_state_t_s Hacl_Hash_Blake2b_block_state_t;
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_block_state_t */
 
 /* SNIPPET_START: Hacl_Hash_Blake2b_state_t */
 
-typedef struct Hacl_Hash_Blake2b_state_t_s
-{
-  Hacl_Hash_Blake2b_block_state_t block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Hash_Blake2b_state_t;
+typedef struct Hacl_Hash_Blake2b_state_t_s Hacl_Hash_Blake2b_state_t;
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_state_t */
 

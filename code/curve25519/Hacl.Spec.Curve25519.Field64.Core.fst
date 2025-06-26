@@ -8,7 +8,6 @@ open Lib.Sequence
 open Hacl.Spec.Curve25519.Field64.Definition
 
 module P = Spec.Curve25519
-module CL = Hacl.Spec.Curve25519.Field64.Lemmas
 
 module SD = Hacl.Spec.Bignum.Definitions
 module SB = Hacl.Spec.Bignum

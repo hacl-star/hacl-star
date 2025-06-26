@@ -1,12 +1,7 @@
 module Hacl.Streaming.Poly1305
 
-module HS = FStar.HyperStack
 module B = LowStar.Buffer
-module G = FStar.Ghost
 module S = FStar.Seq
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
-module F = Hacl.Streaming.Functor
 module I = Hacl.Streaming.Interface
 module P = Hacl.Impl.Poly1305
 module F32xN = Hacl.Spec.Poly1305.Field32xN
@@ -83,10 +78,13 @@ let stateful_poly1305_ctx (fs : field_spec) : I.stateful unit =
     (fun () r ->
       [@inline_let]
       let n = num_lanes fs in
-      let r = B.malloc r (F32xN.zero n) 25ul in
-      let h1 = ST.get () in
-      P.ctx_inv_zeros #fs r h1;
-      r)
+      let r = I.fallible_malloc r (F32xN.zero n) 25ul in
+      if B.is_null r then
+        None
+      else
+        let h1 = ST.get () in
+        P.ctx_inv_zeros #fs r h1;
+        Some r)
     (fun _ s -> B.free s)
     (fun _ src dst ->
       let h0 = ST.get () in
@@ -444,7 +442,7 @@ let poly1305 (fs : field_spec) : I.block unit =
       poly_is_incremental_lazy key input)
 
     (* index_of_state *)
-    (fun _ _ -> ())
+    (fun _ _ _ -> ())
 
     (* init *)
     (fun _ k _ s ->

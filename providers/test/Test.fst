@@ -9,7 +9,6 @@ open EverCrypt.Helpers
 open EverCrypt.Error
 
 module AC = EverCrypt.AutoConfig2
-module H = EverCrypt.Hash
 
 open Test.Vectors
 open LowStar.BufferOps

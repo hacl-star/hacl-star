@@ -3,7 +3,6 @@ module Hacl.Spec.BignumQ.Definitions
 open FStar.Mul
 open Lib.IntTypes
 
-module S = Spec.Ed25519
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 

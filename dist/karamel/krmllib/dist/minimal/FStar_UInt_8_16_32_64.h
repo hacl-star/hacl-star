@@ -22,6 +22,8 @@ extern krml_checked_int_t FStar_UInt64___proj__Mk__item__v(uint64_t projectee);
 
 extern krml_checked_int_t FStar_UInt64_v(uint64_t x);
 
+typedef void *FStar_UInt64_fits;
+
 extern uint64_t FStar_UInt64_uint_to_t(krml_checked_int_t x);
 
 extern uint64_t FStar_UInt64_zero;
@@ -69,6 +71,8 @@ extern bool FStar_UInt32_uu___is_Mk(uint32_t projectee);
 extern krml_checked_int_t FStar_UInt32___proj__Mk__item__v(uint32_t projectee);
 
 extern krml_checked_int_t FStar_UInt32_v(uint32_t x);
+
+typedef void *FStar_UInt32_fits;
 
 extern uint32_t FStar_UInt32_uint_to_t(krml_checked_int_t x);
 
@@ -118,6 +122,8 @@ extern krml_checked_int_t FStar_UInt16___proj__Mk__item__v(uint16_t projectee);
 
 extern krml_checked_int_t FStar_UInt16_v(uint16_t x);
 
+typedef void *FStar_UInt16_fits;
+
 extern uint16_t FStar_UInt16_uint_to_t(krml_checked_int_t x);
 
 extern uint16_t FStar_UInt16_zero;
@@ -165,6 +171,8 @@ extern bool FStar_UInt8_uu___is_Mk(uint8_t projectee);
 extern krml_checked_int_t FStar_UInt8___proj__Mk__item__v(uint8_t projectee);
 
 extern krml_checked_int_t FStar_UInt8_v(uint8_t x);
+
+typedef void *FStar_UInt8_fits;
 
 extern uint8_t FStar_UInt8_uint_to_t(krml_checked_int_t x);
 

@@ -4,7 +4,8 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.LoopCombinators
 
-#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 --using_facts_from '-* +Prims +FStar.Pervasives +FStar.Math.Lemmas +FStar.Seq +Lib.IntTypes +Lib.Sequence'"
+#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+// --using_facts_from '-* +Prims +FStar.Pervasives +FStar.Math.Lemmas +FStar.Seq +Lib.IntTypes +Lib.Sequence'"
 
 let index #a #len s n = Seq.index s n
 
@@ -82,7 +83,7 @@ let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i <
   assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
   Seq.snoc si (init i)
 
-#push-options "--max_fuel 1 --using_facts_from '+Lib.LoopCombinators +FStar.List' --z3rlimit_factor 2 --retry 2"
+#push-options "--max_fuel 1 --z3rlimit_factor 2 --retry 2"
 
 let createi #a len init_f =
   repeat_gen_inductive len
@@ -373,7 +374,7 @@ let rec index_generate_blocks #t len max n f i =
     mod_prop len (n-1) i
     end
 
-#push-options "--using_facts_from '+FStar.UInt.pow2_values'"
+// #push-options "--using_facts_from '+FStar.UInt.pow2_values'"
 
 let create2 #a x0 x1 =
   let l = [x0; x1] in

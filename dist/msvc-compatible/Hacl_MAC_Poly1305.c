@@ -25,6 +25,10 @@
 
 #include "internal/Hacl_MAC_Poly1305.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "internal/Hacl_Streaming_Types.h"
+
 void Hacl_MAC_Poly1305_poly1305_init(uint64_t *ctx, uint8_t *key)
 {
   uint64_t *acc = ctx;
@@ -443,18 +447,95 @@ void Hacl_MAC_Poly1305_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx
 Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(16U, sizeof (uint8_t));
+  if (buf == NULL)
+  {
+    return NULL;
+  }
+  uint8_t *buf1 = buf;
   uint64_t *r1 = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
-  uint64_t *block_state = r1;
-  uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
-  memcpy(k_, key, 32U * sizeof (uint8_t));
-  uint8_t *k_0 = k_;
-  Hacl_MAC_Poly1305_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_0 };
-  Hacl_MAC_Poly1305_state_t
-  *p = (Hacl_MAC_Poly1305_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_MAC_Poly1305_state_t));
-  p[0U] = s;
-  Hacl_MAC_Poly1305_poly1305_init(block_state, key);
-  return p;
+  Hacl_Streaming_Types_optional_64 block_state;
+  if (r1 == NULL)
+  {
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_None });
+  }
+  else
+  {
+    block_state = ((Hacl_Streaming_Types_optional_64){ .tag = Hacl_Streaming_Types_Some, .v = r1 });
+  }
+  if (block_state.tag == Hacl_Streaming_Types_None)
+  {
+    KRML_HOST_FREE(buf1);
+    return NULL;
+  }
+  if (block_state.tag == Hacl_Streaming_Types_Some)
+  {
+    uint64_t *block_state1 = block_state.v;
+    uint8_t *b = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
+    FStar_Pervasives_Native_option___uint8_t_ k_;
+    if (b == NULL)
+    {
+      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_None });
+    }
+    else
+    {
+      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_Some, .v = b });
+    }
+    FStar_Pervasives_Native_option___uint8_t_ k_0;
+    if (k_.tag == Hacl_Streaming_Types_None)
+    {
+      KRML_HOST_FREE(block_state1);
+      KRML_HOST_FREE(buf1);
+      k_0 = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_None });
+    }
+    else if (k_.tag == Hacl_Streaming_Types_Some)
+    {
+      uint8_t *k_1 = k_.v;
+      memcpy(k_1, key, 32U * sizeof (uint8_t));
+      k_0 =
+        ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_Some, .v = k_1 });
+    }
+    else
+    {
+      k_0 =
+        KRML_EABORT(FStar_Pervasives_Native_option___uint8_t_,
+          "unreachable (pattern matches are exhaustive in F*)");
+    }
+    if (k_0.tag == Hacl_Streaming_Types_None)
+    {
+      return NULL;
+    }
+    if (k_0.tag == Hacl_Streaming_Types_Some)
+    {
+      uint8_t *k_1 = k_0.v;
+      Hacl_MAC_Poly1305_state_t
+      s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)0U, .p_key = k_1 };
+      Hacl_MAC_Poly1305_state_t
+      *p = (Hacl_MAC_Poly1305_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_MAC_Poly1305_state_t));
+      if (p != NULL)
+      {
+        p[0U] = s;
+      }
+      if (p == NULL)
+      {
+        KRML_HOST_FREE(k_1);
+        KRML_HOST_FREE(block_state1);
+        KRML_HOST_FREE(buf1);
+        return NULL;
+      }
+      Hacl_MAC_Poly1305_poly1305_init(block_state1, key);
+      return p;
+    }
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "unreachable (pattern matches are exhaustive in F*)");
+    KRML_HOST_EXIT(255U);
+  }
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 void Hacl_MAC_Poly1305_reset(Hacl_MAC_Poly1305_state_t *state, uint8_t *key)
@@ -511,8 +592,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-    *state
-    =
+    *state =
       (
         (Hacl_MAC_Poly1305_state_t){
           .block_state = block_state1,
@@ -559,8 +639,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     poly1305_update(block_state1, data1_len, data1);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
+    *state =
       (
         (Hacl_MAC_Poly1305_state_t){
           .block_state = block_state1,
@@ -592,8 +671,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *state
-    =
+    *state =
       (
         (Hacl_MAC_Poly1305_state_t){
           .block_state = block_state10,
@@ -638,8 +716,7 @@ Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint3
     poly1305_update(block_state1, data1_len, data1);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
+    *state =
       (
         (Hacl_MAC_Poly1305_state_t){
           .block_state = block_state1,

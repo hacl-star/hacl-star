@@ -11,7 +11,6 @@ module ST = FStar.HyperStack.ST
 module F51 = Hacl.Impl.Ed25519.Field51
 module SE = Spec.Ed25519
 module SC = Spec.Curve25519
-module ML = Hacl.Impl.Ed25519.Ladder
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

@@ -1,6 +1,5 @@
 module Vale.Transformers.Transform
 
-module BS = Vale.X64.Machine_Semantics_s
 
 open Vale.X64.Machine_Semantics_s
 open Vale.X64.Machine_s

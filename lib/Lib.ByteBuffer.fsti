@@ -9,7 +9,6 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 
-module B = LowStar.Buffer
 module BS = Lib.ByteSequence
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"

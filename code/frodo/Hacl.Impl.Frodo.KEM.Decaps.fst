@@ -18,13 +18,9 @@ open Hacl.Impl.Frodo.Pack
 open Hacl.Impl.Frodo.Sample
 open Hacl.Frodo.Random
 
-module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
 
 module FP = Spec.Frodo.Params
-module KG = Hacl.Impl.Frodo.KEM.KeyGen
 module S = Spec.Frodo.KEM.Decaps
-module M = Spec.Matrix
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 

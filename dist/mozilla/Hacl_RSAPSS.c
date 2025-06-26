@@ -25,6 +25,9 @@
 
 #include "Hacl_RSAPSS.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"
@@ -792,15 +795,13 @@ Hacl_RSAPSS_rsapss_skey_sign(
     2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U + (dBits - 1U) / 64U + 1U);
   uint64_t
   *skey =
-    (uint64_t *)alloca((2U
-      * ((modBits - 1U) / 64U + 1U)
-      + (eBits - 1U) / 64U + 1U
-      + (dBits - 1U) / 64U + 1U)
+    (uint64_t *)alloca((2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U +
+        (dBits - 1U) / 64U + 1U)
       * sizeof (uint64_t));
   memset(skey,
     0U,
-    (2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U + (dBits - 1U) / 64U + 1U)
-    * sizeof (uint64_t));
+    (2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U + (dBits - 1U) / 64U + 1U) *
+      sizeof (uint64_t));
   bool b = load_skey(modBits, eBits, dBits, nb, eb, db, skey);
   if (b)
   {
@@ -855,8 +856,8 @@ Hacl_RSAPSS_rsapss_pkey_verify(
   KRML_CHECK_SIZE(sizeof (uint64_t), 2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U);
   uint64_t
   *pkey =
-    (uint64_t *)alloca((2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U)
-      * sizeof (uint64_t));
+    (uint64_t *)alloca((2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U) *
+        sizeof (uint64_t));
   memset(pkey,
     0U,
     (2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U) * sizeof (uint64_t));

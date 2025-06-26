@@ -35,13 +35,14 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "libintvector.h"
+#include <inttypes.h>
+
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 
 extern uint64_t fadd_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
 extern uint64_t sha256_update(uint32_t *x0, uint8_t *x1, uint64_t x2, uint32_t *x3);
-
-extern uint64_t x64_poly1305(uint8_t *x0, uint8_t *x1, uint64_t x2, uint64_t x3);
 
 extern uint64_t check_aesni(void);
 
@@ -182,6 +183,8 @@ extern uint64_t fmul2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
 extern uint64_t fmul_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 
 extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
+
+extern uint64_t x64_poly1305(uint8_t *x0, uint8_t *x1, uint64_t x2, uint64_t x3);
 
 #if defined(__cplusplus)
 }

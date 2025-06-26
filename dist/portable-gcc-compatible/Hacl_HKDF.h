@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_HMAC.h"
-
 /* SNIPPET_START: Hacl_HKDF_expand_sha2_256 */
 
 /**

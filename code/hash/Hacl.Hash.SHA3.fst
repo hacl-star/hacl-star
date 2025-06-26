@@ -5,11 +5,9 @@ open Hacl.Hash.Definitions
 open FStar.Mul
 
 module B = LowStar.Buffer
-module S = FStar.Seq
 module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 
-module LB = Lib.Buffer
 
 friend Spec.Agile.Hash
 
@@ -46,9 +44,24 @@ let hash_len (a: keccak_alg { not (is_shake a) }): Lib.IntTypes.(n:size_t { v n 
   | SHA3_384 -> 48ul
   | SHA3_512 -> 64ul
 
-let init a s =
+// No longer inline_for_extraction noextract for code quality
+// We need to expand the type because F* does not know that state i { is_keccak i }
+// is the same as buffer uint64.
+val init_ (a: keccak_alg): s:B.buffer Lib.IntTypes.uint64 { B.length s = 25 }
+ -> FStar.HyperStack.ST.Stack unit
+  (requires (fun h ->
+    B.live h s))
+  (ensures (fun h0 _ h1 ->
+    B.(modifies (loc_buffer s) h0 h1) /\
+    Hacl.Hash.Definitions.as_seq h1 s == Spec.Agile.Hash.init (get_alg (| a, () |))))
+
+let init_ a s =
   [@inline_let] let s: s:B.buffer uint64 { B.length s = 25 } = s in
   LowStar.Buffer.fill s (Lib.IntTypes.u64 0) 25ul
+
+let init a s = init_ a s
+
+#pop-options
 
 noextract inline_for_extraction
 let is_shake a = a = Shake128 || a = Shake256
@@ -151,6 +164,44 @@ let hash a output input input_len =
   | SHA3_384 -> Hacl.Hash.SHA3.Scalar.sha3_384 output input input_len
   | SHA3_512 -> Hacl.Hash.SHA3.Scalar.sha3_512 output input input_len
 
+open FStar.HyperStack
+open FStar.HyperStack.ST
+open FStar.Mul
+
+open LowStar.Buffer
+
+open Lib.IntTypes
+open Lib.IntVector
+open Lib.Buffer
+open Lib.ByteBuffer
+open Lib.NTuple
+open Lib.MultiBuffer
+
+open Spec.Hash.Definitions
+open Hacl.Spec.SHA3.Vec
+open Hacl.Spec.SHA3.Vec.Common
+open Hacl.Impl.SHA3.Vec
+open Hacl.Spec.SHA3.Equiv
+
+module V = Hacl.Spec.SHA3.Vec
+
+val squeeze: (let m = M32 in
+     s:state_t m
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> outputByteLen:size_t
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+    (requires fun h -> live_multi h b /\ live h s /\ internally_disjoint b /\
+      disjoint_multi b s)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc s |+| loc_multi b) h0 h1 /\
+      as_seq_multi h1 b == V.squeeze #m (as_seq h0 s) (v rateInBytes) (v
+      outputByteLen) (as_seq_multi h0 b)))
+
+let squeeze s rateInBytes outputByteLen b =
+  squeeze #M32 s rateInBytes outputByteLen b
+
+#push-options "--z3rlimit 200"
 let finish_keccak (a: keccak_alg): finish_st a = fun s dst l ->
   let open Lib.NTuple in
   let open Lib.MultiBuffer in
@@ -158,12 +209,13 @@ let finish_keccak (a: keccak_alg): finish_st a = fun s dst l ->
   Lib.IntVector.reveal_vec_1 U64;
   if is_shake a then begin
     let h0 = ST.get() in
-    Hacl.Impl.SHA3.Vec.squeeze #M32 s (block_len a) l (ntup1 dst);
+    squeeze s (block_len a) l (ntup1 dst);
     Hacl.Spec.SHA3.Equiv.squeeze_s_lemma (B.as_seq h0 s) (v (block_len a))
       (v l) (as_seq_multi h0 (ntup1 dst))
   end else begin
     let h0 = ST.get() in
-    Hacl.Impl.SHA3.Vec.squeeze #M32 s (block_len a) (hash_len a) (ntup1 dst);
+    squeeze s (block_len a) (hash_len a) (ntup1 dst);
     Hacl.Spec.SHA3.Equiv.squeeze_s_lemma (B.as_seq h0 s) (v (block_len a))
       (v (hash_len a)) (as_seq_multi h0 (ntup1 dst))
   end
+#pop-options

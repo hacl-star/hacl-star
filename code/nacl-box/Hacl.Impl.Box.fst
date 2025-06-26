@@ -12,7 +12,6 @@ open Hacl.Impl.SecretBox
 
 module ST = FStar.HyperStack.ST
 module Spec = Spec.Box
-module LSeq = Lib.Sequence
 
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"

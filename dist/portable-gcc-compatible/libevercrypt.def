@@ -41,9 +41,12 @@ EXPORTS
   Hacl_Hash_Blake2b_Simd256_finish
   Hacl_Hash_Blake2b_Simd256_load_state256b_from_state32
   Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32
-  Hacl_Hash_Blake2b_Simd256_malloc_with_key
+  Hacl_Hash_Blake2b_Simd256_malloc_internal_state_with_key
+  Hacl_Hash_Blake2b_Simd256_update_multi_no_inline
+  Hacl_Hash_Blake2b_Simd256_update_last_no_inline
+  Hacl_Hash_Blake2b_Simd256_copy_internal_state
   Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key
-  Hacl_Hash_Blake2b_Simd256_malloc_with_key0
+  Hacl_Hash_Blake2b_Simd256_malloc_with_key
   Hacl_Hash_Blake2b_Simd256_malloc
   Hacl_Hash_Blake2b_Simd256_reset_with_key_and_params
   Hacl_Hash_Blake2b_Simd256_reset_with_key
@@ -61,9 +64,12 @@ EXPORTS
   Hacl_Hash_Blake2s_Simd128_finish
   Hacl_Hash_Blake2s_Simd128_store_state128s_to_state32
   Hacl_Hash_Blake2s_Simd128_load_state128s_from_state32
-  Hacl_Hash_Blake2s_Simd128_malloc_with_key
+  Hacl_Hash_Blake2s_Simd128_malloc_internal_state_with_key
+  Hacl_Hash_Blake2s_Simd128_update_multi_no_inline
+  Hacl_Hash_Blake2s_Simd128_update_last_no_inline
+  Hacl_Hash_Blake2s_Simd128_copy_internal_state
   Hacl_Hash_Blake2s_Simd128_malloc_with_params_and_key
-  Hacl_Hash_Blake2s_Simd128_malloc_with_key0
+  Hacl_Hash_Blake2s_Simd128_malloc_with_key
   Hacl_Hash_Blake2s_Simd128_malloc
   Hacl_Hash_Blake2s_Simd128_reset_with_key_and_params
   Hacl_Hash_Blake2s_Simd128_reset_with_key
@@ -105,6 +111,7 @@ EXPORTS
   Hacl_Hash_SHA1_free
   Hacl_Hash_SHA1_copy
   Hacl_Hash_SHA1_hash
+  Hacl_Hash_SHA3_init_
   Hacl_Hash_SHA3_update_multi_sha3
   Hacl_Hash_SHA3_update_last_sha3
   Hacl_Hash_SHA3_get_alg
@@ -459,6 +466,16 @@ EXPORTS
   Hacl_Impl_Frodo_Pack_frodo_unpack
   Hacl_Impl_Frodo_Encode_frodo_key_encode
   Hacl_Impl_Frodo_Encode_frodo_key_decode
+  Hacl_Streaming_HMAC_s1
+  Hacl_Streaming_HMAC_s2
+  Hacl_Streaming_HMAC_index_of_state
+  Hacl_Streaming_HMAC_malloc_
+  Hacl_Streaming_HMAC_get_impl
+  Hacl_Streaming_HMAC_reset
+  Hacl_Streaming_HMAC_update
+  Hacl_Streaming_HMAC_digest
+  Hacl_Streaming_HMAC_free
+  Hacl_Streaming_HMAC_copy
   Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64

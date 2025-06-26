@@ -21,7 +21,6 @@ module SPT256 = Hacl.Spec.PrecompBaseTable256
 module BD = Hacl.Spec.Bignum.Definitions
 
 module S = Spec.P256
-module SL = Spec.P256.Lemmas
 
 include Hacl.Impl.P256.Group
 include Hacl.P256.PrecompTable

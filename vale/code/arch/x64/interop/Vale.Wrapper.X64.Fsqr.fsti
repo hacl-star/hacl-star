@@ -3,7 +3,6 @@ module Vale.Wrapper.X64.Fsqr
 open Vale.X64.CPU_Features_s
 open FStar.HyperStack.ST
 module B = LowStar.Buffer
-module HS = FStar.HyperStack
 open Vale.Curve25519.Fast_defs
 open FStar.Mul
 open Vale.Wrapper.X64.Fadd

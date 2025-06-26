@@ -6,9 +6,6 @@ friend Lib.ByteSequence
 friend LowStar.BufferView.Up
 friend FStar.Endianness
 
-module PU = Vale.Poly1305.Util
-module IT = Vale.Interop.Types
-module PS = Vale.Wrapper.X64.Poly
 module BS = Lib.ByteSequence
 module Raw = Lib.RawIntTypes
 

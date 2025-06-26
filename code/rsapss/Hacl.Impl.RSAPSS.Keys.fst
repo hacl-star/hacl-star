@@ -15,7 +15,6 @@ module HS = FStar.HyperStack
 module LSeq = Lib.Sequence
 
 module LS = Hacl.Spec.RSAPSS
-module BM = Hacl.Bignum.Montgomery
 module BN = Hacl.Bignum
 module BB = Hacl.Spec.Bignum.Base
 module BE = Hacl.Bignum.Exponentiation

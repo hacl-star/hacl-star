@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_MD5.h"
 
 /* SNIPPET_START: Hacl_Hash_MD5_init */

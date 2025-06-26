@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_Hash_SHA2_state_t_224 */
 

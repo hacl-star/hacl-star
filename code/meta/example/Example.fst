@@ -2,8 +2,6 @@ module Example
 
 module B = LowStar.Buffer
 module HS = FStar.HyperStack
-module G = FStar.Ghost
-module L = FStar.List.Tot
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.ST

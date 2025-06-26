@@ -2,7 +2,6 @@ module Hacl.HPKE.Interface.DH
 
 open FStar.HyperStack
 open FStar.HyperStack.All
-module HST = FStar.HyperStack.ST
 
 open Lib.Buffer
 open Lib.IntTypes

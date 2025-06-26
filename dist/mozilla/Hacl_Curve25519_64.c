@@ -25,6 +25,7 @@
 
 #include "Hacl_Curve25519_64.h"
 
+#include "Hacl_Krmllib.h"
 #include "internal/Vale.h"
 #include "internal/Hacl_Krmllib.h"
 #include "config.h"

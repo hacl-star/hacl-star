@@ -5,7 +5,6 @@ open Vale.X64.Decls
 open Vale.X64.Machine_s
 open Vale.X64.Instruction_s
 module S = Vale.X64.Machine_Semantics_s
-module L = FStar.List.Tot
 
 let normal_term_spec (#a:Type) (x:a) : Lemma (normal x == x) =
   ()

@@ -1,7 +1,6 @@
 module Spec.SHA2.Lemmas
 
 open Lib.IntTypes
-module C = Spec.SHA2.Constants
 module S = FStar.Seq
 
 open Spec.Hash.Definitions

@@ -16,8 +16,6 @@ open Hacl.Bignum.Multiplication
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
-module B = LowStar.Buffer
-module Loops = Lib.LoopCombinators
 module K = Hacl.Spec.Bignum.Karatsuba
 
 

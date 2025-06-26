@@ -9,7 +9,7 @@ open FStar.Calc
 open Hacl.Spec.Poly1305.Vec
 include Hacl.Spec.Poly1305.Field32xN
 
-#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50"
 
 val lemma_prime: unit -> Lemma (pow2 130 % prime = 5)
 let lemma_prime () =
@@ -223,7 +223,7 @@ val smul_add_felem5_fits_lemma_i:
   -> i:nat{i < w} ->
   Lemma ((uint64xN_v (vec_add_mod acc1 (vec_mul_mod f2 u1))).[i] <= (m3 + m1 * m2) * max26 * max26)
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 250"
 let smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 i =
   let o = vec_add_mod acc1 (vec_mul_mod f2 u1) in
   smul_add_mod_lemma #m1 #m2 #m3 (uint64xN_v u1).[i] (uint64xN_v f2).[i] (uint64xN_v acc1).[i];

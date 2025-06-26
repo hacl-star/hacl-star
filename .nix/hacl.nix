@@ -2,6 +2,7 @@
   bash,
   dotnet-runtime,
   fetchFromGitHub,
+  flock,
   fstar,
   fstar-scripts,
   git,
@@ -58,6 +59,7 @@
           "dist/Makefile.tmpl"
           "dist/configure"
           "dist/package-mozilla.sh"
+          ".scripts/remove_stale_hints.sh"
         ]
         || lib.any (lib.flip lib.hasPrefix relPath) [
           "code"
@@ -82,6 +84,7 @@
 
     nativeBuildInputs =
       [
+        bash
         z3
         fstar
         python3
@@ -90,6 +93,7 @@
         time
         runlim
         rustc
+        flock
       ]
       ++ (with ocamlPackages; [
         ocaml
@@ -124,7 +128,7 @@
 
     buildPhase = ''
       RESOURCEMONITOR=1 make -j$NIX_BUILD_CORES ci 2>&1 | tee log.txt
-      bash ${fstar-scripts}/remove_stale_hints.sh
+      bash .scripts/remove_stale_hints.sh
     '';
 
     installPhase = ''

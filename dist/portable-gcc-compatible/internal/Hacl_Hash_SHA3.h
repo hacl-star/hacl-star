@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "../Hacl_Hash_SHA3.h"
 
 /* SNIPPET_START: Hacl_Hash_SHA3_keccak_rotc */
@@ -54,6 +55,12 @@ extern const uint32_t Hacl_Hash_SHA3_keccak_piln[24U];
 extern const uint64_t Hacl_Hash_SHA3_keccak_rndc[24U];
 
 /* SNIPPET_END: Hacl_Hash_SHA3_keccak_rndc */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_init_ */
+
+void Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_hash_alg a, uint64_t *s);
+
+/* SNIPPET_END: Hacl_Hash_SHA3_init_ */
 
 /* SNIPPET_START: Hacl_Hash_SHA3_update_multi_sha3 */
 
@@ -78,6 +85,29 @@ Hacl_Hash_SHA3_update_last_sha3(
 );
 
 /* SNIPPET_END: Hacl_Hash_SHA3_update_last_sha3 */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_hash_buf */
+
+typedef struct Hacl_Hash_SHA3_hash_buf_s
+{
+  Spec_Hash_Definitions_hash_alg fst;
+  uint64_t *snd;
+}
+Hacl_Hash_SHA3_hash_buf;
+
+/* SNIPPET_END: Hacl_Hash_SHA3_hash_buf */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_state_t */
+
+typedef struct Hacl_Hash_SHA3_state_t_s
+{
+  Hacl_Hash_SHA3_hash_buf block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Hash_SHA3_state_t;
+
+/* SNIPPET_END: Hacl_Hash_SHA3_state_t */
 
 #if defined(__cplusplus)
 }

@@ -5,7 +5,6 @@ module EverCrypt.Poly1305
 module B = LowStar.Buffer
 module U32 = FStar.UInt32
 module ST = FStar.HyperStack.ST
-module F = Hacl.Impl.Poly1305.Fields
 module S = FStar.Seq
 
 open FStar.HyperStack.ST

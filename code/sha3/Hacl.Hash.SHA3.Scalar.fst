@@ -22,7 +22,6 @@ open Hacl.Spec.SHA3.Equiv
 module S = Spec.SHA3
 module V = Hacl.Spec.SHA3.Vec
 module ST = FStar.HyperStack.ST
-module B = LowStar.Buffer
 module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
@@ -242,3 +241,4 @@ val shake128_squeeze_nblocks:
           as_seq_multi h1 (ntup1 output) == b'))
 let shake128_squeeze_nblocks state output outputByteLen =
   squeeze_nblocks #M32 state 168ul outputByteLen (ntup1 output)
+

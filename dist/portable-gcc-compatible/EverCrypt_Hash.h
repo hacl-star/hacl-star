@@ -36,15 +36,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Krmllib.h"
-#include "Hacl_Hash_SHA3.h"
-#include "Hacl_Hash_SHA2.h"
-#include "Hacl_Hash_Blake2s_Simd128.h"
-#include "Hacl_Hash_Blake2s.h"
-#include "Hacl_Hash_Blake2b_Simd256.h"
-#include "Hacl_Hash_Blake2b.h"
 #include "EverCrypt_Error.h"
-#include "EverCrypt_AutoConfig2.h"
 
 /* SNIPPET_START: EverCrypt_Hash_state_s */
 
@@ -60,13 +52,7 @@ uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_state_t */
 
-typedef struct EverCrypt_Hash_Incremental_state_t_s
-{
-  EverCrypt_Hash_state_s *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-EverCrypt_Hash_Incremental_state_t;
+typedef struct EverCrypt_Hash_Incremental_state_t_s EverCrypt_Hash_Incremental_state_t;
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_state_t */
 

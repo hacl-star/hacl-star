@@ -25,6 +25,10 @@
 
 #include "internal/Hacl_Ed25519.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Streaming_Types.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Ed25519_PrecompTable.h"
@@ -425,11 +429,8 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
   uint64_t x4 = y[4U];
   bool
   b =
-    x00
-    >= 0x7ffffffffffedULL
-    && x1 == 0x7ffffffffffffULL
-    && x21 == 0x7ffffffffffffULL
-    && x30 == 0x7ffffffffffffULL
+    x00 >= 0x7ffffffffffedULL && x1 == 0x7ffffffffffffULL && x21 == 0x7ffffffffffffULL &&
+      x30 == 0x7ffffffffffffULL
     && x4 == 0x7ffffffffffffULL;
   bool res;
   if (b)
@@ -787,8 +788,8 @@ static inline void barrett_reduction(uint64_t *z, uint64_t *t)
       56U);
   uint64_t
   t106 =
-    FStar_UInt128_uint128_to_uint64(FStar_UInt128_add_mod(FStar_UInt128_add_mod(xy01, xy10), c0))
-    & 0xffffffffffffffULL;
+    FStar_UInt128_uint128_to_uint64(FStar_UInt128_add_mod(FStar_UInt128_add_mod(xy01, xy10), c0)) &
+      0xffffffffffffffULL;
   FStar_UInt128_uint128 c11 = carry10;
   uint64_t t110 = t106;
   FStar_UInt128_uint128

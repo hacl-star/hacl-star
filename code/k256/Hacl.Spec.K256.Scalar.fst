@@ -4,7 +4,6 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
-module BSeq = Lib.ByteSequence
 
 module SB = Hacl.Spec.Bignum
 module BB = Hacl.Spec.Bignum.Base

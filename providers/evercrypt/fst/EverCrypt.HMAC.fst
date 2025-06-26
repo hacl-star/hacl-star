@@ -18,13 +18,14 @@ let super_hack () =
   let fv = pack_fv (cur_module () `FStar.List.Tot.append` [ "hash_256" ]) in
   let t: term = pack Tv_Unknown in
   let se = pack_sigelt (Sg_Let false [ pack_lb ({ lb_fv = fv; lb_us = []; lb_typ = t; lb_def = hash_256 }) ]) in
+  let se = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se in
   [ se ]
 
 %splice[hash_256] (super_hack ())
 
 // Due to the hack above, the dependency arrow is invisible to the F*
 // parser/lexer, so we add an explicit dependency edge to avoid build errors.
-module Useless = EverCrypt.Hash.Incremental
+open EverCrypt.Hash.Incremental {}
 
 /// Four monomorphized variants, for callers who already know which algorithm they want
 

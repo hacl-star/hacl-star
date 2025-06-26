@@ -25,6 +25,8 @@
 
 #include "Hacl_Hash_Base.h"
 
+#include "Hacl_Streaming_Types.h"
+
 /* SNIPPET_START: Hacl_Hash_Definitions_word_len */
 
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)

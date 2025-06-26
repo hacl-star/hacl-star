@@ -23,8 +23,11 @@
  */
 
 
-#include "EverCrypt_DRBG.h"
+#include "internal/EverCrypt_DRBG.h"
 
+#include "Lib_RandomBuffer_System.h"
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_HMAC_DRBG.h"
 #include "internal/EverCrypt_HMAC.h"
 #include "lib_memzero0.h"
 
@@ -66,26 +69,6 @@ uint32_t EverCrypt_DRBG_min_length(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
-#define SHA1_s 0
-#define SHA2_256_s 1
-#define SHA2_384_s 2
-#define SHA2_512_s 3
-
-typedef uint8_t state_s_tags;
-
-typedef struct EverCrypt_DRBG_state_s_s
-{
-  state_s_tags tag;
-  union {
-    Hacl_HMAC_DRBG_state case_SHA1_s;
-    Hacl_HMAC_DRBG_state case_SHA2_256_s;
-    Hacl_HMAC_DRBG_state case_SHA2_384_s;
-    Hacl_HMAC_DRBG_state case_SHA2_512_s;
-  }
-  ;
-}
-EverCrypt_DRBG_state_s;
-
 bool
 EverCrypt_DRBG_uu___is_SHA1_s(
   Spec_Hash_Definitions_hash_alg uu___,
@@ -93,7 +76,7 @@ EverCrypt_DRBG_uu___is_SHA1_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == SHA1_s)
+  if (projectee.tag == EverCrypt_DRBG_SHA1_s)
   {
     return true;
   }
@@ -107,7 +90,7 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == SHA2_256_s)
+  if (projectee.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     return true;
   }
@@ -121,7 +104,7 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == SHA2_384_s)
+  if (projectee.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     return true;
   }
@@ -135,7 +118,7 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == SHA2_512_s)
+  if (projectee.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     return true;
   }
@@ -152,11 +135,14 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg 
         uint8_t *k = (uint8_t *)KRML_HOST_CALLOC(20U, sizeof (uint8_t));
         uint8_t *v = (uint8_t *)KRML_HOST_CALLOC(20U, sizeof (uint8_t));
         uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
-        ctr[0U] = 1U;
+        if (ctr != NULL)
+        {
+          ctr[0U] = 1U;
+        }
         st =
           (
             (EverCrypt_DRBG_state_s){
-              .tag = SHA1_s,
+              .tag = EverCrypt_DRBG_SHA1_s,
               { .case_SHA1_s = { .k = k, .v = v, .reseed_counter = ctr } }
             }
           );
@@ -167,11 +153,14 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg 
         uint8_t *k = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
         uint8_t *v = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
         uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
-        ctr[0U] = 1U;
+        if (ctr != NULL)
+        {
+          ctr[0U] = 1U;
+        }
         st =
           (
             (EverCrypt_DRBG_state_s){
-              .tag = SHA2_256_s,
+              .tag = EverCrypt_DRBG_SHA2_256_s,
               { .case_SHA2_256_s = { .k = k, .v = v, .reseed_counter = ctr } }
             }
           );
@@ -182,11 +171,14 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg 
         uint8_t *k = (uint8_t *)KRML_HOST_CALLOC(48U, sizeof (uint8_t));
         uint8_t *v = (uint8_t *)KRML_HOST_CALLOC(48U, sizeof (uint8_t));
         uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
-        ctr[0U] = 1U;
+        if (ctr != NULL)
+        {
+          ctr[0U] = 1U;
+        }
         st =
           (
             (EverCrypt_DRBG_state_s){
-              .tag = SHA2_384_s,
+              .tag = EverCrypt_DRBG_SHA2_384_s,
               { .case_SHA2_384_s = { .k = k, .v = v, .reseed_counter = ctr } }
             }
           );
@@ -197,11 +189,14 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg 
         uint8_t *k = (uint8_t *)KRML_HOST_CALLOC(64U, sizeof (uint8_t));
         uint8_t *v = (uint8_t *)KRML_HOST_CALLOC(64U, sizeof (uint8_t));
         uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
-        ctr[0U] = 1U;
+        if (ctr != NULL)
+        {
+          ctr[0U] = 1U;
+        }
         st =
           (
             (EverCrypt_DRBG_state_s){
-              .tag = SHA2_512_s,
+              .tag = EverCrypt_DRBG_SHA2_512_s,
               { .case_SHA2_512_s = { .k = k, .v = v, .reseed_counter = ctr } }
             }
           );
@@ -215,7 +210,10 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg 
   }
   EverCrypt_DRBG_state_s
   *buf = (EverCrypt_DRBG_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_DRBG_state_s));
-  buf[0U] = st;
+  if (buf != NULL)
+  {
+    buf[0U] = st;
+  }
   return buf;
 }
 
@@ -271,7 +269,7 @@ instantiate_sha1(
     personalization_string,
     personalization_string_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA1_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA1_s)
   {
     scrut = st_s.case_SHA1_s;
   }
@@ -359,7 +357,7 @@ instantiate_sha2_256(
     personalization_string,
     personalization_string_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA2_256_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     scrut = st_s.case_SHA2_256_s;
   }
@@ -447,7 +445,7 @@ instantiate_sha2_384(
     personalization_string,
     personalization_string_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA2_384_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     scrut = st_s.case_SHA2_384_s;
   }
@@ -535,7 +533,7 @@ instantiate_sha2_512(
     personalization_string,
     personalization_string_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA2_512_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     scrut = st_s.case_SHA2_512_s;
   }
@@ -616,7 +614,7 @@ reseed_sha1(
     additional_input,
     additional_input_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA1_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA1_s)
   {
     scrut = st_s.case_SHA1_s;
   }
@@ -695,7 +693,7 @@ reseed_sha2_256(
     additional_input,
     additional_input_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA2_256_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     scrut = st_s.case_SHA2_256_s;
   }
@@ -774,7 +772,7 @@ reseed_sha2_384(
     additional_input,
     additional_input_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA2_384_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     scrut = st_s.case_SHA2_384_s;
   }
@@ -853,7 +851,7 @@ reseed_sha2_512(
     additional_input,
     additional_input_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA2_512_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     scrut = st_s.case_SHA2_512_s;
   }
@@ -914,9 +912,8 @@ generate_sha1(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -949,7 +946,7 @@ generate_sha1(
         additional_input,
         additional_input_len * sizeof (uint8_t));
       Hacl_HMAC_DRBG_state scrut;
-      if (st_s.tag == SHA1_s)
+      if (st_s.tag == EverCrypt_DRBG_SHA1_s)
       {
         scrut = st_s.case_SHA1_s;
       }
@@ -1008,7 +1005,7 @@ generate_sha1(
   }
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state ite;
-  if (st_s.tag == SHA1_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA1_s)
   {
     ite = st_s.case_SHA1_s;
   }
@@ -1021,7 +1018,7 @@ generate_sha1(
     return false;
   }
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA1_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA1_s)
   {
     scrut = st_s.case_SHA1_s;
   }
@@ -1127,9 +1124,8 @@ generate_sha2_256(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -1162,7 +1158,7 @@ generate_sha2_256(
         additional_input,
         additional_input_len * sizeof (uint8_t));
       Hacl_HMAC_DRBG_state scrut;
-      if (st_s.tag == SHA2_256_s)
+      if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
       {
         scrut = st_s.case_SHA2_256_s;
       }
@@ -1221,7 +1217,7 @@ generate_sha2_256(
   }
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state ite;
-  if (st_s.tag == SHA2_256_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     ite = st_s.case_SHA2_256_s;
   }
@@ -1234,7 +1230,7 @@ generate_sha2_256(
     return false;
   }
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA2_256_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     scrut = st_s.case_SHA2_256_s;
   }
@@ -1340,9 +1336,8 @@ generate_sha2_384(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -1375,7 +1370,7 @@ generate_sha2_384(
         additional_input,
         additional_input_len * sizeof (uint8_t));
       Hacl_HMAC_DRBG_state scrut;
-      if (st_s.tag == SHA2_384_s)
+      if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
       {
         scrut = st_s.case_SHA2_384_s;
       }
@@ -1434,7 +1429,7 @@ generate_sha2_384(
   }
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state ite;
-  if (st_s.tag == SHA2_384_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     ite = st_s.case_SHA2_384_s;
   }
@@ -1447,7 +1442,7 @@ generate_sha2_384(
     return false;
   }
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA2_384_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     scrut = st_s.case_SHA2_384_s;
   }
@@ -1553,9 +1548,8 @@ generate_sha2_512(
 {
   if
   (
-    additional_input_len
-    > Hacl_HMAC_DRBG_max_additional_input_length
-    || n > Hacl_HMAC_DRBG_max_output_length
+    additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length ||
+      n > Hacl_HMAC_DRBG_max_output_length
   )
   {
     return false;
@@ -1588,7 +1582,7 @@ generate_sha2_512(
         additional_input,
         additional_input_len * sizeof (uint8_t));
       Hacl_HMAC_DRBG_state scrut;
-      if (st_s.tag == SHA2_512_s)
+      if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
       {
         scrut = st_s.case_SHA2_512_s;
       }
@@ -1647,7 +1641,7 @@ generate_sha2_512(
   }
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state ite;
-  if (st_s.tag == SHA2_512_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     ite = st_s.case_SHA2_512_s;
   }
@@ -1660,7 +1654,7 @@ generate_sha2_512(
     return false;
   }
   Hacl_HMAC_DRBG_state scrut;
-  if (st_s.tag == SHA2_512_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     scrut = st_s.case_SHA2_512_s;
   }
@@ -1759,7 +1753,7 @@ static void uninstantiate_sha1(EverCrypt_DRBG_state_s *st)
 {
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state s;
-  if (st_s.tag == SHA1_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA1_s)
   {
     s = st_s.case_SHA1_s;
   }
@@ -1783,7 +1777,7 @@ static void uninstantiate_sha2_256(EverCrypt_DRBG_state_s *st)
 {
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state s;
-  if (st_s.tag == SHA2_256_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     s = st_s.case_SHA2_256_s;
   }
@@ -1807,7 +1801,7 @@ static void uninstantiate_sha2_384(EverCrypt_DRBG_state_s *st)
 {
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state s;
-  if (st_s.tag == SHA2_384_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     s = st_s.case_SHA2_384_s;
   }
@@ -1831,7 +1825,7 @@ static void uninstantiate_sha2_512(EverCrypt_DRBG_state_s *st)
 {
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state s;
-  if (st_s.tag == SHA2_512_s)
+  if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     s = st_s.case_SHA2_512_s;
   }
@@ -1868,19 +1862,19 @@ EverCrypt_DRBG_instantiate(
 )
 {
   EverCrypt_DRBG_state_s scrut = *st;
-  if (scrut.tag == SHA1_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA1_s)
   {
     return instantiate_sha1(st, personalization_string, personalization_string_len);
   }
-  if (scrut.tag == SHA2_256_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     return instantiate_sha2_256(st, personalization_string, personalization_string_len);
   }
-  if (scrut.tag == SHA2_384_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     return instantiate_sha2_384(st, personalization_string, personalization_string_len);
   }
-  if (scrut.tag == SHA2_512_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     return instantiate_sha2_512(st, personalization_string, personalization_string_len);
   }
@@ -1908,19 +1902,19 @@ EverCrypt_DRBG_reseed(
 )
 {
   EverCrypt_DRBG_state_s scrut = *st;
-  if (scrut.tag == SHA1_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA1_s)
   {
     return reseed_sha1(st, additional_input, additional_input_len);
   }
-  if (scrut.tag == SHA2_256_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     return reseed_sha2_256(st, additional_input, additional_input_len);
   }
-  if (scrut.tag == SHA2_384_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     return reseed_sha2_384(st, additional_input, additional_input_len);
   }
-  if (scrut.tag == SHA2_512_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     return reseed_sha2_512(st, additional_input, additional_input_len);
   }
@@ -1952,19 +1946,19 @@ EverCrypt_DRBG_generate(
 )
 {
   EverCrypt_DRBG_state_s scrut = *st;
-  if (scrut.tag == SHA1_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA1_s)
   {
     return generate_sha1(output, st, n, additional_input, additional_input_len);
   }
-  if (scrut.tag == SHA2_256_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     return generate_sha2_256(output, st, n, additional_input, additional_input_len);
   }
-  if (scrut.tag == SHA2_384_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     return generate_sha2_384(output, st, n, additional_input, additional_input_len);
   }
-  if (scrut.tag == SHA2_512_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     return generate_sha2_512(output, st, n, additional_input, additional_input_len);
   }
@@ -1983,22 +1977,22 @@ Uninstantiate and free the DRBG.
 void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st)
 {
   EverCrypt_DRBG_state_s scrut = *st;
-  if (scrut.tag == SHA1_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA1_s)
   {
     uninstantiate_sha1(st);
     return;
   }
-  if (scrut.tag == SHA2_256_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     uninstantiate_sha2_256(st);
     return;
   }
-  if (scrut.tag == SHA2_384_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     uninstantiate_sha2_384(st);
     return;
   }
-  if (scrut.tag == SHA2_512_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     uninstantiate_sha2_512(st);
     return;

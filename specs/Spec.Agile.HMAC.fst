@@ -14,9 +14,6 @@ let wrap
   let paddingLength = block_length a - Seq.length key0 in
   Seq.append key0 (Seq.create paddingLength (u8 0))
 
-let xor (x: uint8) (v: bytes) : lbytes (Seq.length v) =
-  Spec.Loops.seq_map (logxor x) v
-
 #push-options "--max_fuel 1"
 
 let rec xor_lemma (x: uint8) (v: bytes) : Lemma

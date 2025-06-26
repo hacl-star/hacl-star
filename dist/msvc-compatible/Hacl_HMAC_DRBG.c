@@ -25,6 +25,9 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
+#include "Hacl_Streaming_Types.h"
+#include "Hacl_HMAC.h"
+
 uint32_t Hacl_HMAC_DRBG_reseed_interval = 1024U;
 
 uint32_t Hacl_HMAC_DRBG_max_output_length = 65536U;
@@ -154,7 +157,10 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
       }
   }
   uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
-  ctr[0U] = 1U;
+  if (ctr != NULL)
+  {
+    ctr[0U] = 1U;
+  }
   return ((Hacl_HMAC_DRBG_state){ .k = k, .v = v, .reseed_counter = ctr });
 }
 
@@ -190,8 +196,8 @@ Hacl_HMAC_DRBG_instantiate(
           entropy_input_len + nonce_len + personalization_string_len);
         uint8_t
         *seed_material =
-          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-            * sizeof (uint8_t));
+          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+              sizeof (uint8_t));
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -249,8 +255,8 @@ Hacl_HMAC_DRBG_instantiate(
           entropy_input_len + nonce_len + personalization_string_len);
         uint8_t
         *seed_material =
-          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-            * sizeof (uint8_t));
+          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+              sizeof (uint8_t));
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -308,8 +314,8 @@ Hacl_HMAC_DRBG_instantiate(
           entropy_input_len + nonce_len + personalization_string_len);
         uint8_t
         *seed_material =
-          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-            * sizeof (uint8_t));
+          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+              sizeof (uint8_t));
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
@@ -367,8 +373,8 @@ Hacl_HMAC_DRBG_instantiate(
           entropy_input_len + nonce_len + personalization_string_len);
         uint8_t
         *seed_material =
-          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len)
-            * sizeof (uint8_t));
+          (uint8_t *)alloca((entropy_input_len + nonce_len + personalization_string_len) *
+              sizeof (uint8_t));
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));

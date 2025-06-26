@@ -8,7 +8,6 @@ module BR = Hacl.Bignum.ModReduction
 module AM = Hacl.Bignum.AlmostMontgomery
 module MA = Hacl.Bignum.MontArithmetic
 module BI = Hacl.Bignum.ModInv
-module BM = Hacl.Bignum.Montgomery
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

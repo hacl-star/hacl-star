@@ -7,8 +7,6 @@ open Lib.Sequence
 
 open Hacl.Spec.Bignum.Definitions
 
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
 
 module E = Hacl.Spec.Exponentiation.Lemmas
 module M = Hacl.Spec.Montgomery.Lemmas

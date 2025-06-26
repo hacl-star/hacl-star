@@ -35,10 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Curve25519_64.h"
-#include "Hacl_Curve25519_51.h"
-#include "EverCrypt_AutoConfig2.h"
-
 /* SNIPPET_START: EverCrypt_Curve25519_secret_to_public */
 
 /**

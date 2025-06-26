@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Krmllib.h"
-
 /*******************************************************************************
   Verified field arithmetic modulo p = 2^255 - 19.
 

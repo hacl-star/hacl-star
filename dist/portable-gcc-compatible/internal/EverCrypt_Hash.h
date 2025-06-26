@@ -35,23 +35,74 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Vale.h"
-#include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Hash_SHA3.h"
-#include "internal/Hacl_Hash_SHA2.h"
-#include "internal/Hacl_Hash_SHA1.h"
-#include "internal/Hacl_Hash_MD5.h"
-#include "internal/Hacl_Hash_Blake2s_Simd128.h"
-#include "internal/Hacl_Hash_Blake2s.h"
-#include "internal/Hacl_Hash_Blake2b_Simd256.h"
-#include "internal/Hacl_Hash_Blake2b.h"
 #include "../EverCrypt_Hash.h"
+#include "libintvector.h"
+
+/* SNIPPET_START: EverCrypt_Hash_state_s_tags */
+
+#define EverCrypt_Hash_MD5_s 0
+#define EverCrypt_Hash_SHA1_s 1
+#define EverCrypt_Hash_SHA2_224_s 2
+#define EverCrypt_Hash_SHA2_256_s 3
+#define EverCrypt_Hash_SHA2_384_s 4
+#define EverCrypt_Hash_SHA2_512_s 5
+#define EverCrypt_Hash_SHA3_224_s 6
+#define EverCrypt_Hash_SHA3_256_s 7
+#define EverCrypt_Hash_SHA3_384_s 8
+#define EverCrypt_Hash_SHA3_512_s 9
+#define EverCrypt_Hash_Blake2S_s 10
+#define EverCrypt_Hash_Blake2S_128_s 11
+#define EverCrypt_Hash_Blake2B_s 12
+#define EverCrypt_Hash_Blake2B_256_s 13
+
+/* SNIPPET_END: EverCrypt_Hash_state_s_tags */
+
+typedef uint8_t EverCrypt_Hash_state_s_tags;
+
+/* SNIPPET_START: EverCrypt_Hash_state_s */
+
+typedef struct EverCrypt_Hash_state_s_s
+{
+  EverCrypt_Hash_state_s_tags tag;
+  union {
+    uint32_t *case_MD5_s;
+    uint32_t *case_SHA1_s;
+    uint32_t *case_SHA2_224_s;
+    uint32_t *case_SHA2_256_s;
+    uint64_t *case_SHA2_384_s;
+    uint64_t *case_SHA2_512_s;
+    uint64_t *case_SHA3_224_s;
+    uint64_t *case_SHA3_256_s;
+    uint64_t *case_SHA3_384_s;
+    uint64_t *case_SHA3_512_s;
+    uint32_t *case_Blake2S_s;
+    Lib_IntVector_Intrinsics_vec128 *case_Blake2S_128_s;
+    uint64_t *case_Blake2B_s;
+    Lib_IntVector_Intrinsics_vec256 *case_Blake2B_256_s;
+  }
+  ;
+}
+EverCrypt_Hash_state_s;
+
+/* SNIPPET_END: EverCrypt_Hash_state_s */
 
 /* SNIPPET_START: EverCrypt_Hash_update_multi_256 */
 
 void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
 /* SNIPPET_END: EverCrypt_Hash_update_multi_256 */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_state_t */
+
+typedef struct EverCrypt_Hash_Incremental_state_t_s
+{
+  EverCrypt_Hash_state_s *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+EverCrypt_Hash_Incremental_state_t;
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_state_t */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_hash_256 */
 

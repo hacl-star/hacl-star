@@ -25,6 +25,10 @@
 
 #include "EverCrypt_Poly1305.h"
 
+#include "Hacl_MAC_Poly1305_Simd256.h"
+#include "Hacl_MAC_Poly1305_Simd128.h"
+#include "Hacl_MAC_Poly1305.h"
+#include "EverCrypt_AutoConfig2.h"
 #include "internal/Vale.h"
 #include "config.h"
 

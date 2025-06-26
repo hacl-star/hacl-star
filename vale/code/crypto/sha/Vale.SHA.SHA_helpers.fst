@@ -875,7 +875,7 @@ let lemma_mod_transform (quads:seq quad32) : Lemma
   =
   ()
 
-#reset-options "--max_fuel 0 --ifuel 1 --z3rlimit 20"
+#reset-options "--max_fuel 0 --ifuel 1 --z3rlimit 80"
 let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
   Lemma (requires length quads % 4 == 0 /\
@@ -910,6 +910,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     let input1,input2 = Lib.UpdateMulti.split_block block_length blocks (bytes_pivot / 64) in
 
     let h_bytes1 = update_multi SHA2_256 hash () input1 in
+    FStar.Pure.BreakVC.break_vc ();
     let h_bytes2 = update_multi SHA2_256 h_bytes1 () input2 in
     update_multi_associative SHA2_256 hash input1 input2;
     assert (input1 `Seq.append` input2 == blocks);

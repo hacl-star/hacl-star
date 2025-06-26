@@ -12,7 +12,6 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.IntTypes
 
-module Loops = Lib.LoopCombinators
 module UpdateMulti = Lib.UpdateMulti
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 50"

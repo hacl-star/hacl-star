@@ -129,7 +129,8 @@ FSTAR_NO_FLAGS = $(FSTAR_EXE) $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
   --warn_error '@240+241@247-272-274@319@328@331@332@337' \
-  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false
+  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false \
+  --ext context_pruning
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 
@@ -193,7 +194,7 @@ HMAC_BUNDLE=-bundle Hacl.HMAC= \
 # Note: Hacl_Hash_SHA2 is legacy SHA2 here, will eventually go away, there's a proper
 # bundle in STREAMING_BUNDLE, below
 HASH_BUNDLE= \
-  -bundle Hacl.Streaming.MD,Spec.Hash.Definitions,Hacl.Streaming.Types[rename=Hacl_Streaming_Types] \
+  -bundle Hacl.Streaming.Types+Hacl.Streaming.MD=Spec.Hash.Definitions[rename=Hacl_Streaming_Types] \
   -bundle Hacl.Streaming.MD5=Hacl.Hash.MD5,Hacl.Hash.Core.MD5[rename=Hacl_Hash_MD5,rename-prefix] \
   -bundle Hacl.Streaming.SHA1=Hacl.Hash.SHA1,Hacl.Hash.Core.SHA1[rename=Hacl_Hash_SHA1,rename-prefix] \
   -bundle Hacl.Impl.SHA2.Types=[rename=Hacl_SHA2_Types] \
@@ -231,7 +232,8 @@ FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Fro
 # Each of these module should be extracted to a different file. Therefore, this variable
 # should remain empty, and overriden only when we do not want extraction of variants
 HPKE_BUNDLE=-bundle Hacl.HPKE.Interface.*,Hacl.Impl.HPKE,Hacl.Meta.HPKE
-STREAMING_BUNDLE=-bundle Hacl.Streaming.Interface,Hacl.Streaming.Lemmas
+STREAMING_BUNDLE=-bundle Hacl.Streaming.Interface,Hacl.Streaming.Lemmas \
+  -bundle Hacl.Streaming.HMAC=Hacl.Streaming.HMAC.*,Hacl.Agile.Hash
 INTTYPES_BUNDLE=-bundle Hacl.IntTypes.Intrinsics= -static-header Hacl.IntTypes.Intrinsics
 INTTYPES_128_BUNDLE=-bundle Hacl.IntTypes.Intrinsics_128= -static-header Hacl.IntTypes.Intrinsics_128
 RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]

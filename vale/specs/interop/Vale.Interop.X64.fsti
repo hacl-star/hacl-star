@@ -5,8 +5,6 @@ open Vale.Arch.HeapTypes_s
 open Vale.Arch.Heap
 module B = LowStar.Buffer
 module BS = Vale.X64.Machine_Semantics_s
-module UV = LowStar.BufferView.Up
-module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 module MS = Vale.X64.Machine_s
 module IA = Vale.Interop.Assumptions

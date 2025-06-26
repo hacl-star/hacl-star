@@ -1,7 +1,6 @@
 module Lib.MultiBuffer
 
 open FStar.Mul
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.HyperStack.All
 

@@ -1,9 +1,7 @@
 module EverCrypt.AutoConfig2
 
-module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
-module S = FStar.Seq
 
 open FStar.HyperStack.ST
 

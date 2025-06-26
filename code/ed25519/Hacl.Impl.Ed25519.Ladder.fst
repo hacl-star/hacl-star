@@ -19,7 +19,6 @@ module ME = Hacl.Impl.MultiExponentiation
 module PT = Hacl.Impl.PrecompTable
 module SPT256 = Hacl.Spec.PrecompBaseTable256
 module BD = Hacl.Bignum.Definitions
-module SD = Hacl.Spec.Bignum.Definitions
 
 module S = Spec.Ed25519
 

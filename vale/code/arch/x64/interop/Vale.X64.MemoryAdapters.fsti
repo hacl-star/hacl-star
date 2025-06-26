@@ -7,14 +7,11 @@ open Vale.Arch.HeapImpl
 open Vale.Arch.Heap
 open Vale.Arch.MachineHeap_s
 module BS = Vale.X64.Machine_Semantics_s
-module BV = LowStar.BufferView
-module HS = FStar.HyperStack
 module ME = Vale.X64.Memory
 module SI = Vale.X64.Stack_i
 module IB = Vale.Interop.Base
 module VS = Vale.X64.State
 module V = Vale.X64.Decls
-module Map16 = Vale.Lib.Map16
 val as_vale_buffer (#src #t:base_typ) (i:IB.buf_t src t) : GTot (ME.buffer t)
 val as_vale_immbuffer (#src #t:base_typ) (i:IB.ibuf_t src t) : GTot (ME.buffer t)
 

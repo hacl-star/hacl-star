@@ -25,6 +25,7 @@
 
 #include "Hacl_Hash_SHA3_Simd256.h"
 
+#include "Hacl_SHA2_Types.h"
 #include "internal/Hacl_Hash_SHA3.h"
 
 /* SNIPPET_START: Hacl_Hash_SHA3_Simd256_absorb_inner_256 */
@@ -6006,7 +6007,10 @@ Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_SHA3_Simd256_state_malloc(void)
   *buf =
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 25U);
-  memset(buf, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  if (buf != NULL)
+  {
+    memset(buf, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  }
   return buf;
 }
 

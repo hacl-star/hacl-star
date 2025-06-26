@@ -1,4 +1,5 @@
 module Vale.Wrapper.X64.Sha
+module HS = FStar.HyperStack
 open FStar.Mul
 
 module UV = LowStar.BufferView.Up

@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Impl_Blake2_Constants.h"
-#include "internal/Hacl_Hash_Blake2b.h"
 #include "../Hacl_Hash_Blake2s.h"
 
 /* SNIPPET_START: Hacl_Hash_Blake2s_init */
@@ -79,6 +77,42 @@ Hacl_Hash_Blake2s_update_last(
 void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_finish */
+
+/* SNIPPET_START: K____uint32_t___uint32_t_ */
+
+typedef struct K____uint32_t___uint32_t__s
+{
+  uint32_t *fst;
+  uint32_t *snd;
+}
+K____uint32_t___uint32_t_;
+
+/* SNIPPET_END: K____uint32_t___uint32_t_ */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_block_state_t */
+
+typedef struct Hacl_Hash_Blake2s_block_state_t_s
+{
+  uint8_t fst;
+  uint8_t snd;
+  bool thd;
+  K____uint32_t___uint32_t_ f3;
+}
+Hacl_Hash_Blake2s_block_state_t;
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_block_state_t */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_state_t */
+
+typedef struct Hacl_Hash_Blake2s_state_t_s
+{
+  Hacl_Hash_Blake2s_block_state_t block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Hash_Blake2s_state_t;
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_state_t */
 
 #if defined(__cplusplus)
 }

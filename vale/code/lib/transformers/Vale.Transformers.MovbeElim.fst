@@ -27,7 +27,6 @@ let movbe_elim_ph = {
 }
 
 module T = Vale.Def.Types_s
-module H = Vale.Arch.Heap
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --max_ifuel 0"
 let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :

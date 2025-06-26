@@ -10,7 +10,6 @@ open Lib.Sequence
 
 open Hacl.Spec.BignumQ.Definitions
 
-module ST = FStar.HyperStack.ST
 module S = Spec.Ed25519
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

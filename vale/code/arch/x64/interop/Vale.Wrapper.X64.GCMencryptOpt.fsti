@@ -6,9 +6,7 @@ val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
 open Vale.X64.CPU_Features_s
 open FStar.HyperStack.ST
 module B = LowStar.Buffer
-module HS = FStar.HyperStack
 module DV = LowStar.BufferView.Down
-module UV = LowStar.BufferView.Up
 open Vale.AsLowStar.MemoryHelpers
 open FStar.Mul
 open Vale.Def.Words_s

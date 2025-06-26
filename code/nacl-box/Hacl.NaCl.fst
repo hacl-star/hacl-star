@@ -8,8 +8,6 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 
-module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
 module SB = Spec.Box
 module SS = Spec.SecretBox
 

@@ -13,30 +13,57 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 2
     let hacl_Streaming_Types_error_code_Hacl_Streaming_Types_MaximumLengthExceeded
       = Unsigned.UInt8.of_int 3
+    let hacl_Streaming_Types_error_code_Hacl_Streaming_Types_OutOfMemory =
+      Unsigned.UInt8.of_int 4
+    type hacl_Streaming_Types_optional = Unsigned.UInt8.t
+    let hacl_Streaming_Types_optional =
+      typedef uint8_t "Hacl_Streaming_Types_optional"
+    let hacl_Streaming_Types_optional_Hacl_Streaming_Types_None =
+      Unsigned.UInt8.of_int 0
+    let hacl_Streaming_Types_optional_Hacl_Streaming_Types_Some =
+      Unsigned.UInt8.of_int 1
+    type hacl_Streaming_Types_optional_32 =
+      [ `hacl_Streaming_Types_optional_32 ] structure
+    let (hacl_Streaming_Types_optional_32 :
+      [ `hacl_Streaming_Types_optional_32 ] structure typ) =
+      structure "Hacl_Streaming_Types_optional_32_s"
+    let hacl_Streaming_Types_optional_32_tag =
+      field hacl_Streaming_Types_optional_32 "tag"
+        hacl_Streaming_Types_optional
+    let hacl_Streaming_Types_optional_32_v =
+      field hacl_Streaming_Types_optional_32 "v" (ptr uint32_t)
+    let _ = seal hacl_Streaming_Types_optional_32
+    type hacl_Streaming_Types_optional_64 =
+      [ `hacl_Streaming_Types_optional_64 ] structure
+    let (hacl_Streaming_Types_optional_64 :
+      [ `hacl_Streaming_Types_optional_64 ] structure typ) =
+      structure "Hacl_Streaming_Types_optional_64_s"
+    let hacl_Streaming_Types_optional_64_tag =
+      field hacl_Streaming_Types_optional_64 "tag"
+        hacl_Streaming_Types_optional
+    let hacl_Streaming_Types_optional_64_v =
+      field hacl_Streaming_Types_optional_64 "v" (ptr uint64_t)
+    let _ = seal hacl_Streaming_Types_optional_64
+    type hacl_Streaming_Types_two_pointers =
+      [ `hacl_Streaming_Types_two_pointers ] structure
+    let (hacl_Streaming_Types_two_pointers :
+      [ `hacl_Streaming_Types_two_pointers ] structure typ) =
+      structure "Hacl_Streaming_Types_two_pointers_s"
+    let hacl_Streaming_Types_two_pointers_fst =
+      field hacl_Streaming_Types_two_pointers "fst" (ptr uint64_t)
+    let hacl_Streaming_Types_two_pointers_snd =
+      field hacl_Streaming_Types_two_pointers "snd" (ptr uint64_t)
+    let _ = seal hacl_Streaming_Types_two_pointers
     type hacl_Streaming_MD_state_32 =
       [ `hacl_Streaming_MD_state_32 ] structure
     let (hacl_Streaming_MD_state_32 :
       [ `hacl_Streaming_MD_state_32 ] structure typ) =
       structure "Hacl_Streaming_MD_state_32_s"
-    let hacl_Streaming_MD_state_32_block_state =
-      field hacl_Streaming_MD_state_32 "block_state" (ptr uint32_t)
-    let hacl_Streaming_MD_state_32_buf =
-      field hacl_Streaming_MD_state_32 "buf" (ptr uint8_t)
-    let hacl_Streaming_MD_state_32_total_len =
-      field hacl_Streaming_MD_state_32 "total_len" uint64_t
-    let _ = seal hacl_Streaming_MD_state_32
     type hacl_Streaming_MD_state_64 =
       [ `hacl_Streaming_MD_state_64 ] structure
     let (hacl_Streaming_MD_state_64 :
       [ `hacl_Streaming_MD_state_64 ] structure typ) =
       structure "Hacl_Streaming_MD_state_64_s"
-    let hacl_Streaming_MD_state_64_block_state =
-      field hacl_Streaming_MD_state_64 "block_state" (ptr uint64_t)
-    let hacl_Streaming_MD_state_64_buf =
-      field hacl_Streaming_MD_state_64 "buf" (ptr uint8_t)
-    let hacl_Streaming_MD_state_64_total_len =
-      field hacl_Streaming_MD_state_64 "total_len" uint64_t
-    let _ = seal hacl_Streaming_MD_state_64
     type spec_Hash_Definitions_hash_alg = Unsigned.UInt8.t
     let spec_Hash_Definitions_hash_alg =
       typedef uint8_t "Spec_Hash_Definitions_hash_alg"

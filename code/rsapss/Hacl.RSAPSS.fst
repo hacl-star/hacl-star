@@ -9,8 +9,6 @@ module Hash = Spec.Agile.Hash
 module RI = Hacl.Impl.RSAPSS
 module RK = Hacl.Impl.RSAPSS.Keys
 
-module BN = Hacl.Bignum
-module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
 module BD = Hacl.Bignum.Definitions
 

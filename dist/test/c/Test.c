@@ -224,6 +224,59 @@ extern void
 TestLib_compare_and_print(Prims_string uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
 /**
+Allocate initial state for the agile hash. The argument `a` stands for the
+choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
+efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
+before. The state is to be freed by calling `free`.
+*/
+extern Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+*EverCrypt_Hash_Incremental_malloc(Spec_Hash_Definitions_hash_alg a);
+
+/**
+Reset an existing state to the initial hash state with empty data.
+*/
+extern void
+EverCrypt_Hash_Incremental_reset(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *state
+);
+
+/**
+Feed an arbitrary amount of data into the hash. This function returns
+EverCrypt_Error_Success for success, or EverCrypt_Error_MaximumLengthExceeded if
+the combined length of all of the data passed to `update` (since the last call
+to `init`) exceeds 2^61-1 bytes or 2^64-1 bytes, depending on the choice of
+algorithm. Both limits are unlikely to be attained in practice.
+*/
+extern error_code
+EverCrypt_Hash_Incremental_update(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
+);
+
+/**
+Write the resulting hash into `output`, an array whose length is
+algorithm-specific. You can use the macros defined earlier in this file to
+allocate a destination buffer of the right length. The state remains valid after
+a call to `digest`, meaning the user may feed more data into the hash via
+`update`. (The finish function operates on an internal copy of the state and
+therefore does not invalidate the client-held state.)
+*/
+extern void
+EverCrypt_Hash_Incremental_digest(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *state,
+  uint8_t *output
+);
+
+/**
+Free a state previously allocated with `create_in`.
+*/
+extern void
+EverCrypt_Hash_Incremental_free(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *state
+);
+
+/**
 Hash `input`, of len `input_len`, into `output`, an array whose length is determined by
 your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined
 earlier in this file to allocate a destination buffer of the right length. This
@@ -6774,9 +6827,53 @@ Compute the scalar multiple of a point.
 extern void
 EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
+static void test_incremental_api(void)
+{
+  uint8_t b1[4U] = { 0x00U, 0x01U, 0x02U, 0x04U };
+  uint8_t b2[4U] = { 0x05U, 0x06U, 0x07U, 0x08U };
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+  *st = EverCrypt_Hash_Incremental_malloc(Spec_Hash_Definitions_SHA2_256);
+  if (st == NULL)
+  {
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n", __FILE__, __LINE__, "OUT OF MEMORY");
+    KRML_HOST_EXIT(255U);
+  }
+  else
+  {
+    EverCrypt_Hash_Incremental_reset(st);
+  }
+  uint8_t dst[32U] = { 0U };
+  switch (EverCrypt_Hash_Incremental_update(st, b1, 4U))
+  {
+    case Success:
+      {
+        switch (EverCrypt_Hash_Incremental_update(st, b2, 4U))
+        {
+          case Success:
+            {
+              EverCrypt_Hash_Incremental_digest(st, dst);
+              EverCrypt_Hash_Incremental_free(st);
+              break;
+            }
+          default:
+            {
+              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
+            }
+        }
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
 static void Test_Hash_main(void)
 {
-
+  test_incremental_api();
 }
 
 typedef struct state_s0_s state_s0;

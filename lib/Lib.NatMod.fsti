@@ -2,7 +2,6 @@ module Lib.NatMod
 
 open FStar.Mul
 
-module Fermat = FStar.Math.Fermat
 module Euclid = FStar.Math.Euclid
 
 module LE = Lib.Exponentiation.Definition
