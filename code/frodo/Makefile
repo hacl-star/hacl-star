@@ -24,7 +24,7 @@ BASE_FLAGS += -add-include '"krml/internal/target.h"'
 dist:
 	mkdir -p $@
 
-dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES)) | dist
+dist/Makefile.basic: $(ALL_KRML_FILES) | dist
 	$(KRML) $^ -o libfrodo.a \
 	  -bundle Lib.RandomBuffer.System \
 	  $(BASE_FLAGS) \
