@@ -109,12 +109,13 @@ let lemma_bv128_64_64_and x x0 x1 y y0 y1 z z0 z1 =
           rewrite_eqs_from_context ();
           norm [delta])
 
-#push-options "--smtencoding.elim_box true --z3refresh --z3rlimit 20 --max_ifuel 2 --max_fuel 2"
+#restart-solver
+#push-options "--smtencoding.elim_box true --split_queries always --z3refresh --z3rlimit 100 --ifuel 2 --fuel 2"
 let int2bv_uext_64_128 (x1 : nat) :
   Lemma  (requires (FStar.UInt.size x1 64))
-         (ensures (bv_uext #64 #64 (int2bv #64 x1) == int2bv #128 x1)) =
+         (ensures (FStar.UInt.size x1 128 /\ bv_uext #64 #64 (int2bv #64 x1) == int2bv #128 x1)) =
    assert (64 <= 128);
-   pow2_le_compat 128 64;
+   pow2_lt_compat 128 64;
    assert (x1 < pow2 128);
    modulo_lemma x1 (pow2 128); // x1 % pow2 128 = x1
    assert (FStar.UInt.size x1 128);
@@ -133,7 +134,7 @@ let lowerUpper128b (l:bv_t 64) (u:bv_t 64) : bv_t 128 =
   b_add #128 (b_mul #128 (b_uext #64 #64 u) 0x10000000000000000) (b_uext #64 #64 l)
 
 //this was so flaky, new options helped.
-#push-options "--smtencoding.elim_box true --z3refresh --z3rlimit 40 --max_ifuel 1 --max_fuel 1"
+#push-options "--smtencoding.elim_box true --z3refresh --z3rlimit 40 --ifuel 1 --fuel 1"
 let lemma_lowerUpper128_andu
     (x:uint_t 128) (x0:uint_t 64) (x1:uint_t 64) (y:uint_t 128)
     (y0:uint_t 64) (y1:uint_t 64) (z:uint_t 128) (z0:uint_t 64) (z1:uint_t 64) :
