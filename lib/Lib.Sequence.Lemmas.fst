@@ -4,8 +4,9 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
-#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
-
+#set-options "--z3rlimit 60 --max_fuel 0 --max_ifuel 0 --query_stats" 
+#set-options "--using_facts_from '*'"
+#restart-solver
 let rec repeati_extensionality #a n f g acc0 =
   if n = 0 then begin
     Loops.eq_repeati0 n f acc0;
@@ -652,6 +653,7 @@ let map_blocks_acc #a blocksize mi hi inp f l acc0 =
     (repeat_gen_blocks_map_f blocksize hi f)
     (repeat_gen_blocks_map_l blocksize hi l) acc0
 
+#restart-solver
 let map_blocks_acc_length #a blocksize mi hi inp f l acc0 = ()
 
 let map_blocks_multi_acc_is_repeat_gen_blocks_multi #a blocksize mi hi n inp f acc0 = ()

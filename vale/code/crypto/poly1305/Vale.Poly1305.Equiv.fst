@@ -27,7 +27,8 @@ unfold let to_felem = S.to_felem
 unfold let modp = V.modp
 unfold let mod2_128 = V.mod2_128
 
-#set-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
+//optimize_let_vc seems to help in this file
+#set-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1 --ext optimize_let_vc"
 
 let rec lemma_poly1305_equiv_rec (text:bytes) (acc0:felem) (r:felem) (k:nat) : Lemma
   (requires k <= length text / size_block)
@@ -82,6 +83,8 @@ let rec lemma_poly1305_equiv_rec (text:bytes) (acc0:felem) (r:felem) (k:nat) : L
     }
   )
 
+#restart-solver
+#push-options "--retry 5"
 let lemma_poly1305_equiv_last (text:bytes) (r:felem) (hBlocks:felem) : Lemma
   (ensures (
     let inp = block_fun text in
@@ -118,6 +121,7 @@ let lemma_poly1305_equiv_last (text:bytes) (r:felem) (hBlocks:felem) : Lemma
     == {}
     S.poly1305_update1 r nExtra last hBlocks;
   }
+#pop-options
 
 let lemma_poly1305_equiv_r (k:key) : Lemma
   (ensures (
