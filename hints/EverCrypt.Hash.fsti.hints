@@ -1,5 +1,5 @@
 [
-  "D\n±2°%úg¶S$\tÜ™\u0003O",
+  "3946831ad17a259ee5af16508dfc9476",
   [
     [
       "EverCrypt.Hash.broken_alg",
@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq" ],
       0,
-      "8ba608f8b494626b6d911e86b93296a0"
+      "f2fc265144ffb35e4001255e4c42e02a"
     ],
     [
       "EverCrypt.Hash.alg13",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq" ],
       0,
-      "3a51c1ec5909bf4d7c29d01ed6731d46"
+      "f9335fbc5257c627082e33f837941c2f"
     ],
     [
       "EverCrypt.Hash.uint32_fits_maxLength",
@@ -51,7 +51,7 @@
         "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "b8754e073a2482246b24e28672d9f1a9"
+      "9c4197aa56286c3b82f85d7bb9c6a471"
     ],
     [
       "EverCrypt.Hash.invariant",
@@ -65,7 +65,7 @@
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e"
       ],
       0,
-      "49f32f3d48962d4e4b8cd3a2f6e0511c"
+      "fde741b7f49581838a139fe295a396b3"
     ],
     [
       "EverCrypt.Hash.frame_invariant_implies_footprint_preservation",
@@ -113,7 +113,19 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer", "typing_Prims.int"
       ],
       0,
-      "4891d14621c305ba7d67883e0ddc2763"
+      "e8508a9bab269200b368df247b92f42f"
+    ],
+    [
+      "EverCrypt.Hash.create_in",
+      1,
+      0,
+      0,
+      [
+        "@query", "lemma_FStar.Pervasives.invertOption",
+        "typing_EverCrypt.Hash.state"
+      ],
+      0,
+      "dffa60560b4399f2f8773b9e8ef16269"
     ],
     [
       "EverCrypt.Hash.ev_of_uint64",
@@ -138,7 +150,7 @@
         "unit_typing"
       ],
       0,
-      "40774e4a97d28e0b31a1c96570615e73"
+      "95a74ea5ca0a880a8937e2af209d37ae"
     ],
     [
       "EverCrypt.Hash.ev_of_uint64",
@@ -147,7 +159,7 @@
       0,
       [ "@query" ],
       0,
-      "9a0b24a239995aff2d05593f72d21ec9"
+      "22051a0c15e7e8b804693062cf470035"
     ],
     [
       "EverCrypt.Hash.update_multi",
@@ -162,13 +174,13 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "refinement_interpretation_Tm_refine_3f9ed143d682a496e739b153ab798539",
-        "refinement_interpretation_Tm_refine_e0030e1663b31f49bbac5d7071b6a6ca",
+        "refinement_interpretation_Tm_refine_7278305ed596f842a620452d681c225f",
         "typing_Lib.IntTypes.int_t",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1e0ba9701e9bd08b0da291195a767832"
+      "2a9f7ee2168850bd0771e2390e92462b"
     ],
     [
       "EverCrypt.Hash.prev_len_of_uint64",
@@ -191,7 +203,7 @@
         "typing_FStar.UInt64.v", "unit_typing"
       ],
       0,
-      "537a3501b759e3cda26a8108f35fdc75"
+      "d94993f6d73361318cf9c307e89b98ba"
     ],
     [
       "EverCrypt.Hash.prev_len_of_uint64",
@@ -200,7 +212,7 @@
       0,
       [ "@query" ],
       0,
-      "8cc58994d5dc62d9e862bd5e945a0381"
+      "447b119095cda00c11c8805c03f71a11"
     ],
     [
       "EverCrypt.Hash.update_last",
@@ -223,7 +235,7 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_042ec925769949f282ab80a26a462500",
-        "refinement_interpretation_Tm_refine_348f65c9489e4254dbddce258737e569",
+        "refinement_interpretation_Tm_refine_5d0399d0b7e04ea9050d3f97d4f76393",
         "refinement_interpretation_Tm_refine_e4c9442257e14a41caaf14551a1d3cf4",
         "typing_Lib.IntTypes.int_t",
         "typing_LowStar.Buffer.trivial_preorder",
@@ -232,7 +244,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "eb59b23122d7ca418ffb5b3bde5f4c56"
+      "fd22d078ca05fca6b884575a947d0d42"
     ],
     [
       "EverCrypt.Hash.finish",
@@ -273,7 +285,7 @@
         "unit_typing"
       ],
       0,
-      "faf98efb58c0dfc9e74e29ffe3e2b823"
+      "3a796c6d0bd5ab514d5ca6eeefc15638"
     ]
   ]
 ]
