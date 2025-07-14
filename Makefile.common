@@ -77,12 +77,15 @@ VALE_HOME := $(call sanitize_path,$(VALE_HOME))
 
 include $(HACL_HOME)/Makefile.include
 
-# $(FSTAR_ULIB_CHECKED) necessary for vale-depend
 INCLUDES = \
   $(ALL_HACL_DIRS) \
-  $(FSTAR_ULIB_CHECKED) \
   $(KRML_HOME)/krmllib/obj \
   $(KRML_HOME)/krmllib
+
+# $(FSTAR_ULIB_CHECKED) necessary for vale-depend
+VALE_INCLUDES = \
+  $(INCLUDES) \
+  $(FSTAR_ULIB_CHECKED)
 
 # 0. Vale
 

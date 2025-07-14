@@ -351,7 +351,7 @@ ifndef MAKE_RESTARTS
 .vale-depend: .fstar-depend-make .FORCE
 	$(call run-with-log,\
 	  "$(PYTHON3)" tools/valedepend.py \
-	    $(addprefix -include ,$(INCLUDES)) \
+	    $(addprefix -include ,$(VALE_INCLUDES)) \
 	    $(addprefix -in ,$(VALE_ROOTS)) \
 	    -dep $< \
 	    > $@ && \
