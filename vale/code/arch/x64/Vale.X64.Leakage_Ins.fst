@@ -9,7 +9,10 @@ module S = Vale.X64.Machine_Semantics_s
 open Vale.X64.Leakage_s
 open Vale.X64.Leakage_Helpers
 
+#set-options "--z3rlimit 25"
 #set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+
+let coerce_to_normal (#a:Type0) (x:a) : y:(normal a){x == y} = x
 
 unfold let (.[]) = Map.sel
 unfold let (.[]<-) = Map.upd
@@ -102,8 +105,7 @@ let rec check_if_consumes_fixed_time_outs
   | _ -> false_elim ()
 #pop-options
 
-#restart-solver
-#reset-options "--z3rlimit 300"
+#push-options "--z3rlimit 300"
 let rec lemma_args_taint
     (outs:list instr_out) (args:list instr_operand)
     (f:instr_args_t outs args) (oprs:instr_operands_t_args args)
@@ -147,8 +149,9 @@ let rec lemma_args_taint
     assert (v1 == v2);
     let Some v = v1 in
     lemma_args_taint outs args (f v) oprs ts s1 s2
+#pop-options
 
-#restart-solver
+#push-options "--z3rlimit 100"
 let rec lemma_inouts_taint
     (outs inouts:list instr_out) (args:list instr_operand)
     (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
@@ -199,6 +202,7 @@ let rec lemma_inouts_taint
     assert (v1 == v2);
     let Some v = v1 in
     lemma_inouts_taint outs inouts args (f v) oprs ts s1 s2
+#pop-options
 
 let instr_set_taint_explicit
     (i:instr_operand_explicit) (o:instr_operand_t i) (ts:analysis_taints) (t:taint)
@@ -379,6 +383,7 @@ let lemma_preserve_valid128 (m m':S.machine_heap) : Lemma
   =
   reveal_opaque (`%S.valid_addr128) S.valid_addr128
 
+#push-options "--z3rlimit 100"
 let lemma_instr_set_taints_explicit
     (i:instr_operand_explicit) (v1 v2:instr_val_t (IOpEx i)) (o:instr_operand_t i)
     (ts_orig ts:analysis_taints) (t_out:taint)
@@ -412,7 +417,9 @@ let lemma_instr_set_taints_explicit
   lemma_preserve_valid128 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
   reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
+#pop-options
 
+#push-options "--z3rlimit 100"
 let lemma_instr_set_taints_implicit
     (i:instr_operand_implicit) (v1 v2:instr_val_t (IOpIm i))
     (ts_orig ts:analysis_taints) (t_out:taint)
@@ -448,8 +455,9 @@ let lemma_instr_set_taints_implicit
   lemma_preserve_valid128 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
   reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
+#pop-options
 
-#reset-options "--z3rlimit 80"
+#push-options "--z3rlimit 80"
 let rec lemma_instr_set_taints
     (outs:list instr_out) (args:list instr_operand)
     (vs1 vs2:instr_ret_t outs) (oprs:instr_operands_t outs args)
@@ -521,8 +529,7 @@ let check_if_instr_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (
   let ovf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> ovf in
   let ts = AnalysisTaints (LeakageTaints rs flags cf ovf) rts in
   (b, instr_set_taints outs args oprs ts t)
-
-let coerce_to_normal (#a:Type0) (x:a) : y:(normal a){x == y} = x
+#pop-options
 
 let check_if_xor_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Instr? ins /\ S.AnnotateXor64? (BC.Instr?.annotation ins))
@@ -587,9 +594,9 @@ let check_if_dealloc_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure
   =
   (true, ts)
 
-#reset-options "--ifuel 3 --fuel 4 --z3rlimit 80"
-
+#push-options "--ifuel 3 --fuel 4 --z3rlimit 80"
 #push-options "--retry 3" // flaky
+#restart-solver
 let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Push? ins)
   (ensures ins_consumes_fixed_time ins ts)
@@ -598,7 +605,10 @@ let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (b
   let t_out = operand_taint 0 src ts in
   (Public? (Vale.Lib.MapTree.sel ts.rts reg_Rsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_stk = Secret), ts)
 #pop-options
+#pop-options
 
+#push-options "--ifuel 3 --fuel 4 --z3rlimit 100"
+#restart-solver
 let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Pop? ins)
   (ensures ins_consumes_fixed_time ins ts)
@@ -606,6 +616,7 @@ let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bo
   let BC.Pop dst t_stk = ins in
   let allowed = operand_taint_allowed dst t_stk in
   (Public? (Vale.Lib.MapTree.sel ts.rts reg_Rsp) && operand_does_not_use_secrets dst ts && allowed, set_taint 0 dst ts t_stk)
+#pop-options
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins with
@@ -618,7 +629,7 @@ let check_if_ins_consumes_fixed_time ins ts =
   | BC.Alloc _ -> check_if_alloc_consumes_fixed_time ins ts
   | BC.Dealloc _ -> check_if_dealloc_consumes_fixed_time ins ts
 
-#reset-options "--ifuel 1 --fuel 1 --z3rlimit 100"
+#push-options "--ifuel 1 --fuel 1 --z3rlimit 100"
 let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Instr? ins)
   (ensures (
@@ -673,8 +684,10 @@ let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     // assert (isExplicitLeakageFree (Ins ins) ts ts');
     ()
   )
+#pop-options
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+#push-options "--z3rlimit 200 --ifuel 1 --fuel 1"
+#restart-solver
 let lemma_dealloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Dealloc? ins)
   (ensures (
@@ -710,7 +723,6 @@ let lemma_dealloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   )
 #pop-options
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Push? ins)
   (ensures (
@@ -752,9 +764,8 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     in
     ()
   )
-#pop-options
 
-#reset-options "--ifuel 1 --fuel 1 --z3rlimit 100"
+#push-options "--ifuel 1 --fuel 1 --z3rlimit 100"
 let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Pop? ins)
   (ensures (
@@ -788,8 +799,9 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       in
     ()
   )
+#pop-options
 
-#reset-options "--ifuel 2 --fuel 4 --z3rlimit 40"
+#push-options "--ifuel 2 --fuel 4 --z3rlimit 40"
 let lemma_xor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Instr? ins /\ S.AnnotateXor64? (BC.Instr?.annotation ins))
   (ensures (
@@ -837,9 +849,9 @@ let lemma_vpxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     Vale.Arch.Types.lemma_quad32_xor()
   else
     lemma_instr_leakage_free ts ins
+#pop-options
 
-#reset-options "--ifuel 1 --fuel 1 --z3rlimit 20"
-
+#push-options "--ifuel 2 --fuel 1 --z3rlimit 80"
 let lemma_ins_leakage_free ts ins =
   let (b, ts') = check_if_ins_consumes_fixed_time ins ts in
   match ins with
@@ -851,3 +863,4 @@ let lemma_ins_leakage_free ts ins =
   | BC.Dealloc _ -> lemma_dealloc_leakage_free ts ins
   | BC.Push _ _ -> lemma_push_leakage_free ts ins
   | BC.Pop _ _ -> lemma_pop_leakage_free ts ins
+#pop-options
