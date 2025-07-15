@@ -12,6 +12,7 @@ open Hacl.Poly1305.Field32xN.Lemmas2
 
 module Vec = Hacl.Spec.Poly1305.Vec
 
+#set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 1 --using_facts_from '* -FStar.Seq'"
 
 

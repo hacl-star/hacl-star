@@ -322,6 +322,7 @@ val recover_y_vartime_candidate (y x:felem) : Stack bool
     let y2 = S.(x *% x *% x +% b) in
     as_nat h1 y == S.fsqrt y2 /\ (b <==> (S.fmul (as_nat h1 y) (as_nat h1 y) == y2))))
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 let recover_y_vartime_candidate y x =
   push_frame ();
   let y2 = create_felem () in
@@ -334,7 +335,7 @@ let recover_y_vartime_candidate y x =
   let is_y_valid = is_y_sqr_is_y2_vartime y2 y in
   pop_frame ();
   is_y_valid
-
+#pop-options
 
 inline_for_extraction noextract
 val recover_y_vartime (y x:felem) (is_odd:bool) : Stack bool
@@ -354,6 +355,7 @@ let recover_y_vartime y x is_odd =
     true end
 
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --split_queries always"
 [@CInline]
 let aff_point_decompress_vartime x y s =
   let s0 = s.(0ul) in
@@ -366,3 +368,4 @@ let aff_point_decompress_vartime x y s =
 
     if not is_x_valid then false
     else recover_y_vartime y x is_y_odd end
+#pop-options

@@ -179,8 +179,7 @@ val encap:
   -> pkR:DH.serialized_point (kem_dh_of_cs cs) ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#restart-solver
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 50"
 let encap cs skE pkR =
   let _ = allow_inversion Spec.Agile.DH.algorithm in
   match DH.secret_to_public (kem_dh_of_cs cs) skE with
@@ -197,7 +196,7 @@ let encap cs skE pkR =
       assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
       let shared_secret:key_kem_s cs = extract_and_expand cs dhm kem_context in
       Some (shared_secret, enc)
-
+#pop-options
 
 val decap:
     cs: ciphersuite
@@ -205,7 +204,7 @@ val decap:
   -> skR: key_dh_secret_s cs ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 50"
 let decap cs enc skR =
   let _ = allow_inversion Spec.Agile.DH.algorithm in
   let _ = allow_inversion Spec.Agile.Hash.hash_alg in
@@ -223,6 +222,7 @@ let decap cs enc skR =
       assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
       let shared_secret = extract_and_expand cs dhm kem_context in
       Some (shared_secret)
+#pop-options
 
 val auth_encap:
     cs:ciphersuite
@@ -231,7 +231,7 @@ val auth_encap:
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 50"
 let auth_encap cs skE pkR skS =
   let _ = allow_inversion Spec.Agile.DH.algorithm in
   match DH.secret_to_public (kem_dh_of_cs cs) skE with
@@ -263,7 +263,7 @@ let auth_encap cs skE pkR skS =
           assert (extract_and_expand_dh_pred cs (Seq.length dh));
           let shared_secret = extract_and_expand cs dh kem_context in
           Some (shared_secret, enc)
-#reset-options
+#pop-options
 
 val auth_decap:
     cs: ciphersuite
@@ -272,8 +272,7 @@ val auth_decap:
   -> pkS: DH.serialized_point (kem_dh_of_cs cs) ->
   Tot (option (key_kem_s cs))
 
-#restart-solver
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 50"
 let auth_decap cs enc skR pkS =
   let _ = allow_inversion Spec.Agile.DH.algorithm in
   let pkE = deserialize_public_key cs enc in
@@ -300,8 +299,7 @@ let auth_decap cs enc skR pkS =
         assert (extract_and_expand_dh_pred cs (Seq.length dh));
         let shared_secret = extract_and_expand cs dh kem_context in
         Some (shared_secret)
-#reset-options
-
+#pop-options
 
 let default_psk = lbytes_empty
 let default_psk_id = lbytes_empty
@@ -340,7 +338,6 @@ val key_schedule:
     (requires verify_psk_inputs cs m opsk)
     (ensures fun _ -> True)
 
-#set-options "--z3rlimit 500 --fuel 0 --ifuel 2"
 let key_schedule_core
   (cs:ciphersuite)
   (m:mode)
@@ -515,7 +512,6 @@ let sealPSK cs skE pkR info aad pt psk psk_id =
     | None -> None
     | Some (_, ct) -> Some (enc, ct)
 
-#restart-solver
 let openPSK cs enc skR info aad ct psk psk_id =
   match setupPSKR cs enc skR info psk psk_id with
   | None -> None

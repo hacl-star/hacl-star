@@ -9,6 +9,8 @@ module S = Vale.X64.Machine_Semantics_s
 open Vale.X64.Leakage_s
 open Vale.X64.Leakage_Helpers
 
+#set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+
 unfold let (.[]) = Map.sel
 unfold let (.[]<-) = Map.upd
 
@@ -73,7 +75,7 @@ let check_if_consumes_fixed_time_outs_implicit
   | IOpFlagsCf -> true
   | IOpFlagsOf -> true
 
-#push-options "--z3rlimit 20"
+#push-options "--z3rlimit 20 --z3smtopt '(set-option :smt.arith.solver 2)'"
 let rec check_if_consumes_fixed_time_outs
     (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args)
     (ts:analysis_taints) (t_out:taint)
@@ -587,6 +589,7 @@ let check_if_dealloc_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure
 
 #reset-options "--ifuel 3 --fuel 4 --z3rlimit 80"
 
+#push-options "--retry 3" // flaky
 let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Push? ins)
   (ensures ins_consumes_fixed_time ins ts)
@@ -594,6 +597,7 @@ let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (b
   let BC.Push src t_stk = ins in
   let t_out = operand_taint 0 src ts in
   (Public? (Vale.Lib.MapTree.sel ts.rts reg_Rsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_stk = Secret), ts)
+#pop-options
 
 let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Pop? ins)
@@ -670,6 +674,7 @@ let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     ()
   )
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 let lemma_dealloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Dealloc? ins)
   (ensures (
@@ -703,7 +708,9 @@ let lemma_dealloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     in
     ()
   )
+#pop-options
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Push? ins)
   (ensures (
@@ -745,6 +752,7 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     in
     ()
   )
+#pop-options
 
 #reset-options "--ifuel 1 --fuel 1 --z3rlimit 100"
 let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
