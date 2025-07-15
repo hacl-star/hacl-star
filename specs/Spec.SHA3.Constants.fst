@@ -3,7 +3,7 @@ module Spec.SHA3.Constants
 open Lib.IntTypes
 open Lib.Sequence
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let rotc_t = rotval U64
 

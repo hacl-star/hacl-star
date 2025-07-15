@@ -18,7 +18,7 @@ open Vale.Lib.BufferViewHelpers
 let wrap_slice (#a:Type0) (s:Seq.seq a) (i:int) : Seq.seq a =
   Seq.slice s 0 (if 0 <= i && i <= Seq.length s then i else 0)
 
-#set-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 600 --fuel 0 --ifuel 0"
 
 let math_aux (n:nat) : Lemma (n * 1 == n) = ()
 
@@ -881,7 +881,7 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
     B.as_seq h b;
   }
 
-#set-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 600 --fuel 0 --ifuel 0"
 
 inline_for_extraction
 let gcm128_decrypt_opt_stdcall key iv cipher_b cipher_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b scratch_b =

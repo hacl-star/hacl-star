@@ -3,7 +3,7 @@ module Spec.Agile.HMAC
 open Spec.Hash.Definitions
 open Lib.IntTypes
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 let wrap
   (a: fixed_len_alg)

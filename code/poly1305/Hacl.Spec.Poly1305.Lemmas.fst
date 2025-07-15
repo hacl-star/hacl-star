@@ -8,7 +8,7 @@ open FStar.Tactics.CanonCommSemiring
 
 /// Semiring for Poly1305
 
-#set-options "--z3rlimit 5 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.arith.nl=false"
+#set-options "--z3rlimit 5 --fuel 0 --ifuel 0 --z3cliopt smt.arith.nl=false"
 
 let prime: pos = Scalar.prime
 

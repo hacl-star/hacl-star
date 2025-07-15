@@ -15,7 +15,7 @@ open LowStar.BufferOps
 
 friend EverCrypt.Hash
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 (* Implementation-agile hash state, to provide the `state` field of the
 streaming functor instantiation. As said in the fsti, this largely follows EverCrypt.Hash. A TODO would be to figure out if one can build upon the other rather than *)

@@ -45,7 +45,7 @@ module P = Vale.X64.Print_s
 open Vale.X64.Taint_Semantics
 
 friend Vale.X64.Decls
-#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --z3rlimit 20"
+#reset-options "--fuel 2 --max_ifuel 2 --z3rlimit 20"
 #endverbatim
 
 //function operator([]) #[a:Type(0), b:Type(0)](m:FStar.Map.t(a, b), key:a):b extern;

@@ -15,7 +15,7 @@ module Spec = Spec.Salsa20
 module Loop = Lib.LoopCombinators
 
 
-#set-options "--z3rlimit 100 --max_fuel 0"
+#set-options "--z3rlimit 100 --fuel 0"
 
 val rounds: st:state ->
   Stack unit

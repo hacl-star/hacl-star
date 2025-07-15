@@ -582,7 +582,7 @@ let check_if_dealloc_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure
   =
   (true, ts)
 
-#reset-options "--initial_ifuel 3 --max_ifuel 3 --initial_fuel 4 --max_fuel 4 --z3rlimit 80"
+#reset-options "--ifuel 3 --fuel 4 --z3rlimit 80"
 
 let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Push? ins)
@@ -611,7 +611,7 @@ let check_if_ins_consumes_fixed_time ins ts =
   | BC.Alloc _ -> check_if_alloc_consumes_fixed_time ins ts
   | BC.Dealloc _ -> check_if_dealloc_consumes_fixed_time ins ts
 
-#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 100"
+#reset-options "--ifuel 1 --fuel 1 --z3rlimit 100"
 let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Instr? ins)
   (ensures (
@@ -743,7 +743,7 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     ()
   )
 
-#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 100"
+#reset-options "--ifuel 1 --fuel 1 --z3rlimit 100"
 let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Pop? ins)
   (ensures (
@@ -778,7 +778,7 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     ()
   )
 
-#reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 40"
+#reset-options "--ifuel 2 --fuel 4 --z3rlimit 40"
 let lemma_xor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Instr? ins /\ S.AnnotateXor64? (BC.Instr?.annotation ins))
   (ensures (
@@ -827,7 +827,7 @@ let lemma_vpxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   else
     lemma_instr_leakage_free ts ins
 
-#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 20"
+#reset-options "--ifuel 1 --fuel 1 --z3rlimit 20"
 
 let lemma_ins_leakage_free ts ins =
   let (b, ts') = check_if_ins_consumes_fixed_time ins ts in

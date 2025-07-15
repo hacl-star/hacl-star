@@ -19,7 +19,7 @@ friend Spec.SHA2
 friend Spec.SHA2.Lemmas
 friend Vale.X64.CryptoInstructions_s
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 // Define these specific converters here, so that F* only reasons about
 // the correctness of the conversion once, rather that at every call site
@@ -211,7 +211,7 @@ let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
   //        to_uint32 (((vv x + vv y % pow2_32) + vv z) % pow2_32));
 *)
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 
 let lemma_add_wrap_is_add_mod (n0 n1:nat32) :
@@ -440,7 +440,7 @@ let lemma_add_wrap_quad32_is_add_mod_quad32 (q0 q1:quad32) :
   FStar.Classical.forall_intro_2 lemma_add_wrap_is_add_mod;
   ()
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 30"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 30"
 // Top-level proof for the SHA256_msg1 instruction
 let lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w) : Lemma
   (requires 16 <= t /\ t < size_k_w(SHA2_256) /\
@@ -455,7 +455,7 @@ let lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w) : Lemma
   lemma_add_wrap_quad32_is_add_mod_quad32 init sigma0_out;
   ws_partial_reveal ();
   ()
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 
 let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
@@ -624,7 +624,7 @@ let lemma_quads_to_block qs
   =
   reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32);
   reveal_opaque (`%ws) ws
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 let translate_hash_update (h0 h1 h0' h1' a0 a1:quad32) : Lemma
   (requires h0' == add_wrap_quad32 a0 h0 /\
@@ -764,7 +764,7 @@ let update_multi_one (h:hash256) (b:bytes_blocks {length b = block_length}) : Le
 
 friend Lib.ByteSequence
 
-#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0 --z3cliopt smt.arith.nl=true"
+#reset-options "--z3rlimit 50 --max_fuel 1 --ifuel 0 --z3cliopt smt.arith.nl=true"
 let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
   (Lib.ByteSequence.nat_from_bytes_be #Lib.IntTypes.SEC (seq_nat8_to_seq_uint8 s) == be_bytes_to_nat32 s)
   =
@@ -795,7 +795,7 @@ let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
     be_bytes_to_nat32 s;
   }
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 40"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 40"
 
 let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
@@ -875,7 +875,7 @@ let lemma_mod_transform (quads:seq quad32) : Lemma
   =
   ()
 
-#reset-options "--max_fuel 0 --ifuel 1 --z3rlimit 80"
+#reset-options "--fuel 0 --ifuel 1 --z3rlimit 80"
 let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
   Lemma (requires length quads % 4 == 0 /\

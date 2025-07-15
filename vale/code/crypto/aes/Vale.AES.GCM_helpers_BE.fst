@@ -85,7 +85,7 @@ let pad_to_128_bits_be_quad32_to_bytes (s:seq quad32) (num_bytes:int) =
   be_seq_quad32_to_bytes_tail_prefix s num_bytes;
   ()
 
-#reset-options "--smtencoding.elim_box true --z3rlimit 60 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
+#reset-options "--smtencoding.elim_box true --z3rlimit 60 --z3refresh --initial_ifuel 0 --max_ifuel 1 --fuel 1"
 let lemma_pad_to_32_bits_helper (s s'':seq4 nat8) (n:nat) : Lemma
   (requires
     n <= 2 /\
@@ -319,7 +319,7 @@ let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
   assert (equal s12_16'' zero_4);
   ()
 
-#reset-options "--smtencoding.elim_box true --z3rlimit 100 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
+#reset-options "--smtencoding.elim_box true --z3rlimit 100 --z3refresh --initial_ifuel 0 --max_ifuel 1 --fuel 1"
 
 let pad_to_128_bits_lower (q:quad32) (num_bytes:int) =
   let n = num_bytes in

@@ -5,7 +5,7 @@ open Hacl.Impl.Chacha20Poly1305
 open Hacl.Impl.Poly1305.Fields
 open Hacl.Poly1305_256
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 [@CInline]
 private

@@ -144,7 +144,7 @@ procedure Pxor(inout dst:xmm, in src:xmm)
 }
 
 #verbatim
-#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 3 --z3rlimit 50"
+#reset-options "--fuel 4 --max_ifuel 3 --z3rlimit 50"
 #endverbatim
 
 procedure Pand(inout dst:xmm, in src:opr128)

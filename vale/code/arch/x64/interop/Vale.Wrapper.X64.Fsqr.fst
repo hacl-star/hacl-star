@@ -6,7 +6,7 @@ open Vale.Interop.Base
 
 open Vale.AsLowStar.MemoryHelpers
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --ext compat:normalizer_memo_ignore_cfg"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 100 --ext compat:normalizer_memo_ignore_cfg"
 
 let fsqr_e tmp f1 out =
   DV.length_eq (get_downview tmp);
@@ -20,7 +20,7 @@ let fsqr_e tmp f1 out =
 
 #pop-options
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --ext compat:normalizer_memo_ignore_cfg"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 100 --ext compat:normalizer_memo_ignore_cfg"
 
 let fsqr2_e tmp f1 out =
   DV.length_eq (get_downview tmp);

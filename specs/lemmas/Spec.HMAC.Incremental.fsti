@@ -6,7 +6,7 @@ open Spec.Hash.Definitions
 open Lib.IntTypes
 open Spec.Agile.HMAC
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 let sized_key a = k:bytes { keysized a (Seq.length k) }
 

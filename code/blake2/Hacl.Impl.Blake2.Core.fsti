@@ -10,7 +10,7 @@ open Lib.IntVector
 
 module Spec = Spec.Blake2
 
-#set-options "--max_fuel 0 --max_ifuel 1"
+#set-options "--fuel 0 --max_ifuel 1"
 
 type m_spec =
   | M32

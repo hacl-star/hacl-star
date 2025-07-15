@@ -39,7 +39,7 @@ open Hacl.Impl.Blake2.Generic
 /// An instance of the stateful type class for blake2
 /// =================================================
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 inline_for_extraction noextract
 let alg = Spec.alg

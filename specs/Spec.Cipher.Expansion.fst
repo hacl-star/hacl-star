@@ -9,7 +9,7 @@ let vale_alg_of_cipher_alg (a: cipher_alg { a == AES128 \/ a == AES256 }) =
   | AES128 -> Vale.AES.AES_s.AES_128
   | AES256 -> Vale.AES.AES_s.AES_256
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 
 /// Length of Vale expanded keys, i.e. length of the expanded key (per NIST AES
 /// specification) along with other precomputed things.

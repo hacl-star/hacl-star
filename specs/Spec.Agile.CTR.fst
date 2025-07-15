@@ -6,7 +6,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Spec.Agile.Cipher
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 20 --fuel 0 --max_ifuel 1"
 
 // So that clients don't need to open both modules
 include Spec.Agile.Cipher

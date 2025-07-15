@@ -50,7 +50,7 @@ module S = Spec.HMAC_DRBG
 ///
 /// - The reseed_interval is 2^10
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 unfold
 let supported_alg = S.supported_alg

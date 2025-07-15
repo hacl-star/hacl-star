@@ -13,7 +13,7 @@ open Spec.Agile.HMAC
 /// https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
 ///
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 let is_supported_alg = function
   | SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true

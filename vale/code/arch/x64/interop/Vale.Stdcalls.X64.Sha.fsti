@@ -77,7 +77,7 @@ let sha_post : VSig.vale_post dom =
         va_s1 f
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 [@__reduce__] noextract
 let sha_lemma'

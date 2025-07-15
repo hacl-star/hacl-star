@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
 let v_inttype = t:inttype{unsigned t /\ ~(U1? t)}
 

@@ -9,7 +9,7 @@ module C = Hacl.Impl.Curve25519.Field64.Hacl
 let g25519: g25519_t =
   Lib.Buffer.createL_global Spec.Curve25519.basepoint_list
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 let point_add_and_double =
   addanddouble_point_add_and_double_higher #M64 True C.fmul_ C.fsqr2_ C.fmul1_ C.fmul2_ C.fsub_ C.fadd_
 let point_double =

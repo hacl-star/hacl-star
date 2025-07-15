@@ -4,7 +4,7 @@ open Lib.IntTypes
 
 /// Helpers used in tests and tactics (see e.g. Test.LowStarize)
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 
 val is_hex_digit: Char.char -> bool

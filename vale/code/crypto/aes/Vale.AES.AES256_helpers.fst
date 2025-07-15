@@ -9,14 +9,14 @@ let lemma_reveal_expand_key_256 (key:aes_key_LE AES_256) (round:nat) : Lemma
   =
   expand_key_256_reveal ()
 
-#reset-options "--initial_fuel 8 --max_fuel 8 --max_ifuel 0"
+#reset-options "--fuel 8 --ifuel 0"
 let lemma_expand_key_256_0 (key:aes_key_LE AES_256) : Lemma
   (equal key (expand_key AES_256 key 8))
   =
   expand_key_reveal ()
 
 open FStar.Mul
-#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 40 --using_facts_from '* -FStar.Seq.Properties'"
+#reset-options "--fuel 1 --ifuel 0 --z3rlimit 40 --using_facts_from '* -FStar.Seq.Properties'"
 let lemma_expand_key_256_i (key:aes_key_LE AES_256) (i:nat) : Lemma
   (requires
     1 < i /\ i < 15

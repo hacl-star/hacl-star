@@ -154,7 +154,7 @@ let locations_of_ocmp o =
   | OGt o1 o2 ->
     both (locations_of_operand64 o1) `L.append` both (locations_of_operand64 o2)
 
-#push-options "--z3rlimit 50 --initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 50 --fuel 2 --ifuel 1"
 #restart-solver
 let rec lemma_instr_write_outputs_only_affects_write
     (outs:list instr_out) (args:list instr_operand)
@@ -185,7 +185,7 @@ let rec lemma_instr_write_outputs_only_affects_write
     )
 #pop-options
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let lemma_eval_instr_only_affects_write
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s0:machine_state)
@@ -229,7 +229,7 @@ let lemma_machine_eval_ins_st_only_affects_write (i:ins{Instr? i}) (s:machine_st
   FStar.Classical.forall_intro (
     FStar.Classical.move_requires (lemma_machine_eval_ins_st_only_affects_write_aux i s))
 
-#push-options "--initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
+#push-options "--fuel 4 --ifuel 2"
 let lemma_instr_eval_operand_explicit_same_read_both
     (i:instr_operand_explicit) (o:instr_operand_t i)
     (s1 s2:machine_state) :
@@ -241,7 +241,7 @@ let lemma_instr_eval_operand_explicit_same_read_both
         (instr_eval_operand_explicit i o s2))) = ()
 #pop-options
 
-#push-options "--initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
+#push-options "--fuel 4 --ifuel 2"
 let lemma_instr_eval_operand_implicit_same_read_both
     (i:instr_operand_implicit)
     (s1 s2:machine_state) :
@@ -301,7 +301,7 @@ let rec lemma_instr_apply_eval_args_same_read
     | Some v ->
       lemma_instr_apply_eval_args_same_read outs args (f v) oprs s1 s2
 
-#push-options "--z3rlimit 25 --initial_fuel 6 --max_fuel 6 --initial_ifuel 2 --max_ifuel 2"
+#push-options "--z3rlimit 25 --fuel 6 --ifuel 2"
 let rec lemma_instr_apply_eval_inouts_same_read
     (outs inouts:list instr_out) (args:list instr_operand)
     (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
@@ -363,7 +363,7 @@ let unchanged_at' (l:locations) (s1 s2:machine_state) =
   (s1.ms_ok /\ s2.ms_ok ==>
    unchanged_at l s1 s2)
 
-#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 3 --max_ifuel 3"
+#push-options "--z3rlimit 20 --fuel 4 --ifuel 3"
 let lemma_instr_write_output_explicit_only_writes
     (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i)
     (s_orig1 s1 s_orig2 s2:machine_state) :
@@ -381,7 +381,7 @@ let lemma_instr_write_output_explicit_only_writes
          unchanged_except locs s2 s2'))) = ()
 #pop-options
 
-#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 4 --max_ifuel 4"
+#push-options "--z3rlimit 20 --fuel 4 --ifuel 4"
 let lemma_instr_write_output_implicit_only_writes
     (i:instr_operand_implicit) (v:instr_val_t (IOpIm i))
     (s_orig1 s1 s_orig2 s2:machine_state) :
@@ -399,7 +399,7 @@ let lemma_instr_write_output_implicit_only_writes
          unchanged_except locs s2 s2'))) = ()
 #pop-options
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let rec lemma_unchanged_at'_mem (as0:locations) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
@@ -485,7 +485,7 @@ let lemma_instr_write_outputs_only_affects_write_extend
   lemma_unchanged_except_extend locs_extension locs s s'
 
 #restart-solver
-#push-options "--z3rlimit 400 --initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 400 --fuel 2 --ifuel 1"
 let rec lemma_instr_write_outputs_only_writes
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
@@ -582,7 +582,7 @@ let rec lemma_unchanged_at'_maintained_upon_flag_update (locs:locations) (s1 s2:
   | [] -> ()
   | x :: xs -> lemma_unchanged_at'_maintained_upon_flag_update xs s1 s2 flags
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let lemma_eval_instr_unchanged_at'
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s1 s2:machine_state) :
@@ -659,7 +659,7 @@ let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machin
   let Instr it oprs ann = i in
   lemma_eval_instr_unchanged_at' it oprs ann s1 s2
 
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 3 --ifuel 1"
 let lemma_machine_eval_ins_st_constant_on_execution (i:ins{Instr? i}) (s:machine_state) :
   Lemma
     (ensures (constant_on_execution (rw_set_of_ins i).loc_constant_writes (machine_eval_ins_st i) s)) =
@@ -703,7 +703,7 @@ let lemma_machine_eval_ins_st_constant_on_execution (i:ins{Instr? i}) (s:machine
   ) else ()
 #pop-options
 
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 3 --ifuel 1"
 let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
   Lemma
     (ensures (
@@ -814,7 +814,7 @@ let lemma_machine_eval_code_Ins_bounded_effects_aux4 (i:ins) (fuel:nat) s1 s2 :
   lemma_unchanged_at_trace rw.loc_writes (machine_eval_ins i (filt s1)) (machine_eval_ins i (filt s2))
     (intr s1 s1).ms_trace (intr s2 s2).ms_trace
 
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 3 --ifuel 1"
 let lemma_machine_eval_code_Ins_bounded_effects_aux i fuel :
   Lemma
     (requires (safely_bounded i))
@@ -836,7 +836,7 @@ let lemma_machine_eval_code_Ins_bounded_effects_aux i fuel :
 let lemma_machine_eval_code_Ins_bounded_effects i fuel =
   lemma_machine_eval_code_Ins_bounded_effects_aux i fuel
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 (* See fsti *)
 let lemma_locations_of_ocmp o s1 s2 = ()
 #pop-options
@@ -923,7 +923,7 @@ let rec lemma_constant_intersect_belongs_to_writes_union
       lemma_constant_intersect_belongs_to_writes_union xs c2 w1 w2 l v
     )
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let rec lemma_unchanged_at_mem (as0:list location) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
@@ -1197,7 +1197,7 @@ let lemma_bounded_effects_series_aux1 rw1 rw2 f1 f2 s a :
   assert (unchanged_except rw2.loc_writes (run f1 s) (run f2 (run f1 s)));
   assert (eval_location a s == eval_location a (run (f1;*f2) s))
 
-#push-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 1 --ifuel 1"
 let rec lemma_bounded_effects_series_aux2 c1 c2 f1 f2 s :
   Lemma
     (requires (

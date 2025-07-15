@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let qelem5 = (uint64 & uint64 & uint64 & uint64 & uint64)
 let qelem_wide5 = (uint64 & uint64 & uint64 & uint64 & uint64 & uint64 & uint64 & uint64 & uint64 & uint64)

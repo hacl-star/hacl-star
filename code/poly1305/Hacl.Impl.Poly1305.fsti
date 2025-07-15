@@ -12,7 +12,7 @@ open Hacl.Impl.Poly1305.Fields
 module S = Spec.Poly1305
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 50 --fuel 0 --max_ifuel 1"
 
 inline_for_extraction noextract
 let poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s +! precomplen s)

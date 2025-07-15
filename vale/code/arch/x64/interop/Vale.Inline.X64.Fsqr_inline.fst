@@ -70,7 +70,7 @@ let fsqr_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
 
 let fsqr_xmms_modified = fun _ -> false
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
 [@__reduce__]
 let fsqr_lemma'

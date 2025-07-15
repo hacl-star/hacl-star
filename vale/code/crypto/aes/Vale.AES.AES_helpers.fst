@@ -7,11 +7,11 @@ open FStar.Seq
 open Vale.AES.AES_s
 open FStar.Mul
 
-#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 0"
+#reset-options "--fuel 4 --ifuel 0"
 let lemma_expand_key_128_0 (key:aes_key_LE AES_128) =
   expand_key_reveal ()
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--fuel 1 --ifuel 0 --z3rlimit 10"
 let lemma_expand_key_128_i (key:aes_key_LE AES_128) (i:nat) =
   expand_key_reveal ();
   let n = 4 * i in
@@ -27,7 +27,7 @@ let rec lemma_expand_append (key:aes_key_LE AES_128) (size1:nat) (size2:nat) =
   expand_key_reveal ();
   if size1 < size2 then lemma_expand_append key size1 (size2 - 1)
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 40 --using_facts_from '* -FStar.Seq.Properties'"
+#reset-options "--fuel 1 --ifuel 0 --z3rlimit 40 --using_facts_from '* -FStar.Seq.Properties'"
 #restart-solver
 // quad32 key expansion is equivalent to nat32 key expansion
 let rec lemma_expand_key_128 (key:seq nat32) (size:nat) =

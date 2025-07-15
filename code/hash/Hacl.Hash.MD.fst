@@ -19,7 +19,7 @@ open FStar.Mul
 
 (** Auxiliary helpers *)
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 let padding_round (a: md_alg) (len: len_t a): Lemma
   ((len_v a len + pad_length a (len_v a len)) % block_length a = 0)

@@ -8,7 +8,7 @@ open Vale.Poly1305.Spec_s
 module LSig = Vale.AsLowStar.LowStarSig
 open Vale.X64.MemoryAdapters
 
-#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 #set-options "--z3cliopt smt.arith.nl=true"
 #set-options "--ext compat:normalizer_memo_ignore_cfg"
 

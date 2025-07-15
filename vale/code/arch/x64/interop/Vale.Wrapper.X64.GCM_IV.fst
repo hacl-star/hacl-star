@@ -25,7 +25,7 @@ let length_aux (b:uint8_p) (n:nat) : Lemma
     DV.length_eq db;
     FStar.Math.Lemmas.cancel_mul_mod n 16
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let length_aux5 (b:uint8_p) : Lemma
   (requires B.length b = 128)

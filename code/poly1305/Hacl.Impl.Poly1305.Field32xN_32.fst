@@ -18,7 +18,7 @@ open Hacl.Impl.Poly1305.Field32xN
 
 /// See comments in Hacl.Impl.Poly1305.Field32xN_256
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50 --using_facts_from '* -FStar.Seq'"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50 --using_facts_from '* -FStar.Seq'"
 
 
 val load_acc1:

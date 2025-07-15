@@ -15,7 +15,7 @@ module F56 = Hacl.Impl.BignumQ.Mul
 
 module SC = Spec.Curve25519
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
 val gte_q:
   s:lbuffer uint64 5ul ->

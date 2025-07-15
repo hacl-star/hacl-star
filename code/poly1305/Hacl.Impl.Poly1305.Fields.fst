@@ -20,7 +20,7 @@ module Vec = Hacl.Spec.Poly1305.Vec
 module F32xN = Hacl.Impl.Poly1305.Field32xN
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --fuel 0"
 
 noextract
 type field_spec =

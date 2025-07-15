@@ -7,7 +7,7 @@ open FStar.Mul
 open Spec.Hash.Definitions
 open Spec.Agile.HMAC
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 noeq
 type state (a:supported_alg) =

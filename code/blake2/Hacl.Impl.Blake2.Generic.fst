@@ -17,7 +17,7 @@ module Spec = Spec.Blake2
 open Hacl.Impl.Blake2.Constants
 open Hacl.Impl.Blake2.Core
 
-#set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
+#set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
 noextract
 let is_valid_blake2_config (a : Spec.alg) (m : m_spec) =
@@ -844,7 +844,7 @@ let blake2_init #al #ms hash kk nn =
   blake2_init_with_params hash { p with key_length = FStar.Int.Cast.uint32_to_uint8 kk; digest_length = FStar.Int.Cast.uint32_to_uint8 nn };
   pop_frame ()
 
-#push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 let _ : squash (inversion Spec.alg) = allow_inversion Spec.alg
 
 inline_for_extraction noextract

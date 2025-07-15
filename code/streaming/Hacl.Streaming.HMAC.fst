@@ -14,7 +14,7 @@ module S = FStar.Seq
 open Hacl.Agile.Hash
 open Hacl.Streaming.Interface
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 open Hacl.Streaming.HMAC.Definitions
 

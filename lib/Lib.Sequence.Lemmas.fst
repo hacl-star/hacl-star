@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
-#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 let rec repeati_extensionality #a n f g acc0 =
   if n = 0 then begin

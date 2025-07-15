@@ -12,7 +12,7 @@ open Spec.Hash.Definitions
 
 open FStar.Seq
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 let extract = Spec.Agile.HMAC.hmac
 

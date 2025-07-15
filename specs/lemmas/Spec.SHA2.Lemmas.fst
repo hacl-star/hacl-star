@@ -58,7 +58,7 @@ let shuffle_core = shuffle_core_
 let shuffle_aux (a:sha2_alg) (hash:words_state a) (block:block_w a): Tot (words_state a) =
   Spec.Loops.repeat_range 0 (size_k_w a) (shuffle_core a block) hash
 
-#push-options "--max_fuel 1 --max_ifuel 0"
+#push-options "--max_fuel 1 --ifuel 0"
 
 val shuffle_is_shuffle_pre: a:sha2_alg -> hash:words_state a -> block:block_w a ->
   Lemma (shuffle a hash block == shuffle_aux a hash block)

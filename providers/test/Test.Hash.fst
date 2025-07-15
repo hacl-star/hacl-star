@@ -71,7 +71,7 @@ let test_incremental_api (): ST unit
     let h5 = ST.get () in
     ()
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 let main (): St unit =
   // Nothing here: EverCrypt.Hash is no longer a public API, all clients
   // expected to go through HI

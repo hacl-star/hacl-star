@@ -2,7 +2,7 @@ module Hacl.Streaming.Keccak
 
 open FStar.HyperStack.ST
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 module B = LowStar.Buffer
 module G = FStar.Ghost

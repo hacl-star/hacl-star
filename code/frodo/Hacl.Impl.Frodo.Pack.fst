@@ -15,7 +15,7 @@ module Loops = Lib.LoopCombinators
 module Seq = Lib.Sequence
 module S = Spec.Frodo.Pack
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -Spec +Spec.Frodo.Pack +Spec.Matrix'"
+#reset-options "--z3rlimit 100 --fuel 0 --ifuel 0 --using_facts_from '* -Spec +Spec.Frodo.Pack +Spec.Matrix'"
 
 val lemma_split: #a:Type -> #len:size_nat -> s:Seq.lseq a len -> i:size_nat{i <= len} ->
   Lemma (s == Seq.(Seq.sub s 0 i @| Seq.sub s i (len - i)))

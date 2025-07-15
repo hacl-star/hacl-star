@@ -85,7 +85,7 @@ let lemma_mov_mov_is_mov (i1 i2:ins) (s:machine_state) :
 
 #pop-options
 
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 0 --max_ifuel 0"
+#push-options "--fuel 3 --ifuel 0"
 let mov_mov_elim_correct (is:list ins) (s:machine_state) :
   Lemma (peephole_correct mov_mov_elim_ph is s)
     [SMTPat (peephole_correct mov_mov_elim_ph is s)] =

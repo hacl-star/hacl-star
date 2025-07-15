@@ -14,7 +14,7 @@ module S = Spec.Poly1305
 
 include Hacl.Spec.Poly1305.Vec
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let block_v (w:lanes{w * size_block <= max_size_t}) = lbytes (w * size_block)
 

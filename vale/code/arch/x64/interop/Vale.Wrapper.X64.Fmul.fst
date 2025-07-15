@@ -4,7 +4,7 @@ open FStar.Mul
 module DV = LowStar.BufferView.Down
 open Vale.Interop.Base
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 #set-options "--ext compat:normalizer_memo_ignore_cfg"
 
 let fmul_e tmp f1 out f2 =
@@ -19,7 +19,7 @@ let fmul_e tmp f1 out f2 =
 
 #pop-options
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400 --using_facts_from '* -Vale.Interop.*'"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 400 --using_facts_from '* -Vale.Interop.*'"
 #set-options "--ext compat:normalizer_memo_ignore_cfg"
 
 let fmul2_e tmp f1 out f2 =
@@ -32,7 +32,7 @@ let fmul2_e tmp f1 out f2 =
 
 #pop-options
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 #set-options "--ext compat:normalizer_memo_ignore_cfg"
 
 let fmul_scalar_e out f1 f2 =

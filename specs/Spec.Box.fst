@@ -7,7 +7,7 @@ open Lib.ByteSequence
 
 open Spec.SecretBox
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
 (* Constants *)
 let size_publickey = 32 (* in bytes *)

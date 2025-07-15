@@ -21,7 +21,7 @@ friend Spec.SHA2
 friend Spec.SHA2.Lemmas
 friend Vale.SHA2.Wrapper
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 // Define these specific converters here, so that F* only reasons about
 // the correctness of the conversion once, rather that at every call site
@@ -152,7 +152,7 @@ let update_multi_one (h:hash256) (b:bytes_blocks {length b = block_length}) : Le
 
 friend Lib.ByteSequence
 
-#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0 --z3cliopt smt.arith.nl=true"
+#reset-options "--z3rlimit 50 --max_fuel 1 --ifuel 0 --z3cliopt smt.arith.nl=true"
 let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
   (Lib.ByteSequence.nat_from_bytes_be #Lib.IntTypes.SEC (seq_nat8_to_seq_uint8 s) == be_bytes_to_nat32 s)
   =
@@ -203,7 +203,7 @@ let sigma_0_0_partial_def (t:counter) (block:block_w) : nat32 =
     else
        0
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 30"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 30"
 let lemma_sha256_sigma0 (src:quad32) (t:counter) (block:block_w) : Lemma
   (requires 16 <= t /\ t < size_k_w(SHA2_256) /\
             src.hi3 == ws_opaque block (t-15))
@@ -211,7 +211,7 @@ let lemma_sha256_sigma0 (src:quad32) (t:counter) (block:block_w) : Lemma
   =
   sigma_0_0_partial_reveal ();
   ()
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 let sigma_0_1_partial_def (t:counter) (block:block_w) : nat32 =
     if 16 <= t && t < size_k_w_256 then
@@ -220,7 +220,7 @@ let sigma_0_1_partial_def (t:counter) (block:block_w) : nat32 =
     else
        0
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 30"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 30"
 let lemma_sha256_sigma1 (src:quad32) (t:counter) (block:block_w) : Lemma
   (requires 16 <= t /\ t < size_k_w(SHA2_256) /\
             src.hi3 == ws_opaque block (t-2))
@@ -228,7 +228,7 @@ let lemma_sha256_sigma1 (src:quad32) (t:counter) (block:block_w) : Lemma
   =
   sigma_0_1_partial_reveal ();
   ()
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 let sigma_1_0_partial_def (t:counter) (block:block_w) (hash_orig:hash256) : nat32 =
     if t < size_k_w_256 then
@@ -237,7 +237,7 @@ let sigma_1_0_partial_def (t:counter) (block:block_w) (hash_orig:hash256) : nat3
     else
        0
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 30"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 30"
 let lemma_sha256_sigma2 (src:quad32) (t:counter) (block:block_w) (hash_orig:hash256) : Lemma
   (requires t < size_k_w(SHA2_256) /\
             src.hi3 == word_to_nat32 ((repeat_range_vale t block hash_orig).[0]))
@@ -245,7 +245,7 @@ let lemma_sha256_sigma2 (src:quad32) (t:counter) (block:block_w) (hash_orig:hash
   =
   sigma_1_0_partial_reveal ();
   ()
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 let sigma_1_1_partial_def (t:counter) (block:block_w) (hash_orig:hash256) : nat32 =
     if t < size_k_w_256 then
@@ -254,7 +254,7 @@ let sigma_1_1_partial_def (t:counter) (block:block_w) (hash_orig:hash256) : nat3
     else
        0
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 30"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 30"
 let lemma_sha256_sigma3 (src:quad32) (t:counter) (block:block_w) (hash_orig:hash256) : Lemma
   (requires t < size_k_w(SHA2_256) /\
             src.hi3 == word_to_nat32 ((repeat_range_vale t block hash_orig).[4]))
@@ -262,7 +262,7 @@ let lemma_sha256_sigma3 (src:quad32) (t:counter) (block:block_w) (hash_orig:hash
   =
   sigma_1_1_partial_reveal ();
   ()
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 let make_seperated_hash_def (a b c d e f g h:nat32) :
   (hash:words_state SHA2_256 {
@@ -401,7 +401,7 @@ let lemma_quads_to_block_be qs
   =
   reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #nat32);
   reveal_opaque (`%ws) ws
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 #reset-options "--z3rlimit 20"
 let lemma_shuffle_core_properties (t:counter) (block:block_w) (hash_orig:hash256) : Lemma
@@ -447,7 +447,7 @@ let lemma_shuffle_core_properties (t:counter) (block:block_w) (hash_orig:hash256
   lemma_add_wrap_is_add_mod d0 (add_wrap (add_wrap (add_wrap (add_wrap h0 (sigma256_1_1 e0)) (ch_256 e0 f0 g0)) (word_to_nat32 k.[t])) (ws_opaque block t));
   Spec.Loops.repeat_range_induction 0 (t + 1) (shuffle_core_opaque block) hash_orig;
   shuffle_core_properties block (Spec.Loops.repeat_range 0 t (shuffle_core_opaque block) hash_orig) t
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 let lemma_add_mod_commutes (x y:UInt32.t) :
   Lemma (add_mod x y == add_mod y x)
@@ -692,7 +692,7 @@ let lemma_hash_to_bytes (s:seq quad32) : Lemma
   assert (equal (make_ordered_hash s.[0] s.[1]) (le_bytes_to_hash (le_seq_quad32_to_bytes s)));
   ()
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 40"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 40"
 
 let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
@@ -765,7 +765,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   FStar.Classical.forall_intro fi;
   assert (equal (quads_to_block_be qs) (words_of_bytes SHA2_256 #(block_word_length SHA2_256) input2))
 
-#reset-options "--max_fuel 0 --ifuel 1 --z3rlimit 20"
+#reset-options "--fuel 0 --ifuel 1 --z3rlimit 20"
 let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
   Lemma (requires length quads % 4 == 0 /\
