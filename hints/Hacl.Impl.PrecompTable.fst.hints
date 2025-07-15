@@ -14,7 +14,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "b8661571a0128421caf47a8615c6ab54"
+      "ffa050951b9a6f490325f5218af83a4c"
     ],
     [
       "Hacl.Impl.PrecompTable.spec_table_sub_len",
@@ -52,7 +52,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "773ecf9d66511f48481edbc80826f010"
+      "cc7d77b90594cdd15f68c9adc2611439"
     ],
     [
       "Hacl.Impl.PrecompTable.spec_table_sub_len",
@@ -90,7 +90,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "44a38d36c31b6a8d860b97593023d406"
+      "50f9feabf774e4f4ef4eac543f943627"
     ],
     [
       "Hacl.Impl.PrecompTable.table_gsub_len",
@@ -132,7 +132,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "27755066eb6239a07aa7f9f0e10da6c9"
+      "48c35d62fa33c4020121275f4218f00f"
     ],
     [
       "Hacl.Impl.PrecompTable.table_gsub_len",
@@ -189,7 +189,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "664e91cff01d1c7a4651d5ee199afb06"
+      "fdf32db2281037e87487bcf2f100eb1f"
     ],
     [
       "Hacl.Impl.PrecompTable.table_sub_len",
@@ -239,7 +239,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f3fdc5f495f4f7aa32734bf3adcb0209"
+      "808a91ed096e846e3219144301c79cbb"
     ],
     [
       "Hacl.Impl.PrecompTable.table_sub_len",
@@ -247,7 +247,7 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
         "constructor_distinct_Lib.Buffer.IMMUT",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
@@ -265,8 +265,6 @@
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Hacl.Bignum.Definitions.limb_t",
         "equation_Hacl.Impl.PrecompTable.spec_table_sub_len",
         "equation_Hacl.Impl.PrecompTable.table_gsub_len",
@@ -289,11 +287,8 @@
         "int_inversion", "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_Lib.Buffer.as_seq_gsub", "lemma_Lib.IntTypes.mul_lemma",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_2be0681fbf8400b3f2383abcc3fc2050",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
@@ -308,16 +303,14 @@
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947",
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
         "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
-        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.Heap.heap",
         "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperHeap.rid_freeable",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip", "typing_FStar.UInt32.v",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.int_t", "typing_Lib.IntTypes.mul",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.ConstBuffer.as_qbuf",
         "typing_LowStar.ConstBuffer.of_qbuf",
         "typing_LowStar.ConstBuffer.qbuf_mbuf",
@@ -327,10 +320,10 @@
         "typing_LowStar.Monotonic.Buffer.mgsub",
         "typing_tok_Lib.Buffer.IMMUT@tok", "typing_tok_Lib.Buffer.MUT@tok",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "12ce06eb6dfe342083ae0b806197fa50"
+      "fac3df36bb7779386663c742c53d7b42"
     ],
     [
       "Hacl.Impl.PrecompTable.table_sub_len",
@@ -427,7 +420,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "03230c2307bd3e75e52ecc6f33655289"
+      "42adc9ca394f0571dcf2e2956ab5e272"
     ],
     [
       "Hacl.Impl.PrecompTable.spec_table_update_sub_len",
@@ -459,7 +452,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "f5c257678cff75218784a750967d94ee"
+      "01f826b8644d7f6dd36a5d6fa6ad4ffa"
     ],
     [
       "Hacl.Impl.PrecompTable.spec_table_update_sub_len",
@@ -498,7 +491,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "9b4f26a1d4813b791a5cfc6652aaf2c6"
+      "bd5630730ccd76dc7852293e38efbcef"
     ],
     [
       "Hacl.Impl.PrecompTable.table_update_sub_len",
@@ -554,7 +547,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9d9a38fe5b06e8a6b94f7013c9771364"
+      "589a17b2434d72b6b32cdc953bc9607b"
     ],
     [
       "Hacl.Impl.PrecompTable.table_update_sub_len",
@@ -618,7 +611,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "37aba3d39fa227081765623bfb4f2ca4"
+      "027f09b741fb290f4740aa79b3ae6a7d"
     ],
     [
       "Hacl.Impl.PrecompTable.table_update_sub_len",
@@ -685,7 +678,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f538225f30614b38e79dfed3b89fbb49"
+      "14c3863785607f9157afcf28123b00cc"
     ],
     [
       "Hacl.Impl.PrecompTable.table_select_consttime_f",
@@ -736,7 +729,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1a2fa64b934b269ec76596166d8fd600"
+      "8ec09496338072de5495b6b78346d2e9"
     ],
     [
       "Hacl.Impl.PrecompTable.table_select_consttime_f",
@@ -824,7 +817,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "76f5286f98f2b9517e667da8760cf1f0"
+      "5af61e79fb639406740dfa5b59c0995c"
     ],
     [
       "Hacl.Impl.PrecompTable.table_select_consttime_f",
@@ -862,7 +855,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a5c7e10b118ad329f227bf718e38bef1"
+      "0f4d418008a9e311fe07dffd601ec5dd"
     ],
     [
       "Hacl.Impl.PrecompTable.table_select_consttime",
@@ -926,7 +919,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "463cb9c9f7ba09ac3c37a252ab6e9202"
+      "491e672b7cc0e7cab1f1b2caf927a9c5"
     ],
     [
       "Hacl.Impl.PrecompTable.table_select_consttime",
@@ -1032,7 +1025,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "36105f663ebb7b43531691edf4376773"
+      "44a38acfe03de99ee4763af067f10aef"
     ],
     [
       "Hacl.Impl.PrecompTable.table_select_consttime",
@@ -1142,7 +1135,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "86643a3bbb639c51696e789b1a40f007"
+      "4087666838411c4f3ff260e054280a03"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv",
@@ -1177,7 +1170,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "8ee1424c6f43248252073cdac553b803"
+      "7fe568570bae40811b458a0d92da3362"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv",
@@ -1221,7 +1214,7 @@
         "typing_Lib.IntTypes.int_t", "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "69c5667c6a64e9d102b3f0c63938f1e8"
+      "4829d0c8aa6821908dfdfac6f474bb8e"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_mul",
@@ -1252,7 +1245,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "55a8ab14c5a00e626280d734ed38ef06"
+      "83f36bc895109e51c5801cc07ae24dac"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_mul",
@@ -1307,7 +1300,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "725f193cd897f22ae89a950904b0f57e"
+      "92d0056e6ee2be20aed34d32bdd7fdb7"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_mul",
@@ -1362,7 +1355,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4a71baacb6c468ec84856ed77f923938"
+      "b2099a042ad2fd8e74a3a8626ad17f8c"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_sqr",
@@ -1393,7 +1386,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b063358aa85f2e79f566e644b75c5725"
+      "832c0d40d2d172f0f9c0f35e0353e0fa"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_sqr",
@@ -1458,7 +1451,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "75bb15484dedd06108b7799628ff18fd"
+      "b5e053c7a95aac79d75c60b00ba69ede"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_sqr",
@@ -1523,7 +1516,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0c07633d51ed9282f42c630798b6a841"
+      "ccd6ccd068a46d63a8b671dfa296b015"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv_lemma_j",
@@ -1578,7 +1571,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "52ea0d2193789834008d681240eccdf9"
+      "0619ddd4455826301a4e47911a525fbd"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv_lemma_j",
@@ -1643,7 +1636,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5bace41bdd35ff7b07f9101deacb4ef9"
+      "a985c6a531e0ce2ee3a3d36956288765"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv_lemma_j",
@@ -1709,7 +1702,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9b78c2f76254c2e51c040c76f1962b6b"
+      "6a5b231f287124c604f17837bfdf0b06"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv_lemma",
@@ -1763,7 +1756,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8e49a5df4815f7ed907a3c815d4905cc"
+      "b72c2d486643d6e5abf893f5206bffed"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv_lemma",
@@ -1778,7 +1771,7 @@
         "refinement_interpretation_Tm_refine_fbfe3697d06e879daf921dd58e055de9"
       ],
       0,
-      "2fbb80c27917cc14588eac65a008eea0"
+      "5813c3d8288892a4fcb645aa73a996b2"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv_lemma",
@@ -1816,7 +1809,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "62acdfa1ae454b26cace232352042a23"
+      "b706badd2d43bbe1323b72d4a4363964"
     ],
     [
       "Hacl.Impl.PrecompTable.table_update_sub_len_inv",
@@ -1877,7 +1870,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0d0c1b354ceaaadd5233b39506616a39"
+      "81dbbfc095a152ae7d634677c7ecc145"
     ],
     [
       "Hacl.Impl.PrecompTable.table_update_sub_len_inv",
@@ -1974,7 +1967,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ddbe641b48cdd95ea6c82e4052325a89"
+      "8168fddd084665c561e36b51096f13e9"
     ],
     [
       "Hacl.Impl.PrecompTable.table_update_sub_len_inv",
@@ -2071,7 +2064,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "28e497c964c0b6b6f7711f55527a8f5b"
+      "dffb35244f6ff79388bd074657345378"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_f_sqr",
@@ -2118,7 +2111,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "32f19746c99197647dc13aecdf42fdfd"
+      "b7e0244306e26f323aaaeeb181fba909"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_f_sqr",
@@ -2227,7 +2220,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b3da611d977a2b625fee7228834e0245"
+      "284688f092e0537021cb0be33462cd6c"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_f_sqr",
@@ -2337,7 +2330,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "59e3446d258c1f210c5ebd7a6630fd86"
+      "6903e451e62e2e4aab2a3305282130cf"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_f_mul",
@@ -2393,7 +2386,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "472a55c0ddafbcf08a00e38b6be649b6"
+      "f8a06bfce3b21aaf5be130e48ce2c27d"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_f_mul",
@@ -2501,7 +2494,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "62ce503a5e103cfb9ce74014fae8d79a"
+      "ba824b4a08e2ca1bad874c52cd0ab1ec"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_f_mul",
@@ -2609,7 +2602,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d1aa3a9615774e8a507db0c96d876bf8"
+      "41bc1574fb2c5b69c37550506feaf11a"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_f",
@@ -2656,7 +2649,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "14ea5ee3c89dc3ca39aab57b40960cbf"
+      "174852bb7553c8dda70e34588fdda05a"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_f",
@@ -2696,7 +2689,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "bf584f3cdff1029fc0910e9915fd60f6"
+      "29ad6cbf1778b2786d3d4cf77f65b0fe"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_f",
@@ -2732,7 +2725,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6567aaa5426015b85aafb39617c63e4f"
+      "a96a289ec6f28192a5f7802e00859fbc"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_noalloc",
@@ -2778,7 +2771,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6ac0ea322e6f45fb23bfdf6405936cc9"
+      "623c39ebfafbb98f0f08c9c7067f6204"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_noalloc",
@@ -2916,7 +2909,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6baad0d79e076525239a1dcd77987fb7"
+      "b2b31435c137eb96ea74219d0ef2f275"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table_noalloc",
@@ -3049,7 +3042,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a9daf14f332fd336f432db8adf061874"
+      "b65659e754a7fb7dc51483ebd6a910ce"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table",
@@ -3099,7 +3092,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "875725cd51e37b97bb804ab79187405b"
+      "d4dbfb209717fdc2a839d6c2b8e63b35"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table",
@@ -3242,7 +3235,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "061cb935511dea7caef28bc03522e90e"
+      "16ffc23d98375ce09a51a4952d069ca1"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table",
@@ -3279,7 +3272,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "305c1c1edf18e53601181b146e70ef9a"
+      "e52d822167dc372cbb88badeec8301b9"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_get_st",
@@ -3330,7 +3323,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "da8bae5e8edd0c1353ad8238c6c618b8"
+      "68ce39951e833109e55f2c7253728a56"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_get_vartime",
@@ -3423,7 +3416,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "dc14340722423b004e562563e59182b9"
+      "c9c4dff0a94f2930cb2d2943142be487"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_get_vartime",
@@ -3517,7 +3510,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "115174da212c7644cc8249d17897d9dd"
+      "188c2d421883e9ef22c78c2d439f52b3"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_get_consttime",
@@ -3584,7 +3577,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6790473b10c29d2343b1560a15283377"
+      "d5fa52ae971963f1077455fe3b8c3cf1"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_get_consttime",
@@ -3651,7 +3644,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7d6c3456994d45da882a58bf74dd91d6"
+      "9a53b314e0f5d5a9c331d89b5005b902"
     ]
   ]
 ]
