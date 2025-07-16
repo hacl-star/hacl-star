@@ -3,8 +3,6 @@ module Lib.Sequence
 open FStar.Mul
 open Lib.IntTypes
 
-#set-options "--z3rlimit 30 --fuel 0 --ifuel 0 --using_facts_from '-* +Prims +FStar.Math.Lemmas +FStar.Seq +Lib.IntTypes +Lib.Sequence'"
-
 /// Variable length Sequences, derived from FStar.Seq
 
 (* This is the type of unbounded sequences.
@@ -550,9 +548,6 @@ val index_generate_blocks:
            let _,s1 = generate_blocks len max n a_spec f () in
            let _,s2 = f (i / len) () in
            Seq.index s1 i == Seq.index s2 (i % len))
-
-
-#push-options "--using_facts_from '+FStar.UInt.pow2_values'"
 
 val create2: #a:Type -> x0:a -> x1:a -> lseq a 2
 
