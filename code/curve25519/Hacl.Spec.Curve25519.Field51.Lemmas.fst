@@ -921,7 +921,7 @@ let lemma_cswap2_step bit p1 p2 =
   let p2' = p2 ^. dummy in
   logxor_lemma p2 p1
 
-#push-options "--max_fuel 0 --max_ifuel 0"
+#push-options "--fuel 0 --ifuel 0"
 val mul64_wide_add3_lemma:
   #m0:scale64 -> #m1:scale64 -> #m2:scale64
  -> #m3:scale64 -> #m4:scale64 -> #m5:scale64

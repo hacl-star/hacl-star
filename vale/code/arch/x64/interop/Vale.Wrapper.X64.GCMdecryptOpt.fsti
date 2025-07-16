@@ -55,7 +55,7 @@ let length_aux5 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
-#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =

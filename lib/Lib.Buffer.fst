@@ -13,7 +13,7 @@ module IB = LowStar.ImmutableBuffer
 module ST = FStar.HyperStack.ST
 module Seq = Lib.Sequence
 
-#reset-options "--z3rlimit 350 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 350 --fuel 0 --ifuel 0"
 
 let modifies_includes l1 l2 h0 h1 = ()
 let modifies_trans l1 l2 h0 h1 h2 = ()
@@ -88,7 +88,7 @@ let copy #t #a #len o i =
 let memset #a #blen b init len =
   B.fill #a #(fun _ _ -> True) #(fun _ _ -> True) b init len
 
-#set-options "--max_fuel 0"
+#set-options "--fuel 0"
 
 let update_sub #t #a #len dst start n src =
   match t with
@@ -184,7 +184,7 @@ let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
   let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
   Lib.Loops.for (size 0) n inv impl
 
-#set-options "--max_fuel 0"
+#set-options "--fuel 0"
 
 let salloc1_with_inv #a #res h len x footprint spec spec_inv impl =
   let h0 = ST.get() in
@@ -273,7 +273,7 @@ val loopi_blocks_f_nospec:
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 -> modifies (loc w) h0 h1)
 
-#set-options "--z3rlimit 300 --max_fuel 0"
+#set-options "--z3rlimit 300 --fuel 0"
 
 let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
@@ -509,7 +509,7 @@ let lemma_eq_disjoint #t2 #a1 #a2 clen1 clen2 b1 b2 n h0 h1 =
   assert (Seq.index (as_seq h1 b2) (v n) == Seq.index (as_seq h1 (gsub b2 n (clen2 -! n))) 0)
 
 
-#set-options "--z3rlimit 50 --max_fuel 0"
+#set-options "--z3rlimit 50 --fuel 0"
 
 inline_for_extraction
 let mapT #t #a #b clen out f inp =

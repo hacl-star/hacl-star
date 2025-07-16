@@ -46,7 +46,7 @@ let failwith = LowStar.Failure.failwith
 /// Hashes
 /// ------
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 300"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
 val test_one_hash: hash_vector -> Stack unit (fun _ -> true) (fun _ _ _ -> true)
 let test_one_hash vec =

@@ -16,7 +16,7 @@ open LowStar.BufferOps
 friend Hacl.HMAC_DRBG
 friend EverCrypt.HMAC
 
-#set-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 50"
+#set-options "--ifuel 0 --fuel 0 --z3rlimit 50"
 
 /// Some duplication from Hacl.HMAC_DRBG because we don't want clients to depend on it
 ///

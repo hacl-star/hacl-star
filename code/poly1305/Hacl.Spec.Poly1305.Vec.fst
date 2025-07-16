@@ -1,6 +1,6 @@
 module Hacl.Spec.Poly1305.Vec
 
-#reset-options "--z3rlimit 60 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 60 --fuel 0 --ifuel 0"
 
 open FStar.Mul
 open Lib.IntTypes

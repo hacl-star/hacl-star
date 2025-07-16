@@ -28,7 +28,7 @@ open EverCrypt.Error
 /// Note: if the fst and the fsti are running on different fuel settings,
 /// something that works in the interactive mode for the fsti, when
 /// "re-interpreted" in the fst, might stop working!
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 
 /// Abstract footprints, with the same machinery as EverCrypt.Hash

@@ -206,7 +206,7 @@ let with_len (l:list 'a)
     (ensures fun m -> m==l /\ List.length m == normalize_term (List.length l))
   = l
 
-#set-options "--max_fuel 0 --max_ifuel 1 --z3rlimit_factor 2"
+#set-options "--fuel 0 --max_ifuel 1 --z3rlimit_factor 2"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
 [@__reduce__]
@@ -223,7 +223,7 @@ let aesni_lemma'
        aesni_post code va_s0 va_s1 f))
  = VC.va_lemma_Check_aesni_stdcall code va_s0 IA.win
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 2"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit_factor 2"
 
 (* Prove that vm_lemma' has the required type *)
 let aesni_lemma = as_t #(VSig.vale_sig_stdcall aesni_pre aesni_post) aesni_lemma'
@@ -323,7 +323,7 @@ let ta_post : VSig.vale_post ta_dom =
       (as_vale_immbuffer arg7)
       va_s1 f
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
 [@__reduce__]

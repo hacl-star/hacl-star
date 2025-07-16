@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 (* Constants *)
 let size_key = 32 (* in bytes *)

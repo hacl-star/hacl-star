@@ -50,7 +50,7 @@ let store_len a len b =
 
 #set-options "--z3rlimit 20"
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --z3seed 1"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 100 --z3seed 1"
 
 inline_for_extraction noextract
 let len_mod_32 (a: md_alg) (len: len_t a):
@@ -112,7 +112,7 @@ let pad0_len (a: hash_alg{is_md a}) (len: len_t a):
   r %^ block_len a
 #pop-options
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 
 inline_for_extraction
 let pad_1 (a: hash_alg{is_md a}) (dst: B.buffer uint8):

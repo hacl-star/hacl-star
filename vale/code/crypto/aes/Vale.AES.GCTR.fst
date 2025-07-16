@@ -15,7 +15,7 @@ open FStar.Math.Lemmas
 open Vale.Lib.Seqs
 open Vale.AES.Types_helpers
 
-#set-options "--z3rlimit 20 --max_fuel 1 --max_ifuel 0"
+#set-options "--z3rlimit 20 --max_fuel 1 --ifuel 0"
 
 let lemma_counter_init x low64 low8 =
   Vale.Poly1305.Bitvectors.lemma_bytes_and_mod1 low64;

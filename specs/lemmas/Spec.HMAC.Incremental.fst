@@ -8,7 +8,7 @@ open Spec.Agile.HMAC
 
 friend Spec.Agile.HMAC
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 // Processes exactly one block: the input key xored with the ipad
 let init a k =

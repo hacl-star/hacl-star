@@ -12,7 +12,7 @@ open Lib.ByteBuffer
 module F56 = Hacl.Impl.BignumQ.Mul
 module S56 = Hacl.Spec.BignumQ.Definitions
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val hload56_le:

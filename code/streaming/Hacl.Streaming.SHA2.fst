@@ -9,7 +9,7 @@ open FStar.HyperStack.ST
 
 /// A streaming version of MD-based hashes
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 module G = FStar.Ghost
 module F = Hacl.Streaming.Functor

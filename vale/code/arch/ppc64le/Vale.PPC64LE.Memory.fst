@@ -15,7 +15,7 @@ module DV = LowStar.BufferView.Down
 open Vale.Lib.BufferViewHelpers
 module S = Vale.Arch.MachineHeap_s
 
-#reset-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--fuel 2 --ifuel 1"
 
 let b8 = IB.b8
 
@@ -111,7 +111,7 @@ let index_mul_helper (addr i n j:int) : Lemma
   (addr + (i * n + j) == addr + n * i + j) =
  ()
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 let index64_get_heap_val64
     (h:vale_heap)
@@ -446,7 +446,7 @@ let get_addr_ptr (t:base_typ) (ptr:int) (h:vale_heap) : Ghost (buffer t)
   =
   Some?.v (find_valid_buffer t ptr h)
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --initial_fuel 0 --initial_ifuel 0 --z3rlimit 20"
+#reset-options "--fuel 0 --ifuel 0 --initial_fuel 0 --initial_ifuel 0 --z3rlimit 20"
 let load_buffer_read (t:base_typ) (ptr:int) (h:vale_heap) : Lemma
   (requires valid_mem t ptr h)
   (ensures (
@@ -624,7 +624,7 @@ let modifies_valid_taint #t b p h h' mt tn =
   (Classical.move_requires imp_left());
   (Classical.move_requires imp_right())
 
-#set-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
+#set-options "--fuel 1 --ifuel 1"
 let modifies_same_heaplet_id l h1 h2 =
   ()
 

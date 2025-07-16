@@ -10,7 +10,7 @@ module S = FStar.Seq
 open FStar.HyperStack.ST
 open FStar.Integers
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0"
+#reset-options "--fuel 1 --ifuel 0"
 
 friend Lib.IntTypes
 

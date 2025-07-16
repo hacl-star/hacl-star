@@ -4,7 +4,7 @@ open FStar.Mul
 let lemma_self16 (#a:Type) (m:map16 a) (n:int) (v:a) = ()
 let lemma_other16 (#a:Type) (m:map16 a) (n1 n2:int) (v:a) = ()
 
-#reset-options "--initial_ifuel 5 --max_ifuel 5"
+#reset-options "--ifuel 5"
 let lemma_equal16 (#a:Type) (m1 m2:map16 a) =
   assert (sel16 m1  0 == sel16 m2  0);
   assert (sel16 m1  1 == sel16 m2  1);

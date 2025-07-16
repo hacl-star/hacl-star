@@ -184,7 +184,7 @@ let lemma_iand_pow2 (n:pos) (x:natN (pow2 n)) (i:nat{i < n}) : Lemma
   );
   ()
 
-#set-options "--max_fuel 1 --max_ifuel 0"
+#set-options "--max_fuel 1 --ifuel 0"
 let lemma_ishr_pow2_diff (n:pos) (i:nat{i < n}) (j:nat{i <= j /\ j < n}) : Lemma
   (pow2 j < pow2 n /\ ishr #(pow2 n) (pow2 j) (j - i) == pow2 i)
   =

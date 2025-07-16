@@ -9,7 +9,7 @@ open FStar.Mul
 
 module Spec = Spec.Chacha20Poly1305
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 
 let aead_encrypt k n aadlen aad mlen m cipher tag =
   let vec256 = EverCrypt.AutoConfig2.has_vec256 () in

@@ -123,7 +123,7 @@ let rec lemma_make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat) : Lemma
     in
   ()
 
-#push-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 2 --max_ifuel 2"
+#push-options "--fuel 1 --ifuel 2"
 let rec lemma_loc_mutable_buffers_rec (l:list buffer_info) (s:Seq.seq buffer_info) (n:nat) : Lemma
   (requires
     n + List.length l == Seq.length s /\

@@ -10,7 +10,7 @@ open Lib.IntTypes
 module S = Spec.Agile.HPKE
 module SAEAD = Spec.Agile.AEAD
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let key_dh_public (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_dh_public cs))

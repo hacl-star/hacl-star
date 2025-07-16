@@ -50,7 +50,7 @@ module S = Vale.X64.Machine_Semantics_s
 module P = Vale.X64.Print_s
 
 friend Vale.X64.Decls
-#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
+#reset-options "--fuel 4 --max_ifuel 2 --z3rlimit 20"
 #endverbatim
 
 procedure SHA256_rnds2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w, ghost hash_orig:hash256)

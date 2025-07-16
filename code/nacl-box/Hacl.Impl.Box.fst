@@ -14,7 +14,7 @@ module ST = FStar.HyperStack.ST
 module Spec = Spec.Box
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 
 val box_beforenm:

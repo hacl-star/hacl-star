@@ -319,7 +319,7 @@ let be_bytes_to_seq_quad32_empty () :
   reveal_opaque (`%be_bytes_to_seq_quad32) be_bytes_to_seq_quad32;
   ()
 
-#reset-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
+#reset-options "--z3rlimit 10 --fuel 0 --ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
 let le_bytes_to_seq_quad32_to_bytes_one_quad b =
   calc (==) {
     le_bytes_to_seq_quad32 (le_quad32_to_bytes b);
@@ -673,7 +673,7 @@ let slice_commutes_be_seq_quad32_to_bytes0 (s:seq quad32) (n:nat{n <= length s})
   =
   slice_commutes_be_seq_quad32_to_bytes s 0 n
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
+#reset-options "--z3rlimit 20 --fuel 0 --ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
 let append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))
   =

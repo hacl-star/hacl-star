@@ -2,7 +2,7 @@ module Hacl.Meta.Curve25519
 
 open Lib.Buffer
 
-#set-options "--print_implicits --print_full_names --print_effect_args --z3rlimit 300 --ifuel 0 --max_fuel 0"
+#set-options "--print_implicits --print_full_names --print_effect_args --z3rlimit 300 --ifuel 0 --fuel 0"
 
 friend Hacl.Impl.Curve25519.Generic
 

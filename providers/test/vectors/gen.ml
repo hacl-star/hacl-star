@@ -51,7 +51,7 @@ let syntax_of_json module_ json =
 
   Printf.fprintf oc "module B = LowStar.Buffer\n\n";
 
-  Printf.fprintf oc "#set-options \"--max_fuel 0 --max_ifuel 0\"\n\n";
+  Printf.fprintf oc "#set-options \"--fuel 0 --ifuel 0\"\n\n";
 
   let vectors = match json with
     | `List vectors -> vectors

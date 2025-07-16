@@ -13,7 +13,7 @@ module F51 = Hacl.Impl.Ed25519.Field51
 module SC = Spec.Curve25519
 module CI = Hacl.Spec.Curve25519.Finv
 
-#set-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 500 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val crecip_1:

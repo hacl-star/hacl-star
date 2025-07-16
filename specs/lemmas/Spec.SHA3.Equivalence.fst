@@ -9,7 +9,7 @@ open Lib.LoopCombinators
 open Spec.SHA3.Constants
 open Spec.SHA3
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let state_chi_inner (y:index) (s:state) : Tot state =
   let v0  = get s 0 y ^. ((lognot (get s 1 y)) &. get s 2 y) in

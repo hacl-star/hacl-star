@@ -58,7 +58,7 @@ let length_aux5 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 #restart-solver
 
 inline_for_extraction noextract

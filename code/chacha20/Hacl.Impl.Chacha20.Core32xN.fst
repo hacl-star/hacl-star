@@ -13,7 +13,7 @@ open Lib.IntVector
 module Spec = Hacl.Spec.Chacha20.Vec
 module VecTranspose = Lib.IntVector.Transpose
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let lanes = Spec.lanes
 

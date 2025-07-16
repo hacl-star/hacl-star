@@ -127,7 +127,7 @@ let copy_felem f1 f2 =
   let h1 = ST.get () in
   LSeq.eq_intro (as_seq h1 f1) (as_seq h1 f2)
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 val fadd: C.(fadd_t M51 True)
 [@ CInline]

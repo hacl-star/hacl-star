@@ -28,7 +28,7 @@ let movbe_elim_ph = {
 
 module T = Vale.Def.Types_s
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --max_ifuel 0"
+#push-options "--fuel 2 --ifuel 0"
 let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
   Lemma
     (requires (OReg? dst))
@@ -69,7 +69,7 @@ let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
   )
 #pop-options
 
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 0 --max_ifuel 0"
+#push-options "--fuel 3 --ifuel 0"
 let movbe_elim_correct (is:list ins) (s:machine_state) :
   Lemma (peephole_correct movbe_elim_ph is s)
     [SMTPat (peephole_correct movbe_elim_ph is s)] =

@@ -1,7 +1,7 @@
 module Vale.Math.Lemmas.Int
 open FStar.Mul
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native"
+#reset-options "--fuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native"
 
 let multiply_fractions (a:int) (n:pos) = ()
 let lemma_div_mod (a:int) (n:pos) = ()
@@ -15,7 +15,7 @@ let bounded_multiple_is_zero (x:int) (n:pos) = ()
 let small_div (a:nat) (n:pos) : Lemma (requires a < n) (ensures a / n == 0) = ()
 let small_mod (a:nat) (n:pos) : Lemma (requires a < n) (ensures a % n == a) = ()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
+#reset-options "--fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
 
 let lt_multiple_is_equal (a:nat) (b:nat) (x:int) (n:pos) =
   assert (0 * n == 0);
@@ -143,9 +143,9 @@ let lemma_mod_plus_distr_r (a:int) (b:int) (n:pos) = lemma_mod_add_distr a b n
 
 let small_division_lemma_2 (a:int) (n:pos) = lemma_div_mod a n
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native"
+#reset-options "--fuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native"
 let multiplication_order_lemma a b n = ()
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
+#reset-options "--fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
 
 let division_propriety (a:int) (n:pos) = lemma_div_mod a n
 
@@ -159,7 +159,7 @@ let multiple_modulo_lemma (a:int) (n:pos) = cancel_mul_mod a n
 let division_addition_lemma (a:int) (n:pos) (b:int) = lemma_div_plus a b n
 let division_sub_lemma (a:nat) (n:pos) (b:nat) = lemma_div_plus a (-b) n
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native"
+#reset-options "--fuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native"
 
 let modulo_distributivity (a:int) (b:int) (c:pos) =
   lemma_div_mod a c;
@@ -167,7 +167,7 @@ let modulo_distributivity (a:int) (b:int) (c:pos) =
   lemma_div_mod (a % c + b % c) c;
   division_addition_lemma  (a - (a / c) * c + b - (b / c) * c) c (a / c + b / c)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
+#reset-options "--fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
 
 
 let modulo_addition_lemma (a:int) (n:pos) (b:int) = lemma_mod_plus a b n
@@ -191,13 +191,13 @@ let mod_mul_div_exact (a:int) (b:pos) (n:pos) =
   // a / b = k * n
   cancel_mul_mod k n
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
+#reset-options "--fuel 1 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
 let mod_pow2_div2 (a:int) (m:pos) : Lemma
   (requires a % pow2 m == 0)
   (ensures (a / 2) % pow2 (m - 1) == 0)
   =
   mod_mul_div_exact a 2 (pow2 (m - 1))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
+#reset-options "--fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
 
 let division_multiplication_lemma (a:int) (b:pos) (c:pos) =
   FStar.Math.Lemmas.pos_times_pos_is_pos b c;

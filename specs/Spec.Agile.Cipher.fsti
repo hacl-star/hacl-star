@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 20 --fuel 0 --max_ifuel 1"
 
 /// This module is concerned with defining an agile stream cipher, i.e. a
 /// function that given: a key; an iv (nonce); a counter, produces a fresh

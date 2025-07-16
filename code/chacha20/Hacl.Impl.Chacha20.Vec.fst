@@ -15,7 +15,7 @@ module Spec = Hacl.Spec.Chacha20.Vec
 module Chacha20Equiv = Hacl.Spec.Chacha20.Equiv
 
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200 --record_options"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200 --record_options"
 //#set-options "--debug Hacl.Impl.Chacha20.Vec --debug_level ExtractNorm"
 
 noextract

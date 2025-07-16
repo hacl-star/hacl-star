@@ -4,7 +4,7 @@ open FStar.Integers
 
 module S = FStar.Seq
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 let vale_alg_of_alg (a: alg { a = AES128_GCM \/ a = AES256_GCM }) =
   match a with

@@ -15,7 +15,7 @@ module S51 = Hacl.Spec.Curve25519.Field51.Definition
 module SC = Spec.Curve25519
 module SE = Spec.Ed25519
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let elemB = lbuffer uint64 5ul

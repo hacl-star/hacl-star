@@ -34,7 +34,7 @@ open FStar.Calc
 //      ))
 //  = ()
 
-#reset-options "--initial_ifuel 2 --max_ifuel 2"
+#reset-options "--ifuel 2"
 let rec core_create_lemma_disjointness
     (args:list arg{disjoint_or_eq args})
   : Lemma
@@ -378,7 +378,7 @@ let rec stack_of_args_stack_args'_aux
         frame_update_valid_heap fixed v stack ptr
      )
 
-#push-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 150 --z3refresh"
+#push-options "--max_fuel 1 --ifuel 0 --z3rlimit 150 --z3refresh"
 let stack_of_args_stack_args'
     (max_arity:nat)
     (n:nat)

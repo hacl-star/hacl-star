@@ -9,7 +9,7 @@ open Spec.Hash.Definitions
 open FStar.HyperStack.ST
 open Lib.IntTypes
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 
 /// Auxiliary lemma
 

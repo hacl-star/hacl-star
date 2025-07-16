@@ -14,7 +14,7 @@ open Vale.Def.Words.Four_s
 
 unfold let (.[]) = FStar.Seq.index
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 // Specialize these definitions (from Spec.SHA2.fst) for SHA256
 unfold let size_k_w_256 = 64

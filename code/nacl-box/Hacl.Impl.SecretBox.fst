@@ -16,7 +16,7 @@ module Spec = Spec.SecretBox
 module LSeq = Lib.Sequence
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val secretbox_init:
     xkeys:lbuffer uint8 96ul

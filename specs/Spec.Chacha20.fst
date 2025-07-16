@@ -7,7 +7,7 @@ open Lib.ByteSequence
 open Lib.LoopCombinators
 
 
-#set-options "--max_fuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --z3rlimit 100"
 
 /// Constants and Types
 

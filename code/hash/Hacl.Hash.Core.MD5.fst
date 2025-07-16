@@ -106,7 +106,7 @@ val round_op_gen
 			(U32.v a) (U32.v b) (U32.v c) (U32.v d) (U32.v k) s (U32.v i)
   ))
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
 let round_op_gen f abcd x a b c d k s i =
   let h = HST.get () in

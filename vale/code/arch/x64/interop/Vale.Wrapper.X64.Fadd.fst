@@ -14,7 +14,7 @@ let add_scalar_e out f1 f2 =
   let (x, _) = Vale.Stdcalls.X64.Fadd.add_scalar_e out f1 f2 () in
   x
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 let fadd_e out f1 f2 =
   DV.length_eq (get_downview out);

@@ -24,7 +24,7 @@ module Seq = Lib.Sequence
 
 module ST = FStar.HyperStack.ST
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 let mk_extract a hmac prk salt saltlen ikm ikmlen =
   hmac prk salt saltlen ikm ikmlen

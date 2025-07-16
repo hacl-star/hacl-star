@@ -12,7 +12,7 @@ open Hacl.Poly1305.Field32xN.Lemmas2
 
 module Vec = Hacl.Spec.Poly1305.Vec
 
-#set-options "--z3rlimit 100 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 1 --using_facts_from '* -FStar.Seq'"
 
 
 val lemma_feval_is_fas_nat_i:

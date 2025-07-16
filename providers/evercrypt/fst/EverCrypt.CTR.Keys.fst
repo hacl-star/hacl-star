@@ -18,7 +18,7 @@ open Spec.Cipher.Expansion
 
 friend Spec.Cipher.Expansion
 
-#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 let _: squash (inversion impl) = allow_inversion impl
 

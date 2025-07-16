@@ -8,7 +8,7 @@ module D = Vale.Math.Poly2.Defs_s
 module GI = Vale.Math.Poly2.Galois.IntTypes
 
 // recursive definitions of from_vec/to_vec are prone to matching loops, so use no fuel from here on
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 
 let to_poly #f e =
   let G.GF t irred = f in
@@ -572,7 +572,7 @@ let lemma_fmul_fmul (f:G.field) (a b:G.felem f) : Lemma
     in
   ()
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--fuel 0 --ifuel 0"
 let lemma_mul f a b =
   let G.GF t irred = f in
   let n = I.bits t in

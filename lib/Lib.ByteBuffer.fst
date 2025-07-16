@@ -35,7 +35,7 @@ module E = LowStar.Endianness
  * but this would be too cumbersome.
 *)
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
+#set-options "--z3rlimit 50 --fuel 0 --max_ifuel 1"
 
 let uint_to_be #t #l u =
   match t, l with

@@ -12,7 +12,7 @@ module G = FStar.Ghost
 
 open LowStar.BufferOps
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 /// This module largely follows EverCrypt.Hash, but with the caveat that it is
 /// indexed over an implementation rather than a choice of algorithm. This means

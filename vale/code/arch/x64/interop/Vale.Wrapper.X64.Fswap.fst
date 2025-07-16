@@ -4,7 +4,7 @@ open FStar.Mul
 module DV = LowStar.BufferView.Down
 open Vale.Interop.Base
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 #set-options "--ext compat:normalizer_memo_ignore_cfg"
 
 let cswap2_e bit p0 p1 =

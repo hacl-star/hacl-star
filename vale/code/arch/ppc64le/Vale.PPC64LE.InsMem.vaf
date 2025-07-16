@@ -40,7 +40,7 @@ open Vale.Arch.HeapImpl
 module S = Vale.PPC64LE.Semantics_s
 
 friend Vale.PPC64LE.Decls
-#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --z3rlimit 20"
+#reset-options "--fuel 2 --max_ifuel 2 --z3rlimit 20"
 #endverbatim
 
 #verbatim
