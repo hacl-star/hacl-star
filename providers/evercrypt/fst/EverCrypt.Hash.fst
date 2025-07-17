@@ -551,7 +551,7 @@ val modulo_sub_lemma (a : int) (b : nat) (c : pos) :
   (requires (b < c /\ (a - b) % c = 0))
   (ensures (b = a % c))
 let modulo_sub_lemma a b c =
-  calc== {
+  calc (==) {
     (a - b) % c;
   == { Math.Lemmas.lemma_mod_add_distr (-b) a c }
     ((a % c) - b) % c;
