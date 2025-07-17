@@ -133,7 +133,7 @@ FSTAR_NO_FLAGS = $(FSTAR_EXE) $(FSTAR_HINTS) \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
   --warn_error '@240+241@247-272-274@319@328@331@332@337' \
   --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false \
-  --z3version 4.8.5
+  --z3version 4.13.3
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 

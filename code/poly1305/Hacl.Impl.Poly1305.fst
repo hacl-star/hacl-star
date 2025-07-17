@@ -26,7 +26,7 @@ friend Lib.LoopCombinators
 let _: squash (inversion field_spec) = allow_inversion field_spec
 
 
-#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0 --record_options"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0 --record_options"
 
 inline_for_extraction noextract
 let get_acc #s (ctx:poly1305_ctx s) : Stack (felem s)
@@ -54,7 +54,7 @@ let state_inv_t #s h ctx =
   F32xN.load_precompute_r_post #(width s) h (gsub ctx (nlimb s) (precomplen s))
 
 
-#reset-options "--z3rlimit 100 --fuel 0 --ifuel 0 --record_options"
+#push-options "--z3rlimit 100"
 let reveal_ctx_inv' #s ctx ctx' h0 h1 =
   let acc_b = gsub ctx 0ul (nlimb s) in
   let acc_b' = gsub ctx' 0ul (nlimb s) in
@@ -77,7 +77,7 @@ let reveal_ctx_inv' #s ctx ctx' h0 h1 =
   assert (as_seq h0 acc_b == as_seq h1 acc_b');
   assert (as_seq h0 r_b == as_seq h1 r_b');
   assert (as_seq h0 precom_b == as_seq h1 precom_b')
-
+#pop-options
 
 val fmul_precomp_inv_zeros: #s:field_spec -> precomp_b:lbuffer (limb s) (precomplen s) -> h:mem ->
   Lemma
@@ -349,7 +349,6 @@ let poly1305_update1_f #s pre nb len text i acc=
   update1 #s pre block acc
 
 
-#push-options "--z3rlimit 100 --max_fuel 1"
 inline_for_extraction noextract
 val poly1305_update_scalar:
     #s:field_spec
@@ -368,6 +367,8 @@ val poly1305_update_scalar:
     felem_fits h1 acc (2, 2, 2, 2, 2) /\
     (feval h1 acc).[0] ==
     S.poly1305_update (as_seq h0 text) (feval h0 acc).[0] (feval h0 (gsub pre 0ul 5ul)).[0])
+
+#push-options "--z3rlimit 50 --retry 3 --max_fuel 1" // Verifying this function is very slow (~1min), and brittle
 
 let poly1305_update_scalar #s len text pre acc =
   let nb = len /. 16ul in
@@ -546,6 +547,7 @@ val poly1305_update_vec:
     (feval h1 acc).[0] ==
       Vec.poly1305_update_vec #(width s) (as_seq h0 text) (feval h0 acc).[0] (feval h0 (gsub pre 0ul 5ul)).[0])
 
+#push-options "--split_queries always"
 let poly1305_update_vec #s len text pre acc =
   let sz_block = blocklen s in
   FStar.Math.Lemmas.multiply_fractions (v len) (v sz_block);
@@ -557,7 +559,7 @@ let poly1305_update_vec #s len text pre acc =
   let len1 = len -! len0 in
   let t1 = sub text len0 len1 in
   poly1305_update_scalar #s len1 t1 pre acc
-
+#pop-options
 
 inline_for_extraction noextract
 val poly1305_update32: poly1305_update_st M32
@@ -606,7 +608,6 @@ let poly1305_finish #s tag key ctx =
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
   uints64_to_bytes_le tag f30 f31
 
-#restart-solver
 noextract
 [@ Meta.Attribute.specialize ]
 let poly1305_mac #s output input input_len key =

@@ -4,9 +4,6 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.LoopCombinators
 
-#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
-// --using_facts_from '-* +Prims +FStar.Pervasives +FStar.Math.Lemmas +FStar.Seq +Lib.IntTypes +Lib.Sequence'"
-
 let index #a #len s n = Seq.index s n
 
 let create #a len init = Seq.create #a len init
@@ -83,16 +80,12 @@ let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i <
   assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
   Seq.snoc si (init i)
 
-#push-options "--max_fuel 1 --z3rlimit_factor 2 --retry 2"
-
 let createi #a len init_f =
   repeat_gen_inductive len
     (createi_a a len init_f)
     (createi_pred a len init_f)
     (createi_step a len init_f)
     (of_list [])
-
-#pop-options
 
 inline_for_extraction
 let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
@@ -267,14 +260,6 @@ let mod_prop n a b =
   Math.Lemmas.modulo_lemma (b - a * n) n;
   Math.Lemmas.lemma_mod_sub b n a
 
-#push-options "--z3rlimit 200"
-
-// This proof is somehow very brittle on Z3 4.8.5.
-// For a small percentage of seeds, it fails after taking a rather long
-// time. For most others, it succeeds very quickly. Use a retry until we
-// can upgrade.
-#push-options "--retry 5"
-#restart-solver
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in
   let map_blocks_f = map_blocks_f #a bs max inp f in
@@ -292,7 +277,6 @@ let rec index_map_blocks_multi #a bs max n inp f i =
     Seq.lemma_index_app2 s s' i;
     mod_prop bs (n-1) i
   end
-#pop-options
 
 let map_blocks #a blocksize inp f g =
   let len = length inp in
@@ -373,8 +357,6 @@ let rec index_generate_blocks #t len max n f i =
     Seq.lemma_index_app2 s s' i;
     mod_prop len (n-1) i
     end
-
-// #push-options "--using_facts_from '+FStar.UInt.pow2_values'"
 
 let create2 #a x0 x1 =
   let l = [x0; x1] in

@@ -193,6 +193,7 @@ val point_mul_g_double_split_lambda_table_noalloc:
         (refl (as_seq h0 q3)) (qas_nat h0 r3)
         (refl (as_seq h0 q4)) (qas_nat h0 r4) 5)
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 let point_mul_g_double_split_lambda_table_noalloc out table2 r1 q1 r2 q2 r3 q3 r4 q4 p1 p2
   is_negate1 is_negate2 is_negate3 is_negate4 =
   [@inline_let] let len = 15ul in
@@ -248,7 +249,7 @@ let point_mul_g_double_split_lambda_table_noalloc out table2 r1 q1 r2 q2 r3 q3 r
     (to_const precomp_basepoint_table_w5)
     (to_const precomp_basepoint_table_w5)
     (to_const table2) (to_const table2) out
-
+#pop-options
 
 val point_mul_g_double_split_lambda_table:
     out:point
@@ -288,6 +289,7 @@ val point_mul_g_double_split_lambda_table:
         (refl (as_seq h0 q3)) (qas_nat h0 r3)
         (refl (as_seq h0 q4)) (qas_nat h0 r4) 5)
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 [@CInline]
 let point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
   p1 p2 is_negate1 is_negate2 is_negate3 is_negate4 =
@@ -307,7 +309,7 @@ let point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
   pop_frame ();
   let h2 = ST.get () in
   assert (modifies (loc out) h0 h2)
-
+#pop-options
 
 inline_for_extraction noextract
 val point_mul_g_double_split_lambda_vartime_endo_split:

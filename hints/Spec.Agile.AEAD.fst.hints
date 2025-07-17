@@ -1,5 +1,5 @@
 [
-  "c886f8a85f36e53a39ab9514646657d5",
+  "cee33947c4d694b36187a17890d2fa5a",
   [
     [
       "Spec.Agile.AEAD.uu___0",
@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "17885306c2978e9ce8e7cdf01c06a4bc"
+      "3484c4fb34d11f1c548b2f1ec83b8169"
     ],
     [
       "Spec.Agile.AEAD.cipher_alg_of_supported_alg",
@@ -26,7 +26,7 @@
         "typing_Spec.Agile.AEAD.is_supported_alg"
       ],
       0,
-      "13824c724e93c040ff21f720d4192661"
+      "3ec48f66cb0b464012e4178f8ab42c8a"
     ],
     [
       "Spec.Agile.AEAD.key_length",
@@ -66,7 +66,7 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "89b4bd98e460ad4ec2b36a975c4a6ca7"
+      "330002ff6a717a9e883bd15df14db10a"
     ],
     [
       "Spec.Agile.AEAD.tag_length",
@@ -85,7 +85,7 @@
         "fuel_guarded_inversion_Spec.Agile.AEAD.alg"
       ],
       0,
-      "5d85f662456d42806eff8fc384effbef"
+      "abf541e4223ff1093a1dc190469ffb91"
     ],
     [
       "Spec.Agile.AEAD.iv_length",
@@ -110,7 +110,7 @@
         "typing_Spec.Agile.AEAD.is_supported_alg"
       ],
       0,
-      "39f6dfd20054e8aa297d37940189288e"
+      "a883b9df0149f9cc65935ace97003792"
     ],
     [
       "Spec.Agile.AEAD.max_length",
@@ -138,7 +138,7 @@
         "typing_Prims.pow2", "typing_Spec.Agile.AEAD.uu___is_AES256_GCM"
       ],
       0,
-      "343292ed2cac3bd67a92c89f6e8215b5"
+      "51257c0b32e9f266eebc25b7bd9c3bee"
     ],
     [
       "Spec.Agile.AEAD.lbytes",
@@ -147,7 +147,7 @@
       1,
       [ "@query" ],
       0,
-      "f39efe778449b502cad9b01104121aad"
+      "03960807c38259b590711bed3d3d330e"
     ],
     [
       "Spec.Agile.AEAD.vale_alg_of_alg",
@@ -166,7 +166,7 @@
         "refinement_interpretation_Tm_refine_5171614844d45d48a27a076e659221d2"
       ],
       0,
-      "37876623eb062d6d853f69a3f7c80c06"
+      "aa2f12cbc0e14ce052fe7fe7f7fd2a28"
     ],
     [
       "Spec.Agile.AEAD.vale_alg_of_alg",
@@ -175,7 +175,7 @@
       0,
       [ "@query", "assumption_Spec.Agile.AEAD.alg__uu___haseq" ],
       0,
-      "9b680d08c9639268912faf187e028d75"
+      "013edcefe939e243ce499c9fea411881"
     ],
     [
       "Spec.Agile.AEAD.gcm_encrypt_tag_length",
@@ -254,7 +254,7 @@
         "typing_Vale.Def.Words_s.nat32", "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "2bb1e14bf407056389ce66737a1a2a4f"
+      "49c2df0c581ed6ac094194e44f15231b"
     ],
     [
       "Spec.Agile.AEAD.gcm_encrypt_cipher_length",
@@ -317,7 +317,7 @@
         "typing_Vale.Def.Words_s.nat32", "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "61aee3ca7c86719feb9c15589f093b23"
+      "febdd35e5c3e68664e238548974a5633"
     ],
     [
       "Spec.Agile.AEAD.encrypt",
@@ -379,7 +379,8 @@
         "equation_Spec.Chacha20Poly1305.size_key",
         "equation_Spec.Chacha20Poly1305.size_nonce",
         "equation_Spec.Poly1305.size_block",
-        "equation_Spec.Poly1305.size_key",
+        "equation_Spec.Poly1305.size_key", "equation_Spec.Poly1305.to_felem",
+        "equation_Spec.Poly1305.zero",
         "equation_Vale.AES.AES_common_s.is_aes_key",
         "equation_Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8",
         "equation_Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8",
@@ -410,7 +411,7 @@
         "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "df4f87c8fa911dfef5ae5df73048e64d"
+      "b0d6a12c2c5a23bb8532e7b1362427d8"
     ],
     [
       "Spec.Agile.AEAD.gcm_decrypt_cipher_length",
@@ -478,7 +479,7 @@
         "typing_Vale.Def.Words_s.nat32", "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "83f68cc65e393731bcb06af38688e56c"
+      "17238904d847a140cceb62188bf9edf2"
     ],
     [
       "Spec.Agile.AEAD.decrypt",
@@ -580,7 +581,7 @@
         "typing_Vale.Def.Words_s.nat8"
       ],
       0,
-      "b70fc97fbd489cdc7f488e721b0c2317"
+      "6c8c77bd893b979fa5d24d43cb2ae3b3"
     ],
     [
       "Spec.Agile.AEAD.correctness",
@@ -600,7 +601,7 @@
         "typing_Spec.Agile.AEAD.encrypt"
       ],
       0,
-      "e21dd810768686fbb1fb9c76fb6d7eb9"
+      "6194fcffa1187ce82f7c20feed45ac46"
     ]
   ]
 ]

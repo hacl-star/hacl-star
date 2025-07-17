@@ -33,7 +33,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "0f5e0e1fb957da6b071741b12a7b1dff"
+      "532196a6909e57f7284d92093eee256c"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.point_mul_g_compress",
@@ -234,7 +234,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "d862dab9e580d7c5909cb39e9267c0a4"
+      "58bad12a531c90b07ef9677bff6f69bf"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.sign_compute_s",
@@ -271,7 +271,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "ad95b1ba2f12733f44dd4a3dcc14d584"
+      "9ab40a5fceabfac43bf9a0401fbb5031"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.sign_compute_s",
@@ -288,7 +288,6 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
@@ -311,6 +310,7 @@
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Hacl.Impl.BignumQ.Mul.as_nat",
+        "equation_Hacl.Impl.BignumQ.Mul.qelemB",
         "equation_Hacl.Impl.BignumQ.Mul.qelem_fits",
         "equation_Hacl.Impl.BignumQ.Mul.scalar_inv_full_t",
         "equation_Hacl.Spec.BignumQ.Definitions.as_nat5",
@@ -436,6 +436,7 @@
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_Hacl.Impl.BignumQ.Mul.as_nat",
         "typing_Hacl.Spec.BignumQ.Definitions.max56",
         "typing_Hacl.Spec.BignumQ.Definitions.pow56",
         "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.length",
@@ -455,11 +456,10 @@
         "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Prims.int",
         "typing_Prims.pow2", "typing_Spec.Ed25519.q",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "618781c686af80821d7fc53933f6bdc6"
+      "7d32261f5e1bcf4081590c49b4d49bd2"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.sign_expanded",
@@ -564,7 +564,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "7d3349e1911fca23890700edb301ebe2"
+      "c6288831ac52972283577d741777a154"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.sign_expanded",
@@ -768,7 +768,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "26e2f7530038d95c21daf78bf8e14311"
+      "4b92bc41cbdb38f71243f744baf076b6"
     ]
   ]
 ]

@@ -1,5 +1,5 @@
 [
-  "2170055d922572616a76776adf3c3332",
+  "9cc9f067b0938438228eddb01503bfa3",
   [
     [
       "Hacl.Impl.P256.PointMul.table_inv_w4",
@@ -47,7 +47,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7cf7fa773edee966020ca4f21a5c8a54"
+      "092b12691d973d8145167438266aaa4d"
     ],
     [
       "Hacl.Impl.P256.PointMul.table_inv_w5",
@@ -90,7 +90,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "404a235200cd686089e795db2c78cb81"
+      "559d536e894791baf90ee37a163500a1"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul",
@@ -102,7 +102,7 @@
         "refinement_interpretation_Tm_refine_0eef7cb13b84846856f80233596ab64b"
       ],
       0,
-      "e0e3164ec1f812f8f6dec7d2d43bf397"
+      "1b1243c807ee3cae518b82d471ca6cbd"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul",
@@ -152,7 +152,6 @@
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Spec.Exponentiation.exp_fw",
         "equation_Spec.P256.PointOps.aff_point",
-        "equation_Spec.P256.PointOps.one",
         "equation_Spec.P256.PointOps.order",
         "equation_Spec.P256.PointOps.prime",
         "equation_Spec.P256.PointOps.proj_point",
@@ -174,9 +173,9 @@
         "lemma_LowStar.Monotonic.Buffer.live_is_null",
         "lemma_LowStar.Monotonic.Buffer.loc_buffer_null",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkconcrete_ops_to",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_a_spec",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_comm_monoid",
@@ -236,7 +235,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c1bf0a20fca2d41293763221ff63a2c5"
+      "3569d30a314d897f999a463459318f5c"
     ],
     [
       "Hacl.Impl.P256.PointMul.precomp_get_consttime",
@@ -283,7 +282,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "896f145a91a3e87a4951682f309b44ac"
+      "4db2c29683cb6fa49a689be36921ad2c"
     ],
     [
       "Hacl.Impl.P256.PointMul.precomp_get_consttime",
@@ -351,7 +350,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0c2595ba367b3f9f00eb74c8ad193299"
+      "0fe3a0dce19aeeaa3bbdc252293a2345"
     ],
     [
       "Hacl.Impl.P256.PointMul.precomp_get_consttime",
@@ -405,7 +404,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c577d234d0114945244fe96a526ffa10"
+      "bdc2b34597825a29347218c534625f00"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul_g_noalloc",
@@ -434,7 +433,7 @@
         "typing_Prims.pow2", "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "0edbf9015b14fca56e391f442101148f"
+      "2c6212f3488c306903dcba2109117cd3"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul_g_noalloc",
@@ -617,7 +616,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "ac77814a6ba26ca4e274f98c5b0bc29b"
+      "08a5cb6d11ccd196edacf3e3ebb2f594"
     ],
     [
       "Hacl.Impl.P256.PointMul.lemma_exp_four_fw_local",
@@ -645,7 +644,7 @@
         "typing_Prims.pow2", "typing_Spec.P256.PointOps.order"
       ],
       0,
-      "5147b17a3151460e0d27c92274cfab6a"
+      "8b5c698d19c4d7ca1112ee0d3a6e77cb"
     ],
     [
       "Hacl.Impl.P256.PointMul.lemma_exp_four_fw_local",
@@ -701,7 +700,7 @@
         "typing_Prims.pow2", "typing_Spec.P256.PointOps.order"
       ],
       0,
-      "a0e6bd6d727e98b47d8e7afd6e10a546"
+      "b837df14ec048701795d18a09dfd9c6c"
     ],
     [
       "Hacl.Impl.P256.PointMul.lemma_exp_four_fw_local",
@@ -757,7 +756,7 @@
         "typing_Prims.pow2", "typing_Spec.P256.PointOps.order"
       ],
       0,
-      "cc1b37be2a5fe2fd1cde1f463f2e88f6"
+      "20b277d9a5b92c2ed50e43a1ac873ac2"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul_g",
@@ -769,7 +768,7 @@
         "refinement_interpretation_Tm_refine_c756add430c4c246d74e34389159dd2b"
       ],
       0,
-      "cfee11d9043d69b64550ba81ef0ddc4d"
+      "2fc510ac48d172246fa033274be9c353"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul_g",
@@ -914,7 +913,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0922039d13edce8b87404222cabfc217"
+      "117b805b5d90e264f06039def01532f3"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul_g_double_vartime_noalloc",
@@ -967,7 +966,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e67caa4aef398611dbbb4ba02fca9fa4"
+      "d86fc87d8882dee169ef4342e8836ac2"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul_g_double_vartime_noalloc",
@@ -1146,7 +1145,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "24397726603bd941fa589183c9c9380a"
+      "6b6a9a5b4741fd668ad7acd1330a8775"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul_g_double_vartime_noalloc",
@@ -1330,7 +1329,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "5a268a85df0d8529a8a959f33319373a"
+      "e6ed14894a18dd407cc25499f827398b"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul_double_g",
@@ -1342,7 +1341,7 @@
         "refinement_interpretation_Tm_refine_aff0e4c03ecf0b94c2a6354e3abdfdd2"
       ],
       0,
-      "cb2b789ecc545199fdf1eed9cd2a98bb"
+      "331e85c18b2450a8ace09b986697e26c"
     ],
     [
       "Hacl.Impl.P256.PointMul.point_mul_double_g",
@@ -1542,7 +1541,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "d8cf0de6a3c7076aa8bed49eab9c66a6"
+      "0be6b4779ad87176018fe75d2a933ed2"
     ]
   ]
 ]

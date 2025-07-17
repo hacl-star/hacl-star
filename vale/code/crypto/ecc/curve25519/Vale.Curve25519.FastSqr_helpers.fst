@@ -68,7 +68,7 @@ let lemma_sqr_part3
 
 let aux (a b: nat) : Lemma (requires a == b) (ensures a * a == b * b) = ()
 
-#push-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+#push-options "--z3rlimit 100 --fuel 0 --ifuel 0 --z3smtopt '(set-option :smt.arith.solver 2)'"
 let lemma_sqr (a:int) (a0 a1 a2 a3
                r8 r9 r10 r11 r12 r13 rax rcx
                r8' r9' r10' r11' r12' r13' r14'
@@ -138,13 +138,17 @@ let lemma_sqr (a:int) (a0 a1 a2 a3
     squares + lhs_rem;
     (==) { }
     squares + rhs_rem;
-    (==) { assert_by_tactic (squares + rhs_rem ==  pow2_eight (mul_nats a0 a0) r8' ((mul_nats a1 a1) + r9') r10' ((mul_nats a2 a2) + r11') r12' ((mul_nats a3 a3) + r13') r14') int_canon }
- pow2_eight (mul_nats a0 a0) r8' ((mul_nats a1 a1) + r9') r10' ((mul_nats a2 a2) + r11') r12' ((mul_nats a3 a3) + r13') r14';
+    (==) {
+      assert (squares + rhs_rem ==  pow2_eight (mul_nats a0 a0) r8' ((mul_nats a1 a1) + r9') r10' ((mul_nats a2 a2) + r11') r12' ((mul_nats a3 a3) + r13') r14')
+          by int_canon ()
+    }
+    pow2_eight (mul_nats a0 a0) r8' ((mul_nats a1 a1) + r9') r10' ((mul_nats a2 a2) + r11') r12' ((mul_nats a3 a3) + r13') r14';
   };
 
-  assert (cf == 0);
+  assert (cf == 0); (* fixme *)
   let ultimate_rhs:int = pow2_eight d0 d1 d2 d3 d4 d5 d6 d7 in
-  assert_by_tactic (pow2_nine d0 d1 d2 d3 d4 d5 d6 d7 cf == ultimate_rhs) int_canon
+  assert (pow2_nine d0 d1 d2 d3 d4 d5 d6 d7 cf == ultimate_rhs) by int_canon ();
+  ()
 
 #pop-options
 

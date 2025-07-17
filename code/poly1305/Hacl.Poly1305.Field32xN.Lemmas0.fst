@@ -165,6 +165,8 @@ val smul_felem5_fits_lemma1:
   -> f2:uint64xN w{felem_fits1 f2 m2} ->
   Lemma (felem_wide_fits1 (vec_mul_mod f2 u1) (m1 * m2))
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+// ^ much faster with solver 2, though it does work with solver 6 eventually
 let smul_felem5_fits_lemma1 #w #m1 #m2 u1 f2 =
   match w with
   | 1 ->
@@ -177,7 +179,7 @@ let smul_felem5_fits_lemma1 #w #m1 #m2 u1 f2 =
     smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 1;
     smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 2;
     smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 3
-
+#pop-options
 
 val smul_felem5_fits_lemma:
     #w:lanes
@@ -303,6 +305,8 @@ val smul_add_felem5_fits_lemma1:
   -> acc1:uint64xN w{felem_wide_fits1 acc1 m3} ->
   Lemma (felem_wide_fits1 (vec_add_mod acc1 (vec_mul_mod f2 u1)) (m3 + m1 * m2))
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+// ^ much faster with solver 2
 let smul_add_felem5_fits_lemma1 #w #m1 #m2 #m3 u1 f2 acc1 =
   match w with
   | 1 ->
@@ -315,7 +319,7 @@ let smul_add_felem5_fits_lemma1 #w #m1 #m2 #m3 u1 f2 acc1 =
     smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 1;
     smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 2;
     smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 3
-
+#pop-options
 
 val smul_add_felem5_fits_lemma:
     #w:lanes
