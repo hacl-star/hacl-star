@@ -50,9 +50,9 @@ let lemma_16_max52_max48 a =
   assert_norm (16 * (max52 * max48) < max52 * max52);
   calc (<) {
     (a * 16) * (max52 * max48);
-    (==) { Math.Lemmas.paren_mul_right a 16 (max52 * max48) }
+    == { Math.Lemmas.paren_mul_right a 16 (max52 * max48) }
     a * (16 * (max52 * max48));
-    (<) { Math.Lemmas.lemma_mult_lt_left a (16 * (max52 * max48)) (max52 * max52) }
+    < { Math.Lemmas.lemma_mult_lt_left a (16 * (max52 * max48)) (max52 * max52) }
     a * (max52 * max52);
   }
 
@@ -83,11 +83,11 @@ let lemma_add_five_mul64_wide md d a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
 
   calc (<) {
     md * max52 + 8192 * (max52 * max48) + 12288 * (max52 * max52);
-    (<) { lemma_16_max52_max48 512 }
+    < { lemma_16_max52_max48 512 }
     md * max52 + 12800 * (max52 * max52);
-    (<=) { assert_norm (16385 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
+    <= { assert_norm (16385 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
     max52 * max52 + 12800 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left 1 12800 (max52 * max52) }
+    == { Math.Lemmas.distributivity_add_left 1 12800 (max52 * max52) }
     12801 * (max52 * max52);
     };
   assert_norm (12801 * (max52 * max52) < pow2 128);
@@ -122,11 +122,11 @@ let lemma_add_four_mul64_wide md d a1 a2 a3 a4 b1 b2 b3 b4 =
 
   calc (<) {
     md * max52 + 8192 * (max52 * max48) + 8192 * (max52 * max52);
-    (<) { lemma_16_max52_max48 512 }
+    < { lemma_16_max52_max48 512 }
     md * max52 + 8704 * (max52 * max52);
-    (<=) { assert_norm (12802 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
+    <= { assert_norm (12802 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
     max52 * max52 + 8704 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left 1 8704 (max52 * max52) }
+    == { Math.Lemmas.distributivity_add_left 1 8704 (max52 * max52) }
     8705 * (max52 * max52);
     };
   assert_norm (8705 * (max52 * max52) < pow2 128);
@@ -157,9 +157,9 @@ let lemma_add_three_mul64_wide52 md d a0 a1 a2 b0 b1 b2 =
 
   calc (<=) {
     md * max52 + 12288 * (max52 * max52);
-    (<=) { assert_norm (8194 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
+    <= { assert_norm (8194 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
     max52 * max52 + 12288 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left 1 12288 (max52 * max52) }
+    == { Math.Lemmas.distributivity_add_left 1 12288 (max52 * max52) }
     12289 * (max52 * max52);
     };
   assert_norm (12289 * (max52 * max52) < pow2 128);
@@ -190,11 +190,11 @@ let lemma_add_three_mul64_wide md d a2 a3 a4 b2 b3 b4 =
 
   calc (<) {
     md * max52 + 8192 * (max52 * max48) + 4096 * (max52 * max52);
-    (<) { lemma_16_max52_max48 512 }
+    < { lemma_16_max52_max48 512 }
     md * max52 + 4608 * (max52 * max52);
-    (<=) { assert_norm (8705 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
+    <= { assert_norm (8705 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
     max52 * max52 + 4608 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left 1 4608 (max52 * max52) }
+    == { Math.Lemmas.distributivity_add_left 1 4608 (max52 * max52) }
     4609 * (max52 * max52);
     };
   assert_norm (4609 * (max52 * max52) < pow2 128);
@@ -221,9 +221,9 @@ let lemma_add_two_mul64_wide52 md d a0 a1 b0 b1 =
 
   calc (<=) {
     md * max52 + 8192 * (max52 * max52);
-    (<=) { assert_norm (4097 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
+    <= { assert_norm (4097 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
     max52 * max52 + 8192 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left 1 8192 (max52 * max52) }
+    == { Math.Lemmas.distributivity_add_left 1 8192 (max52 * max52) }
     8193 * (max52 * max52);
     };
   assert_norm (8193 * (max52 * max52) < pow2 128);
@@ -250,11 +250,11 @@ let lemma_add_two_mul64_wide md d a3 a4 b3 b4 =
 
   calc (<) {
     md * max52 + 8192 * (max52 * max48);
-    (<) { lemma_16_max52_max48 512 }
+    < { lemma_16_max52_max48 512 }
     md * max52 + 512 * (max52 * max52);
-    (<=) { assert_norm (8193 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
+    <= { assert_norm (8193 < max52); Math.Lemmas.lemma_mult_le_right max52 md max52 }
     max52 * max52 + 512 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left 1 512 (max52 * max52) }
+    == { Math.Lemmas.distributivity_add_left 1 512 (max52 * max52) }
     513 * (max52 * max52);
     };
   assert_norm (513 * (max52 * max52) < pow2 128);
@@ -274,9 +274,9 @@ let lemma_r_lsh12 () =
 
   calc (<) {
     0x1000003D10 * pow2 12;
-    (<) { Math.Lemmas.lemma_mult_lt_right (pow2 12) 0x1000003D10 (pow2 37) }
+    < { Math.Lemmas.lemma_mult_lt_right (pow2 12) 0x1000003D10 (pow2 37) }
     pow2 37 * pow2 12;
-    (==) { Math.Lemmas.pow2_plus 12 37 }
+    == { Math.Lemmas.pow2_plus 12 37 }
     pow2 49;
   };
 
@@ -309,13 +309,13 @@ let lemma_add_mul64_wide pa pb md d a b =
 
   calc (<) {
     md * (max52 * max52) + pow2 pa * pow2 pb;
-    (==) { Math.Lemmas.pow2_plus pa pb }
+    == { Math.Lemmas.pow2_plus pa pb }
     md * (max52 * max52) + pow2 (pa + pb);
-    (<=) { Math.Lemmas.pow2_le_compat 103 (pa + pb) }
+    <= { Math.Lemmas.pow2_le_compat 103 (pa + pb) }
     md * (max52 * max52) + pow2 103;
-    (<) { assert_norm (pow2 103 < max52 * max52) }
+    < { assert_norm (pow2 103 < max52 * max52) }
     md * (max52 * max52) + max52 * max52;
-    (==) { Math.Lemmas.distributivity_add_left md 1 (max52 * max52) }
+    == { Math.Lemmas.distributivity_add_left md 1 (max52 * max52) }
     (md + 1) * (max52 * max52);
   };
 
@@ -373,13 +373,13 @@ let lemma_bound_add_mul64_wide_r_lsh12_add md c d t3 =
 
   calc (<) {
     md * max52 + pow2 49 * pow2 50 + max52;
-    (==) { Math.Lemmas.pow2_plus 49 50 }
+    == { Math.Lemmas.pow2_plus 49 50 }
     md * max52 + pow2 99 + max52;
-    (==) { Math.Lemmas.distributivity_add_left md 1 max52 }
+    == { Math.Lemmas.distributivity_add_left md 1 max52 }
     (md + 1) * max52 + pow2 99;
-    (<=) { Math.Lemmas.lemma_mult_le_right max52 (md + 1) 12291 }
+    <= { Math.Lemmas.lemma_mult_le_right max52 (md + 1) 12291 }
     12291 * max52 + pow2 99;
-    (<) { assert_norm (12291 * max52 + pow2 99 < pow2 100) }
+    < { assert_norm (12291 * max52 + pow2 99 < pow2 100) }
     pow2 100;
   };
 
@@ -536,11 +536,11 @@ let lemma_tx_logor_u0_lsh4 tx u0 =
 
   calc (<=) {
     v u0 * pow2 4;
-    (<=) { Math.Lemmas.lemma_mult_le_right (pow2 4) (v u0) (pow2 52 - 1) }
+    <= { Math.Lemmas.lemma_mult_le_right (pow2 4) (v u0) (pow2 52 - 1) }
     (pow2 52 - 1) * pow2 4;
-    (==) { Math.Lemmas.distributivity_sub_left (pow2 52) 1 (pow2 4) }
+    == { Math.Lemmas.distributivity_sub_left (pow2 52) 1 (pow2 4) }
     pow2 52 * pow2 4 - pow2 4;
-    (==) { Math.Lemmas.pow2_plus 52 4 }
+    == { Math.Lemmas.pow2_plus 52 4 }
     pow2 56 - pow2 4;
     };
 
@@ -582,11 +582,11 @@ let lemma_mul_by2 m max a =
   let r = a *. u64 2 in
   calc (<=) {
     v a * 2;
-    (<=) { Math.Lemmas.lemma_mult_le_right 2 (v a) (m * max) }
+    <= { Math.Lemmas.lemma_mult_le_right 2 (v a) (m * max) }
     m * max * 2;
-    (==) { Math.Lemmas.swap_mul (m * max) 2 }
+    == { Math.Lemmas.swap_mul (m * max) 2 }
     2 * (m * max);
-    (==) { Math.Lemmas.paren_mul_right 2 m max }
+    == { Math.Lemmas.paren_mul_right 2 m max }
     2 * m * max;
     };
   assert (v a * 2 <= 2 * m * max);
@@ -620,9 +620,9 @@ let lemma_four_sqr64_wide a0 a1 a2 a3 =
   Math.Lemmas.small_mod (v a0 * 2 * v a3 + v a1 * 2 * v a2) (pow2 128);
   calc (==) {
     v a0 * 2 * v a3 + v a1 * 2 * v a2;
-    (==) { Math.Lemmas.swap_mul (v a0) 2; Math.Lemmas.paren_mul_right 2 (v a0) (v a3) }
+    == { Math.Lemmas.swap_mul (v a0) 2; Math.Lemmas.paren_mul_right 2 (v a0) (v a3) }
     v a0 * v a3 + v a0 * v a3 + v a1 * 2 * v a2;
-    (==) { Math.Lemmas.swap_mul (v a1) 2; Math.Lemmas.paren_mul_right 2 (v a1) (v a2) }
+    == { Math.Lemmas.swap_mul (v a1) 2; Math.Lemmas.paren_mul_right 2 (v a1) (v a2) }
     v a0 * v a3 + v a0 * v a3 + v a1 * v a2 + v a2 * v a1;
   }
 
@@ -654,11 +654,11 @@ let lemma_add_five_sqr64_wide md d a0 a1 a2 a3 a4 =
 
   calc (<) {
     md * max52 + 8192 * (max52 * max48) + 12288 * (max52 * max52);
-    (<=) { lemma_16_max52_max48 512 }
+    <= { lemma_16_max52_max48 512 }
     md * max52 + 512 * (max52 * max52) + 12288 * (max52 * max52);
-    (<) { assert_norm (16385 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
+    < { assert_norm (16385 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
     max52 * max52 + 12800 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left (max52 * max52) 1 12800 }
+    == { Math.Lemmas.distributivity_add_left (max52 * max52) 1 12800 }
     12801 * (max52 * max52);
     };
 
@@ -669,9 +669,9 @@ let lemma_add_five_sqr64_wide md d a0 a1 a2 a3 a4 =
 
   calc (==) {
     v d + v a0 * (v a4 * 2) + v a1 * 2 * v a3 + v a2 * v a2;
-    (==) { Math.Lemmas.swap_mul (v a1) 2; Math.Lemmas.paren_mul_right 2 (v a1) (v a3) }
+    == { Math.Lemmas.swap_mul (v a1) 2; Math.Lemmas.paren_mul_right 2 (v a1) (v a3) }
     v d + v a0 * (v a4 * 2) + v a1 * v a3 + v a1 * v a3 + v a2 * v a2;
-    (==) { Math.Lemmas.paren_mul_right (v a0) (v a4) 2; Math.Lemmas.swap_mul 2 (v a0 * v a4) }
+    == { Math.Lemmas.paren_mul_right (v a0) (v a4) 2; Math.Lemmas.swap_mul 2 (v a0 * v a4) }
     v d + v a0 * v a4 + v a0 * v a4 + v a1 * v a3 + v a1 * v a3 + v a2 * v a2;
   }
 
@@ -702,11 +702,11 @@ let lemma_add_four_sqr64_wide md d a1 a2 a3 a4 =
 
   calc (<) {
     md * max52 + 8192 * (max52 * max48) + 8192 * (max52 * max52);
-    (<=) { lemma_16_max52_max48 512 }
+    <= { lemma_16_max52_max48 512 }
     md * max52 + 512 * (max52 * max52) + 8192 * (max52 * max52);
-    (<) { assert_norm (12802 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
+    < { assert_norm (12802 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
     max52 * max52 + 8704 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left (max52 * max52) 1 8704 }
+    == { Math.Lemmas.distributivity_add_left (max52 * max52) 1 8704 }
     8705 * (max52 * max52);
     };
   assert_norm (8705 * (max52 * max52) < pow2 128);
@@ -715,9 +715,9 @@ let lemma_add_four_sqr64_wide md d a1 a2 a3 a4 =
 
   calc (==) {
     v d + v a1 * (2 * v a4) + (v a2 * 2) * v a3;
-    (==) { Math.Lemmas.swap_mul (v a2) 2; Math.Lemmas.paren_mul_right 2 (v a2) (v a3) }
+    == { Math.Lemmas.swap_mul (v a2) 2; Math.Lemmas.paren_mul_right 2 (v a2) (v a3) }
     v d + v a1 * (2 * v a4) + v a2 * v a3 + v a3 * v a2;
-    (==) { Math.Lemmas.swap_mul (v a1) (2 * v a4); Math.Lemmas.paren_mul_right 2 (v a4) (v a1) }
+    == { Math.Lemmas.swap_mul (v a1) (2 * v a4); Math.Lemmas.paren_mul_right 2 (v a4) (v a1) }
     v d + v a1 * v a4 + v a4 * v a1 + v a2 * v a3 + v a3 * v a2;
     }
 
@@ -738,9 +738,9 @@ let lemma_add_two_sqr64_wide52 md d a0 a1 =
 
   calc (<) {
     md * max52 + 8192 * (max52 * max52);
-    (<) { assert_norm (4097 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
+    < { assert_norm (4097 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
     max52 * max52 + 8192 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left (max52 * max52) 1 8192 }
+    == { Math.Lemmas.distributivity_add_left (max52 * max52) 1 8192 }
     8193 * (max52 * max52);
     };
   assert_norm (8193 * (max52 * max52) < pow2 128);
@@ -768,11 +768,11 @@ let lemma_add_three_sqr64_wide md d a2 a3 a4 =
 
   calc (<) {
     md * max52 + 8192 * (max52 * max48) + 4096 * (max52 * max52);
-    (<=) { lemma_16_max52_max48 512 }
+    <= { lemma_16_max52_max48 512 }
     md * max52 + 512 * (max52 * max52) + 4096 * (max52 * max52);
-    (<) { assert_norm (8705 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
+    < { assert_norm (8705 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
     max52 * max52 + 4608 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left (max52 * max52) 1 4608 }
+    == { Math.Lemmas.distributivity_add_left (max52 * max52) 1 4608 }
     4609 * (max52 * max52);
     };
   assert_norm (4609 * (max52 * max52) < pow2 128);
@@ -781,7 +781,7 @@ let lemma_add_three_sqr64_wide md d a2 a3 a4 =
 
   calc (==) {
     v d + v a2 * (v a4 * 2) + v a3 * v a3;
-    (==) { Math.Lemmas.paren_mul_right (v a2) (v a4) 2 }
+    == { Math.Lemmas.paren_mul_right (v a2) (v a4) 2 }
     v d + v a2 * v a4 + v a4 * v a2 + v a3 * v a3;
   }
 
@@ -805,9 +805,9 @@ let lemma_add_three_sqr64_wide52 md d a0 a1 a2 =
 
   calc (<) {
     md * max52 + 12288 * (max52 * max52);
-    (<) { assert_norm (8194 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
+    < { assert_norm (8194 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
     max52 * max52 + 12288 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left (max52 * max52) 1 12288 }
+    == { Math.Lemmas.distributivity_add_left (max52 * max52) 1 12288 }
     12289 * (max52 * max52);
     };
   assert_norm (12289 * (max52 * max52) < pow2 128);
@@ -816,7 +816,7 @@ let lemma_add_three_sqr64_wide52 md d a0 a1 a2 =
 
   calc (==) {
     v d + v a0 * 2 * v a2 + v a1 * v a1;
-    (==) { Math.Lemmas.swap_mul (v a0) 2; Math.Lemmas.paren_mul_right 2 (v a0) (v a2) }
+    == { Math.Lemmas.swap_mul (v a0) 2; Math.Lemmas.paren_mul_right 2 (v a0) (v a2) }
     v d + v a0 * v a2 + v a2 * v a0 + v a1 * v a1;
   }
 
@@ -838,11 +838,11 @@ let lemma_add_two_sqr64_wide md d a3 a4 =
 
   calc (<) {
     md * max52 + 8192 * (max52 * max48);
-    (<=) { lemma_16_max52_max48 512 }
+    <= { lemma_16_max52_max48 512 }
     md * max52 + 512 * (max52 * max52);
-    (<) { assert_norm (64193 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
+    < { assert_norm (64193 < max52); Math.Lemmas.lemma_mult_lt_right max52 md max52 }
     max52 * max52 + 512 * (max52 * max52);
-    (==) { Math.Lemmas.distributivity_add_left (max52 * max52) 1 512 }
+    == { Math.Lemmas.distributivity_add_left (max52 * max52) 1 512 }
     513 * (max52 * max52);
     };
   assert_norm (513 * (max52 * max52) < pow2 128);

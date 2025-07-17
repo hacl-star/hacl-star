@@ -76,15 +76,15 @@ val lemma_pow2_260_mod_prime: unit -> Lemma (pow2 260 % S.prime = 0x1000003D10)
 let lemma_pow2_260_mod_prime () =
   calc (==) {
     pow2 260 % S.prime;
-    (==) { Math.Lemmas.pow2_plus 256 4 }
+    == { Math.Lemmas.pow2_plus 256 4 }
     pow2 256 * pow2 4 % S.prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) (pow2 4) S.prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) (pow2 4) S.prime }
     (pow2 256 % S.prime) * pow2 4 % S.prime;
-    (==) { lemma_prime () }
+    == { lemma_prime () }
     0x1000003D1 * pow2 4 % S.prime;
-    (==) { assert_norm (0x1000003D1 * pow2 4 = 0x1000003D10) }
+    == { assert_norm (0x1000003D1 * pow2 4 = 0x1000003D10) }
     0x1000003D10 % S.prime;
-    (==) { Math.Lemmas.small_mod 0x1000003D10 S.prime }
+    == { Math.Lemmas.small_mod 0x1000003D10 S.prime }
     0x1000003D10;
   }
 
@@ -98,23 +98,23 @@ let lemma_as_nat_bound_f4_lt_powa f a =
   let (f0,f1,f2,f3,f4) = f in
   calc (<=) { //as_nat5 f ==
     v f0 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156 + v f4 * pow208;
-    (<=) { }
+    <= { }
     pow2 52 - 1 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156 + v f4 * pow208;
-    (<=) {
+    <= {
       Math.Lemmas.lemma_mult_le_right pow52 (v f1) (pow2 52 - 1);
       Math.Lemmas.distributivity_sub_left (pow2 52) 1 pow52 }
     pow2 52 * pow52 + v f2 * pow104 + v f3 * pow156 + v f4 * pow208 - 1;
-    (<=) {
+    <= {
       Math.Lemmas.lemma_mult_le_right pow104 (v f2) (pow2 52 - 1);
       Math.Lemmas.distributivity_sub_left (pow2 52) 1 pow104;
       Math.Lemmas.pow2_plus 52 52 }
     pow2 52 * pow104 + v f3 * pow156 + v f4 * pow208 - 1;
-    (<=) {
+    <= {
       Math.Lemmas.lemma_mult_le_right pow156 (v f3) (pow2 52 - 1);
       Math.Lemmas.distributivity_sub_left (pow2 52) 1 pow156;
       Math.Lemmas.pow2_plus 52 104 }
     pow2 52 * pow156 + v f4 * pow208 - 1;
-    (<=) {
+    <= {
       Math.Lemmas.lemma_mult_le_right pow208 (v f4) (pow2 a - 1);
       Math.Lemmas.distributivity_sub_left (pow2 a) 1 pow208;
       Math.Lemmas.pow2_plus 52 156;
@@ -196,11 +196,11 @@ val lemma_normalize_x_le_1: t4:uint64 -> Lemma
 let lemma_normalize_x_le_1 t4 =
   calc (==) {
     (2 * (pow2 48 - 1)) / pow2 48;
-    (==) { Math.Lemmas.distributivity_add_right 2 (pow2 48) 1 }
+    == { Math.Lemmas.distributivity_add_right 2 (pow2 48) 1 }
     (2 * pow2 48 - 2) / pow2 48;
-    (==) { Math.Lemmas.division_addition_lemma (-2) (pow2 48) 2 }
+    == { Math.Lemmas.division_addition_lemma (-2) (pow2 48) 2 }
     (-2) / pow2 48 + 2;
-    (==) { assert_norm ((-2) / pow2 48 = -1) }
+    == { assert_norm ((-2) / pow2 48 = -1) }
     1;
   };
 
@@ -258,11 +258,11 @@ let lemma_add_rsh52 m1 m2 a b =
   let c = a +. (b >>. 52ul) in
   calc (<) {
     v a + v b / pow2 52;
-    (<) { Math.Lemmas.lemma_div_lt (v b) 64 52 }
+    < { Math.Lemmas.lemma_div_lt (v b) 64 52 }
     m1 * max52 + pow2 12;
-    (<=) { Math.Lemmas.pow2_lt_compat 52 12 }
+    <= { Math.Lemmas.pow2_lt_compat 52 12 }
     m1 * max52 + max52;
-    (==) { Math.Lemmas.distributivity_add_left m1 1 max52 }
+    == { Math.Lemmas.distributivity_add_left m1 1 max52 }
     (m1 + 1) * max52;
   };
 
@@ -282,11 +282,11 @@ let lemma_add_rsh52_last m1 m2 a b =
   let c = a +. (b >>. 52ul) in
   calc (<) {
     v a + v b / pow2 52;
-    (<) { Math.Lemmas.lemma_div_lt (v b) 64 52 }
+    < { Math.Lemmas.lemma_div_lt (v b) 64 52 }
     m1 * max48 + pow2 12;
-    (<=) { Math.Lemmas.pow2_lt_compat 48 12 }
+    <= { Math.Lemmas.pow2_lt_compat 48 12 }
     m1 * max48 + max48;
-    (==) { Math.Lemmas.distributivity_add_left m1 1 max48 }
+    == { Math.Lemmas.distributivity_add_left m1 1 max48 }
     (m1 + 1) * max48;
   };
 
@@ -328,9 +328,9 @@ val lemma_small_sub_mod: a:nat -> n:pos -> Lemma
 let lemma_small_sub_mod a n =
   calc (==) {
     a % n;
-    (==) { Math.Lemmas.sub_div_mod_1 a n }
+    == { Math.Lemmas.sub_div_mod_1 a n }
     (a - n) % n;
-    (==) { Math.Lemmas.small_mod (a - n) n }
+    == { Math.Lemmas.small_mod (a - n) n }
     a - n;
   }
 
@@ -362,13 +362,13 @@ val lemma_a_plus_b_mul_pow256 (a b:int) :
 let lemma_a_plus_b_mul_pow256 a b =
   calc (==) {
     (a + b * pow2 256) % S.prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r a (b * pow2 256) S.prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_r a (b * pow2 256) S.prime }
     (a + b * pow2 256 % S.prime) % S.prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r b (pow2 256) S.prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r b (pow2 256) S.prime }
     (a + b * (pow2 256 % S.prime) % S.prime) % S.prime;
-    (==) { lemma_prime () }
+    == { lemma_prime () }
     (a + b * 0x1000003D1 % S.prime) % S.prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r a (b * 0x1000003D1) S.prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_r a (b * 0x1000003D1) S.prime }
     (a + b * 0x1000003D1) % S.prime;
   }
 
@@ -380,12 +380,12 @@ val as_nat_mod_prime (t0 t1 t2 t3 t4:int) : Lemma
 let as_nat_mod_prime t0 t1 t2 t3 t4 =
   calc (==) {
     (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 * pow208) % S.prime;
-    (==) { Math.Lemmas.euclidean_division_definition t4 (pow2 48) }
+    == { Math.Lemmas.euclidean_division_definition t4 (pow2 48) }
     (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + (t4 / pow2 48 * pow2 48 + t4 % pow2 48) * pow208) % S.prime;
-    (==) { Math.Lemmas.distributivity_add_left (t4 / pow2 48 * pow2 48) (t4 % pow2 48) pow208 }
+    == { Math.Lemmas.distributivity_add_left (t4 / pow2 48 * pow2 48) (t4 % pow2 48) pow208 }
     (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 / pow2 48 * pow2 48 * pow208 + t4 % pow2 48 * pow208) % S.prime;
-    (==) { Math.Lemmas.paren_mul_right (t4 / pow2 48) (pow2 48) pow208; Math.Lemmas.pow2_plus 48 208 }
+    == { Math.Lemmas.paren_mul_right (t4 / pow2 48) (pow2 48) pow208; Math.Lemmas.pow2_plus 48 208 }
     (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 / pow2 48 * pow2 256 + t4 % pow2 48 * pow208) % S.prime;
-    (==) { lemma_a_plus_b_mul_pow256 (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 % pow2 48 * pow208) (t4 / pow2 48) }
+    == { lemma_a_plus_b_mul_pow256 (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 % pow2 48 * pow208) (t4 / pow2 48) }
     (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 % pow2 48 * pow208 + t4 / pow2 48 * 0x1000003D1) % S.prime;
   }

@@ -404,7 +404,7 @@ let load_blocks_lemma_ij #m b j i =
 
   calc (==) {
     idx_j * blocksize_l + j * blocksize;
-    (==) { Math.Lemmas.paren_mul_right idx_j l blocksize;
+    == { Math.Lemmas.paren_mul_right idx_j l blocksize;
       Math.Lemmas.distributivity_add_left (idx_j * l) j blocksize }
     (idx_j * l + j) * blocksize;
   };
@@ -436,25 +436,25 @@ let load_blocks_lemma_ij_subst #m b j i =
 
   calc (==) {
     i_new % l;
-    (==) { }
+    == { }
     (i / l * l + j) % l;
-    (==) { Math.Lemmas.modulo_addition_lemma j l (i / l) }
+    == { Math.Lemmas.modulo_addition_lemma j l (i / l) }
     j % l;
-    (==) { Math.Lemmas.small_mod j l }
+    == { Math.Lemmas.small_mod j l }
     j;
     };
 
   calc (==) {
     i_new / l * l + j_new;
-    (==) { }
+    == { }
     (i / l * l + j) / l * l + i % l;
-    (==) { Math.Lemmas.division_addition_lemma j l (i / l) }
+    == { Math.Lemmas.division_addition_lemma j l (i / l) }
     (i / l + j / l) * l + i % l;
-    (==) { Math.Lemmas.distributivity_add_left (i / l) (j / l) l }
+    == { Math.Lemmas.distributivity_add_left (i / l) (j / l) l }
     i / l * l + j / l * l + i % l;
-    (==) { Math.Lemmas.euclidean_division_definition i l }
+    == { Math.Lemmas.euclidean_division_definition i l }
     i + j / l * l;
-    (==) { Math.Lemmas.small_div j l }
+    == { Math.Lemmas.small_div j l }
     i;
     }
 
@@ -582,38 +582,38 @@ let storeState_lemma_ij #m s j i =
 
   calc (==) { // j_v % blocksize_v / 8
     (j * (32 * 8) + i) % blocksize_v / 8;
-    (==) { Math.Lemmas.modulo_division_lemma (j * (32 * 8) + i) 8 (lanes m) }
+    == { Math.Lemmas.modulo_division_lemma (j * (32 * 8) + i) 8 (lanes m) }
     (j * (32 * 8) + i) / 8 % lanes m;
-    (==) { Math.Lemmas.paren_mul_right j 32 8;
+    == { Math.Lemmas.paren_mul_right j 32 8;
            Math.Lemmas.division_addition_lemma i 8 (32 * j) }
     (32 * j + i / 8) % lanes m;
     };
 
   calc (==) { // j_v / blocksize_v
     (j * (32 * 8) + i) / (8 * lanes m);
-    (==) { Math.Lemmas.division_multiplication_lemma (j * (32 * 8) + i) 8 (lanes m) }
+    == { Math.Lemmas.division_multiplication_lemma (j * (32 * 8) + i) 8 (lanes m) }
     (j * (32 * 8) + i) / 8 / lanes m;
-    (==) { Math.Lemmas.paren_mul_right j 32 8;
+    == { Math.Lemmas.paren_mul_right j 32 8;
            Math.Lemmas.division_addition_lemma i 8 (32 * j) }
     (32 * j + i / 8) / lanes m;
     };
 
   calc (==) {
     Seq.index (storeState #m s) j_v;
-    (==) { index_vecs_to_bytes_le #U64 #(lanes m) #32 ws1 j_v }
+    == { index_vecs_to_bytes_le #U64 #(lanes m) #32 ws1 j_v }
     (BSeq.uints_to_bytes_le (vec_v ws1.[j_v / blocksize_v])).[j_v % blocksize_v];
-    (==) { BSeq.index_uints_to_bytes_le (vec_v ws1.[j_v / blocksize_v]) (j_v % blocksize_v) }
+    == { BSeq.index_uints_to_bytes_le (vec_v ws1.[j_v / blocksize_v]) (j_v % blocksize_v) }
     (BSeq.uint_to_bytes_le
       (Seq.index (vec_v ws1.[j_v / blocksize_v]) (j_v % blocksize_v / 8))).[(j_v % blocksize_v) % 8];
-    (==) { Math.Lemmas.modulo_modulo_lemma j_v 8 (lanes m) }
+    == { Math.Lemmas.modulo_modulo_lemma j_v 8 (lanes m) }
     (BSeq.uint_to_bytes_le
       (Seq.index (vec_v ws1.[j_v / blocksize_v]) (j_v % blocksize_v / 8))).[j_v % 8];
-    (==) { Lemmas.transpose_s_lemma_ij #m ws j i }
+    == { Lemmas.transpose_s_lemma_ij #m ws j i }
     (BSeq.uint_to_bytes_le (Seq.index (ws_spec_v ws).[j] (i / 8))).[j_v % 8];
-    (==) { Math.Lemmas.paren_mul_right j 32 8;
+    == { Math.Lemmas.paren_mul_right j 32 8;
            Math.Lemmas.modulo_addition_lemma i 8 (j * 32) }
     (BSeq.uint_to_bytes_le (Seq.index (ws_spec_v ws).[j] (i / 8))).[i % 8];
-    (==) { }
+    == { }
     (BSeq.uint_to_bytes_le (Seq.index (state_spec_v s).[j] (i / 8))).[i % 8];
     }
 

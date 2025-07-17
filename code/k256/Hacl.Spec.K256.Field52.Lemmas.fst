@@ -200,7 +200,7 @@ let fnegate5_lemma m a x =
     (0xfffffffffffff * 2 * v x - v a2) * pow104 +
     (0xfffffffffffff * 2 * v x - v a3) * pow156 +
     (0xffffffffffff * 2 * v x - v a4) * pow208;
-  (==) {
+  == {
     Math.Lemmas.paren_mul_right 0xffffefffffc2f 2 (v x);
     Math.Lemmas.paren_mul_right 0xfffffffffffff 2 (v x);
     Math.Lemmas.paren_mul_right 0xffffffffffff 2 (v x);
@@ -208,7 +208,7 @@ let fnegate5_lemma m a x =
       0xffffefffffc2f 0xfffffffffffff 0xfffffffffffff 0xfffffffffffff 0xffffffffffff (2 * v x) }
     - as_nat5 a + 2 * v x * (0xffffefffffc2f + 0xfffffffffffff * pow52 +
     0xfffffffffffff * pow104 + 0xfffffffffffff * pow156 +  0xffffffffffff * pow208);
-  (==) { assert_norm (0xffffefffffc2f + 0xfffffffffffff * pow52 +
+  == { assert_norm (0xffffefffffc2f + 0xfffffffffffff * pow52 +
     0xfffffffffffff * pow104 + 0xfffffffffffff * pow156 +  0xffffffffffff * pow208 = S.prime) }
     - as_nat5 a + 2 * v x * S.prime;
   };

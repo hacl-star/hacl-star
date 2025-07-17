@@ -37,13 +37,13 @@ let minus_x_mul_pow2_256_lemma m f =
   let r = (t0,t1,t2,t3,t4') in
   calc (==) { // as_nat5 f
     v t0 + v t1 * pow52 + v t2 * pow104 + v t3 * pow156 + v t4 * pow208;
-    (==) { Math.Lemmas.euclidean_division_definition (v t4) (pow2 48) }
+    == { Math.Lemmas.euclidean_division_definition (v t4) (pow2 48) }
     v t0 + v t1 * pow52 + v t2 * pow104 + v t3 * pow156 + (v t4 / pow2 48 * pow2 48 + v t4 % pow2 48) * pow208;
-    (==) { Math.Lemmas.distributivity_add_left (v t4 / pow2 48 * pow2 48) (v t4 % pow2 48) pow208 }
+    == { Math.Lemmas.distributivity_add_left (v t4 / pow2 48 * pow2 48) (v t4 % pow2 48) pow208 }
     v t0 + v t1 * pow52 + v t2 * pow104 + v t3 * pow156 + (v t4 / pow2 48 * pow2 48) * pow208 + (v t4 % pow2 48) * pow208;
-    (==) { }
+    == { }
     (v x * pow2 48) * pow208 + as_nat5 r;
-    (==) { Math.Lemmas.paren_mul_right (v x) (pow2 48) pow208; Math.Lemmas.pow2_plus 48 208 }
+    == { Math.Lemmas.paren_mul_right (v x) (pow2 48) pow208; Math.Lemmas.pow2_plus 48 208 }
     v x * pow2 256 + as_nat5 r;
   };
 

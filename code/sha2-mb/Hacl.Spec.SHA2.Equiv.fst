@@ -330,7 +330,7 @@ let load_blocks_lemma_ij #a #m b j i =
 
   calc (==) {
     idx_j * blocksize_l + j * blocksize;
-    (==) { Math.Lemmas.paren_mul_right idx_j l blocksize;
+    == { Math.Lemmas.paren_mul_right idx_j l blocksize;
       Math.Lemmas.distributivity_add_left (idx_j * l) j blocksize }
     (idx_j * l + j) * blocksize;
   };
@@ -367,25 +367,25 @@ let load_blocks_lemma_ij_subst #a #m b j i =
 
   calc (==) {
     i_new % l;
-    (==) { }
+    == { }
     (i / l * l + j) % l;
-    (==) { Math.Lemmas.modulo_addition_lemma j l (i / l) }
+    == { Math.Lemmas.modulo_addition_lemma j l (i / l) }
     j % l;
-    (==) { Math.Lemmas.small_mod j l }
+    == { Math.Lemmas.small_mod j l }
     j;
     };
 
   calc (==) {
     i_new / l * l + j_new;
-    (==) { }
+    == { }
     (i / l * l + j) / l * l + i % l;
-    (==) { Math.Lemmas.division_addition_lemma j l (i / l) }
+    == { Math.Lemmas.division_addition_lemma j l (i / l) }
     (i / l + j / l) * l + i % l;
-    (==) { Math.Lemmas.distributivity_add_left (i / l) (j / l) l }
+    == { Math.Lemmas.distributivity_add_left (i / l) (j / l) l }
     i / l * l + j / l * l + i % l;
-    (==) { Math.Lemmas.euclidean_division_definition i l }
+    == { Math.Lemmas.euclidean_division_definition i l }
     i + j / l * l;
-    (==) { Math.Lemmas.small_div j l }
+    == { Math.Lemmas.small_div j l }
     i;
     }
 
@@ -512,35 +512,35 @@ let store_state_lemma_ij #a #m st j i =
 
   calc (==) { // j_v % blocksize_v / word_length a
     (j * (8 * word_length a) + i) % blocksize_v / word_length a;
-    (==) { Math.Lemmas.modulo_division_lemma (j * (8 * word_length a) + i) (word_length a) (lanes a m) }
+    == { Math.Lemmas.modulo_division_lemma (j * (8 * word_length a) + i) (word_length a) (lanes a m) }
     (j * (8 * word_length a) + i) / word_length a % lanes a m;
-    (==) { Math.Lemmas.paren_mul_right j 8 (word_length a);
+    == { Math.Lemmas.paren_mul_right j 8 (word_length a);
            Math.Lemmas.division_addition_lemma i (word_length a) (8 * j) }
     (8 * j + i / word_length a) % lanes a m;
     };
 
   calc (==) { // j_v / blocksize_v
     (j * (8 * word_length a) + i) / (word_length a * lanes a m);
-    (==) { Math.Lemmas.division_multiplication_lemma (j * (8 * word_length a) + i) (word_length a) (lanes a m) }
+    == { Math.Lemmas.division_multiplication_lemma (j * (8 * word_length a) + i) (word_length a) (lanes a m) }
     (j * (8 * word_length a) + i) / word_length a / lanes a m;
-    (==) { Math.Lemmas.paren_mul_right j 8 (word_length a);
+    == { Math.Lemmas.paren_mul_right j 8 (word_length a);
            Math.Lemmas.division_addition_lemma i (word_length a) (8 * j) }
     (8 * j + i / word_length a) / lanes a m;
     };
 
   calc (==) {
     Seq.index (store_state st) j_v;
-    (==) { index_vecs_to_bytes_be #(word_t a) #(lanes a m) #8 st1 j_v }
+    == { index_vecs_to_bytes_be #(word_t a) #(lanes a m) #8 st1 j_v }
     (BSeq.uints_to_bytes_be (vec_v st1.[j_v / blocksize_v])).[j_v % blocksize_v];
-    (==) { BSeq.index_uints_to_bytes_be (vec_v st1.[j_v / blocksize_v]) (j_v % blocksize_v) }
+    == { BSeq.index_uints_to_bytes_be (vec_v st1.[j_v / blocksize_v]) (j_v % blocksize_v) }
     (BSeq.uint_to_bytes_be
       (Seq.index (vec_v st1.[j_v / blocksize_v]) (j_v % blocksize_v / word_length a))).[(j_v % blocksize_v) % word_length a];
-    (==) { Math.Lemmas.modulo_modulo_lemma j_v (word_length a) (lanes a m) }
+    == { Math.Lemmas.modulo_modulo_lemma j_v (word_length a) (lanes a m) }
     (BSeq.uint_to_bytes_be
       (Seq.index (vec_v st1.[j_v / blocksize_v]) (j_v % blocksize_v / word_length a))).[j_v % word_length a];
-    (==) { Lemmas.transpose_state_lemma_ij #a #m st j i }
+    == { Lemmas.transpose_state_lemma_ij #a #m st j i }
     (BSeq.uint_to_bytes_be (Seq.index (state_spec_v st).[j] (i / word_length a))).[j_v % word_length a];
-    (==) { Math.Lemmas.paren_mul_right j 8 (word_length a);
+    == { Math.Lemmas.paren_mul_right j 8 (word_length a);
            Math.Lemmas.modulo_addition_lemma i (word_length a) (j * 8) }
     (BSeq.uint_to_bytes_be (Seq.index (state_spec_v st).[j] (i / word_length a))).[i % word_length a];
     }

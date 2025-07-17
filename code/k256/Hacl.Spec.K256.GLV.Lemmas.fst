@@ -54,23 +54,23 @@ let lemma_scalar_split_lambda_eval k =
   assert (r1 = S.(k +^ r2 *^ minus_lambda));
   calc (==) {
     (r1 + (r2 * lambda % S.q)) % S.q;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r r1 (r2 * lambda) S.q }
+    == { Math.Lemmas.lemma_mod_plus_distr_r r1 (r2 * lambda) S.q }
     (r1 + r2 * lambda) % S.q;
-    (==) { }
+    == { }
     ((k + (r2 * minus_lambda % S.q)) % S.q + r2 * lambda) % S.q;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r k (r2 * minus_lambda) S.q }
+    == { Math.Lemmas.lemma_mod_plus_distr_r k (r2 * minus_lambda) S.q }
     ((k + r2 * minus_lambda) % S.q + r2 * lambda) % S.q;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l (k + r2 * minus_lambda) (r2 * lambda) S.q }
+    == { Math.Lemmas.lemma_mod_plus_distr_l (k + r2 * minus_lambda) (r2 * lambda) S.q }
     (k + r2 * minus_lambda + r2 * lambda) % S.q;
-    (==) { Math.Lemmas.distributivity_add_right r2 minus_lambda lambda }
+    == { Math.Lemmas.distributivity_add_right r2 minus_lambda lambda }
     (k + r2 * (minus_lambda + lambda)) % S.q;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r k (r2 * (minus_lambda + lambda)) S.q }
+    == { Math.Lemmas.lemma_mod_plus_distr_r k (r2 * (minus_lambda + lambda)) S.q }
     (k + (r2 * (minus_lambda + lambda) % S.q)) % S.q;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r r2 (minus_lambda + lambda) S.q }
+    == { Math.Lemmas.lemma_mod_mul_distr_r r2 (minus_lambda + lambda) S.q }
     (k + (r2 * ((minus_lambda + lambda) % S.q) % S.q)) % S.q;
-    (==) { }
+    == { }
     k % S.q;
-    (==) { Math.Lemmas.small_mod k S.q }
+    == { Math.Lemmas.small_mod k S.q }
     k;
   }
 
@@ -88,17 +88,17 @@ let lemma_aff_point_mul_split_lambda k p =
   let r1, r2 = scalar_split_lambda k in
   calc (==) {
     aff_point_mul k p;
-    (==) { lemma_scalar_split_lambda_eval k }
+    == { lemma_scalar_split_lambda_eval k }
     aff_point_mul S.(r1 +^ r2 *^ lambda) p;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r r1 (r2 * lambda) S.q }
+    == { Math.Lemmas.lemma_mod_plus_distr_r r1 (r2 * lambda) S.q }
     aff_point_mul ((r1 + r2 * lambda) % S.q) p;
-    (==) { SM.lemma_aff_point_mul_neg_modq (r1 + r2 * lambda) p }
+    == { SM.lemma_aff_point_mul_neg_modq (r1 + r2 * lambda) p }
     aff_point_mul (r1 + r2 * lambda) p;
-    (==) { SM.lemma_aff_point_mul_neg_mul_add lambda r2 r1 p }
+    == { SM.lemma_aff_point_mul_neg_mul_add lambda r2 r1 p }
     S.aff_point_add (aff_point_mul r2 (aff_point_mul lambda p)) (aff_point_mul r1 p);
-    (==) { lemma_glv_aff p }
+    == { lemma_glv_aff p }
     S.aff_point_add (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p);
-    (==) { LS.aff_point_add_comm_lemma (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p) }
+    == { LS.aff_point_add_comm_lemma (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p) }
     S.aff_point_add (aff_point_mul r1 p) (aff_point_mul r2 (aff_point_mul_lambda p));
   }
 
@@ -206,7 +206,7 @@ let lemma_aff_proj_point_mul_double_split_lambda k1 p1 k2 p2 =
 
     calc (==) {
       aff_proj_point_mul_double_split_lambda k1 p1 k2 p2;
-    (==) {
+    == {
       LE.exp_four_fw_lemma S.mk_k256_comm_monoid
         p11_aff 128 r11 p12_aff r12 p21_aff r21 p22_aff r22 5 }
       S.aff_point_add
@@ -214,15 +214,15 @@ let lemma_aff_proj_point_mul_double_split_lambda k1 p1 k2 p2 =
           (S.aff_point_add (aff_point_mul r11 p11_aff) (aff_point_mul r12 p12_aff))
           (aff_point_mul r21 p21_aff))
         (aff_point_mul r22 p22_aff);
-      (==) { lemma_aff_point_mul_endo_split k1 p1_aff; lemma_ecmult_endo_split_to_aff k1 p1 }
+      == { lemma_aff_point_mul_endo_split k1 p1_aff; lemma_ecmult_endo_split_to_aff k1 p1 }
       S.aff_point_add
         (S.aff_point_add (aff_point_mul k1 p1_aff) (aff_point_mul r21 p21_aff))
         (aff_point_mul r22 p22_aff);
-      (==) { LS.aff_point_add_assoc_lemma
+      == { LS.aff_point_add_assoc_lemma
         (aff_point_mul k1 p1_aff) (aff_point_mul r21 p21_aff) (aff_point_mul r22 p22_aff) }
       S.aff_point_add (aff_point_mul k1 p1_aff)
         (S.aff_point_add (aff_point_mul r21 p21_aff) (aff_point_mul r22 p22_aff));
-      (==) { lemma_aff_point_mul_endo_split k2 p2_aff; lemma_ecmult_endo_split_to_aff k2 p2 }
+      == { lemma_aff_point_mul_endo_split k2 p2_aff; lemma_ecmult_endo_split_to_aff k2 p2 }
       S.aff_point_add (aff_point_mul k1 p1_aff) (aff_point_mul k2 p2_aff);
     } end
   else begin
@@ -245,11 +245,11 @@ let aff_point_negate_cond_pow_lemma is_negate p k =
   if is_negate then
     calc (==) {
       S.aff_point_negate (S.to_aff_point (point_mul_def k p));
-      (==) { SE.pow_lemma S.mk_k256_concrete_ops p k }
+      == { SE.pow_lemma S.mk_k256_concrete_ops p k }
       S.aff_point_negate (aff_point_mul k p_aff);
-      (==) { SM.aff_point_mul_neg_lemma k p_aff }
+      == { SM.aff_point_mul_neg_lemma k p_aff }
       aff_point_mul k (S.aff_point_negate p_aff);
-      (==) { LS.to_aff_point_negate_lemma p }
+      == { LS.to_aff_point_negate_lemma p }
       aff_point_mul k (S.to_aff_point (S.point_negate p));
     }
   else
@@ -268,22 +268,22 @@ let aff_point_negate_cond_lambda_pow_lemma is_negate p k =
   if is_negate then
     calc (==) {
       aff_point_mul lambda (S.aff_point_negate (S.to_aff_point (point_mul_def k p)));
-      (==) { SE.pow_lemma S.mk_k256_concrete_ops p k }
+      == { SE.pow_lemma S.mk_k256_concrete_ops p k }
       aff_point_mul lambda (S.aff_point_negate (aff_point_mul k p_aff));
-      (==) { SM.aff_point_mul_mul_neg_lemma lambda k p_aff }
+      == { SM.aff_point_mul_mul_neg_lemma lambda k p_aff }
       aff_point_mul k (S.aff_point_negate (aff_point_mul lambda p_aff));
-      (==) { lemma_glv p }
+      == { lemma_glv p }
       aff_point_mul k (S.aff_point_negate (S.to_aff_point p_lambda));
-      (==) { LS.to_aff_point_negate_lemma p_lambda }
+      == { LS.to_aff_point_negate_lemma p_lambda }
       aff_point_mul k (S.to_aff_point (S.point_negate p_lambda));
     }
   else
     calc (==) {
       aff_point_mul lambda (S.to_aff_point (point_mul_def k p));
-      (==) { SE.pow_lemma S.mk_k256_concrete_ops p k }
+      == { SE.pow_lemma S.mk_k256_concrete_ops p k }
       aff_point_mul lambda (aff_point_mul k p_aff);
-      (==) { SM.aff_point_mul_mul_lemma lambda k p_aff }
+      == { SM.aff_point_mul_mul_lemma lambda k p_aff }
       aff_point_mul k (aff_point_mul lambda p_aff);
-      (==) { lemma_glv p }
+      == { lemma_glv p }
       aff_point_mul k (S.to_aff_point p_lambda);
     }

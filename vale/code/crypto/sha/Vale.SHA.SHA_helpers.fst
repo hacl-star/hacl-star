@@ -192,13 +192,13 @@ let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
   let open Lib.IntTypes in
   calc (==) {
     v (x +. (y +. z));
-    (==) { }
+    == { }
     (v x + (v y + v z) % pow2 32) % pow2 32;
-    (==) { FStar.Math.Lemmas.lemma_mod_add_distr (v x) (v y + v z) (pow2 32) }
+    == { FStar.Math.Lemmas.lemma_mod_add_distr (v x) (v y + v z) (pow2 32) }
     ((v x + v y) + v z) % pow2 32;
-    (==) { FStar.Math.Lemmas.lemma_mod_add_distr (v z) (v x + v y) (pow2 32) }
+    == { FStar.Math.Lemmas.lemma_mod_add_distr (v z) (v x + v y) (pow2 32) }
     ((v x + v y) % pow2 32 + v z) % pow2 32;
-    (==) { }
+    == { }
     v ((x +. y) +. z);
   };
   v_inj (x +. (y +. z)) ((x +. y) +. z)
@@ -467,14 +467,14 @@ let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
   let open Lib.IntTypes in
   calc (==) {
     a +. b +. c +. d;
-    (==) {}
+    == {}
     (((a +. b) +. c) +. d);
-    (==) {   lemma_add_mod_commutes ((a +. b) +. c) d;
+    == {   lemma_add_mod_commutes ((a +. b) +. c) d;
              lemma_add_mod_commutes (a +. b) c;
              lemma_add_mod_commutes a b
          }
     d +. (c +. (b +. a));
-    (==) { lemma_add_mod_associates_U32 d c (b +. a);
+    == { lemma_add_mod_associates_U32 d c (b +. a);
            lemma_add_mod_associates_U32 (d +. c) b a}
     (((d +. c) +. b) +. a);
   }
@@ -845,9 +845,9 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
       Lib.ByteSequence.uint_from_bytes_be #U32 #SEC b;
       == { calc (==) {
              Lib.ByteSequence.nat_from_bytes_be #SEC b;
-             (==) { }
+             == { }
              Lib.ByteSequence.nat_from_bytes_be #SEC (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni)));
-             (==) { lemma_be_to_n_4 (four_to_seq_LE (nat_to_four 8 ni)) }
+             == { lemma_be_to_n_4 (four_to_seq_LE (nat_to_four 8 ni)) }
              be_bytes_to_nat32 (four_to_seq_LE (nat_to_four 8 ni));
            };
            v_inj (Lib.ByteSequence.uint_from_bytes_be #U32 #SEC b)

@@ -189,11 +189,11 @@ let to_mont res a =
   assert (SM.fmont_R_inv * SM.fmont_R % S.prime = 1);
   calc (==) {
     (as_nat h0 a * (SM.fmont_R * SM.fmont_R % S.prime) * SM.fmont_R_inv) % S.prime;
-    (==) { Math.Lemmas.swap_mul (as_nat h0 a) (SM.fmont_R * SM.fmont_R % S.prime) }
+    == { Math.Lemmas.swap_mul (as_nat h0 a) (SM.fmont_R * SM.fmont_R % S.prime) }
     ((SM.fmont_R * SM.fmont_R % S.prime) * as_nat h0 a * SM.fmont_R_inv) % S.prime;
-    (==) { SM.mont_cancel_lemma_gen S.prime SM.fmont_R SM.fmont_R_inv SM.fmont_R (as_nat h0 a) }
+    == { SM.mont_cancel_lemma_gen S.prime SM.fmont_R SM.fmont_R_inv SM.fmont_R (as_nat h0 a) }
     SM.fmont_R * as_nat h0 a % S.prime;
-    (==) { Math.Lemmas.swap_mul SM.fmont_R (as_nat h0 a) }
+    == { Math.Lemmas.swap_mul SM.fmont_R (as_nat h0 a) }
     as_nat h0 a * SM.fmont_R % S.prime;
     };
   pop_frame ()

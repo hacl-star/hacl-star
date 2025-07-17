@@ -80,13 +80,13 @@ let mod_inv_limb_inv_vb_is_even #t n0 i ub0 vb0 =
   assert (pow2 (bits t - i + 1) % 2 == 0);
   calc (==) {
     pow2 (bits t - i + 1) % 2;
-    (==) { }
+    == { }
     (v ub0 * 2 * v alpha - v vb0 * v beta) % 2;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l (v ub0 * 2 * v alpha) (- v vb0 * v beta) 2 }
+    == { Math.Lemmas.lemma_mod_plus_distr_l (v ub0 * 2 * v alpha) (- v vb0 * v beta) 2 }
     (- v vb0 * v beta) % 2;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (- v vb0) (v beta) 2 }
+    == { Math.Lemmas.lemma_mod_mul_distr_r (- v vb0) (v beta) 2 }
     (- v vb0) % 2;
-    (==) { aux_mod_2_neg (v vb0) } // flaky without the lemma call
+    == { aux_mod_2_neg (v vb0) } // flaky without the lemma call
     v vb0 % 2;
   }
 
@@ -115,15 +115,15 @@ let mod_inv_limb_inv_step_even #t n0 i ub0 vb0 =
   assert (ub * 2 * v alpha - vb * v beta == v ub0 / 2 * 2 * v alpha - v vb0 / 2 * v beta);
   calc (==) {
     2 * (ub * 2 * v alpha - vb * v beta);
-    (==) { }
+    == { }
     2 * (v ub0 / 2 * 2 * v alpha - v vb0 / 2 * v beta);
-    (==) { Math.Lemmas.distributivity_sub_right 2 (v ub0 / 2 * 2 * v alpha) (v vb0 / 2 * v beta) }
+    == { Math.Lemmas.distributivity_sub_right 2 (v ub0 / 2 * 2 * v alpha) (v vb0 / 2 * v beta) }
     2 * v ub0 / 2 * 2 * v alpha - 2 * (v vb0 / 2) * v beta;
-    (==) { Math.Lemmas.div_exact_r (v ub0) 2 }
+    == { Math.Lemmas.div_exact_r (v ub0) 2 }
     v ub0 * 2 * v alpha - 2 * (v vb0 / 2) * v beta;
-    (==) { mod_inv_limb_inv_vb_is_even n0 i ub0 vb0; Math.Lemmas.div_exact_r (v vb0) 2 }
+    == { mod_inv_limb_inv_vb_is_even n0 i ub0 vb0; Math.Lemmas.div_exact_r (v vb0) 2 }
     v ub0 * 2 * v alpha - v vb0 * v beta;
-    (==) {assert (pow2 (pbits - i + 1) == v ub0 * 2 * v alpha - v vb0 * v beta) }
+    == {assert (pow2 (pbits - i + 1) == v ub0 * 2 * v alpha - v vb0 * v beta) }
     pow2 (pbits - i + 1);
     };
   assert (2 * (ub * 2 * v alpha - vb * v beta) == pow2 (pbits - i + 1))
@@ -151,31 +151,31 @@ let mod_inv_limb_inv_step_odd #t n0 i ub0 vb0 =
 
   calc (==) {
     2 * (ub * 2 * v alpha - vb * v beta);
-    (==) { Math.Lemmas.small_mod ((v ub0 + v beta) / 2) (pow2 pbits) }
+    == { Math.Lemmas.small_mod ((v ub0 + v beta) / 2) (pow2 pbits) }
     2 * ((v ub0 + v beta) / 2 * 2 * v alpha - vb * v beta);
-    (==) { Math.Lemmas.small_mod (v vb0 / 2 + v alpha) (pow2 pbits) }
+    == { Math.Lemmas.small_mod (v vb0 / 2 + v alpha) (pow2 pbits) }
     2 * ((v ub0 + v beta) / 2 * 2 * v alpha - (v vb0 / 2 + v alpha) * v beta);
-    (==) { Math.Lemmas.distributivity_sub_right 2 ((v ub0 + v beta) / 2 * 2 * v alpha) ((v vb0 / 2 + v alpha) * v beta) }
+    == { Math.Lemmas.distributivity_sub_right 2 ((v ub0 + v beta) / 2 * 2 * v alpha) ((v vb0 / 2 + v alpha) * v beta) }
     2 * (v ub0 + v beta) / 2 * 2 * v alpha - 2 * (v vb0 / 2 + v alpha) * v beta;
-    (==) { Math.Lemmas.div_exact_r (v ub0 + v beta) 2 }
+    == { Math.Lemmas.div_exact_r (v ub0 + v beta) 2 }
     (v ub0 + v beta) * 2 * v alpha - 2 * (v vb0 / 2 + v alpha) * v beta;
-    (==) { Math.Lemmas.paren_mul_right 2 (v vb0 / 2 + v alpha) (v beta) }
+    == { Math.Lemmas.paren_mul_right 2 (v vb0 / 2 + v alpha) (v beta) }
     (v ub0 + v beta) * 2 * v alpha - 2 * ((v vb0 / 2 + v alpha) * v beta);
-    (==) { Math.Lemmas.distributivity_add_left (v vb0 / 2) (v alpha) (v beta) }
+    == { Math.Lemmas.distributivity_add_left (v vb0 / 2) (v alpha) (v beta) }
     (v ub0 + v beta) * 2 * v alpha - 2 * (v vb0 / 2 * v beta + v alpha * v beta);
-    (==) { Math.Lemmas.distributivity_add_right 2 (v vb0 / 2 * v beta) (v alpha * v beta);
+    == { Math.Lemmas.distributivity_add_right 2 (v vb0 / 2 * v beta) (v alpha * v beta);
            Math.Lemmas.paren_mul_right 2 (v vb0 / 2) (v beta);
            Math.Lemmas.paren_mul_right 2 (v alpha) (v beta) }
     (v ub0 + v beta) * 2 * v alpha - (2 * (v vb0 / 2) * v beta + 2 * v alpha * v beta);
-    (==) { mod_inv_limb_inv_vb_is_even n0 i ub0 vb0; Math.Lemmas.div_exact_r (v vb0) 2 }
+    == { mod_inv_limb_inv_vb_is_even n0 i ub0 vb0; Math.Lemmas.div_exact_r (v vb0) 2 }
     (v ub0 + v beta) * 2 * v alpha - (v vb0 * v beta + 2 * v alpha * v beta);
-    (==) { Math.Lemmas.distributivity_add_left (v ub0) (v beta) (2 * v alpha) }
+    == { Math.Lemmas.distributivity_add_left (v ub0) (v beta) (2 * v alpha) }
     v ub0 * 2 * v alpha + v beta * 2 * v alpha - (v vb0 * v beta + 2 * v alpha * v beta);
-    (==) { Math.Lemmas.paren_mul_right (v beta) 2 (v alpha); Math.Lemmas.swap_mul (v beta) (2 * v alpha) }
+    == { Math.Lemmas.paren_mul_right (v beta) 2 (v alpha); Math.Lemmas.swap_mul (v beta) (2 * v alpha) }
     v ub0 * 2 * v alpha + 2 * v alpha * v beta - v vb0 * v beta - 2 * v alpha * v beta;
-    (==) { }
+    == { }
     v ub0 * 2 * v alpha - v vb0 * v beta;
-    (==) { assert (pow2 (pbits - i + 1) == v ub0 * 2 * v alpha - v vb0 * v beta) }
+    == { assert (pow2 (pbits - i + 1) == v ub0 * 2 * v alpha - v vb0 * v beta) }
     pow2 (pbits - i + 1);
   };
   assert (2 * (ub * 2 * v alpha - vb * v beta) == pow2 (pbits - i + 1))
@@ -257,11 +257,11 @@ let mod_inv_limb_lemma #t n0 =
   mod_inv_limb_inv n0 pbits;
   calc (==) {
     (1 + v vb * v n0) % pow2 pbits;
-    (==) { }
+    == { }
     (v ub * 2 * v alpha) % pow2 pbits;
-    (==) { Math.Lemmas.pow2_plus 1 (pbits - 1) }
+    == { Math.Lemmas.pow2_plus 1 (pbits - 1) }
     (v ub * pow2 pbits) % pow2 pbits;
-    (==) { Math.Lemmas.cancel_mul_mod (v ub) (pow2 pbits) }
+    == { Math.Lemmas.cancel_mul_mod (v ub) (pow2 pbits) }
     0;
   };
   assert ((1 + v vb * v n0) % pow2 pbits == 0)

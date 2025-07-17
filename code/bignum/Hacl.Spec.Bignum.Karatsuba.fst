@@ -274,15 +274,15 @@ let bn_lshift_add_lemma #t #aLen a b1 i =
 
   calc (==) {
     bn_v a' + v c * p;
-    (==) { bn_update_sub_eval a r' i }
+    == { bn_update_sub_eval a r' i }
     bn_v a - bn_v r * pow2 (pbits * i) + bn_v r' * pow2 (pbits * i) + v c * p;
-    (==) { bn_add1_lemma r b1 }
+    == { bn_add1_lemma r b1 }
     bn_v a - bn_v r * pow2 (pbits * i) + (bn_v r + v b1 - v c * pow2 (pbits * (aLen - i))) * pow2 (pbits * i) + v c * p;
-    (==) { Math.Lemmas.distributivity_add_left (bn_v r) (v b1 - v c * pow2 (pbits * (aLen - i))) (pow2 (pbits * i)) }
+    == { Math.Lemmas.distributivity_add_left (bn_v r) (v b1 - v c * pow2 (pbits * (aLen - i))) (pow2 (pbits * i)) }
     bn_v a + (v b1 - v c * pow2 (pbits * (aLen - i))) * pow2 (pbits * i) + v c * p;
-    (==) { Math.Lemmas.distributivity_sub_left (v b1) (v c * pow2 (pbits * (aLen - i))) (pow2 (pbits * i)) }
+    == { Math.Lemmas.distributivity_sub_left (v b1) (v c * pow2 (pbits * (aLen - i))) (pow2 (pbits * i)) }
     bn_v a + v b1 * pow2 (pbits * i) - (v c * pow2 (pbits * (aLen - i))) * pow2 (pbits * i) + v c * p;
-    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 (pbits * (aLen - i))) (pow2 (pbits * i));
+    == { Math.Lemmas.paren_mul_right (v c) (pow2 (pbits * (aLen - i))) (pow2 (pbits * i));
            Math.Lemmas.pow2_plus (pbits * (aLen - i)) (pbits * i) }
     bn_v a + v b1 * pow2 (pbits * i);
     }
@@ -323,15 +323,15 @@ let bn_lshift_add_early_stop_lemma #t #aLen #bLen a b i =
 
   calc (==) {
     bn_v a' + v c * p;
-    (==) { bn_update_sub_eval a r' i }
+    == { bn_update_sub_eval a r' i }
     bn_v a - bn_v r * pow2 (pbits * i) + bn_v r' * pow2 (pbits * i) + v c * p;
-    (==) { bn_add_lemma r b }
+    == { bn_add_lemma r b }
     bn_v a - bn_v r * pow2 (pbits * i) + (bn_v r + bn_v b - v c * pow2 (pbits * bLen)) * pow2 (pbits * i) + v c * p;
-    (==) { Math.Lemmas.distributivity_add_left (bn_v r) (bn_v b - v c * pow2 (pbits * bLen)) (pow2 (pbits * i)) }
+    == { Math.Lemmas.distributivity_add_left (bn_v r) (bn_v b - v c * pow2 (pbits * bLen)) (pow2 (pbits * i)) }
     bn_v a + (bn_v b - v c * pow2 (pbits * bLen)) * pow2 (pbits * i) + v c * p;
-    (==) { Math.Lemmas.distributivity_sub_left  (bn_v b) (v c * pow2 (pbits * bLen)) (pow2 (pbits * i)) }
+    == { Math.Lemmas.distributivity_sub_left  (bn_v b) (v c * pow2 (pbits * bLen)) (pow2 (pbits * i)) }
     bn_v a + bn_v b * pow2 (pbits * i) - (v c * pow2 (pbits * bLen)) * pow2 (pbits * i) + v c * p;
-    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 (pbits * bLen)) (pow2 (pbits * i));
+    == { Math.Lemmas.paren_mul_right (v c) (pow2 (pbits * bLen)) (pow2 (pbits * i));
            Math.Lemmas.pow2_plus (pbits * bLen) (pbits * i) }
     bn_v a + bn_v b * pow2 (pbits * i);
     }
@@ -389,20 +389,20 @@ let bn_karatsuba_res_lemma #t #aLen r01 r23 c5 t45 =
 
   calc (==) {
     bn_v res2 + v c8 * pow2 (pbits * aLen4);
-    (==) { bn_lshift_add_lemma res1 c7 aLen3 }
+    == { bn_lshift_add_lemma res1 c7 aLen3 }
     bn_v res1 + v c7 * pow2 (pbits * aLen3);
-    (==) { Math.Lemmas.small_mod (v c5 + v c6) (pow2 pbits) }
+    == { Math.Lemmas.small_mod (v c5 + v c6) (pow2 pbits) }
     bn_v res1 + (v c5 + v c6) * pow2 (pbits * aLen3);
-    (==) { bn_lshift_add_early_stop_lemma res0 t45 aLen2 }
+    == { bn_lshift_add_early_stop_lemma res0 t45 aLen2 }
     bn_v res0 + bn_v t45 * pow2 (pbits * aLen2) - v c6 * pow2 (pbits * aLen3) + (v c5 + v c6) * pow2 (pbits * aLen3);
-    (==) { Math.Lemmas.distributivity_add_left (v c5) (v c6) (pow2 (pbits * aLen3)) }
+    == { Math.Lemmas.distributivity_add_left (v c5) (v c6) (pow2 (pbits * aLen3)) }
     bn_v res0 + bn_v t45 * pow2 (pbits * aLen2) + v c5 * pow2 (pbits * aLen3);
-    (==) { Math.Lemmas.pow2_plus (pbits * aLen) (pbits * aLen2) }
+    == { Math.Lemmas.pow2_plus (pbits * aLen) (pbits * aLen2) }
     bn_v res0 + bn_v t45 * pow2 (pbits * aLen2) + v c5 * (pow2 (pbits * aLen) * pow2 (pbits * aLen2));
-    (==) { Math.Lemmas.paren_mul_right (v c5) (pow2 (pbits * aLen)) (pow2 (pbits * aLen2));
+    == { Math.Lemmas.paren_mul_right (v c5) (pow2 (pbits * aLen)) (pow2 (pbits * aLen2));
       Math.Lemmas.distributivity_add_left (bn_v t45) (v c5 * pow2 (pbits * aLen)) (pow2 (pbits * aLen2)) }
     bn_v res0 + (bn_v t45 + v c5 * pow2 (pbits * aLen)) * pow2 (pbits * aLen2);
-    (==) { bn_concat_lemma r01 r23 }
+    == { bn_concat_lemma r01 r23 }
     bn_v r23 * pow2 (pbits * aLen) + (v c5 * pow2 (pbits * aLen) + bn_v t45) * pow2 (pbits * aLen2) + bn_v r01;
     }
 
@@ -430,11 +430,11 @@ let bn_middle_karatsuba_carry_bound #t aLen a0 a1 b0 b1 res c =
 
   calc (<) {
     bn_v a0 * bn_v b1 + bn_v a1 * bn_v b0;
-    (<) { Math.Lemmas.lemma_mult_lt_sqr (bn_v a0) (bn_v b1) p }
+    < { Math.Lemmas.lemma_mult_lt_sqr (bn_v a0) (bn_v b1) p }
     p * p + bn_v a1 * bn_v b0;
-    (<) { Math.Lemmas.lemma_mult_lt_sqr (bn_v a1) (bn_v b0) p }
+    < { Math.Lemmas.lemma_mult_lt_sqr (bn_v a1) (bn_v b0) p }
     p * p + p * p;
-    (==) { K.lemma_double_p (bits t) aLen }
+    == { K.lemma_double_p (bits t) aLen }
     pow2 (pbits * aLen) + pow2 (pbits * aLen);
     };
 

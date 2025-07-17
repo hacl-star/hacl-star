@@ -230,13 +230,13 @@ let os2ip_lemma emBits em =
 
     calc (<=) {
       pow2 ((emLen - 1) * 8) + pow2 ((emLen - 1) * 8) * v em.[0];
-      (==) { Math.Lemmas.distributivity_add_right (pow2 (8 * (emLen - 1))) 1 (v em.[0]) }
+      == { Math.Lemmas.distributivity_add_right (pow2 (8 * (emLen - 1))) 1 (v em.[0]) }
       pow2 (8 * (emLen - 1)) * (1 + v em.[0]);
-      (<=) { Math.Lemmas.lemma_mult_le_left (pow2 (8 * emLen - 1)) (v em.[0] + 1) (pow2 (emBits % 8)) }
+      <= { Math.Lemmas.lemma_mult_le_left (pow2 (8 * emLen - 1)) (v em.[0] + 1) (pow2 (emBits % 8)) }
       pow2 (8 * (emLen - 1)) * pow2 (emBits % 8);
-      (==) { Math.Lemmas.pow2_plus (8 * (emLen - 1)) (emBits % 8) }
+      == { Math.Lemmas.pow2_plus (8 * (emLen - 1)) (emBits % 8) }
       pow2 (8 * ((emBits - 1) / 8) + emBits % 8);
-      (<=) { aux emBits; Math.Lemmas.pow2_le_compat emBits ((emBits - 1) - (emBits - 1) % 8 + emBits % 8) }
+      <= { aux emBits; Math.Lemmas.pow2_le_compat emBits ((emBits - 1) - (emBits - 1) % 8 + emBits % 8) }
       pow2 emBits;
     };
    assert (nat_from_bytes_be em < pow2 emBits) end

@@ -175,15 +175,15 @@ let malloc_with_key k kk r =
     assert (nn == (Spec.blake2_default_params Spec.Blake2B).digest_length);
     calc (==) {
       F.reveal_key blake2b_256 i h1 s;
-    (==) { }
+    == { }
       blake2b_256.key.v i h0 (p, k);
-    (==) { }
+    == { }
       Common.key_v i h0 (p, k);
-    (==) { _ by (FStar.Tactics.trefl ()) }
+    == { _ by (FStar.Tactics.trefl ()) }
       P.v #Spec.Blake2B h0 p, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
-    (==) { }
+    == { }
       { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk; Spec.digest_length = nn }, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
-    (==) { }
+    == { }
       { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = kk }, (if i.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h0 (k <: B.buffer Lib.IntTypes.uint8));
   }
   end);
@@ -289,13 +289,13 @@ let reset_with_key (i: G.erased (Common.index Spec.Blake2B)) s k () =
 
   calc (==) {
     F.reveal_key blake2b_256 idx h2 s;
-  (==) { }
+  == { }
     blake2b_256.key.v idx h1 (p, k);
-  (==) { }
+  == { }
     Common.key_v idx h1 (p, k);
-  (==) { _ by (FStar.Tactics.trefl())  }
+  == { _ by (FStar.Tactics.trefl())  }
     P.v #Spec.Blake2B h1 p, (if idx.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h1 (k <: B.buffer Lib.IntTypes.uint8));
-  (==) { }
+  == { }
     { Spec.blake2_default_params Spec.Blake2B with Spec.key_length = idx.key_length; Spec.digest_length = idx.digest_length }, (if idx.key_length = 0uy then S.empty #Lib.IntTypes.uint8 else B.as_seq h1 (k <: B.buffer Lib.IntTypes.uint8));
   };
 

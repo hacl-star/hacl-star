@@ -38,28 +38,28 @@ let lemma_fits_in_prime_last_byte (b:lbytes 32) : Lemma
   (ensures v (Seq.index b 31) < pow2 7)
   = calc (==) {
       nat_from_bytes_le b <: nat;
-     (==) { nat_from_intseq_le_slice_lemma b 31 }
+     == { nat_from_intseq_le_slice_lemma b 31 }
      nat_from_intseq_le (Seq.slice b 0 31) +
        pow2 (31 * 8) * nat_from_intseq_le (Seq.slice b 31 32);
-     (==) { nat_from_intseq_le_lemma0 (Seq.slice b 31 32) }
+     == { nat_from_intseq_le_lemma0 (Seq.slice b 31 32) }
      nat_from_intseq_le (Seq.slice b 0 31) + pow2 (31*8) * v (Seq.index b 31);
     };
     assert (nat_from_intseq_le (Seq.slice b 0 31) < pow2 (31 * 8));
     calc (<) {
       pow2 (31*8) * v (Seq.index b 31);
-      (<) { }
+      < { }
       Spec.Curve25519.prime - nat_from_intseq_le (Seq.slice b 0 31);
-      (<=) { }
+      <= { }
       Spec.Curve25519.prime;
-      (<) { }
+      < { }
       pow2 255;
     };
     FStar.Math.Lemmas.lemma_div_lt_nat (pow2 (31*8) * v (Seq.index b 31)) 255 (31*8);
     calc (==) {
       (pow2 (31 *8) * v (Seq.index b 31))/ (pow2 (31*8));
-      (==) { FStar.Math.Lemmas.swap_mul (pow2 (31*8)) (v (Seq.index b 31)) }
+      == { FStar.Math.Lemmas.swap_mul (pow2 (31*8)) (v (Seq.index b 31)) }
       (v (Seq.index b 31) * pow2 (31 *8)) / (pow2 (31*8));
-      (==) { FStar.Math.Lemmas.cancel_mul_div (v (Seq.index b 31)) (pow2 (31*8)) }
+      == { FStar.Math.Lemmas.cancel_mul_div (v (Seq.index b 31)) (pow2 (31*8)) }
       v (Seq.index b 31);
     };
     assert_norm (255 - 31 * 8 == 7)
@@ -85,21 +85,21 @@ let add_sign out x =
   (**) let h1 = ST.get() in
   (**) calc (==) {
   (**)   nat_from_intseq_le (as_seq h1 out) <: nat;
-  (**)   (==) { nat_from_intseq_le_slice_lemma (as_seq h1 out) 31 }
+  (**)   == { nat_from_intseq_le_slice_lemma (as_seq h1 out) 31 }
   (**)   nat_from_intseq_le (Seq.slice (as_seq h1 out) 0 31) +
   (**)     pow2 (31 * 8) * nat_from_intseq_le (Seq.slice (as_seq h1 out) 31 32);
-  (**)   (==) {
+  (**)   == {
   (**)     calc (==) {
   (**)       pow2 (31 * 8) * nat_from_intseq_le (Seq.slice (as_seq h1 out) 31 32);
-  (**)       (==) { calc (==) {
+  (**)       == { calc (==) {
   (**)                nat_from_intseq_le (Seq.slice (as_seq h1 out) 31 32) <: nat;
-  (**)                (==) { nat_from_intseq_le_lemma0 (Seq.slice (as_seq h1 out) 31 32) }
+  (**)                == { nat_from_intseq_le_lemma0 (Seq.slice (as_seq h1 out) 31 32) }
   (**)                v (o31 +. (xbyte <<. 7ul));
-  (**)                (==) { calc (==) {
+  (**)                == { calc (==) {
   (**)                         v (o31 +. (xbyte <<. 7ul)) <: nat;
-  (**)                         (==) { }
+  (**)                         == { }
   (**)                         (v o31 + v (xbyte <<. 7ul)) % pow2 8;
-  (**)                         (==) { FStar.Math.Lemmas.lemma_mult_le_left (pow2 7) (v x) 1;
+  (**)                         == { FStar.Math.Lemmas.lemma_mult_le_left (pow2 7) (v x) 1;
   (**)                                assert (pow2 7 * (v x) <= pow2 7);
   (**)                                assert_norm (pow2 7 < pow2 8);
   (**)                                lemma_fits_in_prime_last_byte (as_seq h0 out);
@@ -112,11 +112,11 @@ let add_sign out x =
   (**)                nat_from_intseq_le (Seq.slice (as_seq h0 out) 31 32) + pow2 7 * (v x);
   (**)            } }
   (**)       pow2 (31 * 8) * (nat_from_intseq_le (Seq.slice (as_seq h0 out) 31 32) + pow2 7 * (v x));
-  (**)       (==) { FStar.Math.Lemmas.distributivity_add_right (pow2 (31 * 8))
+  (**)       == { FStar.Math.Lemmas.distributivity_add_right (pow2 (31 * 8))
   (**)              (nat_from_intseq_le (Seq.slice (as_seq h0 out) 31 32)) (pow2 7 * (v x)) }
   (**)       pow2 (31 * 8) * nat_from_intseq_le (Seq.slice (as_seq h0 out) 31 32) +
   (**)       pow2 (31 * 8) * pow2 7 * (v x);
-  (**)       (==) { assert_norm (pow2 (31*8) * pow2 7 == pow2 255) }
+  (**)       == { assert_norm (pow2 (31*8) * pow2 7 == pow2 255) }
   (**)       pow2 (31 * 8) * nat_from_intseq_le (Seq.slice (as_seq h0 out) 31 32) +
   (**)       pow2 255 * (v x);
   (**)     }
@@ -124,7 +124,7 @@ let add_sign out x =
   (**)   nat_from_intseq_le (Seq.slice (as_seq h1 out) 0 31) +
   (**)   pow2 (31 * 8) * nat_from_intseq_le (Seq.slice (as_seq h0 out) 31 32) +
   (**)   pow2 255 * (v x);
-  (**)   (==) { nat_from_intseq_le_slice_lemma (as_seq h0 out) 31 }
+  (**)   == { nat_from_intseq_le_slice_lemma (as_seq h0 out) 31 }
   (**)   nat_from_bytes_le (as_seq h0 out) + pow2 255 * (v x);
   (**) }
 

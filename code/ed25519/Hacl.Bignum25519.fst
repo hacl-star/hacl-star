@@ -143,22 +143,22 @@ let times_2 out a =
 
   calc (==) {
     (2 * (F51.fevalh h0 a)) % SC.prime;
-    (==) { calc (==) {
+    == { calc (==) {
            F51.fevalh h0 a;
-           (==) { }
+           == { }
            S51.as_nat5 (a0, a1, a2, a3, a4) % SC.prime;
            }
          }
     (2 * (S51.as_nat5 (a0, a1, a2, a3, a4) % SC.prime)) % SC.prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r 2 (S51.as_nat5 (a0, a1, a2, a3, a4)) SC.prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r 2 (S51.as_nat5 (a0, a1, a2, a3, a4)) SC.prime }
     (2 * S51.as_nat5 (a0, a1, a2, a3, a4)) % SC.prime;
-    (==) { calc (==) {
+    == { calc (==) {
            2 * S51.as_nat5 (a0, a1, a2, a3, a4);
-           (==) { SL51.lemma_smul_felem5 (u64 2) (a0, a1, a2, a3, a4) }
+           == { SL51.lemma_smul_felem5 (u64 2) (a0, a1, a2, a3, a4) }
            2 * v a0 + 2 * v a1 * S51.pow51 + 2 * v a2 * S51.pow51 * S51.pow51 +
            2 * v a3 * S51.pow51 * S51.pow51 * S51.pow51 +
            2 * v a4 * S51.pow51 * S51.pow51 * S51.pow51 * S51.pow51;
-           (==) {
+           == {
              assert_norm (2 * S51.pow51 < pow2 64);
              assert_norm (4 * S51.pow51 < pow2 64);
              FStar.Math.Lemmas.small_mod (2 * v a0) (pow2 64);
@@ -171,7 +171,7 @@ let times_2 out a =
            }
          }
     S51.as_nat5 (u64 2 *. a0, u64 2 *. a1, u64 2 *. a2, u64 2 *. a3, u64 2 *. a4) % SC.prime;
-    (==) { }
+    == { }
     F51.fevalh h1 out;
   }
 

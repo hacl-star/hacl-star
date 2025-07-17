@@ -11,11 +11,11 @@ val lemma_b_mod_pow2i: bBits:nat -> b:nat{b < pow2 bBits} -> i:pos{i <= bBits} -
 let lemma_b_mod_pow2i bBits b i =
   calc (==) {
     b % pow2 i;
-    (==) { Math.Lemmas.euclidean_division_definition (b % pow2 i) (pow2 (i - 1)) }
+    == { Math.Lemmas.euclidean_division_definition (b % pow2 i) (pow2 (i - 1)) }
     b % pow2 i / pow2 (i - 1) * pow2 (i - 1) + b % pow2 i % pow2 (i - 1);
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 b (i - 1) i }
+    == { Math.Lemmas.pow2_modulo_modulo_lemma_1 b (i - 1) i }
     b % pow2 i / pow2 (i - 1) * pow2 (i - 1) + b % pow2 (i - 1);
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 b (i - 1) i; assert_norm (pow2 1 = 2) }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 b (i - 1) i; assert_norm (pow2 1 = 2) }
     b / pow2 (i - 1) % 2 * pow2 (i - 1) + b % pow2 (i - 1);
   }
 
@@ -29,13 +29,13 @@ let lemma_b_div_pow2ki bBits b k i =
   let c = b / pow2 (bk - k * i) in
   calc (==) {
     b / pow2 (bk - k * i);
-    (==) { Math.Lemmas.euclidean_division_definition c (pow2 k) }
+    == { Math.Lemmas.euclidean_division_definition c (pow2 k) }
     c / pow2 k * pow2 k + c % pow2 k;
-    (==) { Math.Lemmas.division_multiplication_lemma b (pow2 (bk - k * i)) (pow2 k) }
+    == { Math.Lemmas.division_multiplication_lemma b (pow2 (bk - k * i)) (pow2 k) }
     b / (pow2 (bk - k * i) * pow2 k) * pow2 k + c % pow2 k;
-    (==) { Math.Lemmas.pow2_plus (bk - k * i) k }
+    == { Math.Lemmas.pow2_plus (bk - k * i) k }
     b / pow2 (bk - k * i + k) * pow2 k + c % pow2 k;
-    (==) { Math.Lemmas.distributivity_sub_right k i 1 }
+    == { Math.Lemmas.distributivity_sub_right k i 1 }
     b / pow2 (bk - k * (i - 1)) * pow2 k + c % pow2 k;
     }
 
@@ -317,13 +317,13 @@ let exp_fw_lemma_step #t k a bBits b l i acc1 =
 
   calc (==) {
     k.mul (pow k acc1 (pow2 l)) (pow k a r2);
-    (==) { }
+    == { }
     k.mul (pow k (pow k a r1) (pow2 l)) (pow k a r2);
-    (==) { lemma_pow_mul k a r1 (pow2 l) }
+    == { lemma_pow_mul k a r1 (pow2 l) }
     k.mul (pow k a (r1 * pow2 l)) (pow k a r2);
-    (==) { lemma_pow_add k a (r1 * pow2 l) r2 }
+    == { lemma_pow_add k a (r1 * pow2 l) r2 }
     pow k a (r1 * pow2 l + r2);
-    (==) { lemma_b_div_pow2ki bBits b l i }
+    == { lemma_b_div_pow2ki bBits b l i }
     pow k a (b_acc l bBits b i);
   }
 
@@ -412,13 +412,13 @@ val lemma_pow_distr_mul: #t:Type -> k:comm_monoid t -> x:t -> a:t -> r1:nat -> r
 let lemma_pow_distr_mul #t k x a r1 r2 r3 =
   calc (==) {
     k.mul (k.mul x (pow k (pow k a r1) r3)) (pow k a r2);
-    (==) { lemma_pow_mul k a r1 r3 }
+    == { lemma_pow_mul k a r1 r3 }
     k.mul (k.mul x (pow k a (r1 * r3))) (pow k a r2);
-    (==) { k.lemma_mul_assoc x (pow k a (r1 * r3)) (pow k a r2) }
+    == { k.lemma_mul_assoc x (pow k a (r1 * r3)) (pow k a r2) }
     k.mul x (k.mul (pow k a (r1 * r3)) (pow k a r2));
-    (==) { lemma_pow_add k a (r1 * r3) r2 }
+    == { lemma_pow_add k a (r1 * r3) r2 }
     k.mul x (pow k a (r1 * r3 + r2));
-    (==) { k.lemma_mul_comm x (pow k a (r1 * r3 + r2)) }
+    == { k.lemma_mul_comm x (pow k a (r1 * r3 + r2)) }
     k.mul (pow k a (r1 * r3 + r2)) x;
   }
 
@@ -447,25 +447,25 @@ let exp_double_fw_lemma_step #t k a1 bBits b1 a2 b2 l i acc =
 
   calc (==) {
     k.mul acc1 (pow k a2 r22);
-    (==) { exp_pow2_lemma k acc l }
+    == { exp_pow2_lemma k acc l }
     k.mul (pow k acc (pow2 l)) (pow k a2 r22);
-    (==) { }
+    == { }
     k.mul (pow k (k.mul (pow k a1 r11) (pow k a2 r21)) (pow2 l)) (pow k a2 r22);
-    (==) { lemma_pow_mul_base k (pow k a1 r11) (pow k a2 r21) (pow2 l) }
+    == { lemma_pow_mul_base k (pow k a1 r11) (pow k a2 r21) (pow2 l) }
     k.mul (k.mul (pow k (pow k a1 r11) (pow2 l)) (pow k (pow k a2 r21) (pow2 l))) (pow k a2 r22);
-    (==) { lemma_pow_distr_mul k (pow k (pow k a1 r11) (pow2 l)) a2 r21 r22 (pow2 l) }
+    == { lemma_pow_distr_mul k (pow k (pow k a1 r11) (pow2 l)) a2 r21 r22 (pow2 l) }
     k.mul (pow k a2 (r21 * pow2 l + r22)) (pow k (pow k a1 r11) (pow2 l));
-    (==) { lemma_b_div_pow2ki bBits b2 l i }
+    == { lemma_b_div_pow2ki bBits b2 l i }
     k.mul res_a2 (pow k (pow k a1 r11) (pow2 l));
   };
 
   calc (==) {
     k.mul (k.mul acc1 (pow k a2 r22)) (pow k a1 r12);
-    (==) { }
+    == { }
     k.mul (k.mul res_a2 (pow k (pow k a1 r11) (pow2 l))) (pow k a1 r12);
-    (==) { lemma_pow_distr_mul k res_a2 a1 r11 r12 (pow2 l) }
+    == { lemma_pow_distr_mul k res_a2 a1 r11 r12 (pow2 l) }
     k.mul (pow k a1 (r11 * pow2 l + r12)) res_a2;
-    (==) { lemma_b_div_pow2ki bBits b1 l i }
+    == { lemma_b_div_pow2ki bBits b1 l i }
     k.mul res_a1 res_a2;
   }
 
@@ -536,9 +536,9 @@ val lemma_mul_assoc4: #t:Type -> k:comm_monoid t -> a1:t -> a2:t -> a3:t -> a4:t
 let lemma_mul_assoc4 #t k a1 a2 a3 a4 =
   calc (==) {
     k.mul a1 (k.mul (k.mul a2 a3) a4);
-    (==) { k.lemma_mul_assoc a1 (k.mul a2 a3) a4 }
+    == { k.lemma_mul_assoc a1 (k.mul a2 a3) a4 }
     k.mul (k.mul a1 (k.mul a2 a3)) a4;
-    (==) { k.lemma_mul_assoc a1 a2 a3 }
+    == { k.lemma_mul_assoc a1 a2 a3 }
     k.mul (k.mul (k.mul a1 a2) a3) a4;
   }
 
@@ -595,31 +595,31 @@ let exp_four_fw_lemma_step #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l i acc =
 
   calc (==) {
     k.mul acc1 (pow k a4 r42);
-    (==) { exp_pow2_lemma k acc l }
+    == { exp_pow2_lemma k acc l }
     k.mul (pow k acc (pow2 l)) (pow k a4 r42);
-    (==) { }
+    == { }
     k.mul (pow k (k.mul acc_123 (pow k a4 r41)) (pow2 l)) (pow k a4 r42);
-    (==) { lemma_pow_mul_base k acc_123 (pow k a4 r41) (pow2 l) }
+    == { lemma_pow_mul_base k acc_123 (pow k a4 r41) (pow2 l) }
     k.mul (k.mul acc_123_l (pow k (pow k a4 r41) (pow2 l))) (pow k a4 r42);
-    (==) { lemma_pow_distr_mul k acc_123_l a4 r41 r42 (pow2 l) }
+    == { lemma_pow_distr_mul k acc_123_l a4 r41 r42 (pow2 l) }
     k.mul (pow k a4 (r41 * pow2 l + r42)) acc_123_l;
-    (==) { lemma_b_div_pow2ki bBits b4 l i }
+    == { lemma_b_div_pow2ki bBits b4 l i }
     k.mul res_a4 acc_123_l;
   };
 
   calc (==) {
     k.mul (k.mul acc1 (pow k a4 r42)) (pow k a3 r32);
-    (==) { }
+    == { }
     k.mul (k.mul res_a4 (pow k (k.mul acc_12 (pow k a3 r31)) (pow2 l))) (pow k a3 r32);
-    (==) {k.lemma_mul_assoc res_a4 (pow k (k.mul acc_12 (pow k a3 r31)) (pow2 l)) (pow k a3 r32)}
+    == {k.lemma_mul_assoc res_a4 (pow k (k.mul acc_12 (pow k a3 r31)) (pow2 l)) (pow k a3 r32)}
     k.mul res_a4 (k.mul (pow k (k.mul acc_12 (pow k a3 r31)) (pow2 l)) (pow k a3 r32));
-    (==) { lemma_pow_mul_base k acc_12 (pow k a3 r31) (pow2 l) }
+    == { lemma_pow_mul_base k acc_12 (pow k a3 r31) (pow2 l) }
     k.mul res_a4 (k.mul (k.mul acc_12_l (pow k (pow k a3 r31) (pow2 l))) (pow k a3 r32));
-    (==) { lemma_pow_distr_mul k acc_12_l a3 r31 r32 (pow2 l) }
+    == { lemma_pow_distr_mul k acc_12_l a3 r31 r32 (pow2 l) }
     k.mul res_a4 (k.mul (pow k a3 (r31 * pow2 l + r32)) acc_12_l);
-    (==) { lemma_b_div_pow2ki bBits b3 l i }
+    == { lemma_b_div_pow2ki bBits b3 l i }
     k.mul res_a4 (k.mul res_a3 acc_12_l);
-    (==) { k.lemma_mul_assoc res_a4 res_a3 acc_12_l; k.lemma_mul_comm res_a4 res_a3 }
+    == { k.lemma_mul_assoc res_a4 res_a3 acc_12_l; k.lemma_mul_comm res_a4 res_a3 }
     k.mul (k.mul res_a3 res_a4) acc_12_l;
   };
 
@@ -627,31 +627,31 @@ let exp_four_fw_lemma_step #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l i acc =
   let res_a34 = k.mul res_a3 res_a4 in
   calc (==) {
     k.mul (k.mul (k.mul acc1 (pow k a4 r42)) (pow k a3 r32)) (pow k a2 r22);
-    (==) { }
+    == { }
     k.mul (k.mul res_a34 (pow k (k.mul acc_1 (pow k a2 r21)) (pow2 l))) (pow k a2 r22);
-    (==) { lemma_mul_assoc res_a34 (pow k (k.mul acc_1 (pow k a2 r21)) (pow2 l)) (pow k a2 r22) }
+    == { lemma_mul_assoc res_a34 (pow k (k.mul acc_1 (pow k a2 r21)) (pow2 l)) (pow k a2 r22) }
     k.mul res_a34 (k.mul (pow k (k.mul acc_1 (pow k a2 r21)) (pow2 l)) (pow k a2 r22));
-    (==) { lemma_pow_mul_base k acc_1 (pow k a2 r21) (pow2 l) }
+    == { lemma_pow_mul_base k acc_1 (pow k a2 r21) (pow2 l) }
     k.mul res_a34 (k.mul (k.mul acc_1_l (pow k (pow k a2 r21) (pow2 l))) (pow k a2 r22));
-    (==) { lemma_pow_distr_mul k acc_1_l a2 r21 r22 (pow2 l) }
+    == { lemma_pow_distr_mul k acc_1_l a2 r21 r22 (pow2 l) }
     k.mul res_a34 (k.mul (pow k a2 (r21 * pow2 l + r22)) acc_1_l);
-    (==) { lemma_b_div_pow2ki bBits b2 l i }
+    == { lemma_b_div_pow2ki bBits b2 l i }
     k.mul res_a34 (k.mul res_a2 acc_1_l);
-    (==) { k.lemma_mul_assoc res_a34 res_a2 acc_1_l; k.lemma_mul_comm res_a34 res_a2 }
+    == { k.lemma_mul_assoc res_a34 res_a2 acc_1_l; k.lemma_mul_comm res_a34 res_a2 }
     k.mul (k.mul res_a2 res_a34) acc_1_l;
-    (==) { k.lemma_mul_assoc res_a2 res_a3 res_a4 }
+    == { k.lemma_mul_assoc res_a2 res_a3 res_a4 }
     k.mul res_a234 acc_1_l;
   };
 
   calc (==) {
     k.mul (k.mul (k.mul (k.mul acc1 (pow k a4 r42)) (pow k a3 r32)) (pow k a2 r22)) (pow k a1 r12);
-    (==) { }
+    == { }
     k.mul (k.mul res_a234 (pow k (pow k a1 r11) (pow2 l))) (pow k a1 r12);
-    (==) { lemma_pow_distr_mul k res_a234 a1 r11 r12 (pow2 l) }
+    == { lemma_pow_distr_mul k res_a234 a1 r11 r12 (pow2 l) }
     k.mul (pow k a1 (r11 * pow2 l + r12)) res_a234;
-    (==) { lemma_b_div_pow2ki bBits b1 l i }
+    == { lemma_b_div_pow2ki bBits b1 l i }
     k.mul res_a1 (k.mul (k.mul res_a2 res_a3) res_a4);
-    (==) { lemma_mul_assoc4 k res_a1 res_a2 res_a3 res_a4 }
+    == { lemma_mul_assoc4 k res_a1 res_a2 res_a3 res_a4 }
     k.mul (k.mul (k.mul res_a1 res_a2) res_a3) res_a4;
   }
 

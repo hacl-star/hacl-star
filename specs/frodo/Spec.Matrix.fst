@@ -24,11 +24,11 @@ val index_lt:
 let index_lt n1 n2 i j =
   calc (<=) {
     i * n2 + j;
-    (<=) { Math.Lemmas.lemma_mult_le_right n2 i (n1 - 1) }
+    <= { Math.Lemmas.lemma_mult_le_right n2 i (n1 - 1) }
     (n1 - 1) * n2 + j;
-    (==) { Math.Lemmas.distributivity_sub_left n1 1 n2 }
+    == { Math.Lemmas.distributivity_sub_left n1 1 n2 }
     n1 * n2 - n2 + j;
-    (<=) { }
+    <= { }
     n1 * n2 - 1;
     }
 
@@ -50,26 +50,26 @@ let index_neq #n1 #n2 i j i' j' =
   if i' < i then
     calc (<) {
       i' * n2 + j';
-      (<) { }
+      < { }
       i' * n2 + n2;
-      (==) { Math.Lemmas.distributivity_add_left i' 1 n2 }
+      == { Math.Lemmas.distributivity_add_left i' 1 n2 }
       (i' + 1) * n2;
-      (<=) { Math.Lemmas.lemma_mult_le_right n2 (i' + 1) i }
+      <= { Math.Lemmas.lemma_mult_le_right n2 (i' + 1) i }
       i * n2;
-      (<=) { }
+      <= { }
       i * n2 + j;
       }
   else if i = i' then ()
   else
     calc (<) {
       i * n2 + j;
-      (<) { }
+      < { }
       i * n2 + n2;
-      (==) { Math.Lemmas.distributivity_add_left i 1 n2 }
+      == { Math.Lemmas.distributivity_add_left i 1 n2 }
       (i + 1) * n2;
-      (<=) { Math.Lemmas.lemma_mult_le_right n2 (i + 1) i' }
+      <= { Math.Lemmas.lemma_mult_le_right n2 (i + 1) i' }
       i' * n2;
-      (<=) { }
+      <= { }
       i' * n2 + j';
       }
 

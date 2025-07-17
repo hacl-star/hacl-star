@@ -44,23 +44,23 @@ let split_nb_lem (block_length: pos)
   assert(bl % block_length = 0);
   calc (<=) {
      bl;
-  (<=) { Math.Lemmas.lemma_mult_le_right block_length n (data_length / block_length) }
+  <= { Math.Lemmas.lemma_mult_le_right block_length n (data_length / block_length) }
     (data_length / block_length) * block_length;
-  (<=) {}
+  <= {}
     (data_length / block_length) * block_length + data_length % block_length;
-  (==) { Math.Lemmas.euclidean_division_definition data_length block_length }
+  == { Math.Lemmas.euclidean_division_definition data_length block_length }
     data_length;
   };
   let r = data_length - bl in
   calc (==) {
     r % block_length;
-  (==) { Math.Lemmas.modulo_distributivity data_length (- bl) block_length }
+  == { Math.Lemmas.modulo_distributivity data_length (- bl) block_length }
     (data_length % block_length + (- bl) % block_length) % block_length;
-  (==) { Math.Lemmas.paren_mul_right (-1) n block_length }
+  == { Math.Lemmas.paren_mul_right (-1) n block_length }
     (data_length % block_length + ((- n) * block_length) % block_length) % block_length;
-  (==) { Math.Lemmas.multiple_modulo_lemma (-n) block_length }
+  == { Math.Lemmas.multiple_modulo_lemma (-n) block_length }
     (data_length % block_length) % block_length;
-  (==) { Math.Lemmas.lemma_mod_add_distr 0 data_length block_length }
+  == { Math.Lemmas.lemma_mod_add_distr 0 data_length block_length }
     data_length % block_length;
   }
 #pop-options
@@ -330,15 +330,15 @@ let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
   let input2 = s2 in
   calc (==) {
     S.length input % block_len;
-  (==) { S.lemma_len_append input1 input2 }
+  == { S.lemma_len_append input1 input2 }
     (S.length input1 + S.length input2) % block_len;
-  (==) {
+  == {
     FStar.Math.Lemmas.modulo_distributivity (S.length input1) (S.length input2) (block_len)
   }
     (S.length input1 % block_len + S.length input2 % block_len) % block_len;
-  (==) { (* hyp *) }
+  == { (* hyp *) }
     0 % block_len;
-  (==) { FStar.Math.Lemmas.small_mod 0 block_len }
+  == { FStar.Math.Lemmas.small_mod 0 block_len }
     0;
   }
 #pop-options
@@ -375,11 +375,11 @@ let rec update_multi_associative #a (block_length: pos)
   if S.length input1 = 0 then
     calc (==) {
       mk_update_multi block_length update (mk_update_multi block_length update acc input1) input2;
-    (==) { update_multi_zero block_length update acc }
+    == { update_multi_zero block_length update acc }
       mk_update_multi block_length update acc input2;
-    (==) { S.lemma_eq_intro input2 (S.empty `S.append` input2) }
+    == { S.lemma_eq_intro input2 (S.empty `S.append` input2) }
       mk_update_multi block_length update acc (S.empty `S.append` input2);
-    (==) { S.lemma_eq_intro input1 S.empty }
+    == { S.lemma_eq_intro input1 S.empty }
       mk_update_multi block_length update acc (input1 `S.append` input2);
     }
   else

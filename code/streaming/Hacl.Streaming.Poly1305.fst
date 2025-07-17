@@ -185,16 +185,16 @@ let update_last_not_block_is_update input acc r =
   assert_norm (block_length < pow2 32);
   calc (==) {
     update_last (acc, r) input;
-  (==) { }
+  == { }
     update_last' r acc input, r;
-  (==) { Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block (update' r) acc }
+  == { Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block (update' r) acc }
     update_last' r (update_multi' r acc S.empty) input, r;
-  (==) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
+  == { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
     Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
       (repeat_f block_length (update' r))
       (repeat_l block_length (update_last' r) input)
       acc, r;
-  (==) { Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input
+  == { Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input
       (repeat_f block_length (update' r))
       Spec.Poly1305.(poly1305_update1 r size_block)
       (repeat_l block_length (update_last' r) input)
@@ -252,13 +252,13 @@ let update_last_block_is_update input acc r =
   assert(acc1 == acc1');
   calc (==) {
     update_last (acc, r) input;
-  (==) { }
+  == { }
     update_last' r acc input, r;
-  (==) { }
+  == { }
     update_last' r (update' r acc input) S.empty, r;
-  (==) {  }
+  == {  }
    update_last' r (update_multi' r acc input) S.empty, r;
-  (==) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
+  == { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
     Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
       (repeat_f block_length (update' r))
       (repeat_l block_length (update_last' r) input)
@@ -293,16 +293,16 @@ let update_multi_is_update input acc r =
   assert_norm (block_length < pow2 32);
   calc (==) {
     update_multi (acc, r) input;
-  (==) { with_or_without_r acc r input }
+  == { with_or_without_r acc r input }
     update_multi' r acc input, r;
-  (==) { }
+  == { }
     update_last' r (update_multi' r acc input) S.empty, r;
-  (==) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
+  == { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
     Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
       (repeat_f block_length (update' r))
       (repeat_l block_length (update_last' r) input)
       acc, r;
-  (==) { Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input
+  == { Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input
       (repeat_f block_length (update' r))
       Spec.Poly1305.(poly1305_update1 r size_block)
       (repeat_l block_length (update_last' r) input)

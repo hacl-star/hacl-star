@@ -101,11 +101,11 @@ val lemma_pow_mod_mul: f:S.felem -> a:nat -> b:nat ->
 let lemma_pow_mod_mul f a b =
   calc (==) {
     S.fmul (M.pow f a % S.prime) (M.pow f b % S.prime);
-    (==) {
+    == {
       Math.Lemmas.lemma_mod_mul_distr_l (M.pow f a) (M.pow f b % S.prime) S.prime;
       Math.Lemmas.lemma_mod_mul_distr_r (M.pow f a) (M.pow f b) S.prime }
     M.pow f a * M.pow f b % S.prime;
-    (==) { M.lemma_pow_add f a b }
+    == { M.lemma_pow_add f a b }
     M.pow f (a + b) % S.prime;
   }
 
@@ -115,9 +115,9 @@ val lemma_pow_pow_mod: f:S.felem -> a:nat -> b:nat ->
 let lemma_pow_pow_mod f a b =
   calc (==) {
     M.pow (M.pow f a % S.prime) b % S.prime;
-    (==) { M.lemma_pow_mod_base (M.pow f a) b S.prime }
+    == { M.lemma_pow_mod_base (M.pow f a) b S.prime }
     M.pow (M.pow f a) b % S.prime;
-    (==) { M.lemma_pow_mul f a b }
+    == { M.lemma_pow_mul f a b }
     M.pow f (a * b) % S.prime;
     }
 
@@ -127,9 +127,9 @@ val lemma_pow_pow_mod_mul: f:S.felem -> a:nat -> b:nat -> c:nat ->
 let lemma_pow_pow_mod_mul f a b c =
   calc (==) {
     S.fmul (M.pow (M.pow f a % S.prime) b % S.prime) (M.pow f c % S.prime);
-    (==) { lemma_pow_pow_mod f a b }
+    == { lemma_pow_pow_mod f a b }
     S.fmul (M.pow f (a * b) % S.prime) (M.pow f c % S.prime);
-    (==) { lemma_pow_mod_mul f (a * b) c }
+    == { lemma_pow_mod_mul f (a * b) c }
     M.pow f (a * b + c) % S.prime;
   }
 

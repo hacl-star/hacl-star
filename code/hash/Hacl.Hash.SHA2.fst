@@ -125,29 +125,29 @@ let mk_update_multi a st () blocks n_blocks =
 
   calc (==) {
     as_seq h1 st;
-  (==) { }
+  == { }
     as_seq #(| a, () |) h1 st';
-  (==) { }
+  == { }
     Vec.update_nblocks #a #Vec.M32 length_blocks blocks0_multi st0';
-  (==) { state_spec_v_lemma a (Vec.update_nblocks #a #Vec.M32 length_blocks blocks0_multi st0') }
+  == { state_spec_v_lemma a (Vec.update_nblocks #a #Vec.M32 length_blocks blocks0_multi st0') }
     Lib.Sequence.index (Vec.state_spec_v (Vec.update_nblocks #a #Vec.M32 length_blocks blocks0_multi st0')) 0;
-  (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #a #Vec.M32 length_blocks blocks0_multi st0_raw 0 }
+  == { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #a #Vec.M32 length_blocks blocks0_multi st0_raw 0 }
     Hacl.Spec.SHA2.update_nblocks a length_blocks blocks0_multi.(|0|)
       (Lib.Sequence.index (Vec.state_spec_v #a #Vec.M32 (as_seq h0 st)) 0);
-  (==) { state_spec_v_lemma a (as_seq h0 st) }
+  == { state_spec_v_lemma a (as_seq h0 st) }
     Hacl.Spec.SHA2.update_nblocks a length_blocks blocks0_multi.(|0|) (as_seq h0 st);
-  (==) { }
+  == { }
     Hacl.Spec.SHA2.update_nblocks a length_blocks blocks0 st0;
-  (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi a length_blocks blocks0 st0 } (
+  == { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi a length_blocks blocks0 st0 } (
     let b = blocks0 in
     let open Lib.Sequence in
     let bl = block_length a in
     repeat_blocks_multi #Lib.IntTypes.uint8 #(words_state a) bl
       (Seq.slice b 0 (Seq.length b - Seq.length b % bl)) (Hacl.Spec.SHA2.update a) st0);
-  (==) { }
+  == { }
     Lib.Sequence.repeat_blocks_multi #Lib.IntTypes.uint8 #(words_state a)
       (block_length a) blocks0 (Hacl.Spec.SHA2.update a) st0;
-  (==) {
+  == {
     FStar.Classical.forall_intro_2 (Hacl.Spec.SHA2.EquivScalar.update_lemma a);
     Lib.Sequence.Lemmas.repeat_blocks_multi_extensionality
       #Lib.IntTypes.uint8 #(words_state a)
@@ -157,12 +157,12 @@ let mk_update_multi a st () blocks n_blocks =
   }
     Lib.Sequence.repeat_blocks_multi #Lib.IntTypes.uint8 #(words_state a)
       (block_length a) blocks0 (Lib.UpdateMulti.Lemmas.repeat_f (block_length a) (Spec.Agile.Hash.update a)) st0;
-  (==) {
+  == {
     Lib.UpdateMulti.Lemmas.update_multi_is_repeat_blocks_multi #(words_state a)
       (block_length a) (Spec.Agile.Hash.update a) st0 blocks0
   }
     Lib.UpdateMulti.mk_update_multi #(words_state a) (block_length a) (Spec.Agile.Hash.update a) st0 blocks0;
-  (==) { }
+  == { }
     Spec.Agile.Hash.update_multi a st0 () blocks0;
   }
   end
@@ -216,53 +216,53 @@ let mk_update_last a st prev_len input input_len =
     let blocks1_raw = Seq.append input0_raw pad_s in
     calc (==) {
       blocks1;
-      (==) { ntup1_lemma #_ #1 input0; assert (Seq.equal blocks1 blocks1_raw) }
+      == { ntup1_lemma #_ #1 input0; assert (Seq.equal blocks1 blocks1_raw) }
       blocks1_raw;
     };
 
     calc (==) {
       vtotlen % block_length a;
-      (==) { }
+      == { }
       (vprev_len + vlen) % block_length a;
-      (==) { Math.Lemmas.lemma_mod_add_distr vlen vprev_len (block_length a) }
+      == { Math.Lemmas.lemma_mod_add_distr vlen vprev_len (block_length a) }
       vlen % block_length a;
     };
 
     calc (==) {
       Seq.length blocks1 % block_length a;
-      (==) { }
+      == { }
       (vlen + Seq.length pad_s) % block_length a;
-      (==) { Math.Lemmas.lemma_mod_add_distr (Seq.length pad_s) vlen (block_length a) }
+      == { Math.Lemmas.lemma_mod_add_distr (Seq.length pad_s) vlen (block_length a) }
       (vlen % block_length a + Seq.length pad_s) % block_length a;
-      (==) { }
+      == { }
       (vtotlen % block_length a + Seq.length pad_s) % block_length a;
-      (==) { Math.Lemmas.lemma_mod_add_distr (Seq.length pad_s) vtotlen (block_length a) }
+      == { Math.Lemmas.lemma_mod_add_distr (Seq.length pad_s) vtotlen (block_length a) }
       (vtotlen + Seq.length pad_s) % block_length a;
-      (==) { }
+      == { }
       0;
     };
 
     calc (==) {
         as_seq h1 st;
-      (==) { }
+      == { }
         Vec.update_last #a #Vec.M32 totlen vlen input0 st0';
-      (==) { state_spec_v_lemma a (Vec.update_last totlen vlen input0 st0') }
+      == { state_spec_v_lemma a (Vec.update_last totlen vlen input0 st0') }
         Lib.Sequence.index (Vec.state_spec_v #a #Vec.M32 (Vec.update_last totlen vlen input0 st0')) 0;
-      (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #a #Vec.M32 totlen vlen input0 st0' 0 }
+      == { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #a #Vec.M32 totlen vlen input0 st0' 0 }
         Hacl.Spec.SHA2.update_last a totlen vlen input0.(|0|)
           (Lib.Sequence.index (Vec.state_spec_v #a #Vec.M32 st0') 0);
-      (==) { state_spec_v_lemma a st0' }
+      == { state_spec_v_lemma a st0' }
         Hacl.Spec.SHA2.update_last a totlen vlen input0.(|0|) st0';
-      (==) { ntup1_lemma #_ #1 input0 }
+      == { ntup1_lemma #_ #1 input0 }
         Hacl.Spec.SHA2.update_last a totlen vlen input0 st0';
-      (==) {
+      == {
         Hacl.Spec.SHA2.EquivScalar.update_last_is_repeat_blocks_multi a vtotlen vlen input0 st0'
       }
         Lib.Sequence.repeat_blocks_multi (block_length a) blocks1 (Hacl.Spec.SHA2.update a) st0';
-      (==) { assert (st0 `Seq.equal` st0');
+      == { assert (st0 `Seq.equal` st0');
              ntup1_lemma #_ #1 input0; assert (blocks1 `Seq.equal` blocks1_raw) }
         Lib.Sequence.repeat_blocks_multi (block_length a) blocks1_raw (Hacl.Spec.SHA2.update a) st0;
-      (==) { Classical.forall_intro_2 (Hacl.Spec.SHA2.EquivScalar.update_lemma a);
+      == { Classical.forall_intro_2 (Hacl.Spec.SHA2.EquivScalar.update_lemma a);
              Lib.Sequence.Lemmas.repeat_blocks_multi_extensionality (block_length a)
                blocks1_raw
                (Hacl.Spec.SHA2.update a)
@@ -271,10 +271,10 @@ let mk_update_last a st prev_len input input_len =
         Lib.Sequence.repeat_blocks_multi (block_length a) blocks1_raw
           (Lib.UpdateMulti.Lemmas.repeat_f (block_length a) (Spec.Agile.Hash.update a))
           st0;
-      (==) {
+      == {
         Lib.UpdateMulti.Lemmas.update_multi_is_repeat_blocks_multi (block_length a) (Spec.Agile.Hash.update a) st0 blocks1_raw }
         Lib.UpdateMulti.mk_update_multi (block_length a) (Spec.Agile.Hash.update a) st0 blocks1_raw;
-      (==) { }
+      == { }
         Spec.Hash.Incremental.update_last a st0 (prev_len_v prev_len) input0_raw;
     }
   end
@@ -309,13 +309,13 @@ let mk_finish a st dst =
 
     calc (==) {
       B.as_seq h1 dst;
-      (==) { ntup1_lemma #_ #1 hash1_m;
+      == { ntup1_lemma #_ #1 hash1_m;
              ntup1_lemma #_ #1 (Hacl.Spec.SHA2.Vec.finish #a #Vec.M32 st0);
              Hacl.Spec.SHA2.Equiv.finish_lemma_l #a #Vec.M32 st0 0 }
      Hacl.Spec.SHA2.finish a (Lib.Sequence.index (Vec.state_spec_v #a #Vec.M32 st0) 0);
-     (==) { state_spec_v_lemma a st0 }
+     == { state_spec_v_lemma a st0 }
      Hacl.Spec.SHA2.finish a st0;
-     (==) { Hacl.Spec.SHA2.EquivScalar.finish_lemma a st0 }
+     == { Hacl.Spec.SHA2.EquivScalar.finish_lemma a st0 }
      Spec.Agile.Hash.finish a st0 ();
     }
   end

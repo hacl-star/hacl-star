@@ -65,11 +65,11 @@ let to_aff_point_negate_lemma p =
 
   calc (==) { // (-py) % prime /% pz;
     ((- py) % prime * pz_inv) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- py) pz_inv prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (- py) pz_inv prime }
     (- py * pz_inv) % prime;
-    (==) { Math.Lemmas.neg_mul_left py pz_inv }
+    == { Math.Lemmas.neg_mul_left py pz_inv }
     (- (py * pz_inv)) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr 0 (py * pz_inv) prime }
+    == { Math.Lemmas.lemma_mod_sub_distr 0 (py * pz_inv) prime }
     (- (py * pz_inv) % prime) % prime; // (- py /% pz) % prime;
   }
 

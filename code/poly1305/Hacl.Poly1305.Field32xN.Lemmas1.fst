@@ -317,27 +317,27 @@ let carry_wide_felem5_eval_lemma_i0 inp tmp vc0 vc1 vc2 vc3 vc4 vc6 =
 
   calc (==) {
     as_nat5 inp % prime;
-    (==) { }
+    == { }
     (v xi0 + v xi1 * pow26 + v xi2 * pow52 + v xi3 * pow78 + v xi4 * pow104) % prime;
-    (==) { }
+    == { }
     (vc0 * pow2 26 + v t0 +
     (vc1 * pow2 26 + v t1 - vc0) * pow26 +
     (vc2 * pow2 26 + v t2 - vc1) * pow52 +
     (vc3 * pow2 26 + vc6 * pow2 26 + v t3 - vc2) * pow78 +
     (vc4 * pow2 26 + v t4 - vc6 - vc3) * pow104) % prime;
-    (==) {
+    == {
       assert_norm (pow2 26 * pow26 = pow52);
       assert_norm (pow2 26 * pow52 = pow78);
       assert_norm (pow2 26 * pow78 = pow104);
       assert_norm (pow2 26 * pow104 = pow2 130)}
     (v t0 + v t1 * pow26 + v t2 * pow52 + v t3 * pow78 + v t4 * pow104 + vc4 * pow2 130) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp_n (vc4 * pow2 130) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp_n (vc4 * pow2 130) prime }
     (tmp_n + (vc4 * pow2 130 % prime)) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r (vc4) (pow2 130) prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (vc4) (pow2 130) prime }
     (tmp_n + (vc4 * (pow2 130 % prime) % prime)) % prime;
-    (==) { lemma_prime () }
+    == { lemma_prime () }
     (tmp_n + (vc4 * 5 % prime)) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp_n (vc4 * 5) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp_n (vc4 * 5) prime }
     (tmp_n + vc4 * 5) % prime;
   };
   assert (as_nat5 inp % prime == (tmp_n + vc4 * 5) % prime)
@@ -443,9 +443,9 @@ let carry_wide_felem5_eval_lemma_i #w inp i =
 
   calc (==) {
     (feval5 out).[i];
-    (==) { }
+    == { }
     (v o0 + v o1 * pow26 + v o2 * pow52 + v o3 * pow78 + v o4 * pow104) % prime;
-    (==) { }
+    == { }
     (v t0 + vc4 * 5 + (v t1 + vc5) * pow26 - vc5 * pow26 + v t2 * pow52 + v t3 * pow78 + v t4 * pow104) % prime;
     };
   Math.Lemmas.distributivity_add_left (v t1) vc5 pow26;
@@ -515,20 +515,20 @@ let lemma_subtract_p5_1 f f' =
   assert (as_nat5 f' < prime);
   calc (==) {
     as_nat5 f' % prime;
-    (==) { }
+    == { }
     (v f0' + v f1' * pow26 + v f2' * pow52 + v f3' * pow78 + v f4' * pow104) % prime;
-    (==) { }
+    == { }
     (v f0 - (pow2 26 - 5) + (v f1 - (pow2 26 - 1)) * pow26 + (v f2 - (pow2 26 - 1)) * pow52 +
     (v f3 - (pow2 26 - 1)) * pow78 + (v f4 - (pow2 26 - 1)) * pow104) % prime;
-    (==) {
+    == {
       assert_norm (pow2 26 * pow26 = pow52);
       assert_norm (pow2 26 * pow52 = pow78);
       assert_norm (pow2 26 * pow78 = pow104);
       assert_norm (pow2 26 * pow104 = pow2 130) }
     (v f0 + v f1 * pow26 + v f2 * pow52 + v f3 * pow78 + v f4 * pow104 - prime) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_sub (v f0 + v f1 * pow26 + v f2 * pow52 + v f3 * pow78 + v f4 * pow104) prime 1 }
+    == { FStar.Math.Lemmas.lemma_mod_sub (v f0 + v f1 * pow26 + v f2 * pow52 + v f3 * pow78 + v f4 * pow104) prime 1 }
     (v f0 + v f1 * pow26 + v f2 * pow52 + v f3 * pow78 + v f4 * pow104) % prime;
-    (==) { }
+    == { }
     as_nat5 f % prime;
     };
   assert (as_nat5 f' % prime == as_nat5 f % prime);
@@ -746,27 +746,27 @@ let carry_full_felem5_eval_lemma_i0 inp tmp vc0 vc1 vc2 vc3 vc4 =
 
   calc (==) {
     as_nat5 inp % prime;
-    (==) { }
+    == { }
     (v ti0 + v ti1 * pow26 + v ti2 * pow52 + v ti3 * pow78 + v ti4 * pow104) % prime;
-    (==) { }
+    == { }
     (vc0 * pow2 26 + v t0 +
     (vc1 * pow2 26 + v t1 - vc0) * pow26 +
     (vc2 * pow2 26 + v t2 - vc1) * pow52 +
     (vc3 * pow2 26 + v t3 - vc2) * pow78 +
     (vc4 * pow2 26 + v t4 - vc3) * pow104) % prime;
-    (==) {
+    == {
       assert_norm (pow2 26 * pow26 = pow52);
       assert_norm (pow2 26 * pow52 = pow78);
       assert_norm (pow2 26 * pow78 = pow104);
       assert_norm (pow2 26 * pow104 = pow2 130)}
     (v t0 + v t1 * pow26 + v t2 * pow52 + v t3 * pow78 + v t4 * pow104 + vc4 * pow2 130) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp_n (vc4 * pow2 130) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp_n (vc4 * pow2 130) prime }
     (tmp_n + (vc4 * pow2 130 % prime)) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r (vc4) (pow2 130) prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (vc4) (pow2 130) prime }
     (tmp_n + (vc4 * (pow2 130 % prime) % prime)) % prime;
-    (==) { lemma_prime () }
+    == { lemma_prime () }
     (tmp_n + (vc4 * 5 % prime)) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp_n (vc4 * 5) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp_n (vc4 * 5) prime }
     (tmp_n + vc4 * 5) % prime;
   };
   assert (as_nat5 inp % prime == (tmp_n + vc4 * 5) % prime)

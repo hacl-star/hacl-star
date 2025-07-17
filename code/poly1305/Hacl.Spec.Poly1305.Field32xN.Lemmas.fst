@@ -349,14 +349,14 @@ let fmul_r2_normalize51 a fa1 =
 
   calc (==) {
     ((feval5 a).[0] + (feval5 a).[1]) % Vec.prime;
-    (==) { }
+    == { }
     (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime + as_nat5 (a10, a11, a12, a13, a14) % Vec.prime) % Vec.prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_l
     (as_nat5 (a0, a1, a2, a3, a4)) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
     (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime }
     (as_nat5 (a0, a1, a2, a3, a4) + as_nat5 (a10, a11, a12, a13, a14)) % Vec.prime;
-    (==) { }
+    == { }
     (feval5 out).[0];
   };
   out
@@ -529,19 +529,19 @@ let lemma_fmul_r4_normalize51_expand v2 out =
 
   calc (==) {
     as_nat5 (v20, v21, v22, v23, v24) % Vec.prime;
-    (==) { }
+    == { }
     (as_nat5 (as_tup64_i out 0) + as_nat5 (as_tup64_i out 1) + as_nat5 (as_tup64_i out 2) + as_nat5 (as_tup64_i out 3)) % Vec.prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (as_nat5 (as_tup64_i out 0) + as_nat5 (as_tup64_i out 1))
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_l (as_nat5 (as_tup64_i out 0) + as_nat5 (as_tup64_i out 1))
 	 (as_nat5 (as_tup64_i out 2) + as_nat5 (as_tup64_i out 3)) Vec.prime }
     ((as_nat5 (as_tup64_i out 0) + as_nat5 (as_tup64_i out 1)) % Vec.prime + as_nat5 (as_tup64_i out 2) + as_nat5 (as_tup64_i out 3)) % Vec.prime;
-    (==) { FStar.Math.Lemmas.modulo_distributivity (as_nat5 (as_tup64_i out 0)) (as_nat5 (as_tup64_i out 1)) Vec.prime }
+    == { FStar.Math.Lemmas.modulo_distributivity (as_nat5 (as_tup64_i out 0)) (as_nat5 (as_tup64_i out 1)) Vec.prime }
     (((feval5 out).[0] + (feval5 out).[1]) % Vec.prime + as_nat5 (as_tup64_i out 2) + as_nat5 (as_tup64_i out 3)) % Vec.prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (((feval5 out).[0] + (feval5 out).[1]) % Vec.prime + as_nat5 (as_tup64_i out 2))
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_l (((feval5 out).[0] + (feval5 out).[1]) % Vec.prime + as_nat5 (as_tup64_i out 2))
 	(as_nat5 (as_tup64_i out 3)) Vec.prime }
     ((((feval5 out).[0] + (feval5 out).[1]) % Vec.prime + as_nat5 (as_tup64_i out 2)) % Vec.prime + as_nat5 (as_tup64_i out 3)) % Vec.prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r (((feval5 out).[0] + (feval5 out).[1]) % Vec.prime) (as_nat5 (as_tup64_i out 2)) Vec.prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r (((feval5 out).[0] + (feval5 out).[1]) % Vec.prime) (as_nat5 (as_tup64_i out 2)) Vec.prime }
     ((((feval5 out).[0] + (feval5 out).[1]) % Vec.prime + (feval5 out).[2]) % Vec.prime + as_nat5 (as_tup64_i out 3)) % Vec.prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r ((((feval5 out).[0] + (feval5 out).[1]) % Vec.prime + (feval5 out).[2]) % Vec.prime)
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r ((((feval5 out).[0] + (feval5 out).[1]) % Vec.prime + (feval5 out).[2]) % Vec.prime)
 	 (as_nat5 (as_tup64_i out 3)) Vec.prime }
     ((((feval5 out).[0] + (feval5 out).[1]) % Vec.prime + (feval5 out).[2]) % Vec.prime + (feval5 out).[3]) % Vec.prime;
    };

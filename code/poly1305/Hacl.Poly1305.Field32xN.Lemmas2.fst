@@ -24,13 +24,13 @@ val load_tup64_lemma0_lo: lo:uint64 ->
 let load_tup64_lemma0_lo lo =
   calc (==) {
     v lo % pow2 26 + ((v lo / pow2 26) % pow2 26) * pow26 + v lo / pow2 52 * pow52;
-  (==) { FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v lo) 26 52 }
+  == { FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v lo) 26 52 }
     (v lo % pow2 52) % pow2 26 + ((v lo / pow2 26) % pow2 26) * pow2 26 + v lo / pow2 52 * pow2 52;
-  (==) { FStar.Math.Lemmas.pow2_modulo_division_lemma_1 (v lo) 26 52 }
+  == { FStar.Math.Lemmas.pow2_modulo_division_lemma_1 (v lo) 26 52 }
     (v lo % pow2 52) % pow2 26 + ((v lo % pow2 52) / pow2 26) * pow2 26 + v lo / pow2 52 * pow2 52;
-  (==) { FStar.Math.Lemmas.euclidean_division_definition (v lo % pow2 52) (pow2 26) }
+  == { FStar.Math.Lemmas.euclidean_division_definition (v lo % pow2 52) (pow2 26) }
     (v lo % pow2 52) + v lo / pow2 52 * pow2 52;
-  (==) { FStar.Math.Lemmas.euclidean_division_definition (v lo) (pow2 52) }
+  == { FStar.Math.Lemmas.euclidean_division_definition (v lo) (pow2 52) }
     v lo;
   }
 
@@ -43,19 +43,19 @@ val load_tup64_lemma0_hi: hi:uint64 ->
 let load_tup64_lemma0_hi hi =
   calc (==) {
     (v hi % pow2 14) * pow2 64 + (v hi / pow2 14) % pow2 26 * pow78 + v hi / pow2 40 * pow104;
-    (==) {
+    == {
       assert_norm (pow78 = pow2 14 * pow2 64);
       assert_norm (pow104 = pow2 40 * pow2 64)}
     (v hi % pow2 14) * pow2 64 + (v hi / pow2 14) % pow2 26 * pow2 14 * pow2 64 + v hi / pow2 40 * pow2 40 * pow2 64;
-    (==) { }
+    == { }
     (v hi % pow2 14 + ((v hi / pow2 14) % pow2 26) * pow2 14 + (v hi / pow2 40) * pow2 40) * pow2 64;
-  (==) { FStar.Math.Lemmas.pow2_modulo_division_lemma_1 (v hi) 14 40 }
+  == { FStar.Math.Lemmas.pow2_modulo_division_lemma_1 (v hi) 14 40 }
     (v hi % pow2 14 + ((v hi % pow2 40) / pow2 14) * pow2 14 + (v hi / pow2 40) * pow2 40) * pow2 64;
-  (==) { FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v hi) 14 40 }
+  == { FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v hi) 14 40 }
     ((v hi % pow2 40) % pow2 14 + ((v hi % pow2 40) / pow2 14) * pow2 14 + (v hi / pow2 40) * pow2 40) * pow2 64;
-  (==) { FStar.Math.Lemmas.euclidean_division_definition (v hi % pow2 40) (pow2 14) }
+  == { FStar.Math.Lemmas.euclidean_division_definition (v hi % pow2 40) (pow2 14) }
     (v hi % pow2 40 + (v hi / pow2 40) * pow2 40) * pow2 64;
-  (==) { FStar.Math.Lemmas.euclidean_division_definition (v hi) (pow2 40) }
+  == { FStar.Math.Lemmas.euclidean_division_definition (v hi) (pow2 40) }
     v hi * pow2 64;
   }
 
@@ -79,17 +79,17 @@ let load_tup64_lemma0 f lo hi =
   let (f0, f1, f2, f3, f4) = f in
   calc (==) {
     as_nat5 f;
-    (==) { }
+    == { }
     v f0 + v f1 * pow26 + v f2 * pow52 + v f3 * pow78 + v f4 * pow104;
-    (==) { }
+    == { }
     v lo % pow2 26 + (v lo / pow2 26) % pow2 26 * pow26 +
     v lo / pow2 52 * pow52 + (v hi % pow2 14) * pow2 12 * pow52 +
     (v hi / pow2 14) % pow2 26 * pow78 + v hi / pow2 40 * pow104;
-    (==) { load_tup64_lemma0_lo lo }
+    == { load_tup64_lemma0_lo lo }
     v lo + (v hi % pow2 14) * pow2 12 * pow52 + (v hi / pow2 14) % pow2 26 * pow78 + v hi / pow2 40 * pow104;
-    (==) { assert_norm (pow2 12 * pow52 = pow2 64) }
+    == { assert_norm (pow2 12 * pow52 = pow2 64) }
     v lo + (v hi % pow2 14) * pow2 64 + (v hi / pow2 14) % pow2 26 * pow78 + v hi / pow2 40 * pow104;
-    (==) { load_tup64_lemma0_hi hi }
+    == { load_tup64_lemma0_hi hi }
     v lo + v hi * pow2 64;
   };
   assert (as_nat5 f == v hi * pow2 64 + v lo)
@@ -129,13 +129,13 @@ let load_tup64_lemma_f2 lo hi =
 
   calc (==) {
     v (tmp <<. 12ul) % pow2 12;
-  (==) { shift_left_lemma (hi &. u64 0x3fff) 12ul }
+  == { shift_left_lemma (hi &. u64 0x3fff) 12ul }
     (v tmp * pow2 12 % pow2 64) % pow2 12;
-  (==) { assert_norm (pow2 64 = pow2 12 * pow2 52) }
+  == { assert_norm (pow2 64 = pow2 12 * pow2 52) }
     (v tmp * pow2 12 % (pow2 12 * pow2 52)) % pow2 12;
-  (==) {FStar.Math.Lemmas.modulo_modulo_lemma (v tmp * pow2 12) (pow2 12) (pow2 52)}
+  == {FStar.Math.Lemmas.modulo_modulo_lemma (v tmp * pow2 12) (pow2 12) (pow2 52)}
     v tmp * pow2 12 % pow2 12;
-  (==) {FStar.Math.Lemmas.multiple_modulo_lemma (v tmp) (pow2 12)}
+  == {FStar.Math.Lemmas.multiple_modulo_lemma (v tmp) (pow2 12)}
     0;
   };
   assert (v (tmp <<. 12ul) % pow2 12 = 0);
@@ -145,11 +145,11 @@ let load_tup64_lemma_f2 lo hi =
 
   calc (==) {
     v f2;
-  (==) {  }
+  == {  }
     v (lo >>. 52ul) + v ((hi &. u64 0x3fff) <<. 12ul);
-  (==) { shift_right_lemma lo 52ul }
+  == { shift_right_lemma lo 52ul }
     v lo / pow2 52 + v ((hi &. u64 0x3fff) <<. 12ul);
-  (==) { shift_left_lemma (hi &. u64 0x3fff) 12ul }
+  == { shift_left_lemma (hi &. u64 0x3fff) 12ul }
     v lo / pow2 52 + v (hi &. u64 0x3fff) * pow2 12 % pow2 64;
   };
   assert (v f2 == v lo / pow2 52 + v (hi &. u64 0x3fff) * pow2 12 % pow2 64);
@@ -236,11 +236,11 @@ val load_tup64_4_compact_lemma_f2_mod: lo:uint64 -> hi:uint64 -> Lemma
 let load_tup64_4_compact_lemma_f2_mod lo hi =
   calc (<) {
     v lo / pow2 52 + (v hi % pow2 14) * pow2 12;
-    (<) { Math.Lemmas.lemma_div_lt (v lo) 64 52 }
+    < { Math.Lemmas.lemma_div_lt (v lo) 64 52 }
     pow2 12 + (v hi % pow2 14) * pow2 12;
-    (<=) { Math.Lemmas.lemma_mult_le_right (pow2 12) (v hi % pow2 14) (pow2 14 - 1) }
+    <= { Math.Lemmas.lemma_mult_le_right (pow2 12) (v hi % pow2 14) (pow2 14 - 1) }
     pow2 12 + (pow2 14 - 1) * pow2 12;
-    (==) { Math.Lemmas.distributivity_sub_left (pow2 14) 1 (pow2 12); Math.Lemmas.pow2_plus 14 12 }
+    == { Math.Lemmas.distributivity_sub_left (pow2 14) 1 (pow2 12); Math.Lemmas.pow2_plus 14 12 }
     pow2 26;
   };
   assert (v lo / pow2 52 + (v hi % pow2 14) * pow2 12 < pow2 26);
@@ -262,15 +262,15 @@ let load_tup64_4_compact_lemma_f2 lo hi =
 
   calc (==) {
     (v lo / pow2 48 + (v hi * pow2 16) % pow2 64) / pow2 4;
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v hi) 64 16 }
+    == { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v hi) 64 16 }
     (v lo / pow2 48 + (v hi % pow2 48) * pow2 16) / pow2 4;
-    (==) { Math.Lemmas.pow2_plus 12 4 }
+    == { Math.Lemmas.pow2_plus 12 4 }
     (v lo / pow2 48 + (v hi % pow2 48) * pow2 12 * pow2 4) / pow2 4;
-    (==) { Math.Lemmas.division_addition_lemma (v lo / pow2 48) (pow2 4) ((v hi % pow2 48) * pow2 12) }
+    == { Math.Lemmas.division_addition_lemma (v lo / pow2 48) (pow2 4) ((v hi % pow2 48) * pow2 12) }
     (v lo / pow2 48) / pow2 4 + (v hi % pow2 48) * pow2 12;
-    (==) { Math.Lemmas.division_multiplication_lemma (v lo) (pow2 48) (pow2 4); Math.Lemmas.pow2_plus 48 4 }
+    == { Math.Lemmas.division_multiplication_lemma (v lo) (pow2 48) (pow2 4); Math.Lemmas.pow2_plus 48 4 }
     v lo / pow2 52 + (v hi % pow2 48) * pow2 12;
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v hi) 60 12 }
+    == { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v hi) 60 12 }
     v lo / pow2 52 + (v hi * pow2 12) % pow2 60;
   };
   assert (v (t3 >>. 4ul) == v lo / pow2 52 + (v hi * pow2 12) % pow2 60);
@@ -281,13 +281,13 @@ let load_tup64_4_compact_lemma_f2 lo hi =
 
   calc (==) {
     (v lo / pow2 52 + (v hi * pow2 12) % pow2 60) % pow2 26;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r (v lo / pow2 52) ((v hi * pow2 12) % pow2 60) (pow2 26) }
+    == { Math.Lemmas.lemma_mod_plus_distr_r (v lo / pow2 52) ((v hi * pow2 12) % pow2 60) (pow2 26) }
     (v lo / pow2 52 + (v hi * pow2 12) % pow2 60 % pow2 26) % pow2 26;
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 (v hi * pow2 12) 26 60 }
+    == { Math.Lemmas.pow2_modulo_modulo_lemma_1 (v hi * pow2 12) 26 60 }
     (v lo / pow2 52 + (v hi * pow2 12) % pow2 26) % pow2 26;
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v hi) 26 12 }
+    == { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v hi) 26 12 }
     (v lo / pow2 52 + (v hi % pow2 14) * pow2 12) % pow2 26;
-    (==) { load_tup64_4_compact_lemma_f2_mod lo hi }
+    == { load_tup64_4_compact_lemma_f2_mod lo hi }
     v lo / pow2 52 + (v hi % pow2 14) * pow2 12;
   };
   assert (v f2 == v lo / pow2 52 + (v hi % pow2 14) * pow2 12)
@@ -308,18 +308,18 @@ let load_tup64_4_compact_lemma_f3 lo hi =
 
   calc (==) {
     (v lo / pow2 48 + (v hi * pow2 16) % pow2 64) / pow2 30;
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v hi) 64 16 }
+    == { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v hi) 64 16 }
     (v lo / pow2 48 + (v hi % pow2 48) * pow2 16) / pow2 30;
-    (==) { Math.Lemmas.pow2_plus 16 14;
+    == { Math.Lemmas.pow2_plus 16 14;
       Math.Lemmas.division_multiplication_lemma (v lo / pow2 48 + (v hi % pow2 48) * pow2 16) (pow2 16) (pow2 14) }
     ((v lo / pow2 48 + (v hi % pow2 48) * pow2 16) / pow2 16) / pow2 14;
-    (==) { Math.Lemmas.division_addition_lemma (v lo / pow2 48) (pow2 16) (v hi % pow2 48) }
+    == { Math.Lemmas.division_addition_lemma (v lo / pow2 48) (pow2 16) (v hi % pow2 48) }
     ((v lo / pow2 48) / pow2 16 + (v hi % pow2 48)) / pow2 14;
-    (==) { Math.Lemmas.division_multiplication_lemma (v lo) (pow2 48) (pow2 16); Math.Lemmas.pow2_plus 48 16 }
+    == { Math.Lemmas.division_multiplication_lemma (v lo) (pow2 48) (pow2 16); Math.Lemmas.pow2_plus 48 16 }
     (v lo / pow2 64 + (v hi % pow2 48)) / pow2 14;
-    (==) { Math.Lemmas.small_div (v lo) (pow2 64) }
+    == { Math.Lemmas.small_div (v lo) (pow2 64) }
     (v hi % pow2 48) / pow2 14;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (v hi) 14 48 }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 (v hi) 14 48 }
     (v hi / pow2 14) % pow2 34;
     };
 
@@ -444,13 +444,13 @@ let lemma_tup64_mod_pow2_128 f =
 
   calc (==) {
     (as_nat5 f) % pow2 128;
-    (==) { }
+    == { }
     (v f0 + v f1 * pow26 + v f2 * pow52 + v f3 * pow78 + v f4 * pow104) % pow2 128;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f4 * pow104) (pow2 128) }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f4 * pow104) (pow2 128) }
     (tmp + (v f4 * pow104 % pow2 128)) % pow2 128;
-    (==) { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f4) 128 104 }
+    == { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f4) 128 104 }
     (tmp + (v f4 % pow2 24) * pow104) % pow2 128;
-    (==) { lemma_tup64_pow2_128 f; FStar.Math.Lemmas.modulo_lemma (tmp + (v f4 % pow2 24) * pow104) (pow2 128) }
+    == { lemma_tup64_pow2_128 f; FStar.Math.Lemmas.modulo_lemma (tmp + (v f4 % pow2 24) * pow104) (pow2 128) }
     tmp + (v f4 % pow2 24) * pow104;
   };
   assert ((as_nat5 f) % pow2 128 == tmp + (v f4 % pow2 24) * pow104)
@@ -473,30 +473,30 @@ let store_tup64_lemma f =
 
   calc (==) {
     v lo + v hi * pow2 64;
-    (==) { }
+    == { }
     v f0 + v f1 * pow2 26 + (v f2 * pow2 52) % pow2 64 +
     (v f2 / pow2 12 + v f3 * pow2 14 + (v f4 * pow2 40) % pow2 64) * pow2 64;
-    (==) { }
+    == { }
     v f0 + v f1 * pow2 26 + (v f2 * pow2 52) % pow2 64 +
     v f2 / pow2 12 * pow2 64 + v f3 * pow2 14 * pow2 64 + (v f4 * pow2 40) % pow2 64 * pow2 64;
-    (==) { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f4) 64 40 }
+    == { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f4) 64 40 }
     v f0 + v f1 * pow2 26 + (v f2 * pow2 52) % pow2 64 +
     v f2 / pow2 12 * pow2 64 + v f3 * pow2 14 * pow2 64 + (v f4 % pow2 24) * pow2 40 * pow2 64;
-    (==) { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f2) 64 52 }
+    == { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f2) 64 52 }
     v f0 + v f1 * pow2 26 + (v f2 % pow2 12) * pow2 52 +
     v f2 / pow2 12 * pow2 64 + v f3 * pow2 14 * pow2 64 + (v f4 % pow2 24) * pow2 40 * pow2 64;
-    (==) { assert_norm (pow2 40 * pow2 64 = pow104) }
+    == { assert_norm (pow2 40 * pow2 64 = pow104) }
     v f0 + v f1 * pow2 26 + (v f2 % pow2 12) * pow2 52 +
     v f2 / pow2 12 * pow2 64 + v f3 * pow2 14 * pow2 64 + (v f4 % pow2 24) * pow104;
-    (==) { assert_norm (pow2 14 * pow2 64 = pow78) }
+    == { assert_norm (pow2 14 * pow2 64 = pow78) }
     v f0 + v f1 * pow2 26 + (v f2 % pow2 12) * pow2 52 +
     v f2 / pow2 12 * pow2 64 + v f3 * pow78 + (v f4 % pow2 24) * pow104;
-    (==) { assert_norm (pow2 12 * pow52 = pow2 64) }
+    == { assert_norm (pow2 12 * pow52 = pow2 64) }
     v f0 + v f1 * pow2 26 + (v f2 % pow2 12 + v f2 / pow2 12 * pow2 12) * pow52 +
     v f3 * pow78 + (v f4 % pow2 24) * pow104;
-    (==) { FStar.Math.Lemmas.euclidean_division_definition (v f2) (pow2 12) }
+    == { FStar.Math.Lemmas.euclidean_division_definition (v f2) (pow2 12) }
     v f0 + v f1 * pow2 26 + v f2 * pow52 + v f3 * pow78 + (v f4 % pow2 24) * pow104;
-    (==) { lemma_tup64_mod_pow2_128 f }
+    == { lemma_tup64_mod_pow2_128 f }
     (as_nat5 f) % pow2 128;
     };
   assert (v lo + v hi * pow2 64 == (as_nat5 f) % pow2 128);
@@ -574,11 +574,11 @@ let lset_bit5_lemma0 f i =
   let (o0, o1, o2, o3, o4) = (out.[0], out.[1], out.[2], out.[3], out.[4]) in
   calc (==) {
     as_nat5 (o0, o1, o2, o3, o4);
-    (==) { }
+    == { }
     v o0 + v o1 * pow26 + v o2 * pow52 + v o3 * pow78 + v o4 * pow104;
-    (==) { }
+    == { }
     pow2 (i % 26) + as_nat5 (f0, f1, f2, f3, f4);
-    (==) { FStar.Math.Lemmas.euclidean_division_definition i 26 }
+    == { FStar.Math.Lemmas.euclidean_division_definition i 26 }
     pow2 i + as_nat5 (f0, f1, f2, f3, f4);
     };
   assert (as_nat5 (o0, o1, o2, o3, o4) == pow2 i + as_nat5 (f0, f1, f2, f3, f4))
@@ -614,13 +614,13 @@ let lset_bit5_lemma1 f i =
 
   calc (==) {
     as_nat5 (o0, o1, o2, o3, o4);
-    (==) { }
+    == { }
     v o0 + v o1 * pow26 + v o2 * pow52 + v o3 * pow78 + v o4 * pow104;
-    (==) { }
+    == { }
     pow2 (i % 26) * pow26 + as_nat5 (f0, f1, f2, f3, f4);
-    (==) { FStar.Math.Lemmas.pow2_plus (i % 26) 26 }
+    == { FStar.Math.Lemmas.pow2_plus (i % 26) 26 }
     pow2 (i % 26 + 26) + as_nat5 (f0, f1, f2, f3, f4);
-    (==) { FStar.Math.Lemmas.euclidean_division_definition i 26 }
+    == { FStar.Math.Lemmas.euclidean_division_definition i 26 }
     pow2 i + as_nat5 (f0, f1, f2, f3, f4);
     };
   assert (as_nat5 (o0, o1, o2, o3, o4) == pow2 i + as_nat5 (f0, f1, f2, f3, f4))
@@ -656,13 +656,13 @@ let lset_bit5_lemma2 f i =
 
   calc (==) {
     as_nat5 (o0, o1, o2, o3, o4);
-    (==) { }
+    == { }
     v o0 + v o1 * pow26 + v o2 * pow52 + v o3 * pow78 + v o4 * pow104;
-    (==) { }
+    == { }
     pow2 (i % 26) * pow52 + as_nat5 (f0, f1, f2, f3, f4);
-    (==) { FStar.Math.Lemmas.pow2_plus (i % 26) 52 }
+    == { FStar.Math.Lemmas.pow2_plus (i % 26) 52 }
     pow2 (i % 26 + 52) + as_nat5 (f0, f1, f2, f3, f4);
-    (==) { FStar.Math.Lemmas.euclidean_division_definition i 26 }
+    == { FStar.Math.Lemmas.euclidean_division_definition i 26 }
     pow2 i + as_nat5 (f0, f1, f2, f3, f4);
     };
   assert (as_nat5 (o0, o1, o2, o3, o4) == pow2 i + as_nat5 (f0, f1, f2, f3, f4))
@@ -698,13 +698,13 @@ let lset_bit5_lemma3 f i =
 
   calc (==) {
     as_nat5 (o0, o1, o2, o3, o4);
-    (==) { }
+    == { }
     v o0 + v o1 * pow26 + v o2 * pow52 + v o3 * pow78 + v o4 * pow104;
-    (==) { }
+    == { }
     pow2 (i % 26) * pow78 + as_nat5 (f0, f1, f2, f3, f4);
-    (==) { FStar.Math.Lemmas.pow2_plus (i % 26) 78 }
+    == { FStar.Math.Lemmas.pow2_plus (i % 26) 78 }
     pow2 (i % 26 + 78) + as_nat5 (f0, f1, f2, f3, f4);
-    (==) { FStar.Math.Lemmas.euclidean_division_definition i 26 }
+    == { FStar.Math.Lemmas.euclidean_division_definition i 26 }
     pow2 i + as_nat5 (f0, f1, f2, f3, f4);
     };
   assert (as_nat5 (o0, o1, o2, o3, o4) == pow2 i + as_nat5 (f0, f1, f2, f3, f4))
@@ -740,13 +740,13 @@ let lset_bit5_lemma4 f i =
 
   calc (==) {
     as_nat5 (o0, o1, o2, o3, o4);
-    (==) { }
+    == { }
     v o0 + v o1 * pow26 + v o2 * pow52 + v o3 * pow78 + v o4 * pow104;
-    (==) { }
+    == { }
     pow2 (i % 26) * pow104 + as_nat5 (f0, f1, f2, f3, f4);
-    (==) { FStar.Math.Lemmas.pow2_plus (i % 26) 104 }
+    == { FStar.Math.Lemmas.pow2_plus (i % 26) 104 }
     pow2 (i % 26 + 104) + as_nat5 (f0, f1, f2, f3, f4);
-    (==) { FStar.Math.Lemmas.euclidean_division_definition i 26 }
+    == { FStar.Math.Lemmas.euclidean_division_definition i 26 }
     pow2 i + as_nat5 (f0, f1, f2, f3, f4);
     };
   assert (as_nat5 (o0, o1, o2, o3, o4) == pow2 i + as_nat5 (f0, f1, f2, f3, f4))

@@ -26,17 +26,17 @@ let update_is_update_multi (a:keccak_alg) (inp:bytes{S.length inp == block_lengt
     assert (bs == rateInBytes);
     calc (==) {
       update_multi a s () inp;
-      (==) { }
+      == { }
       Lib.Sequence.repeat_blocks_multi #_ #(words_state a) rateInBytes inp f s;
-      (==) { Lib.Sequence.lemma_repeat_blocks_multi #_ #(words_state a) bs inp f s }
+      == { Lib.Sequence.lemma_repeat_blocks_multi #_ #(words_state a) bs inp f s }
       (let len = S.length inp in
        let nb = len / bs in
       Loops.repeati #(words_state a) nb (Lib.Sequence.repeat_blocks_f bs inp f nb) s);
-      (==) {
+      == {
         Loops.unfold_repeati 1 f' s 0;
         Loops.eq_repeati0 1 f' s }
       f' 0 s;
-      (==) { assert (Seq.slice inp (0 * bs) (0 * bs + bs) `S.equal` inp) }
+      == { assert (Seq.slice inp (0 * bs) (0 * bs + bs) `S.equal` inp) }
       f inp s;
     }
 
@@ -56,20 +56,20 @@ val sha3_is_incremental1
 let sha3_is_incremental1 a input out_length =
   calc (==) {
        hash_incremental a input out_length;
-       (==) { }
+       == { }
        (let s = init a in
         let bs, l = split_blocks a input in
         let s = update_multi a s () bs in
         let s = update_last a s () l in
         finish a s out_length);
-       (==) { }
+       == { }
        (let s = Lib.Sequence.create 25 (u64 0) in
         let rateInBytes = rate a/8 in
         let bs, l = UpdateMulti.split_at_last_lazy rateInBytes input in
         let s = update_multi a s () bs in
         let s = update_last a s () l in
         finish a s out_length);
-       (==) { } (
+       == { } (
        let s = Lib.Sequence.create 25 (u64 0) in
        let rateInBytes = rate a / 8 in
        let delimitedSuffix = suffix a in
@@ -84,7 +84,7 @@ let sha3_is_incremental1 a input out_length =
          let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s in
        finish a s out_length
        );
-       (==) { (
+       == { (
          let s = Lib.Sequence.create 25 (u64 0) in
          let rateInBytes = rate a / 8 in
          let delimitedSuffix = suffix a in
@@ -108,7 +108,7 @@ let sha3_is_incremental1 a input out_length =
          let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s in
        finish a s out_length
        );
-       (==) { (
+       == { (
          let s = Lib.Sequence.create 25 (u64 0) in
          let rateInBytes = rate a / 8 in
          let delimitedSuffix = suffix a in
@@ -189,15 +189,15 @@ let sha3_is_incremental2
   let f = Spec.SHA3.absorb_inner rateInBytes in
   calc (==) {
     hash' a input out_length;
-    (==) { } (
+    == { } (
       let s = Spec.SHA3.absorb s rateInBytes (S.length input) input delimitedSuffix in
       Spec.SHA3.squeeze s rateInBytes (hash_length' a out_length)
       );
-   (==) { Lib.Sequence.lemma_repeat_blocks (block_length a) input f (Spec.SHA3.absorb_last delimitedSuffix rateInBytes) s } (
+   == { Lib.Sequence.lemma_repeat_blocks (block_length a) input f (Spec.SHA3.absorb_last delimitedSuffix rateInBytes) s } (
       let s = Loops.repeati #(words_state a) nb (Lib.Sequence.repeat_blocks_f (block_length a) input f nb) s in
       let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s in
       Spec.SHA3.squeeze s rateInBytes (hash_length' a out_length));
-   (==) {
+   == {
      Lib.Sequence.Lemmas.repeati_extensionality #(words_state a) nb
        (Lib.Sequence.repeat_blocks_f (block_length a) input f nb)
        (Lib.Sequence.repeat_blocks_f (block_length a) bs f nb)
@@ -206,7 +206,7 @@ let sha3_is_incremental2
       let s = Loops.repeati #(words_state a) nb (Lib.Sequence.repeat_blocks_f (block_length a) bs f nb) s in
       let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s in
       Spec.SHA3.squeeze s rateInBytes (hash_length' a out_length));
-   (==) { Lib.Sequence.lemma_repeat_blocks_multi #_ #(words_state a) (block_length a) bs f s } (
+   == { Lib.Sequence.lemma_repeat_blocks_multi #_ #(words_state a) (block_length a) bs f s } (
       let s = Lib.Sequence.repeat_blocks_multi #_ #(words_state a) (block_length a) bs f s in
       let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s in
       Spec.SHA3.squeeze s rateInBytes (hash_length' a out_length));

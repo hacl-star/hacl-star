@@ -60,9 +60,9 @@ let fsquare_times inp n =
       let res = fsqr out in
       calc (==) {
         fmul out out;
-        (==) { lemma_pow_add inp (pow2 (i + 1)) (pow2 (i + 1)) }
+        == { lemma_pow_add inp (pow2 (i + 1)) (pow2 (i + 1)) }
         pow inp (pow2 (i + 1) + pow2 (i + 1));
-        (==) { Math.Lemmas.pow2_double_sum (i + 1) }
+        == { Math.Lemmas.pow2_double_sum (i + 1) }
         pow inp (pow2 (i + 2));
       };
       res) out in

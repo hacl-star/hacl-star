@@ -27,13 +27,13 @@ let md_is_hash_incremental
      let padding = pad a (S.length input) in
      calc (==) {
        update_last a (update_multi a s () blocks) (S.length blocks) rest;
-       (==) { }
+       == { }
        update_multi a (update_multi a s () blocks) () S.(rest @| padding);
-       (==) { update_multi_associative a s blocks S.(rest @| padding) }
+       == { update_multi_associative a s blocks S.(rest @| padding) }
        update_multi a s () S.(blocks @| (rest @| padding));
-       (==) { S.append_assoc blocks rest padding }
+       == { S.append_assoc blocks rest padding }
        update_multi a s () S.((blocks @| rest) @| padding);
-       (==) { }
+       == { }
        update_multi a s () S.(input @| padding);
      }
 #pop-options

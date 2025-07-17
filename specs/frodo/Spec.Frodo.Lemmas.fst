@@ -65,20 +65,20 @@ val lemma_frodo_sample2:
 let lemma_frodo_sample2 sign e =
   calc (==) {
     v ((lognot sign +. u16 1) ^. e);
-    (==) { logxor_spec (lognot sign +. u16 1) e }
+    == { logxor_spec (lognot sign +. u16 1) e }
     logxor_v #U16 (v (lognot sign +. u16 1)) (v e);
-    (==) { lognot_plus_one sign }
+    == { lognot_plus_one sign }
     logxor_v #U16 ((modulus U16 - v sign) % modulus U16) (v e);
-    (==) { UInt.logxor_commutative #16 ((modulus U16 - v sign) % modulus U16) (v e) }
+    == { UInt.logxor_commutative #16 ((modulus U16 - v sign) % modulus U16) (v e) }
     logxor_v #U16 (v e) ((modulus U16 - v sign) % modulus U16);
     };
 
   if v sign = 0 then begin
     calc (==) {
       logxor_v #U16 (v e) ((modulus U16 - v sign) % modulus U16);
-      (==) { Math.Lemmas.multiple_modulo_lemma 1 (modulus U16) }
+      == { Math.Lemmas.multiple_modulo_lemma 1 (modulus U16) }
       logxor_v #U16 (v e) 0;
-      (==) { UInt.logxor_lemma_1 #16 (v e) }
+      == { UInt.logxor_lemma_1 #16 (v e) }
       v e;
       };
     assert (v (((lognot sign +. u16 1) ^. e) +. sign) == v e);
@@ -88,11 +88,11 @@ let lemma_frodo_sample2 sign e =
   else begin
     calc (==) {
       logxor_v #U16 (v e) ((modulus U16 - v sign) % modulus U16);
-      (==) { Math.Lemmas.small_mod (modulus U16 - v sign) (modulus U16) }
+      == { Math.Lemmas.small_mod (modulus U16 - v sign) (modulus U16) }
       logxor_v #U16 (v e) (UInt.ones 16);
-      (==) { UInt.logxor_lemma_2 #16 (v e) }
+      == { UInt.logxor_lemma_2 #16 (v e) }
       lognot_v #U16 (v e);
-      (==) { UInt.lemma_lognot_value_mod #16 (v e) }
+      == { UInt.lemma_lognot_value_mod #16 (v e) }
       modulus U16 - v e - 1;
       };
     assert (v (((lognot sign +. u16 1) ^. e) +. sign) == (modulus U16 - v e) % modulus U16);

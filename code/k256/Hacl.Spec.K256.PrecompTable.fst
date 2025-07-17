@@ -79,11 +79,11 @@ val lemma_mod_pow2_sub: x:nat -> a:nat -> b:nat ->
 let lemma_mod_pow2_sub x a b =
   calc (==) {
     x / pow2 a % pow2 b * pow2 a;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 x a (a + b) }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 x a (a + b) }
     x % pow2 (a + b) / pow2 a * pow2 a;
-    (==) { Math.Lemmas.euclidean_division_definition (x % pow2 (a + b)) (pow2 a) }
+    == { Math.Lemmas.euclidean_division_definition (x % pow2 (a + b)) (pow2 a) }
     x % pow2 (a + b) - x % pow2 (a + b) % pow2 a;
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 x a (a + b) }
+    == { Math.Lemmas.pow2_modulo_modulo_lemma_1 x a (a + b) }
     x % pow2 (a + b) - x % pow2 a;
   }
 
@@ -103,15 +103,15 @@ let felem_to_list_lemma_eval x =
   assert (nat_x == x0 + x1 * pow52 + x2 * pow104 + x3 * pow156 + x4 * pow208);
   calc (==) {
     x0 + x1 * pow52 + x2 * pow104 + x3 * pow156 + x4 * pow208;
-    (==) { }
+    == { }
     x0 + x1 * pow52 + x2 * pow104 + (x / pow156 % pow52) * pow156 + x / pow208 * pow208;
-    (==) { lemma_mod_pow2_sub x 156 52 }
+    == { lemma_mod_pow2_sub x 156 52 }
     x0 + x1 * pow52 + x2 * pow104 + x % pow208 - x % pow156 + x / pow208 * pow208;
-    (==) { Math.Lemmas.euclidean_division_definition x pow208 }
+    == { Math.Lemmas.euclidean_division_definition x pow208 }
     x0 + x1 * pow52 + (x / pow104 % pow52) * pow104 - x % pow156 + x;
-    (==) { lemma_mod_pow2_sub x 104 52 }
+    == { lemma_mod_pow2_sub x 104 52 }
     x0 + (x / pow52 % pow52) * pow52 - x % pow104 + x;
-    (==) { lemma_mod_pow2_sub x 52 52 }
+    == { lemma_mod_pow2_sub x 52 52 }
     x;
   }
 

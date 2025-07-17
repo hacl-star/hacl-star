@@ -780,13 +780,13 @@ let rest #index (c: block index) (i: index)
     (**) FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32);
     (**) calc (==) {
     (**)   U32.v r';
-    (**) (==) { }
+    (**) == { }
     (**)   U64.v r % pow2 32;
-    (**) (==) { FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32) }
+    (**) == { FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32) }
     (**)   U64.v r;
-    (**) (==) { FStar.Math.Lemmas.euclidean_division_definition (U64.v total_len) (U64.v (uint32_to_uint64 (c.blocks_state_len i))) }
+    (**) == { FStar.Math.Lemmas.euclidean_division_definition (U64.v total_len) (U64.v (uint32_to_uint64 (c.blocks_state_len i))) }
     (**)   U64.v total_len % U64.v (uint32_to_uint64 (c.blocks_state_len i) );
-    (**) (==) { }
+    (**) == { }
     (**)   U64.v total_len % U32.v (c.blocks_state_len i);
     (**) };
     (**) assert(

@@ -249,7 +249,7 @@ let gcm128_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
 
   calc (<=) {
     256 * ((16 * UInt64.v len128_num) / 16);
-    (==) {  FStar.Math.Lemmas.cancel_mul_div (UInt64.v len128_num) 16 }
+    == {  FStar.Math.Lemmas.cancel_mul_div (UInt64.v len128_num) 16 }
     256 * (UInt64.v len128_num);
     ( <= ) { assert_norm (256 <= 4096); FStar.Math.Lemmas.lemma_mult_le_right (UInt64.v len128_num) 256 4096 }
     4096 * (UInt64.v len128_num);
@@ -457,15 +457,15 @@ let lemma_uv_split (h:HS.mem) (b:uint8_p) (n:UInt32.t) : Lemma
     let bs = UV.as_seq h b_u in
     calc (==) {
       Seq.length split_bs;
-      (==) { }
+      == { }
       Seq.length (UV.as_seq h b1_u) + Seq.length (UV.as_seq h b2_u);
-      (==) { UV.length_eq b1_u; UV.length_eq b2_u }
+      == { UV.length_eq b1_u; UV.length_eq b2_u }
       DV.length b1_d / 16 + DV.length b2_d / 16;
-      (==) { DV.length_eq b1_d; DV.length_eq b2_d; math_aux (B.length b1); math_aux (B.length b2) }
+      == { DV.length_eq b1_d; DV.length_eq b2_d; math_aux (B.length b1); math_aux (B.length b2) }
       B.length b1 / 16 + B.length b2 / 16;
-      (==) { }
+      == { }
       B.length b / 16;
-      (==) { DV.length_eq b_d; UV.length_eq b_u; math_aux (B.length b) }
+      == { DV.length_eq b_d; UV.length_eq b_u; math_aux (B.length b) }
       Seq.length bs;
     };
     assert (Seq.length bs == Seq.length split_bs);
@@ -475,13 +475,13 @@ let lemma_uv_split (h:HS.mem) (b:uint8_p) (n:UInt32.t) : Lemma
         lemma_same_seq_dv h b;
         calc (==) {
           Seq.index bs i;
-          (==) { UV.as_seq_sel h b_u i }
+          == { UV.as_seq_sel h b_u i }
           UV.sel h b_u i;
-          (==) { UV.get_sel h b_u i }
+          == { UV.get_sel h b_u i }
           Vale.Interop.Views.get128 (Seq.slice (DV.as_seq h b_d) (i * 16) (i * 16 + 16));
-          (==) { lemma_same_seq_dv h b }
+          == { lemma_same_seq_dv h b }
           Vale.Interop.Views.get128 (Seq.slice (B.as_seq h b) (i * 16) (i * 16 + 16));
-          (==) { assert (Seq.equal (B.as_seq h b) (Seq.append (B.as_seq h b1) (B.as_seq h b2))) }
+          == { assert (Seq.equal (B.as_seq h b) (Seq.append (B.as_seq h b1) (B.as_seq h b2))) }
           Vale.Interop.Views.get128 (Seq.slice (Seq.append (B.as_seq h b1) (B.as_seq h b2)) (i * 16) (i * 16 + 16));
         };
         if i < Seq.length (UV.as_seq h b1_u) then (
@@ -489,13 +489,13 @@ let lemma_uv_split (h:HS.mem) (b:uint8_p) (n:UInt32.t) : Lemma
           UV.length_eq b1_u;
           calc (==) {
             Vale.Interop.Views.get128 (Seq.slice (Seq.append (B.as_seq h b1) (B.as_seq h b2)) (i * 16) (i * 16 + 16));
-            (==) { }
+            == { }
             Vale.Interop.Views.get128 (Seq.slice (B.as_seq h b1) (i * 16) (i * 16 + 16));
-            (==) { UV.get_sel h b1_u i }
+            == { UV.get_sel h b1_u i }
             UV.sel h b1_u i;
-            (==) { UV.as_seq_sel h b1_u i }
+            == { UV.as_seq_sel h b1_u i }
             Seq.index (UV.as_seq h b1_u) i;
-            (==) { }
+            == { }
             Seq.index split_bs i;
           }
         ) else (
@@ -504,13 +504,13 @@ let lemma_uv_split (h:HS.mem) (b:uint8_p) (n:UInt32.t) : Lemma
           let j = i - UV.length b1_u in
           calc (==) {
             Vale.Interop.Views.get128 (Seq.slice (Seq.append (B.as_seq h b1) (B.as_seq h b2)) (i * 16) (i * 16 + 16));
-            (==) { }
+            == { }
             Vale.Interop.Views.get128 (Seq.slice (B.as_seq h b2) (j * 16) (j * 16 + 16));
-            (==) { UV.get_sel h b2_u j }
+            == { UV.get_sel h b2_u j }
             UV.sel h b2_u j;
-            (==) { UV.as_seq_sel h b2_u j }
+            == { UV.as_seq_sel h b2_u j }
             Seq.index (UV.as_seq h b2_u) j;
-            (==) { }
+            == { }
             Seq.index split_bs i;
           }
        )
@@ -540,9 +540,9 @@ let gcm128_decrypt_opt_alloca key iv cipher_b cipher_len auth_b auth_bytes iv_b
          (key_to_round_keys_LE AES_128 (Ghost.reveal key)));
       calc (==) {
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 keys_b));
-        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 keys_b h0 }
+        == { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 keys_b h0 }
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h0 ub))));
-        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
+        == { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
         UV.as_seq h0 ub;
       }
 
@@ -559,9 +559,9 @@ let gcm128_decrypt_opt_alloca key iv cipher_b cipher_len auth_b auth_bytes iv_b
       let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
       calc (==) {
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b));
-        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 hkeys_b h0 }
+        == { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 hkeys_b h0 }
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h0 ub))));
-        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
+        == { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
         UV.as_seq h0 ub;
       }
 
@@ -573,11 +573,11 @@ let gcm128_decrypt_opt_alloca key iv cipher_b cipher_len auth_b auth_bytes iv_b
   calc (==) {
     compute_iv_BE (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))
                   (Ghost.reveal iv);
-    (==) { }
+    == { }
     le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b));
-    (==) { gcm_simplify2 iv_b h0 }
+    == { gcm_simplify2 iv_b h0 }
     le_bytes_to_quad32 (le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 iv_b 0));
-    (==) { le_bytes_to_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 iv_b 0) }
+    == { le_bytes_to_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 iv_b 0) }
     low_buffer_read TUInt8 TUInt128 h0 iv_b 0;
   };
 
@@ -799,19 +799,19 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
  // if B.length b > B.length b_start then (
    calc (==) {
      sf;
-     (==) { DV.length_eq b_start_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_start h;
+     == { DV.length_eq b_start_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_start h;
           le_bytes_to_seq_quad32_to_bytes (UV.as_seq h b_start_u) }
      wrap_slice (le_seq_quad32_to_bytes (Seq.append
        (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start)))
        (UV.as_seq h b_extra_u)))
      (B.length b);
-     (==) { DV.length_eq b_extra_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_extra h;
+     == { DV.length_eq b_extra_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_extra h;
        le_bytes_to_seq_quad32_to_bytes (UV.as_seq h b_extra_u) }
      wrap_slice (le_seq_quad32_to_bytes (Seq.append
        (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start)))
        (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))))
      (B.length b);
-     (==) { append_distributes_le_seq_quad32_to_bytes
+     == { append_distributes_le_seq_quad32_to_bytes
         (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start)))
         (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))
         }
@@ -819,13 +819,13 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
        (le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start))))
        (le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))))
      (B.length b);
-     (==) { le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start));
+     == { le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start));
             le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)) }
      wrap_slice (Seq.append
        (seq_uint8_to_seq_nat8 (B.as_seq h b_start))
        (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))
      (B.length b);
-     (==) { Seq.lemma_eq_intro b_f
+     == { Seq.lemma_eq_intro b_f
        (wrap_slice (Seq.append
          (seq_uint8_to_seq_nat8 (B.as_seq h b_start))
          (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))
@@ -836,12 +836,12 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
  // ) else (
  //   calc (==) {
  //     sf;
- //     (==) { }
+ //     == { }
  //     wrap_slice (le_seq_quad32_to_bytes (UV.as_seq h b_start_u)) (B.length b);
- //     (==) {    DV.length_eq (get_downview b_start);
+ //     == {    DV.length_eq (get_downview b_start);
  //               gcm_simplify1 b_start h (B.length b) }
  //     seq_uint8_to_seq_nat8 (B.as_seq h b_start);
- //     (==) { }
+ //     == { }
  //     b_f;
  //   }
  // )
@@ -860,20 +860,20 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
   ) =
   calc (==) {
     Seq.slice (Seq.append (B.as_seq h b_sub) (B.as_seq h b_extra)) 0 (B.length b);
-    (==) { Seq.lemma_eq_intro
+    == { Seq.lemma_eq_intro
      (Seq.slice (Seq.append (B.as_seq h b_sub) (B.as_seq h b_extra)) 0 (B.length b))
      (Seq.append (B.as_seq h b_sub) (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16)))
     }
     Seq.append (B.as_seq h b_sub) (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16));
-    (==) { }
+    == { }
     Seq.append
       (Seq.slice (B.as_seq h b) 0 (B.length b_sub))
       (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16));
-    (==) { }
+    == { }
     Seq.append
       (Seq.slice (B.as_seq h b) 0 (B.length b_sub))
       (Seq.slice (B.as_seq h b) (B.length b_sub) (B.length b));
-    (==) { Seq.lemma_eq_intro (B.as_seq h b)
+    == { Seq.lemma_eq_intro (B.as_seq h b)
       (Seq.append
         (Seq.slice (B.as_seq h b) 0 (B.length b_sub))
         (Seq.slice (B.as_seq h b) (B.length b_sub) (B.length b)))

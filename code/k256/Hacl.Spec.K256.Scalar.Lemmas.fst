@@ -335,9 +335,9 @@ val lemma_b_pow2_256_plus_a_modq (a b: nat) :
 let lemma_b_pow2_256_plus_a_modq a b =
   calc (==) {
     (b * (pow2 256 - S.q) + a) % S.q;
-    (==) { Math.Lemmas.distributivity_sub_right b (pow2 256) S.q }
+    == { Math.Lemmas.distributivity_sub_right b (pow2 256) S.q }
     (b * pow2 256 - b * S.q + a) % S.q;
-    (==) { Math.Lemmas.lemma_mod_sub (b * pow2 256 + a) S.q b }
+    == { Math.Lemmas.lemma_mod_sub (b * pow2 256 + a) S.q b }
     (b * pow2 256 + a) % S.q;
   }
 
@@ -372,15 +372,15 @@ let mod_lseq_before_final_lemma a =
 
   calc (==) { //(v c2 * pow2 256 + SD.bn_v r) % S.q;
     rhs_p % S.q;
-    (==) { lemma_b_pow2_256_plus_a_modq_lseq 5 p }
+    == { lemma_b_pow2_256_plus_a_modq_lseq 5 p }
     SD.bn_v p % S.q;
-    (==) { }
+    == { }
     rhs_m % S.q;
-    (==) { lemma_b_pow2_256_plus_a_modq_lseq 7 m }
+    == { lemma_b_pow2_256_plus_a_modq_lseq 7 m }
     SD.bn_v m % S.q;
-    (==) { }
+    == { }
     rhs_a % S.q;
-    (==) { lemma_b_pow2_256_plus_a_modq_lseq 8 a }
+    == { lemma_b_pow2_256_plus_a_modq_lseq 8 a }
     SD.bn_v a % S.q;
     }
 
@@ -444,17 +444,17 @@ val qmul_shift_383_mod_2_lemma : l:lseq uint64 8 ->
 let qmul_shift_383_mod_2_lemma l =
   calc (==) {
     v l.[5] / pow2 63;
-    (==) { SD.bn_eval_index l 5 }
+    == { SD.bn_eval_index l 5 }
     SD.bn_v l / pow2 320 % pow2 64 / pow2 63;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (SD.bn_v l) 320 384 }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 (SD.bn_v l) 320 384 }
     SD.bn_v l % pow2 384 / pow2 320 / pow2 63;
-    (==) { Math.Lemmas.division_multiplication_lemma (SD.bn_v l % pow2 384) (pow2 320) (pow2 63) }
+    == { Math.Lemmas.division_multiplication_lemma (SD.bn_v l % pow2 384) (pow2 320) (pow2 63) }
     SD.bn_v l % pow2 384 / (pow2 320 * pow2 63);
-    (==) { Math.Lemmas.pow2_plus 320 63 }
+    == { Math.Lemmas.pow2_plus 320 63 }
     SD.bn_v l % pow2 384 / pow2 383;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (SD.bn_v l) 383 384 }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 (SD.bn_v l) 383 384 }
     SD.bn_v l / pow2 383 % pow2 1;
-    (==) { assert_norm (pow2 1 = 2) }
+    == { assert_norm (pow2 1 = 2) }
     SD.bn_v l / pow2 383 % 2;
   }
 
