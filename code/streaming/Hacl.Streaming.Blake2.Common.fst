@@ -464,26 +464,26 @@ let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
   let open Lib.Sequence.Lemmas in
   calc (==) {
     update_multi_s (update_multi_s acc prevlen1 input1) prevlen2 input2;
-    (==) { }
+    == { }
     repeati nb2 f2 (repeati nb1 f1 acc);
-    (==) {
+    == {
       Classical.forall_intro_2 aux1;
       repeati_extensionality nb1 f1 f acc
     }
     repeati nb2 f2 (repeati nb1 f acc);
-    (==) {
+    == {
       repeati_def nb1 f acc;
       repeati_def nb2 f2 (repeat_right 0 nb1 (fixed_a (Spec.state a)) f acc)
     }
     repeat_right 0 nb2 (fixed_a (Spec.state a)) f2 (repeat_right 0 nb1 (fixed_a (Spec.state a)) f acc);
-    (==) {
+    == {
       Classical.forall_intro_2 aux2;
       repeat_gen_right_extensionality nb2 nb1 (fixed_a (Spec.state a)) (fixed_a (Spec.state a)) f2 f (repeat_right 0 nb1 (fixed_a (Spec.state a)) f acc)
     }
     repeat_right nb1 (nb1 + nb2) (fixed_a (Spec.state a)) f (repeat_right 0 nb1 (fixed_a (Spec.state a)) f acc);
-    (==) { repeat_right_plus 0 nb1 nb (fixed_a (Spec.state a)) f acc; repeati_def nb f acc }
+    == { repeat_right_plus 0 nb1 nb (fixed_a (Spec.state a)) f acc; repeati_def nb f acc }
     repeati nb f acc;
-    (==) { }
+    == { }
     update_multi_s acc prevlen1 input;
   }
 #pop-options

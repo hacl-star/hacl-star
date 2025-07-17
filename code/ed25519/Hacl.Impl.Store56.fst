@@ -32,14 +32,14 @@ let hstore56_le out off x =
   let h1 = ST.get() in
   calc (==) {
     v x <: nat;
-    (==) { Math.Lemmas.small_mod (v x) (pow2 56) }
+    == { Math.Lemmas.small_mod (v x) (pow2 56) }
     (v x) % pow2 56 <: nat;
-    (==) { assert (Seq.equal (as_seq h1 b8) (Seq.slice (as_seq h1 out) (v off) (v off + 8))) }
+    == { assert (Seq.equal (as_seq h1 b8) (Seq.slice (as_seq h1 out) (v off) (v off + 8))) }
     (nat_from_bytes_le (as_seq h1 b8)) % pow2 56;
-    (==) { nat_from_intseq_le_slice_lemma (as_seq h1 b8) 7 }
+    == { nat_from_intseq_le_slice_lemma (as_seq h1 b8) 7 }
     (nat_from_bytes_le (Seq.slice (as_seq h1 b8) 0 7) +
     pow2 56 * nat_from_bytes_le (Seq.slice (as_seq h1 b8) 7 8)) % pow2 56;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r
+    == { Math.Lemmas.lemma_mod_plus_distr_r
       (nat_from_bytes_le (Seq.slice (as_seq h1 b8) 0 7))
       (pow2 56 * nat_from_bytes_le (Seq.slice (as_seq h1 b8) 7 8))
       (pow2 56);
@@ -50,7 +50,7 @@ let hstore56_le out off x =
         (nat_from_bytes_le (Seq.slice (as_seq h1 b8) 7 8))
         (pow2 56) }
      nat_from_bytes_le (Seq.slice (as_seq h1 b8) 0 7) % pow2 56;
-     (==) {
+     == {
        Math.Lemmas.small_mod (nat_from_bytes_le (Seq.slice (as_seq h1 b8) 0 7)) (pow2 56);
      assert (Seq.equal (Seq.slice (as_seq h1 b8) 0 7) (Seq.slice (as_seq h1 out) (v off) (v off + 7))) }
      nat_from_bytes_le (Seq.slice (as_seq h1 out) (v off) (v off + 7));

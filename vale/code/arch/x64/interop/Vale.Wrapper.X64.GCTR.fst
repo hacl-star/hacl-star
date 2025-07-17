@@ -197,9 +197,9 @@ let gctr128_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blo
          (key_to_round_keys_LE AES_128 (Ghost.reveal key)));
       calc (==) {
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 keys_b));
-        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 keys_b h0 }
+        == { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 keys_b h0 }
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h0 ub))));
-        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
+        == { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
         UV.as_seq h0 ub;
       }
 
@@ -250,9 +250,9 @@ let gctr256_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blo
          (key_to_round_keys_LE AES_256 (Ghost.reveal key)));
       calc (==) {
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 keys_b));
-        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 keys_b h0 }
+        == { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 keys_b h0 }
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h0 ub))));
-        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
+        == { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
         UV.as_seq h0 ub;
       }
 
@@ -309,19 +309,19 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
  // if B.length b > B.length b_start then (
    calc (==) {
      sf;
-     (==) { DV.length_eq b_start_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_start h;
+     == { DV.length_eq b_start_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_start h;
           le_bytes_to_seq_quad32_to_bytes (UV.as_seq h b_start_u) }
      wrap_slice (le_seq_quad32_to_bytes (Seq.append
        (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start)))
        (UV.as_seq h b_extra_u)))
      (B.length b);
-     (==) { DV.length_eq b_extra_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_extra h;
+     == { DV.length_eq b_extra_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_extra h;
        le_bytes_to_seq_quad32_to_bytes (UV.as_seq h b_extra_u) }
      wrap_slice (le_seq_quad32_to_bytes (Seq.append
        (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start)))
        (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))))
      (B.length b);
-     (==) { append_distributes_le_seq_quad32_to_bytes
+     == { append_distributes_le_seq_quad32_to_bytes
         (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start)))
         (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))
         }
@@ -329,13 +329,13 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
        (le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start))))
        (le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))))
      (B.length b);
-     (==) { le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start));
+     == { le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start));
             le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)) }
      wrap_slice (Seq.append
        (seq_uint8_to_seq_nat8 (B.as_seq h b_start))
        (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))
      (B.length b);
-     (==) { Seq.lemma_eq_intro b_f
+     == { Seq.lemma_eq_intro b_f
        (wrap_slice (Seq.append
          (seq_uint8_to_seq_nat8 (B.as_seq h b_start))
          (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))
@@ -357,20 +357,20 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
   ) =
   calc (==) {
     Seq.slice (Seq.append (B.as_seq h b_sub) (B.as_seq h b_extra)) 0 (B.length b);
-    (==) { Seq.lemma_eq_intro
+    == { Seq.lemma_eq_intro
      (Seq.slice (Seq.append (B.as_seq h b_sub) (B.as_seq h b_extra)) 0 (B.length b))
      (Seq.append (B.as_seq h b_sub) (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16)))
     }
     Seq.append (B.as_seq h b_sub) (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16));
-    (==) { }
+    == { }
     Seq.append
       (Seq.slice (B.as_seq h b) 0 (B.length b_sub))
       (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16));
-    (==) { }
+    == { }
     Seq.append
       (Seq.slice (B.as_seq h b) 0 (B.length b_sub))
       (Seq.slice (B.as_seq h b) (B.length b_sub) (B.length b));
-    (==) { Seq.lemma_eq_intro (B.as_seq h b)
+    == { Seq.lemma_eq_intro (B.as_seq h b)
       (Seq.append
         (Seq.slice (B.as_seq h b) 0 (B.length b_sub))
         (Seq.slice (B.as_seq h b) (B.length b_sub) (B.length b)))

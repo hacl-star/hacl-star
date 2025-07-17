@@ -258,7 +258,7 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
           assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
           calc (==) {
             Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
-            (==) { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
+            == { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
             hkeys_quad;
           }
 
@@ -487,7 +487,7 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
               assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
               calc (==) {
               Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
-              (==) { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
+              == { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
               hkeys_quad;
               }
 

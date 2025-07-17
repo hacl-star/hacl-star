@@ -133,15 +133,15 @@ let lemma_aff_double_aux x y =
 
   calc (==) {
     1 -% d *% (x *% x) *% (y *% y);
-    (==) { }
+    == { }
     1 -% (y *% y -% x *% x -% 1);
-    (==) { }
+    == { }
     (1 - (y *% y -% x *% x - 1) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr 1 (y *% y -% x *% x - 1) prime }
+    == { Math.Lemmas.lemma_mod_sub_distr 1 (y *% y -% x *% x - 1) prime }
     (2 - (y *% y - x *% x) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr 2 (y *% y - x *% x) prime }
+    == { Math.Lemmas.lemma_mod_sub_distr 2 (y *% y - x *% x) prime }
     (2 - (y *% y - x *% x)) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l (2 - y *% y) (x *% x) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_l (2 - y *% y) (x *% x) prime }
     2 -% y *% y +% x *% x;
     }
 
@@ -163,33 +163,33 @@ let aff_point_at_infinity_lemma p =
 
   calc (==) {
     k1;
-    (==) { }
+    == { }
     x1 *% one +% y1 *% zero;
-    (==) { Math.Lemmas.small_mod x1 prime }
+    == { Math.Lemmas.small_mod x1 prime }
     x1;
     };
 
   calc (==) {
     k2;
-    (==) { }
+    == { }
     1 +% d *% (x1 *% zero) *% (y1 *% one);
-    (==) { }
+    == { }
     1;
     };
 
   calc (==) {
     k3;
-    (==) { }
+    == { }
     y1 *% one +% x1 *% zero;
-    (==) { Math.Lemmas.small_mod y1 prime }
+    == { Math.Lemmas.small_mod y1 prime }
     y1;
     };
 
   calc (==) {
     k4;
-    (==) { }
+    == { }
     1 -% d *% (x1 *% zero) *% (y1 *% one);
-    (==) { }
+    == { }
     1;
     };
 
@@ -214,31 +214,31 @@ let aff_point_double_lemma p =
 
   calc (==) {
     k1;
-    (==) { }
+    == { }
     x *% y +% y *% x;
-    (==) { assert (x *% y +% y *% x == 2 *% x *% y) by (ed25519_semiring ()) }
+    == { assert (x *% y +% y *% x == 2 *% x *% y) by (ed25519_semiring ()) }
     2 *% x *% y;
-    (==) { }
+    == { }
     k5;
     };
 
   calc (==) {
     k2;
-    (==) { }
+    == { }
     1 +% d *% (x *% x) *% (y *% y);
-    (==) { }
+    == { }
     y *% y -% x *% x;
-    (==) { }
+    == { }
     k6;
     };
 
   calc (==) {
     k4;
-    (==) { }
+    == { }
     1 -% d *% (x *% x) *% (y *% y);
-    (==) { lemma_aff_double_aux x y }
+    == { lemma_aff_double_aux x y }
     2 -% y *% y +% x *% x;
-    (==) { }
+    == { }
     k8;
     }
 
@@ -247,11 +247,11 @@ val lemma_neg_sqr: x:elem -> Lemma ((-x) % prime *% ((-x) % prime) == x *% x)
 let lemma_neg_sqr x =
   calc (==) {
     (- x) % prime * ((- x) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- x) ((- x) % prime) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (- x) ((- x) % prime) prime }
     (- x) * ((- x) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (- x) (- x) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r (- x) (- x) prime }
     (- x) * (- x) % prime;
-    (==) { Math.Lemmas.neg_mul_left x (- x); Math.Lemmas.neg_mul_right x x }
+    == { Math.Lemmas.neg_mul_left x (- x); Math.Lemmas.neg_mul_right x x }
     (x * x) % prime;
   }
 
@@ -295,9 +295,9 @@ let ext_dx1x2y1y2 p q =
   assert (x2 == _X2 /% _Z2 /\ y2 == _Y2 /% _Z2);
   calc (==) {
     d *% (x1 *% x2) *% (y1 *% y2);
-    (==) { fdiv_to_one_denominator _X1 _X2 _Z1 _Z2 }
+    == { fdiv_to_one_denominator _X1 _X2 _Z1 _Z2 }
     d *% (_X1 *% _X2 *% finv (_Z1 *% _Z2)) *% (y1 *% y2);
-    (==) { fdiv_to_one_denominator _Y1 _Y2 _Z1 _Z2 }
+    == { fdiv_to_one_denominator _Y1 _Y2 _Z1 _Z2 }
     d *% (_X1 *% _X2 *% finv (_Z1 *% _Z2)) *% (_Y1 *% _Y2 *% finv (_Z1 *% _Z2));
   };
   assert (
@@ -323,15 +323,15 @@ let ext_dx1x2y1y2_mulz1z2 p q =
 
   calc (==) {
     _Z1 *% _Z2 *% (d *% (x1 *% x2) *% (y1 *% y2));
-    (==) { ext_dx1x2y1y2 p q }
+    == { ext_dx1x2y1y2 p q }
     _Z1 *% _Z2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% finv (_Z1 *% _Z2));
-    (==) {
+    == {
       assert (
 	_Z1 *% _Z2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% finv (_Z1 *% _Z2)) ==
 	d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% (finv (_Z1 *% _Z2) *% (_Z1 *% _Z2)))
        by (ed25519_semiring ()) }
     d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% (finv (_Z1 *% _Z2) *% (_Z1 *% _Z2));
-    (==) { fmul_nonzero_lemma _Z1 _Z2; fdiv_one_lemma1 (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2)) (_Z1 *% _Z2) }
+    == { fmul_nonzero_lemma _Z1 _Z2; fdiv_one_lemma1 (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2)) (_Z1 *% _Z2) }
     d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2);
     }
 
@@ -355,11 +355,11 @@ let ext_x1x2_plus_y1y2 p q =
 
   calc (==) {
     x1 *% x2 +% y1 *% y2;
-    (==) { }
+    == { }
     _X1 *% finv _Z1 *% (_X2 *% finv _Z2) +% _Y1 *% finv _Z1 *% (_Y2 *% finv _Z2);
-    (==) { fdiv_to_one_denominator _X1 _X2 _Z1 _Z2; fdiv_to_one_denominator _Y1 _Y2 _Z1 _Z2 }
+    == { fdiv_to_one_denominator _X1 _X2 _Z1 _Z2; fdiv_to_one_denominator _Y1 _Y2 _Z1 _Z2 }
     _X1 *% _X2 *% finv (_Z1 *% _Z2) +% _Y1 *% _Y2 *% finv (_Z1 *% _Z2);
-    (==) { LM.lemma_mod_distributivity_add_left #prime (_X1 *% _X2) (_Y1 *% _Y2) (finv (_Z1 *% _Z2)) }
+    == { LM.lemma_mod_distributivity_add_left #prime (_X1 *% _X2) (_Y1 *% _Y2) (finv (_Z1 *% _Z2)) }
     (_X1 *% _X2 +% _Y1 *% _Y2) *% finv (_Z1 *% _Z2);
     }
 
@@ -383,11 +383,11 @@ let ext_x1y2_plus_y1x2 p q =
 
   calc (==) {
     x1 *% y2 +% y1 *% x2;
-    (==) { }
+    == { }
     _X1 *% finv _Z1 *% (_Y2 *% finv _Z2) +% _Y1 *% finv _Z1 *% (_X2 *% finv _Z2);
-    (==) { fdiv_to_one_denominator _X1 _Y2 _Z1 _Z2; fdiv_to_one_denominator _Y1 _X2 _Z1 _Z2 }
+    == { fdiv_to_one_denominator _X1 _Y2 _Z1 _Z2; fdiv_to_one_denominator _Y1 _X2 _Z1 _Z2 }
     _X1 *% _Y2 *% finv (_Z1 *% _Z2) +% _Y1 *% _X2 *% finv (_Z1 *% _Z2);
-    (==) { LM.lemma_mod_distributivity_add_left #prime (_X1 *% _Y2) (_Y1 *% _X2) (finv (_Z1 *% _Z2)) }
+    == { LM.lemma_mod_distributivity_add_left #prime (_X1 *% _Y2) (_Y1 *% _X2) (finv (_Z1 *% _Z2)) }
     (_X1 *% _Y2 +% _Y1 *% _X2) *% finv (_Z1 *% _Z2);
     }
 
@@ -406,11 +406,11 @@ let ext_yy_minus_xx p =
 
   calc (==) {
     y *% y -% x *% x;
-    (==) { }
+    == { }
     _Y *% finv _Z *% (_Y *% finv _Z) -% _X *% finv _Z *% (_X *% finv _Z);
-    (==) { fdiv_to_one_denominator _X _X _Z _Z; fdiv_to_one_denominator _Y _Y _Z _Z }
+    == { fdiv_to_one_denominator _X _X _Z _Z; fdiv_to_one_denominator _Y _Y _Z _Z }
     _Y *% _Y *% finv (_Z *% _Z) -% _X *% _X *% finv (_Z *% _Z);
-    (==) { LM.lemma_mod_distributivity_sub_left #prime (_Y *% _Y) (_X *% _X) (finv (_Z *% _Z)) }
+    == { LM.lemma_mod_distributivity_sub_left #prime (_Y *% _Y) (_X *% _X) (finv (_Z *% _Z)) }
     (_Y *% _Y -% _X *% _X) *% finv (_Z *% _Z);
     }
 
@@ -429,13 +429,13 @@ let ext_2_minus_yy_plus_xx p =
 
   calc (==) {
     2 -% y *% y +% x *% x;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l (2 - y *% y) (x *% x) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_l (2 - y *% y) (x *% x) prime }
     (2 - y *% y + x *% x) % prime;
-    (==) { }
+    == { }
     (2 - (y *% y - x *% x)) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr 2 (y *% y - x *% x) prime }
+    == { Math.Lemmas.lemma_mod_sub_distr 2 (y *% y - x *% x) prime }
     (2 - (y *% y -% x *% x)) % prime;
-    (==) { ext_yy_minus_xx p }
+    == { ext_yy_minus_xx p }
     2 -% (_Y *% _Y -% _X *% _X) *% finv (_Z *% _Z);
     }
 
@@ -454,15 +454,15 @@ let ext_2_minus_yy_plus_xx_mul_zz p =
 
   calc (==) {
     (2 -% y *% y +% x *% x) *% (_Z *% _Z);
-    (==) { ext_2_minus_yy_plus_xx p }
+    == { ext_2_minus_yy_plus_xx p }
     (2 -% (_Y *% _Y -% _X *% _X) *% finv (_Z *% _Z)) *% (_Z *% _Z);
-    (==) { LM.lemma_mod_distributivity_sub_left #prime 2 ((_Y *% _Y -% _X *% _X) *% finv (_Z *% _Z)) (_Z *% _Z) }
+    == { LM.lemma_mod_distributivity_sub_left #prime 2 ((_Y *% _Y -% _X *% _X) *% finv (_Z *% _Z)) (_Z *% _Z) }
     2 *% (_Z *% _Z) -% (_Y *% _Y -% _X *% _X) *% finv (_Z *% _Z) *% (_Z *% _Z);
-    (==) { LM.lemma_mul_mod_assoc #prime (_Y *% _Y -% _X *% _X) (finv (_Z *% _Z)) (_Z *% _Z) }
+    == { LM.lemma_mul_mod_assoc #prime (_Y *% _Y -% _X *% _X) (finv (_Z *% _Z)) (_Z *% _Z) }
     2 *% (_Z *% _Z) -% (_Y *% _Y -% _X *% _X) *% (finv (_Z *% _Z) *% (_Z *% _Z));
-    (==) { LM.lemma_mul_mod_comm #prime (finv (_Z *% _Z)) (_Z *% _Z) }
+    == { LM.lemma_mul_mod_comm #prime (finv (_Z *% _Z)) (_Z *% _Z) }
     2 *% (_Z *% _Z) -% (_Y *% _Y -% _X *% _X) *% ((_Z *% _Z) *% finv (_Z *% _Z));
-    (==) { fmul_nonzero_lemma _Z _Z; fdiv_one_lemma1 (_Y *% _Y -% _X *% _X) (_Z *% _Z) }
+    == { fmul_nonzero_lemma _Z _Z; fdiv_one_lemma1 (_Y *% _Y -% _X *% _X) (_Z *% _Z) }
     2 *% (_Z *% _Z) -% (_Y *% _Y -% _X *% _X);
     }
 
@@ -484,22 +484,22 @@ let ext_denominator_lemma1 p q =
   let p1 = 1 +% d *% (x1 *% x2) *% (y1 *% y2) in
   calc (==) {
     _Z1 *% _Z2 *% p1;
-    (==) { LM.lemma_mod_distributivity_add_right #prime (_Z1 *% _Z2) one (d *% (x1 *% x2) *% (y1 *% y2)) }
+    == { LM.lemma_mod_distributivity_add_right #prime (_Z1 *% _Z2) one (d *% (x1 *% x2) *% (y1 *% y2)) }
     _Z1 *% _Z2 *% one +% _Z1 *% _Z2 *% (d *% (x1 *% x2) *% (y1 *% y2));
-    (==) { Math.Lemmas.small_mod (_Z1 *% _Z2) prime }
+    == { Math.Lemmas.small_mod (_Z1 *% _Z2) prime }
     _Z1 *% _Z2 +% _Z1 *% _Z2 *% (d *% (x1 *% x2) *% (y1 *% y2));
-    (==) { ext_dx1x2y1y2_mulz1z2 p q }
+    == { ext_dx1x2y1y2_mulz1z2 p q }
     _Z1 *% _Z2 +% d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2);
     };
 
   let p2 = 1 -% d *% (x1 *% x2) *% (y1 *% y2) in
   calc (==) {
     _Z1 *% _Z2 *% p2;
-    (==) { LM.lemma_mod_distributivity_sub_right #prime (_Z1 *% _Z2) one (d *% (x1 *% x2) *% (y1 *% y2)) }
+    == { LM.lemma_mod_distributivity_sub_right #prime (_Z1 *% _Z2) one (d *% (x1 *% x2) *% (y1 *% y2)) }
     _Z1 *% _Z2 *% one -% _Z1 *% _Z2 *% (d *% (x1 *% x2) *% (y1 *% y2));
-    (==) { Math.Lemmas.small_mod (_Z1 *% _Z2) prime }
+    == { Math.Lemmas.small_mod (_Z1 *% _Z2) prime }
     _Z1 *% _Z2 -% _Z1 *% _Z2 *% (d *% (x1 *% x2) *% (y1 *% y2));
-    (==) { ext_dx1x2y1y2_mulz1z2 p q }
+    == { ext_dx1x2y1y2_mulz1z2 p q }
     _Z1 *% _Z2 -% d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2);
     };
 
@@ -526,22 +526,22 @@ let ext_denominator_lemma2 p =
   let p2 = 1 -% d *% (x *% x) *% (y *% y) in
   calc (==) {
     p2 *% (_Z *% _Z);
-    (==) { lemma_aff_double_aux x y }
+    == { lemma_aff_double_aux x y }
     (2 -% y *% y +% x *% x) *% (_Z *% _Z);
-    (==) { ext_2_minus_yy_plus_xx_mul_zz p }
+    == { ext_2_minus_yy_plus_xx_mul_zz p }
     2 *% (_Z *% _Z) -% (_Y *% _Y -% _X *% _X);
     };
 
   let p1 = 1 +% d *% (x *% x) *% (y *% y) in
   calc (==) {
     p1 *% (_Z *% _Z);
-    (==) { }
+    == { }
     (y *% y -% x *% x) *% (_Z *% _Z);
-    (==) { ext_yy_minus_xx p }
+    == { ext_yy_minus_xx p }
     (_Y *% _Y -% _X *% _X) *% finv (_Z *% _Z) *% (_Z *% _Z);
-    (==) { LM.lemma_mul_mod_assoc #prime (_Y *% _Y -% _X *% _X) (finv (_Z *% _Z)) (_Z *% _Z) }
+    == { LM.lemma_mul_mod_assoc #prime (_Y *% _Y -% _X *% _X) (finv (_Z *% _Z)) (_Z *% _Z) }
     (_Y *% _Y -% _X *% _X) *% (finv (_Z *% _Z) *% (_Z *% _Z));
-    (==) { fmul_nonzero_lemma _Z _Z; fdiv_one_lemma1 (_Y *% _Y -% _X *% _X) (_Z *% _Z) }
+    == { fmul_nonzero_lemma _Z _Z; fdiv_one_lemma1 (_Y *% _Y -% _X *% _X) (_Z *% _Z) }
     (_Y *% _Y -% _X *% _X);
     };
 
@@ -578,29 +578,29 @@ let point_add_expand_eh_lemma p q =
 
   calc (==) { //a
     (_Y1 -% _X1) *% (_Y2 -% _X2);
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (_Y1 - _X1) (_Y2 -% _X2) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (_Y1 - _X1) (_Y2 -% _X2) prime }
     (_Y1 - _X1) * (_Y2 -% _X2) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (_Y1 - _X1) (_Y2 - _X2) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r (_Y1 - _X1) (_Y2 - _X2) prime }
     (_Y1 - _X1) * (_Y2 - _X2) % prime;
-    (==) { Math.Lemmas.distributivity_sub_right (_Y1 - _X1) _Y2 _X2 }
+    == { Math.Lemmas.distributivity_sub_right (_Y1 - _X1) _Y2 _X2 }
     ((_Y1 - _X1) * _Y2 - (_Y1 - _X1) * _X2) % prime;
-    (==) { Math.Lemmas.distributivity_sub_left _Y1 _X1 _Y2 }
+    == { Math.Lemmas.distributivity_sub_left _Y1 _X1 _Y2 }
     (_Y1 * _Y2 - _X1 * _Y2 - (_Y1 - _X1) * _X2) % prime;
-    (==) { Math.Lemmas.distributivity_sub_left _Y1 _X1 _X2 }
+    == { Math.Lemmas.distributivity_sub_left _Y1 _X1 _X2 }
     (_Y1 * _Y2 - _X1 * _Y2 - _Y1 * _X2 + _X1 * _X2) % prime;
     };
 
   calc (==) { //b
     (_Y1 +% _X1) *% (_Y2 +% _X2);
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (_Y1 + _X1) (_Y2 +% _X2) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (_Y1 + _X1) (_Y2 +% _X2) prime }
     (_Y1 + _X1) * (_Y2 +% _X2) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (_Y1 + _X1) (_Y2 + _X2) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r (_Y1 + _X1) (_Y2 + _X2) prime }
     (_Y1 + _X1) * (_Y2 + _X2) % prime;
-    (==) { Math.Lemmas.distributivity_add_right (_Y1 + _X1) _Y2 _X2 }
+    == { Math.Lemmas.distributivity_add_right (_Y1 + _X1) _Y2 _X2 }
     ((_Y1 + _X1) * _Y2 + (_Y1 + _X1) * _X2) % prime;
-    (==) { Math.Lemmas.distributivity_add_left _Y1 _X1 _Y2 }
+    == { Math.Lemmas.distributivity_add_left _Y1 _X1 _Y2 }
     (_Y1 * _Y2 + _X1 * _Y2 + (_Y1 + _X1) * _X2) % prime;
-    (==) { Math.Lemmas.distributivity_add_left _Y1 _X1 _X2 }
+    == { Math.Lemmas.distributivity_add_left _Y1 _X1 _X2 }
     (_Y1 * _Y2 + _X1 * _Y2 + _Y1 * _X2 + _X1 * _X2) % prime;
     };
 
@@ -608,45 +608,45 @@ let point_add_expand_eh_lemma p q =
   let p2 = _Y1 * _Y2 - _X1 * _Y2 - _Y1 * _X2 + _X1 * _X2 in
   calc (==) { //e = b -% a;
     (_Y1 +% _X1) *% (_Y2 +% _X2) -% (_Y1 -% _X1) *% (_Y2 -% _X2);
-    (==) { }
+    == { }
     (p1 % prime - p2 % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (p1 % prime) p2 prime }
+    == { Math.Lemmas.lemma_mod_sub_distr (p1 % prime) p2 prime }
     (p1 % prime - p2) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l p1 (- p2) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_l p1 (- p2) prime }
     (p1 - p2) % prime;
-    (==) { }
+    == { }
     (_Y1 * _Y2 + _X1 * _Y2 + _Y1 * _X2 + _X1 * _X2 - _Y1 * _Y2 + _X1 * _Y2 + _Y1 * _X2 - _X1 * _X2) % prime;
-    (==) { }
+    == { }
     (_X1 * _Y2 + _Y1 * _X2 + _X1 * _Y2 + _Y1 * _X2) % prime;
-    (==) { }
+    == { }
     (2 * (_X1 * _Y2) + 2 * (_Y1 * _X2)) % prime;
-    (==) { Math.Lemmas.distributivity_add_right 2 (_X1 * _Y2) (_Y1 * _X2) }
+    == { Math.Lemmas.distributivity_add_right 2 (_X1 * _Y2) (_Y1 * _X2) }
     2 * (_X1 * _Y2 + _Y1 * _X2) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r 2 (_X1 * _Y2 + _Y1 * _X2) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r 2 (_X1 * _Y2 + _Y1 * _X2) prime }
     2 * ((_X1 * _Y2 + _Y1 * _X2) % prime) % prime;
-    (==) { Math.Lemmas.modulo_distributivity (_X1 * _Y2) (_Y1 * _X2) prime }
+    == { Math.Lemmas.modulo_distributivity (_X1 * _Y2) (_Y1 * _X2) prime }
     2 *% (_X1 *% _Y2 +% _Y1 *% _X2);
     };
 
   calc (==) { //h = b +% a;
     (_Y1 +% _X1) *% (_Y2 +% _X2) +% (_Y1 -% _X1) *% (_Y2 -% _X2);
-    (==) { }
+    == { }
     (p1 % prime + p2 % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r (p1 % prime) p2 prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_r (p1 % prime) p2 prime }
     (p1 % prime + p2) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l p1 p2 prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_l p1 p2 prime }
     (p1 + p2) % prime;
-    (==) { }
+    == { }
     (_Y1 * _Y2 + _X1 * _Y2 + _Y1 * _X2 + _X1 * _X2 + _Y1 * _Y2 - _X1 * _Y2 - _Y1 * _X2 + _X1 * _X2) % prime;
-    (==) { }
+    == { }
     (_Y1 * _Y2 + _X1 * _X2 + _Y1 * _Y2 + _X1 * _X2) % prime;
-    (==) { }
+    == { }
     (2 * (_Y1 * _Y2) + 2 * (_X1 * _X2)) % prime;
-    (==) { Math.Lemmas.distributivity_add_right 2 (_Y1 * _Y2) (_X1 * _X2) }
+    == { Math.Lemmas.distributivity_add_right 2 (_Y1 * _Y2) (_X1 * _X2) }
     2 * (_X1 * _X2 + _Y1 * _Y2) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r 2 (_X1 * _X2 + _Y1 * _Y2) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r 2 (_X1 * _X2 + _Y1 * _Y2) prime }
     2 * ((_X1 * _X2 + _Y1 * _Y2) % prime) % prime;
-    (==) { Math.Lemmas.modulo_distributivity (_X1 * _X2) (_Y1 * _Y2) prime }
+    == { Math.Lemmas.modulo_distributivity (_X1 * _X2) (_Y1 * _Y2) prime }
     2 *% (_X1 *% _X2 +% _Y1 *% _Y2);
     }
 
@@ -676,25 +676,25 @@ let point_add_expand_gf_lemma p q =
 
   calc (==) { //c
     d2 *% _T1 *% _T2;
-    (==) {
+    == {
       assert (
 	2 *% d *% (_X1 *% _Y1 *% finv _Z1) *% (_X2 *% _Y2 *% finv _Z2) ==
 	2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% (finv _Z1 *% finv _Z2))) by (ed25519_semiring ()) }
     2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% (finv _Z1 *% finv _Z2));
-    (==) { prime_lemma(); LM.lemma_inv_mod_both #prime _Z1 _Z2 }
+    == { prime_lemma(); LM.lemma_inv_mod_both #prime _Z1 _Z2 }
     2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2));
-    (==) { }
+    == { }
     2 *% k;
     };
 
 
   calc (==) { //f == d1 -% c
     2 *% _Z1 *% _Z2 -% d2 *% _T1 *% _T2;
-    (==) { }
+    == { }
     2 *% _Z1 *% _Z2 -% 2 *% k;
-    (==) { LM.lemma_mul_mod_assoc #prime 2 _Z1 _Z2 }
+    == { LM.lemma_mul_mod_assoc #prime 2 _Z1 _Z2 }
     2 *% (_Z1 *% _Z2) -% 2 *% k;
-    (==) { LM.lemma_mod_distributivity_sub_right #prime 2 (_Z1 *% _Z2) k }
+    == { LM.lemma_mod_distributivity_sub_right #prime 2 (_Z1 *% _Z2) k }
     2 *% (_Z1 *% _Z2 -% k);
     };
 
@@ -702,11 +702,11 @@ let point_add_expand_gf_lemma p q =
 
   calc (==) { //g == d1 +% c
     2 *% _Z1 *% _Z2 +% d2 *% _T1 *% _T2;
-    (==) { }
+    == { }
     2 *% _Z1 *% _Z2 +% 2 *% k;
-    (==) { LM.lemma_mul_mod_assoc #prime 2 _Z1 _Z2 }
+    == { LM.lemma_mul_mod_assoc #prime 2 _Z1 _Z2 }
     2 *% (_Z1 *% _Z2) +% 2 *% k;
-    (==) { LM.lemma_mod_distributivity_add_right #prime 2 (_Z1 *% _Z2) k }
+    == { LM.lemma_mod_distributivity_add_right #prime 2 (_Z1 *% _Z2) k }
     2 *% (_Z1 *% _Z2 +% k);
     };
 
@@ -769,23 +769,23 @@ let fghe_relation f g h e =
 
   calc (==) {
     _Y3 /% _Z3;
-    (==) { }
+    == { }
     g *% h /% (f *% g);
-    (==) { LM.lemma_mul_mod_comm #prime g h; LM.lemma_mul_mod_comm #prime f g }
+    == { LM.lemma_mul_mod_comm #prime g h; LM.lemma_mul_mod_comm #prime f g }
     h *% g *% finv (g *% f);
-    (==) { fdiv_cancel_lemma h f g }
+    == { fdiv_cancel_lemma h f g }
     h /% f;
     };
 
   calc (==) {
     _X3 *% _Y3 /% _Z3;
-    (==) { LM.lemma_mul_mod_assoc #prime _X3 _Y3 (finv _Z3) }
+    == { LM.lemma_mul_mod_assoc #prime _X3 _Y3 (finv _Z3) }
     _X3 *% (_Y3 /% _Z3);
-    (==) { }
+    == { }
     e *% f *% (h /% f);
-    (==) { assert (e *% f *% (h *% finv f) == e *% h *% (f *% finv f)) by (ed25519_semiring ()) }
+    == { assert (e *% f *% (h *% finv f) == e *% h *% (f *% finv f)) by (ed25519_semiring ()) }
     e *% h *% (f *% finv f);
-    (==) { fdiv_one_lemma1 (e *% h) f }
+    == { fdiv_one_lemma1 (e *% h) f }
     e *% h;
     };
 
@@ -835,37 +835,37 @@ let to_aff_point_add_lemma p q =
 
   calc (==) { //_X3 /% _Z3
     e /% g;
-    (==) { }
+    == { }
     2 *% (_X1 *% _Y2 +% _Y1 *% _X2) /% (2 *% (_Z1 *% _Z2 +% k));
-    (==) { fdiv_cancel_lemma (_X1 *% _Y2 +% _Y1 *% _X2) (_Z1 *% _Z2 +% k) 2 }
+    == { fdiv_cancel_lemma (_X1 *% _Y2 +% _Y1 *% _X2) (_Z1 *% _Z2 +% k) 2 }
     (_X1 *% _Y2 +% _Y1 *% _X2) /% (_Z1 *% _Z2 +% k);
-    (==) { finv2_nonzero_lemma _Z1 _Z2; fdiv_cancel_lemma (_X1 *% _Y2 +% _Y1 *% _X2) (_Z1 *% _Z2 +% k) (finv (_Z1 *% _Z2)) }
+    == { finv2_nonzero_lemma _Z1 _Z2; fdiv_cancel_lemma (_X1 *% _Y2 +% _Y1 *% _X2) (_Z1 *% _Z2 +% k) (finv (_Z1 *% _Z2)) }
     (_X1 *% _Y2 +% _Y1 *% _X2) *% finv (_Z1 *% _Z2) /% ((_Z1 *% _Z2 +% k) *% finv (_Z1 *% _Z2));
-    (==) { ext_x1y2_plus_y1x2 p q }
+    == { ext_x1y2_plus_y1x2 p q }
     k1 /% ((_Z1 *% _Z2 +% k) *% finv (_Z1 *% _Z2));
-    (==) { LM.lemma_mod_distributivity_add_left #prime (_Z1 *% _Z2) k (finv (_Z1 *% _Z2)) }
+    == { LM.lemma_mod_distributivity_add_left #prime (_Z1 *% _Z2) k (finv (_Z1 *% _Z2)) }
     k1 /% (_Z1 *% _Z2 *% finv (_Z1 *% _Z2) +% k *% finv (_Z1 *% _Z2));
-    (==) { fmul_nonzero_lemma _Z1 _Z2; fdiv_lemma (_Z1 *% _Z2) }
+    == { fmul_nonzero_lemma _Z1 _Z2; fdiv_lemma (_Z1 *% _Z2) }
     k1 /% (1 +% k *% finv (_Z1 *% _Z2));
-    (==) { ext_dx1x2y1y2 p q }
+    == { ext_dx1x2y1y2 p q }
     k1 /% k2;
     };
 
   calc (==) { //_Y3 /% _Z3
     h /% f;
-    (==) { }
+    == { }
     2 *% (_X1 *% _X2 +% _Y1 *% _Y2) /% (2 *% (_Z1 *% _Z2 -% k));
-    (==) { fdiv_cancel_lemma (_X1 *% _X2 +% _Y1 *% _Y2) (_Z1 *% _Z2 -% k) 2 }
+    == { fdiv_cancel_lemma (_X1 *% _X2 +% _Y1 *% _Y2) (_Z1 *% _Z2 -% k) 2 }
     (_X1 *% _X2 +% _Y1 *% _Y2) /% (_Z1 *% _Z2 -% k);
-    (==) { finv2_nonzero_lemma _Z1 _Z2; fdiv_cancel_lemma (_X1 *% _X2 +% _Y1 *% _Y2) (_Z1 *% _Z2 -% k) (finv (_Z1 *% _Z2)) }
+    == { finv2_nonzero_lemma _Z1 _Z2; fdiv_cancel_lemma (_X1 *% _X2 +% _Y1 *% _Y2) (_Z1 *% _Z2 -% k) (finv (_Z1 *% _Z2)) }
     (_X1 *% _X2 +% _Y1 *% _Y2) *% finv (_Z1 *% _Z2) /% ((_Z1 *% _Z2 -% k) *% finv (_Z1 *% _Z2));
-    (==) { ext_x1x2_plus_y1y2 p q }
+    == { ext_x1x2_plus_y1y2 p q }
     k3 /% ((_Z1 *% _Z2 -% k) *% finv (_Z1 *% _Z2));
-    (==) { LM.lemma_mod_distributivity_sub_left #prime (_Z1 *% _Z2) k (finv (_Z1 *% _Z2)) }
+    == { LM.lemma_mod_distributivity_sub_left #prime (_Z1 *% _Z2) k (finv (_Z1 *% _Z2)) }
     k3 /% (_Z1 *% _Z2 *% finv (_Z1 *% _Z2) -% k *% finv (_Z1 *% _Z2));
-    (==) { fmul_nonzero_lemma _Z1 _Z2; fdiv_lemma (_Z1 *% _Z2) }
+    == { fmul_nonzero_lemma _Z1 _Z2; fdiv_lemma (_Z1 *% _Z2) }
     k3 /% (1 -% k *% finv (_Z1 *% _Z2));
-    (==) { ext_dx1x2y1y2 p q }
+    == { ext_dx1x2y1y2 p q }
     k3 /% k4;
     };
   assert (k1 /% k2 == _X3 /% _Z3 /\ k3 /% k4 == _Y3 /% _Z3);
@@ -896,25 +896,25 @@ let point_double_expand_eh_lemma p =
 
   calc (==) {
     h -% ((_X +% _Y) *% (_X +% _Y));
-    (==) { }
+    == { }
     (_X *% _X +% _Y *% _Y - (_X *% _X +% _Y *% _X +% (_X *% _Y +% _Y *% _Y))) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l (_X *% _X + _Y *% _Y) (- (_X *% _X +% _Y *% _X +% (_X *% _Y +% _Y *% _Y))) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_l (_X *% _X + _Y *% _Y) (- (_X *% _X +% _Y *% _X +% (_X *% _Y +% _Y *% _Y))) prime }
     (_X *% _X + _Y *% _Y - (_X *% _X +% _Y *% _X +% (_X *% _Y +% _Y *% _Y))) % prime;
-    (==) { Math.Lemmas.modulo_distributivity (_X *% _X + _Y *% _X) (_X *% _Y + _Y *% _Y) prime }
+    == { Math.Lemmas.modulo_distributivity (_X *% _X + _Y *% _X) (_X *% _Y + _Y *% _Y) prime }
     (_X *% _X + _Y *% _Y - (_X *% _X + _Y *% _X + (_X *% _Y + _Y *% _Y)) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (_X *% _X + _Y *% _Y) (_X *% _X + _Y *% _X + (_X *% _Y + _Y *% _Y)) prime }
+    == { Math.Lemmas.lemma_mod_sub_distr (_X *% _X + _Y *% _Y) (_X *% _X + _Y *% _X + (_X *% _Y + _Y *% _Y)) prime }
     (_X *% _X + _Y *% _Y - (_X *% _X + _Y *% _X + (_X *% _Y + _Y *% _Y))) % prime;
-    (==) { }
+    == { }
     (_X *% _X + _Y *% _Y - _X *% _X - _Y *% _X - _X *% _Y - _Y *% _Y) % prime;
-    (==) { }
+    == { }
     (- _Y *% _X - _X *% _Y) % prime;
-    (==) { }
+    == { }
     (- 2 * (_X *% _Y)) % prime;
-    (==) { }
+    == { }
     ((- 1) * 2 * (_X *% _Y)) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- 1) (2 * (_X *% _Y)) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (- 1) (2 * (_X *% _Y)) prime }
     ((- 1) % prime * (2 * (_X *% _Y))) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r ((- 1) % prime) (2 * (_X *% _Y)) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r ((- 1) % prime) (2 * (_X *% _Y)) prime }
     (- 1) % prime *% (2 *% (_X *% _Y));
     };
   assert (e == (- 1) % prime *% (2 *% (_X *% _Y)))
@@ -944,23 +944,23 @@ let point_double_expand_gf_lemma p =
 
   calc (==) { //g
     _X *% _X -% _Y *% _Y;
-    (==) { }
+    == { }
     (-1) * (_Y *% _Y - _X *% _X) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- 1) (_Y *% _Y - _X *% _X) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (- 1) (_Y *% _Y - _X *% _X) prime }
     (-1) % prime * (_Y *% _Y - _X *% _X) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r ((- 1) % prime) (_Y *% _Y - _X *% _X) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r ((- 1) % prime) (_Y *% _Y - _X *% _X) prime }
     (-1) % prime *% (_Y *% _Y -% _X *% _X);
     };
 
   calc (==) { //f
     2 *% (_Z *% _Z) +% (_X *% _X -% _Y *% _Y);
-    (==) { }
+    == { }
     (2 *% (_Z *% _Z) + (_X *% _X -% _Y *% _Y)) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r (2 *% (_Z *% _Z)) (_X *% _X - _Y *% _Y) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_r (2 *% (_Z *% _Z)) (_X *% _X - _Y *% _Y) prime }
     (2 *% (_Z *% _Z) + (_X *% _X - _Y *% _Y)) % prime;
-    (==) { }
+    == { }
     (2 *% (_Z *% _Z) - (_Y *% _Y - _X *% _X)) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (2 *% (_Z *% _Z)) (_Y *% _Y - _X *% _X) prime }
+    == { Math.Lemmas.lemma_mod_sub_distr (2 *% (_Z *% _Z)) (_Y *% _Y - _X *% _X) prime }
     (2 *% (_Z *% _Z) -% (_Y *% _Y -% _X *% _X));
     }
 
@@ -1032,35 +1032,35 @@ let to_aff_point_double_lemma p =
 
   calc (==) { //_X3 /% _Z3
     e /% g;
-    (==) { }
+    == { }
     (- 1) % prime *% (2 *% (_X *% _Y)) /% ((-1) % prime *% (_Y *% _Y -% _X *% _X));
-    (==) { fdiv_cancel_lemma (2 *% (_X *% _Y)) (_Y *% _Y -% _X *% _X) ((- 1) % prime) }
+    == { fdiv_cancel_lemma (2 *% (_X *% _Y)) (_Y *% _Y -% _X *% _X) ((- 1) % prime) }
     2 *% (_X *% _Y) /% (_Y *% _Y -% _X *% _X);
-    (==) { finv2_nonzero_lemma _Z _Z; fdiv_cancel_lemma (2 *% (_X *% _Y)) (_Y *% _Y -% _X *% _X) (finv (_Z *% _Z)) }
+    == { finv2_nonzero_lemma _Z _Z; fdiv_cancel_lemma (2 *% (_X *% _Y)) (_Y *% _Y -% _X *% _X) (finv (_Z *% _Z)) }
     2 *% (_X *% _Y) *% finv (_Z *% _Z) /% (finv (_Z *% _Z) *% (_Y *% _Y -% _X *% _X));
-    (==) { ext_yy_minus_xx p }
+    == { ext_yy_minus_xx p }
     2 *% (_X *% _Y) *% finv (_Z *% _Z) /% k2;
-    (==) { LM.lemma_mul_mod_assoc #prime 2 (_X *% _Y) (finv (_Z *% _Z)); fdiv_to_one_denominator _X _Y _Z _Z }
+    == { LM.lemma_mul_mod_assoc #prime 2 (_X *% _Y) (finv (_Z *% _Z)); fdiv_to_one_denominator _X _Y _Z _Z }
     2 *% (x *% y) /% k2;
-    (==) { LM.lemma_mul_mod_assoc #prime 2 x y }
+    == { LM.lemma_mul_mod_assoc #prime 2 x y }
     k1 /% k2;
     };
 
   calc (==) { //_Y3 /% _Z3
     h /% f;
-    (==) { }
+    == { }
     (_X *% _X +% _Y *% _Y) /% (2 *% (_Z *% _Z) -% (_Y *% _Y -% _X *% _X));
-    (==) { ext_2_minus_yy_plus_xx_mul_zz p }
+    == { ext_2_minus_yy_plus_xx_mul_zz p }
     (_X *% _X +% _Y *% _Y) /% (k4 *% (_Z *% _Z));
-    (==) { finv2_nonzero_lemma _Z _Z; fdiv_cancel_lemma (_X *% _X +% _Y *% _Y) (k4 *% (_Z *% _Z)) (finv (_Z *% _Z)) }
+    == { finv2_nonzero_lemma _Z _Z; fdiv_cancel_lemma (_X *% _X +% _Y *% _Y) (k4 *% (_Z *% _Z)) (finv (_Z *% _Z)) }
     (_X *% _X +% _Y *% _Y) *% finv (_Z *% _Z) /% (k4 *% (_Z *% _Z) *% finv (_Z *% _Z));
-    (==) { LM.lemma_mul_mod_assoc #prime k4 (_Z *% _Z) (finv (_Z *% _Z)) }
+    == { LM.lemma_mul_mod_assoc #prime k4 (_Z *% _Z) (finv (_Z *% _Z)) }
     (_X *% _X +% _Y *% _Y) *% finv (_Z *% _Z) /% (k4 *% ((_Z *% _Z) *% finv (_Z *% _Z)));
-    (==) { fmul_nonzero_lemma _Z _Z; fdiv_one_lemma1 k4 (_Z *% _Z) }
+    == { fmul_nonzero_lemma _Z _Z; fdiv_one_lemma1 k4 (_Z *% _Z) }
     (_X *% _X +% _Y *% _Y) *% finv (_Z *% _Z) /% k4;
-    (==) { LM.lemma_mod_distributivity_add_left #prime (_X *% _X) (_Y *% _Y) (finv (_Z *% _Z)) }
+    == { LM.lemma_mod_distributivity_add_left #prime (_X *% _X) (_Y *% _Y) (finv (_Z *% _Z)) }
     (_X *% _X *% finv (_Z *% _Z) +% _Y *% _Y *% finv (_Z *% _Z)) /% k4;
-    (==) { fdiv_to_one_denominator _X _X _Z _Z; fdiv_to_one_denominator _Y _Y _Z _Z }
+    == { fdiv_to_one_denominator _X _X _Z _Z; fdiv_to_one_denominator _Y _Y _Z _Z }
     k3 /% k4;
     };
   assert (k1 /% k2 == _X3 /% _Z3 /\ k3 /% k4 == _Y3 /% _Z3);
@@ -1079,11 +1079,11 @@ let to_aff_point_negate p =
   assert (y *% y -% x *% x == 1 +% d *% (x *% x) *% (y *% y));
   calc (==) {
     (-_X) % prime * finv _Z % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (-_X) (finv _Z) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (-_X) (finv _Z) prime }
     (-_X) * finv _Z % prime;
-    (==) { Math.Lemmas.neg_mul_left _X (finv _Z) }
+    == { Math.Lemmas.neg_mul_left _X (finv _Z) }
     (- (_X * finv _Z)) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr 0 (_X * finv _Z) prime }
+    == { Math.Lemmas.lemma_mod_sub_distr 0 (_X * finv _Z) prime }
     (- (_X *% finv _Z)) % prime;
     };
   lemma_neg_sqr (_X *% finv _Z);
@@ -1091,19 +1091,19 @@ let to_aff_point_negate p =
 
   calc (==) {
     ((-_X) % prime * _Y) % prime * finv _Z % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (-_X) _Y prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (-_X) _Y prime }
     ((-_X) * _Y) % prime * finv _Z % prime;
-    (==) { Math.Lemmas.neg_mul_left _X _Y }
+    == { Math.Lemmas.neg_mul_left _X _Y }
     (-(_X * _Y)) % prime * finv _Z % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (-(_X * _Y)) (finv _Z) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (-(_X * _Y)) (finv _Z) prime }
     (-(_X * _Y)) * finv _Z % prime;
-    (==) { Math.Lemmas.neg_mul_left (_X * _Y) (finv _Z) }
+    == { Math.Lemmas.neg_mul_left (_X * _Y) (finv _Z) }
     (-(_X * _Y * finv _Z)) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr 0 (_X * _Y * finv _Z) prime }
+    == { Math.Lemmas.lemma_mod_sub_distr 0 (_X * _Y * finv _Z) prime }
     (-(_X * _Y * finv _Z % prime)) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (_X * _Y) (finv _Z) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (_X * _Y) (finv _Z) prime }
     (-(_X *% _Y *% finv _Z)) % prime;
-    (==) { }
+    == { }
     (-_T) % prime;
     };
   assert (is_ext p');
@@ -1116,11 +1116,11 @@ val fmul_both_lemma: a:elem -> b:elem -> c:elem -> Lemma
 let fmul_both_lemma a b c =
   calc (==) {
     (a * c) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l a c prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l a c prime }
     ((a % prime) * c) % prime;
-    (==) {  }
+    == {  }
     ((b % prime) * c) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l b c prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l b c prime }
     (b * c) % prime;
   }
 
@@ -1178,11 +1178,11 @@ let recover_x_lemma_aux y =
   let x2 = (y2 -% one) *% finv (d *% y2 +% one) in
   calc (==) {
     x2 *% (d *% y2 +% one);
-    (==) { }
+    == { }
     (y2 -% one) *% p *% (d *% y2 +% one);
-    (==) { Lib.NatMod.lemma_mul_mod_assoc #prime (y2 -% one) p (d *% y2 +% one) }
+    == { Lib.NatMod.lemma_mul_mod_assoc #prime (y2 -% one) p (d *% y2 +% one) }
     (y2 -% one) *% (p *% (d *% y2 +% one));
-    (==) { denominator_lemma1 y; fdiv_one_lemma1 (y2 -% one) (d *% y2 +% one) }
+    == { denominator_lemma1 y; fdiv_one_lemma1 (y2 -% one) (d *% y2 +% one) }
     y2 -% one;
     };
   assert (x2 *% (d *% y2 +% one) == y2 -% one);
@@ -1220,11 +1220,11 @@ let recover_x_lemma y sign =
 	  let x1 = (prime - x) % prime in
 	  calc (==) {
 	    x1 *% x1;
-	    (==) { }
+	    == { }
 	    (prime - x) % prime * ((prime - x) % prime) % prime;
-	    (==) { Math.Lemmas.modulo_addition_lemma (-x) prime 1 }
+	    == { Math.Lemmas.modulo_addition_lemma (-x) prime 1 }
 	    (- x) % prime * ((- x) % prime) % prime;
-	    (==) { lemma_neg_sqr x }
+	    == { lemma_neg_sqr x }
 	    (x * x) % prime;
 	    };
 	  assert (x1 *% x1 = x2);
@@ -1264,11 +1264,11 @@ let point_equal_lemma_aux1 a b c d e f =
   assert (a *% b *% f <> c *% d *% f);
   calc (==) {
     a *% b *% f;
-    (==) { lemma_fmul_assoc1 a b f }
+    == { lemma_fmul_assoc1 a b f }
     a *% f *% b;
-    (==) { fdiv_lemma1 a d e f }
+    == { fdiv_lemma1 a d e f }
     e *% d *% b;
-    (==) { lemma_fmul_assoc1 e d b }
+    == { lemma_fmul_assoc1 e d b }
     e *% b *% d;
     };
   lemma_fmul_assoc1 c d f;
@@ -1284,11 +1284,11 @@ let point_equal_lemma_aux2 a b c d e f =
   assert (a *% b *% f == c *% d *% f);
   calc (==) {
     a *% b *% f;
-    (==) { lemma_fmul_assoc1 a b f }
+    == { lemma_fmul_assoc1 a b f }
     a *% f *% b;
-    (==) { fdiv_lemma1 a d e f }
+    == { fdiv_lemma1 a d e f }
     e *% d *% b;
-    (==) { lemma_fmul_assoc1 e d b }
+    == { lemma_fmul_assoc1 e d b }
     e *% b *% d;
     };
   lemma_fmul_assoc1 c d f;

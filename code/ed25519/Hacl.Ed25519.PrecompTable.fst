@@ -39,25 +39,25 @@ let lemma_is_on_curve x y =
   let open Spec.Ed25519 in
   calc (==) {
     y *% y -% x *% x;
-    (==) { }
+    == { }
     ((y * y) % prime - (x * x) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l (y * y) (- (x * x) % prime) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_l (y * y) (- (x * x) % prime) prime }
     (y * y - (x * x) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (y * y) (x * x) prime }
+    == { Math.Lemmas.lemma_mod_sub_distr (y * y) (x * x) prime }
     (y * y - x * x) % prime;
     };
 
   calc (==) {
     1 +% S.d *% (x *% x) *% (y *% y);
-    (==) { }
+    == { }
     (1 + (S.d * (x * x % prime) % prime) * (y * y % prime) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r S.d (x * x) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r S.d (x * x) prime }
     (1 + (S.d * (x * x) % prime) * (y * y % prime) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (S.d * (x * x)) (y * y % prime) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (S.d * (x * x)) (y * y % prime) prime }
     (1 + (S.d * (x * x)) * (y * y % prime) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (S.d * (x * x)) (y * y) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r (S.d * (x * x)) (y * y) prime }
     (1 + (S.d * (x * x)) * (y * y) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r 1 ((S.d * (x * x)) * (y * y)) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_r 1 ((S.d * (x * x)) * (y * y)) prime }
     (1 + (S.d * (x * x)) * (y * y)) % prime;
     }
 

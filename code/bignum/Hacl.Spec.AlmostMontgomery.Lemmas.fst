@@ -101,11 +101,11 @@ let almost_mont_mul_is_mont_mul_lemma pbits rLen n mu a b =
   let c1 = M.mont_mul pbits rLen n mu (a % n) (b % n) in
   calc (==) {
     c1;
-    (==) { M.mont_mul_lemma pbits rLen n mu (a % n) (b % n) }
+    == { M.mont_mul_lemma pbits rLen n mu (a % n) (b % n) }
     (a % n) * (b % n) * d % n;
-    (==) { M.lemma_mod_mul_distr3 (a % n) b d n }
+    == { M.lemma_mod_mul_distr3 (a % n) b d n }
     (a % n) * b * d % n;
-    (==) {
+    == {
       Math.Lemmas.paren_mul_right (a % n) b d;
       Math.Lemmas.lemma_mod_mul_distr_l a (b * d) n;
       Math.Lemmas.paren_mul_right a b d }

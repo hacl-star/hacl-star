@@ -291,17 +291,17 @@ let bn_to_bytes_be_lemma_aux #t len b i =
 
   calc (==) {
     v b.[e1] / pow2 (8 * e) % pow2 8;
-    (==) { bn_eval_index b e1 }
+    == { bn_eval_index b e1 }
     (bn_v b / pow2 (pbits * e1) % pow2 (pbits)) / pow2 (8 * e) % pow2 8;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b) (pbits * e1) (pbits + pbits * e1) }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b) (pbits * e1) (pbits + pbits * e1) }
     (bn_v b % pow2 (pbits + pbits * e1) / pow2 (pbits * e1)) / pow2 (8 * e) % pow2 8;
-    (==) { Math.Lemmas.division_multiplication_lemma (bn_v b % pow2 (pbits + pbits * e1)) (pow2 (pbits * e1)) (pow2 (8 * e)) }
+    == { Math.Lemmas.division_multiplication_lemma (bn_v b % pow2 (pbits + pbits * e1)) (pow2 (pbits * e1)) (pow2 (8 * e)) }
     (bn_v b % pow2 (pbits + pbits * e1)) / (pow2 (pbits * e1) * pow2 (8 * e)) % pow2 8;
-    (==) { Math.Lemmas.pow2_plus (pbits * e1) (8 * e) }
+    == { Math.Lemmas.pow2_plus (pbits * e1) (8 * e) }
     (bn_v b % pow2 (pbits + pbits * e1)) / pow2 (pbits * e1 + 8 * e) % pow2 8;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b) (8 * e2) (pbits + pbits * e1) }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b) (8 * e2) (pbits + pbits * e1) }
     (bn_v b / pow2 (8 * e2)) % pow2 (pbits + pbits * e1 - 8 * e2) % pow2 8;
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v b / pow2 (8 * e2)) 8 (pbits + pbits * e1 - 8 * e2) }
+    == { Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v b / pow2 (8 * e2)) 8 (pbits + pbits * e1 - 8 * e2) }
     (bn_v b / pow2 (8 * (numb * len - i - 1))) % pow2 8;
     }
 

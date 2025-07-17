@@ -27,9 +27,9 @@ let limb_get_ith_bit_lemma #t a i =
   let tmp2 = tmp1 &. uint #t 1 in
   calc (==) {
     v (limb_get_ith_bit a i);
-    (==) { }
+    == { }
     v tmp2;
-    (==) {
+    == {
       shift_left_lemma #t #SEC (mk_int 1) 1ul;
       assert_norm (1 * pow2 1 == 2);
       FStar.Math.Lemmas.small_mod 2 (modulus t);
@@ -37,9 +37,9 @@ let limb_get_ith_bit_lemma #t a i =
       assert (mod_mask #t #SEC 1ul == uint #t #SEC 1)
     }
     v (tmp1 `logand` mod_mask 1ul);
-    (==) { mod_mask_lemma tmp1 1ul }
+    == { mod_mask_lemma tmp1 1ul }
     v tmp1 % pow2 (v 1ul);
-    (==) { }
+    == { }
     v a / pow2 i % 2;
   }
 
@@ -66,15 +66,15 @@ let bn_get_ith_bit_aux_lemma #t #len b ind =
 
   calc (==) {
     v b.[i] / pow2 j;
-    (==) { bn_eval_index b i }
+    == { bn_eval_index b i }
     (bn_v b / pow2 (pbits * i) % pow2 pbits) / pow2 j;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b / pow2 (pbits * i)) j pbits }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b / pow2 (pbits * i)) j pbits }
     (bn_v b / pow2 (pbits * i) / pow2 j) % pow2 (pbits - j);
-    (==) { Math.Lemmas.division_multiplication_lemma (bn_v b) (pow2 (pbits * i)) (pow2 j) }
+    == { Math.Lemmas.division_multiplication_lemma (bn_v b) (pow2 (pbits * i)) (pow2 j) }
     (bn_v b / (pow2 (pbits * i) * pow2 j)) % pow2 (pbits - j);
-    (==) { Math.Lemmas.pow2_plus (pbits * i) j }
+    == { Math.Lemmas.pow2_plus (pbits * i) j }
     (bn_v b / pow2 (pbits * i + j)) % pow2 (pbits - j);
-    (==) {
+    == {
       Math.Lemmas.euclidean_division_definition ind pbits;
       Math.Lemmas.euclidean_div_axiom ind pbits }
     (bn_v b / pow2 ind) % pow2 (pbits - j);
@@ -95,9 +95,9 @@ let bn_get_ith_bit_lemma #t #len b ind =
 
   calc (==) {
     v b.[i] / pow2 j % 2;
-    (==) { bn_get_ith_bit_aux_lemma b ind }
+    == { bn_get_ith_bit_aux_lemma b ind }
     (bn_v b / pow2 ind) % pow2 (pbits - j) % 2;
-    (==) { assert_norm (pow2 1 = 2);
+    == { assert_norm (pow2 1 = 2);
            Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v b / pow2 ind) 1 (pbits - j) }
     (bn_v b / pow2 ind) % 2;
     };
@@ -143,9 +143,9 @@ let bn_lt_pow2_index_lemma #t #len b ind =
   assert (bn_v b < pow2 (i * pbits + pbits));
   calc (==) {
     i * pbits + pbits;
-    (==) { }
+    == { }
     i * pbits + 1 * pbits;
-    (==) {
+    == {
       Math.Lemmas.distributivity_add_left i 1 pbits;
       Math.Lemmas.swap_mul pbits (i+1)
     }
@@ -199,25 +199,25 @@ let bn_set_ith_bit_lemma #t #len input ind =
 
   calc (==) {
     bn_v inp <: int;
-    (==) {
+    == {
       bn_eval_split_i #t #len inp (i + 1);
       bn_eval_split_i #t #len input (i + 1);
       bn_eval_extensionality_j (slice inp (i + 1) len) (slice input (i + 1) len) (len - i - 1)
     }
     bn_v (slice inp 0 (i + 1));
-    (==) { bn_eval_split_i #t #(i + 1) (slice inp 0 (i + 1)) i }
+    == { bn_eval_split_i #t #(i + 1) (slice inp 0 (i + 1)) i }
     bn_v (slice inp 0 i) + pow2 (i * pbits) * bn_v (slice inp i (i + 1));
-    (==) { bn_eval1 (slice inp i (i + 1)) }
+    == { bn_eval1 (slice inp i (i + 1)) }
     bn_v (slice inp 0 i) + pow2 (i * pbits) * v inp.[i];
-    (==) { bn_eval_extensionality_j input inp i }
+    == { bn_eval_extensionality_j input inp i }
     bn_v (slice input 0 i) + pow2 (i * pbits) * v inp.[i];
-    (==) { }
+    == { }
     bn_v (slice input 0 i) + pow2 (i * pbits) * (v input.[i] + v b);
-    (==) { Math.Lemmas.distributivity_add_right (pow2 (i * pbits)) (v input.[i]) (v b) }
+    == { Math.Lemmas.distributivity_add_right (pow2 (i * pbits)) (v input.[i]) (v b) }
     bn_v (slice input 0 i) + pow2 (i * pbits) * v input.[i] + pow2 (i * pbits) * v b;
-    (==) { Math.Lemmas.pow2_plus (i * pbits) j; Math.Lemmas.euclidean_division_definition ind pbits }
+    == { Math.Lemmas.pow2_plus (i * pbits) j; Math.Lemmas.euclidean_division_definition ind pbits }
     bn_v (slice input 0 i) + pow2 (i * pbits) * v input.[i] + pow2 ind;
-    (==) { }
+    == { }
     bn_v input + pow2 ind;
   }
 
@@ -240,11 +240,11 @@ let bn_div_pow2_lemma #t #len c i =
   Math.Lemmas.nat_times_nat_is_nat pbits i;
   calc (==) {
     bn_v c / pow2 (pbits * i);
-    (==) { bn_eval_split_i c i }
+    == { bn_eval_split_i c i }
     (bn_v (slice c 0 i) + pow2 (pbits * i) * bn_v (slice c i len)) / pow2 (pbits * i);
-    (==) { Math.Lemmas.division_addition_lemma (bn_v (slice c 0 i)) (pow2 (pbits * i)) (bn_v (slice c i len)) }
+    == { Math.Lemmas.division_addition_lemma (bn_v (slice c 0 i)) (pow2 (pbits * i)) (bn_v (slice c i len)) }
     bn_v (slice c 0 i) / pow2 (pbits * i) + bn_v (slice c i len);
-    (==) { bn_eval_bound (slice c 0 i) i; Math.Lemmas.small_division_lemma_1 (bn_v (slice c 0 i)) (pow2 (pbits * i)) }
+    == { bn_eval_bound (slice c 0 i) i; Math.Lemmas.small_division_lemma_1 (bn_v (slice c 0 i)) (pow2 (pbits * i)) }
     bn_v (slice c i len);
   };
   assert (bn_v (slice c i len) == bn_v c / pow2 (pbits * i))
@@ -262,11 +262,11 @@ let bn_mod_pow2_lemma #t #aLen a i =
   Math.Lemmas.nat_times_nat_is_nat pbits i;
   calc (==) {
     bn_v a % pow2 (pbits * i);
-    (==) { bn_eval_split_i a i }
+    == { bn_eval_split_i a i }
     (bn_v (slice a 0 i) + pow2 (pbits * i) * bn_v (slice a i aLen)) % pow2 (pbits * i);
-    (==) { Math.Lemmas.modulo_addition_lemma (bn_v (slice a 0 i)) (pow2 (pbits * i)) (bn_v (slice a i aLen)) }
+    == { Math.Lemmas.modulo_addition_lemma (bn_v (slice a 0 i)) (pow2 (pbits * i)) (bn_v (slice a i aLen)) }
     (bn_v (slice a 0 i)) % pow2 (pbits * i);
-    (==) { bn_eval_bound (slice a 0 i) i; Math.Lemmas.small_mod (bn_v (slice a 0 i)) (pow2 (pbits * i)) }
+    == { bn_eval_bound (slice a 0 i) i; Math.Lemmas.small_mod (bn_v (slice a 0 i)) (pow2 (pbits * i)) }
     bn_v (slice a 0 i);
     }
 
@@ -502,25 +502,25 @@ let bn_get_bits_limb_aux_lemma #t #nLen n ind =
 
   calc (==) {
     bn_v n / pow2 ind % pow2 pbits;
-    (==) { Math.Lemmas.euclidean_division_definition res (pow2 (pbits - j)) }
+    == { Math.Lemmas.euclidean_division_definition res (pow2 (pbits - j)) }
     res / pow2 (pbits - j) * pow2 (pbits - j) + res % pow2 (pbits - j);
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v n / pow2 ind) (pbits - j) pbits }
+    == { Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v n / pow2 ind) (pbits - j) pbits }
     res / pow2 (pbits - j) * pow2 (pbits - j) + bn_v n / pow2 ind % pow2 (pbits - j);
-    (==) { bn_get_ith_bit_aux_lemma n ind }
+    == { bn_get_ith_bit_aux_lemma n ind }
     res / pow2 (pbits - j) * pow2 (pbits - j) + v p1;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v n / pow2 ind) (pbits - j) pbits }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v n / pow2 ind) (pbits - j) pbits }
     bn_v n / pow2 ind / pow2 (pbits - j) % pow2 j * pow2 (pbits - j) + v p1;
-    (==) { Math.Lemmas.division_multiplication_lemma (bn_v n) (pow2 ind) (pow2 (pbits - j)) }
+    == { Math.Lemmas.division_multiplication_lemma (bn_v n) (pow2 ind) (pow2 (pbits - j)) }
     bn_v n / (pow2 ind * pow2 (pbits - j)) % pow2 j * pow2 (pbits - j) + v p1;
-    (==) { Math.Lemmas.pow2_plus ind (pbits - j) }
+    == { Math.Lemmas.pow2_plus ind (pbits - j) }
     bn_v n / pow2 (ind + pbits - j) % pow2 j * pow2 (pbits - j) + v p1;
-    (==) { Math.Lemmas.euclidean_division_definition ind pbits }
+    == { Math.Lemmas.euclidean_division_definition ind pbits }
     bn_v n / pow2 (i * pbits + pbits) % pow2 j * pow2 (pbits - j) + v p1;
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (bn_v n / pow2 (i * pbits + pbits)) pbits (pbits - j) }
+    == { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (bn_v n / pow2 (i * pbits + pbits)) pbits (pbits - j) }
     bn_v n / pow2 (i * pbits + pbits) * pow2 (pbits - j) % pow2 pbits + v p1;
-    (==) { Math.Lemmas.distributivity_add_left i 1 pbits }
+    == { Math.Lemmas.distributivity_add_left i 1 pbits }
     bn_v n / pow2 ((i + 1) * pbits) * pow2 (pbits - j) % pow2 pbits + v p1;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (bn_v n / pow2 ((i + 1) * pbits)) (pow2 (pbits - j)) (pow2 pbits) }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (bn_v n / pow2 ((i + 1) * pbits)) (pow2 (pbits - j)) (pow2 pbits) }
     bn_v n / pow2 ((i + 1) * pbits) % pow2 pbits * pow2 (pbits - j) % pow2 pbits + v p1;
     }
 
@@ -552,11 +552,11 @@ let bn_get_bits_limb_lemma #t #nLen n ind =
       let p2 = n.[i + 1] <<. (size (pbits - j)) in
       calc (==) {
 	v p2 % pow2 (pbits - j);
-	(==) { }
+	== { }
 	v n.[i + 1] * pow2 (pbits - j) % pow2 pbits % pow2 (pbits - j);
-	(==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 (v n.[i + 1] * pow2 (pbits - j)) (pbits - j) pbits }
+	== { Math.Lemmas.pow2_modulo_modulo_lemma_1 (v n.[i + 1] * pow2 (pbits - j)) (pbits - j) pbits }
 	v n.[i + 1] * pow2 (pbits - j) % pow2 (pbits - j);
-	(==) { Math.Lemmas.multiple_modulo_lemma (v n.[i + 1]) (pow2 (pbits - j)) }
+	== { Math.Lemmas.multiple_modulo_lemma (v n.[i + 1]) (pow2 (pbits - j)) }
 	0;
 	};
       let p3 = p1 |. p2 in

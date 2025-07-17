@@ -37,9 +37,9 @@ let aes128_key_expansion_stdcall input_b output_b =
        assert (Seq.equal (UV.as_seq h1 ub) (key_to_round_keys_LE AES_128 key));
        calc (==) {
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 output_b));
-        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 output_b h1 }
+        == { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 output_b h1 }
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h1 ub))));
-        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h1 ub) }
+        == { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h1 ub) }
         UV.as_seq h1 ub;
       };
       le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 output_b))
@@ -68,9 +68,9 @@ let aes256_key_expansion_stdcall input_b output_b =
        assert (Seq.equal (UV.as_seq h1 ub) (key_to_round_keys_LE AES_256 key));
        calc (==) {
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 output_b));
-        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 output_b h1 }
+        == { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 output_b h1 }
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h1 ub))));
-        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h1 ub) }
+        == { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h1 ub) }
         UV.as_seq h1 ub;
       };
       le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 output_b))

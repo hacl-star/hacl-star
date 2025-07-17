@@ -82,11 +82,11 @@ val lemma_mod_pow2_sub: x:nat -> a:nat -> b:nat ->
 let lemma_mod_pow2_sub x a b =
   calc (==) {
     x / pow2 a % pow2 b * pow2 a;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 x a (a + b) }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 x a (a + b) }
     x % pow2 (a + b) / pow2 a * pow2 a;
-    (==) { Math.Lemmas.euclidean_division_definition (x % pow2 (a + b)) (pow2 a) }
+    == { Math.Lemmas.euclidean_division_definition (x % pow2 (a + b)) (pow2 a) }
     x % pow2 (a + b) - x % pow2 (a + b) % pow2 a;
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 x a (a + b) }
+    == { Math.Lemmas.pow2_modulo_modulo_lemma_1 x a (a + b) }
     x % pow2 (a + b) - x % pow2 a;
   }
 
@@ -107,15 +107,15 @@ let felem_to_list_lemma_eval x =
   assert (nat_x == x0 + x1 * pow51 + x2 * pow102 + x3 * pow153 + x4 * pow204);
   calc (==) {
     x0 + x1 * pow51 + x2 * pow102 + x3 * pow153 + x4 * pow204;
-    (==) { }
+    == { }
     x0 + x1 * pow51 + x2 * pow102 + (x / pow153 % pow51) * pow153 + x / pow204 * pow204;
-    (==) { lemma_mod_pow2_sub x 153 51 }
+    == { lemma_mod_pow2_sub x 153 51 }
     x0 + x1 * pow51 + x2 * pow102 + x % pow204 - x % pow153 + x / pow204 * pow204;
-    (==) { Math.Lemmas.euclidean_division_definition x pow204 }
+    == { Math.Lemmas.euclidean_division_definition x pow204 }
     x0 + x1 * pow51 + (x / pow102 % pow51) * pow102 - x % pow153 + x;
-    (==) { lemma_mod_pow2_sub x 102 51 }
+    == { lemma_mod_pow2_sub x 102 51 }
     x0 + (x / pow51 % pow51) * pow51 - x % pow102 + x;
-    (==) { lemma_mod_pow2_sub x 51 51 }
+    == { lemma_mod_pow2_sub x 51 51 }
     x;
   }
 
@@ -152,9 +152,9 @@ let ext_point_to_list_sub p =
 
   calc (==) { // ((a * b) * c) * d == a * (b * (c * d))
     FL.append (FL.append (FL.append px_list py_list) pz_list) pt_list;
-    (==) { FL.append_assoc FL.(px_list @ py_list) pz_list pt_list }
+    == { FL.append_assoc FL.(px_list @ py_list) pz_list pt_list }
     FL.append (FL.append px_list py_list) (FL.append pz_list pt_list);
-    (==) { FL.append_assoc px_list py_list (FL.append pz_list pt_list) }
+    == { FL.append_assoc px_list py_list (FL.append pz_list pt_list) }
     FL.(px_list @ py_list @ pz_list @ pt_list);
   };
 

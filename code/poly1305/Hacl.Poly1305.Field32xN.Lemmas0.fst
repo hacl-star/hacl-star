@@ -143,11 +143,11 @@ let smul_felem5_eval_lemma_i #w #m1 #m2 u1 f2 i =
 
   calc (==) {
     vu1 * (fas_nat5 f2).[i];
-  (==) { }
+  == { }
     vu1 * (v tf20 + v tf21 * pow26 + v tf22 * pow52 + v tf23 * pow78 + v tf24 * pow104);
-  (==) { lemma_mul5_distr_l vu1 (v tf20) (v tf21 * pow26) (v tf22 * pow52) (v tf23 * pow78) (v tf24 * pow104)}
+  == { lemma_mul5_distr_l vu1 (v tf20) (v tf21 * pow26) (v tf22 * pow52) (v tf23 * pow78) (v tf24 * pow104)}
     vu1 * v tf20 + vu1 * (v tf21 * pow26) + vu1 * (v tf22 * pow52) + vu1 * (v tf23 * pow78) + vu1 * (v tf24 * pow104);
-  (==) {
+  == {
     FStar.Math.Lemmas.paren_mul_right vu1 (v tf21) pow26;
     FStar.Math.Lemmas.paren_mul_right vu1 (v tf22) pow52;
     FStar.Math.Lemmas.paren_mul_right vu1 (v tf23) pow78;
@@ -263,17 +263,17 @@ let smul_add_felem5_eval_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 i =
 
   calc (==) {
     (fas_nat5 o).[i];
-    (==) { }
+    == { }
     v ta0 + vu1 * v tf20 + (v ta1 + vu1 * v tf21) * pow26 + (v ta2 + vu1 * v tf22) * pow52 +
     (v ta3 + vu1 * v tf23) * pow78 + (v ta4 + vu1 * v tf24) * pow104;
-    (==) {
+    == {
       FStar.Math.Lemmas.distributivity_add_left (v ta1) (vu1 * v tf21) pow26;
       FStar.Math.Lemmas.distributivity_add_left (v ta2) (vu1 * v tf22) pow52;
       FStar.Math.Lemmas.distributivity_add_left (v ta3) (vu1 * v tf23) pow78;
       FStar.Math.Lemmas.distributivity_add_left (v ta1) (vu1 * v tf24) pow104 }
     v ta0 + v ta1 * pow26 + v ta2 * pow52 + v ta3 * pow78 + v ta4 * pow104 +
     vu1 * v tf20 + vu1 * v tf21 * pow26 + vu1 * v tf22 * pow52 + vu1 * v tf23 * pow78 + vu1 * v tf24 * pow104;
-    (==) { }
+    == { }
     (fas_nat5 acc1).[i] + vu1 * v tf20 + vu1 * v tf21 * pow26 + vu1 * v tf22 * pow52 + vu1 * v tf23 * pow78 + vu1 * v tf24 * pow104;
    };
    assert ((fas_nat5 o).[i] == (fas_nat5 acc1).[i] +
@@ -281,11 +281,11 @@ let smul_add_felem5_eval_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 i =
 
   calc (==) {
     vu1 * (fas_nat5 f2).[i];
-  (==) { }
+  == { }
     vu1 * (v tf20 + v tf21 * pow26 + v tf22 * pow52 + v tf23 * pow78 + v tf24 * pow104);
-  (==) { lemma_mul5_distr_l vu1 (v tf20) (v tf21 * pow26) (v tf22 * pow52) (v tf23 * pow78) (v tf24 * pow104)}
+  == { lemma_mul5_distr_l vu1 (v tf20) (v tf21 * pow26) (v tf22 * pow52) (v tf23 * pow78) (v tf24 * pow104)}
     vu1 * v tf20 + vu1 * (v tf21 * pow26) + vu1 * (v tf22 * pow52) + vu1 * (v tf23 * pow78) + vu1 * (v tf24 * pow104);
-  (==) {
+  == {
     FStar.Math.Lemmas.paren_mul_right vu1 (v tf21) pow26;
     FStar.Math.Lemmas.paren_mul_right vu1 (v tf22) pow52;
     FStar.Math.Lemmas.paren_mul_right vu1 (v tf23) pow78;
@@ -372,26 +372,26 @@ let lemma_fmul5_pow26 r =
   let (r0, r1, r2, r3, r4) = r in
   calc (==) {
     (pow26 * as_nat5 r) % prime;
-  (==) { }
+  == { }
     (pow26 * (v r0 + v r1 * pow26 + v r2 * pow52 + v r3 * pow78 + v r4 * pow104)) % prime;
-  (==) { lemma_mul5_distr_l pow26 (v r0) (v r1 * pow26) (v r2 * pow52) (v r3 * pow78) (v r4 * pow104) }
+  == { lemma_mul5_distr_l pow26 (v r0) (v r1 * pow26) (v r2 * pow52) (v r3 * pow78) (v r4 * pow104) }
     (v r0 * pow26 + pow26 * v r1 * pow26 + pow26 * v r2 * pow52 + pow26 * v r3 * pow78 + pow26 * v r4 * pow104) % prime;
-  (==) { }
+  == { }
     (v r0 * pow26 + v r1 * pow26 * pow26 + v r2 * pow26 * pow52 + v r3 * pow26 * pow78 + v r4 * pow26 * pow104) % prime;
-  (==) {
+  == {
     assert_norm (pow26 * pow26 = pow52);
     assert_norm (pow26 * pow52 = pow78);
     assert_norm (pow26 * pow78 = pow104);
     assert_norm (pow26 * pow104 = pow2 130) }
     (v r0 * pow26 + v r1 * pow52 + v r2 * pow78 + v r3 * pow104 + v r4 * pow2 130) % prime;
-  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+  == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
     (v r0 * pow26 + v r1 * pow52 + v r2 * pow78 + v r3 * pow104) (v r4 * pow2 130) prime }
     (v r0 * pow26 + v r1 * pow52 + v r2 * pow78 + v r3 * pow104 + (v r4 * pow2 130) % prime) % prime;
-  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v r4) (pow2 130) prime }
+  == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v r4) (pow2 130) prime }
     (v r0 * pow26 + v r1 * pow52 + v r2 * pow78 + v r3 * pow104 + (v r4 * (pow2 130 % prime)) % prime) % prime;
-  (==) { lemma_prime () }
+  == { lemma_prime () }
     (v r0 * pow26 + v r1 * pow52 + v r2 * pow78 + v r3 * pow104 + (v r4 * 5) % prime) % prime;
-  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+  == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
     (v r0 * pow26 + v r1 * pow52 + v r2 * pow78 + v r3 * pow104) (v r4 * 5) prime }
     (v r0 * pow26 + v r1 * pow52 + v r2 * pow78 + v r3 * pow104 + v r4 * 5) % prime;
   };
@@ -409,17 +409,17 @@ let lemma_fmul5_pow52 r =
   let (r0, r1, r2, r3, r4) = r in
   calc (==) {
     (pow52 * as_nat5 r) % prime;
-    (==) { assert_norm (pow52 == pow26 * pow26) }
+    == { assert_norm (pow52 == pow26 * pow26) }
     (pow26 * pow26 * as_nat5 r) % prime;
-    (==) {
+    == {
       FStar.Math.Lemmas.paren_mul_right pow26 pow26 (as_nat5 r);
       FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (pow26 * as_nat5 r) prime }
     (pow26 * (pow26 * as_nat5 r % prime)) % prime;
-    (==) { lemma_fmul5_pow26 r }
+    == { lemma_fmul5_pow26 r }
     (pow26 * (as_nat5 (r4 *! u64 5, r0, r1, r2, r3) % prime)) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) prime }
     (pow26 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) % prime;
-    (==) { lemma_fmul5_pow26 (r4 *! u64 5, r0, r1, r2, r3) }
+    == { lemma_fmul5_pow26 (r4 *! u64 5, r0, r1, r2, r3) }
     as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) % prime;
   };
   assert ((pow52 * as_nat5 r) % prime == as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) % prime)
@@ -435,17 +435,17 @@ let lemma_fmul5_pow78 r =
   let (r0, r1, r2, r3, r4) = r in
   calc (==) {
     (pow78 * as_nat5 r) % prime;
-    (==) { assert_norm (pow78 == pow26 * pow52) }
+    == { assert_norm (pow78 == pow26 * pow52) }
     (pow26 * pow52 * as_nat5 r) % prime;
-    (==) {
+    == {
       FStar.Math.Lemmas.paren_mul_right pow26 pow52 (as_nat5 r);
       FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (pow52 * as_nat5 r) prime }
     (pow26 * (pow52 * as_nat5 r % prime)) % prime;
-    (==) { lemma_fmul5_pow52 r }
+    == { lemma_fmul5_pow52 r }
     (pow26 * (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) % prime)) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) prime }
     (pow26 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) % prime;
-    (==) { lemma_fmul5_pow26 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) }
+    == { lemma_fmul5_pow26 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) }
     as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) % prime;
   };
   assert ((pow78 * as_nat5 r) % prime == as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) % prime)
@@ -462,17 +462,17 @@ let lemma_fmul5_pow104 r =
   let (r0, r1, r2, r3, r4) = r in
   calc (==) {
     (pow104 * as_nat5 r) % prime;
-    (==) { assert_norm (pow104 == pow26 * pow78) }
+    == { assert_norm (pow104 == pow26 * pow78) }
     (pow26 * pow78 * as_nat5 r) % prime;
-    (==) {
+    == {
       FStar.Math.Lemmas.paren_mul_right pow26 pow78 (as_nat5 r);
       FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (pow78 * as_nat5 r) prime }
     (pow26 * (pow78 * as_nat5 r % prime)) % prime;
-    (==) { lemma_fmul5_pow78 r }
+    == { lemma_fmul5_pow78 r }
     (pow26 * (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) % prime)) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime }
     (pow26 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) % prime;
-    (==) { lemma_fmul5_pow26 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) }
+    == { lemma_fmul5_pow26 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) }
     as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0) % prime;
   };
   assert ((pow104 * as_nat5 r) % prime == as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0) % prime)
@@ -496,22 +496,22 @@ let mul_felem5_lemma_1 f1 r =
 
   calc (==) {
     (as_nat5 f1 * as_nat5 r) % prime;
-    (==) { }
+    == { }
     (v f10 + v f11 * pow26 + v f12 * pow52 + v f13 * pow78 + v f14 * pow104) * as_nat5 r % prime;
-    (==) { lemma_mul5_distr_r (v f10) (v f11 * pow26) (v f12 * pow52) (v f13 * pow78) (v f14 * pow104) (as_nat5 r) }
+    == { lemma_mul5_distr_r (v f10) (v f11 * pow26) (v f12 * pow52) (v f13 * pow78) (v f14 * pow104) (as_nat5 r) }
     (v f10 * as_nat5 r + v f11 * pow26 * as_nat5 r + v f12 * pow52 * as_nat5 r + v f13 * pow78 * as_nat5 r + v f14 * pow104 * as_nat5 r) % prime;
-    (==) {
+    == {
       FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp  (v f11 * pow26 * as_nat5 r) prime }
     (tmp + (v f11 * pow26 * as_nat5 r) % prime) % prime;
-    (==) {
+    == {
       FStar.Math.Lemmas.paren_mul_right (v f11) pow26 (as_nat5 r);
       FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f11) (pow26 * as_nat5 r) prime }
     (tmp + v f11 * (pow26 * as_nat5 r % prime) % prime) % prime;
-    (==) { lemma_fmul5_pow26 r }
+    == { lemma_fmul5_pow26 r }
     (tmp + v f11 * (as_nat5 (r4 *! u64 5, r0, r1, r2, r3) % prime) % prime) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f11) (as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f11) (as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) prime }
     (tmp + v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) % prime) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) prime }
     (tmp + v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) % prime;
     };
   assert ((as_nat5 f1 * as_nat5 r) % prime == (tmp + v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) % prime)
@@ -538,19 +538,19 @@ let mul_felem5_lemma_2 f1 r =
 
   calc (==) {
     (as_nat5 f1 * as_nat5 r) % prime;
-    (==) { mul_felem5_lemma_1 f1 r }
+    == { mul_felem5_lemma_1 f1 r }
     (tmp + v f12 * pow52 * as_nat5 r) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f12 * pow52 * as_nat5 r) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f12 * pow52 * as_nat5 r) prime }
     (tmp + (v f12 * pow52 * as_nat5 r) % prime) % prime;
-    (==) {
+    == {
       FStar.Math.Lemmas.paren_mul_right (v f12) pow52 (as_nat5 r);
       FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f12) (pow52 * as_nat5 r) prime }
     (tmp + v f12 * (pow52 * as_nat5 r % prime) % prime) % prime;
-    (==) { lemma_fmul5_pow52 r }
+    == { lemma_fmul5_pow52 r }
     (tmp + v f12 * (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) % prime) % prime) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f12) (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f12) (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) prime }
     (tmp + v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) % prime) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) prime }
     (tmp + v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) % prime;
    };
   assert ((as_nat5 f1 * as_nat5 r) % prime == (tmp + v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) % prime)
@@ -578,19 +578,19 @@ let mul_felem5_lemma_3 f1 r =
 
   calc (==) {
     (as_nat5 f1 * as_nat5 r) % prime;
-    (==) { mul_felem5_lemma_2 f1 r }
+    == { mul_felem5_lemma_2 f1 r }
     (tmp +  v f13 * pow78 * as_nat5 r) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f13 * pow78 * as_nat5 r) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f13 * pow78 * as_nat5 r) prime }
     (tmp + (v f13 * pow78 * as_nat5 r) % prime) % prime;
-    (==) {
+    == {
       FStar.Math.Lemmas.paren_mul_right (v f13) pow78 (as_nat5 r);
       FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f13) (pow78 * as_nat5 r) prime }
     (tmp + v f13 * (pow78 * as_nat5 r % prime) % prime) % prime;
-    (==) { lemma_fmul5_pow78 r }
+    == { lemma_fmul5_pow78 r }
     (tmp + v f13 * (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) % prime) % prime) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f13) (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f13) (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime }
     (tmp + v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) % prime) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime }
     (tmp + v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) % prime;
    };
   assert ((as_nat5 f1 * as_nat5 r) % prime == (tmp + v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) % prime)
@@ -618,19 +618,19 @@ let mul_felem5_lemma_4 f1 r =
 
   calc (==) {
     (as_nat5 f1 * as_nat5 r) % prime;
-    (==) { mul_felem5_lemma_3 f1 r }
+    == { mul_felem5_lemma_3 f1 r }
     (tmp + v f14 * pow104 * as_nat5 r) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f14 * pow104 * as_nat5 r) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f14 * pow104 * as_nat5 r) prime }
     (tmp + (v f14 * pow104 * as_nat5 r) % prime) % prime;
-    (==) {
+    == {
       FStar.Math.Lemmas.paren_mul_right (v f14) pow104 (as_nat5 r);
       FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f14) (pow104 * as_nat5 r) prime }
     (tmp + v f14 * (pow104 * as_nat5 r % prime) % prime) % prime;
-    (==) { lemma_fmul5_pow104 r }
+    == { lemma_fmul5_pow104 r }
     (tmp + v f14 * (as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0) % prime) % prime) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f14) (as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f14) (as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) prime }
     (tmp + v f14 * as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0) % prime) % prime;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f14 * as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) prime }
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r tmp (v f14 * as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) prime }
     (tmp + v f14 * as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) % prime;
    };
   assert ((as_nat5 f1 * as_nat5 r) % prime == (tmp + v f14 * as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) % prime)

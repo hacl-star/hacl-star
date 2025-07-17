@@ -31,9 +31,9 @@ let ec logq b k =
 
   calc (<) {
     v k * pow2 (logq - b);
-    (<) { Math.Lemmas.lemma_mult_lt_right (pow2 (logq - b)) (v k) (pow2 b) }
+    < { Math.Lemmas.lemma_mult_lt_right (pow2 (logq - b)) (v k) (pow2 b) }
     pow2 b * pow2 (logq - b);
-    (==) { Math.Lemmas.pow2_plus b (logq - b) }
+    == { Math.Lemmas.pow2_plus b (logq - b) }
     pow2 logq;
     };
 
@@ -58,13 +58,13 @@ let dc logq b c =
 
   calc (==) {
     v res1;
-    (==) { }
+    == { }
     (((v c + pow2 (logq - b - 1) % modulus U16) % modulus U16) / pow2 (logq - b)) % modulus U16;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r (v c) (pow2 (logq - b - 1)) (modulus U16) }
+    == { Math.Lemmas.lemma_mod_plus_distr_r (v c) (pow2 (logq - b - 1)) (modulus U16) }
     (((v c + pow2 (logq - b - 1)) % modulus U16) / pow2 (logq - b)) % modulus U16;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (v c + pow2 (logq - b - 1)) (logq - b) 16 }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 (v c + pow2 (logq - b - 1)) (logq - b) 16 }
     (((v c + pow2 (logq - b - 1)) / pow2 (logq - b)) % pow2 (16 - logq + b)) % modulus U16;
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_2 ((v c + pow2 (logq - b - 1)) / pow2 (logq - b)) 16 (16 - logq + b) }
+    == { Math.Lemmas.pow2_modulo_modulo_lemma_2 ((v c + pow2 (logq - b - 1)) / pow2 (logq - b)) 16 (16 - logq + b) }
     ((v c + pow2 (logq - b - 1)) / pow2 (logq - b)) % pow2 (16 - logq + b);
     };
 
@@ -73,9 +73,9 @@ let dc logq b c =
 
   calc (==) {
     v res;
-    (==) { modulo_pow2_u16 res1 b }
+    == { modulo_pow2_u16 res1 b }
     v res1 % pow2 b;
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 ((v c + pow2 (logq - b - 1)) / pow2 (logq - b)) b (16 - logq + b) }
+    == { Math.Lemmas.pow2_modulo_modulo_lemma_1 ((v c + pow2 (logq - b - 1)) / pow2 (logq - b)) b (16 - logq + b) }
     ((v c + pow2 (logq - b - 1)) / pow2 (logq - b)) % pow2 b;
     };
   res
@@ -99,9 +99,9 @@ let ec1 logq b x k =
 
   calc (==) {
     v rk;
-    (==) { modulo_pow2_u64 (x >>. size (b * k)) b }
+    == { modulo_pow2_u64 (x >>. size (b * k)) b }
     v (x >>. size (b * k)) % pow2 b;
-    (==) { }
+    == { }
     v x / pow2 (b * k) % pow2 b;
     };
 

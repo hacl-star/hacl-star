@@ -121,19 +121,19 @@ let lemma_l_plus_pow2i_lt #w n i l =
 
   calc (<) {
     l + pow2 i;
-    (==) { Math.Lemmas.euclidean_division_definition l pow2i1 }
+    == { Math.Lemmas.euclidean_division_definition l pow2i1 }
     l / pow2i1 * pow2i1 + l % pow2i1 + pow2 i;
-    (==) { Math.Lemmas.pow2_plus 1 i }
+    == { Math.Lemmas.pow2_plus 1 i }
     l / pow2i1 * pow2i1 + l % (2 * pow2 i) + pow2 i;
-    (<) { assert (l % (2 * pow2 i) < pow2 i) }
+    < { assert (l % (2 * pow2 i) < pow2 i) }
     l / pow2i1 * pow2i1 + pow2 i + pow2 i;
-    (==) { Math.Lemmas.pow2_double_sum i }
+    == { Math.Lemmas.pow2_double_sum i }
     l / pow2i1 * pow2i1 + pow2i1;
-    (==) { Math.Lemmas.distributivity_add_left (l / pow2i1) 1 pow2i1 }
+    == { Math.Lemmas.distributivity_add_left (l / pow2i1) 1 pow2i1 }
     (l / pow2i1 + 1) * pow2i1;
-    (<=) { Math.Lemmas.lemma_div_lt_nat l n (i + 1) }
+    <= { Math.Lemmas.lemma_div_lt_nat l n (i + 1) }
     pow2 (n - i - 1) * pow2 (i + 1);
-    (==) { Math.Lemmas.pow2_plus (n - i - 1) (i + 1) }
+    == { Math.Lemmas.pow2_plus (n - i - 1) (i + 1) }
     pow2 n;
   }
 

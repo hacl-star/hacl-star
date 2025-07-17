@@ -34,18 +34,18 @@ let hload56_le b off =
   assert_norm (0x100000000000000 == pow2 56 );
   calc (==) {
     v z' <: nat;
-    (==) { }
+    == { }
     v (z &. u64 0xffffffffffffff);
-    (==) { logand_spec z (u64 0xffffffffffffff) }
+    == { logand_spec z (u64 0xffffffffffffff) }
     v z `logand_v` 0xffffffffffffff;
-    (==) { assert_norm(pow2 56 - 1 == 0xffffffffffffff); UInt.logand_mask (UInt.to_uint_t 64 (v z)) 56 }
+    == { assert_norm(pow2 56 - 1 == 0xffffffffffffff); UInt.logand_mask (UInt.to_uint_t 64 (v z)) 56 }
     (v z % pow2 56);
-    (==) { lemma_reveal_uint_to_bytes_le #U64 #SEC (as_seq h0 b8) }
+    == { lemma_reveal_uint_to_bytes_le #U64 #SEC (as_seq h0 b8) }
     nat_from_bytes_le (as_seq h0 b8) % pow2 56;
-    (==) { nat_from_intseq_le_slice_lemma (as_seq h0 b8) 7 }
+    == { nat_from_intseq_le_slice_lemma (as_seq h0 b8) 7 }
     (nat_from_bytes_le (Seq.slice (as_seq h0 b8) 0 7) +
       pow2 (7 * 8) * nat_from_bytes_le (Seq.slice (as_seq h0 b8) 7 8)) % pow2 56;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
       (nat_from_bytes_le (Seq.slice (as_seq h0 b8) 0 7))
       (pow2 (7 * 8) * nat_from_bytes_le (Seq.slice (as_seq h0 b8) 7 8))
       (pow2 56);
@@ -165,18 +165,18 @@ let hload56_le' b off =
   assert_norm (0x100000000000000 == pow2 56 );
   calc (==) {
     v z' <: nat;
-    (==) { }
+    == { }
     v (z &. u64 0xffffffffffffff);
-    (==) { logand_spec z (u64 0xffffffffffffff) }
+    == { logand_spec z (u64 0xffffffffffffff) }
     v z `logand_v` 0xffffffffffffff;
-    (==) { assert_norm(pow2 56 - 1 == 0xffffffffffffff); UInt.logand_mask (UInt.to_uint_t 64 (v z)) 56 }
+    == { assert_norm(pow2 56 - 1 == 0xffffffffffffff); UInt.logand_mask (UInt.to_uint_t 64 (v z)) 56 }
     (v z % pow2 56);
-    (==) { lemma_reveal_uint_to_bytes_le #U64 #SEC (as_seq h0 b8) }
+    == { lemma_reveal_uint_to_bytes_le #U64 #SEC (as_seq h0 b8) }
     nat_from_bytes_le (as_seq h0 b8) % pow2 56;
-    (==) { nat_from_intseq_le_slice_lemma (as_seq h0 b8) 7 }
+    == { nat_from_intseq_le_slice_lemma (as_seq h0 b8) 7 }
     (nat_from_bytes_le (Seq.slice (as_seq h0 b8) 0 7) +
       pow2 (7 * 8) * nat_from_bytes_le (Seq.slice (as_seq h0 b8) 7 8)) % pow2 56;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
       (nat_from_bytes_le (Seq.slice (as_seq h0 b8) 0 7))
       (pow2 (7 * 8) * nat_from_bytes_le (Seq.slice (as_seq h0 b8) 7 8))
       (pow2 56);

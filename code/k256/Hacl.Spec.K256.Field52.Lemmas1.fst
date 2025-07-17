@@ -154,15 +154,15 @@ let store_felem5_lemma_as_nat f s =
 
   calc (==) {
     v s0 + v s1 * pow2 64 + v s2 * pow2 128 + v s3 * pow2 192;
-    (==) { }
+    == { }
     v f0 + v f1 % pow2 12 * pow2 52 + (v f1 / pow2 12 + v f2 % pow2 24 * pow2 40) * pow2 64 + v s2 * pow2 128 + v s3 * pow2 192;
-    (==) { ML.lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f1) 12 52 (v f2 % pow2 24) 40 64 }
+    == { ML.lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f1) 12 52 (v f2 % pow2 24) 40 64 }
     v f0 + v f1 * pow2 52 + v f2 % pow2 24 * pow2 104 + (v f2 / pow2 24 + v f3 % pow2 36 * pow2 28) * pow2 128 + v s3 * pow2 192;
-    (==) { ML.lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f2) 24 104 (v f3 % pow2 36) 28 128 }
+    == { ML.lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f2) 24 104 (v f3 % pow2 36) 28 128 }
     v f0 + v f1 * pow2 52 + v f2 * pow2 104 + v f3 % pow2 36 * pow2 156 + (v f3 / pow2 36 + v f4 % pow2 48 * pow2 16) * pow2 192;
-    (==) { ML.lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f3) 36 156 (v f4 % pow2 48) 16 192 }
+    == { ML.lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f3) 36 156 (v f4 % pow2 48) 16 192 }
     v f0 + v f1 * pow2 52 + v f2 * pow2 104 + v f3 * pow2 156 + (v f4 % pow2 48) * pow2 208;
-    (==) { Math.Lemmas.small_mod (v f4) (pow2 48) }
+    == { Math.Lemmas.small_mod (v f4) (pow2 48) }
     v f0 + v f1 * pow2 52 + v f2 * pow2 104 + v f3 * pow2 156 + v f4 * pow2 208;
     }
 
@@ -311,17 +311,17 @@ let mul15_lemma m1 m2 f c =
 
   calc (==) { //as_nat5 (r0,r1,r2,r3,r4);
     v r0 + v r1 * pow52 + v r2 * pow104 + v r3 * pow156 + v r4 * pow208;
-    (==) { mul15_lemma1 mf0 m2 f0 c }
+    == { mul15_lemma1 mf0 m2 f0 c }
     v c * v f0 + v r1 * pow52 + v r2 * pow104 + v r3 * pow156 + v r4 * pow208;
-    (==) { mul15_lemma1 mf1 m2 f1 c }
+    == { mul15_lemma1 mf1 m2 f1 c }
     v c * v f0 + v c * v f1 * pow52 + v r2 * pow104 + v r3 * pow156 + v r4 * pow208;
-    (==) { mul15_lemma1 mf2 m2 f2 c }
+    == { mul15_lemma1 mf2 m2 f2 c }
     v c * v f0 + v c * v f1 * pow52 + v c * v f2 * pow104 + v r3 * pow156 + v r4 * pow208;
-    (==) { mul15_lemma1 mf3 m2 f3 c }
+    == { mul15_lemma1 mf3 m2 f3 c }
     v c * v f0 + v c * v f1 * pow52 + v c * v f2 * pow104 + v c * v f3 * pow156 + v r4 * pow208;
-    (==) { mul15_lemma_last1 mf4 m2 f4 c }
+    == { mul15_lemma_last1 mf4 m2 f4 c }
     v c * v f0 + v c * v f1 * pow52 + v c * v f2 * pow104 + v c * v f3 * pow156 + v c * v f4 * pow208;
-    (==) { ML.lemma_distr5_pow52 (v c) (v f0) (v f1) (v f2) (v f3) (v f4) }
+    == { ML.lemma_distr5_pow52 (v c) (v f0) (v f1) (v f2) (v f3) (v f4) }
     v c * (v f0 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156 + v f4 * pow208);
   };
   assert (as_nat5 (r0,r1,r2,r3,r4) == v c * as_nat5 f)

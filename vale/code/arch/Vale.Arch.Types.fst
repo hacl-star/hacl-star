@@ -393,9 +393,9 @@ let le_seq_quad32_to_bytes_to_seq_quad32 s =
   le_seq_quad32_to_bytes_reveal ();
   calc (==) {
     le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 s);
-    (==) { }
+    == { }
     seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE (seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE s)));
-    (==) { }
+    == { }
     s;
   }
 
@@ -708,39 +708,39 @@ let append_distributes_le_seq_quad32_to_bytes s1 s2 =
   le_seq_quad32_to_bytes_reveal ();
   calc (==) {
     le_seq_quad32_to_bytes (s1 @| s2);
-    (==) { }
+    == { }
     seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE (s1 @| s2));
-    (==) { append_distributes_seq_four_to_seq_LE s1 s2 }
+    == { append_distributes_seq_four_to_seq_LE s1 s2 }
     seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE s1 @| seq_four_to_seq_LE s2);
-    (==) { append_distributes_seq_map (nat_to_four 8) (seq_four_to_seq_LE s1) (seq_four_to_seq_LE s2) }
+    == { append_distributes_seq_map (nat_to_four 8) (seq_four_to_seq_LE s1) (seq_four_to_seq_LE s2) }
     seq_four_to_seq_LE (
       seq_map (nat_to_four 8) (seq_four_to_seq_LE s1) @|
       seq_map (nat_to_four 8) (seq_four_to_seq_LE s2));
-    (==) { append_distributes_seq_four_to_seq_LE
+    == { append_distributes_seq_four_to_seq_LE
          (seq_map (nat_to_four 8) (seq_four_to_seq_LE s1))
          (seq_map (nat_to_four 8) (seq_four_to_seq_LE s2)) }
       seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s1)) @|
       seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s2));
-    (==) { }
+    == { }
     le_seq_quad32_to_bytes s1 @| le_seq_quad32_to_bytes s2;
   }
 
 let append_distributes_be_seq_quad32_to_bytes s1 s2 =
   calc (==) {
     seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (s1 @| s2));
-    (==) { }
+    == { }
     seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (s1 @| s2));
-    (==) { append_distributes_seq_four_to_seq_BE s1 s2 }
+    == { append_distributes_seq_four_to_seq_BE s1 s2 }
     seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s1 @| seq_four_to_seq_BE s2);
-    (==) { append_distributes_seq_map (nat_to_four 8) (seq_four_to_seq_BE s1) (seq_four_to_seq_BE s2) }
+    == { append_distributes_seq_map (nat_to_four 8) (seq_four_to_seq_BE s1) (seq_four_to_seq_BE s2) }
     seq_four_to_seq_BE (
       seq_map (nat_to_four 8) (seq_four_to_seq_BE s1) @|
       seq_map (nat_to_four 8) (seq_four_to_seq_BE s2));
-    (==) { append_distributes_seq_four_to_seq_BE
+    == { append_distributes_seq_four_to_seq_BE
          (seq_map (nat_to_four 8) (seq_four_to_seq_BE s1))
          (seq_map (nat_to_four 8) (seq_four_to_seq_BE s2)) }
       seq_four_to_seq_BE (seq_map (nat_to_four 8) (seq_four_to_seq_BE s1)) @|
       seq_four_to_seq_BE (seq_map (nat_to_four 8) (seq_four_to_seq_BE s2));
-    (==) { }
+    == { }
     seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s1) @| seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s2);
   }

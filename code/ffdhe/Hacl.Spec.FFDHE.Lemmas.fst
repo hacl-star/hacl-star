@@ -50,15 +50,15 @@ let pow2_lt_len len =
   let b = pow2 (8 * (len - 1)) * (pow2 8 - 1) in
   calc (==) {
     b / a;
-    (==) { Math.Lemmas.pow2_plus (8 * len - 8) 7 }
+    == { Math.Lemmas.pow2_plus (8 * len - 8) 7 }
     b / (pow2 (8 * len - 8) * pow2 7);
-    (==) { Math.Lemmas.division_multiplication_lemma b (pow2 (8 * len - 8)) (pow2 7) }
+    == { Math.Lemmas.division_multiplication_lemma b (pow2 (8 * len - 8)) (pow2 7) }
     b / pow2 (8 * len - 8) / pow2 7;
-    (==) { Math.Lemmas.cancel_mul_div (pow2 8 - 1) (pow2 (8 * len - 8)) }
+    == { Math.Lemmas.cancel_mul_div (pow2 8 - 1) (pow2 (8 * len - 8)) }
     (pow2 8 - 1) / pow2 7;
-    (==) { Math.Lemmas.pow2_plus 7 1 }
+    == { Math.Lemmas.pow2_plus 7 1 }
     (pow2 7 * 2 - 1) / pow2 7;
-    (==) { }
+    == { }
     1;
     };
   //  assert (b / a * a <= b);
@@ -66,15 +66,15 @@ let pow2_lt_len len =
 
   calc (>) {
     pow2 (8 * len - 8) * (pow2 8 - 1) % pow2 (8 * len - 1);
-    (==) { Math.Lemmas.pow2_plus (8 * len - 8) 8 }
+    == { Math.Lemmas.pow2_plus (8 * len - 8) 8 }
     (pow2 (8 * len) - pow2 (8 * len - 8)) % pow2 (8 * len - 1);
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l (pow2 (8 * len)) (- pow2 (8 * len - 8)) (pow2 (8 * len - 1)) }
+    == { Math.Lemmas.lemma_mod_plus_distr_l (pow2 (8 * len)) (- pow2 (8 * len - 8)) (pow2 (8 * len - 1)) }
     (pow2 (8 * len) % pow2 (8 * len - 1) - pow2 (8 * len - 8)) % pow2 (8 * len - 1);
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_1 1 (8 * len - 1) (8 * len) }
+    == { Math.Lemmas.pow2_multiplication_modulo_lemma_1 1 (8 * len - 1) (8 * len) }
     (0 - pow2 (8 * len - 8)) % pow2 (8 * len - 1);
-    //(==) { Math.Lemmas.pow2_lt_compat (8 * len - 1) (8 * len - 8) }
+    //== { Math.Lemmas.pow2_lt_compat (8 * len - 1) (8 * len - 8) }
     //pow2 (8 * len - 1) - pow2 (8 * len - 8);
-    (>) { Math.Lemmas.pow2_lt_compat (8 * len - 1) (8 * len - 8) }
+    > { Math.Lemmas.pow2_lt_compat (8 * len - 1) (8 * len - 8) }
     0;
     };
 

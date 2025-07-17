@@ -487,21 +487,21 @@ let nat_to_bytes_2 l tmp =
   let open Lib.ByteSequence in
   calc (==) {
     Seq.index (as_seq h1 tmp) 0;
-  (==) { }
+  == { }
     Seq.index (uint_to_bytes_be l16) 0;
-  (==) { index_uint_to_bytes_be_i l16 1 }
+  == { index_uint_to_bytes_be_i l16 1 }
     uint #U8 (v l / pow2 (8 * 1) % pow2 8);
-  (==) { Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 1 }
+  == { Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 1 }
     Seq.index (Lib.ByteSequence.nat_to_bytes_be 2 (v l)) 0;
  };
 
   calc (==) {
     Seq.index (as_seq h1 tmp) 1;
-  (==) { }
+  == { }
     Seq.index (uint_to_bytes_be l16) 1;
-  (==) { index_uint_to_bytes_be_i l16 0 }
+  == { index_uint_to_bytes_be_i l16 0 }
     uint #U8 (v l / pow2 (8 * 0) % pow2 8);
-  (==) { Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 0 }
+  == { Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 0 }
     Seq.index (Lib.ByteSequence.nat_to_bytes_be 2 (v l)) 1;
  }
 #pop-options

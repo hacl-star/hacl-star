@@ -224,11 +224,11 @@ let mul64_wide_5 a b =
     = if v a = 0 || v b = 0 then () else
       calc (<) {
        v a * v b <: int;
-       (<) { Math.Lemmas.lemma_mult_le_left (v a) (v b) (pow2 56) }
+       < { Math.Lemmas.lemma_mult_le_left (v a) (v b) (pow2 56) }
        v a * pow2 56;
-       (<) { Math.Lemmas.lemma_mult_le_right (pow2 56) (v a) (pow2 56) }
+       < { Math.Lemmas.lemma_mult_le_right (pow2 56) (v a) (pow2 56) }
        pow2 56 * pow2 56;
-       (==) { assert_norm (pow2 56 * pow2 56 == pow2 112) }
+       == { assert_norm (pow2 56 * pow2 56 == pow2 112) }
        pow2 112;
       }
   in
@@ -239,11 +239,11 @@ let mul64_wide_5 a b =
       assert_norm (pow2 112 - pow2 57 + 1 >= 0);
       calc (<=) {
        v a * v b <: int;
-       (<=) { Math.Lemmas.lemma_mult_le_left (v a) (v b) (pow2 56 - 1) }
+       <= { Math.Lemmas.lemma_mult_le_left (v a) (v b) (pow2 56 - 1) }
        v a * (pow2 56 - 1);
-       (<=) { Math.Lemmas.lemma_mult_le_right (pow2 56 - 1) (v a) (pow2 56 - 1) }
+       <= { Math.Lemmas.lemma_mult_le_right (pow2 56 - 1) (v a) (pow2 56 - 1) }
        (pow2 56 - 1) * (pow2 56 - 1);
-       (==) { assert_norm ((pow2 56 - 1) * (pow2 56 - 1) == pow2 112 - pow2 57 + 1) }
+       == { assert_norm ((pow2 56 - 1) * (pow2 56 - 1) == pow2 112 - pow2 57 + 1) }
        pow2 112 - pow2 57 + 1;
       }
   in
@@ -412,38 +412,38 @@ let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
 
       calc (<) {
         v c0;
-        (<) { Math.Lemmas.lemma_div_lt_nat (v z0) 112 56 }
+        < { Math.Lemmas.lemma_div_lt_nat (v z0) 112 56 }
         pow2 56;
       };
       calc (<) {
         v c1;
-        (<) { assert_norm (2*(pow2 112 - pow2 57 + 1) + pow2 56 <= pow2 113);
+        < { assert_norm (2*(pow2 112 - pow2 57 + 1) + pow2 56 <= pow2 113);
           Math.Lemmas.lemma_div_lt_nat (v z1 + v c0) 113 56 }
         pow2 57;
       };
       calc (<) {
         v c2;
-        (<) { assert_norm (3*(pow2 112 - pow2 57 + 1) + pow2 57 <= pow2 114);
+        < { assert_norm (3*(pow2 112 - pow2 57 + 1) + pow2 57 <= pow2 114);
           Math.Lemmas.lemma_div_lt_nat (v z2 + v c1) 114 56 }
         pow2 58;
       };
       calc (<=) {
         v c3;
-        (<=) { assert_norm (4*(pow2 112 - pow2 57 + 1) + pow2 58 <= 31153781151208965410895007785680895);
+        <= { assert_norm (4*(pow2 112 - pow2 57 + 1) + pow2 58 <= 31153781151208965410895007785680895);
            assert_norm (31153781151208965410895007785680895 / pow56 == 432345564227567610);
           Math.Lemmas.lemma_div_le (v z3 + v c2) 31153781151208965410895007785680895 (pow2 56) }
         432345564227567610;
       };
       calc (<=) {
         v c4;
-        (<=) { assert_norm (5*(pow2 112 - pow2 57 + 1) + 432345564227567610 <= 25961484292674137854422105494388735); // (pow2 59 - 2) * pow56
+        <= { assert_norm (5*(pow2 112 - pow2 57 + 1) + 432345564227567610 <= 25961484292674137854422105494388735); // (pow2 59 - 2) * pow56
           assert_norm (25961484292674137854422105494388735 / pow56 == 360287970189639675);
           Math.Lemmas.lemma_div_le (v z4 + v c3) 25961484292674137854422105494388735 (pow2 56) }
         360287970189639675;
       };
       calc (<=) {
         v c5;
-        (<=) { assert_norm (4*(pow2 112 - pow2 57 + 1) + 360287970189639675 <= 20769187434139310297949203203096575);
+        <= { assert_norm (4*(pow2 112 - pow2 57 + 1) + 360287970189639675 <= 20769187434139310297949203203096575);
           Math.Lemmas.lemma_div_le (v z5 + v c4) 20769187434139310297949203203096575 (pow2 56);
           assert_norm (20769187434139310297949203203096575 / pow2 56 == pow2 58 - 4) }
         pow2 58 - 4;
@@ -451,21 +451,21 @@ let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
 
       calc (<=) {
         v c6;
-        (<=) { assert_norm (3*(pow2 112 - pow2 57 + 1) + pow2 58 - 4 <= 15576890575604482741476300911804415);
+        <= { assert_norm (3*(pow2 112 - pow2 57 + 1) + pow2 58 - 4 <= 15576890575604482741476300911804415);
           Math.Lemmas.lemma_div_le (v z6 + v c5) 15576890575604482741476300911804415 (pow2 56);
           assert_norm (15576890575604482741476300911804415 / pow2 56 == 216172782113783805) }
         216172782113783805;
       };
       calc (<=) {
         v c7;
-        (<=) { assert_norm (2*(pow2 112 - pow2 57 + 1) + 216172782113783805 <= 10384593717069655185003398620512255); // (pow2 57 - 1) * pow2 56 - 1
+        <= { assert_norm (2*(pow2 112 - pow2 57 + 1) + 216172782113783805 <= 10384593717069655185003398620512255); // (pow2 57 - 1) * pow2 56 - 1
           Math.Lemmas.lemma_div_le (v z7 + v c6) 10384593717069655185003398620512255 (pow2 56);
           assert_norm (10384593717069655185003398620512255 / pow2 56 == pow2 57 - 2) }
         pow2 57 - 2;
       };
       calc (<) {
         v c8;
-        (<) { Math.Lemmas.lemma_div_lt_nat (v z8 + v c7) 112 56 }
+        < { Math.Lemmas.lemma_div_lt_nat (v z8 + v c7) 112 56 }
         pow2 56;
       };
       assert_norm (pow2 56 < pow2 64);
@@ -476,10 +476,10 @@ let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
 
   calc (==) {
     wide_as_nat5 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) <: int;
-    (==) { }
+    == { }
     v t0 + v t1 * pow56 + v t2 * pow112 + v t3 * pow168 + v t4 * pow224 +
     v t5 * pow280 + v t6 * pow336 + v t7 * pow392 + v t8 * pow448 + v t9 * pow504;
-    (==) { assert_norm (pow2 61 < pow2 64);
+    == { assert_norm (pow2 61 < pow2 64);
            Math.Lemmas.small_mod (v c8) (pow2 64)
     }
     v z0 - v c0 * pow2 56 +
@@ -492,7 +492,7 @@ let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
     (v z7 + v c6 - v c7 * pow2 56) * pow392 +
     (v z8 + v c7 - v c8 * pow2 56) * pow448 +
     v c8 * pow504;
-    (==) {
+    == {
       lemma_mult_distr_3 (v z1) (v c0) (v c1) 56;
       lemma_mult_distr_3 (v z2) (v c1) (v c2) 112;
       lemma_mult_distr_3 (v z3) (v c2) (v c3) 168;
@@ -511,44 +511,44 @@ let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
     v z6 * pow336 +
     v z7 * pow392 +
     v z8 * pow448;
-    (==) { calc (==) {
+    == { calc (==) {
              v z1;
-             (==) { }
+             == { }
              v x0 * v y1 + v x1 * v y0;
            };
            calc (==) {
              v z2;
-             (==) { }
+             == { }
              v x0 * v y2 + v x1 * v y1 + v x2 * v y0;
            };
            calc (==) {
              v z3;
-             (==) { }
+             == { }
              v x0 * v y3 + v x1 * v y2 + v x2 * v y1 + v x3 * v y0;
            };
            calc (==) {
              v z4;
-             (==) { }
+             == { }
              v x0 * v y4 + v x1 * v y3 + v x2 * v y2 + v x3 * v y1 + v x4 * v y0;
            };
            calc (==) {
              v z5;
-             (==) { }
+             == { }
              v x1 * v y4 + v x2 * v y3 + v x3 * v y2 + v x4 * v y1;
            };
            calc (==) {
              v z6;
-             (==) { }
+             == { }
              v x2 * v y4 + v x3 * v y3 + v x4 * v y2;
            };
            calc (==) {
              v z7;
-             (==) { }
+             == { }
              v x3 * v y4 + v x4 * v y3;
            };
            calc (==) {
              v z8;
-             (==) { }
+             == { }
              v x4 * v y4;
            }
          }
@@ -561,7 +561,7 @@ let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
     (v x2 * v y4 + v x3 * v y3 + v x4 * v y2) * pow336 +
     (v x3 * v y4 + v x4 * v y3) * pow392 +
     (v x4 * v y4) * pow448;
-    (==) { Lemmas.lemma_mul_qelem5 (v x0) (v x1) (v x2) (v x3) (v x4) (v y0) (v y1) (v y2) (v y3) (v y4) }
+    == { Lemmas.lemma_mul_qelem5 (v x0) (v x1) (v x2) (v x3) (v x4) (v y0) (v y1) (v y2) (v y3) (v y4) }
     (v x0 + v x1 * pow2 56 + v x2 * pow2 112 + v x3 * pow2 168 + v x4 * pow2 224) *
     (v y0 + v y1 * pow2 56 + v y2 * pow2 112 + v y3 * pow2 168 + v y4 * pow2 224);
   };
@@ -608,15 +608,15 @@ let low_mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
 
   calc (==) {
     as_nat5 (t0, t1, t2, t3, t4) <: int;
-    (==) { }
+    == { }
     v t0 + v t1 * pow56 + v t2 * pow112 + v t3 * pow168 + v t4 * pow224;
-    (==) { }
+    == { }
     v xy00 - v c0 * pow2 56 +
     (v xy01 + v xy10 + v c0 - v c1 * pow2 56) * pow56 +
     (v xy02 + v xy11 + v xy20 + v c1 - v c2 * pow56) * pow112 +
     (v xy03 + v xy12 + v xy21 + v xy30 + v c2 - v c3 * pow56) * pow168 +
     v t4 * pow224;
-    (==) { logand_mask (to_u64 (add_inner_carry (add5 xy04 xy13 xy22 xy31 xy40) c3)) mask40 40;
+    == { logand_mask (to_u64 (add_inner_carry (add5 xy04 xy13 xy22 xy31 xy40) c3)) mask40 40;
       Math.Lemmas.pow2_modulo_modulo_lemma_1 (v (add_inner_carry (add5 xy04 xy13 xy22 xy31 xy40) c3)) 40 64
     }
     v x0 * v y0 +

@@ -35,15 +35,15 @@ let mod_inv_prime_lemma n a =
 
   calc (==) {
     Lib.NatMod.pow_mod #n a (n - 2) * a % n;
-    (==) { Lib.NatMod.lemma_pow_mod #n a (n - 2) }
+    == { Lib.NatMod.lemma_pow_mod #n a (n - 2) }
     Lib.NatMod.pow a (n - 2) % n * a % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (Lib.NatMod.pow a (n - 2)) a n }
+    == { Math.Lemmas.lemma_mod_mul_distr_l (Lib.NatMod.pow a (n - 2)) a n }
     Lib.NatMod.pow a (n - 2) * a % n;
-    (==) { Lib.NatMod.lemma_pow1 a; Lib.NatMod.lemma_pow_add a (n - 2) 1 }
+    == { Lib.NatMod.lemma_pow1 a; Lib.NatMod.lemma_pow_add a (n - 2) 1 }
     Lib.NatMod.pow a (n - 1) % n;
-    (==) { pow_eq a (n - 1) }
+    == { pow_eq a (n - 1) }
     Fermat.pow a (n - 1) % n;
-    (==) { Fermat.fermat_alt n a }
+    == { Fermat.fermat_alt n a }
     1;
     }
 

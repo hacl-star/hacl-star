@@ -145,11 +145,11 @@ val lemma_pow_mod_mul: f:S.qelem -> a:nat -> b:nat ->
 let lemma_pow_mod_mul f a b =
   calc (==) {
     S.qmul (M.pow f a % S.order) (M.pow f b % S.order);
-    (==) {
+    == {
       Math.Lemmas.lemma_mod_mul_distr_l (M.pow f a) (M.pow f b % S.order) S.order;
       Math.Lemmas.lemma_mod_mul_distr_r (M.pow f a) (M.pow f b) S.order }
     M.pow f a * M.pow f b % S.order;
-    (==) { M.lemma_pow_add f a b }
+    == { M.lemma_pow_add f a b }
     M.pow f (a + b) % S.order;
   }
 
@@ -159,9 +159,9 @@ val lemma_pow_pow_mod: f:S.qelem -> a:nat -> b:nat ->
 let lemma_pow_pow_mod f a b =
   calc (==) {
     M.pow (M.pow f a % S.order) b % S.order;
-    (==) { M.lemma_pow_mod_base (M.pow f a) b S.order }
+    == { M.lemma_pow_mod_base (M.pow f a) b S.order }
     M.pow (M.pow f a) b % S.order;
-    (==) { M.lemma_pow_mul f a b }
+    == { M.lemma_pow_mul f a b }
     M.pow f (a * b) % S.order;
     }
 
@@ -171,9 +171,9 @@ val lemma_pow_pow_mod_mul: f:S.qelem -> a:nat -> b:nat -> c:nat ->
 let lemma_pow_pow_mod_mul f a b c =
   calc (==) {
     S.qmul (M.pow (M.pow f a % S.order) b % S.order) (M.pow f c % S.order);
-    (==) { lemma_pow_pow_mod f a b }
+    == { lemma_pow_pow_mod f a b }
     S.qmul (M.pow f (a * b) % S.order) (M.pow f c % S.order);
-    (==) { lemma_pow_mod_mul f (a * b) c }
+    == { lemma_pow_mod_mul f (a * b) c }
     M.pow f (a * b + c) % S.order;
   }
 

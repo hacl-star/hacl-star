@@ -59,19 +59,19 @@ val lemma_aff_point_mul_neg_modq (a:int) (p:S.aff_point) :
 let lemma_aff_point_mul_neg_modq a p =
   calc (==) {
     aff_point_mul_neg a p;
-    (==) { Math.Lemmas.euclidean_division_definition a S.q }
+    == { Math.Lemmas.euclidean_division_definition a S.q }
     aff_point_mul_neg (a / S.q * S.q + a % S.q) p;
-    (==) { lemma_aff_point_mul_neg_add (a / S.q * S.q) (a % S.q) p }
+    == { lemma_aff_point_mul_neg_add (a / S.q * S.q) (a % S.q) p }
     S.aff_point_add (aff_point_mul_neg (a / S.q * S.q) p) (aff_point_mul_neg (a % S.q) p);
-    (==) { lemma_aff_point_mul_neg_mul (a / S.q) S.q p }
+    == { lemma_aff_point_mul_neg_mul (a / S.q) S.q p }
     S.aff_point_add
       (aff_point_mul S.q (aff_point_mul_neg (a / S.q) p))
       (aff_point_mul (a % S.q) p);
-    (==) { lemma_order_of_curve_group (aff_point_mul_neg (a / S.q) p) }
+    == { lemma_order_of_curve_group (aff_point_mul_neg (a / S.q) p) }
     S.aff_point_add S.aff_point_at_inf (aff_point_mul (a % S.q) p);
-    (==) { LS.aff_point_add_comm_lemma S.aff_point_at_inf (aff_point_mul (a % S.q) p) }
+    == { LS.aff_point_add_comm_lemma S.aff_point_at_inf (aff_point_mul (a % S.q) p) }
     S.aff_point_add (aff_point_mul (a % S.q) p) S.aff_point_at_inf;
-    (==) { LS.aff_point_at_inf_lemma (aff_point_mul (a % S.q) p) }
+    == { LS.aff_point_at_inf_lemma (aff_point_mul (a % S.q) p) }
     aff_point_mul (a % S.q) p;
   }
 
@@ -87,13 +87,13 @@ let lemma_aff_point_mul_neg a p =
   if a > 0 then begin
     calc (==) {
       aff_point_mul ((- a) % S.q) p_neg;
-      (==) { lemma_aff_point_mul_neg_modq (- a) p_neg }
+      == { lemma_aff_point_mul_neg_modq (- a) p_neg }
       aff_point_mul_neg (- a) p_neg;
-      (==) { }
+      == { }
       S.aff_point_negate (aff_point_mul a p_neg);
-      (==) { LE.lemma_inverse_pow ag p a }
+      == { LE.lemma_inverse_pow ag p a }
       S.aff_point_negate (S.aff_point_negate (aff_point_mul a p));
-      (==) { LE.lemma_inverse_id ag (aff_point_mul a p) }
+      == { LE.lemma_inverse_id ag (aff_point_mul a p) }
       aff_point_mul a p;
     } end
   else begin
@@ -109,9 +109,9 @@ val aff_point_mul_mul_lemma: a:nat -> b:nat -> p:S.aff_point ->
 let aff_point_mul_mul_lemma a b p =
   calc (==) {
     aff_point_mul a (aff_point_mul b p);
-    (==) { LE.lemma_pow_mul S.mk_k256_comm_monoid p b a }
+    == { LE.lemma_pow_mul S.mk_k256_comm_monoid p b a }
     aff_point_mul (a * b) p;
-    (==) { LE.lemma_pow_mul S.mk_k256_comm_monoid p a b }
+    == { LE.lemma_pow_mul S.mk_k256_comm_monoid p a b }
     aff_point_mul b (aff_point_mul a p);
   }
 
@@ -134,10 +134,10 @@ let aff_point_mul_mul_neg_lemma a b p =
 
   calc (==) {
     aff_point_mul a (S.aff_point_negate (aff_point_mul b p));
-    (==) { aff_point_mul_neg_lemma b p }
+    == { aff_point_mul_neg_lemma b p }
     aff_point_mul a (aff_point_mul b p_neg);
-    (==) { aff_point_mul_mul_lemma a b p_neg }
+    == { aff_point_mul_mul_lemma a b p_neg }
     aff_point_mul b (aff_point_mul a p_neg);
-    (==) { aff_point_mul_neg_lemma a p }
+    == { aff_point_mul_neg_lemma a p }
     aff_point_mul b (S.aff_point_negate (aff_point_mul a p));
   }

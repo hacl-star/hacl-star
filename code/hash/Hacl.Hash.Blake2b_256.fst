@@ -42,13 +42,13 @@ let hash output input input_len = Hacl.Streaming.Blake2b_256.hash_with_key outpu
 let copy_internal_state src dst =
   calc (==) {
     B.length src;
-  (==) {}
+  == {}
     impl_state_length (| Spec.Agile.Hash.Blake2B, Hacl.Impl.Blake2.Core.M256 |);
-  (==) {}
+  == {}
     UInt32.v (4ul *. row_len Spec.Blake2.Definitions.Blake2B Hacl.Impl.Blake2.Core.M256);
-  (==) {}
+  == {}
     UInt32.v (4ul *. 1ul);
-  (==) { Lib.IntTypes.mul_mod_lemma 4ul 1ul; assert_norm (4 < pow2 32) }
+  == { Lib.IntTypes.mul_mod_lemma 4ul 1ul; assert_norm (4 < pow2 32) }
     UInt32.v 4ul;
   };
   B.blit src 0ul dst 0ul 4ul
