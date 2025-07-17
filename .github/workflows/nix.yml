@@ -15,10 +15,8 @@ concurrency:
 
 jobs:
   nix:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: checkout
         uses: actions/checkout@v4
       - name: build hacl
