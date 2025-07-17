@@ -59,7 +59,7 @@ let equiv_states_sanity_check (s1 s2 s3 : machine_state) =
       )
   )
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let sanity_check_unchanged_except1 s =
   assert (unchanged_except [] s s);
   assert (unchanged_except [ALocCf] s s);

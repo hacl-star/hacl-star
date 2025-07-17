@@ -267,7 +267,7 @@ let lemma_shift_pow2_eight (z0 z1 z2 z3 z4 z5 z6:nat) :
   Lemma (pow2_eight 0 z0 z1 z2 z3 z4 z5 z6 == pow2_64 * pow2_seven z0 z1 z2 z3 z4 z5 z6)
   = ()
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FStar.Pervasives Prims Vale.Def.Words_s Vale.Curve25519.Fast_defs'"
+#reset-options "--z3rlimit 100 --fuel 0 --ifuel 0 --using_facts_from 'FStar.Pervasives Prims Vale.Def.Words_s Vale.Curve25519.Fast_defs'"
 val lemma_sqr (a:int) (a0 a1 a2 a3
                r8 r9 r10 r11 r12 r13 rax rcx
                r8' r9' r10' r11' r12' r13' r14'

@@ -1,5 +1,5 @@
 [
-  "9802ad7df19d27f5784d7d339d9816e0",
+  "58b661d55d9b70d5c0b47054346e755c",
   [
     [
       "Spec.SHA3.Constants.rotc_list",
@@ -11,6 +11,9 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.PUB@tok",
@@ -24,7 +27,7 @@
         "equation_Lib.IntTypes.rotval", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Prims.nat",
         "equation_Spec.SHA3.Constants.rotc_t", "int_typing",
-        "lemma_FStar.Int.pow2_values", "lemma_FStar.UInt32.vu_inv",
+        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -36,7 +39,7 @@
         "typing_FStar.UInt32.uint_to_t"
       ],
       0,
-      "e8b1150e68ce025354bc2b0239e59003"
+      "4eb7aa3f93d2a1e0e32011c12c51a8c5"
     ],
     [
       "Spec.SHA3.Constants.keccak_rotc",
@@ -46,12 +49,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "eb3a58f87477ea086761183144348eea"
+      "11266106c9c014f39cc32eb1ae5adf00"
     ],
     [
       "Spec.SHA3.Constants.piln_list",
@@ -63,6 +66,8 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.UInt.fits",
@@ -71,7 +76,7 @@
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
@@ -81,7 +86,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "ddd4b89c57fd0d4899100588224b2dbd"
+      "acfb058e85a65396b49f879dcd2695f4"
     ],
     [
       "Spec.SHA3.Constants.keccak_piln",
@@ -91,12 +96,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "0254083b5b63de0afdb7d77fc319f8d1"
+      "042ebcd6762e39c281fca64e716e8b70"
     ],
     [
       "Spec.SHA3.Constants.keccak_rndc",
@@ -106,12 +111,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "211cbcea66274455e0ec08a69b289ddd"
+      "650392433e021b532b061e584acb09be"
     ]
   ]
 ]

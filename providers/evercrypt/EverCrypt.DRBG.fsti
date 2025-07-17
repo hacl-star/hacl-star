@@ -9,7 +9,7 @@ module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module S = Spec.HMAC_DRBG
 
-#set-options "--max_ifuel 0 --max_fuel 0"
+#set-options "--ifuel 0 --fuel 0"
 
 /// HMAC-DRBG
 ///

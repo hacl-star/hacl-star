@@ -77,12 +77,15 @@ VALE_HOME := $(call sanitize_path,$(VALE_HOME))
 
 include $(HACL_HOME)/Makefile.include
 
-# $(FSTAR_ULIB_CHECKED) necessary for vale-depend
 INCLUDES = \
   $(ALL_HACL_DIRS) \
-  $(FSTAR_ULIB_CHECKED) \
   $(KRML_HOME)/krmllib/obj \
   $(KRML_HOME)/krmllib
+
+# $(FSTAR_ULIB_CHECKED) necessary for vale-depend
+VALE_INCLUDES = \
+  $(INCLUDES) \
+  $(FSTAR_ULIB_CHECKED)
 
 # 0. Vale
 
@@ -126,10 +129,11 @@ endif
 # Please keep this in sync with Hacl.fst.config.json
 # so the vscode extension works seamlessly.
 FSTAR_NO_FLAGS = $(FSTAR_EXE) $(FSTAR_HINTS) \
-  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
+  --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES) --cmi \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
   --warn_error '@240+241@247-272-274@319@328@331@332@337' \
-  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false
+  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false \
+  --z3version 4.13.3
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 

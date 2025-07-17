@@ -7,14 +7,16 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "primitive_Prims.op_LessThanOrEqual",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_fd8cf28772b650d5028e4d73b8cb4e6b"
+        "refinement_interpretation_Tm_refine_3e04674625ba1e90ddf6da6977508e33",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Seq.Base.length"
       ],
       0,
-      "7a38c35c868a8af5c9dfa50de6b02b74"
+      "cd67ef753a7b93dd5eacb28a0565708c"
     ],
     [
       "Vale.Lib.Seqs_s.reverse_seq",
@@ -24,11 +26,11 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_160fe7faad9a466b3cae8455bac5be60",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55"
       ],
       0,
-      "62657b7c29534c7f906c7d3ec9f21d96"
+      "527817c5398a1c48d89f4882e8daeda2"
     ]
   ]
 ]

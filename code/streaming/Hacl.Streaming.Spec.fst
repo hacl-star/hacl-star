@@ -28,7 +28,7 @@ module Hacl.Streaming.Spec
 /// distinguishes three sub-situations to make the proof tractable and we need
 /// helper lemmas for all three situations.
 
-#set-options "--max_fuel 0 --max_ifuel 0 \
+#set-options "--fuel 0 --ifuel 0 \
   --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2' --z3rlimit 50"
 
 module S = FStar.Seq

@@ -9,7 +9,7 @@ module Lemmas = Hacl.Spec.BignumQ.Lemmas
 include Hacl.Spec.BignumQ.Definitions
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let mask56 : x:uint64{v x == pow2 56 - 1} =
@@ -355,6 +355,7 @@ let lemma_mult_distr_3 (a b c:nat) (n:nat) : Lemma
 
 #set-options "--z3rlimit 300"
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
   let xy00 = mul64_wide_5 x0 y0 in
   let xy01 = mul64_wide_5 x0 y1 in
@@ -566,6 +567,7 @@ let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
   };
 
   (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9)
+#pop-options
 
 inline_for_extraction noextract
 val low_mul_5:
@@ -579,6 +581,7 @@ val low_mul_5:
     qelem_fits5 r (1, 1, 1, 1, 1) /\
     as_nat5 r == (as_nat5 x * as_nat5 y) % pow2 264)
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 let low_mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
   let xy00 = mul64_wide_5 x0 y0 in
   let xy01 = mul64_wide_5 x0 y1 in
@@ -626,7 +629,7 @@ let low_mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
   Lemmas.lemma_mul_5_low_264 (v x0) (v x1) (v x2) (v x3) (v x4) (v y0) (v y1) (v y2) (v y3) (v y4);
 
   (t0, t1, t2, t3, t4)
-
+#pop-options
 
 inline_for_extraction noextract
 val div_2_24_step: x:uint64 -> y:uint64 ->
@@ -747,7 +750,7 @@ let subm_last_step x y =
   let t = ((b <<. 40ul) +! x) -! y in
   b, t
 
-#push-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 400 --fuel 0 --ifuel 0"
 inline_for_extraction noextract
 val sub_mod_264: x:qelem5 -> y:qelem5 ->
   Pure qelem5

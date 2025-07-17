@@ -16,7 +16,7 @@ module HS = FStar.HyperStack
 module Seq = Lib.Sequence
 module Loop = Lib.LoopCombinators
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
+#set-options "--z3rlimit 20 --fuel 0 --max_ifuel 1"
 
 type buftype =
   | MUT
@@ -131,7 +131,7 @@ let get (#t : buftype) (#a : Type0) (h : mem) (b : buffer_t t a) (i : nat{i < le
   | MUT -> B.get h (b <: buffer a) i
   | CONST -> B.get h (CB.as_mbuf (b <: cbuffer a)) i
 
-#set-options "--max_ifuel 0"
+#set-options "--ifuel 0"
 
 let union (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
 let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
@@ -421,7 +421,7 @@ val createL_mglobal: #a:Type0 -> init:list a ->
       alloc_post_mem_common (b <: buffer a) h0 h1 (FStar.Seq.seq_of_list init) /\
       length b == normalize_term (FStar.List.Tot.length init))
 
-#set-options "--max_fuel 0"
+#set-options "--fuel 0"
 
 (** Recall the liveness and contents of a global immutable buffer *)
 inline_for_extraction

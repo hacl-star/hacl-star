@@ -50,14 +50,12 @@ $(OUTPUT_DIR)/Vale.%.checked: FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 %.krml:
 	$(FSTAR) --codegen krml \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	    $(notdir $(subst .checked,,$<))
+	    $<
 
 CODEGEN=OCaml
 
 %.ml:
-	$(FSTAR) --codegen $(CODEGEN) \
-	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	    $(notdir $(subst .checked,,$<))
+	$(FSTAR) --codegen $(CODEGEN) $<
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -o $@

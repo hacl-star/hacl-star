@@ -21,7 +21,7 @@ open Vale.Lib.BufferViewHelpers
 let wrap_slice (#a:Type0) (s:Seq.seq a) (i:int) : Seq.seq a =
   Seq.slice s 0 (if 0 <= i && i <= Seq.length s then i else 0)
 
-#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --split_queries no"
+#reset-options "--z3rlimit 500 --fuel 0 --ifuel 0 --split_queries no"
 
 let math_aux (n:nat) : Lemma (n * 1 == n) = ()
 

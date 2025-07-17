@@ -1,5 +1,5 @@
 [
-  "fac7f4ea4a19bfacae9a915728d33c44",
+  "cb64ff0068fcd9f2690e03a9b56bbd26",
   [
     [
       "Vale.Def.Sel.logsel_vec",
@@ -17,7 +17,7 @@
         "equation_FStar.BitVector.bv_t", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing",
+        "function_token_typing_Prims.bool", "int_inversion", "int_typing",
         "lemma_FStar.Seq.Base.lemma_create_len",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Base.lemma_len_slice",
@@ -26,16 +26,15 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_150c87740acaa31f788a9e84dd5820c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5a92b6e4e7af9363bc35e43d9d7f3f13",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "typing_FStar.Seq.Base.length", "typing_Prims.bool",
-        "well-founded-ordering-on-nat"
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_e2d5d62a90ceed8a6faf9d20615f4e1e",
+        "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "3ef9e98e4d870a73cd70b26d5da5d8ce"
+      "231ade82dcd1bb6917801bc40ac30615"
     ],
     [
       "Vale.Def.Sel.logsel_vec",
@@ -43,12 +42,34 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
+        "binder_x_258eefc28ab673d68ad6ce5649eeb6c6_1",
+        "binder_x_258eefc28ab673d68ad6ce5649eeb6c6_2",
+        "binder_x_258eefc28ab673d68ad6ce5649eeb6c6_3",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
+        "equation_FStar.BitVector.bv_t", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.bool", "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_e2d5d62a90ceed8a6faf9d20615f4e1e",
+        "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "36e520d4fc58d03144a4c6d2b8fbd479"
+      "4d7e1a4fda559aa82f2c1d1b296b5e63"
     ],
     [
       "Vale.Def.Sel.logsel_vec_definition",
@@ -71,7 +92,7 @@
         "equation_Vale.Def.Sel.sel",
         "equation_with_fuel_Vale.Def.Sel.logsel_vec.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing",
+        "function_token_typing_Prims.bool", "int_inversion", "int_typing",
         "lemma_FStar.Seq.Base.lemma_create_len",
         "lemma_FStar.Seq.Base.lemma_index_app1",
         "lemma_FStar.Seq.Base.lemma_index_app2",
@@ -84,26 +105,26 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_150c87740acaa31f788a9e84dd5820c2",
-        "refinement_interpretation_Tm_refine_160fe7faad9a466b3cae8455bac5be60",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
-        "refinement_interpretation_Tm_refine_444061fd0bd0053c4f27fa233082c9ca",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5a92b6e4e7af9363bc35e43d9d7f3f13",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "refinement_interpretation_Tm_refine_b9ca4cf05147d86d6eff56ccafdd09d0",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "refinement_interpretation_Tm_refine_e7e187a3dd7809a8774c5c8d469196cd",
+        "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
+        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
+        "refinement_interpretation_Tm_refine_e2d5d62a90ceed8a6faf9d20615f4e1e",
+        "refinement_interpretation_Tm_refine_e639bc716ce103acac3584307c0d076c",
         "refinement_interpretation_Tm_refine_f61c88f7b091b2f36e8249b0c1c7337c",
         "token_correspondence_Vale.Def.Sel.logsel_vec.fuel_instrumented",
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.index",
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
-        "typing_Prims.bool", "typing_Vale.Def.Sel.logsel_vec",
-        "typing_Vale.Def.Sel.sel", "well-founded-ordering-on-nat"
+        "typing_Vale.Def.Sel.logsel_vec", "typing_Vale.Def.Sel.sel",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "72955f296726d9ecc3881e16d9be6e80"
+      "516cc8c658840e6b10912f7bd69e8368"
     ],
     [
       "Vale.Def.Sel.logsel_vec_definition",
@@ -111,20 +132,54 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Vale.Def.Sel.logsel_vec.fuel_instrumented",
-        "@query", "equation_FStar.BitVector.bv_t", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion",
+        "@fuel_irrelevance_Vale.Def.Sel.logsel_vec.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
+        "binder_x_258eefc28ab673d68ad6ce5649eeb6c6_1",
+        "binder_x_258eefc28ab673d68ad6ce5649eeb6c6_2",
+        "binder_x_258eefc28ab673d68ad6ce5649eeb6c6_3",
+        "binder_x_a6ca6afaf28feca12f50f23fc064a6db_4",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0", "bool_typing",
+        "equation_FStar.BitVector.bv_t", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Vale.Def.Sel.sel",
+        "equation_with_fuel_Vale.Def.Sel.logsel_vec.fuel_instrumented",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.bool", "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_index_app1",
+        "lemma_FStar.Seq.Base.lemma_index_app2",
+        "lemma_FStar.Seq.Base.lemma_index_create",
+        "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_150c87740acaa31f788a9e84dd5820c2",
+        "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_936e8a213b2d625c3629fb021b7d4f07",
+        "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "refinement_interpretation_Tm_refine_c840a8b67f39746a6b7dda2870c0aaaa",
-        "typing_Vale.Def.Sel.logsel_vec"
+        "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
+        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
+        "refinement_interpretation_Tm_refine_e2d5d62a90ceed8a6faf9d20615f4e1e",
+        "refinement_interpretation_Tm_refine_f61c88f7b091b2f36e8249b0c1c7337c",
+        "token_correspondence_Vale.Def.Sel.logsel_vec.fuel_instrumented",
+        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.index",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
+        "typing_Vale.Def.Sel.logsel_vec", "typing_Vale.Def.Sel.sel",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "4e795da50dbbeaca12575e67c1c59c03"
+      "e9dff33dde903118ea90cc36f48c16ff"
     ],
     [
       "Vale.Def.Sel.logsel",
@@ -137,7 +192,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "f7e080f4a124d09fb465cec0fdf35471"
+      "60efe4c62b85ec6a8ac532179dd7b3a2"
     ],
     [
       "Vale.Def.Sel.logsel",
@@ -150,7 +205,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "4d9334a9d328ad3c695c1db2d94786e1"
+      "e136a05aaa6086e3093dafdf58b57e5b"
     ],
     [
       "Vale.Def.Sel.isel32",
@@ -174,7 +229,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "4da5bc74a438f65617f815454ab71ba5"
+      "9b594182f00b4d436bc3566916c5edb3"
     ]
   ]
 ]

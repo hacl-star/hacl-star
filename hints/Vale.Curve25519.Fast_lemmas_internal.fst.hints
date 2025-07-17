@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "2059de144fb49c4a79cb65336b59f141"
+      "bb6e20d104e642974d55cac560a47a25"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_pow2_bound",
@@ -20,7 +20,7 @@
         "refinement_interpretation_Tm_refine_6161103b5d8ff67ff3c6e4753e084441"
       ],
       0,
-      "a20ed7c37a89d7a69a39f6635c26c762"
+      "aa958192cabc451bad64f30ce2c60551"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_pow2_bound",
@@ -43,16 +43,30 @@
         "typing_Prims.pow2"
       ],
       0,
-      "3f2e2fdc417e2b4948b7069e9132da91"
+      "77fc86bd0bcf6616a66fa2b865e83188"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_pow2_bound",
       3,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_6161103b5d8ff67ff3c6e4753e084441",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Prims.pow2"
+      ],
       0,
-      "76b30895ddc2e076d4fd97b73364c487"
+      "af4a747454e17efe5c2cd4d8c0580b7c"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_bound64",
@@ -61,7 +75,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "ae49d42c142e84a6a31a512aa148c622"
+      "243fb45545f564d844fd6f373e08072f"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_intel_prod_sum_bound",
@@ -74,7 +88,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "7172096babae7c7363b1e675e33cf01f"
+      "b292359ca65c71c81e187f8e1f053cbd"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_double_bound",
@@ -90,7 +104,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "f451bd4326c7f0c756e1baa9b2b1bede"
+      "f14ff62993189e94270fd674774563f3"
     ]
   ]
 ]

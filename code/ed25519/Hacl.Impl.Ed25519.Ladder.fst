@@ -27,6 +27,7 @@ include Hacl.Impl.Ed25519.Group
 include Hacl.Ed25519.PrecompTable
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+#set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 
 inline_for_extraction noextract
 let table_inv_w4 : BE.table_inv_t U64 20ul 16ul =
@@ -234,6 +235,7 @@ let lemma_exp_four_fw_local b =
   assert (S.to_aff_point (S.point_mul_g b) == LE.pow cm g_aff bn)
 
 
+#push-options "--z3rlimit 100"
 [@CInline]
 let point_mul_g out scalar =
   push_frame ();
@@ -245,7 +247,7 @@ let point_mul_g out scalar =
   point_mul_g_mk_q1234 out bscalar q1;
   lemma_exp_four_fw_local (as_seq h0 scalar);
   pop_frame ()
-
+#pop-options
 
 inline_for_extraction noextract
 val point_mul_g_double_vartime_noalloc:

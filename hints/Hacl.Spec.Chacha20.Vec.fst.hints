@@ -1,5 +1,5 @@
 [
-  "a2e8be07c6473ab120c7bfabe1ec2471",
+  "f0f6b4a902b227d60647688dc2f2b396",
   [
     [
       "Hacl.Spec.Chacha20.Vec.key",
@@ -9,13 +9,24 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Hacl.Spec.Chacha20.Vec.size_key", "equation_Prims.nat",
-        "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Hacl.Spec.Chacha20.Vec.size_key",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "473ef85d323d2a54e3b1c654872b7a8f"
+      "7999410660520e29b3275c4ca7cef8cc"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.block1",
@@ -25,13 +36,24 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Hacl.Spec.Chacha20.Vec.size_block", "equation_Prims.nat",
-        "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Hacl.Spec.Chacha20.Vec.size_block",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "6dfa7faf9ca5a4d3d7503aa3156ab4dc"
+      "70b0d7336d775757fc0bcbc0af7d84da"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.nonce",
@@ -41,13 +63,24 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Hacl.Spec.Chacha20.Vec.size_nonce", "equation_Prims.nat",
-        "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Hacl.Spec.Chacha20.Vec.size_nonce",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "546c83007d1fc12f348ffbdc017ddd6a"
+      "4aaf8e18d1aa723884ebebf72de88e43"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.uint32xN",
@@ -55,12 +88,22 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
-        "projection_inverse_BoxBool_proj_0"
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "1ae0d63c2f0b9d408433922fa28be83b"
+      "9769f7d8af418532aeb6b053034ec2a8"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.state",
@@ -70,12 +113,22 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "a77aec3a5660a1ead4175629f4ce81d3"
+      "d850545540c14c169ed048943726f593"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.blocks",
@@ -85,17 +138,27 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.width", "equation_Prims.nat",
-        "int_inversion", "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_inversion", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "d19f719c219a0be53623f29e2a782093"
+      "734b5d87d402e4f117746ee798776b84"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose_state",
@@ -106,20 +169,29 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.width", "equation_Prims.nat",
-        "int_inversion", "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_inversion", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "bd836cc12b9d81565ab89b32d45599a0"
+      "a111137db6884dfac31413727dd196e0"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.line",
@@ -130,7 +202,10 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.idx",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
         "equation_Hacl.Spec.Chacha20.Vec.state",
@@ -139,23 +214,28 @@
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.width",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
-        "int_typing", "lemma_FStar.Int.pow2_values",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_79c30e418298fa5c904762cbd4b74813",
+        "refinement_interpretation_Tm_refine_6e73970f35dc6d550b2ed60987fd331b",
         "refinement_interpretation_Tm_refine_7c4161c9505fe096ba66623182cf5f6d",
-        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "typing_Prims.int"
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "82463679ad2ffe1b6c1b0af3c83944ec"
+      "2c7a1f1efcfc9db082eb495d641cbc61"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.quarter_round",
@@ -166,21 +246,34 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Prims.nat", "int_typing",
-        "lemma_FStar.Int.pow2_values", "lemma_Lib.IntTypes.v_mk_int",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.v", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.Chacha20.size_nonce", "equation_Spec.GaloisField.gf",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_55adfa9be630cfb71b973b0871f4f9b2",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.v",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.mk_int",
+        "typing_Lib.IntTypes.v", "typing_Spec.AES.gf8",
+        "typing_Spec.Chacha20.size_nonce",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5fb7520015a104c4a592ba2245fe7d61"
+      "bebc397f39fc95805a1fba7ff8611e7a"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.column_round",
@@ -190,16 +283,26 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
-        "equation_Lib.IntVector.width", "equation_Prims.nat", "int_typing",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntVector.width", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "f2bb6c10da2c1c44bc325b26b360a345"
+      "5908c4754ee27b11b000d8ea63864b3f"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.diagonal_round",
@@ -209,16 +312,26 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
-        "equation_Lib.IntVector.width", "equation_Prims.nat", "int_typing",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntVector.width", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "71e983c4b24fe08b6d31927aab46a7c9"
+      "8f3a5a2e433b88da63f2196cfce34fdb"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.sum_state",
@@ -229,15 +342,24 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "484e40369e5dd7d7126b4157108c4931"
+      "d75e277d4fa2608f9f259ca452d71762"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.add_counter",
@@ -247,29 +369,39 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Lib.IntTypes.S128", "disc_equation_Lib.IntTypes.U1",
         "disc_equation_Lib.IntTypes.U128",
+        "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.counter",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.width",
-        "equation_Prims.nat", "int_inversion", "int_typing",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_27680283e93f30a8d9ac7d3b22ec31bf",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_72cb67ed20d90b190edbe06e07c70970",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "9e1f92d0c5c87adca9dbf10e6c0ef294"
+      "e08eafc75634b11cdcf8b2c6a6ce4c1f"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.chacha20_constants",
@@ -279,12 +411,22 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "922b1ffe85dee26224779fe92b16727f"
+      "0b3df19cc9182695dad58bf4cb1bc303"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.setup1",
@@ -295,23 +437,36 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.key",
         "equation_Hacl.Spec.Chacha20.Vec.size_key",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_Spec.AES.elem",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.Chacha20.size_key", "equation_Spec.GaloisField.felem",
+        "equation_Spec.GaloisField.gf",
+        "function_token_typing_Spec.AES.elem",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_48486e77aa5457d9a27027fef170c244",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.v",
+        "typing_Spec.AES.gf8", "typing_Spec.AES.irred",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "645f77710d50c0fccda4bc0591f5dc37"
+      "9a78bc2aada3005d8e22a6d354e3d788"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.vec_load_i",
@@ -320,7 +475,7 @@
       0,
       [ "@query" ],
       0,
-      "7ccef804fdb4a07b6ccecf957cd5e3d4"
+      "d897b773b861394e68c9f3b30f59f270"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.chacha20_init",
@@ -331,28 +486,35 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.SEC@tok",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.key",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
         "equation_Hacl.Spec.Chacha20.Vec.size_key",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntVector.width", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.width",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Spec.AES.elem", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.Chacha20.size_key",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "function_token_typing_Spec.AES.elem",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
-        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "refinement_interpretation_Tm_refine_8f5bacb69a016785e5356e99e7760edf",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_FStar.Seq.Base.length", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "060ee2532610bfc110d7c2f2722abaa2"
+      "62ed4a9a0e5b36f28c549ec0b6345b16"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose1",
@@ -362,12 +524,22 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "6ca80d3a56ec8cce8cae76b6eecf1cd4"
+      "03bd2b94b55080251dda2877f1164fec"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose1",
@@ -377,12 +549,22 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "fe9ec7cc1011590a4df527a1a3b88fa8"
+      "d70197031e003906a19ab600d31d7698"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose4",
@@ -393,16 +575,24 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Hacl.Spec.Chacha20.Vec.size_key", "equation_Prims.nat",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Hacl.Spec.Chacha20.Vec.size_key"
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "721fe402a5e43239fd2a84b29f45bea9"
+      "db91b39904ec247d37aabb261a6f73e2"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose4",
@@ -412,12 +602,25 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "4be32841b7165d12f299bc7bd6cd2b41"
+      "b0d1b8eb03fac383f4f1de5b1f236bfd"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose8",
@@ -428,16 +631,24 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Hacl.Spec.Chacha20.Vec.size_key", "equation_Prims.nat",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Hacl.Spec.Chacha20.Vec.size_key"
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "d6d3aaa66d362654163de5b891607eb0"
+      "0302d01d42f4541d627f8212122cdf6d"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose8",
@@ -447,12 +658,25 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "ccfe245b25b41305722c6cc720f217c3"
+      "327342d8fbd2633391c9804af1a119ab"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose",
@@ -466,10 +690,10 @@
         "equation_Hacl.Spec.Chacha20.Vec.uint32xN",
         "equation_Lib.Sequence.lseq",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
-        "refinement_interpretation_Tm_refine_55f848066cd5ee4e0810122d2ff9c6c2"
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "4de751f67805fc2a9b2a43119b6934d7"
+      "7eaef8794c1e9625962c8b13ac689d73"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.xor_block_f",
@@ -480,26 +704,31 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.SEC@tok",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
-        "equation_Hacl.Spec.Chacha20.Vec.size_key",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntVector.width",
-        "equation_Lib.Sequence.lseq", "equation_Prims.nat", "int_inversion",
-        "int_typing", "lemma_FStar.Int.pow2_values",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntVector.width", "equation_Lib.Sequence.lseq",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_55f848066cd5ee4e0810122d2ff9c6c2",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_f4ec0a04344e7130939ebe4f31f6bd8f",
-        "typing_Hacl.Spec.Chacha20.Vec.size_key"
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "fc250333b7b2a8c725713cab44f1a1e7"
+      "cd913d007ea06138babd487c3e646902"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.xor_block_f",
@@ -509,19 +738,32 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
-        "equation_Hacl.Spec.Chacha20.Vec.size_key",
-        "equation_Lib.IntVector.width", "equation_Prims.nat",
-        "int_inversion", "lemma_FStar.Int.pow2_values",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntVector.width", "equation_Lib.Sequence.lseq",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Hacl.Spec.Chacha20.Vec.size_key"
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "refinement_interpretation_Tm_refine_f4ec0a04344e7130939ebe4f31f6bd8f",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "22c456fc4b90a074419a6d10b052e8ec"
+      "a3060fe842d87f2b3327e403c297be9b"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.xor_block",
@@ -531,24 +773,30 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equality_tok_Lib.IntTypes.SEC@tok",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.blocks",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
-        "equation_Hacl.Spec.Chacha20.Vec.size_key",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntVector.width",
-        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "int_inversion", "lemma_FStar.Int.pow2_values",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntVector.width", "equation_Lib.Sequence.length",
+        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
-        "typing_Hacl.Spec.Chacha20.Vec.size_key"
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "8121394777998dff2d404e67f6fdd139"
+      "b6e87242c890c12bac15e78422c1fea6"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.chacha20_encrypt_block",
@@ -557,7 +805,7 @@
       0,
       [ "@query", "primitive_Prims.op_Multiply" ],
       0,
-      "990c3b62d5d334972e47b0f0eac7007d"
+      "1aa0faed77e40ae8d968f523f331270f"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.chacha20_encrypt_last",
@@ -572,28 +820,28 @@
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
         "equation_Hacl.Spec.Chacha20.Vec.size_block",
-        "equation_Hacl.Spec.Chacha20.Vec.size_key",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.width", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion", "lemma_FStar.Int.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Prims.pos", "int_inversion", "int_typing",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_6b84940c37200b702c331453229ae759",
         "refinement_interpretation_Tm_refine_6c1ead74174df94a46c805979f61b0e0",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_7b976814ae2642aa89113bbdcaf094ca",
         "refinement_interpretation_Tm_refine_987ec92934a1458a26b143023b853451",
-        "typing_Hacl.Spec.Chacha20.Vec.size_key", "typing_Lib.IntTypes.bits",
-        "typing_Prims.pow2", "typing_tok_Lib.IntTypes.U8@tok"
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3f1e09b326b2e61540f7a71ab4848b8c"
+      "1536cb50ff42c0073f1e2fec442d1a89"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.chacha20_update",
@@ -603,33 +851,47 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equality_tok_Lib.IntTypes.SEC@tok",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
         "equation_Hacl.Spec.Chacha20.Vec.size_block",
-        "equation_Hacl.Spec.Chacha20.Vec.size_key",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntVector.width",
-        "equation_Lib.Sequence.length", "equation_Prims.nat",
-        "int_inversion", "lemma_FStar.Int.pow2_values",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntVector.width", "equation_Lib.Sequence.length",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_9343b0c4d6c02093eb9f55c6ef4a33ab",
-        "typing_Hacl.Spec.Chacha20.Vec.size_key"
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "1a8648b44e0fcd8882b1fca3d800ff28"
+      "790209a085223d2dc9427b10feaa21e2"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.chacha20_decrypt_bytes",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+      ],
       0,
-      "c270dc24041a65d2c3f940ff3c156c1a"
+      "f0ef1f33ad63dcfbff212947cd6c7b4c"
     ]
   ]
 ]

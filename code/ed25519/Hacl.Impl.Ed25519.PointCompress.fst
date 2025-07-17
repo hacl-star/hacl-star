@@ -12,7 +12,7 @@ open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
 
 inline_for_extraction noextract

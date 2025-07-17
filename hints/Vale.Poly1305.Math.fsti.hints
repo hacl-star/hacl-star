@@ -14,7 +14,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "8f627dae5ce16f9dbfe582d711c5383d"
+      "4d45e1c6e2f15009266f76d5ac85b7eb"
     ],
     [
       "Vale.Poly1305.Math.lemma_poly_multiply",
@@ -26,7 +26,7 @@
         "refinement_interpretation_Tm_refine_fada436d46f1798fe5e8566b0d8b1399"
       ],
       0,
-      "d2feef4658fe07de41348f2d4a119012"
+      "de0acb6e7defcae3e6d2650012ed7efb"
     ],
     [
       "Vale.Poly1305.Math.lemma_poly_reduce",
@@ -39,7 +39,7 @@
         "refinement_interpretation_Tm_refine_3fdd2da50b1b6bf90fc17d7eb0e4018e"
       ],
       0,
-      "93be7888a12386e5b47be013360a773e"
+      "44baf9dae302def3dacd772c608c8207"
     ],
     [
       "Vale.Poly1305.Math.lemma_bytes_shift_power2",
@@ -48,7 +48,7 @@
       0,
       [ "@query" ],
       0,
-      "f779aa5f5051f899a67ff808d6bda792"
+      "28da1b3795f114def017acdbbcebf93f"
     ],
     [
       "Vale.Poly1305.Math.lemma_bytes_and_mod",
@@ -64,7 +64,7 @@
         "typing_Vale.Def.Types_s.ishl"
       ],
       0,
-      "fc5188b149764b108fe940fff5c266f4"
+      "76c7a03f3cb1bcbf4d046b75a3150ae0"
     ],
     [
       "Vale.Poly1305.Math.lemma_mod_power2_lo",
@@ -72,12 +72,15 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "int_inversion",
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.squash",
+        "int_inversion", "l_and-interp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_7fe01682f069326ca602268a6ffb85ff"
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "6c553c7d414554161097a87233f3fc88"
+      "7c30e95006aeefedb6a9199b3195509c"
     ],
     [
       "Vale.Poly1305.Math.lemma_power2_add64",
@@ -90,7 +93,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3f0133afb13209c52f7a5b6835fe4d71"
+      "62b3fcc45cdcb0f2043c8f04c88abef0"
     ],
     [
       "Vale.Poly1305.Math.lemma_mod_hi",
@@ -105,7 +108,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "ea854450c48cb2da249bdfba533e011b"
+      "e205e32b0ba45bfdd0c2b5d2ebd992bf"
     ],
     [
       "Vale.Poly1305.Math.lemma_poly_demod",
@@ -117,7 +120,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "1ac0b524161d76daa60c853554eee66b"
+      "fc5c3d2a59771f68c8fef9489866f313"
     ]
   ]
 ]

@@ -12,7 +12,7 @@ module SB = Spec.Box
 module SS = Spec.SecretBox
 
 
-#set-options "--max_fuel 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--max_fuel 50 --fuel 0 --ifuel 0"
 
 [@@ Comment "Encrypt a message with a key and nonce.
 

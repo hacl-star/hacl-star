@@ -61,6 +61,9 @@ let bytes_seed_a = 16
 let bytes_pkhash (a:frodo_alg) : size_pos =
   crypto_bytes a
 
+// Why are we multiplying by 8 and then dividing by 8? Is this meant to be updated
+// at some later point? If not, simplfying this to params_nbar * params_extracted_bits a
+// would be easier on the SMT.
 let bytes_mu (a:frodo_alg) : size_pos =
   params_extracted_bits a * params_nbar * params_nbar / 8
 

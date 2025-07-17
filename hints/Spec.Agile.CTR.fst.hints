@@ -1,5 +1,5 @@
 [
-  "4bf92a96ae7d8730905497b1818d1664",
+  "f44d350093505bd774cb62921a8b418b",
   [
     [
       "Spec.Agile.CTR.counter_mode",
@@ -7,14 +7,19 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat",
+        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "typing_Prims.int"
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "7ba44457847475abf08d129d96beb130"
+      "81b429136df44cd2c3452d9e9ef9e8dc"
     ],
     [
       "Spec.Agile.CTR.counter_mode",
@@ -22,19 +27,20 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
+        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Lib.Sequence.length", "equation_Prims.eqtype",
-        "equation_Prims.nat",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.felem",
+        "equation_Spec.GaloisField.gf", "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_6ea782d20d3a5b4d53411900c5408b2a",
-        "refinement_interpretation_Tm_refine_9343b0c4d6c02093eb9f55c6ef4a33ab",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "typing_Prims.int"
+        "refinement_interpretation_Tm_refine_9343b0c4d6c02093eb9f55c6ef4a33ab"
       ],
       0,
-      "f1a5c4bd8f1e4a27878b1fda407e95e9"
+      "d3cf158da02ab8cbe39c73e68fae2cc5"
     ]
   ]
 ]

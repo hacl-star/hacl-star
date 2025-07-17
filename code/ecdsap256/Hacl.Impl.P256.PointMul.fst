@@ -159,6 +159,7 @@ let lemma_exp_four_fw_local b =
   assert (S.to_aff_point (S.point_mul_g (BD.bn_v b)) == LE.pow cm g_aff (BD.bn_v b))
 
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 [@CInline]
 let point_mul_g res scalar =
   push_frame ();
@@ -178,6 +179,7 @@ let point_mul_g res scalar =
   LowStar.Ignore.ignore q4;
   lemma_exp_four_fw_local (as_seq h0 scalar);
   pop_frame ()
+#pop-options
 
 //-------------------------
 
@@ -204,6 +206,7 @@ val point_mul_g_double_vartime_noalloc:
     S.to_aff_point (S.point_mul_double_g
       (as_nat h0 scalar1) (as_nat h0 scalar2) (from_mont_point (as_point_nat h0 q2))))
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   [@inline_let] let len = 12ul in
   [@inline_let] let ctx_len = 0ul in
@@ -231,8 +234,9 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   SE.exp_double_fw_lemma S.mk_p256_concrete_ops
     (from_mont_point (as_point_nat h0 q1)) 256 (as_nat h0 scalar1)
     (from_mont_point (as_point_nat h0 q2)) (as_nat h0 scalar2) 5
+#pop-options
 
-
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 [@CInline]
 let point_mul_double_g res scalar1 scalar2 q2 =
   push_frame ();
@@ -251,3 +255,4 @@ let point_mul_double_g res scalar1 scalar2 q2 =
   assert (table_inv_w5 (as_seq h q2) (as_seq h table2));
   point_mul_g_double_vartime_noalloc res scalar1 q1 scalar2 q2 table2;
   pop_frame ()
+#pop-options

@@ -1,5 +1,5 @@
 [
-  "4182d1458ab2cf22e9bdca646498c405",
+  "b0c79a5528b5cd4bc7012878d4fbce11",
   [
     [
       "Vale.PPC64LE.StateLemmas.lemma_to_eval_maddr",
@@ -11,7 +11,7 @@
         "equation_Vale.PPC64LE.State.eval_maddr"
       ],
       0,
-      "1159441789d4733e7e8d03091bacf629"
+      "32cb101ba803ac237f0909be47b45a8c"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_to_eval_cmp_opr",
@@ -23,7 +23,7 @@
         "equation_Vale.PPC64LE.State.eval_cmp_opr"
       ],
       0,
-      "b28c8079dc1d3d5c42f724ac9dba60f9"
+      "28d72cb57d130a5e4c8be634f040976d"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_valid_mem_addr64",
@@ -36,7 +36,7 @@
         "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e"
       ],
       0,
-      "e6464dea003ef1e95f023b17fa54af5d"
+      "6bd0d89ab522865f2d9653ac03c121af"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_valid_mem_addr64",
@@ -45,7 +45,7 @@
       0,
       [ "@query" ],
       0,
-      "34d6c612f6edc9d0b297771d14296662"
+      "5911a59a3539f1a3a3038de58010a455"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_valid_mem_addr128",
@@ -58,7 +58,7 @@
         "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e"
       ],
       0,
-      "a8b0e235464ec230df83339d9e7bbe50"
+      "19f6ed308eff443289be1ebd92312509"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_valid_mem_addr128",
@@ -67,7 +67,7 @@
       0,
       [ "@query" ],
       0,
-      "7943b58c5cdee999fc1e101897489f45"
+      "9e85c2db5ed952deb8c504232925f034"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_load_mem_get64",
@@ -80,7 +80,7 @@
         "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e"
       ],
       0,
-      "7bddd9fedc3aa82595256646d38ac5fb"
+      "95e4c3a046802b4c9ed2db215af375bb"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_load_mem_get64",
@@ -89,7 +89,7 @@
       0,
       [ "@query" ],
       0,
-      "ad897a3de4e4a13015ec2c7266d9e9a8"
+      "fbec611e8e99ceed1f96626c0d204069"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_load_mem_get128",
@@ -102,7 +102,7 @@
         "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e"
       ],
       0,
-      "5dcf6573e5ce479693f614de7db9ab13"
+      "48abe8f9913cfa0f0ca365f52989fc6e"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_load_mem_get128",
@@ -111,16 +111,26 @@
       0,
       [ "@query" ],
       0,
-      "86faa1b5e054a59f41c1123f3fc8f8b0"
+      "9a95b2bcde5d498c86b8c9365f8ee5aa"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_load_buffer_read64",
       1,
       2,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt64",
+        "equality_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.PPC64LE.Memory.base_typ_as_vale_type",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
       0,
-      "b4a92a7ee91d6a7f375c280fade59ac8"
+      "a4cb7716518226b088bfef87dbcdc7ca"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_load_buffer_read64",
@@ -138,7 +148,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "a4f5a879147b231fbaf140a0bb6cde38"
+      "f82ba8090a780908a6b33fb1fbdf403b"
     ],
     [
       "Vale.PPC64LE.StateLemmas.lemma_load_buffer_read128",
@@ -156,7 +166,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "036aa77c117a940eb0757da10d58d3de"
+      "e3c5bc1458527c97c5f525d7ebeb1425"
     ]
   ]
 ]

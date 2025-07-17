@@ -182,7 +182,7 @@ let lemma_gf128_reduce a b g n h =
   // d' *. h +. m' +. m
   ()
 
-#reset-options "--max_ifuel 0"
+#reset-options "--ifuel 0"
 let lemma_gf128_reduce_rev a b h n =
   let m = monomial n in
   let g = m +. h in
@@ -427,7 +427,7 @@ let lemma_reduce_rev_hi x3 x2 h n =
     (y1 +. mask (y0 *. c) n) *. c +. (shift y1 n +. y0 +. swap (y0 *. c) n);
   }
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 let lemma_swap_right (a b:poly) (n:nat) : Lemma
   (requires n == 64 /\ degree a < n + n /\ degree b < n + n)
   (ensures swap (swap a n +. b) n == a +. swap b n)
@@ -435,7 +435,7 @@ let lemma_swap_right (a b:poly) (n:nat) : Lemma
   lemma_bitwise_all ();
   lemma_equal (swap (swap a n +. b) n) (a +. swap b n)
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 let lemma_reduce_rev_bits (a0 a1 a2 c:poly) (n:pos) : Lemma
   (requires
     n == 64 /\ // verification times out unless n is known
@@ -510,7 +510,7 @@ let lemma_reduce_rev_bits (a0 a1 a2 c:poly) (n:pos) : Lemma
     (shift y1 n +. y0 +. swap (y0 *. c) n) +. rev (x0 +. shift x1 n) +. (y1 +. mask (y0 *. c) n) *. c;
   }
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 let lemma_reduce_rev a0 a1 a2 h n =
   (*
     <-----256 bits------>

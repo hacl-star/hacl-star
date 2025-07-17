@@ -4,7 +4,7 @@ open FStar.Integers
 
 module S = FStar.Seq
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 // to be used via a module abbreviation, e.g. AEAD.alg
 type alg =

@@ -8,7 +8,7 @@ open Lib.ByteSequence
 module Poly = Spec.Poly1305
 
 (* RFC7539: https://tools.ietf.org/html/rfc7539#section-2.8 *)
-#set-options "--max_fuel 0 --z3rlimit 30"
+#set-options "--fuel 0 --z3rlimit 30"
 
 /// Constants
 

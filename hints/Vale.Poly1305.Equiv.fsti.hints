@@ -9,11 +9,15 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.Sequence.length", "equation_Lib.Sequence.seq",
-        "equation_Prims.nat", "equation_Spec.Poly1305.size_block",
-        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.length",
+        "equation_Lib.Sequence.seq", "equation_Prims.nat",
+        "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_Lib.IntTypes.pow2_127", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
@@ -21,12 +25,12 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5a92b6e4e7af9363bc35e43d9d7f3f13",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "typing_FStar.Seq.Base.length", "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "851199510401d53d24f17b487a076886"
+      "da83ad9f81910f8d51e3e21206d5a1e7"
     ],
     [
       "Vale.Poly1305.Equiv.lemma_poly1305_equiv",
@@ -36,33 +40,34 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Prims.nat",
         "equation_Spec.Poly1305.key", "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key",
-        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_typing",
-        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_Lib.IntTypes.pow2_127", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5a92b6e4e7af9363bc35e43d9d7f3f13",
-        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_b980dd096af896d3c53bb79f2279e581",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "typing_FStar.Seq.Base.length",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "typing_Lib.ByteSequence.nat_from_bytes_le",
-        "typing_Lib.IntTypes.int_t", "typing_Spec.Poly1305.size_block",
-        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
+        "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "ef259ac7206cf06261f57b632a073a80"
+      "4730a8930b3dcda26087a92237e7ed0c"
     ]
   ]
 ]

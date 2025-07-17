@@ -15,7 +15,7 @@ module S51 = Hacl.Spec.Curve25519.Field51.Definition
 module SC = Spec.Curve25519
 module SE = Spec.Ed25519
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let elemB = lbuffer uint64 5ul
@@ -232,6 +232,7 @@ val recover_x_step_5:
     F51.mul_inv_t h1 x /\
     F51.fevalh h1 x == Some?.v (SE.recover_x (F51.as_nat h0 y) (uint_v #U64 sign <> 0)))
 
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 let recover_x_step_5 x y sign tmp =
   let x3  = sub tmp 5ul 5ul in
   let t0  = sub tmp 10ul 5ul in
@@ -249,7 +250,7 @@ let recover_x_step_5 x y sign tmp =
     (**) assert_norm (SC.prime % SC.prime = SC.zero % SC.prime);
     (**) FStar.Math.Lemmas.mod_add_both SC.prime SC.zero (- (F51.fevalh h0 x3)) SC.prime);
   copy x x3
-
+#pop-options
 
 inline_for_extraction noextract
 val recover_x_:

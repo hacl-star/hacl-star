@@ -7,7 +7,7 @@ open Lib.ByteSequence
 (* We represent GF(2^n) by uint_t along  with some  irreducible polynomial also of type uint_t *)
 (* Consequently this module is specialized for GF(8/16/32/64/128) but can be generalized to other sizes if needed *)
 
-#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 noeq type field =
   | GF: t:inttype{unsigned t /\ t <> U1} -> irred: uint_t t SEC -> field

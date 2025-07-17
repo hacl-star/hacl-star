@@ -18,7 +18,7 @@ friend Spec.Agile.AEAD
 friend Spec.Cipher.Expansion
 friend EverCrypt.CTR.Keys
 
-#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 /// Defining abstract predicates, invariants, footprint, etc.
 /// ---------------------------------------------------------
@@ -100,7 +100,7 @@ let alg_of_state a s =
 let as_kv #a (Ek _ kv _) =
   G.reveal kv
 
-#push-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.QI.EAGER_THRESHOLD=5"
+#push-options "--z3rlimit 10 --fuel 0 --ifuel 0 --z3cliopt smt.QI.EAGER_THRESHOLD=5"
 
 let create_in_chacha20_poly1305: create_in_st CHACHA20_POLY1305 = fun r dst k ->
   let h0 = ST.get () in
@@ -157,7 +157,7 @@ let create_in #a r dst k =
   | CHACHA20_POLY1305 -> create_in_chacha20_poly1305 r dst k
   | _ -> UnsupportedAlgorithm
 
-#push-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.QI.EAGER_THRESHOLD=5"
+#push-options "--z3rlimit 10 --fuel 0 --ifuel 0 --z3cliopt smt.QI.EAGER_THRESHOLD=5"
 
 inline_for_extraction noextract
 let alloca_chacha20_poly1305: alloca_st CHACHA20_POLY1305 =
@@ -207,7 +207,7 @@ let aes_gcm_encrypt (i: vale_impl):
   | Vale_AES128 -> Vale.Wrapper.X64.GCMencryptOpt.gcm128_encrypt_opt_stdcall
   | Vale_AES256 -> Vale.Wrapper.X64.GCMencryptOpt256.gcm256_encrypt_opt_stdcall
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
+#reset-options "--z3rlimit 100 --fuel 0 --ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
 inline_for_extraction noextract
 let encrypt_aes_gcm (i: vale_impl): encrypt_st (alg_of_vale_impl i) =
 fun s iv iv_len ad ad_len plain plain_len cipher tag ->
@@ -436,7 +436,7 @@ let aes_gcm_decrypt (i: vale_impl):
   | Vale_AES128 -> Vale.Wrapper.X64.GCMdecryptOpt.gcm128_decrypt_opt_stdcall
   | Vale_AES256 -> Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_opt_stdcall
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
+#reset-options "--z3rlimit 100 --fuel 0 --ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
 inline_for_extraction noextract
 let decrypt_aes_gcm (i: vale_impl): decrypt_st (alg_of_vale_impl i) =
 fun s iv iv_len ad ad_len cipher cipher_len tag dst ->

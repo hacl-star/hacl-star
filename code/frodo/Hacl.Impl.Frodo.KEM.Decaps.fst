@@ -23,6 +23,7 @@ module FP = Spec.Frodo.Params
 module S = Spec.Frodo.KEM.Decaps
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+#set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 
 inline_for_extraction noextract
 val get_bp_c_matrices:

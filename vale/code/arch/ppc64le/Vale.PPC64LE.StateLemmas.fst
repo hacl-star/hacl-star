@@ -2,7 +2,7 @@ module Vale.PPC64LE.StateLemmas
 open Vale.PPC64LE.Memory_Sems
 open Vale.PPC64LE.Memory
 
-#reset-options "--initial_fuel 2 --max_fuel 2"
+#reset-options "--fuel 2"
 
 let lemma_to_eval_reg s r = ()
 let lemma_to_eval_vec s v = ()

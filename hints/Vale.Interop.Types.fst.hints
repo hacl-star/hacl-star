@@ -8,16 +8,19 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.UInt16.t__uu___haseq",
+        "assumption_FStar.UInt32.t__uu___haseq",
+        "assumption_FStar.UInt64.t__uu___haseq",
+        "assumption_FStar.UInt8.t__uu___haseq",
         "disc_equation_Vale.Arch.HeapTypes_s.TUInt128",
         "disc_equation_Vale.Arch.HeapTypes_s.TUInt16",
         "disc_equation_Vale.Arch.HeapTypes_s.TUInt32",
         "disc_equation_Vale.Arch.HeapTypes_s.TUInt64",
         "disc_equation_Vale.Arch.HeapTypes_s.TUInt8",
-        "fuel_guarded_inversion_Vale.Arch.HeapTypes_s.base_typ",
-        "projection_inverse_BoxBool_proj_0"
+        "fuel_guarded_inversion_Vale.Arch.HeapTypes_s.base_typ"
       ],
       0,
-      "61364880627efb8658ce1d281bd44b4e"
+      "28e9b7afef782c83d07d6246c48076db"
     ],
     [
       "Vale.Interop.Types.view_n_unfold",
@@ -31,11 +34,10 @@
         "disc_equation_Vale.Arch.HeapTypes_s.TUInt32",
         "disc_equation_Vale.Arch.HeapTypes_s.TUInt64",
         "disc_equation_Vale.Arch.HeapTypes_s.TUInt8",
-        "fuel_guarded_inversion_Vale.Arch.HeapTypes_s.base_typ",
-        "projection_inverse_BoxBool_proj_0"
+        "fuel_guarded_inversion_Vale.Arch.HeapTypes_s.base_typ"
       ],
       0,
-      "864f2fabda99889a33935fbdfdfb7e61"
+      "8e0b21e5879367da76345387a2f6d584"
     ],
     [
       "Vale.Interop.Types.down_view",
@@ -60,11 +62,10 @@
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt8@tok",
         "equation_Vale.Interop.Types.base_typ_as_type",
-        "fuel_guarded_inversion_Vale.Arch.HeapTypes_s.base_typ",
-        "projection_inverse_BoxBool_proj_0"
+        "fuel_guarded_inversion_Vale.Arch.HeapTypes_s.base_typ"
       ],
       0,
-      "040af97b527b07c690202282464627e9"
+      "9edce0d4057b91c1d2fb88dc030d4f3a"
     ],
     [
       "Vale.Interop.Types.b8_preorder",
@@ -73,7 +74,7 @@
       0,
       [ "@MaxIFuel_assumption", "@query", "bool_inversion" ],
       0,
-      "0aea54e39a709eab00b4d9365dedbb0f"
+      "30957ae337b8be10f32651fc592f4f29"
     ],
     [
       "Vale.Interop.Types.__proj__Buffer__item__bsrc",
@@ -81,13 +82,13 @@
       1,
       0,
       [
-        "@query", "proj_equation_Vale.Interop.Types.Buffer_@src",
-        "proj_equation_Vale.Interop.Types.Buffer_@writeable",
-        "projection_inverse_Vale.Interop.Types.Buffer_@src",
-        "projection_inverse_Vale.Interop.Types.Buffer_@writeable"
+        "@query", "proj_equation_Vale.Interop.Types.Buffer_src",
+        "proj_equation_Vale.Interop.Types.Buffer_writeable",
+        "projection_inverse_Vale.Interop.Types.Buffer_src",
+        "projection_inverse_Vale.Interop.Types.Buffer_writeable"
       ],
       0,
-      "410fdf023675ac24f5280f19676c2245"
+      "848cf629629231c650899e7ddeab6aff"
     ]
   ]
 ]

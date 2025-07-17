@@ -8,7 +8,7 @@ open FStar.Integers
 /// underlying block-based API. For that, we use classic framing lemma and
 /// invariant preservation techniques used in EverCrypt and elsewhere.
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST

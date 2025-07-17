@@ -24,7 +24,7 @@ module LSeq = Lib.Sequence
 module HD = Hacl.Hash.Definitions
 
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 (** Top-level constant arrays for the SHA2 algorithms. *)
 

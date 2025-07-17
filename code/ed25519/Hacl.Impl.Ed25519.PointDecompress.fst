@@ -14,7 +14,7 @@ module F51 = Hacl.Impl.Ed25519.Field51
 
 module SE = Spec.Ed25519
 
-#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val most_significant_bit:

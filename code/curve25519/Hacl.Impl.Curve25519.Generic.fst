@@ -25,6 +25,7 @@ module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 
 friend Lib.LoopCombinators
 
+#set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 1 --using_facts_from '* -FStar.Seq -Hacl.Spec.*' --record_options"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 

@@ -13,7 +13,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "af4af7c07b3f392f9dde6a58fc444873"
+      "ab6a31928d2ab2dea4516253c23cdc0f"
     ],
     [
       "Hacl.Hash.SHA1.hash_oneshot",
@@ -21,17 +21,25 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Hash.Definitions.SHA1",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Hash.Definitions.SHA1@tok",
+        "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
         "equation_Spec.Hash.Definitions.is_md",
         "equation_Spec.Hash.Definitions.is_shake",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
-        "typing_Spec.Hash.Definitions.is_md",
-        "typing_tok_Spec.Hash.Definitions.SHA1@tok"
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "3c60f0f3cbf10ee839a9e588a5670d39"
+      "153ff6157fe97c6b07f35020a749c008"
     ]
   ]
 ]

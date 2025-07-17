@@ -2,7 +2,7 @@ module Lib.IntTypes
 
 open FStar.Math.Lemmas
 
-#push-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 200"
+#push-options "--fuel 0 --max_ifuel 1 --z3rlimit 200"
 
 let pow2_2 _   = assert_norm (pow2 2 = 4)
 let pow2_3 _   = assert_norm (pow2 3 = 8)
@@ -977,7 +977,7 @@ let mod_mask_lemma #t #l a m =
 
 #pop-options
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 1000"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 1000"
 
 (**
   Conditionally subtracts 2^(bits t') from a in constant-time,

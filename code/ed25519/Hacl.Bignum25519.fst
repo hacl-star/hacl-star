@@ -18,7 +18,7 @@ module SC = Spec.Curve25519
 
 friend Hacl.Curve25519_51
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let mask_51 = u64 0x7ffffffffffff

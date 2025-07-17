@@ -22,7 +22,7 @@ SHA2MB_BUNDLE=-bundle Hacl.Impl.SHA2.Generic=Hacl.Impl.SHA2.*,Hacl.Hash.*[rename
 dist/libsha2mb.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
-dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
+dist/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) $^ -o libsha2mb.a $(BASE_FLAGS) $(SHA2MB_BUNDLE) \
 	  -add-include '"libintvector.h"' \
 	  -tmpdir dist \

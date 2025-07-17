@@ -12,7 +12,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "34e767de9b8d84cd8827481db49a1d17"
+      "f55b94d7d97a46d74c56242031e336c6"
     ],
     [
       "Vale.Math.Poly2.Bits_s.of_uint",
@@ -25,16 +25,20 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "52b7540df19776d84cfcc0d205865792"
+      "2ad88a154504080bdff8fdc8ba4cf189"
     ],
     [
       "Vale.Math.Poly2.Bits_s.of_uint",
       2,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
       0,
-      "1fb3ac84e2e3962ce134b7b5894a1a01"
+      "5eaa3785b7f53eb468f87a3825ccc117"
     ],
     [
       "Vale.Math.Poly2.Bits_s.to_double32_def",
@@ -43,31 +47,29 @@
       0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_FStar.UInt.from_vec.fuel_instrumented",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "b2t_def",
         "bool_typing", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_with_fuel_FStar.UInt.from_vec.fuel_instrumented",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
-        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "function_token_typing_Prims.bool", "int_typing",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5a92b6e4e7af9363bc35e43d9d7f3f13",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.Seq.Base.length", "typing_Prims.bool"
+        "typing_FStar.Seq.Base.length"
       ],
       0,
-      "7dca758ec2c49e15adf027ad5df6b5f8"
+      "3f3177a15e2a02de0a5cd908cda71b68"
     ],
     [
       "Vale.Math.Poly2.Bits_s.of_double32_def",
@@ -91,7 +93,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "a112b3eadbb59323d1c8957206354840"
+      "b7fe3b654c950e2fee9558e96c4ebb2c"
     ],
     [
       "Vale.Math.Poly2.Bits_s.to_quad32_def",
@@ -100,32 +102,29 @@
       0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_FStar.UInt.from_vec.fuel_instrumented",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "b2t_def",
         "bool_typing", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_with_fuel_FStar.UInt.from_vec.fuel_instrumented",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
-        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "function_token_typing_Prims.bool", "int_typing",
         "lemma_FStar.Seq.Base.lemma_len_slice",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5a92b6e4e7af9363bc35e43d9d7f3f13",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.Seq.Base.length", "typing_Prims.bool"
+        "typing_FStar.Seq.Base.length"
       ],
       0,
-      "5fbad6a3f6bc188279d71821502b8c87"
+      "203a9d14e3a9dae9465942ab4b4694fe"
     ],
     [
       "Vale.Math.Poly2.Bits_s.of_quad32_def",
@@ -151,7 +150,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "a876b8d43d4c77293c4edcc7491b3ecb"
+      "4a13af3d9e44f26587a4d722f5e7ce38"
     ],
     [
       "Vale.Math.Poly2.Bits_s.reveal_to_double32",
@@ -160,7 +159,7 @@
       0,
       [ "@query", "equation_Vale.Math.Poly2.Bits_s.to_double32" ],
       0,
-      "0b3366e4bd0cec50570ff9d87120ab3b"
+      "0539156b27ed459481e4b27ade4b37fc"
     ],
     [
       "Vale.Math.Poly2.Bits_s.reveal_of_double32",
@@ -169,7 +168,7 @@
       0,
       [ "@query", "equation_Vale.Math.Poly2.Bits_s.of_double32" ],
       0,
-      "70205a36ff03a250962434917ba69952"
+      "faedf5c277114079e94ff3e88fc00a13"
     ],
     [
       "Vale.Math.Poly2.Bits_s.reveal_to_quad32",
@@ -178,7 +177,7 @@
       0,
       [ "@query", "equation_Vale.Math.Poly2.Bits_s.to_quad32" ],
       0,
-      "2abe1006f84009a1dadd50d7a772680c"
+      "a5b591b143da124341eb623ad9831609"
     ],
     [
       "Vale.Math.Poly2.Bits_s.reveal_of_quad32",
@@ -187,7 +186,7 @@
       0,
       [ "@query", "equation_Vale.Math.Poly2.Bits_s.of_quad32" ],
       0,
-      "8ef0b9c70ff42a2f479f18ddc439a5b2"
+      "c138eee9a889c65eb2cfb84ea5be586a"
     ]
   ]
 ]

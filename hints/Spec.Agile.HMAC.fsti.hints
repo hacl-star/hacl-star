@@ -1,5 +1,5 @@
 [
-  "6b72bb245a77ffeee9dff40fc1b4d8c6",
+  "f53ff221605389c077aa00f9be13c34c",
   [
     [
       "Spec.Agile.HMAC.lbytes",
@@ -10,11 +10,11 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "typing_Prims.int"
       ],
       0,
-      "08d86a8c2e9b632ad2b7318e4d600960"
+      "81fe0faa47ea732a9112d00c38565cf1"
     ],
     [
       "Spec.Agile.HMAC.wrap",
@@ -23,26 +23,34 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
+        "constructor_distinct_Lib.IntTypes.S128",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Tm_unit", "equation_Lib.IntTypes.uint8",
         "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.bytes",
         "equation_Spec.Hash.Definitions.fixed_len_alg",
         "equation_Spec.Hash.Definitions.is_shake",
         "equation_Spec.Hash.Definitions.less_than_max_input_length",
-        "equation_Spec.Hash.Definitions.word_length", "int_inversion",
+        "equation_Spec.Hash.Definitions.word_length",
+        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_042ec925769949f282ab80a26a462500",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cca9c83ae95a933c4c4caeb7b0c0ce71",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "refinement_interpretation_Tm_refine_d58134fb55bef01eae6b023f162e2553",
+        "typing_FStar.Seq.Base.length",
         "typing_Spec.Hash.Definitions.less_than_max_input_length",
-        "typing_Spec.Hash.Definitions.word_length",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "ecf1b8341d78a4cf3776851f84ac751a"
+      "7a39fe2d33aa2a3a98f0b6b2082fec38"
     ],
     [
       "Spec.Agile.HMAC.xor",
@@ -51,7 +59,7 @@
       0,
       [ "@query" ],
       0,
-      "a0cd14ef268fd9786b330a39a4f4b331"
+      "e679f077b771c859ff16d8a0bcb13082"
     ]
   ]
 ]

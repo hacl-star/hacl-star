@@ -94,7 +94,7 @@ let rec lemma_seq_add_rec (#n:nat) (as0 bs:seq (natN n)) (c0:nat1) (i:nat) : Lem
 let lemma_seq_add #n as0 bs c0 =
   lemma_seq_add_rec as0 bs c0 (length as0)
 
-#push-options "--z3rlimit 100 --z3cliopt smt.arith.nl=true --max_ifuel 0"
+#push-options "--z3rlimit 100 --z3cliopt smt.arith.nl=true --ifuel 0"
 #restart-solver
 let rec lemma_seq_scale_rec (#n:nat) (a:natN n) (bs:seq (natN n)) (d:natN n) (i:nat) : Lemma
   (requires i <= length bs)

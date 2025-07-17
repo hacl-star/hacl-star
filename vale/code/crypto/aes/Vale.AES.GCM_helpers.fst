@@ -146,7 +146,7 @@ let insert_0_is_padding (q:quad32) :
 *)
 
 
-#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
+#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
 let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
   reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   let Mkfour q0 q1 q2 q3 = q in
@@ -231,6 +231,8 @@ let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
   assert(8 <= i /\ i < 12 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q2) (i % 4));
   assert(12 <= i /\ i < 16 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q3) (i % 4))
 
+
+#reset-options "--smtencoding.elim_box true --z3rlimit 60 --z3refresh --initial_ifuel 0 --max_ifuel 1 --fuel 1"
 let lemma_pad_to_32_bits_helper (s s'':seq4 nat8) (n:nat) : Lemma
   (requires
     n <= 2 /\

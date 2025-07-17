@@ -2,7 +2,7 @@ module Test.Vectors.Aes128Gcm
 
 module B = LowStar.Buffer
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 let key0: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   [@inline_let] let l = [ 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; ] in

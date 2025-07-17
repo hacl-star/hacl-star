@@ -34,7 +34,7 @@ open Vale.X64.Stack_i
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
 friend Vale.X64.Decls
-#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
+#reset-options "--fuel 5 --max_ifuel 2 --z3rlimit 20"
 #endverbatim
 
 type vale_heap:Type(1) := Vale.X64.Memory.vale_heap;
@@ -262,7 +262,7 @@ procedure Sbb64(inout dst:dst_opr64, in src:opr64)
 
 #verbatim
 #restart-solver
-#push-options "--max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.UInt'"
+#push-options "--fuel 0 --ifuel 0 --using_facts_from 'Prims FStar.UInt'"
 let lemma_fundamental_div_mod (a b:nat64) :
   Lemma (pow2_64 * (FStar.UInt.mul_div #64 a b) + (FStar.UInt.mul_mod #64 a b) == a * b)
   =

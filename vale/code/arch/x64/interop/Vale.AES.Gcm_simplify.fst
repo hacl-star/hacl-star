@@ -44,7 +44,7 @@ val be_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) :
 
 open FStar.Tactics
 
-#push-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
+#push-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
 
 let be_quad32_to_bytes_sel q i =
   reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes;
@@ -185,7 +185,7 @@ let lemma_same_seq_dv (h:HS.mem) (b:B.buffer UInt8.t) : Lemma
     Vale.Interop.Views.put8_reveal ()
   in Classical.forall_intro aux
 
-#reset-options "--z3rlimit 250 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 250 --fuel 0 --ifuel 1"
 
 let aes_simplify_aux (s:seq16 nat8) : Lemma
   (seq_nat8_to_seq_nat32_LE s == quad32_to_seq (le_bytes_to_quad32 s))

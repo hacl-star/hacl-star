@@ -6,9 +6,17 @@
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "equation_Prims.l_and", "equation_Prims.squash",
+        "equation_Prims.subtype_of",
+        "l_quant_interp_5b2993f9f2c0eba3627049a3b4167c7a",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "unit_typing"
+      ],
       0,
-      "8a0e979af4a72c15c4b4dd4bf1daa7b2"
+      "53892463c20b970df8d6e9fc105f237d"
     ],
     [
       "Vale.Poly1305.X64.va_ens_Poly1305",
@@ -16,15 +24,22 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equation_Prims.l_and", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_Prims.subtype_of",
         "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.Poly1305.X64.va_req_Poly1305",
+        "equation_Vale.X64.Decls.va_state_eq",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "l_quant_interp_5b2993f9f2c0eba3627049a3b4167c7a",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "unit_typing"
       ],
       0,
-      "c3d78853e0f641c2173d2d26527473b7"
+      "771559734d75b6bbf40e0b9c49d63166"
     ],
     [
       "Vale.Poly1305.X64.va_lemma_Poly1305",
@@ -32,16 +47,23 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.Def.Words_s.natN",
-        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
+        "equality_tok_Vale.X64.Machine_s.Public@tok", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.Poly1305.Util.readable_words",
+        "equation_Vale.Poly1305.Util.validSrcAddrs64",
+        "equation_Vale.X64.Decls.va_require_total",
+        "equation_Vale.X64.Decls.validDstAddrs64",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state", "int_inversion",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_6688d8d4d0a4ee4e5fc12d9bf7990aa3",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "60bf1563904fe59511be78089a6e9085"
+      "e3839c8bdde9ebd25e23b9d922838341"
     ],
     [
       "Vale.Poly1305.X64.va_wp_Poly1305",
@@ -56,7 +78,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "9d7d7135e78aec7a90f319b05e845450"
+      "fc7652a89210bd7cf9e205cfe7e98064"
     ],
     [
       "Vale.Poly1305.X64.va_quick_Poly1305",
@@ -68,7 +90,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "3ed89d95b081d17d9e2f08a61d51ad34"
+      "f343bc65642e1c31b08679315573e5c9"
     ]
   ]
 ]

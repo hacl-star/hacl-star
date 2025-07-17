@@ -45,7 +45,8 @@ open Vale.Curve25519.Fast_defs
 open Vale.Curve25519.Fast_lemmas_external
 open Vale.Curve25519.FastMul_helpers
 open Vale.X64.CPU_Features_s
-#reset-options "--z3rlimit 60"
+#set-options "--z3rlimit 60"
+#set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 #endverbatim
 
 const int_canon:tactic extern;

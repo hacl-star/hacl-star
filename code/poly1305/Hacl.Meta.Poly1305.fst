@@ -2,7 +2,7 @@ module Hacl.Meta.Poly1305
 
 friend Hacl.Impl.Poly1305
 
-#set-options "--z3rlimit 250 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 250 --fuel 0 --ifuel 0"
 
 
 

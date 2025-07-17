@@ -11,7 +11,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "ebe887a2fc31e1f2959bd5bc39f945b6"
+      "09201a0b7d5712002e217ce9836e7886"
     ],
     [
       "Hacl.Spec.P256.Montgomery.mul_fmont_R_and_R_inv_is_one",
@@ -20,7 +20,7 @@
       0,
       [ "@query" ],
       0,
-      "407471e94e55ac129b782f0f23c225a2"
+      "103ad32cb590e627d3f80b44de2e6b56"
     ],
     [
       "Hacl.Spec.P256.Montgomery.from_mont",
@@ -33,7 +33,7 @@
         "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688"
       ],
       0,
-      "6e6fb0816d9cbb41c41c3ac39b6c319b"
+      "a77fb5f0a9b743245e3ef46f24486ac4"
     ],
     [
       "Hacl.Spec.P256.Montgomery.to_mont",
@@ -46,7 +46,7 @@
         "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688"
       ],
       0,
-      "17fc5e84f64e672304a95b719c22b234"
+      "8ab3f5ca3fe68a9f18531bd641890f5f"
     ],
     [
       "Hacl.Spec.P256.Montgomery.bn_mont_reduction_lemma",
@@ -56,12 +56,15 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "equation_Spec.P256.PointOps.prime",
-        "int_typing", "lemma_FStar.Int.pow2_values",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -69,7 +72,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "62a7cd912858599b2fda70894a724745"
+      "2b313df6879563d785cb1d317f7f7629"
     ],
     [
       "Hacl.Spec.P256.Montgomery.fmont_mul_lemma",
@@ -79,13 +82,13 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
         "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "typing_Prims.int"
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "478cf763cccd0b95e84c746dafb69eba"
+      "5ca595853a8e286815ff872e286b9e4a"
     ],
     [
       "Hacl.Spec.P256.Montgomery.fmont_add_lemma",
@@ -95,13 +98,13 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
         "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "typing_Prims.int"
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "128201c1a8fab875e32f777ad8999c2e"
+      "539d5c0051a04f98620b25bdd1807f00"
     ],
     [
       "Hacl.Spec.P256.Montgomery.fmont_sub_lemma",
@@ -111,13 +114,13 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
         "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "typing_Prims.int"
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e390e335dfe34053e12714543c8f8afa"
+      "b10fdfcfeb5709201e48234106efbc7b"
     ],
     [
       "Hacl.Spec.P256.Montgomery.mul_qmont_R_and_R_inv_is_one",
@@ -126,7 +129,7 @@
       0,
       [ "@query" ],
       0,
-      "bbc36536f460e8980948ab9903c22361"
+      "867580253a1d0e0d819b5e06db10d67c"
     ],
     [
       "Hacl.Spec.P256.Montgomery.from_qmont",
@@ -138,7 +141,7 @@
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "01f0956b47ec4d3a1d1a242a7821444d"
+      "1ef483a2fe1bf3e90ac14464408289fd"
     ],
     [
       "Hacl.Spec.P256.Montgomery.to_qmont",
@@ -150,7 +153,7 @@
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "e66e3f538953b4f9950aa29989d5e129"
+      "f4e47bf96fcfac76646a5ce85b65f3f4"
     ],
     [
       "Hacl.Spec.P256.Montgomery.bn_qmont_reduction_lemma",
@@ -160,18 +163,21 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "equation_Spec.P256.PointOps.order",
-        "int_typing", "lemma_FStar.Int.pow2_values",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "83bfe531970b7ca72390fff4b6855d1e"
+      "47997902c5e20dabc8b393c36062cdb4"
     ],
     [
       "Hacl.Spec.P256.Montgomery.qmont_add_lemma",
@@ -182,14 +188,14 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.P256.PointOps.order",
         "equation_Spec.P256.PointOps.qelem",
+        "function_token_typing_Prims.int",
         "haseqTm_refine_1784cc7a038eaccf15977ed76dfcdb5e",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "typing_Prims.int"
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e980b9ef2d2b4da9c84c44e0e1d56a89"
+      "ff72f380400ef3f1ad083538f393bee0"
     ],
     [
       "Hacl.Spec.P256.Montgomery.qmont_mul_lemma",
@@ -200,14 +206,14 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.P256.PointOps.order",
         "equation_Spec.P256.PointOps.qelem",
+        "function_token_typing_Prims.int",
         "haseqTm_refine_1784cc7a038eaccf15977ed76dfcdb5e",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "typing_Prims.int"
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "f96883a891bafbb6c3071b1211d3fc1b"
+      "490cff202433feb865b13aaf0184530c"
     ],
     [
       "Hacl.Spec.P256.Montgomery.qmont_inv_mul_lemma",
@@ -225,7 +231,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "0ae6cd4984a60a93c065f49a5e47e556"
+      "c97c8188b2a0831651f8df60ca222466"
     ],
     [
       "Hacl.Spec.P256.Montgomery.lemma_ecdsa_sign_s",
@@ -242,7 +248,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "18db478185e3da73f6aa51fe29691a68"
+      "970a0af641cefb278de206421eea323d"
     ]
   ]
 ]

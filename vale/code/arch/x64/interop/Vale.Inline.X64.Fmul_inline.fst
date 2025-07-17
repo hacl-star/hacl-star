@@ -23,6 +23,8 @@ module FW = Vale.Curve25519.X64.FastWide
 
 let uint64 = UInt64.t
 
+#set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+
 (* A little utility to trigger normalization in types *)
 let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
@@ -163,7 +165,7 @@ let lowstar_fmul_normal_t : normal lowstar_fmul_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 let math_aux (n:nat) : Lemma ((n*8)/8 = n) = ()
 
@@ -292,8 +294,8 @@ let lowstar_fmul2 : lowstar_fmul2_t  =
 let lowstar_fmul2_normal_t : normal lowstar_fmul2_t
   = as_normal_t #lowstar_fmul2_t lowstar_fmul2
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
-
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 200"
+(* The verification time of this lemma varies wildly, at least with arith solver 6. *)
 let fmul2 out f1 f2 tmp =
     DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);

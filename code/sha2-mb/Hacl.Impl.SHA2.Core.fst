@@ -25,7 +25,7 @@ module HD = Hacl.Hash.Definitions
    into the Types module first. *)
 let _ = Hacl.Impl.SHA2.Types.uint8_8p
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 unfold
 let state_t (a:sha2_alg) (m:m_spec) =

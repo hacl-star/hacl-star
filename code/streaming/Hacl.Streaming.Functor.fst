@@ -6,7 +6,7 @@ module Hacl.Streaming.Functor
 /// of the index, and a type class for that index. Then, as usual, a given value
 /// for the index as a parameter.
 
-#set-options "--max_fuel 0 --max_ifuel 0 \
+#set-options "--fuel 0 --ifuel 0 \
   --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2' --z3rlimit 50"
 
 module ST = FStar.HyperStack.ST

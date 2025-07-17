@@ -8,6 +8,9 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
@@ -23,7 +26,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "eb37d3dec817cb4e5847f31941937014"
+      "3a541518e9ed41c852565bb17785de7b"
     ],
     [
       "Hacl.Spec.P256.PrecompTable.proj_point_to_list",
@@ -33,25 +36,22 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U64@tok",
-        "equation_FStar.List.Tot.Base.op_At",
+        "@query", "equation_FStar.List.Tot.Base.op_At",
         "equation_Hacl.Spec.P256.PrecompTable.felem_list",
         "equation_Hacl.Spec.P256.PrecompTable.felem_to_list",
-        "equation_Lib.IntTypes.int_t", "equation_Prims.nat", "int_inversion",
+        "equation_Lib.IntTypes.uint64", "equation_Prims.nat",
+        "function_token_typing_Lib.IntTypes.uint64", "int_inversion",
         "lemma_FStar.List.Tot.Properties.append_length",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_ce3a9a02923d42ec0584a397bb205aa1",
+        "refinement_interpretation_Tm_refine_fdcff82198d20dc63bf6e233473df9f3",
         "typing_FStar.List.Tot.Base.length",
         "typing_FStar.List.Tot.Base.op_At",
         "typing_Hacl.Spec.P256.Montgomery.to_mont",
-        "typing_Hacl.Spec.P256.PrecompTable.felem_to_list",
-        "typing_Lib.IntTypes.int_t", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U64@tok"
+        "typing_Hacl.Spec.P256.PrecompTable.felem_to_list"
       ],
       0,
-      "65e4f4152d5b88044842ca29612f5d82"
+      "06e48e631746b0b359a4c6acbb7e4a23"
     ],
     [
       "Hacl.Spec.P256.PrecompTable.point_inv_list",
@@ -61,14 +61,16 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
         "equation_Hacl.Spec.P256.PrecompTable.point_list",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_8ebf265cda65d1a718d23602c1b443a1"
+        "refinement_interpretation_Tm_refine_1b67e19a94e16dec9dbb6b4d8efe6254",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "920887cf3a940e9f7b15d21ef5c35391"
+      "a85953450eeb18ea66225d1f6832fceb"
     ],
     [
       "Hacl.Spec.P256.PrecompTable.point_eval_list",
@@ -78,14 +80,16 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
         "equation_Hacl.Spec.P256.PrecompTable.point_list",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_8ebf265cda65d1a718d23602c1b443a1"
+        "refinement_interpretation_Tm_refine_1b67e19a94e16dec9dbb6b4d8efe6254",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6ab62c55d96ae0436eccbab47e3ee1e8"
+      "84015c73714abc768785884479b663f7"
     ]
   ]
 ]

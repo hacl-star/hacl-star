@@ -250,7 +250,7 @@ let rec lemma_instr_apply_eval_inouts_equiv_states
       lemma_instr_apply_eval_inouts_equiv_states outs inouts args (f v) oprs s1 s2
 #pop-options
 
-#push-options "--z3rlimit 10 --max_fuel 1 --max_ifuel 0"
+#push-options "--z3rlimit 10 --max_fuel 1 --ifuel 0"
 
 let lemma_instr_write_output_implicit_equiv_states
     (i:instr_operand_implicit) (v:instr_val_t (IOpIm i))
@@ -356,7 +356,7 @@ let lemma_eval_instr_equiv_states
   | Some vs ->
     lemma_instr_write_outputs_equiv_states outs args vs oprs s1 s1_new s2 s2_new
 
-#push-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
+#push-options "--z3rlimit 20 --fuel 0 --max_ifuel 1"
 (* REVIEW: This proof is INSANELY annoying to deal with due to the [Pop].
 
    TODO: Figure out why it is slowing down so much. It practically
@@ -606,7 +606,7 @@ let lemma_unchanged_except_append_symmetric (a1 a2:list location) (s1 s2:machine
     lemma_disjoint_location_from_locations_append a a2 a1 in
   FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let rec lemma_disjoint_location_from_locations_mem
     (a1 a2:list location) (a:location) :
   Lemma
@@ -622,7 +622,7 @@ let rec lemma_disjoint_location_from_locations_mem
     lemma_disjoint_location_from_locations_mem xs a2 a
 #pop-options
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let rec lemma_constant_on_execution_mem
     (locv:locations_with_values) (f:st unit) (s:machine_state)
     (l:location_eq) (v:location_val_eqt l) :
@@ -693,7 +693,7 @@ let rec lemma_value_of_const_loc_mem (c:locations_with_values) (l:location_eq) (
   let x :: xs = c in
   if dfst x = l then () else lemma_value_of_const_loc_mem xs l v
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let rec lemma_unchanged_at_mem (as0:list location) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
@@ -812,7 +812,7 @@ let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   assert_norm (overflow s2.ms_flags == overflow (filter_state s2 s1.ms_flags ok []).ms_flags); (* OBSERVE *)
   lemma_locations_complete s1 s2 s1.ms_flags ok []
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
   Lemma
     (requires (L.mem a as1 /\ L.mem a as2))
@@ -863,7 +863,7 @@ let lemma_both_not_ok (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
     lemma_disjoint_implies_unchanged_at rw1.loc_reads rw2.loc_writes s (run f2 s)
   ) else ()
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let lemma_constant_on_execution_stays_constant (f1 f2:st unit) (rw1 rw2:rw_set) (s s1 s2:machine_state) :
   Lemma
     (requires (
@@ -1135,7 +1135,7 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
 
 /// Not-ok states lead to erroring states upon execution
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not s.ms_ok))
@@ -1450,7 +1450,7 @@ let code_exchange_allowed (c1 c2:safely_bounded_code) : pbool =
   rw_exchange_allowed (rw_set_of_code c1) (rw_set_of_code c2)
   /+> normal (" for instructions " ^ fst (print_code c1 0 gcc) ^ " and " ^ fst (print_code c2 0 gcc))
 
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 0 --max_ifuel 0"
+#push-options "--fuel 3 --ifuel 0"
 let lemma_code_exchange_allowed (c1 c2:safely_bounded_code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
@@ -1482,7 +1482,7 @@ let lemma_code_exchange_allowed (c1 c2:safely_bounded_code) (fuel:nat) (s:machin
 /// define a relation that tells us if some [codes] can be transformed
 /// into another using only allowed swaps.
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 1"
 let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
     let a, b, c = L.split3 cs i in
     cs' == L.append a c /\
@@ -1883,7 +1883,7 @@ let rec find_transformation_hints (c1 c2:codes) :
 /// If a transformation can be performed, then the result behaves
 /// identically as per the [equiv_states] relation.
 
-#push-options "--z3rlimit 10 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 10 --fuel 3 --ifuel 1"
 let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s s' : machine_state) :
   Lemma
     (requires (
@@ -1919,7 +1919,7 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
     )
 #pop-options
 
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 3 --ifuel 1"
 let rec lemma_machine_eval_codes_block_to_append (c1 c2 : codes) (fuel:nat) (s:machine_state) :
   Lemma
     (ensures (machine_eval_codes (c1 `L.append` c2) fuel s == machine_eval_codes (Block c1 :: c2) fuel s)) =
@@ -1942,7 +1942,7 @@ let rec lemma_append_single (xs:list 'a) (y:'a) (i:nat) :
   | [] -> ()
   | x :: xs -> lemma_append_single xs y (i - 1)
 
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 3 --ifuel 1"
 let rec lemma_is_empty_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (is_empty_code c))
@@ -1964,7 +1964,7 @@ and lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
 #pop-options
 
 #restart-solver
-#push-options "--z3rlimit 100 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 100 --fuel 3 --ifuel 1"
 let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
@@ -2150,7 +2150,7 @@ and purge_empty_codes (cs:codes) : codes =
       purge_empty_code x :: purge_empty_codes xs
     )
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --initial_ifuel 0"
+#push-options "--fuel 2 --initial_ifuel 0 --initial_ifuel 0"
 let rec lemma_purge_empty_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (ensures (machine_eval_code c fuel s == machine_eval_code (purge_empty_code c) fuel s))

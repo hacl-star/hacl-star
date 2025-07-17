@@ -8,7 +8,7 @@ open Spec.Hash.Definitions
 
 type hash_alg = EverCrypt.Hash.alg
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 noeq noextract
 type hash_vector = {

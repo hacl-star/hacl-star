@@ -11,7 +11,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1189e71160bcffe21d953b93d3204dac"
+      "13c200affc53a22f366424f52fc54c92"
     ],
     [
       "Hacl.Spec.K256.GLV.beta",
@@ -26,7 +26,7 @@
         "typing_Spec.K256.PointOps.prime"
       ],
       0,
-      "7c5979677fa30c9591166e7767a2a6a8"
+      "a85d5d5202cd3e05efdeda191d405424"
     ],
     [
       "Hacl.Spec.K256.GLV.a1",
@@ -38,7 +38,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a6c1843583d6a1098f8ba71b8b1f8beb"
+      "ac2df0329ab9c0f3cf338799b6e3646b"
     ],
     [
       "Hacl.Spec.K256.GLV.minus_b1",
@@ -50,7 +50,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "519478f594304b125f4bb26151c15927"
+      "5781e9332716a8621a4f39c0af4b4eec"
     ],
     [
       "Hacl.Spec.K256.GLV.a2",
@@ -62,7 +62,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c94ff051911a81e4006765999ccfec54"
+      "12d45dc4c6311584a63f5a4586d662ab"
     ],
     [
       "Hacl.Spec.K256.GLV.b2",
@@ -74,7 +74,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ce8a0ff47cd65e9c5c01ed96334585c8"
+      "50708e4665b2ef84139866f35b03ac6f"
     ],
     [
       "Hacl.Spec.K256.GLV.minus_lambda",
@@ -86,7 +86,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1d161398856d0bd9ada7760df8c1cb7e"
+      "0150020b77c6325572fa70fb22fafa34"
     ],
     [
       "Hacl.Spec.K256.GLV.b1",
@@ -98,7 +98,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "cc380f3ce5044f2e7574f1ed59e02b80"
+      "6689633d09f0683723db9e4f97f49edc"
     ],
     [
       "Hacl.Spec.K256.GLV.minus_b2",
@@ -110,7 +110,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "cc7e9ddb2ccdd8f174a91c3078e04b8b"
+      "3cb9c8420512c22072980b47db6151b3"
     ],
     [
       "Hacl.Spec.K256.GLV.g1",
@@ -122,7 +122,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "2c133ebf29ec46be6ab698f39b63a5c9"
+      "876b66bc2c462b31426e0b52660f0c49"
     ],
     [
       "Hacl.Spec.K256.GLV.g2",
@@ -134,7 +134,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "8c7852599d5dcb1c350588ba8cb0ed28"
+      "fb69fbd59b9226390f8e0c700e9bea3a"
     ],
     [
       "Hacl.Spec.K256.GLV.qmul_shift_384",
@@ -143,7 +143,7 @@
       0,
       [ "@query" ],
       0,
-      "40284c015f015e9436cd13d68866e081"
+      "3662719131595d1b39659c7bb8d4258a"
     ],
     [
       "Hacl.Spec.K256.GLV.qmul_shift_384_lemma",
@@ -156,7 +156,8 @@
         "equation_Hacl.Spec.K256.GLV.qmul_shift_384", "equation_Prims.nat",
         "equation_Spec.K256.PointOps.q", "equation_Spec.K256.PointOps.qelem",
         "int_inversion", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_3abfe4124fc12c50f5f1600a0293cedd",
@@ -165,7 +166,7 @@
         "typing_Spec.K256.PointOps.q"
       ],
       0,
-      "98374cf340963a38785cc9a3bc8b1621"
+      "572f23dd407820378a6a58859ad395f1"
     ],
     [
       "Hacl.Spec.K256.GLV.scalar_split_lambda",
@@ -177,17 +178,18 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "equation_Hacl.Spec.K256.GLV.g1", "equation_Hacl.Spec.K256.GLV.g2",
         "equation_Hacl.Spec.K256.GLV.qmul_shift_384", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.K256.PointOps.qelem",
-        "int_typing", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "equation_Prims.pos", "equation_Spec.K256.PointOps.q",
+        "equation_Spec.K256.PointOps.qelem", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_3abfe4124fc12c50f5f1600a0293cedd",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "typing_Prims.pow2"
       ],
       0,
-      "f937e760dd0b27a437753f8bf1130ad4"
+      "0d37726a6c363b629c23cc688e71a798"
     ]
   ]
 ]

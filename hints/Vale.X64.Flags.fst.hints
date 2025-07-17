@@ -7,9 +7,10 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Vale.X64.Flags.t", "equation_Vale.X64.Machine_s.flag",
-        "int_inversion", "kinding_FStar.Pervasives.Native.option@tok",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Vale.X64.Flags.flag_val_t", "equation_Vale.X64.Flags.t",
+        "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Vale.X64.Flags.flag_val_t", "int_inversion",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_InDomUpd1",
         "lemma_FStar.Set.lemma_equal_elim",
@@ -17,15 +18,14 @@
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_empty",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Negation",
         "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_2ea34cbc8e73c89468af536d5146da5a",
         "refinement_interpretation_Tm_refine_72758763fd3a331db555502c82719e64",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "refinement_interpretation_Tm_refine_d7b4bfa9eb5ff309a4d3f43d8ca319bf",
         "typing_FStar.Map.domain", "typing_FStar.Map.upd",
         "typing_FStar.Set.complement", "typing_FStar.Set.empty",
-        "typing_Prims.bool", "typing_Vale.X64.Machine_s.flag"
+        "typing_Vale.X64.Machine_s.flag"
       ],
       0,
-      "d4c9a6d330e653329d2d65b3822d4259"
+      "53549c26ccb82446eb9c85a93478152f"
     ],
     [
       "Vale.X64.Flags.of_fun",
@@ -34,12 +34,15 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Flags_interpretation_Tm_arrow_152fcedcb80444a2b3095a3a1303f59b",
+        "Vale.X64.Flags_interpretation_Tm_arrow_6d1d81ae558d658d7d34082785eb5144",
         "data_typing_intro_FStar.Pervasives.Native.None@tok",
-        "equation_Prims.eqtype", "equation_Vale.X64.Machine_s.flag",
+        "equation_Prims.eqtype", "equation_Vale.X64.Flags.flag_val_t",
+        "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Prims.bool",
+        "function_token_typing_Prims.int",
+        "function_token_typing_Vale.X64.Flags.flag_val_t",
         "haseqTm_refine_a29663a141e931174462ff96f2d1bbb5", "int_inversion",
-        "int_typing", "kinding_FStar.Pervasives.Native.option@tok",
-        "lemma_FStar.Map.lemma_ContainsDom",
+        "int_typing", "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_InDomConstMap",
         "lemma_FStar.Map.lemma_SelUpd1", "lemma_FStar.Map.lemma_SelUpd2",
         "lemma_FStar.Map.lemma_UpdDomain",
@@ -50,18 +53,17 @@
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_72758763fd3a331db555502c82719e64",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "refinement_interpretation_Tm_refine_a29663a141e931174462ff96f2d1bbb5",
         "refinement_kinding_Tm_refine_a29663a141e931174462ff96f2d1bbb5",
         "typing_FStar.Map.const", "typing_FStar.Map.domain",
         "typing_FStar.Map.upd", "typing_FStar.Set.complement",
         "typing_FStar.Set.empty", "typing_FStar.Set.singleton",
-        "typing_FStar.Set.union", "typing_Prims.bool", "typing_Prims.int",
-        "typing_Vale.X64.Machine_s.flag"
+        "typing_FStar.Set.union", "typing_Vale.X64.Machine_s.flag"
       ],
       0,
-      "6da6e283e3c0326cb4e631080a349bf3"
+      "9494c0172efec3a0d2dfe51464de1704"
     ],
     [
       "Vale.X64.Flags.lemma_upd_eq",
@@ -71,11 +73,11 @@
       [
         "@query", "function_token_typing_Vale.X64.Flags.sel",
         "function_token_typing_Vale.X64.Flags.upd",
-        "interpretation_Tm_abs_1c14d8e030deadb2b09287cba8d3ab2a",
-        "interpretation_Tm_abs_271d7d117fc527ee83dd1be3effe7ebd"
+        "interpretation_Tm_abs_9fabf848a1a32f51b141d5916bad7662",
+        "interpretation_Tm_abs_dee13f6801a03886b79150447bc19803"
       ],
       0,
-      "23546f862deff2195529e94fdfc92f9f"
+      "3449d3930323e40d25f80c256acc31b5"
     ],
     [
       "Vale.X64.Flags.lemma_upd_ne",
@@ -85,11 +87,11 @@
       [
         "@query", "function_token_typing_Vale.X64.Flags.sel",
         "function_token_typing_Vale.X64.Flags.upd",
-        "interpretation_Tm_abs_1c14d8e030deadb2b09287cba8d3ab2a",
-        "interpretation_Tm_abs_271d7d117fc527ee83dd1be3effe7ebd"
+        "interpretation_Tm_abs_9fabf848a1a32f51b141d5916bad7662",
+        "interpretation_Tm_abs_dee13f6801a03886b79150447bc19803"
       ],
       0,
-      "fc84a10a638adecca3e16e16bcdf559b"
+      "82d1cdf2ce68b4e5c1ca1cef850242ef"
     ],
     [
       "Vale.X64.Flags.lemma_equal_intro",
@@ -98,20 +100,19 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Prims.eqtype", "equation_Vale.X64.Flags.equal",
-        "equation_Vale.X64.Flags.t", "equation_Vale.X64.Machine_s.flag",
-        "kinding_FStar.Pervasives.Native.option@tok",
+        "equation_Vale.X64.Flags.equal",
+        "equation_Vale.X64.Flags.flag_val_t", "equation_Vale.X64.Flags.t",
+        "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Vale.X64.Flags.flag_val_t",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_equal_elim",
         "lemma_FStar.Set.lemma_equal_elim",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "refinement_interpretation_Tm_refine_d7b4bfa9eb5ff309a4d3f43d8ca319bf",
+        "refinement_interpretation_Tm_refine_2ea34cbc8e73c89468af536d5146da5a",
         "typing_FStar.Map.domain", "typing_FStar.Set.complement",
-        "typing_FStar.Set.empty", "typing_Prims.bool",
-        "typing_Vale.X64.Machine_s.flag"
+        "typing_FStar.Set.empty", "typing_Vale.X64.Machine_s.flag"
       ],
       0,
-      "70e48cd107a24391cdd8a641cca660a0"
+      "1789dd58c9d0840b3d59e0edf0668786"
     ],
     [
       "Vale.X64.Flags.lemma_equal_elim",
@@ -123,7 +124,7 @@
         "equation_Vale.X64.Flags.t"
       ],
       0,
-      "e11beb22f3f4d4f9b698c57c212afb49"
+      "d3d8c743ad89822b541e271ab5e1d6bd"
     ]
   ]
 ]

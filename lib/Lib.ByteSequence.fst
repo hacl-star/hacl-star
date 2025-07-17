@@ -7,7 +7,7 @@ open Lib.Sequence
 open Lib.RawIntTypes
 open Lib.LoopCombinators
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 /// BEGIN constant-time sequence equality
 

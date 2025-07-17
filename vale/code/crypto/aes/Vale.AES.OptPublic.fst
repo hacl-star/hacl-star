@@ -32,7 +32,7 @@ let hkeys_reqs_pub (hkeys:seq quad32) (h_BE:quad32) : Vale.Def.Prop_s.prop0
   of_quad32 (index hkeys 6) == gf128_power h 5 /\
   of_quad32 (index hkeys 7) == gf128_power h 6
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
 open FStar.List.Tot
 open Vale.Math.Poly2.Bits

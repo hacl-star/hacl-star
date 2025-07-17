@@ -14,7 +14,7 @@ open Lib.IntVector.Transpose
 open Spec.Hash.Definitions
 open Spec.SHA3.Constants
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val create5: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a -> x4:a -> lseq a 5
 

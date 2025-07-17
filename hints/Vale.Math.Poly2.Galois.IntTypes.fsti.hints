@@ -8,22 +8,23 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
-        "equality_tok_Lib.IntTypes.SEC@tok",
+        "eq2-interp", "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "primitive_Prims.op_AmpAmp",
+        "equation_Lib.IntTypes.v", "equation_Prims.l_not",
+        "equation_Prims.squash", "l_not-interp", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "refinement_interpretation_Tm_refine_dea64135a4a56c48b984c3b63435efb1",
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "c47b38188d6064b06cc8e774958c2737"
+      "d12ce724d3934edb5a25338bd7a9dcc7"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_logor",
@@ -32,22 +33,23 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
-        "equality_tok_Lib.IntTypes.SEC@tok",
+        "eq2-interp", "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "primitive_Prims.op_AmpAmp",
+        "equation_Lib.IntTypes.v", "equation_Prims.l_not",
+        "equation_Prims.squash", "l_not-interp", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "refinement_interpretation_Tm_refine_dea64135a4a56c48b984c3b63435efb1",
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "0186c9556172ced68d1389c97808aad4"
+      "d00cb586576f8fa1b7d5629a887f5a70"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_logxor",
@@ -56,22 +58,23 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
-        "equality_tok_Lib.IntTypes.SEC@tok",
+        "eq2-interp", "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "primitive_Prims.op_AmpAmp",
+        "equation_Lib.IntTypes.v", "equation_Prims.l_not",
+        "equation_Prims.squash", "l_not-interp", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "refinement_interpretation_Tm_refine_dea64135a4a56c48b984c3b63435efb1",
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "408ade5a4b6936a354b8669c9ee767d8"
+      "28f81f6c4a032d92ffdf094419e70def"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_eq_mask",
@@ -79,16 +82,22 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "constructor_distinct_Tm_unit",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.S128",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Lib.IntTypes.S128", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "int_inversion",
+        "equation_Lib.IntTypes.unsigned",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "typing_Lib.IntTypes.bits"
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5"
       ],
       0,
-      "acd16f33e7e09b5bedfdffb2259c3ce1"
+      "68bd546f16aefe980cd84c88d0d8c357"
     ]
   ]
 ]

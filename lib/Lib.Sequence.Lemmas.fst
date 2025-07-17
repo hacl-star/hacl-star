@@ -4,9 +4,8 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
-#set-options "--z3rlimit 60 --max_fuel 0 --max_ifuel 0 --query_stats" 
-#set-options "--using_facts_from '*'"
-#restart-solver
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
+
 let rec repeati_extensionality #a n f g acc0 =
   if n = 0 then begin
     Loops.eq_repeati0 n f acc0;

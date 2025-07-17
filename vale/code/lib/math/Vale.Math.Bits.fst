@@ -88,7 +88,7 @@ let lemma_i2b_equal #n x y =
   lemma_i2b_all ();
   lemma_i2b_eq x y
 
-#reset-options "--initial_fuel 0 --max_fuel 0"
+#reset-options "--fuel 0"
 let lemma_bveq #n a b =
   let ia = bv2int a in
   let ib = bv2int b in

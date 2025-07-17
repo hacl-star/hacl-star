@@ -8,22 +8,23 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
-        "equality_tok_Lib.IntTypes.SEC@tok",
+        "eq2-interp", "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "primitive_Prims.op_AmpAmp",
+        "equation_Lib.IntTypes.v", "equation_Prims.l_not",
+        "equation_Prims.squash", "l_not-interp", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "refinement_interpretation_Tm_refine_dea64135a4a56c48b984c3b63435efb1",
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "a2b68bb8b1d66f51aa333a8df87ce038"
+      "247f9a80976a32a74cd1c4256974571a"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_logand",
@@ -33,7 +34,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S64",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.SEC",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_FStar.UInt128.n",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
@@ -41,10 +48,9 @@
         "equation_Lib.IntTypes.mk_int", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_t",
         "equation_Lib.IntTypes.sec_int_v", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "lemma_Lib.IntTypes.v_injective",
-        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "equation_Lib.IntTypes.v", "int_inversion",
+        "lemma_Lib.IntTypes.v_injective", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_4a73301fbc41c8e432f23b6aef69a5eb",
@@ -58,7 +64,7 @@
         "typing_Lib.IntTypes.unsigned", "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "ed1f6e895a8672d90ee5667dc6c0977d"
+      "93c609699ac2fcafd5e7ca6220fd7f76"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_logor",
@@ -67,22 +73,23 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
-        "equality_tok_Lib.IntTypes.SEC@tok",
+        "eq2-interp", "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "primitive_Prims.op_AmpAmp",
+        "equation_Lib.IntTypes.v", "equation_Prims.l_not",
+        "equation_Prims.squash", "l_not-interp", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "refinement_interpretation_Tm_refine_dea64135a4a56c48b984c3b63435efb1",
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "9ae4a5c01c472d6c6303bdf461cbd6b3"
+      "50f9ff016e57dcae378fa1416ae5f1ca"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_logor",
@@ -92,7 +99,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S64",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.SEC",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_FStar.UInt128.n",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
@@ -100,10 +113,9 @@
         "equation_Lib.IntTypes.mk_int", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_t",
         "equation_Lib.IntTypes.sec_int_v", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "lemma_Lib.IntTypes.v_injective",
-        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "equation_Lib.IntTypes.v", "int_inversion",
+        "lemma_Lib.IntTypes.v_injective", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_3881ab512ff2d0d86d43bf57b0c61e75",
@@ -117,7 +129,7 @@
         "typing_Lib.IntTypes.unsigned", "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "a7c974831071565c9b566269ca40b60b"
+      "2f76cfd100220cd849efb05c9d6f49d9"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_logxor",
@@ -126,22 +138,23 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
-        "equality_tok_Lib.IntTypes.SEC@tok",
+        "eq2-interp", "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "primitive_Prims.op_AmpAmp",
+        "equation_Lib.IntTypes.v", "equation_Prims.l_not",
+        "equation_Prims.squash", "l_not-interp", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "refinement_interpretation_Tm_refine_dea64135a4a56c48b984c3b63435efb1",
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "53fc181d38666efba10ee1e199e5194e"
+      "54bc134fdf44126376d655ec899bed43"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_logxor",
@@ -149,34 +162,46 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S64",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.SEC",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_FStar.UInt128.n",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.logxor", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.mk_int", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_t",
+        "equation_Lib.IntTypes.logxor", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.mk_int",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.sec_int_t",
         "equation_Lib.IntTypes.sec_int_v", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "lemma_Lib.IntTypes.v_injective",
-        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "equation_Lib.IntTypes.v", "equation_Prims.nat", "int_inversion",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.v_injective",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_1e2a54f659380dff04459b91e600441e",
         "refinement_interpretation_Tm_refine_2b25e5c3b25bc06167200cbfa5d36b3e",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_97e4a63388ae45ee4261a689ecdcc635",
         "refinement_interpretation_Tm_refine_b87f471e80e3c2bc077d38b7026cfcf6",
         "refinement_interpretation_Tm_refine_e55be37d77d9b240b683ff3354ca439c",
         "typing_FStar.UInt128.logxor", "typing_FStar.UInt16.logxor",
         "typing_FStar.UInt32.logxor", "typing_FStar.UInt64.logxor",
         "typing_FStar.UInt8.logxor", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.unsigned", "typing_tok_Lib.IntTypes.SEC@tok"
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
+        "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "72c9d7c04b6699f665fc6084418d609c"
+      "178b548e9a420d665e2513bb896b68d8"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_eq_mask",
@@ -184,16 +209,22 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "constructor_distinct_Tm_unit",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.S128",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Lib.IntTypes.S128", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "int_inversion",
+        "equation_Lib.IntTypes.unsigned",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "typing_Lib.IntTypes.bits"
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5"
       ],
       0,
-      "a061208df62aa710d0760b441714ccf0"
+      "cf2412c4010e963f425a8a442190f8d9"
     ],
     [
       "Vale.Math.Poly2.Galois.IntTypes.define_eq_mask",
@@ -212,7 +243,7 @@
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "bede97e380468da6ff521540f6601a3c"
+      "f82277e9635b1378b02dda6005eb0ed2"
     ]
   ]
 ]

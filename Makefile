@@ -351,7 +351,7 @@ ifndef MAKE_RESTARTS
 .vale-depend: .fstar-depend-make .FORCE
 	$(call run-with-log,\
 	  "$(PYTHON3)" tools/valedepend.py \
-	    $(addprefix -include ,$(INCLUDES)) \
+	    $(addprefix -include ,$(VALE_INCLUDES)) \
 	    $(addprefix -in ,$(VALE_ROOTS)) \
 	    -dep $< \
 	    > $@ && \
@@ -398,7 +398,7 @@ endif
 
 %.dump:
 	$(call run-with-log,\
-	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
+	  $(FSTAR) --dump_module $(basename $(notdir $*)) \
 	    --print_implicits --print_universes --print_effect_args --print_full_names \
 	    --print_bound_var_types --ugly --admit_smt_queries true \
 	    --hint_dir hints/ \
@@ -470,7 +470,7 @@ hints:
 	$(call run-with-log,\
 	  $(FSTAR) $(FSTAR_FLAGS) \
 	    --hint_dir hints \
-	    $< \
+	    --cache_checked_modules $< -o $@ \
 	    && \
 	    touch -c $@ \
 	  ,[VERIFY] $(notdir $*),$(call to-obj-dir,$@))
@@ -561,8 +561,7 @@ obj/%.ml: CODEGEN=OCaml
 
 obj/%.ml:
 	$(call run-with-log,\
-	  $(FSTAR) $(notdir $(subst .checked,,$<)) --codegen $(CODEGEN) \
-	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
+	  $(FSTAR) $< --codegen $(CODEGEN) \
 	  ,[EXTRACT-ML] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale:
@@ -648,7 +647,7 @@ obj/%.krml:
 	$(call run-with-log,\
 	  $(FSTAR) --codegen krml \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	    $(notdir $(subst .checked,,$<)) && \
+	    $< && \
 	  touch -c $@ \
 	  ,[EXTRACT-KRML] $*,$@)
 

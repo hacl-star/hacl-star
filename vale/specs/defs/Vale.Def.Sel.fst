@@ -13,7 +13,7 @@ let rec logsel_vec (#n: pos) (a b c: bv_t n) : Tot (bv_t n) =
   then create 1 (sel (index a 0) (index b 0) (index c 0))
   else append (create 1 (sel (index a 0) (index b 0) (index c 0))) (logsel_vec #(n - 1) (slice a 1 n) (slice b 1 n) (slice c 1 n))
 
-#push-options "--initial_fuel 1 --max_fuel 1"
+#push-options "--fuel 1"
 let rec logsel_vec_definition (#n: pos) (a b c: bv_t n) (i: nat{i < n})
     : Lemma (ensures index (logsel_vec #n a b c) i = sel (index a i) (index b i) (index c i))
       [SMTPat (index (logsel_vec #n a b c) i)] =

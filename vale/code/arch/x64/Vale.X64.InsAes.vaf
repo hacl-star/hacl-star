@@ -44,7 +44,7 @@ module S = Vale.X64.Machine_Semantics_s
 module P = Vale.X64.Print_s
 
 friend Vale.X64.Decls
-#reset-options "--initial_fuel 4 --max_fuel 4 --z3rlimit 20"
+#reset-options "--fuel 4 --z3rlimit 20"
 #endverbatim
 
 procedure Pclmulqdq(inout dst:xmm, in src:xmm, inline dstHi:bool, inline srcHi:bool)

@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 20 --fuel 0 --max_ifuel 1"
 
 let force_flush_interleaving = ()
 

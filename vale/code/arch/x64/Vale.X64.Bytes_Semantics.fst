@@ -61,7 +61,7 @@ open Vale.X64.Instruction_s
 //
 //(* The following lemmas prove that the unspecified heap remains invariant through execution *)
 //
-//#push-options "--max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
+//#push-options "--fuel 0 --max_ifuel 1 --initial_ifuel 1"
 //let update_operand_flags_same_unspecified (dst:operand64) (v:nat64) (s_orig s:machine_state) : Lemma
 //  (ensures (
 //    let s1 = update_operand64_preserve_flags'' dst v s_orig s in

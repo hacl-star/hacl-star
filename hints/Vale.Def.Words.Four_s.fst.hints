@@ -19,7 +19,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "9218ca421a6ac68aa18ce7a7621eae13"
+      "6ad353bfde9de059b9505c374fa60f04"
     ],
     [
       "Vale.Def.Words.Four_s.nat_to_four_unfold",
@@ -27,12 +27,19 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
       ],
       0,
-      "f675fcb3f86a3a457c31a0c155b79620"
+      "15fe15598a3a4c628ff07a4e7dcc1cea"
     ],
     [
       "Vale.Def.Words.Four_s.nat_to_four",
@@ -41,7 +48,7 @@
       0,
       [ "@query" ],
       0,
-      "277e9bc819a4d2bd0c6f79f16d9cc591"
+      "57510166a115c42fd2e05b3a658e2d45"
     ],
     [
       "Vale.Def.Words.Four_s.nat_to_four",
@@ -54,7 +61,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "20dca6901b5d1429ce9946cc561dbd8f"
+      "b7737b093a1b8adaa53c9ff5bc138499"
     ],
     [
       "Vale.Def.Words.Four_s.four_to_nat_unfold",
@@ -74,16 +81,27 @@
         "typing_Prims.pow2"
       ],
       0,
-      "9031e7fcf805db9ad58ed234d4776a81"
+      "181cd9a01f6f33cb0d7f1066c057ad4e"
     ],
     [
       "Vale.Def.Words.Four_s.four_to_nat_unfold",
       2,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
+      ],
       0,
-      "e9ead8235580bc59eeae278b5a96c960"
+      "136812245e345789a7f4011e8f40a382"
     ],
     [
       "Vale.Def.Words.Four_s.four_to_nat",
@@ -96,7 +114,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "b5a4bf4c1f612980cafbf4938a31db90"
+      "b1e598f764b2d01c25ceb1d2ebfffa16"
     ],
     [
       "Vale.Def.Words.Four_s.four_to_nat",
@@ -105,7 +123,7 @@
       0,
       [ "@query" ],
       0,
-      "487f263d24f5c621e087921c578ccbfa"
+      "772a780b1f1398dee70e4e18ad98f69a"
     ],
     [
       "Vale.Def.Words.Four_s.four_select",
@@ -120,7 +138,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "bf5e687dba4eb9a0a1d96326f4c8db0d"
+      "41e5913c5f264f443d12e4d537b75587"
     ],
     [
       "Vale.Def.Words.Four_s.four_insert",
@@ -135,7 +153,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "f9dcc2ec18d0680f080122639125a671"
+      "fde8e9eb23946b08e45d5c7f322d1488"
     ]
   ]
 ]

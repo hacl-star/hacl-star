@@ -5,7 +5,7 @@ module B = LowStar.Buffer
 
 open FStar.HyperStack.ST
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 (** Only partially specified; the flag may be false because it has been
   intentionally disabled by the client, for instance. *)

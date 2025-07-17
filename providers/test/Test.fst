@@ -26,7 +26,7 @@ friend Lib.IntTypes
 
 // #reset-options "--using_facts_from '* -Test.Vectors'"
 
-// #push-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
+// #push-options "--z3rlimit 50 --max_fuel 1 --ifuel 0"
 
 
 let aead_vector = cipher * vec8 * vec8 * vec8 * vec8 * vec8 * vec8
@@ -120,7 +120,7 @@ let aead_iv_length32 (al: Spec.Agile.AEAD.supported_alg) (x:U32.t) : Tot
 
 #reset-options "--using_facts_from '* -Test.Vectors'"
 
-#push-options "--z3rlimit 700 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 700 --fuel 0 --ifuel 0"
 
 let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext plaintext_len
   ciphertext ciphertext_len: ST unit
@@ -278,7 +278,7 @@ let key_len a: Tot (x:UInt32.t { UInt32.v x = Spec.Agile.Cipher.key_length a }) 
   | Spec.Agile.Cipher.AES256 -> 32ul
 
 (*
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
   (counter: B.buffer UInt8.t)
   (counter_len: UInt32.t)

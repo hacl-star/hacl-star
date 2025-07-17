@@ -2,7 +2,7 @@ module Test.Vectors.Aes128
 
 module B = LowStar.Buffer
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 let input0: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   [@inline_let] let l = [ 0x53uy; 0x69uy; 0x6Euy; 0x67uy; 0x6Cuy; 0x65uy; 0x20uy; 0x62uy; 0x6Cuy; 0x6Fuy; 0x63uy; 0x6Buy; 0x20uy; 0x6Duy; 0x73uy; 0x67uy; ] in

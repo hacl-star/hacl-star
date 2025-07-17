@@ -11,7 +11,7 @@ unfold let machine_eval_code = S.machine_eval_code
 unfold let machine_eval_codes = S.machine_eval_codes
 unfold let machine_eval_while = S.machine_eval_while
 
-#reset-options "--initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
+#reset-options "--initial_ifuel 0 --max_ifuel 1 --fuel 1"
 
 let normalize_taints (ts:analysis_taints) : analysis_taints =
   let AnalysisTaints lts rts = ts in
@@ -262,7 +262,7 @@ val monotone_ok_eval_block: (codes:S.codes) -> (fuel:nat) -> (s:S.machine_state)
     Some? s' /\ (Some?.v s').S.ms_ok ==> s.S.ms_ok))
  (decreases %[codes;1])
 
-#set-options "--z3rlimit 20 --initial_ifuel 0 --max_ifuel 1 --initial_fuel 2 --max_fuel 2"
+#set-options "--z3rlimit 20 --initial_ifuel 0 --max_ifuel 1 --fuel 2"
 let rec monotone_ok_eval code fuel s =
   match code with
   | Ins ins -> reveal_opaque (`%S.machine_eval_code_ins) S.machine_eval_code_ins
@@ -313,7 +313,7 @@ val lemma_loop_taintstate_monotone (ts:analysis_taints) (code:S.code{While? code
     taintstate_monotone ts ts'))
   (decreases %[count_publics ts])
 
-#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 2 --max_fuel 2 --z3rlimit 40"
+#reset-options "--ifuel 1 --fuel 2 --z3rlimit 40"
 let rec lemma_loop_taintstate_monotone ts code =
   let ts = normalize_taints ts in
   let While pred body = code in
@@ -327,7 +327,7 @@ let rec lemma_loop_taintstate_monotone ts code =
     taintstate_monotone_trans ts combined_ts ts_fin
   )
 
-#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 2 --max_fuel 2 --z3rlimit 60"
+#reset-options "--ifuel 1 --fuel 2 --z3rlimit 60"
 val lemma_code_explicit_leakage_free: (ts:analysis_taints) -> (code:S.code) -> (s1:S.machine_state) -> (s2:S.machine_state) -> (fuel:nat) -> Lemma
   (requires True)
   (ensures (let b, ts' = check_if_code_consumes_fixed_time code ts in
@@ -346,7 +346,7 @@ val lemma_loop_explicit_leakage_free: (ts:analysis_taints) -> (code:S.code{While
     (b2t b ==> isConstantTimeGivenStates code fuel ts.lts s1 s2 /\ isExplicitLeakageFreeGivenStates code fuel ts.lts ts'.lts s1 s2)))
   (decreases %[fuel; code; 0])
 
-#reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 1 --max_fuel 2 --z3rlimit 300"
+#reset-options "--ifuel 2 --initial_fuel 1 --max_fuel 2 --z3rlimit 300"
 let rec lemma_code_explicit_leakage_free ts code s1 s2 fuel = match code with
   | Ins ins -> lemma_ins_leakage_free ts ins
   | Block block -> lemma_block_explicit_leakage_free ts block s1 s2 fuel

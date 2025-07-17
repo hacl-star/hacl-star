@@ -40,7 +40,7 @@ val swap_add: a:int -> b:int -> c:int -> Lemma
       (a + b + c = a + c + b)
 let swap_add a b c = ()
 
-#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 0 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 15"
+#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --fuel 0 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 15"
 
 let lemma_mul_increases(x y:pos) :
   Lemma (y <= y * x) = ()
@@ -53,7 +53,7 @@ val multiplication_order_eq_lemma_int: a:int -> b:int -> p:pos ->
     Lemma (a <= b <==> p * a <= p * b)
 let multiplication_order_eq_lemma_int a b p = ()
 
-#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=false --max_fuel 0 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 8"
+#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=false --fuel 0 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 8"
 
 let lemma_poly_multiply (n:int) (p:int) (r:int) (h:int) (r0:int) (r1:int) (h0:int) (h1:int)
                         (h2:int) (s1:int) (d0:int) (d1:int) (d2:int) (hh:int) =
@@ -243,7 +243,7 @@ let lemma_mul_pos_pos_is_pos_inverse (x:pos) (y:int) :
     end
   else ()
 
-#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=false --max_fuel 0 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 8"
+#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=false --fuel 0 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 8"
 let lemma_mod_factor_lo(x0:nat64) (x1:nat64) (y:int) (z:pos) :
   Lemma (requires z < 0x10000000000000000 /\
                   y * z == 0x10000000000000000)
@@ -271,7 +271,7 @@ let lemma_power2_add64 (n:nat) =
   pow2_plus 64 n;
   FStar.UInt.pow2_values 64
 
-#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=false --max_fuel 0 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 8"
+#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=false --fuel 0 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 8"
 
 (* lemma_div_mod <-> lemma_fundamental_div_mod *)
 let lemma_part_bound1(a:nat) (b:pos) (c:pos):
