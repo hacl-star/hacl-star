@@ -56,7 +56,8 @@ open Vale.X64.QuickCodes
 open Vale.Poly1305.Spec_s
 open Vale.Poly1305.Math
 open Vale.Poly1305.Util
-#reset-options "--z3rlimit 40"
+#set-options "--z3rlimit 40"
+#set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 #endverbatim
 
 procedure Poly1305_multiply(ghost r1:nat64) returns(ghost hh:int)
