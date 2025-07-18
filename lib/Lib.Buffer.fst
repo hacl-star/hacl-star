@@ -203,17 +203,17 @@ let salloc1_with_inv #a #res h len x footprint spec spec_inv impl =
   spec_inv h2 h3 h5 r;
   r
 
-inline_for_extraction 
+inline_for_extraction
 let salloc1 #a #res h len x footprint spec impl =
   salloc1_with_inv #a #res h len x footprint spec
     (fun h1 h2 h3 (r:res) -> assert (spec r h2); assert (spec r h3))
     impl
 
-inline_for_extraction 
+inline_for_extraction
 let salloc_nospec #a #res h len x footprint impl =
   salloc1 #a #res h len x footprint (fun _ _ -> True) impl
 
-inline_for_extraction 
+inline_for_extraction
 val loopi_blocks_f:
     #a:Type0
   -> #b:Type0
@@ -251,7 +251,7 @@ let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   let block = sub inp (i *! bs) bs in
   f i block w
 
-inline_for_extraction 
+inline_for_extraction
 val loopi_blocks_f_nospec:
     #a:Type0
   -> #b:Type0
@@ -302,7 +302,7 @@ let loopi_blocks_nospec #a #b #blen bs inpLen inp f l w =
   let last = sub inp (nb *. bs) rem in
   l nb rem last w
 
-inline_for_extraction 
+inline_for_extraction
 val loop_blocks_f:
     #a:Type0
   -> #b:Type0
@@ -480,7 +480,7 @@ let fill #a h0 clen out spec impl =
      assert (Seq.equal (refl h' (v i + 1)) (spec h0 (v i) (refl h (v i))))
   )
 
-inline_for_extraction 
+inline_for_extraction
 val lemma_eq_disjoint:
     #t2:buftype
   -> #a1:Type
@@ -643,7 +643,7 @@ let create16 #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
   let h1 = ST.get () in
   assert (Seq.equal (as_seq h1 st) (Seq.create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15))
 
-#set-options "--z3rlimit 300 --max_fuel 1"
+#set-options "--z3rlimit 400 --fuel 1"
 
 let create32 #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 =
   let h0 = ST.get () in
