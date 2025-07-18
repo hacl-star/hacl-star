@@ -39,24 +39,27 @@ include{:fstar}{:open} "Vale.Poly1305.Util"
 module Vale.Poly1305.X64
 
 #verbatim{:interface}{:implementation}
-open Vale.Def.Opaque_s
-open Vale.Def.Types_s
-open Vale.Arch.Types
 open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
-open Vale.X64.State
 open Vale.X64.Decls
+open Vale.X64.QuickCode
+#endverbatim
+#verbatim{:implementation}
+open Vale.Def.Opaque_s
+open Vale.Def.Types_s
+open Vale.Arch.Types
+open Vale.X64.State
 open Vale.X64.InsBasic
 open Vale.X64.InsMem
 open Vale.X64.InsStack
-open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.Poly1305.Spec_s
 open Vale.Poly1305.Math
 open Vale.Poly1305.Util
-#reset-options "--z3rlimit 40"
+#set-options "--z3rlimit 200"
+#set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 #endverbatim
 
 procedure Poly1305_multiply(ghost r1:nat64) returns(ghost hh:int)

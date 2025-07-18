@@ -50,7 +50,9 @@ open Spec.Hash.Definitions
 open Spec.Loops
 open Vale.SHA.PPC64LE.Rounds
 open Vale.SHA2.Wrapper
-#reset-options "--z3rlimit 2000"
+#endverbatim
+#verbatim{:implementation}
+#set-options "--z3rlimit 2000"
 #endverbatim
 
 procedure Loop_prologue(ghost in_b:buffer128, ghost offset:nat, ghost k_b:buffer128, ghost block:block_w, ghost hash_orig:hash256)
