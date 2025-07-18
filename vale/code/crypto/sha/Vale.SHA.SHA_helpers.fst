@@ -282,7 +282,7 @@ let lemma_add_mod_e (a b c d e f g h wk:UInt32.t) :
   assert (core == add_mod (_Ch SHA2_256 e f g) (add_mod (_Sigma1 SHA2_256 e) (add_mod wk (add_mod h d))));
   ()
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 30"
+#push-options "--z3rlimit 30"
 let lemma_sha256_rnds2_spec_update_is_shuffle_core (hash:hash256) (wk:UInt32.t) (t:counter) (block:block_w) : Lemma
    (requires t < size_k_w SHA2_256 /\ wk == to_uint32 (add_mod32 (k0 SHA2_256).[t] (ws_opaque block t)))
    (ensures (let a', b', c', d', e', f', g', h' =
@@ -330,7 +330,7 @@ let lemma_rnds_quad32 (abef cdgh:quad32) (wk:UInt32.t) (block:block_w) (t:counte
   ()
 
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 30"
+#push-options "--z3rlimit 30"
 let lemma_rnds2_spec_quad32_is_shuffle_core_x2 (abef cdgh:quad32) (wk0 wk1:UInt32.t) (block:block_w) (t:counter{t < size_k_w_256 - 1}) : Lemma
   (requires vv wk0 == add_mod32 (k0 SHA2_256).[t] (ws_opaque block t) /\
             vv wk1 == add_mod32 (k0 SHA2_256).[t+1] (ws_opaque block (t+1)))
