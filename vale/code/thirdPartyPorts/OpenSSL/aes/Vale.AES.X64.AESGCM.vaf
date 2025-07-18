@@ -37,32 +37,34 @@ include "Vale.AES.X64.AESopt2.vaf"
 
 module Vale.AES.X64.AESGCM
 
-#verbatim{:interface}{:implementation}
+#verbatim{:interface}
 open FStar.Mul
-open Vale.Def.Prop_s
-open Vale.Def.Opaque_s
-open Vale.Def.Words_s
-open Vale.Def.Types_s
 open FStar.Seq
 open Vale.AES.AES_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
-open Vale.X64.State
 open Vale.X64.Decls
+open Vale.X64.QuickCode
+open Vale.X64.CPU_Features_s
+open Vale.AES.X64.AESopt
+#endverbatim
+#verbatim{:implementation}
+open Vale.Def.Prop_s
+open Vale.Def.Opaque_s
+open Vale.Def.Words_s
+open Vale.Def.Types_s
+open Vale.X64.State
 open Vale.X64.InsBasic
 open Vale.X64.InsMem
 open Vale.X64.InsVector
 open Vale.X64.InsAes
-open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.Arch.Types
 open Vale.AES.AES_helpers
-//open Vale.Poly1305.Math    // For lemma_poly_bits64()
 open Vale.AES.GCM_helpers
 open Vale.AES.GCTR_s
 open Vale.AES.GCTR
 open Vale.Arch.TypesNative
-open Vale.X64.CPU_Features_s
 open Vale.AES.X64.PolyOps
 open Vale.Math.Poly2_s
 open Vale.Math.Poly2
@@ -72,8 +74,8 @@ open Vale.Math.Poly2.Lemmas
 open Vale.AES.GF128_s
 open Vale.AES.GF128
 open Vale.AES.GHash
-open Vale.AES.X64.AESopt
 open Vale.AES.X64.AESopt2
+open Vale.Poly1305.Math    // For lemma_poly_bits64()
 #endverbatim
 
 #verbatim{:implementation}
@@ -128,7 +130,7 @@ function operator(~~) (a:quad32):poly := of_quad32;
 function operator([]) #[a:Type(0)](s:FStar.Seq.Base.seq(a), i:int):a extern;
 #verbatim
 let va_subscript_FStar__Seq__Base__seq = Seq.index
-#reset-options "--z3rlimit 30"
+#set-options "--z3rlimit 30"
 #endverbatim
 
 //function operator([]) (b:buffer128, i:int):fun(heap0)->quad32:= buffer128_read;

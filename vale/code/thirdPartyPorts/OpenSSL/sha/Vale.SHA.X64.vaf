@@ -51,7 +51,9 @@ open Spec.Hash.Definitions
 open Spec.Loops
 open Vale.X64.Stack
 open Vale.X64.CPU_Features_s
-#reset-options "--z3rlimit 40"
+#endverbatim
+#verbatim{:implementation}
+#set-options "--z3rlimit 40"
 #endverbatim
 
 procedure Preamble(ghost ctx_b:buffer128)
