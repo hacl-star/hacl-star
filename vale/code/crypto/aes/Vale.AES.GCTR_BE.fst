@@ -439,6 +439,8 @@ let nat32_xor_bytewise (k k' m:nat32) (s s' t t':seq4 nat8) (n:nat) : Lemma
   lemma_slice_orig_index t t' 0 n;
   ()
 
+#reset-options "--z3rlimit 50"
+
 let quad32_xor_bytewise (q q' r:quad32) (n:nat{ n <= 16 }) : Lemma
   (requires (let q_bytes  = be_quad32_to_bytes q in
              let q'_bytes = be_quad32_to_bytes q' in
