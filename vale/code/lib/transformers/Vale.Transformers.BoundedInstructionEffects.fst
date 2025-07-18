@@ -154,7 +154,7 @@ let locations_of_ocmp o =
   | OGt o1 o2 ->
     both (locations_of_operand64 o1) `L.append` both (locations_of_operand64 o2)
 
-#push-options "--z3rlimit 50 --fuel 2 --ifuel 1"
+#push-options "--z3rlimit 100 --fuel 2 --ifuel 1"
 #restart-solver
 let rec lemma_instr_write_outputs_only_affects_write
     (outs:list instr_out) (args:list instr_operand)
