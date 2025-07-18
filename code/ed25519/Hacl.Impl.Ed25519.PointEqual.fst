@@ -85,7 +85,7 @@ let lemma_equality1 a b c d e a' b' c' d' e' =
 
     calc (==) {
       (a + pow2 51 * b + pow2 102 * c + pow2 153 * d + pow2 204 * e) % (pow2 204);
-      (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+      == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
          (a + pow2 51 * b + pow2 102 * c + pow2 153 * d)
          (pow2 204 * e)
          (pow2 204);
@@ -95,7 +95,7 @@ let lemma_equality1 a b c d e a' b' c' d' e' =
     };
     calc (==) {
       (a' + pow2 51 * b' + pow2 102 * c' + pow2 153 * d' + pow2 204 * e') % (pow2 204);
-      (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+      == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
          (a' + pow2 51 * b' + pow2 102 * c' + pow2 153 * d')
          (pow2 204 * e')
          (pow2 204);
@@ -109,7 +109,7 @@ let lemma_equality1 a b c d e a' b' c' d' e' =
 
     calc (==) {
       (a + pow2 51 * b + pow2 102 * c + pow2 153 * d) % (pow2 153);
-      (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+      == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
          (a + pow2 51 * b + pow2 102 * c)
          (pow2 153 * d)
          (pow2 153);
@@ -119,7 +119,7 @@ let lemma_equality1 a b c d e a' b' c' d' e' =
     };
     calc (==) {
       (a' + pow2 51 * b' + pow2 102 * c' + pow2 153 * d') % (pow2 153);
-      (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+      == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
          (a' + pow2 51 * b' + pow2 102 * c')
          (pow2 153 * d')
          (pow2 153);
@@ -134,7 +134,7 @@ let lemma_equality1 a b c d e a' b' c' d' e' =
 
     calc (==) {
       (a + pow2 51 * b + pow2 102 * c) % (pow2 102);
-      (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+      == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
          (a + pow2 51 * b)
          (pow2 102 * c)
          (pow2 102);
@@ -144,7 +144,7 @@ let lemma_equality1 a b c d e a' b' c' d' e' =
     };
     calc (==) {
       (a' + pow2 51 * b' + pow2 102 * c') % (pow2 102);
-      (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r
+      == { FStar.Math.Lemmas.lemma_mod_plus_distr_r
          (a' + pow2 51 * b')
          (pow2 102 * c')
          (pow2 102);

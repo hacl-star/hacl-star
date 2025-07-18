@@ -113,17 +113,17 @@ let carry_pass_lemma f cin =
   SD.bn_upd_eval r b1 0;
   calc (==) {
     SD.bn_v out % P.prime;
-    (==) { assert_norm (pow2 0 = 1) }
+    == { assert_norm (pow2 0 = 1) }
     (SD.bn_v r - v r.[0] + v b1) % P.prime;
-    (==) { lemma_add1_carry f cin }
+    == { lemma_add1_carry f cin }
     (SD.bn_v r - v r.[0] + (v r.[0] + v c * 38)) % P.prime;
-    (==) { }
+    == { }
     (SD.bn_v r + v c * 38) % P.prime;
-    (==) { Lemmas.lemma_mul_pow256_add (SD.bn_v r) (v c) }
+    == { Lemmas.lemma_mul_pow256_add (SD.bn_v r) (v c) }
     (SD.bn_v r + v c * pow2 256) % P.prime;
-    (==) { }
+    == { }
     (SD.bn_v f + v cin * 38) % P.prime;
-    (==) { Lemmas.lemma_mul_pow256_add (SD.bn_v f) (v cin) }
+    == { Lemmas.lemma_mul_pow256_add (SD.bn_v f) (v cin) }
     (SD.bn_v f + v cin * pow2 256) % P.prime;
     }
 
@@ -145,15 +145,15 @@ let carry_wide f =
   let out = carry_pass r0 c in
   calc (==) {
     SD.bn_v out % P.prime;
-    (==) { carry_pass_lemma r0 c }
+    == { carry_pass_lemma r0 c }
     (SD.bn_v r0 + v c * pow2 256) % P.prime;
-    (==) { }
+    == { }
     (SD.bn_v (sub f 0 4) + SD.bn_v (sub f 4 4) * 38) % P.prime;
-    (==) { Lemmas.lemma_mul_pow256_add (SD.bn_v (sub f 0 4)) (SD.bn_v (sub f 4 4)) }
+    == { Lemmas.lemma_mul_pow256_add (SD.bn_v (sub f 0 4)) (SD.bn_v (sub f 4 4)) }
     (SD.bn_v (sub f 0 4) + SD.bn_v (sub f 4 4) * pow2 256) % P.prime;
-    (==) { SD.bn_concat_lemma (sub f 0 4) (sub f 4 4) }
+    == { SD.bn_concat_lemma (sub f 0 4) (sub f 4 4) }
     SD.bn_v (concat (sub f 0 4) (sub f 4 4)) % P.prime;
-    (==) { eq_intro f (concat (sub f 0 4) (sub f 4 4)) }
+    == { eq_intro f (concat (sub f 0 4) (sub f 4 4)) }
     SD.bn_v f % P.prime;
   };
   out
@@ -236,13 +236,13 @@ let fsub4 f1 f2 =
   SD.bn_upd_eval r1 b1 0;
   calc (==) {
     SD.bn_v out % P.prime;
-    (==) { assert_norm (pow2 0 = 1) }
+    == { assert_norm (pow2 0 = 1) }
     (SD.bn_v r1 - v r1.[0] + v b1) % P.prime;
-    (==) { lemma_sub1_carry r0 c0 }
+    == { lemma_sub1_carry r0 c0 }
     (SD.bn_v r1 - v r1.[0] + (v r1.[0] - v c1 * 38)) % P.prime;
-    (==) { }
+    == { }
     (SD.bn_v f1 - SD.bn_v f2 + v c0 * pow2 256 - v c0 * 38 + v c1 * pow2 256 - v c1 * 38) % P.prime;
-    (==) { Lemmas.lemma_fsub4 (SD.bn_v f1) (SD.bn_v f2) (v c0) (v c1) }
+    == { Lemmas.lemma_fsub4 (SD.bn_v f1) (SD.bn_v f2) (v c0) (v c1) }
     (SD.bn_v f1 % P.prime - SD.bn_v f2 % P.prime) % P.prime;
     };
   out
@@ -291,11 +291,11 @@ let fmul14 f1 f2 =
   let out = carry_pass r0 c0 in
   calc (==) {
     SD.bn_v out % P.prime;
-    (==) { carry_pass_lemma r0 c0 }
+    == { carry_pass_lemma r0 c0 }
     (SD.bn_v r0 + v c0 * pow2 256) % P.prime;
-    (==) { }
+    == { }
     (SD.bn_v f1 * v f2) % P.prime;
-    (==) {Math.Lemmas.lemma_mod_mul_distr_l (SD.bn_v f1) (v f2) P.prime }
+    == {Math.Lemmas.lemma_mod_mul_distr_l (SD.bn_v f1) (v f2) P.prime }
     (SD.bn_v f1 % P.prime * v f2) % P.prime;
     };
   out

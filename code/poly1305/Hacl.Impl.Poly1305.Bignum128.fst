@@ -93,17 +93,17 @@ let mod_add128_lemma a b =
 
   calc (==) {
     v r2 * pow2 64 + v r0;
-    (==) { }
+    == { }
     ((v a1 + v b1) % pow2 64 + (v a0 + v b0) / pow2 64) % pow2 64 * pow2 64 + (v a0 + v b0) % pow2 64;
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 ((v a1 + v b1) % pow2 64 + (v a0 + v b0) / pow2 64) 128 64 }
+    == { Math.Lemmas.pow2_multiplication_modulo_lemma_2 ((v a1 + v b1) % pow2 64 + (v a0 + v b0) / pow2 64) 128 64 }
     ((v a1 + v b1) % pow2 64 + (v a0 + v b0) / pow2 64) * pow2 64 % pow2 128 + (v a0 + v b0) % pow2 64;
-    (==) { }
+    == { }
     ((v a1 + v b1) % pow2 64 * pow2 64 + (v a0 + v b0) / pow2 64 * pow2 64) % pow2 128 + (v a0 + v b0) % pow2 64;
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v a1 + v b1) 128 64 }
+    == { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v a1 + v b1) 128 64 }
     ((v a1 + v b1) * pow2 64 % pow2 128 + (v a0 + v b0) / pow2 64 * pow2 64) % pow2 128 + (v a0 + v b0) % pow2 64;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l ((v a1 + v b1) * pow2 64) ((v a0 + v b0) / pow2 64 * pow2 64) (pow2 128) }
+    == { Math.Lemmas.lemma_mod_plus_distr_l ((v a1 + v b1) * pow2 64) ((v a0 + v b0) / pow2 64 * pow2 64) (pow2 128) }
     ((v a1 + v b1) * pow2 64 + (v a0 + v b0) / pow2 64 * pow2 64) % pow2 128 + (v a0 + v b0) % pow2 64;
-    (==) { Math.Lemmas.modulo_lemma ((v a0 + v b0) % pow2 64) (pow2 128) }
+    == { Math.Lemmas.modulo_lemma ((v a0 + v b0) % pow2 64) (pow2 128) }
     ((v a1 + v b1) * pow2 64 + (v a0 + v b0) / pow2 64 * pow2 64) % pow2 128 + ((v a0 + v b0) % pow2 64) % pow2 128;
   };
   assert (v r2 * pow2 64 + v r0 ==

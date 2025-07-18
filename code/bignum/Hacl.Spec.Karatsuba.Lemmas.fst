@@ -28,11 +28,11 @@ let lemma_double_p pbits aLen =
   let p = pow2 (aLen / 2 * pbits) in
   calc (==) {
     p * p;
-    (==) { Math.Lemmas.pow2_plus (aLen / 2 * pbits) (aLen / 2 * pbits) }
+    == { Math.Lemmas.pow2_plus (aLen / 2 * pbits) (aLen / 2 * pbits) }
     pow2 (aLen / 2 * pbits + aLen / 2 * pbits);
-    (==) { Math.Lemmas.distributivity_add_left (aLen / 2) (aLen / 2) pbits }
+    == { Math.Lemmas.distributivity_add_left (aLen / 2) (aLen / 2) pbits }
     pow2 ((aLen / 2 * 2) * pbits);
-    (==) { Math.Lemmas.lemma_div_exact aLen 2 }
+    == { Math.Lemmas.lemma_div_exact aLen 2 }
     pow2 (aLen * pbits);
     }
 
@@ -61,52 +61,52 @@ let lemma_middle_karatsuba a0 a1 b0 b1 =
   | (Positive, Positive) ->
     calc (==) { //t45
      t01 - t23;
-     (==) { }
+     == { }
      a0 * b0 + a1 * b1 - (a0 - a1) * (b0 - b1);
-     (==) { Math.Lemmas.distributivity_sub_right (a0 - a1) b0 b1 }
+     == { Math.Lemmas.distributivity_sub_right (a0 - a1) b0 b1 }
      a0 * b0 + a1 * b1 - ((a0 - a1) * b0 - (a0 - a1) * b1);
-     (==) { Math.Lemmas.distributivity_sub_left a0 a1 b0; Math.Lemmas.distributivity_sub_left a0 a1 b1 }
+     == { Math.Lemmas.distributivity_sub_left a0 a1 b0; Math.Lemmas.distributivity_sub_left a0 a1 b1 }
      a0 * b0 + a1 * b1 - (a0 * b0 - a1 * b0 - (a0 * b1 - a1 * b1));
-     (==) { }
+     == { }
      a1 * b0 + a0 * b1;
      }
 
   | (Negative, Negative) ->
     calc (==) { //t45
      t01 - t23;
-     (==) { }
+     == { }
      a0 * b0 + a1 * b1 - (a1 - a0) * (b1 - b0);
-     (==) { Math.Lemmas.distributivity_sub_right (a1 - a0) b1 b0 }
+     == { Math.Lemmas.distributivity_sub_right (a1 - a0) b1 b0 }
      a0 * b0 + a1 * b1 - ((a1 - a0) * b1 - (a1 - a0) * b0);
-     (==) { Math.Lemmas.distributivity_sub_left a1 a0 b1; Math.Lemmas.distributivity_sub_left a1 a0 b0 }
+     == { Math.Lemmas.distributivity_sub_left a1 a0 b1; Math.Lemmas.distributivity_sub_left a1 a0 b0 }
      a0 * b0 + a1 * b1 - (a1 * b1 - a0 * b1 - (a1 * b0 - a0 * b0));
-     (==) { }
+     == { }
      a1 * b0 + a0 * b1;
      }
 
   | (Positive, Negative) ->
     calc (==) { //t45
      t01 + t23;
-     (==) { }
+     == { }
      a0 * b0 + a1 * b1 + (a0 - a1) * (b1 - b0);
-     (==) { Math.Lemmas.distributivity_sub_right (a0 - a1) b1 b0 }
+     == { Math.Lemmas.distributivity_sub_right (a0 - a1) b1 b0 }
      a0 * b0 + a1 * b1 + ((a0 - a1) * b1 - (a0 - a1) * b0);
-     (==) { Math.Lemmas.distributivity_sub_left a0 a1 b1; Math.Lemmas.distributivity_sub_left a0 a1 b0 }
+     == { Math.Lemmas.distributivity_sub_left a0 a1 b1; Math.Lemmas.distributivity_sub_left a0 a1 b0 }
      a0 * b0 + a1 * b1 + (a0 * b1 - a1 * b1 - (a0 * b0 - a1 * b0));
-     (==) { }
+     == { }
      a1 * b0 + a0 * b1;
      }
 
   | (Negative, Positive) ->
     calc (==) { //t45
      t01 + t23;
-     (==) { }
+     == { }
      a0 * b0 + a1 * b1 + (a1 - a0) * (b0 - b1);
-     (==) { Math.Lemmas.distributivity_sub_right (a1 - a0) b0 b1 }
+     == { Math.Lemmas.distributivity_sub_right (a1 - a0) b0 b1 }
      a0 * b0 + a1 * b1 + ((a1 - a0) * b0 - (a1 - a0) * b1);
-     (==) { Math.Lemmas.distributivity_sub_left a1 a0 b0; Math.Lemmas.distributivity_sub_left a1 a0 b1 }
+     == { Math.Lemmas.distributivity_sub_left a1 a0 b0; Math.Lemmas.distributivity_sub_left a1 a0 b1 }
      a0 * b0 + a1 * b1 + (a1 * b0 - a0 * b0 - (a1 * b1 - a0 * b1));
-     (==) { }
+     == { }
      a1 * b0 + a0 * b1;
      }
 
@@ -127,25 +127,25 @@ let lemma_karatsuba pbits aLen a0 a1 b0 b1 =
 
   calc (==) {
     a * b;
-    (==) { }
+    == { }
     (a1 * p + a0) * (b1 * p + b0);
-    (==) { Math.Lemmas.distributivity_add_left (a1 * p) a0 (b1 * p + b0) }
+    == { Math.Lemmas.distributivity_add_left (a1 * p) a0 (b1 * p + b0) }
     a1 * p * (b1 * p + b0) + a0 * (b1 * p + b0);
-    (==) { Math.Lemmas.distributivity_add_right (a1 * p) (b1 * p) b0; Math.Lemmas.distributivity_add_right a0 (b1 * p) b0 }
+    == { Math.Lemmas.distributivity_add_right (a1 * p) (b1 * p) b0; Math.Lemmas.distributivity_add_right a0 (b1 * p) b0 }
     a1 * p * (b1 * p) + a1 * p * b0 + a0 * (b1 * p) + a0 * b0;
-    (==) { Math.Lemmas.paren_mul_right a0 b1 p }
+    == { Math.Lemmas.paren_mul_right a0 b1 p }
     a1 * p * (b1 * p) + a1 * p * b0 + a0 * b1 * p + a0 * b0;
-    (==) {
+    == {
       Math.Lemmas.paren_mul_right a1 p (b1 * p); Math.Lemmas.swap_mul b1 p;
       Math.Lemmas.paren_mul_right p p b1; Math.Lemmas.swap_mul b1 (p * p) }
     a1 * (b1 * (p * p)) + a1 * p * b0 + a0 * b1 * p + a0 * b0;
-    (==) { Math.Lemmas.paren_mul_right a1 b1 (p * p) }
+    == { Math.Lemmas.paren_mul_right a1 b1 (p * p) }
     a1 * b1 * (p * p) + a1 * p * b0 + a0 * b1 * p + a0 * b0;
-    (==) { lemma_double_p pbits aLen }
+    == { lemma_double_p pbits aLen }
     a1 * b1 * pow2 (pbits * aLen) + a1 * p * b0 + a0 * b1 * p + a0 * b0;
-    (==) { Math.Lemmas.paren_mul_right a1 p b0; Math.Lemmas.swap_mul b0 p; Math.Lemmas.paren_mul_right a1 b0 p }
+    == { Math.Lemmas.paren_mul_right a1 p b0; Math.Lemmas.swap_mul b0 p; Math.Lemmas.paren_mul_right a1 b0 p }
     a1 * b1 * pow2 (pbits * aLen) + a1 * b0 * p + a0 * b1 * p + a0 * b0;
-    (==) { Math.Lemmas.distributivity_add_left (a1 * b0) (a0 * b1) p }
+    == { Math.Lemmas.distributivity_add_left (a1 * b0) (a0 * b1) p }
     a1 * b1 * pow2 (pbits * aLen) + (a1 * b0 + a0 * b1) * p + a0 * b0;
    }
 #pop-options

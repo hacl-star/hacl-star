@@ -23,14 +23,14 @@ let bn_v_is_as_nat a =
 
   calc (==) {
     bn_v a;
-  (==) { bn_eval1 (slice a 0 1); bn_eval_split_i #U64 a 1 }
+  == { bn_eval1 (slice a 0 1); bn_eval_split_i #U64 a 1 }
     v a.[0] + pow2 64 * bn_v (slice a 1 4);
-  (==) { bn_eval_split_i #U64 (slice a 1 4) 1; bn_eval1 (slice a 1 2) }
+  == { bn_eval_split_i #U64 (slice a 1 4) 1; bn_eval1 (slice a 1 2) }
     v a.[0] + pow2 64 * v a.[1] + pow2 64 * pow2 64 * bn_v (slice a 2 4);
-  (==) { bn_eval_split_i #U64 (slice a 2 4) 1; bn_eval1 (slice a 2 3) }
+  == { bn_eval_split_i #U64 (slice a 2 4) 1; bn_eval1 (slice a 2 3) }
     v a.[0] + pow2 64 * v a.[1] + pow2 64 * pow2 64 * v a.[2]
     + pow2 64 * pow2 64 * pow2 64 * bn_v (slice a 3 4);
-  (==) { bn_eval1 (slice a 3 4) }
+  == { bn_eval1 (slice a 3 4) }
     v a.[0] + pow2 64 * v a.[1] + pow2 64 * pow2 64 * v a.[2]
     + pow2 64 * pow2 64 * pow2 64 * v a.[3];
   }

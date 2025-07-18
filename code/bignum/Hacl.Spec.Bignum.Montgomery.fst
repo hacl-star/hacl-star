@@ -175,15 +175,15 @@ let bn_mont_reduction_f_eval_lemma_aux pbits er0 rj nLen n qj j c0 c1 c2 =
   let p = pow2 (pbits * (nLen + j)) in
   calc (==) {
     er0 + n * qj * pow2 (pbits * j) - c1 * p + p * (c0 + c1 + rj - c2 * pow2 pbits);
-    (==) { Math.Lemmas.distributivity_add_right p c1 (c0 + rj - c2 * pow2 pbits) }
+    == { Math.Lemmas.distributivity_add_right p c1 (c0 + rj - c2 * pow2 pbits) }
     er0 + n * qj * pow2 (pbits * j) - c1 * p + p * c1 + p * (c0 + rj - c2 * pow2 pbits);
-    (==) { }
+    == { }
     er0 + n * qj * pow2 (pbits * j) + p * (c0 + rj - c2 * pow2 pbits);
-    (==) { Math.Lemmas.distributivity_add_right p rj (c0 - c2 * pow2 pbits) }
+    == { Math.Lemmas.distributivity_add_right p rj (c0 - c2 * pow2 pbits) }
     er0 + n * qj * pow2 (pbits * j) + p * rj + p * (c0 - c2 * pow2 pbits);
-    (==) { Math.Lemmas.distributivity_sub_right p c0 (c2 * pow2 pbits); Math.Lemmas.paren_mul_right p c2 (pow2 pbits) }
+    == { Math.Lemmas.distributivity_sub_right p c0 (c2 * pow2 pbits); Math.Lemmas.paren_mul_right p c2 (pow2 pbits) }
     er0 + n * qj * pow2 (pbits * j) + p * rj + p * c0 - p * c2 * pow2 pbits;
-    (==) { Math.Lemmas.pow2_plus (pbits * (nLen + j)) pbits; Math.Lemmas.paren_mul_right c2 p (pow2 pbits) }
+    == { Math.Lemmas.pow2_plus (pbits * (nLen + j)) pbits; Math.Lemmas.paren_mul_right c2 p (pow2 pbits) }
     er0 + n * qj * pow2 (pbits * j) + p * rj + p * c0 - c2 * pow2 (pbits * (nLen + j + 1));
     }
 
@@ -222,13 +222,13 @@ let bn_mont_reduction_f_eval_lemma #t #nLen n mu j (c0, res0) =
 
   calc (==) {
     eval_ resLen res1 (nLen + j) + p * v res.[nLen + j];
-    (==) { }
+    == { }
     eval_ resLen res0 (nLen + j) + bn_v n * v qj * pow2 (pbits * j) - v c1 * p + p * (v c0 + v c1 + v res1.[nLen + j] - v c2 * pow2 pbits);
-    (==) { bn_mont_reduction_f_eval_lemma_aux pbits (eval_ resLen res0 (nLen + j)) (v res1.[nLen + j]) nLen (bn_v n) (v qj) j (v c0) (v c1) (v c2) }
+    == { bn_mont_reduction_f_eval_lemma_aux pbits (eval_ resLen res0 (nLen + j)) (v res1.[nLen + j]) nLen (bn_v n) (v qj) j (v c0) (v c1) (v c2) }
     eval_ resLen res0 (nLen + j) + p * v res1.[nLen + j] + bn_v n * v qj * pow2 (pbits * j) + p * v c0 - pow2 (pbits * (nLen + j + 1)) * v c2;
-    (==) { Seq.lemma_index_slice res1 (nLen + j) resLen 0 }
+    == { Seq.lemma_index_slice res1 (nLen + j) resLen 0 }
     eval_ resLen res0 (nLen + j) + p * v res0.[nLen + j] + bn_v n * v qj * pow2 (pbits * j) + p * v c0 - pow2 (pbits * (nLen + j + 1)) * v c2;
-    (==) { bn_eval_unfold_i res0 (nLen + j + 1) }
+    == { bn_eval_unfold_i res0 (nLen + j + 1) }
     eval_ resLen res0 (nLen + j + 1) + bn_v n * v qj * pow2 (pbits * j) + p * v c0 - pow2 (pbits * (nLen + j + 1)) * v c2;
   };
 
@@ -293,13 +293,13 @@ let bn_mont_reduction_loop_step_lemma #t #nLen n mu j c1 res1 resM1 =
 
   calc (==) {
     (v c1 * pow2 (pbits * (nLen + j)) + bn_v res1) / pow2 (pbits * j) % pow2 pbits;
-    (==) { Math.Lemmas.pow2_plus (pbits * nLen) (pbits * j) }
+    == { Math.Lemmas.pow2_plus (pbits * nLen) (pbits * j) }
     (v c1 * pow2 (pbits * nLen) * pow2 (pbits * j) + bn_v res1) / pow2 (pbits * j) % pow2 pbits;
-    (==) { Math.Lemmas.division_addition_lemma (bn_v res1) (pow2 (pbits * j)) (v c1 * pow2 (pbits * nLen)) }
+    == { Math.Lemmas.division_addition_lemma (bn_v res1) (pow2 (pbits * j)) (v c1 * pow2 (pbits * nLen)) }
     (v c1 * pow2 (pbits * nLen) + bn_v res1 / pow2 (pbits * j)) % pow2 pbits;
-    (==) { Math.Lemmas.pow2_plus (pbits * (nLen - 1)) pbits }
+    == { Math.Lemmas.pow2_plus (pbits * (nLen - 1)) pbits }
     (v c1 * pow2 (pbits * (nLen - 1)) * pow2 pbits + bn_v res1 / pow2 (pbits * j)) % pow2 pbits;
-    (==) { Math.Lemmas.modulo_addition_lemma (bn_v res1 / pow2 (pbits * j)) (pow2 pbits) (v c1 * pow2 (pbits * (nLen - 1))) }
+    == { Math.Lemmas.modulo_addition_lemma (bn_v res1 / pow2 (pbits * j)) (pow2 pbits) (v c1 * pow2 (pbits * (nLen - 1))) }
     (bn_v res1 / pow2 (pbits * j)) % pow2 pbits;
     }
 
@@ -363,11 +363,11 @@ let bn_mont_reduction_loop_div_r_lemma #t #nLen n mu res0 =
 
   calc (==) { // resM / r =
     (v c0 * pow2 (pbits * resLen) + bn_v res1) / r;
-    (==) { Math.Lemmas.pow2_plus (pbits * nLen) (pbits * nLen) }
+    == { Math.Lemmas.pow2_plus (pbits * nLen) (pbits * nLen) }
     (v c0 * r * r + bn_v res1) / r;
-    (==) { Math.Lemmas.division_addition_lemma (bn_v res1) (r) (v c0 * r) }
+    == { Math.Lemmas.division_addition_lemma (bn_v res1) (r) (v c0 * r) }
     v c0 * r + bn_v res1 / r;
-    (==) { }
+    == { }
     v c0 * r + bn_v res2;
     };
   assert (resM / r == v c0 * r + bn_v res2)

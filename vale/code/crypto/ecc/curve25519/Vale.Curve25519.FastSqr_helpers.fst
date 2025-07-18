@@ -54,9 +54,9 @@ let lemma_sqr_part3
   =
   calc (==) {
     pow2_nine d0 d1 d2 d3 d4 d5 d6 d7 c;
-    (==) { () }
+    == { () }
     pow2_eight (pow2_64 * a0_sqr_hi + a0_sqr_lo) r8 (pow2_64 * a1_sqr_hi + a1_sqr_lo + r9) r10 (pow2_64 * a2_sqr_hi + a2_sqr_lo + r11) r12 (pow2_64 * a3_sqr_hi + a3_sqr_lo + r13) r14;
-    (==) {
+    == {
       assert_norm (mul_nats a0 a0 == a0 * a0);
       assert_norm (mul_nats a1 a1 == a1 * a1);
       assert_norm (mul_nats a2 a2 == a2 * a2);
@@ -107,21 +107,21 @@ let lemma_sqr (a:int) (a0 a1 a2 a3
 
   calc (==) {
     lhs_rem;
-    (==) { assert_by_tactic (pow2_seven 0 (2 * (mul_nats a0 a1)) (2 * (mul_nats a0 a2)) (2 * (mul_nats a0 a3 + mul_nats a1 a2)) (2 * (mul_nats a1 a3)) (2* (mul_nats a2 a3)) 0 == (2 * pow2_64) * pow2_five (mul_nats a0 a1) (mul_nats a0 a2) (mul_nats a0 a3) (mul_nats a1 a3) (mul_nats a2 a3) + (2 * pow2_192 * mul_nats a1 a2)) int_canon }
+    == { assert_by_tactic (pow2_seven 0 (2 * (mul_nats a0 a1)) (2 * (mul_nats a0 a2)) (2 * (mul_nats a0 a3 + mul_nats a1 a2)) (2 * (mul_nats a1 a3)) (2* (mul_nats a2 a3)) 0 == (2 * pow2_64) * pow2_five (mul_nats a0 a1) (mul_nats a0 a2) (mul_nats a0 a3) (mul_nats a1 a3) (mul_nats a2 a3) + (2 * pow2_192 * mul_nats a1 a2)) int_canon }
     (2 * pow2_64) * pow2_five (mul_nats a0 a1) (mul_nats a0 a2) (mul_nats a0 a3) (mul_nats a1 a3) (mul_nats a2 a3) + (2 * pow2_192 * mul_nats a1 a2);
-    (==) { }
+    == { }
     (2 * pow2_64) * pow2_six r8 r9 r10 r11 r12 r13 + (2 * pow2_192 * mul_nats a1 a2);
-    (==) { assert_norm (mul_nats a1 a2 == a1 * a2) }
+    == { assert_norm (mul_nats a1 a2 == a1 * a2) }
     (2 * pow2_64) * pow2_six r8 r9 r10 r11 r12 r13 + (2 * pow2_192 * (pow2_64 * rcx + rax));
-    (==) { assert_by_tactic (
+    == { assert_by_tactic (
       (2 * pow2_64) * pow2_six r8 r9 r10 r11 r12 r13 + (2 * pow2_192 * (pow2_64 * rcx + rax))
         ==
       pow2_64 * pow2_six (2*r8) (2*r9) (2*(r10+rax)) (2*(r11+rcx)) (2*r12) (2*r13)
     ) int_canon }
     pow2_64 * pow2_six (2*r8) (2*r9) (2*(r10+rax)) (2*(r11+rcx)) (2*r12) (2*r13);
-    (==) { }
+    == { }
     pow2_64 * pow2_seven r8' r9' r10' r11' r12' r13' r14';
-    (==) { assert_by_tactic (
+    == { assert_by_tactic (
          pow2_64 * pow2_seven r8' r9' r10' r11' r12' r13' r14' ==
          pow2_eight 0 r8' r9' r10' r11' r12' r13' r14'
       ) int_canon }
@@ -130,15 +130,15 @@ let lemma_sqr (a:int) (a0 a1 a2 a3
 
   calc (==) {
     a * a;
-    (==) { }
+    == { }
     pow2_seven (mul_nats a0 a0) (2*(mul_nats a0 a1)) (2*(mul_nats a0 a2) + (mul_nats a1 a1))
                          (2*((mul_nats a0 a3) + (mul_nats a1 a2))) (2*(mul_nats a1 a3) + (mul_nats a2 a2)) (2*(mul_nats a2 a3)) (mul_nats a3 a3);
-    (==) { assert_by_tactic (pow2_seven (mul_nats a0 a0) (2*(mul_nats a0 a1)) (2*(mul_nats a0 a2) + (mul_nats a1 a1))
+    == { assert_by_tactic (pow2_seven (mul_nats a0 a0) (2*(mul_nats a0 a1)) (2*(mul_nats a0 a2) + (mul_nats a1 a1))
                          (2*((mul_nats a0 a3) + (mul_nats a1 a2))) (2*(mul_nats a1 a3) + (mul_nats a2 a2)) (2*(mul_nats a2 a3)) (mul_nats a3 a3) == squares + lhs_rem) int_canon }
     squares + lhs_rem;
-    (==) { }
+    == { }
     squares + rhs_rem;
-    (==) {
+    == {
       assert (squares + rhs_rem ==  pow2_eight (mul_nats a0 a0) r8' ((mul_nats a1 a1) + r9') r10' ((mul_nats a2 a2) + r11') r12' ((mul_nats a3 a3) + r13') r14')
           by int_canon ()
     }

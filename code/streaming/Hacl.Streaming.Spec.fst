@@ -339,13 +339,13 @@ let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes
   Math.Lemmas.modulo_distributivity (S.length b) (S.length blocks') l;
   calc (==) {
     S.length (S.append b blocks') % l;
-  (==) {}
+  == {}
     (S.length b + S.length blocks') % l;
-  (==) { Math.Lemmas.modulo_distributivity (S.length b) (S.length blocks') l }
+  == { Math.Lemmas.modulo_distributivity (S.length b) (S.length blocks') l }
     ((S.length b % l) + (S.length blocks' % l)) % l;
-  (==) {}
+  == {}
     0 % l;
-  (==) { Math.Lemmas.modulo_lemma 0 l }
+  == { Math.Lemmas.modulo_lemma 0 l }
     0;
   };
 

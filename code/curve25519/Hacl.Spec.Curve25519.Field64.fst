@@ -43,11 +43,11 @@ let lemma_carry_pass_store0 f =
   assert (SD.bn_v r0 == SD.bn_v f - v f.[3] * pow2 (3 * 64) + v f3' * pow2 (3 * 64));
   calc (==) {
     SD.bn_v f - v f.[3] * pow2 (3 * 64) + v f3' * pow2 (3 * 64);
-    (==) { }
+    == { }
     SD.bn_v f - (v top_bit * pow2 63 + v f3') * pow2 (3 * 64) + v f3' * pow2 (3 * 64);
-    (==) { Math.Lemmas.distributivity_add_left (v top_bit * pow2 63) (v f3') (pow2 (3 * 64)) }
+    == { Math.Lemmas.distributivity_add_left (v top_bit * pow2 63) (v f3') (pow2 (3 * 64)) }
     SD.bn_v f - (v top_bit * pow2 63) * pow2 (3 * 64);
-    (==) { Math.Lemmas.paren_mul_right (v top_bit) (pow2 63) (pow2 (3 * 64)); Math.Lemmas.pow2_plus 63 (3 * 64) }
+    == { Math.Lemmas.paren_mul_right (v top_bit) (pow2 63) (pow2 (3 * 64)); Math.Lemmas.pow2_plus 63 (3 * 64) }
     SD.bn_v f - v top_bit * pow2 255;
     };
 
@@ -59,11 +59,11 @@ let lemma_carry_pass_store0 f =
 
   calc (==) { //SD.bn_v r1 % prime ==
     (SD.bn_v r0 + 19 * v top_bit) % prime;
-    (==) { }
+    == { }
     (SD.bn_v f - v top_bit * pow2 255 + 19 * v top_bit) % prime;
-    (==) { Lemmas.lemma_mul_pow255_add (SD.bn_v f - v top_bit * pow2 255) (v top_bit) }
+    == { Lemmas.lemma_mul_pow255_add (SD.bn_v f - v top_bit * pow2 255) (v top_bit) }
     (SD.bn_v f - v top_bit * pow2 255 + v top_bit * pow2 255) % prime;
-    (==) { }
+    == { }
     SD.bn_v f % prime;
     }
 

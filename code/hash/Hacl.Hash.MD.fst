@@ -290,15 +290,15 @@ let mk_hash a alloca update_multi update_last finish output input input_len =
   // We need to prove that rest_v0 @| padding is a block. We do this using the calc below
   calc (==) {
     S.(length (rest_v0 @| padding)) % block_length a;
-    (==) { }
+    == { }
     S.(length rest_v0 + S.length padding) % block_length a;
-    (==) { Math.Lemmas.lemma_mod_add_distr (S.length padding) (S.length rest_v0) (block_length a) }
+    == { Math.Lemmas.lemma_mod_add_distr (S.length padding) (S.length rest_v0) (block_length a) }
     S.(length rest_v0 % block_length a + S.length padding) % block_length a;
-    (==) { }
+    == { }
     S.(length input_v0 % block_length a + S.length padding) % block_length a;
-    (==) { Math.Lemmas.lemma_mod_add_distr (S.length padding) (S.length input_v0) (block_length a) }
+    == { Math.Lemmas.lemma_mod_add_distr (S.length padding) (S.length input_v0) (block_length a) }
     S.(length input_v0 + S.length padding) % block_length a;
-    (==) { }
+    == { }
     0;
   };
   (**) assert (as_seq h02 s == Spec.Agile.Hash.(update_multi a

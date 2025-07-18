@@ -137,15 +137,15 @@ let precomp_base_table_step_g_i #t #a_t #len #ctx_len k g n g_i_acc1 =
   assert (k.concr_ops.SE.to.SE.refl g_i1 == pow_base k g n);
   calc (==) {
     refl g_i;
-    (==) { }
+    == { }
     refl (k.concr_ops.SE.mul g_i1 g);
-    (==) { }
+    == { }
     k.concr_ops.SE.to.SE.comm_monoid.LE.mul (refl g_i1) (refl g);
-    (==) { }
+    == { }
     k.concr_ops.SE.to.SE.comm_monoid.LE.mul (pow_base k g n) (refl g);
-    (==) { k.concr_ops.SE.to.SE.comm_monoid.LE.lemma_mul_comm (pow_base k g n) (refl g) }
+    == { k.concr_ops.SE.to.SE.comm_monoid.LE.lemma_mul_comm (pow_base k g n) (refl g) }
     k.concr_ops.SE.to.SE.comm_monoid.LE.mul (refl g) (pow_base k g n);
-    (==) { LE.lemma_pow_unfold k.concr_ops.SE.to.SE.comm_monoid (refl g) (n + 1) }
+    == { LE.lemma_pow_unfold k.concr_ops.SE.to.SE.comm_monoid (refl g) (n + 1) }
     pow_base k g (n + 1);
   };
   assert (refl g_i == pow_base k g (n + 1))

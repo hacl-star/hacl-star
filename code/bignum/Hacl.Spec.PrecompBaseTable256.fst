@@ -14,11 +14,11 @@ module BD = Hacl.Spec.Bignum.Definitions
 let lemma_mod_pow2_sub x a b =
   calc (==) {
     x / pow2 a % pow2 b * pow2 a;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 x a (a + b) }
+    == { Math.Lemmas.pow2_modulo_division_lemma_1 x a (a + b) }
     x % pow2 (a + b) / pow2 a * pow2 a;
-    (==) { Math.Lemmas.euclidean_division_definition (x % pow2 (a + b)) (pow2 a) }
+    == { Math.Lemmas.euclidean_division_definition (x % pow2 (a + b)) (pow2 a) }
     x % pow2 (a + b) - x % pow2 (a + b) % pow2 a;
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 x a (a + b) }
+    == { Math.Lemmas.pow2_modulo_modulo_lemma_1 x a (a + b) }
     x % pow2 (a + b) - x % pow2 a;
   }
 
@@ -34,13 +34,13 @@ let lemma_decompose_nat256_as_four_u64 x =
   assert (x3 == x3');
   calc (==) {
     x0 + x1 * pow2 64 + x2 * pow2 128 + x3 * pow2 192;
-    (==) { }
+    == { }
     x0 + x1 * pow2 64 + (x / pow2 128 % pow2 64) * pow2 128 + x / pow2 192 * pow2 192;
-    (==) { lemma_mod_pow2_sub x 128 64 }
+    == { lemma_mod_pow2_sub x 128 64 }
     x0 + x1 * pow2 64 + x % pow2 192 - x % pow2 128 + x / pow2 192 * pow2 192;
-    (==) { Math.Lemmas.euclidean_division_definition x (pow2 192) }
+    == { Math.Lemmas.euclidean_division_definition x (pow2 192) }
     x0 + x1 * pow2 64 - x % pow2 128 + x;
-    (==) { lemma_mod_pow2_sub x 64 64 }
+    == { lemma_mod_pow2_sub x 64 64 }
     x;
   }
 
@@ -54,39 +54,39 @@ let lemma_point_mul_base_precomp4 #t k a b =
 
   calc (==) {
     LE.exp_four_fw k a 64 b0 a_pow2_64 b1 a_pow2_128 b2 a_pow2_192 b3 4;
-    (==) { LE.exp_four_fw_lemma k a 64 b0 a_pow2_64 b1 a_pow2_128 b2 a_pow2_192 b3 4 }
+    == { LE.exp_four_fw_lemma k a 64 b0 a_pow2_64 b1 a_pow2_128 b2 a_pow2_192 b3 4 }
     k.LE.mul
       (k.LE.mul
         (k.LE.mul (LE.pow k a b0) (LE.pow k (LE.pow k a (pow2 64)) b1))
         (LE.pow k a_pow2_128 b2))
       (LE.pow k a_pow2_192 b3);
-    (==) { LE.lemma_pow_mul k a (pow2 64) b1 }
+    == { LE.lemma_pow_mul k a (pow2 64) b1 }
     k.LE.mul
       (k.LE.mul
         (k.LE.mul (LE.pow k a b0) (LE.pow k a (b1 * pow2 64)))
         (LE.pow k a_pow2_128 b2))
       (LE.pow k a_pow2_192 b3);
-    (==) { LE.lemma_pow_add k a b0 (b1 * pow2 64) }
+    == { LE.lemma_pow_add k a b0 (b1 * pow2 64) }
     k.LE.mul
       (k.LE.mul
         (LE.pow k a (b0 + b1 * pow2 64))
         (LE.pow k (LE.pow k a (pow2 128)) b2))
       (LE.pow k a_pow2_192 b3);
-    (==) { LE.lemma_pow_mul k a (pow2 128) b2 }
+    == { LE.lemma_pow_mul k a (pow2 128) b2 }
     k.LE.mul
       (k.LE.mul (LE.pow k a (b0 + b1 * pow2 64)) (LE.pow k a (b2 * pow2 128)))
       (LE.pow k a_pow2_192 b3);
-    (==) { LE.lemma_pow_add k a (b0 + b1 * pow2 64) (b2 * pow2 128) }
+    == { LE.lemma_pow_add k a (b0 + b1 * pow2 64) (b2 * pow2 128) }
     k.LE.mul
       (LE.pow k a (b0 + b1 * pow2 64 + b2 * pow2 128))
       (LE.pow k (LE.pow k a (pow2 192)) b3);
-    (==) { LE.lemma_pow_mul k a (pow2 192) b3 }
+    == { LE.lemma_pow_mul k a (pow2 192) b3 }
     k.LE.mul
       (LE.pow k a (b0 + b1 * pow2 64 + b2 * pow2 128))
       (LE.pow k a (b3 * pow2 192));
-    (==) { LE.lemma_pow_add k a (b0 + b1 * pow2 64 + b2 * pow2 128) (b3 * pow2 192) }
+    == { LE.lemma_pow_add k a (b0 + b1 * pow2 64 + b2 * pow2 128) (b3 * pow2 192) }
     LE.pow k a (b0 + b1 * pow2 64 + b2 * pow2 128 + b3 * pow2 192);
-    (==) { lemma_decompose_nat256_as_four_u64 b }
+    == { lemma_decompose_nat256_as_four_u64 b }
     LE.pow k a b;
   }
 
@@ -112,15 +112,15 @@ let a_pow2_128_lemma #t k a =
   let refl = k.SE.to.SE.refl in
   calc (==) {
     refl (a_pow2_128 k a);
-    (==) { }
+    == { }
     refl (SE.exp_pow2 k (a_pow2_64 k a) 64);
-    (==) { a_pow2_64_lemma k (a_pow2_64 k a) }
+    == { a_pow2_64_lemma k (a_pow2_64 k a) }
     LE.pow cm (refl (a_pow2_64 k a)) (pow2 64);
-    (==) { a_pow2_64_lemma k a }
+    == { a_pow2_64_lemma k a }
     LE.pow cm (LE.pow cm (refl a) (pow2 64)) (pow2 64);
-    (==) { LE.lemma_pow_mul cm (refl a) (pow2 64) (pow2 64) }
+    == { LE.lemma_pow_mul cm (refl a) (pow2 64) (pow2 64) }
     LE.pow cm (refl a) (pow2 64 * pow2 64);
-    (==) { Math.Lemmas.pow2_plus 64 64 }
+    == { Math.Lemmas.pow2_plus 64 64 }
     LE.pow cm (refl a) (pow2 128);
   }
 
@@ -130,15 +130,15 @@ let a_pow2_192_lemma #t k a =
   let refl = k.SE.to.SE.refl in
   calc (==) {
     refl (a_pow2_192 k a);
-    (==) { }
+    == { }
     refl (SE.exp_pow2 k (a_pow2_128 k a) 64);
-    (==) { a_pow2_64_lemma k (a_pow2_128 k a) }
+    == { a_pow2_64_lemma k (a_pow2_128 k a) }
     LE.pow cm (refl (a_pow2_128 k a)) (pow2 64);
-    (==) { a_pow2_128_lemma k a }
+    == { a_pow2_128_lemma k a }
     LE.pow cm (LE.pow cm (refl a) (pow2 128)) (pow2 64);
-    (==) { LE.lemma_pow_mul cm (refl a) (pow2 128) (pow2 64) }
+    == { LE.lemma_pow_mul cm (refl a) (pow2 128) (pow2 64) }
     LE.pow cm (refl a) (pow2 128 * pow2 64);
-    (==) { Math.Lemmas.pow2_plus 128 64 }
+    == { Math.Lemmas.pow2_plus 128 64 }
     LE.pow cm (refl a) (pow2 192);
   }
 

@@ -18,15 +18,15 @@ val lemma_prime: unit -> Lemma (pow2 256 % prime == 38)
 let lemma_prime () =
   calc (==) {
     pow2 256 % prime;
-    (==) { Math.Lemmas.pow2_plus 255 1 }
+    == { Math.Lemmas.pow2_plus 255 1 }
     2 * pow2 255 % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r 2 (pow2 255) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r 2 (pow2 255) prime }
     2 * (pow2 255 % prime) % prime;
-    (==) { Math.Lemmas.sub_div_mod_1 (pow2 255) prime }
+    == { Math.Lemmas.sub_div_mod_1 (pow2 255) prime }
     2 * (19 % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r 2 19 prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r 2 19 prime }
     38 % prime;
-    (==) { Math.Lemmas.small_mod 38 prime }
+    == { Math.Lemmas.small_mod 38 prime }
     38;
     }
 
@@ -42,13 +42,13 @@ val lemma_mul_pow256_add: fn:int -> c:int ->
 let lemma_mul_pow256_add fn c =
   calc (==) {
     (fn + c * pow2 256) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r fn (c * pow2 256) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_r fn (c * pow2 256) prime }
     (fn + c * pow2 256 % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r c (pow2 256) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r c (pow2 256) prime }
     (fn + c * (pow2 256 % prime) % prime) % prime;
-    (==) { lemma_prime () }
+    == { lemma_prime () }
     (fn + c * 38 % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r fn (c * 38) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_r fn (c * 38) prime }
     (fn + c * 38) % prime;
     }
 
@@ -58,13 +58,13 @@ val lemma_mul_pow255_add: fn:int -> c:int ->
 let lemma_mul_pow255_add fn c =
   calc (==) {
     (fn + c * pow2 255) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r fn (c * pow2 255) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_r fn (c * pow2 255) prime }
     (fn + c * pow2 255 % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r c (pow2 255) prime }
+    == { Math.Lemmas.lemma_mod_mul_distr_r c (pow2 255) prime }
     (fn + c * (pow2 255 % prime) % prime) % prime;
-    (==) { lemma_prime19 () }
+    == { lemma_prime19 () }
     (fn + c * 19 % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r fn (c * 19) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_r fn (c * 19) prime }
     (fn + c * 19) % prime;
     }
 
@@ -75,17 +75,17 @@ val lemma_fsub4: fn1:nat -> fn2:nat -> c0:nat -> c1:nat ->
 let lemma_fsub4 fn1 fn2 c0 c1 =
   calc (==) {
     (fn1 - fn2 + c0 * pow2 256 - c0 * 38 + c1 * pow2 256 - c1 * 38) % prime;
-    (==) { lemma_mul_pow256_add (fn1 - fn2 + c0 * pow2 256 - c0 * 38 + c1 * pow2 256) (- c1) }
+    == { lemma_mul_pow256_add (fn1 - fn2 + c0 * pow2 256 - c0 * 38 + c1 * pow2 256) (- c1) }
     (fn1 - fn2 + c0 * pow2 256 - c0 * 38 + c1 * pow2 256 - c1 * pow2 256) % prime;
-    (==) { }
+    == { }
     (fn1 - fn2 + c0 * pow2 256 - c0 * 38) % prime;
-    (==) { lemma_mul_pow256_add (fn1 - fn2 + c0 * pow2 256) (- c0) }
+    == { lemma_mul_pow256_add (fn1 - fn2 + c0 * pow2 256) (- c0) }
     (fn1 - fn2 + c0 * pow2 256 - c0 * pow2 256) % prime;
-    (==) { }
+    == { }
     (fn1 - fn2) % prime;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l fn1 (- fn2) prime }
+    == { Math.Lemmas.lemma_mod_plus_distr_l fn1 (- fn2) prime }
     (fn1 % prime - fn2) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (fn1 % prime) fn2 prime }
+    == { Math.Lemmas.lemma_mod_sub_distr (fn1 % prime) fn2 prime }
     (fn1 % prime - fn2 % prime) % prime;
     }
 
@@ -257,13 +257,13 @@ let lemma_felem64_mod255 a =
 
   calc (==) { //SD.bn_v a == SD.bn_v r + v a.[3] * pow2 192 - v a3' * pow2 192
     SD.bn_v r + v a.[3] * pow2 192 - v a3' * pow2 192;
-    (==) { }
+    == { }
     SD.bn_v r + v a.[3] * pow2 192 - v a.[3] % pow2 63 * pow2 192;
-    (==) { Math.Lemmas.distributivity_sub_left (v a.[3]) (v a.[3] % pow2 63) (pow2 192) }
+    == { Math.Lemmas.distributivity_sub_left (v a.[3]) (v a.[3] % pow2 63) (pow2 192) }
     SD.bn_v r + (v a.[3] - v a.[3] % pow2 63) * pow2 192;
-    (==) { Math.Lemmas.euclidean_division_definition (v a.[3]) (pow2 63) }
+    == { Math.Lemmas.euclidean_division_definition (v a.[3]) (pow2 63) }
     SD.bn_v r + v a.[3] / pow2 63 * pow2 63 * pow2 192;
-    (==) { Math.Lemmas.paren_mul_right (v a.[3] / pow2 63) (pow2 63) (pow2 192); Math.Lemmas.pow2_plus 63 192 }
+    == { Math.Lemmas.paren_mul_right (v a.[3] / pow2 63) (pow2 63) (pow2 192); Math.Lemmas.pow2_plus 63 192 }
     SD.bn_v r + v a.[3] / pow2 63 * pow2 255;
   };
 

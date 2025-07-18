@@ -91,17 +91,17 @@ let lemma_blocki_aux2 (a:blake_alg) (s1 s2:bytes) (nb1 nb2:nat) (i:nat{i < nb2})
     let a' = to_blake_alg a in
     calc (==) {
           Spec.Blake2.get_blocki a' s (i + nb1);
-          (==) { }
+          == { }
           S.slice s ((i + nb1) * block_length a) ((i + nb1 + 1) * block_length a);
-          (==) { }
+          == { }
           S.slice s (i * block_length a + nb1 * block_length a) ((i + 1) * block_length a + nb1 * block_length a);
-          (==) { }
+          == { }
           S.slice s (i * block_length a + S.length s1) ((i + 1) * block_length a + S.length s1);
-          (==) { S.slice_slice s (S.length s1) (S.length s) (i * block_length a) ((i+1) * block_length a) }
+          == { S.slice_slice s (S.length s1) (S.length s) (i * block_length a) ((i+1) * block_length a) }
           S.slice (S.slice s (S.length s1) (S.length s)) (i * block_length a) ((i+1) * block_length a);
-          (==) { S.append_slices s1 s2; assert (s2 `S.equal` S.slice s (S.length s1) (S.length s)) }
+          == { S.append_slices s1 s2; assert (s2 `S.equal` S.slice s (S.length s1) (S.length s)) }
           S.slice s2 (i * block_length a) ((i+1) * block_length a);
-          (==) { }
+          == { }
           Spec.Blake2.get_blocki a' s2 i;
         }
 
@@ -127,25 +127,25 @@ let lemma_update_aux2 (a:blake_alg) (s1 s2:bytes) (nb1 nb2:nat) (prevlen1 prevle
     // Proving totlen1 == totlen2 for the last calc step below
     calc (==) {
       totlen2;
-      (==) { }
+      == { }
       prevlen2 + (i + 1) * block_length a;
-      (==) { }
+      == { }
       prevlen1 + S.length s1 + (i + 1) * block_length a;
-      (==) { }
+      == { }
       prevlen1 + nb1 * block_length a + (i + 1) * block_length a;
-      (==) { Math.Lemmas.distributivity_add_left (i + 1) nb1 (block_length a) }
+      == { Math.Lemmas.distributivity_add_left (i + 1) nb1 (block_length a) }
       prevlen1 + (i + 1 + nb1) * block_length a;
-      (==) { }
+      == { }
       totlen1;
     };
 
     calc (==) {
       f1 (i + nb1) acc;
-      (==) { }
+      == { }
       blake2_update_block a' false false totlen1 (get_blocki a' s (i + nb1)) acc;
-      (==) { lemma_blocki_aux2 a s1 s2 nb1 nb2 i }
+      == { lemma_blocki_aux2 a s1 s2 nb1 nb2 i }
       blake2_update_block a' false false totlen1 (get_blocki a' s2 i) acc;
-      (==) { }
+      == { }
       f2 i acc;
 
     }
@@ -189,17 +189,17 @@ let update_multi_associative_blake (a: blake_alg)
     let fix = fixed_a (words_state a) in
     calc (==) {
       update_multi a h prevlen1 input;
-      (==) { }
+      == { }
       repeati #(words_state a) nb f h;
-      (==) { repeati_def nb f h }
+      == { repeati_def nb f h }
       repeat_right 0 nb fix f h;
-      (==) { repeat_right_plus 0 nb1 nb fix f h; repeati_def nb1 f h }
+      == { repeat_right_plus 0 nb1 nb fix f h; repeati_def nb1 f h }
       repeat_right nb1 nb fix f (repeati nb1 f h);
-      (==) { Classical.forall_intro_2 aux1; repeati_extensionality nb1 f f1 h }
+      == { Classical.forall_intro_2 aux1; repeati_extensionality nb1 f f1 h }
       repeat_right nb1 nb fix f (update_multi a h prevlen1 input1);
-      (==) { Classical.forall_intro_2 aux2; repeat_gen_right_extensionality nb2 nb1 fix fix f2 f (update_multi a h prevlen1 input1) }
+      == { Classical.forall_intro_2 aux2; repeat_gen_right_extensionality nb2 nb1 fix fix f2 f (update_multi a h prevlen1 input1) }
       repeat_right 0 nb2 fix f2 (update_multi a h prevlen1 input1);
-      (==) { repeati_def nb2 f2 (update_multi a h prevlen1 input1) }
+      == { repeati_def nb2 f2 (update_multi a h prevlen1 input1) }
       update_multi a (update_multi a h prevlen1 input1) prevlen2 input2;
     }
 

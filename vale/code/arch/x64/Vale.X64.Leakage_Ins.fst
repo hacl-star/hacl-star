@@ -851,13 +851,13 @@ let lemma_vpxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     lemma_instr_leakage_free ts ins
 #pop-options
 
-#push-options "--ifuel 2 --fuel 1 --z3rlimit 80"
+#push-options "--ifuel 2 --fuel 1 --z3rlimit 200"
 let lemma_ins_leakage_free ts ins =
   let (b, ts') = check_if_ins_consumes_fixed_time ins ts in
   match ins with
   | BC.Instr _ _ (S.AnnotateXor64 _) -> lemma_xor_leakage_free ts ins
   | BC.Instr _ _ (S.AnnotatePxor _) -> lemma_pxor_leakage_free ts ins
-  | BC.Instr _ _ (S.AnnotateVPxor _) -> lemma_vpxor_leakage_free ts ins  
+  | BC.Instr _ _ (S.AnnotateVPxor _) -> lemma_vpxor_leakage_free ts ins
   | BC.Instr _ _ _ -> lemma_instr_leakage_free ts ins
   | BC.Alloc _ -> ()
   | BC.Dealloc _ -> lemma_dealloc_leakage_free ts ins

@@ -110,16 +110,16 @@ let lemma_div224 x =
   assert_norm (pow2 280 * pow2 224 == pow2 504);
   calc (==) {
     wide_as_nat5 x / pow2 224;
-    (==) { }
+    == { }
     (v x0 + v x1 * pow2 56 + v x2 * pow2 112 + v x3 * pow2 168 +
     (v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280) * pow2 224) / pow2 224;
-    (==) {
+    == {
       FStar.Math.Lemmas.lemma_div_plus
         (v x0 + v x1 * pow2 56 + v x2 * pow2 112 + v x3 * pow2 168)
         (v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280) (pow2 224) }
     (v x0 + v x1 * pow2 56 + v x2 * pow2 112 + v x3 * pow2 168) / pow2 224 +
     v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280;
-    (==) { FStar.Math.Lemmas.small_division_lemma_1 (v x0 + v x1 * pow2 56 + v x2 * pow2 112 + v x3 * pow2 168) (pow2 224) }
+    == { FStar.Math.Lemmas.small_division_lemma_1 (v x0 + v x1 * pow2 56 + v x2 * pow2 112 + v x3 * pow2 168) (pow2 224) }
       v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280;
     }
 #pop-options
@@ -149,12 +149,12 @@ let lemma_div248_aux x =
 
   calc (==) {
     wide_as_nat5 x / pow2 248;
-  (==) { FStar.Math.Lemmas.division_multiplication_lemma (wide_as_nat5 x) (pow2 224) (pow2 24) }
+  == { FStar.Math.Lemmas.division_multiplication_lemma (wide_as_nat5 x) (pow2 224) (pow2 24) }
     (wide_as_nat5 x / pow2 224) / pow2 24;
-  (==) { lemma_div224 x }
+  == { lemma_div224 x }
     (v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280) / pow2 24;
-  (==) { _ by (Tactics.mapply (`feq #int #int (fun x -> x / pow2 24)); int_semiring ()) }    (v x4 + (v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256) * pow2 24) / pow2 24;
-  (==) { FStar.Math.Lemmas.lemma_div_plus (v x4) (v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256) (pow2 24) }
+  == { _ by (Tactics.mapply (`feq #int #int (fun x -> x / pow2 24)); int_semiring ()) }    (v x4 + (v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256) * pow2 24) / pow2 24;
+  == { FStar.Math.Lemmas.lemma_div_plus (v x4) (v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256) (pow2 24) }
     v x4 / pow2 24 + v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256;
   }
 #pop-options
@@ -169,9 +169,9 @@ val lemma_div248_x6: x6:uint64 ->
 let lemma_div248_x6 x6 =
   calc (==) {
     pow2 32 * (v x6 % pow2 24) * pow2 56 + v x6 / pow2 24 * pow2 112;
-    (==) { _ by (Tactics.norm [delta_only [`%pow2]; primops]; int_semiring ()) }
+    == { _ by (Tactics.norm [delta_only [`%pow2]; primops]; int_semiring ()) }
     ((v x6 / pow2 24) * pow2 24 + v x6 % pow2 24) * pow2 88;
-    (==) { FStar.Math.Lemmas.euclidean_division_definition (v x6) (pow2 24) }
+    == { FStar.Math.Lemmas.euclidean_division_definition (v x6) (pow2 24) }
     v x6 * pow2 88;
   }
 
@@ -181,9 +181,9 @@ val lemma_div248_x7: x7:uint64 ->
 let lemma_div248_x7 x7 =
   calc (==) {
     pow2 32 * (v x7 % pow2 24) * pow2 112 + v x7 / pow2 24 * pow2 168;
-    (==) { _ by (Tactics.norm [delta_only [`%pow2]; primops]; int_semiring ()) }
+    == { _ by (Tactics.norm [delta_only [`%pow2]; primops]; int_semiring ()) }
     ((v x7 / pow2 24) * pow2 24 + v x7 % pow2 24) * pow2 144;
-    (==) { FStar.Math.Lemmas.euclidean_division_definition (v x7) (pow2 24) }
+    == { FStar.Math.Lemmas.euclidean_division_definition (v x7) (pow2 24) }
     v x7 * pow2 144;
   }
 
@@ -193,9 +193,9 @@ val lemma_div248_x8: x8:uint64 ->
 let lemma_div248_x8 x8 =
   calc (==) {
     pow2 32 * (v x8 % pow2 24) * pow2 168 + v x8 / pow2 24 * pow2 224;
-    (==) { _ by (Tactics.norm [delta_only [`%pow2]; primops]; int_semiring ()) }
+    == { _ by (Tactics.norm [delta_only [`%pow2]; primops]; int_semiring ()) }
     ((v x8 / pow2 24) * pow2 24 + v x8 % pow2 24) * pow2 200;
-    (==) { FStar.Math.Lemmas.euclidean_division_definition (v x8) (pow2 24) }
+    == { FStar.Math.Lemmas.euclidean_division_definition (v x8) (pow2 24) }
     v x8 * pow2 200;
   }
 
@@ -205,9 +205,9 @@ val lemma_div248_x9: x9:uint64{v x9 < pow2 24} ->
 let lemma_div248_x9 x9 =
   calc (==) {
     pow2 32 * (v x9 % pow2 24) * pow2 224;
-    (==) { Math.Lemmas.small_mod (v x9) (pow2 24) }
+    == { Math.Lemmas.small_mod (v x9) (pow2 24) }
     pow2 32 * v x9 * pow2 224;
-    (==) { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
+    == { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
     v x9 * pow2 256;
   }
 
@@ -257,23 +257,23 @@ let lemma_div248 x =
     let z3 = v x7 / pow2 24 + pow2 32 * (v x8 % pow2 24) in
     let z4 = v x8 / pow2 24 + pow2 32 * (v x9 % pow2 24) in
     z0 + z1 * pow2 56 + z2 * pow2 112 + z3 * pow2 168 + z4 * pow2 224);
-  (==) { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
+  == { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
     v x4 / pow2 24 + pow2 32 * (v x5 % pow2 24) +
     v x5 / pow2 24 * pow2 56 + pow2 32 * (v x6 % pow2 24) * pow2 56 +
     v x6 / pow2 24 * pow2 112 + pow2 32 * (v x7 % pow2 24) * pow2 112 +
     v x7 / pow2 24 * pow2 168 + pow2 32 * (v x8 % pow2 24) * pow2 168 +
     v x8 / pow2 24 * pow2 224 + pow2 32 * (v x9 % pow2 24) * pow2 224;
-  (==) { lemma_div248_x5 x5; lemma_div248_x6 x6 }
+  == { lemma_div248_x5 x5; lemma_div248_x6 x6 }
     v x4 / pow2 24 + v x5 * pow2 32 + v x6 * pow2 88 +
     pow2 32 * (v x7 % pow2 24) * pow2 112 +
     v x7 / pow2 24 * pow2 168 + pow2 32 * (v x8 % pow2 24) * pow2 168 +
     v x8 / pow2 24 * pow2 224 + pow2 32 * (v x9 % pow2 24) * pow2 224;
-  (==) { lemma_div248_x7 x7; lemma_div248_x8 x8 }
+  == { lemma_div248_x7 x7; lemma_div248_x8 x8 }
     v x4 / pow2 24 + v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 +
     pow2 32 * (v x9 % pow2 24) * pow2 224;
-  (==) { lemma_div248_x9 x9 }
+  == { lemma_div248_x9 x9 }
     v x4 / pow2 24 + v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256;
-  (==) { lemma_div248_aux x }
+  == { lemma_div248_aux x }
     wide_as_nat5 x / pow2 248;
   }
 #pop-options
@@ -345,13 +345,13 @@ let lemma_div264_aux x =
 
   calc (==) {
     wide_as_nat5 x / pow2 264;
-  (==) { FStar.Math.Lemmas.division_multiplication_lemma (wide_as_nat5 x) (pow2 224) (pow2 40) }
+  == { FStar.Math.Lemmas.division_multiplication_lemma (wide_as_nat5 x) (pow2 224) (pow2 40) }
     (wide_as_nat5 x / pow2 224) / pow2 40;
-  (==) { lemma_div224 x }
+  == { lemma_div224 x }
     (v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280) / pow2 40;
-  (==) { _ by (Tactics.mapply (`feq #int #int (fun x -> x / pow2 40)); int_semiring ()) }
+  == { _ by (Tactics.mapply (`feq #int #int (fun x -> x / pow2 40)); int_semiring ()) }
     (v x4 + (v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240) * pow2 40) / pow2 40;
-  (==) { FStar.Math.Lemmas.lemma_div_plus (v x4) (v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240) (pow2 40) }
+  == { FStar.Math.Lemmas.lemma_div_plus (v x4) (v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240) (pow2 40) }
     v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240;
   }
 
@@ -362,9 +362,9 @@ let lemma_div264_x5 x5 =
   assert_norm (0 < pow2 24);
   calc (==) {
     pow2 16 * (v x5 % pow2 40) + v x5 / pow2 40 * pow2 56;
-    (==) { _ by (Tactics.norm [delta_only [`%pow2]; primops]; int_semiring ()) }
+    == { _ by (Tactics.norm [delta_only [`%pow2]; primops]; int_semiring ()) }
     ((v x5 / pow2 40) * pow2 40 + v x5 % pow2 40) * pow2 16;
-    (==) { FStar.Math.Lemmas.euclidean_division_definition (v x5) (pow2 40) }
+    == { FStar.Math.Lemmas.euclidean_division_definition (v x5) (pow2 40) }
     v x5 * pow2 16;
   }
 
@@ -374,9 +374,9 @@ val lemma_div264_x6: x6:uint64 ->
 let lemma_div264_x6 x6 =
   calc (==) {
     pow2 16 * (v x6 % pow2 40) * pow2 56 + v x6 / pow2 40 * pow2 112;
-    (==) { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
+    == { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
     ((v x6 / pow2 40) * pow2 40 + v x6 % pow2 40) * pow2 72;
-    (==) { Math.Lemmas.euclidean_division_definition (v x6) (pow2 40) }
+    == { Math.Lemmas.euclidean_division_definition (v x6) (pow2 40) }
     v x6 * pow2 72;
   }
 
@@ -386,9 +386,9 @@ val lemma_div264_x7: x7:uint64 ->
 let lemma_div264_x7 x7 =
   calc (==) {
     pow2 16 * (v x7 % pow2 40) * pow2 112 + v x7 / pow2 40 * pow2 168;
-    (==) { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
+    == { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
     ((v x7 / pow2 40) * pow2 40 + v x7 % pow2 40) * pow2 128;
-    (==) { Math.Lemmas.euclidean_division_definition (v x7) (pow2 40) }
+    == { Math.Lemmas.euclidean_division_definition (v x7) (pow2 40) }
     v x7 * pow2 128;
   }
 
@@ -398,9 +398,9 @@ val lemma_div264_x8: x8:uint64 ->
 let lemma_div264_x8 x8 =
   calc (==) {
     pow2 16 * (v x8 % pow2 40) * pow2 168 + v x8 / pow2 40 * pow2 224;
-    (==) { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
+    == { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
     ((v x8 / pow2 40) * pow2 40 + v x8 % pow2 40) * pow2 184;
-    (==) { Math.Lemmas.euclidean_division_definition (v x8) (pow2 40) }
+    == { Math.Lemmas.euclidean_division_definition (v x8) (pow2 40) }
     v x8 * pow2 184;
   }
 
@@ -409,9 +409,9 @@ val lemma_div264_x9: x9:uint64{v x9 < pow2 40} ->
 let lemma_div264_x9 x9 =
   calc (==) {
     pow2 16 * (v x9 % pow2 40) * pow2 224;
-    (==) { Math.Lemmas.small_mod (v x9) (pow2 40) }
+    == { Math.Lemmas.small_mod (v x9) (pow2 40) }
     pow2 16 * v x9 * pow2 224;
-    (==) { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
+    == { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
     v x9 * pow2 240;
   }
 
@@ -443,23 +443,23 @@ let lemma_div264 x =
     let z3 = v x7 / pow2 40 + pow2 16 * (v x8 % pow2 40) in
     let z4 = v x8 / pow2 40 + pow2 16 * (v x9 % pow2 40) in
     z0 + z1 * pow2 56 + z2 * pow2 112 + z3 * pow2 168 + z4 * pow2 224);
-  (==) { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
+  == { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
     v x4 / pow2 40 + pow2 16 * (v x5 % pow2 40) +
     v x5 / pow2 40 * pow2 56 + pow2 16 * (v x6 % pow2 40) * pow2 56 +
     v x6 / pow2 40 * pow2 112 + pow2 16 * (v x7 % pow2 40) * pow2 112 +
     v x7 / pow2 40 * pow2 168 + pow2 16 * (v x8 % pow2 40) * pow2 168 +
     v x8 / pow2 40 * pow2 224 + pow2 16 * (v x9 % pow2 40) * pow2 224;
-  (==) { lemma_div264_x5 x5; lemma_div264_x6 x6 }
+  == { lemma_div264_x5 x5; lemma_div264_x6 x6 }
     v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 +
     pow2 16 * (v x7 % pow2 40) * pow2 112 +
     v x7 / pow2 40 * pow2 168 + pow2 16 * (v x8 % pow2 40) * pow2 168 +
     v x8 / pow2 40 * pow2 224 + pow2 16 * (v x9 % pow2 40) * pow2 224;
-  (==) { lemma_div264_x7 x7; lemma_div264_x8 x8 }
+  == { lemma_div264_x7 x7; lemma_div264_x8 x8 }
     v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 +
     pow2 16 * (v x9 % pow2 40) * pow2 224;
-  (==) { lemma_div264_x9 x9 }
+  == { lemma_div264_x9 x9 }
     v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240;
-  (==) { lemma_div264_aux x }
+  == { lemma_div264_aux x }
     wide_as_nat5 x / pow2 264;
   }
 #pop-options
@@ -488,14 +488,14 @@ let lemma_mod_264_aux t =
 
   calc (==) {
     (wide_as_nat5 t) % pow2 264;
-  (==) { }
+  == { }
     (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224 +
      (v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) * pow2 264) % pow2 264;
-  (==) { FStar.Math.Lemmas.lemma_mod_add_distr (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224)
+  == { FStar.Math.Lemmas.lemma_mod_add_distr (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224)
     ((v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) * pow2 264) (pow2 264)}
     ((v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224) +
      ((v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) * pow2 264) % pow2 264) % pow2 264;
-  (==) { FStar.Math.Lemmas.cancel_mul_mod (v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) (pow2 264) }
+  == { FStar.Math.Lemmas.cancel_mul_mod (v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) (pow2 264) }
     (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224) % pow2 264;
   }
 #pop-options
@@ -535,13 +535,13 @@ let lemma_mod_264 t =
 
   calc (==) {
     (wide_as_nat5 t) % pow2 264;
-    (==) { lemma_mod_264_aux t }
+    == { lemma_mod_264_aux t }
     (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224) % pow2 264;
-    (==) { FStar.Math.Lemmas.lemma_mod_add_distr (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168) (v t4 * pow2 224) (pow2 264) }
+    == { FStar.Math.Lemmas.lemma_mod_add_distr (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168) (v t4 * pow2 224) (pow2 264) }
     (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + (v t4 * pow2 224) % pow2 264) % pow2 264;
-    (==) { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v t4) 264 224 }
+    == { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v t4) 264 224 }
     (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + (v t4 % pow2 40) * pow2 224) % pow2 264;
-    (==) { lemma_as_nat_pow264 res; FStar.Math.Lemmas.modulo_lemma (as_nat5 res) (pow2 264) }
+    == { lemma_as_nat_pow264 res; FStar.Math.Lemmas.modulo_lemma (as_nat5 res) (pow2 264) }
     v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + (v t4 % pow2 40) * pow2 224;
     }
 
@@ -677,7 +677,7 @@ let lemma_mul_5''' x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 =
   calc (==) {
     ((x1 + pow2 56 * x2 + pow2 112 * x3 + pow2 168 * x4 + pow2 224 * x5)
     * (y1 + pow2 56 * y2 + pow2 112 * y3 + pow2 168 * y4 + pow2 224 * y5)) % pow2 264;
-  (==) { _ by (Tactics.mapply (`feq #int #int (fun x -> x % pow2 264));
+  == { _ by (Tactics.mapply (`feq #int #int (fun x -> x % pow2 264));
               Tactics.norm [zeta; iota; delta; primops];
               int_semiring ()) }
     (x1 * y1
@@ -689,7 +689,7 @@ let lemma_mul_5''' x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 =
        pow2 16 * x3 * y4 + pow2 72 * x3 * y5 +
        pow2 16 * x4 * y3 + pow2 72 * x4 * y4 + pow2 128 * x4 * y5 +
        pow2 16 * x5 * y2 + pow2 72 * x5 * y3 + pow2 128 * x5 * y4 + pow2 184 * x5 * y5) * pow2 264) % pow2 264;
-  (==) { _ by (Tactics.mapply (`eq_eq2); Tactics.mapply (`Math.Lemmas.lemma_mod_plus)) }
+  == { _ by (Tactics.mapply (`eq_eq2); Tactics.mapply (`Math.Lemmas.lemma_mod_plus)) }
     (x1 * y1
     + pow2 56 * (x2 * y1 + x1 * y2)
     + pow2 112 * (x3 * y1 + x2 * y2 + x1 * y3)
@@ -879,23 +879,23 @@ let lemma_barrett_reduce'' (u:nat) (z:nat) (x:nat) (q:nat) : Lemma
   if u >= S.q then (
     calc (==) {
     z;
-    (==) { Math.Lemmas.small_mod z S.q }
+    == { Math.Lemmas.small_mod z S.q }
     (u - S.q) % S.q;
-    (==) { }
+    == { }
     (x - (q * S.q + S.q)) % S.q;
-    (==) { Math.Lemmas.distributivity_add_left q 1 S.q; assert_norm (1 * S.q == S.q) }
+    == { Math.Lemmas.distributivity_add_left q 1 S.q; assert_norm (1 * S.q == S.q) }
     (x - (q + 1) * S.q) % S.q;
-    (==) { Math.Lemmas.lemma_mod_sub x S.q (q+1) }
+    == { Math.Lemmas.lemma_mod_sub x S.q (q+1) }
     x % S.q;
     }
   ) else (
     calc (==) {
     z;
-    (==) { Math.Lemmas.small_mod z S.q }
+    == { Math.Lemmas.small_mod z S.q }
     u % S.q;
-    (==) { }
+    == { }
     (x - (q * S.q)) % S.q;
-    (==) { Math.Lemmas.lemma_mod_sub x S.q q }
+    == { Math.Lemmas.lemma_mod_sub x S.q q }
     x % S.q;
     }
   )
@@ -921,25 +921,25 @@ let lemma_barrett_reduce' x =
   let a' = (x % pow2 264) - (q * l) % pow2 264 in
   calc (<) {
     x - q * l;
-    (<) { lemma_optimized_barrett_reduce x }
+    < { lemma_optimized_barrett_reduce x }
     2 * S.q;
-    (<) { assert_norm (2 * S.q < pow2 264) }
+    < { assert_norm (2 * S.q < pow2 264) }
     pow2 264;
   };
   calc (>=) {
     x - q * l;
-    (>=) { lemma_optimized_barrett_reduce x}
+    >= { lemma_optimized_barrett_reduce x}
     0;
   };
   Math.Lemmas.modulo_lemma (x - q * l) (pow2 264);
   calc (<) {
     x - ((x * m) / pow2 512) * l;
-    (<) { lemma_optimized_barrett_reduce2 x }
+    < { lemma_optimized_barrett_reduce2 x }
     pow2 264;
   };
   calc (>=) {
     x - ((x * m) / pow2 512) * l;
-    (>=) { lemma_optimized_barrett_reduce2 x }
+    >= { lemma_optimized_barrett_reduce2 x }
     0;
   };
   Math.Lemmas.modulo_lemma (x - ((x * m) / pow2 512) * l) (pow2 264);

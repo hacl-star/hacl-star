@@ -207,13 +207,13 @@ let bn_sqr_diag_loop_step #t #aLen a i =
 
   calc (==) {
     v acc1.[i + i - 2] * pow2 (pbits * (i + i - 2)) + v acc1.[i + i - 1] * pow2 (pbits * (i + i - 1));
-    (==) { Math.Lemmas.pow2_plus (pbits * (i + i - 2)) pbits }
+    == { Math.Lemmas.pow2_plus (pbits * (i + i - 2)) pbits }
     v acc1.[i + i - 2] * pow2 (pbits * (i + i - 2)) + v acc1.[i + i - 1] * (pow2 (pbits * (i + i - 2)) * pow2 pbits);
-    (==) { Math.Lemmas.paren_mul_right (v acc1.[i + i - 1]) (pow2 pbits) (pow2 (pbits * (i + i - 2))) }
+    == { Math.Lemmas.paren_mul_right (v acc1.[i + i - 1]) (pow2 pbits) (pow2 (pbits * (i + i - 2))) }
     v acc1.[i + i - 2] * pow2 (pbits * (i + i - 2)) + (v acc1.[i + i - 1] * pow2 pbits) * pow2 (pbits * (i + i - 2));
-    (==) { Math.Lemmas.distributivity_add_left (v acc1.[i + i - 2]) (v acc1.[i + i - 1] * pow2 pbits) (pow2 (pbits * (i + i - 2))) }
+    == { Math.Lemmas.distributivity_add_left (v acc1.[i + i - 2]) (v acc1.[i + i - 1] * pow2 pbits) (pow2 (pbits * (i + i - 2))) }
     (v acc1.[i + i - 2] + v acc1.[i + i - 1] * pow2 pbits) * pow2 (pbits * (i + i - 2));
-    (==) { bn_sqr_diag_lemma a i }
+    == { bn_sqr_diag_lemma a i }
     v a.[i - 1] * v a.[i - 1] * pow2 (pbits * (i + i - 2));
   };
 
@@ -312,17 +312,17 @@ let bn_eval_square #t #aLen a i =
 
   calc (==) {
     eval_ aLen a i * eval_ aLen a i;
-    (==) { bn_eval_unfold_i a i }
+    == { bn_eval_unfold_i a i }
     (e1 + v a.[i - 1] * p1) * (e1 + v a.[i - 1] * p1);
-    (==) { square_of_sum e1 (v a.[i - 1] * p1) }
+    == { square_of_sum e1 (v a.[i - 1] * p1) }
     e1 * e1 + 2 * e1 * (v a.[i - 1] * p1) + (v a.[i - 1] * p1) * (v a.[i - 1] * p1);
-    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) p1 (v a.[i - 1] * p1); Math.Lemmas.paren_mul_right p1 p1 (v a.[i - 1]) }
+    == { Math.Lemmas.paren_mul_right (v a.[i - 1]) p1 (v a.[i - 1] * p1); Math.Lemmas.paren_mul_right p1 p1 (v a.[i - 1]) }
     e1 * e1 + 2 * e1 * (v a.[i - 1] * p1) + v a.[i - 1] * (p1 * p1 * v a.[i - 1]);
-    (==) { Math.Lemmas.pow2_plus (bits t * (i - 1)) (bits t * (i - 1)) }
+    == { Math.Lemmas.pow2_plus (bits t * (i - 1)) (bits t * (i - 1)) }
     e1 * e1 + 2 * e1 * (v a.[i - 1] * p1) + v a.[i - 1] * (p2 * v a.[i - 1]);
-    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) (v a.[i - 1]) p2 }
+    == { Math.Lemmas.paren_mul_right (v a.[i - 1]) (v a.[i - 1]) p2 }
     e1 * e1 + 2 * e1 * (v a.[i - 1] * p1) + v a.[i - 1] * v a.[i - 1] * p2;
-    (==) { Math.Lemmas.paren_mul_right (2 * e1) (v a.[i - 1]) p1 }
+    == { Math.Lemmas.paren_mul_right (2 * e1) (v a.[i - 1]) p1 }
     e1 * e1 + 2 * e1 * v a.[i - 1] * p1 + v a.[i - 1] * v a.[i - 1] * p2;
     }
 
@@ -367,20 +367,20 @@ let rec bn_sqr_loop_lemma #t #aLen a i =
 
     calc (==) {
       2 * eval_ resLen acc (i + i) + eval_ resLen tmp (i + i);
-      (==) { bn_sqr_diag_loop_step a i }
+      == { bn_sqr_diag_loop_step a i }
       2 * eval_ resLen acc (i + i) + eval_ resLen tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
-      (==) { bn_eval_unfold_i acc (i + i) }
+      == { bn_eval_unfold_i acc (i + i) }
       2 * (eval_ resLen acc (i + i - 1) + v acc.[i + i - 1] * p1) +
       eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
-      (==) { Classical.forall_intro (bn_sqr_f_lemma a (i - 1) acc1) }
+      == { Classical.forall_intro (bn_sqr_f_lemma a (i - 1) acc1) }
       2 * (eval_ resLen acc1 (i + i - 2) + eval_ aLen a (i - 1) * v a.[i - 1] * p3) +
       eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
-      (==) { Math.Lemmas.distributivity_add_right 2 (eval_ resLen acc1 (i + i - 2)) (eval_ aLen a (i - 1) * v a.[i - 1] * p3) }
+      == { Math.Lemmas.distributivity_add_right 2 (eval_ resLen acc1 (i + i - 2)) (eval_ aLen a (i - 1) * v a.[i - 1] * p3) }
       2 * eval_ resLen acc1 (i + i - 2) + 2 * eval_ aLen a (i - 1) * v a.[i - 1] * p3 +
       eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
-      (==) { bn_sqr_loop_lemma a (i - 1) }
+      == { bn_sqr_loop_lemma a (i - 1) }
       eval_ aLen a (i - 1) * eval_ aLen a (i - 1) + 2 * eval_ aLen a (i - 1) * v a.[i - 1] * p3 + v a.[i - 1] * v a.[i - 1] * p2;
-      (==) { bn_eval_square a i }
+      == { bn_eval_square a i }
       eval_ aLen a i * eval_ aLen a i;
     }; () end
 #pop-options

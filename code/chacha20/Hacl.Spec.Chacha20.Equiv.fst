@@ -345,13 +345,13 @@ let lemma_i_div_w4 w i =
   let bs = w * 4 in
   calc (==) {
     i / bs * bs + i % bs / 4 * 4;
-    (==) { Math.Lemmas.euclidean_division_definition (i % bs) 4 }
+    == { Math.Lemmas.euclidean_division_definition (i % bs) 4 }
     i / bs * bs + i % bs - i % bs % 4;
-    (==) { Math.Lemmas.euclidean_division_definition i bs }
+    == { Math.Lemmas.euclidean_division_definition i bs }
     i - i % bs % 4;
-    (==) { Math.Lemmas.modulo_modulo_lemma i 4 w }
+    == { Math.Lemmas.modulo_modulo_lemma i 4 w }
     i - i % 4;
-    (==) { Math.Lemmas.euclidean_division_definition i 4 }
+    == { Math.Lemmas.euclidean_division_definition i 4 }
     i / 4 * 4;
     }
 
@@ -360,13 +360,13 @@ val lemma_i_div_blocksize: w:pos -> i:nat{i < w * blocksize} ->
 let lemma_i_div_blocksize w i =
   calc (==) {
     i / blocksize * blocksize + i % blocksize / 4 * 4;
-    (==) { Math.Lemmas.euclidean_division_definition (i % blocksize) 4 }
+    == { Math.Lemmas.euclidean_division_definition (i % blocksize) 4 }
     i / blocksize * blocksize + i % blocksize - i % blocksize % 4;
-    (==) { Math.Lemmas.modulo_modulo_lemma i 4 16 }
+    == { Math.Lemmas.modulo_modulo_lemma i 4 16 }
     i / blocksize * blocksize + i % blocksize - i % 4;
-    (==) { Math.Lemmas.euclidean_division_definition i blocksize }
+    == { Math.Lemmas.euclidean_division_definition i blocksize }
     i - i % 4;
-    (==) { Math.Lemmas.euclidean_division_definition i 4 }
+    == { Math.Lemmas.euclidean_division_definition i 4 }
     i / 4 * 4;
   }
 
@@ -391,17 +391,17 @@ let xor_block_vec_lemma_i #w k b i =
 
   calc (==) {
     Seq.index (xor_block k b) i;
-    (==) { index_map_blocks_multi (w * 4) 16 16 b (xor_block_f #w k) i }
+    == { index_map_blocks_multi (w * 4) 16 16 b (xor_block_f #w k) i }
     Seq.index (uints_to_bytes_le ob) (i % bs);
-    (==) { index_uints_to_bytes_le ob (i % bs) }
+    == { index_uints_to_bytes_le ob (i % bs) }
     Seq.index (uint_to_bytes_le ob.[i % bs / 4]) (i % bs % 4);
-    (==) { Math.Lemmas.modulo_modulo_lemma i 4 w }
+    == { Math.Lemmas.modulo_modulo_lemma i 4 w }
     Seq.index (uint_to_bytes_le ob.[i % bs / 4]) (i % 4);
-    (==) { (* def of xor *) }
+    == { (* def of xor *) }
     Seq.index (uint_to_bytes_le ((uints_from_bytes_le #U32 #SEC #w b_j).[i % bs / 4] ^. kb_j.[i % bs / 4])) (i % 4);
-    (==) { index_uints_from_bytes_le #U32 #SEC #w b_j (i % bs / 4) }
+    == { index_uints_from_bytes_le #U32 #SEC #w b_j (i % bs / 4) }
     Seq.index (uint_to_bytes_le ((uint_from_bytes_le b_i) ^. kb_j.[i % bs / 4])) (i % 4);
-    (==) { lemma_i_div_w4 w i; Seq.slice_slice b (j * bs) (j * bs + bs) (i % bs / 4 * 4) (i % bs / 4 * 4 + 4) }
+    == { lemma_i_div_w4 w i; Seq.slice_slice b (j * bs) (j * bs + bs) (i % bs / 4 * 4) (i % bs / 4 * 4 + 4) }
     Seq.index (uint_to_bytes_le ((uint_from_bytes_le block) ^. kb_j.[i % bs / 4])) (i % 4);
     }
 
@@ -416,11 +416,11 @@ let xor_block_scalar_lemma_i k b i =
 
   calc (==) {
     Seq.index (uints_to_bytes_le ob) i;
-    (==) { index_uints_to_bytes_le ob i }
+    == { index_uints_to_bytes_le ob i }
     Seq.index (uint_to_bytes_le ob.[i / 4]) (i % 4);
-    (==) { (* def of xor *) }
+    == { (* def of xor *) }
     Seq.index (uint_to_bytes_le (ib.[i / 4] ^. k.[i / 4])) (i % 4);
-    (==) { index_uints_from_bytes_le #U32 #SEC #16 b (i / 4) }
+    == { index_uints_from_bytes_le #U32 #SEC #16 b (i / 4) }
     Seq.index (uint_to_bytes_le ((uint_from_bytes_le b_i) ^. k.[i / 4])) (i % 4);
     }
 
@@ -435,13 +435,13 @@ let transpose_lemma_i #w k i =
   let ki = (transpose_state k).[i / blocksize] in
   calc (==) {
     Seq.index (vec_v (Seq.index (transpose k) j)) (i % bs / 4);
-    (==) { Math.Lemmas.modulo_division_lemma i 4 w }
+    == { Math.Lemmas.modulo_division_lemma i 4 w }
     Seq.index (vec_v (Seq.index (transpose k) j)) (i / 4 % w);
-    (==) { Math.Lemmas.division_multiplication_lemma i 4 w }
+    == { Math.Lemmas.division_multiplication_lemma i 4 w }
     Seq.index (vec_v (Seq.index (transpose k) (i / 4 / w))) (i / 4 % w);
-    (==) { Lemmas.transpose_lemma_index #w k (i / 4); Math.Lemmas.division_multiplication_lemma i 4 16 }
+    == { Lemmas.transpose_lemma_index #w k (i / 4); Math.Lemmas.division_multiplication_lemma i 4 16 }
     Seq.index ki (i / 4 % 16);
-    (==) { Math.Lemmas.modulo_division_lemma i 4 16 }
+    == { Math.Lemmas.modulo_division_lemma i 4 16 }
     Seq.index ki (i % blocksize / 4);
     }
 
@@ -461,17 +461,17 @@ let xor_block_lemma_i #w k b i =
 
   calc (==) {
     Seq.index (xor_block (transpose k) b) i;
-    (==) { xor_block_vec_lemma_i #w (transpose k) b i }
+    == { xor_block_vec_lemma_i #w (transpose k) b i }
     Seq.index (uint_to_bytes_le ((uint_from_bytes_le block) ^. (Seq.index (vec_v (transpose k).[j]) (i % bs / 4)))) (i % 4);
-    (==) { transpose_lemma_i #w k i }
+    == { transpose_lemma_i #w k i }
     Seq.index (uint_to_bytes_le ((uint_from_bytes_le block) ^. (Seq.index ki (i % blocksize / 4)))) (i % 4);
     };
 
   calc (==) {
     Seq.index (Scalar.xor_block ki b_i) (i % blocksize);
-    (==) { xor_block_scalar_lemma_i ki b_i (i % blocksize); Math.Lemmas.modulo_modulo_lemma i 4 16 }
+    == { xor_block_scalar_lemma_i ki b_i (i % blocksize); Math.Lemmas.modulo_modulo_lemma i 4 16 }
     Seq.index (uint_to_bytes_le ((uint_from_bytes_le #U32 #SEC (sub b_i (i % blocksize / 4 * 4) 4)) ^. ki.[i % blocksize / 4])) (i % 4);
-    (==) { lemma_i_div_blocksize w i; Seq.Properties.slice_slice b (i / blocksize * blocksize)
+    == { lemma_i_div_blocksize w i; Seq.Properties.slice_slice b (i / blocksize * blocksize)
             (i / blocksize * blocksize + blocksize) (i % blocksize / 4 * 4) (i % blocksize / 4 * 4 + 4) }
     Seq.index (uint_to_bytes_le ((uint_from_bytes_le #U32 #SEC block) ^. (Seq.index ki (i % blocksize / 4)))) (i % 4);
     }
@@ -631,9 +631,9 @@ let update_sub_get_block_lemma_k #a w blocksize zero len b_v j k =
 
   calc (<=) {
     (j / blocksize + 1) * blocksize;
-    (<=) { div_mul_lt blocksize j (len / blocksize) }
+    <= { div_mul_lt blocksize j (len / blocksize) }
     len / blocksize * blocksize;
-    (<=) { Math.Lemmas.multiply_fractions len blocksize }
+    <= { Math.Lemmas.multiply_fractions len blocksize }
     len;
   };
 
@@ -641,11 +641,11 @@ let update_sub_get_block_lemma_k #a w blocksize zero len b_v j k =
   
   calc (==) {
     Seq.index b_p k;
-    (==) { }
+    == { }
     Seq.index (Seq.slice plain (j / blocksize * blocksize) (j / blocksize * blocksize + blocksize)) k;
-    (==) { Seq.lemma_index_slice plain (j / blocksize * blocksize) (j / blocksize * blocksize + blocksize) k }
+    == { Seq.lemma_index_slice plain (j / blocksize * blocksize) (j / blocksize * blocksize + blocksize) k }
     Seq.index plain (j / blocksize * blocksize + k);
-    (==) { Seq.lemma_index_app1 b_v zeros (j / blocksize * blocksize + k) }
+    == { Seq.lemma_index_app1 b_v zeros (j / blocksize * blocksize + k) }
     Seq.index b_v (j / blocksize * blocksize + k);
     };
 
@@ -711,11 +711,11 @@ let update_sub_get_last_lemma_plain_k #a w blocksize zero len b_v j k =
   if k < len % blocksize then begin
     calc (==) {
       Seq.index plain k;
-      (==) { Seq.lemma_index_app1 block_l zeros k }
+      == { Seq.lemma_index_app1 block_l zeros k }
       Seq.index block_l k;
-      (==) { Seq.lemma_index_slice b_v (len - len % blocksize) len k }
+      == { Seq.lemma_index_slice b_v (len - len % blocksize) len k }
       Seq.index b_v (len - len % blocksize + k);
-      (==) { Math.Lemmas.euclidean_division_definition len blocksize }
+      == { Math.Lemmas.euclidean_division_definition len blocksize }
       Seq.index b_v (len / blocksize * blocksize + k);
       } end
   else ()
@@ -761,11 +761,11 @@ let update_sub_get_last_lemma_plain_v_k #a w blocksize zero len b_v j k =
 
   calc (==) {
     //Seq.index b k;
-    //(==) { }
+    //== { }
     Seq.index (Seq.slice plain_v (j / blocksize * blocksize) (j / blocksize * blocksize + blocksize)) k;
-    (==) { Seq.lemma_index_slice plain_v (j / blocksize * blocksize) (j / blocksize * blocksize + blocksize) k }
+    == { Seq.lemma_index_slice plain_v (j / blocksize * blocksize) (j / blocksize * blocksize + blocksize) k }
     Seq.index plain_v (j / blocksize * blocksize + k);
-    (==) {  }
+    == {  }
     Seq.index plain_v (len / blocksize * blocksize + k);
     }
 
@@ -845,9 +845,9 @@ let chacha20_map_blocks_vec_equiv_pre_k0 #w k n c0 hi_fv rem b_v j =
 
   calc (==) {
     Seq.index (g_v hi_fv rem b_v) j;
-    (==) { encrypt_block_lemma_bs_i #w k n c0 hi_fv plain_v j; div_mul_lt blocksize j w }
+    == { encrypt_block_lemma_bs_i #w k n c0 hi_fv plain_v j; div_mul_lt blocksize j w }
     Seq.index (f (w * hi_fv + j / blocksize) b) (j % blocksize);
-    (==) { update_sub_get_block_lemma w blocksize (u8 0) rem b_v j }
+    == { update_sub_get_block_lemma w blocksize (u8 0) rem b_v j }
     Seq.index (f (w * hi_fv + j / blocksize) b1) (j % blocksize);
     }
 
@@ -890,11 +890,11 @@ let chacha20_map_blocks_vec_equiv_pre_k1 #w k n c0 hi_fv rem b_v j =
 
   calc (==) {
     Seq.index (g_v hi_fv rem b_v) j;
-    (==) { encrypt_block_lemma_bs_i #w k n c0 hi_fv plain_v j; div_mul_lt blocksize j w }
+    == { encrypt_block_lemma_bs_i #w k n c0 hi_fv plain_v j; div_mul_lt blocksize j w }
     Seq.index (f (w * hi_fv + j / blocksize) b) (j % blocksize);
-    (==) { update_sub_get_last_lemma w blocksize (u8 0) rem b_v j; mod_div_lt blocksize j rem }
+    == { update_sub_get_last_lemma w blocksize (u8 0) rem b_v j; mod_div_lt blocksize j rem }
     Seq.index (f (w * hi_fv + j / blocksize) plain) (j % blocksize);
-    (==) { }
+    == { }
     Seq.index (g (w * hi_fv + j / blocksize) (rem % blocksize) b1) (j % blocksize);
     }
 

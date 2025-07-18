@@ -42,13 +42,13 @@ val bn_eval_lt_pow2_modBits:
 let bn_eval_lt_pow2_modBits #t modBits m =
   calc (==) {
     bn_v m;
-    (==) { Math.Lemmas.euclidean_division_definition (bn_v m) (pow2 (modBits - 1)) }
+    == { Math.Lemmas.euclidean_division_definition (bn_v m) (pow2 (modBits - 1)) }
     bn_v m / pow2 (modBits - 1) * pow2 (modBits - 1) + bn_v m % pow2 (modBits - 1);
-    (==) { Math.Lemmas.euclidean_division_definition (bn_v m / pow2 (modBits - 1)) 2 }
+    == { Math.Lemmas.euclidean_division_definition (bn_v m / pow2 (modBits - 1)) 2 }
     (bn_v m / pow2 (modBits - 1) / 2 * 2 + bn_v m / pow2 (modBits - 1) % 2) * pow2 (modBits - 1) + bn_v m % pow2 (modBits - 1);
-    (==) { Math.Lemmas.division_multiplication_lemma (bn_v m) (pow2 (modBits - 1)) 2; Math.Lemmas.pow2_plus (modBits - 1) 1}
+    == { Math.Lemmas.division_multiplication_lemma (bn_v m) (pow2 (modBits - 1)) 2; Math.Lemmas.pow2_plus (modBits - 1) 1}
     (bn_v m / pow2 modBits * 2 + bn_v m / pow2 (modBits - 1) % 2) * pow2 (modBits - 1) + bn_v m % pow2 (modBits - 1);
-    (==) { Math.Lemmas.small_division_lemma_1 (bn_v m) (pow2 modBits) }
+    == { Math.Lemmas.small_division_lemma_1 (bn_v m) (pow2 modBits) }
     (bn_v m / pow2 (modBits - 1) % 2) * pow2 (modBits - 1) + bn_v m % pow2 (modBits - 1);
     }
 

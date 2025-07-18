@@ -39,11 +39,11 @@ let lemma_spec_update_224_256 b st: Lemma (ensures
 =
   calc (==) {
     Hacl.Spec.SHA2.update SHA2_256 b st;
-  (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_256 b st }
+  == { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_256 b st }
     Spec.Agile.Hash.update SHA2_256 st b;
-  (==) { Spec.SHA2.Lemmas.update_224_256 st b }
+  == { Spec.SHA2.Lemmas.update_224_256 st b }
     Spec.Agile.Hash.update SHA2_224 st b;
-  (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_224 b st }
+  == { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_224 b st }
     Hacl.Spec.SHA2.update SHA2_224 b st;
   }
 
@@ -58,13 +58,13 @@ let lemma_spec_update_vec_224_256 b0 st0 : Lemma (ensures
   let st1_m32 = (state_spec_v st1).[0] <: words_state SHA2_256 in
     calc (==) {
       st1_m32;
-    (==) {}
+    == {}
       (state_spec_v (SpecVec.update #SHA2_256 b0 st0)).[0];
-    (==) { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_256 #M32 b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_256 #M32 b0 st0 0 }
       Hacl.Spec.SHA2.update SHA2_256 b0.(|0|) st0_m32;
-    (==) { lemma_spec_update_224_256 b0.(|0|) st0_m32 }
+    == { lemma_spec_update_224_256 b0.(|0|) st0_m32 }
       Hacl.Spec.SHA2.update SHA2_224 b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_224 #M32 b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_224 #M32 b0 st0 0 }
       (state_spec_v #SHA2_224 #M32 (SpecVec.update #SHA2_224 b0 st0)).[0];
     };
     state_spec_v_extensionality SHA2_256
@@ -85,13 +85,13 @@ let lemma_spec_update_nblocks_vec_224_256 (len:size_t) b0 st0 : Lemma (ensures (
     let st1_m32 = (state_spec_v st1).[0] <: words_state SHA2_256 in
     calc (==) {
       st1_m32;
-    (==) {}
+    == {}
       (state_spec_v (SpecVec.update_nblocks #SHA2_256 (v len) b0 st0)).[0];
-    (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_256 #M32 (v len) b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_256 #M32 (v len) b0 st0 0 }
       Hacl.Spec.SHA2.update_nblocks SHA2_256 (v len) b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_256 (v len) b0.(|0|) st0_m32 }
+    == { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_256 (v len) b0.(|0|) st0_m32 }
       Lib.Sequence.repeat_blocks_multi (block_length SHA2_256) b0_m32' (Hacl.Spec.SHA2.update SHA2_256) st0_m32;
-    (==) {
+    == {
       FStar.Classical.forall_intro_2 lemma_spec_update_224_256;
       Lib.Sequence.Lemmas.repeat_blocks_multi_extensionality #uint8 #(words_state SHA2_256) (block_length SHA2_256) b0_m32'
         (Hacl.Spec.SHA2.update SHA2_256)
@@ -99,11 +99,11 @@ let lemma_spec_update_nblocks_vec_224_256 (len:size_t) b0 st0 : Lemma (ensures (
         st0_m32
     }
       Lib.Sequence.repeat_blocks_multi #uint8 #(words_state SHA2_256) (block_length SHA2_256) b0_m32' (Hacl.Spec.SHA2.update SHA2_224) st0_m32;
-    (==) { }
+    == { }
       Lib.Sequence.repeat_blocks_multi #uint8 #(words_state SHA2_224) (block_length SHA2_224) b0_m32' (Hacl.Spec.SHA2.update SHA2_224) (st0_m32 <: words_state SHA2_224);
-    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_224 (v len) b0.(|0|) st0_m32 }
+    == { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_224 (v len) b0.(|0|) st0_m32 }
       Hacl.Spec.SHA2.update_nblocks SHA2_224 (v len) b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_224 #M32 (v len) b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_224 #M32 (v len) b0 st0 0 }
       (state_spec_v #SHA2_224 #M32 (SpecVec.update_nblocks #SHA2_224 (v len) b0 st0)).[0];
     };
     state_spec_v_extensionality SHA2_256
@@ -129,13 +129,13 @@ let lemma_spec_update_last_vec_224_256 totlen (len:size_t{v len <= block_length 
     in
     calc (==) {
       st1_m32;
-    (==) {}
+    == {}
       (state_spec_v (SpecVec.update_last #SHA2_256 totlen (v len) b0 st0)).[0];
-    (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_256 #M32 totlen (v len) b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_256 #M32 totlen (v len) b0 st0 0 }
       Hacl.Spec.SHA2.update_last SHA2_256 totlen (v len) b0.(|0|) st0_m32;
-    (==) { }
+    == { }
       Hacl.Spec.SHA2.update_last SHA2_224 totlen (v len) b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_224 #M32 totlen (v len) b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_224 #M32 totlen (v len) b0 st0 0 }
       (state_spec_v (SpecVec.update_last #SHA2_224 #M32 totlen (v len) b0 st0)).[0];
     };
     state_spec_v_extensionality SHA2_256
@@ -149,11 +149,11 @@ let lemma_spec_update_384_512 b st: Lemma (ensures
 =
   calc (==) {
     Hacl.Spec.SHA2.update SHA2_512 b st;
-  (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_512 b st }
+  == { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_512 b st }
     Spec.Agile.Hash.update SHA2_512 st b;
-  (==) { Spec.SHA2.Lemmas.update_384_512 st b }
+  == { Spec.SHA2.Lemmas.update_384_512 st b }
     Spec.Agile.Hash.update SHA2_384 st b;
-  (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_384 b st }
+  == { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_384 b st }
     Hacl.Spec.SHA2.update SHA2_384 b st;
   }
 
@@ -168,13 +168,13 @@ let lemma_spec_update_vec_384_512 b0 st0 : Lemma (ensures
   let st1_m32 = (state_spec_v st1).[0] <: words_state SHA2_512 in
     calc (==) {
       st1_m32;
-    (==) {}
+    == {}
       (state_spec_v (SpecVec.update #SHA2_512 b0 st0)).[0];
-    (==) { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_512 #M32 b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_512 #M32 b0 st0 0 }
       Hacl.Spec.SHA2.update SHA2_512 b0.(|0|) st0_m32;
-    (==) { lemma_spec_update_384_512 b0.(|0|) st0_m32 }
+    == { lemma_spec_update_384_512 b0.(|0|) st0_m32 }
       Hacl.Spec.SHA2.update SHA2_384 b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_384 #M32 b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_384 #M32 b0 st0 0 }
       (state_spec_v #SHA2_384 #M32 (SpecVec.update #SHA2_384 b0 st0)).[0];
     };
     state_spec_v_extensionality SHA2_512
@@ -195,13 +195,13 @@ let lemma_spec_update_nblocks_vec_384_512 (len:size_t) b0 st0 : Lemma (ensures (
     let st1_m32 = (state_spec_v st1).[0] <: words_state SHA2_512 in
     calc (==) {
       st1_m32;
-    (==) {}
+    == {}
       (state_spec_v (SpecVec.update_nblocks #SHA2_512 (v len) b0 st0)).[0];
-    (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_512 #M32 (v len) b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_512 #M32 (v len) b0 st0 0 }
       Hacl.Spec.SHA2.update_nblocks SHA2_512 (v len) b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_512 (v len) b0.(|0|) st0_m32 }
+    == { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_512 (v len) b0.(|0|) st0_m32 }
       Lib.Sequence.repeat_blocks_multi (block_length SHA2_512) b0_m32' (Hacl.Spec.SHA2.update SHA2_512) st0_m32;
-    (==) {
+    == {
       FStar.Classical.forall_intro_2 lemma_spec_update_384_512;
       Lib.Sequence.Lemmas.repeat_blocks_multi_extensionality #uint8 #(words_state SHA2_512) (block_length SHA2_512) b0_m32'
         (Hacl.Spec.SHA2.update SHA2_512)
@@ -209,11 +209,11 @@ let lemma_spec_update_nblocks_vec_384_512 (len:size_t) b0 st0 : Lemma (ensures (
         st0_m32
     }
       Lib.Sequence.repeat_blocks_multi #uint8 #(words_state SHA2_512) (block_length SHA2_512) b0_m32' (Hacl.Spec.SHA2.update SHA2_384) st0_m32;
-    (==) { }
+    == { }
       Lib.Sequence.repeat_blocks_multi #uint8 #(words_state SHA2_384) (block_length SHA2_384) b0_m32' (Hacl.Spec.SHA2.update SHA2_384) (st0_m32 <: words_state SHA2_384);
-    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_384 (v len) b0.(|0|) st0_m32 }
+    == { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_384 (v len) b0.(|0|) st0_m32 }
       Hacl.Spec.SHA2.update_nblocks SHA2_384 (v len) b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_384 #M32 (v len) b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_384 #M32 (v len) b0 st0 0 }
       (state_spec_v #SHA2_384 #M32 (SpecVec.update_nblocks #SHA2_384 (v len) b0 st0)).[0];
     };
     state_spec_v_extensionality SHA2_512
@@ -239,13 +239,13 @@ let lemma_spec_update_last_vec_384_512 totlen (len:size_t{v len <= block_length 
     in
     calc (==) {
       st1_m32;
-    (==) {}
+    == {}
       (state_spec_v (SpecVec.update_last #SHA2_512 totlen (v len) b0 st0)).[0];
-    (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_512 #M32 totlen (v len) b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_512 #M32 totlen (v len) b0 st0 0 }
       Hacl.Spec.SHA2.update_last SHA2_512 totlen (v len) b0.(|0|) st0_m32;
-    (==) { }
+    == { }
       Hacl.Spec.SHA2.update_last SHA2_384 totlen (v len) b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_384 #M32 totlen (v len) b0 st0 0 }
+    == { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_384 #M32 totlen (v len) b0 st0 0 }
       (state_spec_v (SpecVec.update_last #SHA2_384 #M32 totlen (v len) b0 st0)).[0];
     };
     state_spec_v_extensionality SHA2_512
