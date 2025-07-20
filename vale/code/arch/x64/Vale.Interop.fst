@@ -10,7 +10,7 @@ open Vale.Def.Opaque_s
 //open Vale.Interop.Base
 open Vale.Lib.BufferViewHelpers
 
-#reset-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
+#reset-options "--fuel 2 --ifuel 1"
 
 (* Write a buffer in the vale memory *)
 

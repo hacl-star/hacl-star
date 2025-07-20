@@ -17,7 +17,7 @@ open FStar.Calc
 
 friend LowStar.BufferView.Up
 
-#reset-options "--z3rlimit 10 --fuel 0 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 1"
+#reset-options "--z3rlimit 10 --fuel 0 --initial_fuel 0 --ifuel 1"
 
 let math_aux (a b c:int) : Lemma (a + b + (c - b) == a + c) = ()
 
@@ -45,7 +45,7 @@ let get128_aux (ptr:int) (heap:machine_heap) (v:quad32) (k:nat{k < 16}) : Lemma
   reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   four_to_nat_8_injective ()
 
-#reset-options "--max_fuel 1 --initial_fuel 1 --z3rlimit 200"
+#reset-options "--fuel 1 --z3rlimit 200"
 
 let bv_upd_update_heap64 b heap i v mem =
   let dv = IB.get_downview b.IB.bsrc in

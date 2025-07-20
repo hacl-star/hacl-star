@@ -44,7 +44,7 @@ val be_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) :
 
 open FStar.Tactics
 
-#push-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
+#push-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --fuel 2 --ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
 
 let be_quad32_to_bytes_sel q i =
   reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes;

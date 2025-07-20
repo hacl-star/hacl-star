@@ -77,7 +77,7 @@ let rec lemma_expand_key_256 (key:seq nat32) (size:nat) =
   )
 
 // SIMD version of round_key_256 is equivalent to scalar round_key_256
-#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
+#push-options "--fuel 3 --ifuel 3"  // REVIEW: Why do we need this?
 let lemma_simd_round_key (prev0 prev1:quad32) (rcon:nat32) (round:int) =
   quad32_xor_reveal ();
   reverse_bytes_nat32_reveal ();
