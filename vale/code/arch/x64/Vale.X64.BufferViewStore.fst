@@ -17,7 +17,7 @@ open FStar.Calc
 
 friend LowStar.BufferView.Up
 
-#reset-options "--z3rlimit 10 --fuel 0 --initial_fuel 0 --ifuel 1"
+#set-options "--z3rlimit 10 --fuel 0 --ifuel 1"
 
 let math_aux (a b c:int) : Lemma (a + b + (c - b) == a + c) = ()
 
