@@ -45,7 +45,7 @@ let rec lemma_expand_key_128 (key:seq nat32) (size:nat) =
 #reset-options
 
 // SIMD version of round_key_128 is equivalent to scalar round_key_128
-#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
+#push-options "--fuel 3 --ifuel 3"  // REVIEW: Why do we need this?
 let lemma_simd_round_key (prev:quad32) (rcon:nat32) =
   quad32_xor_reveal ();
   reverse_bytes_nat32_reveal ();
@@ -59,7 +59,7 @@ let commute_sub_bytes_shift_rows_forall () =
 let init_rounds_opaque (init:quad32) (round_keys:seq quad32) =
   eval_rounds_reveal ()
 
-#push-options "--max_ifuel 2 --initial_ifuel 2"  // REVIEW: Why do we need this?  Extra inversion to deal with opaque?
+#push-options "--ifuel 2"  // REVIEW: Why do we need this?  Extra inversion to deal with opaque?
 let finish_cipher (alg:algorithm) (input:quad32) (round_keys:seq quad32) =
   eval_rounds_reveal ();
   eval_cipher_reveal ();

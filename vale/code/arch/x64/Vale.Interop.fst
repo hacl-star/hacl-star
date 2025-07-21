@@ -10,7 +10,7 @@ open Vale.Def.Opaque_s
 //open Vale.Interop.Base
 open Vale.Lib.BufferViewHelpers
 
-#reset-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
+#reset-options "--fuel 2 --ifuel 1"
 
 (* Write a buffer in the vale memory *)
 
@@ -439,7 +439,7 @@ let up_down_identity mem heap =
   in Classical.forall_intro (Classical.move_requires aux);
   assert (Map.equal heap new_heap)
 
-#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1 --initial_fuel 1 --initial_ifuel 1"
+#reset-options "--z3rlimit 50 --fuel 1 --ifuel 1"
 
 let rec update_buffer_up_mem_aux
   (h1 h2:machine_heap)

@@ -44,7 +44,7 @@ let xor_lemmas () =
   FStar.Classical.forall_intro_3 lemma_BitwiseXorAssociative;
   ()
 
-#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
+#push-options "--fuel 3 --ifuel 3"  // REVIEW: Why do we need this?
 let lemma_quad32_xor () =
   quad32_xor_reveal ();
   reverse_bytes_nat32_reveal ();
@@ -73,7 +73,7 @@ let lemma_reverse_reverse_bytes_nat32 (n:nat32) :
   be_bytes_to_nat32_to_be_bytes r;
   ()
 
-#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
+#push-options "--fuel 3 --ifuel 3"  // REVIEW: Why do we need this?
 let lemma_reverse_bytes_quad32 (q:quad32) =
   quad32_xor_reveal ();
   reverse_bytes_nat32_reveal ();
@@ -270,7 +270,7 @@ let push_pop_xmm (x y:quad32) : Lemma
   hi64_reveal ();
   ()
 
-#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
+#push-options "--fuel 3 --ifuel 3"  // REVIEW: Why do we need this?
 let lemma_insrq_extrq_relations (x y:quad32) :
   Lemma (let z = insert_nat64 x (lo64 y) 0 in
          z == Mkfour y.lo0 y.lo1 x.hi2 x.hi3 /\

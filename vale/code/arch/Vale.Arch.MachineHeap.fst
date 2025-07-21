@@ -83,7 +83,7 @@ let correct_update_get128 ptr v mem =
   frame_update_heap32 (ptr+12) v.hi3 mem3;
   correct_update_get32 (ptr+12) v.hi3 mem3
 
-#reset-options "--z3rlimit 10 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
+#reset-options "--z3rlimit 10 --fuel 2 --ifuel 1"
 
 let same_domain_update128 ptr v mem =
   let mem1 = update_heap32 ptr v.lo0 mem in

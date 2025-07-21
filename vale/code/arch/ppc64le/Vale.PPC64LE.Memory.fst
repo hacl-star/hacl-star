@@ -446,7 +446,7 @@ let get_addr_ptr (t:base_typ) (ptr:int) (h:vale_heap) : Ghost (buffer t)
   =
   Some?.v (find_valid_buffer t ptr h)
 
-#reset-options "--fuel 0 --ifuel 0 --initial_fuel 0 --initial_ifuel 0 --z3rlimit 20"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 let load_buffer_read (t:base_typ) (ptr:int) (h:vale_heap) : Lemma
   (requires valid_mem t ptr h)
   (ensures (
