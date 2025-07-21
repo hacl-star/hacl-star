@@ -71,7 +71,9 @@ open Vale.Math.Poly2.Lemmas
 open Vale.AES.GF128_s
 open Vale.AES.GF128
 open Vale.AES.GHash
-#reset-options "--z3rlimit 50"
+#endverbatim
+#verbatim{:implementation}
+#set-options "--z3rlimit 50"
 #endverbatim
 
 #token +. precedence +

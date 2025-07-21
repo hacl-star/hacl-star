@@ -50,7 +50,9 @@ open Spec.Hash.Definitions
 open Spec.Loops
 open Vale.SHA.PPC64LE.Rounds.Core
 open Vale.SHA2.Wrapper
-#reset-options "--z3rlimit 2000"
+#endverbatim
+#verbatim{:implementation}
+#set-options "--z3rlimit 2000"
 #endverbatim
 
 procedure Loop_rounds_0_15(

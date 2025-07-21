@@ -137,7 +137,7 @@ let scratch_reqs (scratch_b:buffer128) (count:nat) (heap3:vale_heap) (s:seq quad
 #verbatim
 open FStar.Mul
 let add = Vale.Math.Poly2_s.add
-#reset-options "--z3rlimit 30"
+#set-options "--z3rlimit 30"
 #endverbatim
 
 type six_of(a:Type(0)):Type(0) := tuple(a, a, a, a, a, a);
@@ -946,9 +946,6 @@ procedure Loop6x_partial(
     Loop6x_round9(alg, count, in_b, scratch_b, key_words, round_keys, keys_b);
 }
 
-#verbatim{:interface}
-#reset-options "--z3rlimit 50"
-#endverbatim
 procedure Loop6x(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -1150,7 +1147,6 @@ procedure Loop6x(
 }
 
 /*
-#reset-options "--z3rlimit 600"
 procedure Loop6x_loop(
         inline alg:algorithm,
         ghost count:nat,        // Number of 6x128-bit blocks processed so far
@@ -1168,6 +1164,7 @@ procedure Loop6x_loop(
         ghost ctr_BE_orig:quad32,
         ghost ctr_BE:quad32)
     {:quick exportOnly}
+    {:options z3rlimit(600)}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8;
@@ -1377,7 +1374,6 @@ procedure Loop6x_loop(
 
 
 
-#reset-options "--z3rlimit 40"
 procedure AESNI_ctr32_6x_preamble(
         inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost key_words:seq(nat32),
@@ -1386,6 +1382,7 @@ procedure AESNI_ctr32_6x_preamble(
 
         ghost ctr_orig:quad32)
     {:quick}
+    {:options z3rlimit(40)}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx;
@@ -1460,7 +1457,6 @@ procedure AESNI_ctr32_6x_preamble(
     init_rounds_opaque(inout5, round_keys);
 }
 
-#reset-options ""
 procedure AESNI_ctr32_6x_loop_body(
         inline alg:algorithm,
         inline rnd:nat,
@@ -1794,7 +1790,6 @@ procedure AESNI_ctr32_6x_final(
     finish_aes_encrypt_le(alg, ctr5, key_words);
 }
 
-#reset-options "--z3rlimit 20"
 procedure AESNI_ctr32_6x(
         inline alg:algorithm,
         ghost count:nat,
@@ -1902,7 +1897,6 @@ procedure AESNI_ctr32_6x(
 
 }
 
-#reset-options "--z3rlimit 20"
 procedure Ctr32_ghash_6_prelude(
         inline alg:algorithm,
         ghost scratch_b:buffer128,
@@ -1971,7 +1965,6 @@ procedure Ctr32_ghash_6_prelude(
     Store128_buffer(heap3, rsp, Z0, 0x10, Secret, scratch_b, 1);     // # "$Z3" = 0
 }
 
-#reset-options ""
 procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128)
     {:quick}
     lets
@@ -2031,7 +2024,6 @@ procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128
     VPshufb(inout5, inout5, Ii);
 }
 
-#reset-options "--z3rlimit 30"
 procedure AES_GCM_encrypt(
         inline alg:algorithm,
         ghost iv_b:buffer128,
