@@ -7,6 +7,8 @@ open Spec.Hash.MD
 open FStar.Mul
 open Lib.IntTypes
 
+#reset-options "--z3rlimit 30"
+
 unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
 let init a =
