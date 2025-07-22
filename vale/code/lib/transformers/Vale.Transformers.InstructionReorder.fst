@@ -52,6 +52,8 @@ module L = FStar.List.Tot
 
 /// Some convenience functions
 
+#reset-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+
 let rec locations_of_locations_with_values (lv:locations_with_values) : locations =
   match lv with
   | [] -> []

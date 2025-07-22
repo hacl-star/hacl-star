@@ -14,6 +14,7 @@ friend Vale.Transformers.Locations
 
 module L = FStar.List.Tot
 
+#reset-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 
 let locations_of_maddr (m:maddr) (mem:location) : locations =
   mem :: (
