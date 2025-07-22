@@ -221,7 +221,7 @@ let rec lemma_instr_apply_eval_args_equiv_states
       lemma_instr_apply_eval_args_equiv_states outs args (f v) oprs s1 s2
 #pop-options
 
-#push-options "--z3rlimit 10"
+#push-options "--z3rlimit 40"
 let rec lemma_instr_apply_eval_inouts_equiv_states
     (outs inouts:list instr_out) (args:list instr_operand)
     (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)

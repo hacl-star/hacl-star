@@ -364,7 +364,7 @@ let unchanged_at' (l:locations) (s1 s2:machine_state) =
   (s1.ms_ok /\ s2.ms_ok ==>
    unchanged_at l s1 s2)
 
-#push-options "--z3rlimit 20 --fuel 4 --ifuel 3"
+#push-options "--z3rlimit 50 --fuel 4 --ifuel 3"
 let lemma_instr_write_output_explicit_only_writes
     (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i)
     (s_orig1 s1 s_orig2 s2:machine_state) :
