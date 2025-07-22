@@ -360,7 +360,7 @@ let lemma_eval_instr_equiv_states
   | Some vs ->
     lemma_instr_write_outputs_equiv_states outs args vs oprs s1 s1_new s2 s2_new
 
-#push-options "--z3rlimit 20 --fuel 0 --max_ifuel 1"
+#push-options "--z3rlimit 50 --fuel 0 --max_ifuel 1"
 (* REVIEW: This proof is INSANELY annoying to deal with due to the [Pop].
 
    TODO: Figure out why it is slowing down so much. It practically
