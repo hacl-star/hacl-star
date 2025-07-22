@@ -52,7 +52,7 @@ module L = FStar.List.Tot
 
 /// Some convenience functions
 
-#reset-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+#reset-options "--z3rlimit 30 --z3smtopt '(set-option :smt.arith.solver 2)'"
 
 let rec locations_of_locations_with_values (lv:locations_with_values) : locations =
   match lv with
@@ -254,7 +254,7 @@ let rec lemma_instr_apply_eval_inouts_equiv_states
       lemma_instr_apply_eval_inouts_equiv_states outs inouts args (f v) oprs s1 s2
 #pop-options
 
-#push-options "--z3rlimit 10 --max_fuel 1 --ifuel 0"
+#push-options "--z3rlimit 50 --max_fuel 1 --ifuel 0"
 
 let lemma_instr_write_output_implicit_equiv_states
     (i:instr_operand_implicit) (v:instr_val_t (IOpIm i))
