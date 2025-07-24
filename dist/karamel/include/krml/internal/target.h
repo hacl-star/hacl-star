@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef float float32_t;
+typedef double float64_t;
+
 /* Since KaRaMeL emits the inline keyword unconditionally, we follow the
  * guidelines at https://gcc.gnu.org/onlinedocs/gcc/Inline.html and make this
  * __inline__ to ensure the code compiles with -std=c90 and earlier. */
