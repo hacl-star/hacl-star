@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Krmllib_H
-#define __Hacl_Krmllib_H
+#ifndef Hacl_Krmllib_H
+#define Hacl_Krmllib_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -56,5 +56,5 @@ static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
 }
 #endif
 
-#define __Hacl_Krmllib_H_DEFINED
-#endif
+#define Hacl_Krmllib_H_DEFINED
+#endif /* Hacl_Krmllib_H */

@@ -4,8 +4,8 @@
 */
 
 
-#ifndef __FStar_UInt128_H
-#define __FStar_UInt128_H
+#ifndef FStar_UInt128_H
+#define FStar_UInt128_H
 
 #include <inttypes.h>
 #include <stdbool.h>
@@ -74,5 +74,5 @@ static inline FStar_UInt128_uint128 FStar_UInt128_mul32(uint64_t x, uint32_t y);
 static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
 
 
-#define __FStar_UInt128_H_DEFINED
-#endif
+#define FStar_UInt128_H_DEFINED
+#endif /* FStar_UInt128_H */

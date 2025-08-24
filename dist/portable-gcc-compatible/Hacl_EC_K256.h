@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_EC_K256_H
-#define __Hacl_EC_K256_H
+#ifndef Hacl_EC_K256_H
+#define Hacl_EC_K256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -327,5 +327,5 @@ bool Hacl_EC_K256_is_point_valid(uint8_t *b);
 }
 #endif
 
-#define __Hacl_EC_K256_H_DEFINED
-#endif
+#define Hacl_EC_K256_H_DEFINED
+#endif /* Hacl_EC_K256_H */

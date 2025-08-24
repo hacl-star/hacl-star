@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_HMAC_DRBG_H
-#define __Hacl_HMAC_DRBG_H
+#ifndef Hacl_HMAC_DRBG_H
+#define Hacl_HMAC_DRBG_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -204,5 +204,5 @@ void Hacl_HMAC_DRBG_free(Spec_Hash_Definitions_hash_alg uu___, Hacl_HMAC_DRBG_st
 }
 #endif
 
-#define __Hacl_HMAC_DRBG_H_DEFINED
-#endif
+#define Hacl_HMAC_DRBG_H_DEFINED
+#endif /* Hacl_HMAC_DRBG_H */

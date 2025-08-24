@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_Error_H
-#define __EverCrypt_Error_H
+#ifndef EverCrypt_Error_H
+#define EverCrypt_Error_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -53,5 +53,5 @@ typedef uint8_t EverCrypt_Error_error_code;
 }
 #endif
 
-#define __EverCrypt_Error_H_DEFINED
-#endif
+#define EverCrypt_Error_H_DEFINED
+#endif /* EverCrypt_Error_H */

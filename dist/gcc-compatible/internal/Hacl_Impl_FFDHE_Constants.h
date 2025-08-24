@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Impl_FFDHE_Constants_H
-#define __internal_Hacl_Impl_FFDHE_Constants_H
+#ifndef internal_Hacl_Impl_FFDHE_Constants_H
+#define internal_Hacl_Impl_FFDHE_Constants_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -300,5 +300,5 @@ Hacl_Impl_FFDHE_Constants_ffdhe_p8192[1024U] =
 }
 #endif
 
-#define __internal_Hacl_Impl_FFDHE_Constants_H_DEFINED
-#endif
+#define internal_Hacl_Impl_FFDHE_Constants_H_DEFINED
+#endif /* internal_Hacl_Impl_FFDHE_Constants_H */

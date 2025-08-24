@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_FFDHE_H
-#define __Hacl_FFDHE_H
+#ifndef Hacl_FFDHE_H
+#define Hacl_FFDHE_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -67,5 +67,5 @@ Hacl_FFDHE_ffdhe_shared_secret(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk,
 }
 #endif
 
-#define __Hacl_FFDHE_H_DEFINED
-#endif
+#define Hacl_FFDHE_H_DEFINED
+#endif /* Hacl_FFDHE_H */
