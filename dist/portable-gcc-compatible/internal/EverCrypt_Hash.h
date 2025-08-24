@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_EverCrypt_Hash_H
-#define __internal_EverCrypt_Hash_H
+#ifndef internal_EverCrypt_Hash_H
+#define internal_EverCrypt_Hash_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -114,5 +114,5 @@ void EverCrypt_Hash_Incremental_hash_256(uint8_t *output, uint8_t *input, uint32
 }
 #endif
 
-#define __internal_EverCrypt_Hash_H_DEFINED
-#endif
+#define internal_EverCrypt_Hash_H_DEFINED
+#endif /* internal_EverCrypt_Hash_H */

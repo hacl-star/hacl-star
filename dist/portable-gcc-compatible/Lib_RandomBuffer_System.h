@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Lib_RandomBuffer_System_H
-#define __Lib_RandomBuffer_System_H
+#ifndef Lib_RandomBuffer_System_H
+#define Lib_RandomBuffer_System_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -59,5 +59,5 @@ extern void Lib_RandomBuffer_System_crypto_random(uint8_t *buf, uint32_t len);
 }
 #endif
 
-#define __Lib_RandomBuffer_System_H_DEFINED
-#endif
+#define Lib_RandomBuffer_System_H_DEFINED
+#endif /* Lib_RandomBuffer_System_H */

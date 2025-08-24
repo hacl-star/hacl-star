@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_MAC_Poly1305_Simd128_H
-#define __internal_Hacl_MAC_Poly1305_Simd128_H
+#ifndef internal_Hacl_MAC_Poly1305_Simd128_H
+#define internal_Hacl_MAC_Poly1305_Simd128_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -89,5 +89,5 @@ Hacl_MAC_Poly1305_Simd128_state_t;
 }
 #endif
 
-#define __internal_Hacl_MAC_Poly1305_Simd128_H_DEFINED
-#endif
+#define internal_Hacl_MAC_Poly1305_Simd128_H_DEFINED
+#endif /* internal_Hacl_MAC_Poly1305_Simd128_H */

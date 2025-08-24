@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Test_H
-#define __internal_Test_H
+#ifndef internal_Test_H
+#define internal_Test_H
 
 #include "krml/internal/compat.h"
 
@@ -148,5 +148,5 @@ test_many_st_loop___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uin
 );
 
 
-#define __internal_Test_H_DEFINED
-#endif
+#define internal_Test_H_DEFINED
+#endif /* internal_Test_H */

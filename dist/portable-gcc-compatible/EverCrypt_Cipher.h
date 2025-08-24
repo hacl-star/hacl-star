@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_Cipher_H
-#define __EverCrypt_Cipher_H
+#ifndef EverCrypt_Cipher_H
+#define EverCrypt_Cipher_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -53,5 +53,5 @@ EverCrypt_Cipher_chacha20(
 }
 #endif
 
-#define __EverCrypt_Cipher_H_DEFINED
-#endif
+#define EverCrypt_Cipher_H_DEFINED
+#endif /* EverCrypt_Cipher_H */

@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_SHA2_Types_H
-#define __Hacl_SHA2_Types_H
+#ifndef Hacl_SHA2_Types_H
+#define Hacl_SHA2_Types_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -64,5 +64,5 @@ typedef Hacl_Hash_SHA2_uint8_4p Hacl_Hash_SHA2_bufx4;
 }
 #endif
 
-#define __Hacl_SHA2_Types_H_DEFINED
-#endif
+#define Hacl_SHA2_Types_H_DEFINED
+#endif /* Hacl_SHA2_Types_H */

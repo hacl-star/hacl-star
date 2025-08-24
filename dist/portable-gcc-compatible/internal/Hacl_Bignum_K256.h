@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Bignum_K256_H
-#define __internal_Hacl_Bignum_K256_H
+#ifndef internal_Hacl_Bignum_K256_H
+#define internal_Hacl_Bignum_K256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -737,5 +737,5 @@ static inline void Hacl_Impl_K256_Finv_fsqrt(uint64_t *out, uint64_t *f)
 }
 #endif
 
-#define __internal_Hacl_Bignum_K256_H_DEFINED
-#endif
+#define internal_Hacl_Bignum_K256_H_DEFINED
+#endif /* internal_Hacl_Bignum_K256_H */
