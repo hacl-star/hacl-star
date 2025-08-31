@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_K256_ECDSA_H
-#define __Hacl_K256_ECDSA_H
+#ifndef Hacl_K256_ECDSA_H
+#define Hacl_K256_ECDSA_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -428,5 +428,5 @@ bool Hacl_K256_ECDSA_ecdh(uint8_t *shared_secret, uint8_t *their_pubkey, uint8_t
 }
 #endif
 
-#define __Hacl_K256_ECDSA_H_DEFINED
-#endif
+#define Hacl_K256_ECDSA_H_DEFINED
+#endif /* Hacl_K256_ECDSA_H */

@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_HPKE_Curve51_CP128_SHA512_H
-#define __Hacl_HPKE_Curve51_CP128_SHA512_H
+#ifndef Hacl_HPKE_Curve51_CP128_SHA512_H
+#define Hacl_HPKE_Curve51_CP128_SHA512_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -103,5 +103,5 @@ Hacl_HPKE_Curve51_CP128_SHA512_openBase(
 }
 #endif
 
-#define __Hacl_HPKE_Curve51_CP128_SHA512_H_DEFINED
-#endif
+#define Hacl_HPKE_Curve51_CP128_SHA512_H_DEFINED
+#endif /* Hacl_HPKE_Curve51_CP128_SHA512_H */

@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_Chacha20Poly1305_H
-#define __EverCrypt_Chacha20Poly1305_H
+#ifndef EverCrypt_Chacha20Poly1305_H
+#define EverCrypt_Chacha20Poly1305_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -71,5 +71,5 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
 }
 #endif
 
-#define __EverCrypt_Chacha20Poly1305_H_DEFINED
-#endif
+#define EverCrypt_Chacha20Poly1305_H_DEFINED
+#endif /* EverCrypt_Chacha20Poly1305_H */

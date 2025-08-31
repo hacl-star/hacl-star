@@ -1,5 +1,5 @@
-#ifndef __KRMLLIB_H
-#define __KRMLLIB_H
+#ifndef KRML_HEADER_KRMLLIB_H
+#define KRML_HEADER_KRMLLIB_H
 
 /******************************************************************************/
 /* The all-in-one krmllib.h header                                            */
@@ -25,4 +25,4 @@
 #include "krml/lowstar_endianness.h"
 #include "krml/fstar_int.h"
 
-#endif     /* __KRMLLIB_H */
+#endif     /* KRML_HEADER_KRMLLIB_H */

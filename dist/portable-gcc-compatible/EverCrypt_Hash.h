@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_Hash_H
-#define __EverCrypt_Hash_H
+#ifndef EverCrypt_Hash_H
+#define EverCrypt_Hash_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -225,5 +225,5 @@ EverCrypt_Hash_Incremental_hash(
 }
 #endif
 
-#define __EverCrypt_Hash_H_DEFINED
-#endif
+#define EverCrypt_Hash_H_DEFINED
+#endif /* EverCrypt_Hash_H */

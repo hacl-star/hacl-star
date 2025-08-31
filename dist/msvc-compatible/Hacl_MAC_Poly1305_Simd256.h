@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_MAC_Poly1305_Simd256_H
-#define __Hacl_MAC_Poly1305_Simd256_H
+#ifndef Hacl_MAC_Poly1305_Simd256_H
+#define Hacl_MAC_Poly1305_Simd256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -70,5 +70,5 @@ Hacl_MAC_Poly1305_Simd256_mac(
 }
 #endif
 
-#define __Hacl_MAC_Poly1305_Simd256_H_DEFINED
-#endif
+#define Hacl_MAC_Poly1305_Simd256_H_DEFINED
+#endif /* Hacl_MAC_Poly1305_Simd256_H */
