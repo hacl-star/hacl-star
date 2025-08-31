@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Ed25519_H
-#define __internal_Hacl_Ed25519_H
+#ifndef internal_Hacl_Ed25519_H
+#define internal_Hacl_Ed25519_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -113,5 +113,5 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
 }
 #endif
 
-#define __internal_Hacl_Ed25519_H_DEFINED
-#endif
+#define internal_Hacl_Ed25519_H_DEFINED
+#endif /* internal_Hacl_Ed25519_H */

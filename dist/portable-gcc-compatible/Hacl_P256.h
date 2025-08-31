@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_P256_H
-#define __Hacl_P256_H
+#ifndef Hacl_P256_H
+#define Hacl_P256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -435,5 +435,5 @@ Hacl_P256_dh_responder(uint8_t *shared_secret, uint8_t *their_pubkey, uint8_t *p
 }
 #endif
 
-#define __Hacl_P256_H_DEFINED
-#endif
+#define Hacl_P256_H_DEFINED
+#endif /* Hacl_P256_H */

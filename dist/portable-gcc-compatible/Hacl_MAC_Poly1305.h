@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_MAC_Poly1305_H
-#define __Hacl_MAC_Poly1305_H
+#ifndef Hacl_MAC_Poly1305_H
+#define Hacl_MAC_Poly1305_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -87,5 +87,5 @@ void Hacl_MAC_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len, 
 }
 #endif
 
-#define __Hacl_MAC_Poly1305_H_DEFINED
-#endif
+#define Hacl_MAC_Poly1305_H_DEFINED
+#endif /* Hacl_MAC_Poly1305_H */

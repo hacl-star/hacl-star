@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Hash_Base_H
-#define __Hacl_Hash_Base_H
+#ifndef Hacl_Hash_Base_H
+#define Hacl_Hash_Base_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -51,5 +51,5 @@ typedef uint8_t *Hacl_Hash_Definitions_hash_t;
 }
 #endif
 
-#define __Hacl_Hash_Base_H_DEFINED
-#endif
+#define Hacl_Hash_Base_H_DEFINED
+#endif /* Hacl_Hash_Base_H */

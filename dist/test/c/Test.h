@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Test_H
-#define __Test_H
+#ifndef Test_H
+#define Test_H
 
 #include "krml/internal/compat.h"
 
@@ -39,5 +39,5 @@ Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
 exit_code main(void);
 
 
-#define __Test_H_DEFINED
-#endif
+#define Test_H_DEFINED
+#endif /* Test_H */

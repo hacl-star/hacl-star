@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_AEAD_H
-#define __EverCrypt_AEAD_H
+#ifndef EverCrypt_AEAD_H
+#define EverCrypt_AEAD_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -351,5 +351,5 @@ void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *s);
 }
 #endif
 
-#define __EverCrypt_AEAD_H_DEFINED
-#endif
+#define EverCrypt_AEAD_H_DEFINED
+#endif /* EverCrypt_AEAD_H */
