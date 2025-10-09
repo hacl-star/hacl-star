@@ -231,7 +231,7 @@ val auth_encap:
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 50"
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 150"
 let auth_encap cs skE pkR skS =
   let _ = allow_inversion Spec.Agile.DH.algorithm in
   match DH.secret_to_public (kem_dh_of_cs cs) skE with
@@ -272,7 +272,7 @@ val auth_decap:
   -> pkS: DH.serialized_point (kem_dh_of_cs cs) ->
   Tot (option (key_kem_s cs))
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 50"
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --z3rlimit 100"
 let auth_decap cs enc skR pkS =
   let _ = allow_inversion Spec.Agile.DH.algorithm in
   let pkE = deserialize_public_key cs enc in

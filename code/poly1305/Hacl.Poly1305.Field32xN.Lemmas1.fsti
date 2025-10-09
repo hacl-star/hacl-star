@@ -221,6 +221,8 @@ val lemma_subtract_p5:
      (v f0' = v f0 && v f1' = v f1 && v f2' = v f2 && v f3' = v f3 && v f4' = v f4))))
   (ensures as_nat5 f' == as_nat5 f % prime)
 
+#push-options "--z3rlimit 50"
+#restart-solver
 noextract
 let subtract_p5_s
     (#w:lanes)
@@ -253,7 +255,12 @@ let subtract_p5_s
   let f3' = f3 -. p3 in
   let f4' = f4 -. p4 in
   lemma_subtract_p5 (f0, f1, f2, f3, f4) (f0', f1', f2', f3', f4');
-  (f0', f1', f2', f3', f4')
+  let out = (f0', f1', f2', f3', f4') in
+  assert (as_nat5 out == as_nat5 (as_tup64_i f i) % prime);
+  assert (tup64_fits5 out (1, 1, 1, 1, 1));
+  // ^ This seems needed to trigger the SMT, why?
+  out
+#pop-options
 
 val subtract_p5_felem5_lemma_i:
     #w:lanes
