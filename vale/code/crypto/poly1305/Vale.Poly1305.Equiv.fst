@@ -115,7 +115,13 @@ let lemma_poly1305_equiv_last (text:bytes) (r:felem) (hBlocks:felem) : Lemma
     fmul (fadd (x + padLast) hBlocks) r;
     == { FStar.Math.Lemmas.lemma_mod_plus_distr_l (x + padLast) hBlocks prime }
     fmul (fadd (fadd x padLast) hBlocks) r;
-    == {}
+    == {
+      assert_norm (
+        fmul (fadd (fadd x padLast) hBlocks) r
+        ==
+        S.poly1305_update1 r nExtra last hBlocks
+      )
+    }
     S.poly1305_update1 r nExtra last hBlocks;
   }
 
