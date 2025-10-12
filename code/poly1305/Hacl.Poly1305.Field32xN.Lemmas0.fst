@@ -145,7 +145,7 @@ let smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 i =
   assert ((uint64xN_v o).[i] <= m3 * max26 * max26 + m1 * m2 * max26 * max26)
 #pop-options
 
-#push-options "--ifuel 1"
+#push-options "--ifuel 1 --z3rlimit 100"
 let smul_add_felem5_eval_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 i =
   let o = smul_add_felem5 #w u1 f2 acc1 in
   let (m20, m21, m22, m23, m24) = m2 in
@@ -161,9 +161,22 @@ let smul_add_felem5_eval_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 i =
   smul_add_mod_lemma #m1 #m23 #m33 vu1 (v tf23) (v ta3);
   smul_add_mod_lemma #m1 #m24 #m34 vu1 (v tf24) (v ta4);
 
-  calc (==) {
-    (fas_nat5 o).[i];
-    == { }
+  calc (eq2 #int) {
+    (fas_nat5 o).[i] <: int;
+    // ^ The int ascriptions above may help, since they make the proof of this
+    // equality happen at an unrefined type, which means we don't need to prove
+    // that every intermediate step fits in nat (or whatever type was inferred).
+    // Even if we're provnig an equality (and hence they would all satisfy the
+    // same refinement), the refinement must be proven _before_, in order to
+    // typecheck the statement of what we're proving.
+    == {
+      assert_norm (
+        (fas_nat5 o).[i]
+        ==
+        v ta0 + vu1 * v tf20 + (v ta1 + vu1 * v tf21) * pow26 + (v ta2 + vu1 * v tf22) * pow52 +
+        (v ta3 + vu1 * v tf23) * pow78 + (v ta4 + vu1 * v tf24) * pow104
+      )
+    }
     v ta0 + vu1 * v tf20 + (v ta1 + vu1 * v tf21) * pow26 + (v ta2 + vu1 * v tf22) * pow52 +
     (v ta3 + vu1 * v tf23) * pow78 + (v ta4 + vu1 * v tf24) * pow104;
     == {

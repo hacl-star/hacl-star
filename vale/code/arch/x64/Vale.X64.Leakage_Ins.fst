@@ -851,7 +851,17 @@ let lemma_vpxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     lemma_instr_leakage_free ts ins
 #pop-options
 
-#push-options "--ifuel 2 --fuel 1 --z3rlimit 200"
+#push-options "--z3rlimit 350 --ifuel 2 --fuel 1 --split_queries always"
+let lemma_alloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
+  (requires BC.Alloc? ins)
+  (ensures (
+    let (b, ts') = check_if_alloc_consumes_fixed_time ins ts in
+    b2t b ==> isConstantTime (Ins ins) ts.lts /\ isLeakageFree (Ins ins) ts.lts ts'.lts
+  ))
+  =
+  ()
+#pop-options
+
 let lemma_ins_leakage_free ts ins =
   let (b, ts') = check_if_ins_consumes_fixed_time ins ts in
   match ins with
@@ -859,8 +869,7 @@ let lemma_ins_leakage_free ts ins =
   | BC.Instr _ _ (S.AnnotatePxor _) -> lemma_pxor_leakage_free ts ins
   | BC.Instr _ _ (S.AnnotateVPxor _) -> lemma_vpxor_leakage_free ts ins
   | BC.Instr _ _ _ -> lemma_instr_leakage_free ts ins
-  | BC.Alloc _ -> ()
+  | BC.Alloc _ -> lemma_alloc_leakage_free ts ins
   | BC.Dealloc _ -> lemma_dealloc_leakage_free ts ins
   | BC.Push _ _ -> lemma_push_leakage_free ts ins
   | BC.Pop _ _ -> lemma_pop_leakage_free ts ins
-#pop-options

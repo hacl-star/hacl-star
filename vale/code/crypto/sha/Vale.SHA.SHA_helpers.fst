@@ -655,7 +655,12 @@ let update_block (hash:hash256) (block:block_w): Tot (hash256) =
   let open Lib.IntTypes in
   Spec.Loops.seq_map2 ( +. ) hash hash_1
 
-let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = block_length}) :
+let _ = assert (block_length == Spec.Hash.Definitions.block_length SHA2_256)
+
+// It's trivial to prove that block_length = Spec.Hash.Definitions.block_length SHA2_256 (see above)
+// but somehow if we only keep the left conjunct in the refinement of 'block', the lemma statement
+// fails to typecheck.
+let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = block_length /\ length block = Spec.Hash.Definitions.block_length SHA2_256}) :
   Lemma (update_block hash (words_of_bytes SHA2_256 #(block_word_length SHA2_256) block) == update SHA2_256 hash block)
   =
   Pervasives.reveal_opaque (`%Spec.SHA2.update) Spec.SHA2.update;
