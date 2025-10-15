@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Bignum_H
-#define __Hacl_Bignum_H
+#ifndef Hacl_Bignum_H
+#define Hacl_Bignum_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -67,5 +67,5 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64;
 }
 #endif
 
-#define __Hacl_Bignum_H_DEFINED
-#endif
+#define Hacl_Bignum_H_DEFINED
+#endif /* Hacl_Bignum_H */

@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Bignum_Base_H
-#define __internal_Hacl_Bignum_Base_H
+#ifndef internal_Hacl_Bignum_Base_H
+#define internal_Hacl_Bignum_Base_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -536,5 +536,5 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
 }
 #endif
 
-#define __internal_Hacl_Bignum_Base_H_DEFINED
-#endif
+#define internal_Hacl_Bignum_Base_H_DEFINED
+#endif /* internal_Hacl_Bignum_Base_H */

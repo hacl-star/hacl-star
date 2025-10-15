@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_EverCrypt_DRBG_H
-#define __internal_EverCrypt_DRBG_H
+#ifndef internal_EverCrypt_DRBG_H
+#define internal_EverCrypt_DRBG_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -110,5 +110,5 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 }
 #endif
 
-#define __internal_EverCrypt_DRBG_H_DEFINED
-#endif
+#define internal_EverCrypt_DRBG_H_DEFINED
+#endif /* internal_EverCrypt_DRBG_H */

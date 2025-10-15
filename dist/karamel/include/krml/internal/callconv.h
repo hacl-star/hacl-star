@@ -1,8 +1,8 @@
 /* Copyright (c) INRIA and Microsoft Corporation. All rights reserved.
    Licensed under the Apache 2.0 and MIT Licenses. */
 
-#ifndef __KRML_CALLCONV_H
-#define __KRML_CALLCONV_H
+#ifndef KRML_HEADER_CALLCONV_H
+#define KRML_HEADER_CALLCONV_H
 
 /******************************************************************************/
 /* Some macros to ease compatibility (TODO: move to miTLS)                    */
@@ -24,4 +24,4 @@
 #endif
 #endif
 
-#endif
+#endif /* KRML_HEADER_CALLCONV_H */

@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Spec_H
-#define __internal_Hacl_Spec_H
+#ifndef internal_Hacl_Spec_H
+#define internal_Hacl_Spec_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -60,5 +60,5 @@ typedef uint8_t Spec_Frodo_Params_frodo_gen_a;
 }
 #endif
 
-#define __internal_Hacl_Spec_H_DEFINED
-#endif
+#define internal_Hacl_Spec_H_DEFINED
+#endif /* internal_Hacl_Spec_H */

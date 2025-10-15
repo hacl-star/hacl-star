@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_AES128_H
-#define __Hacl_AES128_H
+#ifndef Hacl_AES128_H
+#define Hacl_AES128_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -44,5 +44,5 @@ Hacl_AES128_aes128_encrypt_block(uint16_t *cipher, uint16_t *plain, uint8_t *exp
 }
 #endif
 
-#define __Hacl_AES128_H_DEFINED
-#endif
+#define Hacl_AES128_H_DEFINED
+#endif /* Hacl_AES128_H */

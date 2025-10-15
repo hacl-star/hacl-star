@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_K256_ECDSA_H
-#define __internal_Hacl_K256_ECDSA_H
+#ifndef internal_Hacl_K256_ECDSA_H
+#define internal_Hacl_K256_ECDSA_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -55,5 +55,5 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
 }
 #endif
 
-#define __internal_Hacl_K256_ECDSA_H_DEFINED
-#endif
+#define internal_Hacl_K256_ECDSA_H_DEFINED
+#endif /* internal_Hacl_K256_ECDSA_H */

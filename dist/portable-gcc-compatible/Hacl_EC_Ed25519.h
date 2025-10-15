@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_EC_Ed25519_H
-#define __Hacl_EC_Ed25519_H
+#ifndef Hacl_EC_Ed25519_H
+#define Hacl_EC_Ed25519_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -331,5 +331,5 @@ bool Hacl_EC_Ed25519_point_decompress(uint8_t *s, uint64_t *out);
 }
 #endif
 
-#define __Hacl_EC_Ed25519_H_DEFINED
-#endif
+#define Hacl_EC_Ed25519_H_DEFINED
+#endif /* Hacl_EC_Ed25519_H */

@@ -1,8 +1,8 @@
 /* Copyright (c) INRIA and Microsoft Corporation. All rights reserved.
    Licensed under the Apache 2.0 and MIT Licenses. */
 
-#ifndef __KRML_ENDIAN_H
-#define __KRML_ENDIAN_H
+#ifndef KRML_HEADER_ENDIAN_H
+#define KRML_HEADER_ENDIAN_H
 
 #ifdef __GNUC__
 #warning "c_endianness.h is deprecated, include lowstar_endianness.h instead"
@@ -10,4 +10,4 @@
 
 #include "lowstar_endianness.h"
 
-#endif
+#endif /* KRML_HEADER_ENDIAN_H */

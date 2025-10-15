@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Vale_H
-#define __internal_Vale_H
+#ifndef internal_Vale_H
+#define internal_Vale_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -318,5 +318,5 @@ extern uint64_t x64_poly1305(uint8_t *x0, uint8_t *x1, uint64_t x2, uint64_t x3)
 }
 #endif
 
-#define __internal_Vale_H_DEFINED
-#endif
+#define internal_Vale_H_DEFINED
+#endif /* internal_Vale_H */

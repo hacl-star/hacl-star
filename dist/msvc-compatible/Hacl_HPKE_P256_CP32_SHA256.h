@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_HPKE_P256_CP32_SHA256_H
-#define __Hacl_HPKE_P256_CP32_SHA256_H
+#ifndef Hacl_HPKE_P256_CP32_SHA256_H
+#define Hacl_HPKE_P256_CP32_SHA256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -87,5 +87,5 @@ Hacl_HPKE_P256_CP32_SHA256_openBase(
 }
 #endif
 
-#define __Hacl_HPKE_P256_CP32_SHA256_H_DEFINED
-#endif
+#define Hacl_HPKE_P256_CP32_SHA256_H_DEFINED
+#endif /* Hacl_HPKE_P256_CP32_SHA256_H */

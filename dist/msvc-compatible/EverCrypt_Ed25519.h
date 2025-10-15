@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_Ed25519_H
-#define __EverCrypt_Ed25519_H
+#ifndef EverCrypt_Ed25519_H
+#define EverCrypt_Ed25519_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -67,5 +67,5 @@ EverCrypt_Ed25519_verify(
 }
 #endif
 
-#define __EverCrypt_Ed25519_H_DEFINED
-#endif
+#define EverCrypt_Ed25519_H_DEFINED
+#endif /* EverCrypt_Ed25519_H */

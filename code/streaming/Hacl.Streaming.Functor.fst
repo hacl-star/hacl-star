@@ -2060,8 +2060,14 @@ let digest_heap #index c i t t' state output l =
   optional_frame #_ #i #c.km #c.key B.(loc_buffer output `loc_union` c.state.footprint #i h5 tmp_block_state) k' h5 h6;
 
   // pop_frame ();
+  c.state.free i tmp_block_state;
 
   let h7 = ST.get () in
+
+  c.state.frame_invariant #i B.(c.state.footprint #i h5 tmp_block_state) block_state h6 h7;
+  stateful_frame_preserves_freeable #index #c.state #i B.(c.state.footprint #i h6 tmp_block_state) block_state h6 h7;
+  optional_frame #_ #i #c.km #c.key B.(c.state.footprint #i h5 tmp_block_state) k' h6 h7;
+
   // c.state.frame_invariant #i B.(loc_region_only false (HS.get_tip h6)) block_state h6 h7;
   // stateful_frame_preserves_freeable #index #c.state #i B.(loc_region_only false (HS.get_tip h6)) block_state h6 h7;
   // optional_frame #_ #i #c.km #c.key B.(loc_region_only false (HS.get_tip h6)) k' h6 h7;

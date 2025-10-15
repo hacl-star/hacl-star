@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_HKDF_Blake2b_256_H
-#define __Hacl_HKDF_Blake2b_256_H
+#ifndef Hacl_HKDF_Blake2b_256_H
+#define Hacl_HKDF_Blake2b_256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -85,5 +85,5 @@ Hacl_HKDF_Blake2b_256_extract_blake2b_256(
 }
 #endif
 
-#define __Hacl_HKDF_Blake2b_256_H_DEFINED
-#endif
+#define Hacl_HKDF_Blake2b_256_H_DEFINED
+#endif /* Hacl_HKDF_Blake2b_256_H */

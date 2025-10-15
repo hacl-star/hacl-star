@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Hash_Blake2b_H
-#define __Hacl_Hash_Blake2b_H
+#ifndef Hacl_Hash_Blake2b_H
+#define Hacl_Hash_Blake2b_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -307,5 +307,5 @@ Hacl_Hash_Blake2b_hash_with_key_and_params(
 }
 #endif
 
-#define __Hacl_Hash_Blake2b_H_DEFINED
-#endif
+#define Hacl_Hash_Blake2b_H_DEFINED
+#endif /* Hacl_Hash_Blake2b_H */

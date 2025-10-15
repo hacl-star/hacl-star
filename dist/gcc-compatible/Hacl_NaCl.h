@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_NaCl_H
-#define __Hacl_NaCl_H
+#ifndef Hacl_NaCl_H
+#define Hacl_NaCl_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -256,5 +256,5 @@ Hacl_NaCl_crypto_box_open_easy(
 }
 #endif
 
-#define __Hacl_NaCl_H_DEFINED
-#endif
+#define Hacl_NaCl_H_DEFINED
+#endif /* Hacl_NaCl_H */

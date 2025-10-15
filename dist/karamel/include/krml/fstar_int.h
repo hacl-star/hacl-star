@@ -1,5 +1,5 @@
-#ifndef __FSTAR_INT_H
-#define __FSTAR_INT_H
+#ifndef KRML_HEADER_FSTAR_INT_H
+#define KRML_HEADER_FSTAR_INT_H
 
 #include "internal/types.h"
 
@@ -78,4 +78,4 @@ int64_t FStar_Int64_shift_arithmetic_right(int64_t a, uint32_t b) {
 
 #endif     /* !(defined(_MSC_VER) ... ) */
 
-#endif     /* __FSTAR_INT_H */
+#endif     /* KRML_HEADER_FSTAR_INT_H */

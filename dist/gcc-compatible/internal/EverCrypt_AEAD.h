@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_EverCrypt_AEAD_H
-#define __internal_EverCrypt_AEAD_H
+#ifndef internal_EverCrypt_AEAD_H
+#define internal_EverCrypt_AEAD_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -59,5 +59,5 @@ bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s pro
 }
 #endif
 
-#define __internal_EverCrypt_AEAD_H_DEFINED
-#endif
+#define internal_EverCrypt_AEAD_H_DEFINED
+#endif /* internal_EverCrypt_AEAD_H */

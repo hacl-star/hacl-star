@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Ed25519_PrecompTable_H
-#define __internal_Hacl_Ed25519_PrecompTable_H
+#ifndef internal_Hacl_Ed25519_PrecompTable_H
+#define internal_Hacl_Ed25519_PrecompTable_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -550,5 +550,5 @@ Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w5[640U] =
 }
 #endif
 
-#define __internal_Hacl_Ed25519_PrecompTable_H_DEFINED
-#endif
+#define internal_Hacl_Ed25519_PrecompTable_H_DEFINED
+#endif /* internal_Hacl_Ed25519_PrecompTable_H */

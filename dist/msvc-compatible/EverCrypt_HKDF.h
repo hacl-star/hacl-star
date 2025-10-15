@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_HKDF_H
-#define __EverCrypt_HKDF_H
+#ifndef EverCrypt_HKDF_H
+#define EverCrypt_HKDF_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -90,5 +90,5 @@ EverCrypt_HKDF_extract(
 }
 #endif
 
-#define __EverCrypt_HKDF_H_DEFINED
-#endif
+#define EverCrypt_HKDF_H_DEFINED
+#endif /* EverCrypt_HKDF_H */

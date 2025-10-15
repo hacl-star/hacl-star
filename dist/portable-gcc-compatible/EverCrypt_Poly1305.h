@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_Poly1305_H
-#define __EverCrypt_Poly1305_H
+#ifndef EverCrypt_Poly1305_H
+#define EverCrypt_Poly1305_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -45,5 +45,5 @@ void EverCrypt_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len,
 }
 #endif
 
-#define __EverCrypt_Poly1305_H_DEFINED
-#endif
+#define EverCrypt_Poly1305_H_DEFINED
+#endif /* EverCrypt_Poly1305_H */

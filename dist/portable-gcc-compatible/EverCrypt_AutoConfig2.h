@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_AutoConfig2_H
-#define __EverCrypt_AutoConfig2_H
+#ifndef EverCrypt_AutoConfig2_H
+#define EverCrypt_AutoConfig2_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -201,5 +201,5 @@ bool EverCrypt_AutoConfig2_has_vec256(void);
 }
 #endif
 
-#define __EverCrypt_AutoConfig2_H_DEFINED
-#endif
+#define EverCrypt_AutoConfig2_H_DEFINED
+#endif /* EverCrypt_AutoConfig2_H */
