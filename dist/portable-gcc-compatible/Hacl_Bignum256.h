@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Bignum256_H
-#define __Hacl_Bignum256_H
+#ifndef Hacl_Bignum256_H
+#define Hacl_Bignum256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -482,5 +482,5 @@ uint64_t Hacl_Bignum256_eq_mask(uint64_t *a, uint64_t *b);
 }
 #endif
 
-#define __Hacl_Bignum256_H_DEFINED
-#endif
+#define Hacl_Bignum256_H_DEFINED
+#endif /* Hacl_Bignum256_H */

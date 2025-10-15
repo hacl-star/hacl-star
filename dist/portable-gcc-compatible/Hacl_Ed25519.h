@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Ed25519_H
-#define __Hacl_Ed25519_H
+#ifndef Hacl_Ed25519_H
+#define Hacl_Ed25519_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -131,5 +131,5 @@ Hacl_Ed25519_verify(uint8_t *public_key, uint32_t msg_len, uint8_t *msg, uint8_t
 }
 #endif
 
-#define __Hacl_Ed25519_H_DEFINED
-#endif
+#define Hacl_Ed25519_H_DEFINED
+#endif /* Hacl_Ed25519_H */

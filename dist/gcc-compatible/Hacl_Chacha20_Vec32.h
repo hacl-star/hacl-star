@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Chacha20_Vec32_H
-#define __Hacl_Chacha20_Vec32_H
+#ifndef Hacl_Chacha20_Vec32_H
+#define Hacl_Chacha20_Vec32_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -59,5 +59,5 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
 }
 #endif
 
-#define __Hacl_Chacha20_Vec32_H_DEFINED
-#endif
+#define Hacl_Chacha20_Vec32_H_DEFINED
+#endif /* Hacl_Chacha20_Vec32_H */

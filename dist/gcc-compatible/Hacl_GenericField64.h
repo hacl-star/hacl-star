@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_GenericField64_H
-#define __Hacl_GenericField64_H
+#ifndef Hacl_GenericField64_H
+#define Hacl_GenericField64_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -265,5 +265,5 @@ Hacl_GenericField64_inverse(
 }
 #endif
 
-#define __Hacl_GenericField64_H_DEFINED
-#endif
+#define Hacl_GenericField64_H_DEFINED
+#endif /* Hacl_GenericField64_H */

@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_GenericField32_H
-#define __Hacl_GenericField32_H
+#ifndef Hacl_GenericField32_H
+#define Hacl_GenericField32_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -325,5 +325,5 @@ Hacl_GenericField32_inverse(
 }
 #endif
 
-#define __Hacl_GenericField32_H_DEFINED
-#endif
+#define Hacl_GenericField32_H_DEFINED
+#endif /* Hacl_GenericField32_H */

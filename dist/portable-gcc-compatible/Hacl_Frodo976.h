@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Frodo976_H
-#define __Hacl_Frodo976_H
+#ifndef Hacl_Frodo976_H
+#define Hacl_Frodo976_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -81,5 +81,5 @@ uint32_t Hacl_Frodo976_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk);
 }
 #endif
 
-#define __Hacl_Frodo976_H_DEFINED
-#endif
+#define Hacl_Frodo976_H_DEFINED
+#endif /* Hacl_Frodo976_H */

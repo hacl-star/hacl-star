@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Frodo_KEM_H
-#define __internal_Hacl_Frodo_KEM_H
+#ifndef internal_Hacl_Frodo_KEM_H
+#define internal_Hacl_Frodo_KEM_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -569,5 +569,5 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(
 }
 #endif
 
-#define __internal_Hacl_Frodo_KEM_H_DEFINED
-#endif
+#define internal_Hacl_Frodo_KEM_H_DEFINED
+#endif /* internal_Hacl_Frodo_KEM_H */

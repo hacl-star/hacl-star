@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_Curve25519_H
-#define __EverCrypt_Curve25519_H
+#ifndef EverCrypt_Curve25519_H
+#define EverCrypt_Curve25519_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -79,5 +79,5 @@ bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their
 }
 #endif
 
-#define __EverCrypt_Curve25519_H_DEFINED
-#endif
+#define EverCrypt_Curve25519_H_DEFINED
+#endif /* EverCrypt_Curve25519_H */

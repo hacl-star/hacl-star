@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Salsa20_H
-#define __Hacl_Salsa20_H
+#ifndef Hacl_Salsa20_H
+#define Hacl_Salsa20_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -79,5 +79,5 @@ void Hacl_Salsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n);
 }
 #endif
 
-#define __Hacl_Salsa20_H_DEFINED
-#endif
+#define Hacl_Salsa20_H_DEFINED
+#endif /* Hacl_Salsa20_H */

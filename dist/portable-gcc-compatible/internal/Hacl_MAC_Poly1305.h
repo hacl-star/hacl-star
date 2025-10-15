@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_MAC_Poly1305_H
-#define __internal_Hacl_MAC_Poly1305_H
+#ifndef internal_Hacl_MAC_Poly1305_H
+#define internal_Hacl_MAC_Poly1305_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -78,5 +78,5 @@ FStar_Pervasives_Native_option___uint8_t_;
 }
 #endif
 
-#define __internal_Hacl_MAC_Poly1305_H_DEFINED
-#endif
+#define internal_Hacl_MAC_Poly1305_H_DEFINED
+#endif /* internal_Hacl_MAC_Poly1305_H */

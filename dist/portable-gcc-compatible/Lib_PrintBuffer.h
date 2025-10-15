@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Lib_PrintBuffer_H
-#define __Lib_PrintBuffer_H
+#ifndef Lib_PrintBuffer_H
+#define Lib_PrintBuffer_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -65,5 +65,5 @@ Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const 
 }
 #endif
 
-#define __Lib_PrintBuffer_H_DEFINED
-#endif
+#define Lib_PrintBuffer_H_DEFINED
+#endif /* Lib_PrintBuffer_H */

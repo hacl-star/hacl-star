@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_SHA2_Vec128_H
-#define __Hacl_SHA2_Vec128_H
+#ifndef Hacl_SHA2_Vec128_H
+#define Hacl_SHA2_Vec128_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -65,5 +65,5 @@ Hacl_SHA2_Vec128_sha256_4(
 }
 #endif
 
-#define __Hacl_SHA2_Vec128_H_DEFINED
-#endif
+#define Hacl_SHA2_Vec128_H_DEFINED
+#endif /* Hacl_SHA2_Vec128_H */

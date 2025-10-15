@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Bignum_H
-#define __internal_Hacl_Bignum_H
+#ifndef internal_Hacl_Bignum_H
+#define internal_Hacl_Bignum_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -339,5 +339,5 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u64(
 }
 #endif
 
-#define __internal_Hacl_Bignum_H_DEFINED
-#endif
+#define internal_Hacl_Bignum_H_DEFINED
+#endif /* internal_Hacl_Bignum_H */

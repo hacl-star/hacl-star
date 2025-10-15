@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Chacha20_H
-#define __internal_Hacl_Chacha20_H
+#ifndef internal_Hacl_Chacha20_H
+#define internal_Hacl_Chacha20_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -48,5 +48,5 @@ Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, ui
 }
 #endif
 
-#define __internal_Hacl_Chacha20_H_DEFINED
-#endif
+#define internal_Hacl_Chacha20_H_DEFINED
+#endif /* internal_Hacl_Chacha20_H */

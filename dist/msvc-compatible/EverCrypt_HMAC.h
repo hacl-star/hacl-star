@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __EverCrypt_HMAC_H
-#define __EverCrypt_HMAC_H
+#ifndef EverCrypt_HMAC_H
+#define EverCrypt_HMAC_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -55,5 +55,5 @@ EverCrypt_HMAC_compute(
 }
 #endif
 
-#define __EverCrypt_HMAC_H_DEFINED
-#endif
+#define EverCrypt_HMAC_H_DEFINED
+#endif /* EverCrypt_HMAC_H */
