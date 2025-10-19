@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Spec_H
-#define __Hacl_Spec_H
+#ifndef Hacl_Spec_H
+#define Hacl_Spec_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -57,5 +57,5 @@ typedef uint8_t Spec_Agile_AEAD_alg;
 }
 #endif
 
-#define __Hacl_Spec_H_DEFINED
-#endif
+#define Hacl_Spec_H_DEFINED
+#endif /* Hacl_Spec_H */

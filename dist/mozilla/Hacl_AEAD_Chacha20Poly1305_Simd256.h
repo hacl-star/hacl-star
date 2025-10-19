@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_AEAD_Chacha20Poly1305_Simd256_H
-#define __Hacl_AEAD_Chacha20Poly1305_Simd256_H
+#ifndef Hacl_AEAD_Chacha20Poly1305_Simd256_H
+#define Hacl_AEAD_Chacha20Poly1305_Simd256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -98,5 +98,5 @@ Hacl_AEAD_Chacha20Poly1305_Simd256_decrypt(
 }
 #endif
 
-#define __Hacl_AEAD_Chacha20Poly1305_Simd256_H_DEFINED
-#endif
+#define Hacl_AEAD_Chacha20Poly1305_Simd256_H_DEFINED
+#endif /* Hacl_AEAD_Chacha20Poly1305_Simd256_H */
