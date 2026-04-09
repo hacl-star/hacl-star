@@ -62,7 +62,7 @@ CODEGEN=OCaml
 
 # Useful definitions for C compilation
 
-CFLAGS += -Idist -I$(KRML_HOME)/include -I$(KRML_HOME)/krmllib/dist/minimal
+CFLAGS += -Idist -I$(KRML_INCLUDE) -I$(KRML_LIB)/dist/minimal
 
 %.exe:
 	$(CC) $^ -o $@

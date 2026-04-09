@@ -12,13 +12,6 @@
 # - libevercrypt.so, a shared object where unused symbols have been removed
 # - libevercrypt.a
 
-# By default, this Makefile relies on the local checkout of krmllib
-KRML_HOME ?= ../karamel
-
-ifeq (,$(wildcard $(KRML_HOME)/include/krmllib.h))
-	$(error Incorrect KRML_HOME)
-endif
-
 -include Makefile.config
 
 UNAME		?= $(shell uname)

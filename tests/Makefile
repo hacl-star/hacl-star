@@ -7,7 +7,10 @@ endif
 
 include ../dist/gcc-compatible/Makefile.config
 
-KRML_HOME?=../dist/karamel
+KRML_EXE ?= krml
+KRML_LIB := $(shell $(KRML_EXE) -locate-krmllib)
+KRML_INCLUDE := $(shell $(KRML_EXE) -locate-include)
+
 USER_CFLAGS?=
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
@@ -59,8 +62,8 @@ TARGETS += uint128-intrinsics-test.exe
 endif
 endif
 
-CFLAGS += -I$(KRML_HOME)/include -I../dist/gcc-compatible \
-  -I$(KRML_HOME)/krmllib/dist/minimal \
+CFLAGS += -I$(KRML_INCLUDE) -I../dist/gcc-compatible \
+  -I$(KRML_LIB)/dist/minimal \
   -I../secure_api/merkle_tree \
   -O3 $(USER_CFLAGS) -Werror -Wall -Wno-deprecated-declarations -Wno-unused
 

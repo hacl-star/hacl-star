@@ -26,9 +26,12 @@ ifneq ($(.SHELLSTATUS),0)
 endif
 endif
 
-ifndef KRML_HOME
-# assuming an Everest source tree
-KRML_HOME 	:= $(HACL_HOME)/../karamel
+# Similar for KRML_EXE ?= krml
+ifndef KRML_EXE
+KRML_EXE := $(shell which krml)
+ifneq ($(.SHELLSTATUS),0)
+  $(error "Did not find krml in PATH, add it or set KRML_EXE")
+endif
 endif
 
 # Check that the relevant homes and executables at least exist.
@@ -45,7 +48,7 @@ FSTAR_OCAMLENV += OCAMLFIND_IGNORE_DUPS_IN='$(shell ocamlc -where)/compiler-libs
 FSTAR_OCAMLENV += export OCAMLFIND_IGNORE_DUPS_IN;
 
 $(call mustexist, FSTAR_EXE)
-$(call mustexist, KRML_HOME)
+$(call mustexist, KRML_EXE)
 
 # Find the location of the checked files in F*'s library, for the
 # vale-depend call. Note: we still rely on the fact this directory is
@@ -75,12 +78,17 @@ KRML_HOME := $(call sanitize_path,$(KRML_HOME))
 FSTAR_ULIB_CHECKED := $(call sanitize_path,$(FSTAR_ULIB_CHECKED))
 VALE_HOME := $(call sanitize_path,$(VALE_HOME))
 
+KRML_LIB  := $(shell $(KRML_EXE) -locate-krmllib)
+KRML_LIB  := $(call sanitize_path,$(KRML_LIB))
+KRML_INCLUDE := $(shell $(KRML_EXE) -locate-include)
+KRML_INCLUDE := $(call sanitize_path,$(KRML_INCLUDE))
+
 include $(HACL_HOME)/Makefile.include
 
 INCLUDES = \
   $(ALL_HACL_DIRS) \
-  $(KRML_HOME)/krmllib/obj \
-  $(KRML_HOME)/krmllib
+  $(KRML_LIB)/obj \
+  $(KRML_LIB)
 
 # $(FSTAR_ULIB_CHECKED) necessary for vale-depend
 VALE_INCLUDES = \
@@ -142,8 +150,7 @@ FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 
 # 2. KaRaMeL
 
-KRML := $(KRML_HOME)/krml
-$(call mustexist, KRML)
+KRML := $(KRML_EXE)
 
 BASE_FLAGS = \
   -no-prefix 'Hacl.Frodo.Random' \
