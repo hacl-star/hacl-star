@@ -106,9 +106,9 @@ let crypto_secretbox_easy c m mlen n k =
 
 [@@ Comment "Verify and decrypt a ciphertext produced with `crypto_secretbox_easy`.
 
-@param m Pointer to `mlen` bytes where the message is written to.
+@param m Pointer to `clen` - 16 bytes where the message is written to.
 @param c Pointer to `clen` bytes where the ciphertext is read from. The authentication tag must be included.
-@param clen Length of ciphertext.
+@param clen Length of ciphertext. Must be at least 16 (tag length).
 @param n Pointer to 24 (`crypto_secretbox_NONCEBYTES`) bytes where the nonce is read from.
 @param k Pointer to 32 (`crypto_secretbox_KEYBYTES`) bytes where the key is read from."]
 val crypto_secretbox_open_easy:
@@ -308,7 +308,9 @@ let crypto_box_easy c m mlen n pk sk =
   Hacl.Impl.Box.box_easy mlen c sk pk n m
 
 
-[@@ Comment "See `crypto_box_open_easy`."]
+[@@ Comment "See `crypto_box_open_easy`.
+
+Note: `clen` must be at least 16 (tag length)."]
 val crypto_box_open_easy_afternm:
     m:buffer uint8
   -> c:buffer uint8
@@ -333,7 +335,7 @@ let crypto_box_open_easy_afternm m c clen n k =
 
 @param m Pointer to `clen` - 16 (tag length) bytes of memory where the decrypted message is written to.
 @param c Pointer to `clen` bytes of memory where the ciphertext is read from. Note: the ciphertext must include the tag.
-@param clen Length of the ciphertext.
+@param clen Length of the ciphertext. Must be at least 16 (tag length).
 @param n Pointer to 24 (`crypto_box_NONCEBYTES`) bytes of memory where the nonce is read from.
 @param pk Pointer to 32 bytes of memory where the public key of the sender is read from.
 @param sk Pointer to 32 bytes of memory where the secret key of the recipient is read from."]

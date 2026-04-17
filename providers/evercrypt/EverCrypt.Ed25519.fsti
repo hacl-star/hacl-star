@@ -8,6 +8,7 @@ open Lib.Buffer
 /// This module multiplexes transparently between various implementations of
 /// Ed25519 depending on one's CPU capabilities.
 
+[@@ Comment "@param public_key Pointer to 32 bytes where the public key is written to. Must not overlap `private_key`. @param private_key Pointer to 32 bytes where the private key is read from."]
 val secret_to_public:
     public_key:lbuffer uint8 32ul
   -> private_key:lbuffer uint8 32ul ->
@@ -18,6 +19,7 @@ val secret_to_public:
       as_seq h1 public_key == Spec.Ed25519.secret_to_public (as_seq h0 private_key))
 
 
+[@@ Comment "@param expanded_keys Pointer to 96 bytes where the expanded keys are written to. Must not overlap `private_key`. @param private_key Pointer to 32 bytes where the private key is read from."]
 val expand_keys:
     expanded_keys:lbuffer uint8 96ul
   -> private_key:lbuffer uint8 32ul ->
@@ -31,6 +33,7 @@ val expand_keys:
       as_seq h1 (gsub expanded_keys 64ul 32ul) == prefix))
 
 
+[@@ Comment "@param signature Pointer to 64 bytes where the signature is written to. Must not overlap `expanded_keys` or `msg`. @param expanded_keys Pointer to 96 bytes where the expanded keys are read from. @param msg_len Length of the message. @param msg Pointer to `msg_len` bytes where the message is read from."]
 val sign_expanded:
     signature:lbuffer uint8 64ul
   -> expanded_keys:lbuffer uint8 96ul
@@ -48,6 +51,7 @@ val sign_expanded:
         (as_seq h0 msg))
 
 
+[@@ Comment "@param signature Pointer to 64 bytes where the signature is written to. Must not overlap `private_key` or `msg`. @param private_key Pointer to 32 bytes where the private key is read from. @param msg_len Length of the message. @param msg Pointer to `msg_len` bytes where the message is read from."]
 val sign:
     signature:lbuffer uint8 64ul
   -> private_key:lbuffer uint8 32ul
@@ -61,6 +65,7 @@ val sign:
       as_seq h1 signature == Spec.Ed25519.sign (as_seq h0 private_key) (as_seq h0 msg))
 
 
+[@@ Comment "Returns `true` if the signature is valid, `false` otherwise. @param public_key Pointer to 32 bytes where the public key is read from. @param msg_len Length of the message. @param msg Pointer to `msg_len` bytes where the message is read from. @param signature Pointer to 64 bytes where the signature is read from."]
 val verify:
     public_key:lbuffer uint8 32ul
   -> msg_len:size_t

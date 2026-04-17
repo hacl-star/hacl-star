@@ -159,11 +159,11 @@ val mk_instantiate: #a:supported_alg -> hmac:HMAC.compute_st a -> instantiate_st
 
 @param a Hash algorithm to use. (Value must match the value used in `Hacl_HMAC_DRBG_create_in`.)
 @param st Pointer to DRBG state.
-@param entropy_input_len Length of entropy input.
+@param entropy_input_len Length of entropy input. Must be at least `min_length(a)` (16 for SHA1, 32 for SHA2) and at most 65536 bytes.
 @param entropy_input Pointer to `entropy_input_len` bytes of memory where entropy input is read from.
-@param nonce_len Length of nonce.
+@param nonce_len Length of nonce. Must be at least `min_length(a) / 2` and at most 65536 bytes.
 @param nonce Pointer to `nonce_len` bytes of memory where nonce is read from.
-@param personalization_string_len length of personalization string.
+@param personalization_string_len Length of personalization string. Must be at most 65536 bytes.
 @param personalization_string Pointer to `personalization_string_len` bytes of memory where personalization string is read from."]
 val instantiate: a:supported_alg -> instantiate_st a
 
@@ -197,9 +197,9 @@ val mk_reseed: #a:supported_alg -> hmac:HMAC.compute_st a -> reseed_st a
 
 @param a Hash algorithm to use. (Value must match the value used in `Hacl_HMAC_DRBG_create_in`.)
 @param st Pointer to DRBG state.
-@param entropy_input_len Length of entropy input.
+@param entropy_input_len Length of entropy input. Must be at least `min_length(a)` (16 for SHA1, 32 for SHA2) and at most 65536 bytes.
 @param entropy_input Pointer to `entropy_input_len` bytes of memory where entropy input is read from.
-@param additional_input_input_len Length of additional input.
+@param additional_input_input_len Length of additional input. Must be at most 65536 bytes.
 @param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from."]
 val reseed: a:supported_alg -> reseed_st a
 
@@ -234,11 +234,13 @@ val mk_generate: #a:supported_alg -> HMAC.compute_st a -> generate_st a
 
 [@@ Comment "Generate output.
 
+Returns `true` if the output was successfully generated and `false` if a reseed is required.
+
 @param a Hash algorithm to use. (Value must match the value used in `create_in`.)
 @param output Pointer to `n` bytes of memory where random output is written to.
 @param st Pointer to DRBG state.
-@param n Length of desired output.
-@param additional_input_input_len Length of additional input.
+@param n Length of desired output. Must be at most 65536 bytes.
+@param additional_input_input_len Length of additional input. Must be at most 65536 bytes.
 @param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from."]
 val generate: a:supported_alg -> generate_st a
 

@@ -9,6 +9,12 @@ module BF = Vale.Arch.BufferFriend
 
 open FStar.HyperStack.ST
 
+[@@ Comment "Compute the Poly1305 MAC of a message.
+
+@param output Pointer to 16 bytes of memory where the MAC is written to.
+@param input Pointer to `input_len` bytes of memory where the message is read from.
+@param input_len Length of the message.
+@param key Pointer to 32 bytes of memory where the key is read from."]
 (** @type: true
 *)
 val mac: output:B.buffer UInt8.t { B.length output = 16 } ->

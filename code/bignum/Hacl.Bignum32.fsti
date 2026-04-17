@@ -340,7 +340,7 @@ val new_bn_from_bytes_le: BS.new_bn_from_bytes_le_st t_limbs
 
 [@@ Comment "Serialize a bignum into big-endian memory.
 
-  @param[in] len Size of `b` as number of bytes.
+  @param[in] len Size of `b` as number of bytes. Must be greater than 0.
   @param[in] b Points to a bignum of `ceil(len/4)` size. Must be disjoint from
     the memory location of `res`.
   @param[out] res Points to `len` number of bytes, i.e. `uint8_t[len]`. Must be
@@ -349,7 +349,7 @@ val bn_to_bytes_be: len:_ -> Hacl.Bignum.Convert.bn_to_bytes_be_st t_limbs len
 
 [@@ Comment "Serialize a bignum into little-endian memory.
 
-  @param[in] len Size of `b` as number of bytes.
+  @param[in] len Size of `b` as number of bytes. Must be greater than 0.
   @param[in] b Points to a bignum of `ceil(len/4)` size. Must be disjoint from
     the memory location of `res`.
   @param[out] res Points to `len` number of bytes, i.e. `uint8_t[len]`. Must be

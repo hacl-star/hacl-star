@@ -23,6 +23,22 @@ let finv = finv_finv_higher #M64 C.p C.fmul fsquare_times
 // that generic aspect.)
 let store_felem = fields_store_felem_higher #M64 C.p C.add_scalar
 let encode_point = generic_encode_point_higher #M64 C.p store_felem C.fmul finv
+[@@ Comment "Compute the scalar multiple of a point.
+
+@param out Pointer to 32 bytes of memory where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret scalar is read from.
+@param pub Pointer to 32 bytes of memory where the base point is read from."]
 let scalarmult = generic_scalarmult_higher #M64 C.p encode_point montgomery_ladder decode_point
+[@@ Comment "Compute the public key from a private key (scalar multiplication with the base point).
+
+@param pub Pointer to 32 bytes of memory where the resulting point is written to. Must not overlap the memory location of `priv`.
+@param priv Pointer to 32 bytes of memory where the secret scalar is read from."]
 let secret_to_public = generic_secret_to_public_higher #M64 C.p scalarmult g25519
+[@@ Comment "Execute the Diffie-Hellman key exchange.
+
+Returns `true` on success (the result is not the all-zero point) and `false` otherwise.
+
+@param out Pointer to 32 bytes of memory where the resulting point is written to. Must not overlap the memory location of `priv` or `pub`.
+@param priv Pointer to 32 bytes of memory where the secret scalar is read from.
+@param pub Pointer to 32 bytes of memory where the other party's public point is read from."]
 let ecdh = generic_ecdh_higher #M64 C.p scalarmult

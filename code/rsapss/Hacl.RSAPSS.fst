@@ -89,10 +89,10 @@ let rsapss_verify a modBits eBits pkey saltLen sgntLen sgnt msgLen msg =
 
 [@@ Comment "Load a public key from key parts.
 
-@param modBits Count of bits in modulus (`n`).
-@param eBits Count of bits in `e` value.
+@param modBits Count of bits in modulus (`n`). Must be greater than 1.
+@param eBits Count of bits in `e` value. Must be greater than 0.
 @param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param eb Pointer to `ceil(eBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
 
 @return Returns an allocated public key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key."]
 val new_rsapss_load_pkey: modBits:modBits_t -> RK.new_rsapss_load_pkey_st t_limbs (ke modBits) modBits
@@ -102,12 +102,12 @@ let new_rsapss_load_pkey modBits r eBits nb eb =
 
 [@@ Comment "Load a secret key from key parts.
 
-@param modBits Count of bits in modulus (`n`).
-@param eBits Count of bits in `e` value.
-@param dBits Count of bits in `d` value.
+@param modBits Count of bits in modulus (`n`). Must be greater than 1.
+@param eBits Count of bits in `e` value. Must be greater than 0.
+@param dBits Count of bits in `d` value. Must be greater than 0.
 @param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
-@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
+@param eb Pointer to `ceil(eBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param db Pointer to `ceil(dBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
 
 @return Returns an allocated secret key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key."]
 val new_rsapss_load_skey: modBits:modBits_t -> RK.new_rsapss_load_skey_st t_limbs (ke modBits) modBits
@@ -125,8 +125,8 @@ let new_rsapss_load_skey modBits r eBits dBits nb eb db =
 @param eBits Count of bits in `e` value.
 @param dBits Count of bits in `d` value.
 @param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
-@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
+@param eb Pointer to `ceil(eBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param db Pointer to `ceil(dBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
 @param saltLen Length of salt.
 @param salt Pointer to `saltLen` bytes where the salt is read from.
 @param msgLen Length of message.
@@ -153,7 +153,7 @@ let rsapss_skey_sign a modBits eBits dBits nb eb db saltLen salt msgLen msg sgnt
 @param modBits Count of bits in the modulus (`n`).
 @param eBits Count of bits in `e` value.
 @param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param eb Pointer to `ceil(eBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
 @param saltLen Length of salt.
 @param sgntLen Length of signature.
 @param sgnt Pointer to `sgntLen` bytes where the signature is read from.

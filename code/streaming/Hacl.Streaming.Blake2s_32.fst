@@ -414,7 +414,7 @@ let copy (kk: G.erased (Common.index Spec.Blake2S)): Tot _ =
 [@@ Comment "Write the BLAKE2s digest of message `input` using key `key` into `output`.
 
 @param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 32.
 @param input Pointer to `input_len` bytes of memory where the input message is read from.
 @param input_len Length of the input message.
 @param key Pointer to `key_len` bytes of memory where the key is read from.

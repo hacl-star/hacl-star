@@ -14,14 +14,22 @@ let state_t = F.state_s (poly1305 M256) () (t M256) (poly1305_key.I.s ())
 
 noextract
 let alloca = F.alloca (poly1305 M256) () (t M256) (poly1305_key.I.s ())
+[@@ Comment "Key must be 32 bytes. Returns NULL on allocation failure."]
 let malloc = F.malloc (poly1305 M256) () (t M256) (poly1305_key.I.s ())
 let reset = F.reset (poly1305 M256) (G.hide ()) (t M256) (poly1305_key.I.s ())
 [@@ Comment "0 = success, 1 = max length exceeded" ]
 let update = F.update (poly1305 M256) (G.hide ()) (t M256) (poly1305_key.I.s ())
+[@@ Comment "Output must be 16 bytes."]
 let digest = F.digest (poly1305 M256) () (t M256) (poly1305_key.I.s ())
 let free = F.free (poly1305 M256) (G.hide ()) (t M256) (poly1305_key.I.s ())
 
 open Hacl.Impl.Poly1305
 
 (* The one-shot MAC *)
+[@@ Comment "Compute the Poly1305 MAC of a message.
+
+@param output Pointer to 16 bytes of memory where the MAC is written to.
+@param input Pointer to `input_len` bytes of memory where the message is read from.
+@param input_len Length of the message.
+@param key Pointer to 32 bytes of memory where the key is read from."]
 val mac: poly1305_mac_st M256

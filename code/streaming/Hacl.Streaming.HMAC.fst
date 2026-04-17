@@ -177,6 +177,14 @@ let malloc_ impl key key_length r dst =
       F.frame_invariant hmac (| impl, key_length |) (B.loc_buffer dst) st h1 h2;
       Success
 
+[@@ Comment "Reset the streaming HMAC state with a new key.
+
+The key length `k_len` must match the key length used during the original `malloc_` call.
+Returns `InvalidLength` if `k_len` does not match, `Success` otherwise.
+
+@param state The streaming HMAC state.
+@param k Pointer to `k_len` bytes of memory where the new key is read from.
+@param k_len Length of the new key. Must equal the original key length."]
 val reset:
   i: G.erased index -> (
   let c = hmac in
@@ -223,8 +231,37 @@ let reset i state key key_length =
     Hacl.Streaming.Types.Success
   end
 
+[@@ Comment "Feed more data into the streaming HMAC state.
+
+Returns `Success` (0) on success, or `MaximumLengthExceeded` if the cumulative input
+exceeds the maximum input length for the hash algorithm.
+
+@param state The streaming HMAC state.
+@param chunk Pointer to `chunk_len` bytes of data to feed.
+@param chunk_len Length of the data."]
 let update (i: G.erased index) = F.update hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
+
+[@@ Comment "Write the HMAC value into `output`.
+
+The state remains valid after this call and can continue to be used for further `update` calls.
+
+@param state The streaming HMAC state.
+@param output Pointer to `hash_length` bytes where the HMAC is written to (hash_length depends on the algorithm used during `malloc_`).
+@param digest_length Length of the output buffer. Must be equal to `hash_length` of the algorithm."]
 let digest (i: G.erased index) = F.digest_heap_erased hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
+
+[@@ Comment "Free the streaming HMAC state.
+
+The state must have been created by a previous call to `malloc_`.
+
+@param state The streaming HMAC state to free."]
 let free (i: G.erased index) = F.free hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
+
+[@@ Comment "Copy a streaming HMAC state.
+
+The caller must free the returned state to avoid memory leaks.
+
+@param state The streaming HMAC state to copy.
+@returns A new streaming HMAC state, or NULL on allocation failure."]
 let copy (i: G.erased index) = F.copy hmac i (stateful_agile_hash_state.s i) (G.erased (t i))
  

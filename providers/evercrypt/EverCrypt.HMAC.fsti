@@ -52,6 +52,16 @@ let supported_alg = a:hash_alg{ is_supported_alg a }
    Tolerates overlaps between tag and data (we used to require [disjoint data tag])
 *)
 
+[@@ Comment "Compute the HMAC of a message using the given hash algorithm.
+
+Supported algorithms: SHA1, SHA2_256, SHA2_384, SHA2_512, Blake2S, Blake2B.
+
+@param a Hash algorithm to use.
+@param tag Pointer to `hash_length(a)` bytes of memory where the HMAC is written to (20 for SHA1, 32 for SHA2_256, 48 for SHA2_384, 64 for SHA2_512, 32 for Blake2S, 64 for Blake2B).
+@param key Pointer to `keylen` bytes of memory where the key is read from. The key can be any length; it will be hashed if longer than the block length.
+@param keylen Length of the key.
+@param data Pointer to `datalen` bytes of memory where the data is read from.
+@param datalen Length of the data."]
 (** @type: true
 *)
 val compute: a: supported_alg -> compute_st a

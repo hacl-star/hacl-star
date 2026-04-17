@@ -10,6 +10,18 @@ open FStar.Mul
 
 module Spec = Spec.Chacha20Poly1305
 
+[@@ Comment "Encrypt and authenticate a message with Chacha20-Poly1305.
+
+Note: `m` and `cipher` can point to the same memory for in-place encryption.
+
+@param k Pointer to 32 bytes of memory where the key is read from.
+@param n Pointer to 12 bytes of memory where the nonce is read from.
+@param aadlen Length of the associated data.
+@param aad Pointer to `aadlen` bytes of memory where the associated data is read from.
+@param mlen Length of the message.
+@param m Pointer to `mlen` bytes of memory where the message is read from.
+@param cipher Pointer to `mlen` bytes of memory where the ciphertext is written to.
+@param tag Pointer to 16 bytes of memory where the authentication tag is written to."]
 (** @type: true
 *)
 val aead_encrypt:
@@ -34,6 +46,20 @@ val aead_encrypt:
         (Seq.concat (as_seq h1 cipher) (as_seq h1 tag))
         (Spec.aead_encrypt (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) (as_seq h0 aad))))
 
+[@@ Comment "Verify and decrypt a ciphertext produced with Chacha20-Poly1305.
+
+Note: `m` and `c` can point to the same memory for in-place decryption.
+
+@param k Pointer to 32 bytes of memory where the key is read from.
+@param n Pointer to 12 bytes of memory where the nonce is read from.
+@param aadlen Length of the associated data.
+@param aad Pointer to `aadlen` bytes of memory where the associated data is read from.
+@param mlen Length of the ciphertext.
+@param m Pointer to `mlen` bytes of memory where the decrypted message is written to.
+@param c Pointer to `mlen` bytes of memory where the ciphertext is read from.
+@param mac Pointer to 16 bytes of memory where the authentication tag is read from.
+
+@returns 0 on success (MAC verified); 1 on failure."]
 (** @type: true
 *)
 val aead_decrypt:

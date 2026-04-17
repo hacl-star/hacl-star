@@ -50,6 +50,14 @@ val recall: unit -> Stack unit
   (ensures (fun h0 _ h1 ->
     B.(loc_not_unused_in h1 `loc_includes` (fp ())) /\ h0 == h1))
 
+[@@ Comment "Detect CPU features and cache the results.
+
+This function MUST be called before using any agile EverCrypt API (e.g. EverCrypt_AEAD,
+EverCrypt_Hash, EverCrypt_HMAC, EverCrypt_Curve25519). Without calling `init`, the
+`has_*` feature queries will return `false` and agile APIs may select suboptimal or
+incorrect implementations.
+
+Clients should call this function once at program startup."]
 (* By default, all feature flags are disabled. A client must call init to get
   meaningful results from the various has_* functions. *)
 val init: unit -> Stack unit
