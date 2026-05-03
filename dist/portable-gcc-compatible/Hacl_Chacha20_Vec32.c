@@ -136,7 +136,7 @@ static inline void double_round_32(uint32_t *st)
 static inline void chacha20_core_32(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
   memcpy(k, ctx, 16U * sizeof (uint32_t));
-  uint32_t ctr_u32 = 1U * ctr;
+  uint32_t ctr_u32 = ctr;
   uint32_t cv = ctr_u32;
   k[12U] = k[12U] + cv;
   double_round_32(k);

@@ -632,7 +632,7 @@ static inline void Hacl_Impl_Curve25519_Field51_store_felem(uint64_t *u64s, uint
   uint64_t f2 = f[2U];
   uint64_t f3 = f[3U];
   uint64_t f4 = f[4U];
-  uint64_t l_ = f0 + 0ULL;
+  uint64_t l_ = f0;
   uint64_t tmp0 = l_ & 0x7ffffffffffffULL;
   uint64_t c0 = l_ >> 51U;
   uint64_t l_0 = f1 + c0;

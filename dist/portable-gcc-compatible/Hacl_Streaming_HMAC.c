@@ -2266,7 +2266,7 @@ Hacl_Streaming_HMAC_update(
       (uint64_t)chunk_len %
         (uint64_t)block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1)))
       == 0ULL
-      && (uint64_t)chunk_len > 0ULL
+      && chunk_len > 0ULL
     )
     {
       ite = block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1)));
@@ -2367,7 +2367,7 @@ Hacl_Streaming_HMAC_update(
       (uint64_t)(chunk_len - diff) %
         (uint64_t)block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1)))
       == 0ULL
-      && (uint64_t)(chunk_len - diff) > 0ULL
+      && chunk_len - diff > 0ULL
     )
     {
       ite = block_len(alg_of_impl(dfst__Hacl_Agile_Hash_impl_uint32_t(i1)));

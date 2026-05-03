@@ -159,14 +159,9 @@ FStar_UInt128_shift_left_large(FStar_UInt128_uint128 a, uint32_t s)
 static inline FStar_UInt128_uint128
 FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s)
 {
-  if (s < FStar_UInt128_u32_64)
-  {
-    return FStar_UInt128_shift_left_small(a, s);
-  }
-  else
-  {
-    return FStar_UInt128_shift_left_large(a, s);
-  }
+  return
+    s < FStar_UInt128_u32_64 ? FStar_UInt128_shift_left_small(a, s)
+                             : FStar_UInt128_shift_left_large(a, s);
 }
 
 static inline uint64_t FStar_UInt128_add_u64_shift_right(uint64_t hi, uint64_t lo, uint32_t s)
@@ -208,14 +203,9 @@ FStar_UInt128_shift_right_large(FStar_UInt128_uint128 a, uint32_t s)
 static inline FStar_UInt128_uint128
 FStar_UInt128_shift_right(FStar_UInt128_uint128 a, uint32_t s)
 {
-  if (s < FStar_UInt128_u32_64)
-  {
-    return FStar_UInt128_shift_right_small(a, s);
-  }
-  else
-  {
-    return FStar_UInt128_shift_right_large(a, s);
-  }
+  return
+    s < FStar_UInt128_u32_64 ? FStar_UInt128_shift_right_small(a, s)
+                             : FStar_UInt128_shift_right_large(a, s);
 }
 
 static inline bool FStar_UInt128_eq(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b)

@@ -34,8 +34,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_DRBG_state_s_tags_EverCrypt_DRBG_SHA2_512_s =
       Unsigned.UInt8.of_int 3
     type everCrypt_DRBG_state_s = [ `everCrypt_DRBG_state_s ] structure
-    let (everCrypt_DRBG_state_s : [ `everCrypt_DRBG_state_s ] structure typ)
-      = structure "EverCrypt_DRBG_state_s_s"
+    let everCrypt_DRBG_state_s : [ `everCrypt_DRBG_state_s ] structure typ =
+      structure "EverCrypt_DRBG_state_s_s"
     let everCrypt_DRBG_create_in =
       foreign "EverCrypt_DRBG_create_in"
         (spec_Hash_Definitions_hash_alg @->

@@ -202,7 +202,7 @@ Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x(uint32_t n, uint8_t *seed, uint16_
   memset(res, 0U, n * n * sizeof (uint16_t));
   for (uint32_t i = 0U; i < n / 4U; i++)
   {
-    uint8_t *r0 = r + 0U * n;
+    uint8_t *r0 = r;
     uint8_t *r1 = r + 2U * n;
     uint8_t *r2 = r + 4U * n;
     uint8_t *r3 = r + 6U * n;
@@ -210,7 +210,7 @@ Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x(uint32_t n, uint8_t *seed, uint16_
     uint8_t *tmp_seed1 = tmp_seed + 18U;
     uint8_t *tmp_seed2 = tmp_seed + 36U;
     uint8_t *tmp_seed3 = tmp_seed + 54U;
-    store16_le(tmp_seed0, (uint16_t)(4U * i + 0U));
+    store16_le(tmp_seed0, (uint16_t)(4U * i));
     store16_le(tmp_seed1, (uint16_t)(4U * i + 1U));
     store16_le(tmp_seed2, (uint16_t)(4U * i + 2U));
     store16_le(tmp_seed3, (uint16_t)(4U * i + 3U));
@@ -231,7 +231,7 @@ Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x(uint32_t n, uint8_t *seed, uint16_
       uint8_t *resij2 = r2 + i0 * 2U;
       uint8_t *resij3 = r3 + i0 * 2U;
       uint16_t u = load16_le(resij0);
-      res[(4U * i + 0U) * n + i0] = u;
+      res[4U * i * n + i0] = u;
       uint16_t u0 = load16_le(resij1);
       res[(4U * i + 1U) * n + i0] = u0;
       uint16_t u1 = load16_le(resij2);
@@ -311,7 +311,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix64(
         sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
+      res[i0 * n2 + i1] = (((~(uint32_t)sign & 0xFFFFU) + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -344,7 +344,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(
         sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
+      res[i0 * n2 + i1] = (((~(uint32_t)sign & 0xFFFFU) + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -377,7 +377,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix976(
         sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
+      res[i0 * n2 + i1] = (((~(uint32_t)sign & 0xFFFFU) + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -410,7 +410,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344(
         sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
+      res[i0 * n2 + i1] = (((~(uint32_t)sign & 0xFFFFU) + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -450,8 +450,8 @@ Hacl_Impl_Frodo_Pack_frodo_pack(
                 FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a3), 4U * d)),
               FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a4), 3U * d)),
             FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a5), 2U * d)),
-          FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a6), 1U * d)),
-        FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a7), 0U * d));
+          FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a6), d)),
+        FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a7), 0U));
     store128_be(v16, templong);
     uint8_t *src = v16 + 16U - d;
     memcpy(r, src, d * sizeof (uint8_t));
@@ -502,13 +502,11 @@ Hacl_Impl_Frodo_Pack_frodo_unpack(
           2U * d))
       & (uint32_t)maskd;
     r[6U] =
-      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          1U * d))
-      & (uint32_t)maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, d)) &
+        (uint32_t)maskd;
     r[7U] =
-      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          0U * d))
-      & (uint32_t)maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 0U)) &
+        (uint32_t)maskd;
   }
 }
 

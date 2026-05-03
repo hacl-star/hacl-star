@@ -1286,11 +1286,7 @@ decrypt_aes128_gcm(
     inout_b,
     (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
   uint64_t r = c;
-  if (r == 0ULL)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -1421,11 +1417,7 @@ decrypt_aes256_gcm(
     inout_b,
     (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
   uint64_t r = c;
-  if (r == 0ULL)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -1459,11 +1451,7 @@ decrypt_chacha20_poly1305(
   uint8_t *ek = (*s).ek;
   uint32_t
   r = EverCrypt_Chacha20Poly1305_aead_decrypt(ek, iv, ad_len, ad, cipher_len, dst, cipher, tag);
-  if (r == 0U)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0U ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
 }
 
 /**
@@ -1673,11 +1661,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
     inout_b,
     (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
   uint64_t r = c;
-  if (r == 0ULL)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -1823,11 +1807,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
     inout_b,
     (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
   uint64_t r = c;
-  if (r == 0ULL)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -1972,11 +1952,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
       inout_b,
       (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
     uint64_t r = c;
-    if (r == 0ULL)
-    {
-      return EverCrypt_Error_Success;
-    }
-    return EverCrypt_Error_AuthenticationFailure;
+    return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   }
   return EverCrypt_Error_UnsupportedAlgorithm;
   #else
@@ -2119,11 +2095,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
       inout_b,
       (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
     uint64_t r = c;
-    if (r == 0ULL)
-    {
-      return EverCrypt_Error_Success;
-    }
-    return EverCrypt_Error_AuthenticationFailure;
+    return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   }
   return EverCrypt_Error_UnsupportedAlgorithm;
   #else

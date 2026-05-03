@@ -7,8 +7,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     open Hacl_Streaming_Types_applied
     type hacl_Hash_Blake2b_blake2_params =
       [ `hacl_Hash_Blake2b_blake2_params ] structure
-    let (hacl_Hash_Blake2b_blake2_params :
-      [ `hacl_Hash_Blake2b_blake2_params ] structure typ) =
+    let hacl_Hash_Blake2b_blake2_params :
+      [ `hacl_Hash_Blake2b_blake2_params ] structure typ =
       structure "Hacl_Hash_Blake2b_blake2_params_s"
     let hacl_Hash_Blake2b_blake2_params_digest_length =
       field hacl_Hash_Blake2b_blake2_params "digest_length" uint8_t
@@ -32,9 +32,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       field hacl_Hash_Blake2b_blake2_params "personal" (ptr uint8_t)
     let _ = seal hacl_Hash_Blake2b_blake2_params
     type hacl_Hash_Blake2b_index = [ `hacl_Hash_Blake2b_index ] structure
-    let (hacl_Hash_Blake2b_index :
-      [ `hacl_Hash_Blake2b_index ] structure typ) =
-      structure "Hacl_Hash_Blake2b_index_s"
+    let hacl_Hash_Blake2b_index : [ `hacl_Hash_Blake2b_index ] structure typ
+      = structure "Hacl_Hash_Blake2b_index_s"
     let hacl_Hash_Blake2b_index_key_length =
       field hacl_Hash_Blake2b_index "key_length" uint8_t
     let hacl_Hash_Blake2b_index_digest_length =
@@ -44,8 +43,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let _ = seal hacl_Hash_Blake2b_index
     type hacl_Hash_Blake2b_params_and_key =
       [ `hacl_Hash_Blake2b_params_and_key ] structure
-    let (hacl_Hash_Blake2b_params_and_key :
-      [ `hacl_Hash_Blake2b_params_and_key ] structure typ) =
+    let hacl_Hash_Blake2b_params_and_key :
+      [ `hacl_Hash_Blake2b_params_and_key ] structure typ =
       structure "Hacl_Hash_Blake2b_params_and_key_s"
     let hacl_Hash_Blake2b_params_and_key_fst =
       field hacl_Hash_Blake2b_params_and_key "fst"
@@ -61,12 +60,22 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
     type hacl_Hash_Blake2b_block_state_t =
       [ `hacl_Hash_Blake2b_block_state_t ] structure
-    let (hacl_Hash_Blake2b_block_state_t :
-      [ `hacl_Hash_Blake2b_block_state_t ] structure typ) =
+    let hacl_Hash_Blake2b_block_state_t :
+      [ `hacl_Hash_Blake2b_block_state_t ] structure typ =
       structure "Hacl_Hash_Blake2b_block_state_t_s"
+    let hacl_Hash_Blake2b_block_state_t_fst =
+      field hacl_Hash_Blake2b_block_state_t "fst" uint8_t
+    let hacl_Hash_Blake2b_block_state_t_snd =
+      field hacl_Hash_Blake2b_block_state_t "snd" uint8_t
+    let hacl_Hash_Blake2b_block_state_t_thd =
+      field hacl_Hash_Blake2b_block_state_t "thd" bool
+    let hacl_Hash_Blake2b_block_state_t_f3 =
+      field hacl_Hash_Blake2b_block_state_t "f3"
+        hacl_Streaming_Types_two_pointers
+    let _ = seal hacl_Hash_Blake2b_block_state_t
     type hacl_Hash_Blake2b_state_t = [ `hacl_Hash_Blake2b_state_t ] structure
-    let (hacl_Hash_Blake2b_state_t :
-      [ `hacl_Hash_Blake2b_state_t ] structure typ) =
+    let hacl_Hash_Blake2b_state_t :
+      [ `hacl_Hash_Blake2b_state_t ] structure typ =
       structure "Hacl_Hash_Blake2b_state_t_s"
     let hacl_Hash_Blake2b_malloc_with_params_and_key =
       foreign "Hacl_Hash_Blake2b_malloc_with_params_and_key"

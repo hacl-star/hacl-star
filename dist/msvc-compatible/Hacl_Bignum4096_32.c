@@ -487,15 +487,7 @@ static uint32_t exp_check(uint32_t *n, uint32_t *a, uint32_t bBits, uint32_t *b)
   }
   uint32_t m10 = acc0;
   uint32_t m00 = m0 & m10;
-  uint32_t bLen;
-  if (bBits == 0U)
-  {
-    bLen = 1U;
-  }
-  else
-  {
-    bLen = (bBits - 1U) / 32U + 1U;
-  }
+  uint32_t bLen = bBits == 0U ? 1U : (bBits - 1U) / 32U + 1U;
   uint32_t m1;
   if (bBits < 32U * bLen)
   {
@@ -573,15 +565,7 @@ exp_vartime_precomp(
   uint32_t aM[128U] = { 0U };
   to(n, mu, r2, a, aM);
   uint32_t resM[128U] = { 0U };
-  uint32_t bLen;
-  if (bBits == 0U)
-  {
-    bLen = 1U;
-  }
-  else
-  {
-    bLen = (bBits - 1U) / 32U + 1U;
-  }
+  uint32_t bLen = bBits == 0U ? 1U : (bBits - 1U) / 32U + 1U;
   uint32_t ctx[256U] = { 0U };
   memcpy(ctx, n, 128U * sizeof (uint32_t));
   memcpy(ctx + 128U, r2, 128U * sizeof (uint32_t));
@@ -694,15 +678,7 @@ exp_consttime_precomp(
   uint32_t aM[128U] = { 0U };
   to(n, mu, r2, a, aM);
   uint32_t resM[128U] = { 0U };
-  uint32_t bLen;
-  if (bBits == 0U)
-  {
-    bLen = 1U;
-  }
-  else
-  {
-    bLen = (bBits - 1U) / 32U + 1U;
-  }
+  uint32_t bLen = bBits == 0U ? 1U : (bBits - 1U) / 32U + 1U;
   uint32_t ctx[256U] = { 0U };
   memcpy(ctx, n, 128U * sizeof (uint32_t));
   memcpy(ctx + 128U, r2, 128U * sizeof (uint32_t));

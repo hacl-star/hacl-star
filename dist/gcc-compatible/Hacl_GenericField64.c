@@ -327,15 +327,7 @@ Hacl_GenericField64_exp_consttime(
   }
   else
   {
-    uint32_t bLen;
-    if (bBits == 0U)
-    {
-      bLen = 1U;
-    }
-    else
-    {
-      bLen = (bBits - 1U) / 64U + 1U;
-    }
+    uint32_t bLen = bBits == 0U ? 1U : (bBits - 1U) / 64U + 1U;
     KRML_CHECK_SIZE(sizeof (uint64_t), len1 + len1);
     uint64_t ctx[len1 + len1];
     memset(ctx, 0U, (len1 + len1) * sizeof (uint64_t));
@@ -369,7 +361,7 @@ Hacl_GenericField64_exp_consttime(
     {
       uint32_t i0 = bBits / 4U * 4U;
       uint64_t bits_c = Hacl_Bignum_Lib_bn_get_bits_u64(bLen, b, i0, 4U);
-      memcpy(resM, (uint64_t *)(table + 0U * len1), len1 * sizeof (uint64_t));
+      memcpy(resM, (uint64_t *)table, len1 * sizeof (uint64_t));
       KRML_MAYBE_FOR15(i1,
         0U,
         15U,
@@ -402,7 +394,7 @@ Hacl_GenericField64_exp_consttime(
         Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, ctx_n, k1.mu, resM, resM););
       uint32_t k2 = bBits - bBits % 4U - 4U * i0 - 4U;
       uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(bLen, b, k2, 4U);
-      memcpy(tmp0, (uint64_t *)(table + 0U * len1), len1 * sizeof (uint64_t));
+      memcpy(tmp0, (uint64_t *)table, len1 * sizeof (uint64_t));
       KRML_MAYBE_FOR15(i1,
         0U,
         15U,
@@ -481,15 +473,7 @@ Hacl_GenericField64_exp_vartime(
   }
   else
   {
-    uint32_t bLen;
-    if (bBits == 0U)
-    {
-      bLen = 1U;
-    }
-    else
-    {
-      bLen = (bBits - 1U) / 64U + 1U;
-    }
+    uint32_t bLen = bBits == 0U ? 1U : (bBits - 1U) / 64U + 1U;
     KRML_CHECK_SIZE(sizeof (uint64_t), len1 + len1);
     uint64_t ctx[len1 + len1];
     memset(ctx, 0U, (len1 + len1) * sizeof (uint64_t));

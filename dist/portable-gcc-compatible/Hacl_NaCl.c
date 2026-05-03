@@ -55,15 +55,7 @@ secretbox_detached(uint32_t mlen, uint8_t *c, uint8_t *tag, uint8_t *k, uint8_t 
   uint8_t *n1 = n + 16U;
   uint8_t *subkey = xkeys;
   uint8_t *ekey0 = xkeys + 64U;
-  uint32_t mlen0;
-  if (mlen <= 32U)
-  {
-    mlen0 = mlen;
-  }
-  else
-  {
-    mlen0 = 32U;
-  }
+  uint32_t mlen0 = mlen <= 32U ? mlen : 32U;
   uint32_t mlen1 = mlen - mlen0;
   uint8_t *m0 = m;
   uint8_t *m1 = m + mlen0;
@@ -114,15 +106,7 @@ secretbox_open_detached(
     uint8_t *subkey = xkeys;
     uint8_t *ekey0 = xkeys + 64U;
     uint8_t *n1 = n + 16U;
-    uint32_t mlen0;
-    if (mlen <= 32U)
-    {
-      mlen0 = mlen;
-    }
-    else
-    {
-      mlen0 = 32U;
-    }
+    uint32_t mlen0 = mlen <= 32U ? mlen : 32U;
     uint32_t mlen1 = mlen - mlen0;
     uint8_t *c0 = c;
     uint8_t *c1 = c + mlen0;

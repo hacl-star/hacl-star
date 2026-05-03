@@ -310,7 +310,7 @@ Hacl_Hash_SHA3_Simd256_absorb_inner_256(
       0U,
       5U,
       1U,
-      Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+      Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
       Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
       Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
       _C[i] =
@@ -352,7 +352,7 @@ Hacl_Hash_SHA3_Simd256_absorb_inner_256(
       0U,
       5U,
       1U,
-      Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+      Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
       Lib_IntVector_Intrinsics_vec256
       uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
       Lib_IntVector_Intrinsics_vec256
@@ -379,15 +379,14 @@ Hacl_Hash_SHA3_Simd256_absorb_inner_256(
       Lib_IntVector_Intrinsics_vec256
       v37 =
         Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-          Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+          Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
       Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
-      Lib_IntVector_Intrinsics_vec256
-      uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+      Lib_IntVector_Intrinsics_vec256 uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
       Lib_IntVector_Intrinsics_vec256
       v4 =
         Lib_IntVector_Intrinsics_vec256_xor(uu____14,
           Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-      s[0U + 5U * i] = v07;
+      s[5U * i] = v07;
       s[1U + 5U * i] = v17;
       s[2U + 5U * i] = v27;
       s[3U + 5U * i] = v37;
@@ -1001,7 +1000,7 @@ Hacl_Hash_SHA3_Simd256_shake128(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -1044,7 +1043,7 @@ Hacl_Hash_SHA3_Simd256_shake128(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -1071,15 +1070,15 @@ Hacl_Hash_SHA3_Simd256_shake128(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -1934,7 +1933,7 @@ Hacl_Hash_SHA3_Simd256_shake256(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -1977,7 +1976,7 @@ Hacl_Hash_SHA3_Simd256_shake256(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -2004,15 +2003,15 @@ Hacl_Hash_SHA3_Simd256_shake256(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -2866,7 +2865,7 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -2909,7 +2908,7 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -2936,15 +2935,15 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -3798,7 +3797,7 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -3841,7 +3840,7 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -3868,15 +3867,15 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -4730,7 +4729,7 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -4773,7 +4772,7 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -4800,15 +4799,15 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -5662,7 +5661,7 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -5705,7 +5704,7 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -5732,15 +5731,15 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -6689,7 +6688,7 @@ Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = state[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = state[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = state[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = state[i + 10U];
         _C[i] =
@@ -6732,7 +6731,7 @@ Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = state[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = state[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(state[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -6759,15 +6758,15 @@ Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks(
         Lib_IntVector_Intrinsics_vec256
         v37 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, state[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, state[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = state[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(state[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(state[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, state[1U + 5U * i]));
-        state[0U + 5U * i] = v07;
+        state[5U * i] = v07;
         state[1U + 5U * i] = v17;
         state[2U + 5U * i] = v27;
         state[3U + 5U * i] = v37;

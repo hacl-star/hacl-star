@@ -224,8 +224,8 @@ module Bindings(F:Cstubs.FOREIGN) =
                           ((ptr uint64_t) @-> (returning void))))))))
     type hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 =
       [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 ] structure
-    let (hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 :
-      [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 ] structure typ) =
+    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 :
+      [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 ] structure typ =
       structure "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s"
     let hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_len =
       field hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 "len" uint32_t
@@ -238,8 +238,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let _ = seal hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
     type hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 =
       [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 ] structure
-    let (hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 :
-      [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 ] structure typ) =
+    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 :
+      [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 ] structure typ =
       structure "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s"
     let hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_len =
       field hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 "len" uint32_t

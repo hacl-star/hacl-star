@@ -432,15 +432,7 @@ sha224_update_last8(
   Lib_IntVector_Intrinsics_vec256 *hash
 )
 {
-  uint32_t blocks;
-  if (len + 8U + 1U <= 64U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 8U + 1U <= 64U ? 1U : 2U;
   uint32_t fin = blocks * 64U;
   uint8_t last[1024U] = { 0U };
   uint8_t totlen_buf[8U] = { 0U };
@@ -1181,15 +1173,7 @@ sha256_update_last8(
   Lib_IntVector_Intrinsics_vec256 *hash
 )
 {
-  uint32_t blocks;
-  if (len + 8U + 1U <= 64U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 8U + 1U <= 64U ? 1U : 2U;
   uint32_t fin = blocks * 64U;
   uint8_t last[1024U] = { 0U };
   uint8_t totlen_buf[8U] = { 0U };
@@ -1809,15 +1793,7 @@ sha384_update_last4(
   Lib_IntVector_Intrinsics_vec256 *hash
 )
 {
-  uint32_t blocks;
-  if (len + 16U + 1U <= 128U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 16U + 1U <= 128U ? 1U : 2U;
   uint32_t fin = blocks * 128U;
   uint8_t last[1024U] = { 0U };
   uint8_t totlen_buf[16U] = { 0U };
@@ -2265,15 +2241,7 @@ sha512_update_last4(
   Lib_IntVector_Intrinsics_vec256 *hash
 )
 {
-  uint32_t blocks;
-  if (len + 16U + 1U <= 128U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 16U + 1U <= 128U ? 1U : 2U;
   uint32_t fin = blocks * 128U;
   uint8_t last[1024U] = { 0U };
   uint8_t totlen_buf[16U] = { 0U };

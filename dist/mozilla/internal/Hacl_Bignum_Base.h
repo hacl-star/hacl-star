@@ -123,16 +123,7 @@ Hacl_Bignum_Lib_bn_get_bits_u32(uint32_t len, uint32_t *b, uint32_t i, uint32_t 
   uint32_t i1 = i / 32U;
   uint32_t j = i % 32U;
   uint32_t p1 = b[i1] >> j;
-  uint32_t ite;
-  if (i1 + 1U < len && 0U < j)
-  {
-    ite = p1 | b[i1 + 1U] << (32U - j);
-  }
-  else
-  {
-    ite = p1;
-  }
-  return ite & ((1U << l) - 1U);
+  return (i1 + 1U < len && 0U < j ? p1 | b[i1 + 1U] << (32U - j) : p1) & ((1U << l) - 1U);
 }
 
 static inline uint64_t
@@ -141,16 +132,7 @@ Hacl_Bignum_Lib_bn_get_bits_u64(uint32_t len, uint64_t *b, uint32_t i, uint32_t 
   uint32_t i1 = i / 64U;
   uint32_t j = i % 64U;
   uint64_t p1 = b[i1] >> j;
-  uint64_t ite;
-  if (i1 + 1U < len && 0U < j)
-  {
-    ite = p1 | b[i1 + 1U] << (64U - j);
-  }
-  else
-  {
-    ite = p1;
-  }
-  return ite & ((1ULL << l) - 1ULL);
+  return (i1 + 1U < len && 0U < j ? p1 | b[i1 + 1U] << (64U - j) : p1) & ((1ULL << l) - 1ULL);
 }
 
 static inline uint32_t

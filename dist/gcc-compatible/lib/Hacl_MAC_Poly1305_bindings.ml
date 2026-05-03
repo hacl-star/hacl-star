@@ -13,8 +13,8 @@ module Bindings(F:Cstubs.FOREIGN) =
         (ocaml_bytes @->
            (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
     type hacl_MAC_Poly1305_state_t = [ `hacl_MAC_Poly1305_state_t ] structure
-    let (hacl_MAC_Poly1305_state_t :
-      [ `hacl_MAC_Poly1305_state_t ] structure typ) =
+    let hacl_MAC_Poly1305_state_t :
+      [ `hacl_MAC_Poly1305_state_t ] structure typ =
       structure "Hacl_MAC_Poly1305_state_t_s"
     let hacl_MAC_Poly1305_malloc =
       foreign "Hacl_MAC_Poly1305_malloc"

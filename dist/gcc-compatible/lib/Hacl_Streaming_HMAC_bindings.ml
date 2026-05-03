@@ -65,13 +65,12 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Agile_Hash_state_s_tags_Hacl_Agile_Hash_Blake2B_256_a =
       Unsigned.UInt8.of_int 13
     type hacl_Agile_Hash_state_s = [ `hacl_Agile_Hash_state_s ] structure
-    let (hacl_Agile_Hash_state_s :
-      [ `hacl_Agile_Hash_state_s ] structure typ) =
-      structure "Hacl_Agile_Hash_state_s_s"
+    let hacl_Agile_Hash_state_s : [ `hacl_Agile_Hash_state_s ] structure typ
+      = structure "Hacl_Agile_Hash_state_s_s"
     type hacl_Streaming_HMAC_Definitions_index =
       [ `hacl_Streaming_HMAC_Definitions_index ] structure
-    let (hacl_Streaming_HMAC_Definitions_index :
-      [ `hacl_Streaming_HMAC_Definitions_index ] structure typ) =
+    let hacl_Streaming_HMAC_Definitions_index :
+      [ `hacl_Streaming_HMAC_Definitions_index ] structure typ =
       structure "Hacl_Streaming_HMAC_Definitions_index_s"
     let hacl_Streaming_HMAC_Definitions_index_fst =
       field hacl_Streaming_HMAC_Definitions_index "fst" hacl_Agile_Hash_impl
@@ -80,8 +79,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let _ = seal hacl_Streaming_HMAC_Definitions_index
     type hacl_Streaming_HMAC_Definitions_two_state =
       [ `hacl_Streaming_HMAC_Definitions_two_state ] structure
-    let (hacl_Streaming_HMAC_Definitions_two_state :
-      [ `hacl_Streaming_HMAC_Definitions_two_state ] structure typ) =
+    let hacl_Streaming_HMAC_Definitions_two_state :
+      [ `hacl_Streaming_HMAC_Definitions_two_state ] structure typ =
       structure "Hacl_Streaming_HMAC_Definitions_two_state_s"
     let hacl_Streaming_HMAC_Definitions_two_state_fst =
       field hacl_Streaming_HMAC_Definitions_two_state "fst" uint32_t
@@ -108,8 +107,8 @@ module Bindings(F:Cstubs.FOREIGN) =
            (returning hacl_Streaming_HMAC_Definitions_index))
     type hacl_Streaming_HMAC_agile_state =
       [ `hacl_Streaming_HMAC_agile_state ] structure
-    let (hacl_Streaming_HMAC_agile_state :
-      [ `hacl_Streaming_HMAC_agile_state ] structure typ) =
+    let hacl_Streaming_HMAC_agile_state :
+      [ `hacl_Streaming_HMAC_agile_state ] structure typ =
       structure "Hacl_Streaming_HMAC_agile_state_s"
     let hacl_Streaming_HMAC_malloc_ =
       foreign "Hacl_Streaming_HMAC_malloc_"

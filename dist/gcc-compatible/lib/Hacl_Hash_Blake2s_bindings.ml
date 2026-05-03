@@ -30,8 +30,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Hash_Blake2s_finish"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint32_t) @-> (returning void))))
     type k____uint32_t___uint32_t_ = [ `k____uint32_t___uint32_t_ ] structure
-    let (k____uint32_t___uint32_t_ :
-      [ `k____uint32_t___uint32_t_ ] structure typ) =
+    let k____uint32_t___uint32_t_ :
+      [ `k____uint32_t___uint32_t_ ] structure typ =
       structure "K____uint32_t___uint32_t__s"
     let k____uint32_t___uint32_t__fst =
       field k____uint32_t___uint32_t_ "fst" (ptr uint32_t)
@@ -40,12 +40,21 @@ module Bindings(F:Cstubs.FOREIGN) =
     let _ = seal k____uint32_t___uint32_t_
     type hacl_Hash_Blake2s_block_state_t =
       [ `hacl_Hash_Blake2s_block_state_t ] structure
-    let (hacl_Hash_Blake2s_block_state_t :
-      [ `hacl_Hash_Blake2s_block_state_t ] structure typ) =
+    let hacl_Hash_Blake2s_block_state_t :
+      [ `hacl_Hash_Blake2s_block_state_t ] structure typ =
       structure "Hacl_Hash_Blake2s_block_state_t_s"
+    let hacl_Hash_Blake2s_block_state_t_fst =
+      field hacl_Hash_Blake2s_block_state_t "fst" uint8_t
+    let hacl_Hash_Blake2s_block_state_t_snd =
+      field hacl_Hash_Blake2s_block_state_t "snd" uint8_t
+    let hacl_Hash_Blake2s_block_state_t_thd =
+      field hacl_Hash_Blake2s_block_state_t "thd" bool
+    let hacl_Hash_Blake2s_block_state_t_f3 =
+      field hacl_Hash_Blake2s_block_state_t "f3" k____uint32_t___uint32_t_
+    let _ = seal hacl_Hash_Blake2s_block_state_t
     type hacl_Hash_Blake2s_state_t = [ `hacl_Hash_Blake2s_state_t ] structure
-    let (hacl_Hash_Blake2s_state_t :
-      [ `hacl_Hash_Blake2s_state_t ] structure typ) =
+    let hacl_Hash_Blake2s_state_t :
+      [ `hacl_Hash_Blake2s_state_t ] structure typ =
       structure "Hacl_Hash_Blake2s_state_t_s"
     let hacl_Hash_Blake2s_malloc_with_params_and_key =
       foreign "Hacl_Hash_Blake2s_malloc_with_params_and_key"

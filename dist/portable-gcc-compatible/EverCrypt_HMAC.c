@@ -91,16 +91,7 @@ EverCrypt_HMAC_compute_sha1(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 20U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 20U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -199,16 +190,7 @@ EverCrypt_HMAC_compute_sha2_256(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 32U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 32U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -246,7 +228,7 @@ EverCrypt_HMAC_compute_sha2_256(
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
-    Hacl_Hash_SHA2_sha256_update_last(0ULL + (uint64_t)64U, 64U, ipad, s);
+    Hacl_Hash_SHA2_sha256_update_last((uint64_t)64U, 64U, ipad, s);
   }
   else
   {
@@ -321,16 +303,7 @@ EverCrypt_HMAC_compute_sha2_384(
   uint8_t key_block[128U];
   memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 128U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 48U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 128U ? key_len : 48U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 128U)
   {
@@ -451,16 +424,7 @@ EverCrypt_HMAC_compute_sha2_512(
   uint8_t key_block[128U];
   memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 128U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 64U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 128U ? key_len : 64U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 128U)
   {
@@ -581,16 +545,7 @@ EverCrypt_HMAC_compute_blake2s(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 32U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 32U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -720,16 +675,7 @@ EverCrypt_HMAC_compute_blake2b(
   uint8_t key_block[128U];
   memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 128U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 64U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 128U ? key_len : 64U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 128U)
   {
