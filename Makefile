@@ -39,6 +39,9 @@
 
 include Makefile.common
 
+# Many rules rely on this directory existing.
+$(shell mkdir -p obj)
+
 #########################
 # Catching setup errors #
 #########################
