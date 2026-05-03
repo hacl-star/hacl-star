@@ -76,11 +76,7 @@ EverCrypt_DRBG_uu___is_SHA1_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == EverCrypt_DRBG_SHA1_s)
-  {
-    return true;
-  }
-  return false;
+  return projectee.tag == EverCrypt_DRBG_SHA1_s;
 }
 
 bool
@@ -90,11 +86,7 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == EverCrypt_DRBG_SHA2_256_s)
-  {
-    return true;
-  }
-  return false;
+  return projectee.tag == EverCrypt_DRBG_SHA2_256_s;
 }
 
 bool
@@ -104,11 +96,7 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == EverCrypt_DRBG_SHA2_384_s)
-  {
-    return true;
-  }
-  return false;
+  return projectee.tag == EverCrypt_DRBG_SHA2_384_s;
 }
 
 bool
@@ -118,11 +106,7 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == EverCrypt_DRBG_SHA2_512_s)
-  {
-    return true;
-  }
-  return false;
+  return projectee.tag == EverCrypt_DRBG_SHA2_512_s;
 }
 
 EverCrypt_DRBG_state_s *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)

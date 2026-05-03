@@ -554,11 +554,9 @@ option___EverCrypt_Hash_state_s_;
 static option___EverCrypt_Hash_state_s_ create_in(Spec_Hash_Definitions_hash_alg a)
 {
   EverCrypt_Hash_state_s *s = malloc_(a);
-  if (s == NULL)
-  {
-    return ((option___EverCrypt_Hash_state_s_){ .tag = Hacl_Streaming_Types_None });
-  }
-  return ((option___EverCrypt_Hash_state_s_){ .tag = Hacl_Streaming_Types_Some, .v = s });
+  return
+    s == NULL ? ((option___EverCrypt_Hash_state_s_){ .tag = Hacl_Streaming_Types_None })
+              : ((option___EverCrypt_Hash_state_s_){ .tag = Hacl_Streaming_Types_Some, .v = s });
 }
 
 /* SNIPPET_END: create_in */
@@ -1883,7 +1881,7 @@ EverCrypt_Hash_Incremental_update(
         update_multi(block_state1, prevlen, buf, block_len(i1));
       }
       uint32_t ite0;
-      if ((uint64_t)chunk_len % (uint64_t)block_len(i1) == 0ULL && (uint64_t)chunk_len > 0ULL)
+      if ((uint64_t)chunk_len % (uint64_t)block_len(i1) == 0ULL && chunk_len > 0ULL)
       {
         ite0 = block_len(i1);
       }
@@ -1956,11 +1954,7 @@ EverCrypt_Hash_Incremental_update(
         update_multi(block_state1, prevlen, buf, block_len(i1));
       }
       uint32_t ite0;
-      if
-      (
-        (uint64_t)(chunk_len - diff) % (uint64_t)block_len(i1) == 0ULL &&
-          (uint64_t)(chunk_len - diff) > 0ULL
-      )
+      if ((uint64_t)(chunk_len - diff) % (uint64_t)block_len(i1) == 0ULL && chunk_len - diff > 0ULL)
       {
         ite0 = block_len(i1);
       }
@@ -2695,15 +2689,7 @@ void EverCrypt_Hash_Incremental_hash_256(uint8_t *output, uint8_t *input, uint32
     os[i] = x;);
   uint32_t *s = st;
   uint32_t blocks_n0 = input_len / 64U;
-  uint32_t blocks_n1;
-  if (input_len % 64U == 0U && blocks_n0 > 0U)
-  {
-    blocks_n1 = blocks_n0 - 1U;
-  }
-  else
-  {
-    blocks_n1 = blocks_n0;
-  }
+  uint32_t blocks_n1 = input_len % 64U == 0U && blocks_n0 > 0U ? blocks_n0 - 1U : blocks_n0;
   uint32_t blocks_len0 = blocks_n1 * 64U;
   uint8_t *blocks0 = input;
   uint32_t rest_len0 = input_len - blocks_len0;
@@ -2737,15 +2723,7 @@ static void hash_224(uint8_t *output, uint8_t *input, uint32_t input_len)
     os[i] = x;);
   uint32_t *s = st;
   uint32_t blocks_n0 = input_len / 64U;
-  uint32_t blocks_n1;
-  if (input_len % 64U == 0U && blocks_n0 > 0U)
-  {
-    blocks_n1 = blocks_n0 - 1U;
-  }
-  else
-  {
-    blocks_n1 = blocks_n0;
-  }
+  uint32_t blocks_n1 = input_len % 64U == 0U && blocks_n0 > 0U ? blocks_n0 - 1U : blocks_n0;
   uint32_t blocks_len0 = blocks_n1 * 64U;
   uint8_t *blocks0 = input;
   uint32_t rest_len0 = input_len - blocks_len0;

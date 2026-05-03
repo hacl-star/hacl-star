@@ -40,8 +40,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_Hash_state_s_tags_EverCrypt_Hash_Blake2B_256_s =
       Unsigned.UInt8.of_int 13
     type everCrypt_Hash_state_s = [ `everCrypt_Hash_state_s ] structure
-    let (everCrypt_Hash_state_s : [ `everCrypt_Hash_state_s ] structure typ)
-      = structure "EverCrypt_Hash_state_s_s"
+    let everCrypt_Hash_state_s : [ `everCrypt_Hash_state_s ] structure typ =
+      structure "EverCrypt_Hash_state_s_s"
     let everCrypt_Hash_update_multi_256 =
       foreign "EverCrypt_Hash_update_multi_256"
         ((ptr uint32_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
@@ -50,8 +50,8 @@ module Bindings(F:Cstubs.FOREIGN) =
         (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
     type everCrypt_Hash_Incremental_state_t =
       [ `everCrypt_Hash_Incremental_state_t ] structure
-    let (everCrypt_Hash_Incremental_state_t :
-      [ `everCrypt_Hash_Incremental_state_t ] structure typ) =
+    let everCrypt_Hash_Incremental_state_t :
+      [ `everCrypt_Hash_Incremental_state_t ] structure typ =
       structure "EverCrypt_Hash_Incremental_state_t_s"
     let everCrypt_Hash_Incremental_malloc =
       foreign "EverCrypt_Hash_Incremental_malloc"

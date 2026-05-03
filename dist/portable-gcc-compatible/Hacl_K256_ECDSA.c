@@ -411,27 +411,11 @@ static inline bool load_qelem_vartime(uint64_t *f, uint8_t *b)
   uint64_t a1 = f[1U];
   uint64_t a2 = f[2U];
   uint64_t a3 = f[3U];
-  bool is_lt_q_b;
-  if (a3 < 0xffffffffffffffffULL || a2 < 0xfffffffffffffffeULL)
-  {
-    is_lt_q_b = true;
-  }
-  else if (a2 > 0xfffffffffffffffeULL)
-  {
-    is_lt_q_b = false;
-  }
-  else if (a1 < 0xbaaedce6af48a03bULL)
-  {
-    is_lt_q_b = true;
-  }
-  else if (a1 > 0xbaaedce6af48a03bULL)
-  {
-    is_lt_q_b = false;
-  }
-  else
-  {
-    is_lt_q_b = a0 < 0xbfd25e8cd0364141ULL;
-  }
+  bool
+  is_lt_q_b =
+    a3 < 0xffffffffffffffffULL || a2 < 0xfffffffffffffffeULL ||
+      (!(a2 > 0xfffffffffffffffeULL) &&
+        (a1 < 0xbaaedce6af48a03bULL || (!(a1 > 0xbaaedce6af48a03bULL) && a0 < 0xbfd25e8cd0364141ULL)));
   return !is_zero && is_lt_q_b;
 }
 
@@ -637,23 +621,11 @@ static inline bool is_qelem_le_q_halved_vartime(uint64_t *f)
   uint64_t a1 = f[1U];
   uint64_t a2 = f[2U];
   uint64_t a3 = f[3U];
-  if (a3 < 0x7fffffffffffffffULL)
-  {
-    return true;
-  }
-  if (a3 > 0x7fffffffffffffffULL)
-  {
-    return false;
-  }
-  if (a2 < 0xffffffffffffffffULL || a1 < 0x5d576e7357a4501dULL)
-  {
-    return true;
-  }
-  if (a1 > 0x5d576e7357a4501dULL)
-  {
-    return false;
-  }
-  return a0 <= 0xdfe92f46681b20a0ULL;
+  return
+    a3 < 0x7fffffffffffffffULL ||
+      (!(a3 > 0x7fffffffffffffffULL) &&
+        (a2 < 0xffffffffffffffffULL || a1 < 0x5d576e7357a4501dULL ||
+          (!(a1 > 0x5d576e7357a4501dULL) && a0 <= 0xdfe92f46681b20a0ULL)));
 }
 
 /* SNIPPET_END: is_qelem_le_q_halved_vartime */
@@ -2229,17 +2201,8 @@ void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw
   uint8_t *pk_x = pk_raw;
   uint8_t *pk_y = pk_raw + 32U;
   uint8_t x0 = pk_y[31U];
-  bool is_pk_y_odd = ((uint32_t)x0 & 1U) == 1U;
-  uint8_t ite;
-  if (is_pk_y_odd)
-  {
-    ite = 0x03U;
-  }
-  else
-  {
-    ite = 0x02U;
-  }
-  pk[0U] = ite;
+  bool is_pk_y_odd = (((uint32_t)x0 & 1U) & 0xFFU) == 1U;
+  pk[0U] = is_pk_y_odd ? 0x03U : 0x02U;
   memcpy(pk + 1U, pk_x, 32U * sizeof (uint8_t));
 }
 

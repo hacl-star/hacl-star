@@ -281,15 +281,7 @@ pss_verify(
 {
   uint32_t emLen = (emBits - 1U) / 8U + 1U;
   uint32_t msBits = emBits % 8U;
-  uint8_t em_0;
-  if (msBits > 0U)
-  {
-    em_0 = (uint32_t)em[0U] & 0xffU << msBits;
-  }
-  else
-  {
-    em_0 = 0U;
-  }
+  uint8_t em_0 = msBits > 0U ? (uint32_t)em[0U] & 0xffU << msBits : 0U;
   uint8_t em_last = em[emLen - 1U];
   if (emLen < saltLen + hash_len(a) + 2U || !(em_last == 0xbcU && em_0 == 0U))
   {

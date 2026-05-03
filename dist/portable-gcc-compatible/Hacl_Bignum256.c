@@ -611,15 +611,7 @@ static uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
     acc0 = (beq & acc0) | (~beq & blt););
   uint64_t m10 = acc0;
   uint64_t m00 = m0 & m10;
-  uint32_t bLen;
-  if (bBits == 0U)
-  {
-    bLen = 1U;
-  }
-  else
-  {
-    bLen = (bBits - 1U) / 64U + 1U;
-  }
+  uint32_t bLen = bBits == 0U ? 1U : (bBits - 1U) / 64U + 1U;
   uint64_t m1;
   if (bBits < 64U * bLen)
   {
@@ -702,15 +694,7 @@ exp_vartime_precomp(
   uint64_t aM[4U] = { 0U };
   to(n, mu, r2, a, aM);
   uint64_t resM[4U] = { 0U };
-  uint32_t bLen;
-  if (bBits == 0U)
-  {
-    bLen = 1U;
-  }
-  else
-  {
-    bLen = (bBits - 1U) / 64U + 1U;
-  }
+  uint32_t bLen = bBits == 0U ? 1U : (bBits - 1U) / 64U + 1U;
   uint64_t ctx[8U] = { 0U };
   memcpy(ctx, n, 4U * sizeof (uint64_t));
   memcpy(ctx + 4U, r2, 4U * sizeof (uint64_t));
@@ -829,15 +813,7 @@ exp_consttime_precomp(
   uint64_t aM[4U] = { 0U };
   to(n, mu, r2, a, aM);
   uint64_t resM[4U] = { 0U };
-  uint32_t bLen;
-  if (bBits == 0U)
-  {
-    bLen = 1U;
-  }
-  else
-  {
-    bLen = (bBits - 1U) / 64U + 1U;
-  }
+  uint32_t bLen = bBits == 0U ? 1U : (bBits - 1U) / 64U + 1U;
   uint64_t ctx[8U] = { 0U };
   memcpy(ctx, n, 4U * sizeof (uint64_t));
   memcpy(ctx + 4U, r2, 4U * sizeof (uint64_t));

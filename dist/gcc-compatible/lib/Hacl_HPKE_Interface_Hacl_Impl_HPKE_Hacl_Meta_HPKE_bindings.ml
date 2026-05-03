@@ -3,8 +3,8 @@ module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
     type hacl_Impl_HPKE_context_s = [ `hacl_Impl_HPKE_context_s ] structure
-    let (hacl_Impl_HPKE_context_s :
-      [ `hacl_Impl_HPKE_context_s ] structure typ) =
+    let hacl_Impl_HPKE_context_s :
+      [ `hacl_Impl_HPKE_context_s ] structure typ =
       structure "Hacl_Impl_HPKE_context_s_s"
     let hacl_Impl_HPKE_context_s_ctx_key =
       field hacl_Impl_HPKE_context_s "ctx_key" (ptr uint8_t)

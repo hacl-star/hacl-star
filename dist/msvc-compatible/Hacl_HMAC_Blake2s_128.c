@@ -47,16 +47,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 32U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 32U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {

@@ -24,8 +24,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 1
     type hacl_Streaming_Types_optional_32 =
       [ `hacl_Streaming_Types_optional_32 ] structure
-    let (hacl_Streaming_Types_optional_32 :
-      [ `hacl_Streaming_Types_optional_32 ] structure typ) =
+    let hacl_Streaming_Types_optional_32 :
+      [ `hacl_Streaming_Types_optional_32 ] structure typ =
       structure "Hacl_Streaming_Types_optional_32_s"
     let hacl_Streaming_Types_optional_32_tag =
       field hacl_Streaming_Types_optional_32 "tag"
@@ -35,8 +35,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let _ = seal hacl_Streaming_Types_optional_32
     type hacl_Streaming_Types_optional_64 =
       [ `hacl_Streaming_Types_optional_64 ] structure
-    let (hacl_Streaming_Types_optional_64 :
-      [ `hacl_Streaming_Types_optional_64 ] structure typ) =
+    let hacl_Streaming_Types_optional_64 :
+      [ `hacl_Streaming_Types_optional_64 ] structure typ =
       structure "Hacl_Streaming_Types_optional_64_s"
     let hacl_Streaming_Types_optional_64_tag =
       field hacl_Streaming_Types_optional_64 "tag"
@@ -46,8 +46,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let _ = seal hacl_Streaming_Types_optional_64
     type hacl_Streaming_Types_two_pointers =
       [ `hacl_Streaming_Types_two_pointers ] structure
-    let (hacl_Streaming_Types_two_pointers :
-      [ `hacl_Streaming_Types_two_pointers ] structure typ) =
+    let hacl_Streaming_Types_two_pointers :
+      [ `hacl_Streaming_Types_two_pointers ] structure typ =
       structure "Hacl_Streaming_Types_two_pointers_s"
     let hacl_Streaming_Types_two_pointers_fst =
       field hacl_Streaming_Types_two_pointers "fst" (ptr uint64_t)
@@ -56,13 +56,13 @@ module Bindings(F:Cstubs.FOREIGN) =
     let _ = seal hacl_Streaming_Types_two_pointers
     type hacl_Streaming_MD_state_32 =
       [ `hacl_Streaming_MD_state_32 ] structure
-    let (hacl_Streaming_MD_state_32 :
-      [ `hacl_Streaming_MD_state_32 ] structure typ) =
+    let hacl_Streaming_MD_state_32 :
+      [ `hacl_Streaming_MD_state_32 ] structure typ =
       structure "Hacl_Streaming_MD_state_32_s"
     type hacl_Streaming_MD_state_64 =
       [ `hacl_Streaming_MD_state_64 ] structure
-    let (hacl_Streaming_MD_state_64 :
-      [ `hacl_Streaming_MD_state_64 ] structure typ) =
+    let hacl_Streaming_MD_state_64 :
+      [ `hacl_Streaming_MD_state_64 ] structure typ =
       structure "Hacl_Streaming_MD_state_64_s"
     type spec_Hash_Definitions_hash_alg = Unsigned.UInt8.t
     let spec_Hash_Definitions_hash_alg =

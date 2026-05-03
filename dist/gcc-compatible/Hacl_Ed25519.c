@@ -53,7 +53,7 @@ void Hacl_Bignum25519_reduce_513(uint64_t *a)
   uint64_t f2 = a[2U];
   uint64_t f3 = a[3U];
   uint64_t f4 = a[4U];
-  uint64_t l_ = f0 + 0ULL;
+  uint64_t l_ = f0;
   uint64_t tmp0 = l_ & 0x7ffffffffffffULL;
   uint64_t c0 = l_ >> 51U;
   uint64_t l_0 = f1 + c0;
@@ -166,7 +166,7 @@ static inline void reduce(uint64_t *out)
   uint64_t o2 = out[2U];
   uint64_t o3 = out[3U];
   uint64_t o4 = out[4U];
-  uint64_t l_ = o0 + 0ULL;
+  uint64_t l_ = o0;
   uint64_t tmp0 = l_ & 0x7ffffffffffffULL;
   uint64_t c0 = l_ >> 51U;
   uint64_t l_0 = o1 + c0;
@@ -1143,31 +1143,12 @@ static inline bool gte_q(uint64_t *s)
   uint64_t s2 = s[2U];
   uint64_t s3 = s[3U];
   uint64_t s4 = s[4U];
-  if (s4 > 0x00000010000000ULL)
-  {
-    return true;
-  }
-  if (s4 < 0x00000010000000ULL)
-  {
-    return false;
-  }
-  if (s3 > 0x00000000000000ULL || s2 > 0x000000000014deULL)
-  {
-    return true;
-  }
-  if (s2 < 0x000000000014deULL)
-  {
-    return false;
-  }
-  if (s1 > 0xf9dea2f79cd658ULL)
-  {
-    return true;
-  }
-  if (s1 < 0xf9dea2f79cd658ULL)
-  {
-    return false;
-  }
-  return s0 >= 0x12631a5cf5d3edULL;
+  return
+    s4 > 0x00000010000000ULL ||
+      (!(s4 < 0x00000010000000ULL) &&
+        (s3 > 0x00000000000000ULL || s2 > 0x000000000014deULL ||
+          (!(s2 < 0x000000000014deULL) &&
+            (s1 > 0xf9dea2f79cd658ULL || (!(s1 < 0xf9dea2f79cd658ULL) && s0 >= 0x12631a5cf5d3edULL)))));
 }
 
 static inline bool eq(uint64_t *a, uint64_t *b)

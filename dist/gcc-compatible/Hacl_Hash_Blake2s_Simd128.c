@@ -54,24 +54,8 @@ update_block(
     uint32_t x = r;
     os[i] = x;);
   Lib_IntVector_Intrinsics_vec128 mask = Lib_IntVector_Intrinsics_vec128_zero;
-  uint32_t wv_14;
-  if (flag)
-  {
-    wv_14 = 0xFFFFFFFFU;
-  }
-  else
-  {
-    wv_14 = 0U;
-  }
-  uint32_t wv_15;
-  if (last_node)
-  {
-    wv_15 = 0xFFFFFFFFU;
-  }
-  else
-  {
-    wv_15 = 0U;
-  }
+  uint32_t wv_14 = flag ? 0xFFFFFFFFU : 0U;
+  uint32_t wv_15 = last_node ? 0xFFFFFFFFU : 0U;
   mask =
     Lib_IntVector_Intrinsics_vec128_load32s((uint32_t)totlen,
       (uint32_t)(totlen >> 32U),
@@ -90,7 +74,7 @@ update_block(
     Lib_IntVector_Intrinsics_vec128 *r1 = m_st + 1U;
     Lib_IntVector_Intrinsics_vec128 *r20 = m_st + 2U;
     Lib_IntVector_Intrinsics_vec128 *r30 = m_st + 3U;
-    uint32_t s0 = Hacl_Hash_Blake2b_sigmaTable[start_idx + 0U];
+    uint32_t s0 = Hacl_Hash_Blake2b_sigmaTable[start_idx];
     uint32_t s1 = Hacl_Hash_Blake2b_sigmaTable[start_idx + 1U];
     uint32_t s2 = Hacl_Hash_Blake2b_sigmaTable[start_idx + 2U];
     uint32_t s3 = Hacl_Hash_Blake2b_sigmaTable[start_idx + 3U];
@@ -118,34 +102,34 @@ update_block(
     uint32_t b0 = 1U;
     uint32_t c0 = 2U;
     uint32_t d10 = 3U;
-    Lib_IntVector_Intrinsics_vec128 *wv_a0 = wv + a * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b0 = wv + b0 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a0 = wv + a;
+    Lib_IntVector_Intrinsics_vec128 *wv_b0 = wv + b0;
     wv_a0[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a0[0U], wv_b0[0U]);
     wv_a0[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a0[0U], x[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a1 = wv + d10 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b1 = wv + a * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a1 = wv + d10;
+    Lib_IntVector_Intrinsics_vec128 *wv_b1 = wv + a;
     wv_a1[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a1[0U], wv_b1[0U]);
     wv_a1[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a1[0U], 16U);
-    Lib_IntVector_Intrinsics_vec128 *wv_a2 = wv + c0 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b2 = wv + d10 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a2 = wv + c0;
+    Lib_IntVector_Intrinsics_vec128 *wv_b2 = wv + d10;
     wv_a2[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a2[0U], wv_b2[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a3 = wv + b0 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b3 = wv + c0 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a3 = wv + b0;
+    Lib_IntVector_Intrinsics_vec128 *wv_b3 = wv + c0;
     wv_a3[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a3[0U], wv_b3[0U]);
     wv_a3[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a3[0U], 12U);
-    Lib_IntVector_Intrinsics_vec128 *wv_a4 = wv + a * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b4 = wv + b0 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a4 = wv + a;
+    Lib_IntVector_Intrinsics_vec128 *wv_b4 = wv + b0;
     wv_a4[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a4[0U], wv_b4[0U]);
     wv_a4[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a4[0U], y[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a5 = wv + d10 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b5 = wv + a * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a5 = wv + d10;
+    Lib_IntVector_Intrinsics_vec128 *wv_b5 = wv + a;
     wv_a5[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a5[0U], wv_b5[0U]);
     wv_a5[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a5[0U], 8U);
-    Lib_IntVector_Intrinsics_vec128 *wv_a6 = wv + c0 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b6 = wv + d10 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a6 = wv + c0;
+    Lib_IntVector_Intrinsics_vec128 *wv_b6 = wv + d10;
     wv_a6[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a6[0U], wv_b6[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a7 = wv + b0 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b7 = wv + c0 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a7 = wv + b0;
+    Lib_IntVector_Intrinsics_vec128 *wv_b7 = wv + c0;
     wv_a7[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a7[0U], wv_b7[0U]);
     wv_a7[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a7[0U], 7U);
     Lib_IntVector_Intrinsics_vec128 *r10 = wv + 1U;
@@ -167,34 +151,34 @@ update_block(
     uint32_t b = 1U;
     uint32_t c = 2U;
     uint32_t d1 = 3U;
-    Lib_IntVector_Intrinsics_vec128 *wv_a = wv + a0 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b8 = wv + b * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a = wv + a0;
+    Lib_IntVector_Intrinsics_vec128 *wv_b8 = wv + b;
     wv_a[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a[0U], wv_b8[0U]);
     wv_a[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a[0U], z[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a8 = wv + d1 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b9 = wv + a0 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a8 = wv + d1;
+    Lib_IntVector_Intrinsics_vec128 *wv_b9 = wv + a0;
     wv_a8[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a8[0U], wv_b9[0U]);
     wv_a8[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a8[0U], 16U);
-    Lib_IntVector_Intrinsics_vec128 *wv_a9 = wv + c * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b10 = wv + d1 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a9 = wv + c;
+    Lib_IntVector_Intrinsics_vec128 *wv_b10 = wv + d1;
     wv_a9[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a9[0U], wv_b10[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a10 = wv + b * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b11 = wv + c * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a10 = wv + b;
+    Lib_IntVector_Intrinsics_vec128 *wv_b11 = wv + c;
     wv_a10[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a10[0U], wv_b11[0U]);
     wv_a10[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a10[0U], 12U);
-    Lib_IntVector_Intrinsics_vec128 *wv_a11 = wv + a0 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b12 = wv + b * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a11 = wv + a0;
+    Lib_IntVector_Intrinsics_vec128 *wv_b12 = wv + b;
     wv_a11[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a11[0U], wv_b12[0U]);
     wv_a11[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a11[0U], w[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a12 = wv + d1 * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b13 = wv + a0 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a12 = wv + d1;
+    Lib_IntVector_Intrinsics_vec128 *wv_b13 = wv + a0;
     wv_a12[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a12[0U], wv_b13[0U]);
     wv_a12[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a12[0U], 8U);
-    Lib_IntVector_Intrinsics_vec128 *wv_a13 = wv + c * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b14 = wv + d1 * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a13 = wv + c;
+    Lib_IntVector_Intrinsics_vec128 *wv_b14 = wv + d1;
     wv_a13[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a13[0U], wv_b14[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a14 = wv + b * 1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b = wv + c * 1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a14 = wv + b;
+    Lib_IntVector_Intrinsics_vec128 *wv_b = wv + c;
     wv_a14[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a14[0U], wv_b[0U]);
     wv_a14[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a14[0U], 7U);
     Lib_IntVector_Intrinsics_vec128 *r11 = wv + 1U;
@@ -370,24 +354,8 @@ update_blocks(
 {
   uint32_t nb0 = len / 64U;
   uint32_t rem0 = len % 64U;
-  uint32_t nb;
-  if (rem0 == 0U && nb0 > 0U)
-  {
-    nb = nb0 - 1U;
-  }
-  else
-  {
-    nb = nb0;
-  }
-  uint32_t rem;
-  if (rem0 == 0U && nb0 > 0U)
-  {
-    rem = 64U;
-  }
-  else
-  {
-    rem = rem0;
-  }
+  uint32_t nb = rem0 == 0U && nb0 > 0U ? nb0 - 1U : nb0;
+  uint32_t rem = rem0 == 0U && nb0 > 0U ? 64U : rem0;
   Hacl_Hash_Blake2s_Simd128_update_multi(len, wv, hash, prev, blocks, nb);
   Hacl_Hash_Blake2s_Simd128_update_last(len, wv, hash, false, prev, rem, blocks);
 }
@@ -655,17 +623,13 @@ static Hacl_Hash_Blake2s_Simd128_state_t
       case Hacl_Streaming_Types_Some:
         {
           uint8_t kk10 = kk.key_length;
-          uint32_t ite;
-          if (kk10 != 0U)
-          {
-            ite = 64U;
-          }
-          else
-          {
-            ite = 0U;
-          }
           Hacl_Hash_Blake2s_Simd128_state_t
-          s = { .block_state = block_state1, .buf = buf1, .total_len = (uint64_t)ite };
+          s =
+            {
+              .block_state = block_state1,
+              .buf = buf1,
+              .total_len = (uint64_t)(kk10 != 0U ? 64U : 0U)
+            };
           Hacl_Hash_Blake2s_Simd128_state_t
           *p =
             (Hacl_Hash_Blake2s_Simd128_state_t *)KRML_HOST_MALLOC(sizeof (
@@ -947,17 +911,9 @@ reset_raw(Hacl_Hash_Blake2s_Simd128_state_t *state, Hacl_Hash_Blake2b_params_and
   r0[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_, iv1_, iv2_, iv3_);
   r1[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4_, iv5_, iv6_, iv7_);
   uint8_t kk11 = i.key_length;
-  uint32_t ite;
-  if (kk11 != 0U)
-  {
-    ite = 64U;
-  }
-  else
-  {
-    ite = 0U;
-  }
   Hacl_Hash_Blake2s_Simd128_state_t
-  tmp8 = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
+  tmp8 =
+    { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(kk11 != 0U ? 64U : 0U) };
   state[0U] = tmp8;
 }
 
@@ -1032,30 +988,21 @@ Hacl_Hash_Blake2s_Simd128_update(
   {
     return Hacl_Streaming_Types_MaximumLengthExceeded;
   }
-  uint32_t sz;
-  if (total_len % (uint64_t)64U == 0ULL && total_len > 0ULL)
-  {
-    sz = 64U;
-  }
-  else
-  {
-    sz = (uint32_t)(total_len % (uint64_t)64U);
-  }
+  uint32_t
+  sz =
+    total_len % (uint64_t)64U == 0ULL && total_len > 0ULL ? 64U
+                                                          : (uint32_t)(total_len % (uint64_t)64U);
   if (chunk_len <= 64U - sz)
   {
     Hacl_Hash_Blake2s_Simd128_state_t s1 = *state;
     Hacl_Hash_Blake2s_Simd128_block_state_t block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
-    uint32_t sz1;
-    if (total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL)
-    {
-      sz1 = 64U;
-    }
-    else
-    {
-      sz1 = (uint32_t)(total_len1 % (uint64_t)64U);
-    }
+    uint32_t
+    sz1 =
+      total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL ? 64U
+                                                              : (uint32_t)(total_len1 %
+                                                                (uint64_t)64U);
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
@@ -1074,15 +1021,11 @@ Hacl_Hash_Blake2s_Simd128_update(
     Hacl_Hash_Blake2s_Simd128_block_state_t block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
-    uint32_t sz1;
-    if (total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL)
-    {
-      sz1 = 64U;
-    }
-    else
-    {
-      sz1 = (uint32_t)(total_len1 % (uint64_t)64U);
-    }
+    uint32_t
+    sz1 =
+      total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL ? 64U
+                                                              : (uint32_t)(total_len1 %
+                                                                (uint64_t)64U);
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
@@ -1092,16 +1035,13 @@ Hacl_Hash_Blake2s_Simd128_update(
       uint32_t nb = 1U;
       Hacl_Hash_Blake2s_Simd128_update_multi(64U, wv, hash, prevlen, buf, nb);
     }
-    uint32_t ite;
-    if ((uint64_t)chunk_len % (uint64_t)64U == 0ULL && (uint64_t)chunk_len > 0ULL)
-    {
-      ite = 64U;
-    }
-    else
-    {
-      ite = (uint32_t)((uint64_t)chunk_len % (uint64_t)64U);
-    }
-    uint32_t n_blocks = (chunk_len - ite) / 64U;
+    uint32_t
+    n_blocks =
+      (chunk_len -
+        ((uint64_t)chunk_len % (uint64_t)64U == 0ULL && chunk_len > 0ULL ? 64U
+                                                                         : (uint32_t)((uint64_t)chunk_len
+                                                                         % (uint64_t)64U)))
+      / 64U;
     uint32_t data1_len = n_blocks * 64U;
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
@@ -1131,15 +1071,11 @@ Hacl_Hash_Blake2s_Simd128_update(
     Hacl_Hash_Blake2s_Simd128_block_state_t block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
-    uint32_t sz10;
-    if (total_len10 % (uint64_t)64U == 0ULL && total_len10 > 0ULL)
-    {
-      sz10 = 64U;
-    }
-    else
-    {
-      sz10 = (uint32_t)(total_len10 % (uint64_t)64U);
-    }
+    uint32_t
+    sz10 =
+      total_len10 % (uint64_t)64U == 0ULL && total_len10 > 0ULL ? 64U
+                                                                : (uint32_t)(total_len10 %
+                                                                  (uint64_t)64U);
     uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
@@ -1155,15 +1091,11 @@ Hacl_Hash_Blake2s_Simd128_update(
     Hacl_Hash_Blake2s_Simd128_block_state_t block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
-    uint32_t sz1;
-    if (total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL)
-    {
-      sz1 = 64U;
-    }
-    else
-    {
-      sz1 = (uint32_t)(total_len1 % (uint64_t)64U);
-    }
+    uint32_t
+    sz1 =
+      total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL ? 64U
+                                                              : (uint32_t)(total_len1 %
+                                                                (uint64_t)64U);
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
@@ -1173,17 +1105,15 @@ Hacl_Hash_Blake2s_Simd128_update(
       uint32_t nb = 1U;
       Hacl_Hash_Blake2s_Simd128_update_multi(64U, wv, hash, prevlen, buf, nb);
     }
-    uint32_t ite;
-    if
-    ((uint64_t)(chunk_len - diff) % (uint64_t)64U == 0ULL && (uint64_t)(chunk_len - diff) > 0ULL)
-    {
-      ite = 64U;
-    }
-    else
-    {
-      ite = (uint32_t)((uint64_t)(chunk_len - diff) % (uint64_t)64U);
-    }
-    uint32_t n_blocks = (chunk_len - diff - ite) / 64U;
+    uint32_t
+    n_blocks =
+      (chunk_len - diff -
+        ((uint64_t)(chunk_len - diff) % (uint64_t)64U == 0ULL && chunk_len - diff > 0ULL ? 64U
+                                                                                         : (uint32_t)((uint64_t)(chunk_len
+                                                                                         - diff)
+                                                                                         %
+                                                                                           (uint64_t)64U)))
+      / 64U;
     uint32_t data1_len = n_blocks * 64U;
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
@@ -1230,15 +1160,10 @@ uint8_t Hacl_Hash_Blake2s_Simd128_digest(Hacl_Hash_Blake2s_Simd128_state_t *s, u
   Hacl_Hash_Blake2s_Simd128_block_state_t block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
-  uint32_t r;
-  if (total_len % (uint64_t)64U == 0ULL && total_len > 0ULL)
-  {
-    r = 64U;
-  }
-  else
-  {
-    r = (uint32_t)(total_len % (uint64_t)64U);
-  }
+  uint32_t
+  r =
+    total_len % (uint64_t)64U == 0ULL && total_len > 0ULL ? 64U
+                                                          : (uint32_t)(total_len % (uint64_t)64U);
   uint8_t *buf_1 = buf_;
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv0[4U] KRML_POST_ALIGN(16) = { 0U };
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 b[4U] KRML_POST_ALIGN(16) = { 0U };
@@ -1254,16 +1179,7 @@ uint8_t Hacl_Hash_Blake2s_Simd128_digest(Hacl_Hash_Blake2s_Simd128_state_t *s, u
   Lib_IntVector_Intrinsics_vec128 *dst_b = tmp_block_state.f3.snd;
   memcpy(dst_b, src_b, 4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   uint64_t prev_len = total_len - (uint64_t)r;
-  uint32_t ite;
-  if (r % 64U == 0U && r > 0U)
-  {
-    ite = 64U;
-  }
-  else
-  {
-    ite = r % 64U;
-  }
-  uint8_t *buf_last = buf_1 + r - ite;
+  uint8_t *buf_last = buf_1 + r - (r % 64U == 0U && r > 0U ? 64U : r % 64U);
   uint8_t *buf_multi = buf_1;
   Hacl_Hash_Blake2s_Simd128_two_2s_128 acc0 = tmp_block_state.f3;
   Lib_IntVector_Intrinsics_vec128 *wv1 = acc0.fst;

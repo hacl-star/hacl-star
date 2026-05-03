@@ -23,7 +23,7 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_HMAC_DRBG_min_length"
         (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
     type hacl_HMAC_DRBG_state = [ `hacl_HMAC_DRBG_state ] structure
-    let (hacl_HMAC_DRBG_state : [ `hacl_HMAC_DRBG_state ] structure typ) =
+    let hacl_HMAC_DRBG_state : [ `hacl_HMAC_DRBG_state ] structure typ =
       structure "Hacl_HMAC_DRBG_state_s"
     let hacl_HMAC_DRBG_state_k = field hacl_HMAC_DRBG_state "k" (ptr uint8_t)
     let hacl_HMAC_DRBG_state_v = field hacl_HMAC_DRBG_state "v" (ptr uint8_t)

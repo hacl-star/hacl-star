@@ -438,7 +438,7 @@ static inline void mont_reduction(uint64_t *res, uint64_t *x)
     0U,
     4U,
     1U,
-    uint64_t qj = 1ULL * x[i0];
+    uint64_t qj = x[i0];
     uint64_t *res_j0 = x + i0;
     uint64_t c = 0ULL;
     {
