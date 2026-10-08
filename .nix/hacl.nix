@@ -87,6 +87,7 @@
         bash
         z3
         fstar
+        karamel
         python3
         which
         dotnet-runtime
@@ -120,13 +121,13 @@
     buildInputs = [openssl.dev];
 
     VALE_HOME = vale;
-    KRML_HOME = karamel;
 
     configurePhase = "export HACL_HOME=$(pwd)";
 
     enableParallelBuilding = true;
 
     buildPhase = ''
+      set -o pipefail
       RESOURCEMONITOR=1 make -j$NIX_BUILD_CORES ci 2>&1 | tee log.txt
       bash .scripts/remove_stale_hints.sh
     '';

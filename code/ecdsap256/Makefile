@@ -32,7 +32,7 @@ dist/Makefile.basic: $(ALL_KRML_FILES)
 	-skip-compilation
 
 dist/p256-test.exe: dist/libp256.a \
-	$(KRML_HOME)/krmllib/dist/generic/libkrmllib.a
+	$(KRML_LIB)/dist/generic/libkrmllib.a
 
 %.exe:
 	$(CC) $(CFLAGS) $^ -o $@

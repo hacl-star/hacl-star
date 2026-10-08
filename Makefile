@@ -953,8 +953,8 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
 	echo "This code was generated with the following toolchain." > $(dir $@)/INFO.txt
-	echo "F* version: $(shell $(FSTAR_EXE) --version | tr '\n' ' ')" >> $(dir $@)/INFO.txt
-	echo "KaRaMeL version: $(shell cd $(KRML_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
+	echo "F* version: $(shell $(FSTAR_EXE) --version | paste -sd ' ' -)" >> $(dir $@)/INFO.txt
+	echo "KaRaMeL version: $(shell $(KRML_EXE) -version | sed 's/KaRaMeL version: //')" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
 	if [ "$*" == "wasm" ]; then touch $@; fi
 
@@ -992,8 +992,10 @@ dist/test/c/Hacl_Test_K256.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-incl
 ###################################################################################
 
 copy-krmllib:
-	mkdir -p dist/karamel
-	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal $$(find include -type f -and -not -name 'steel_types.h')) | (cd dist/karamel && tar xf -)
+	mkdir -p dist/karamel/krmllib/dist/minimal dist/karamel/include
+	chmod -R u+w dist/karamel
+	cp -r $(KRML_LIB)/dist/minimal/. dist/karamel/krmllib/dist/minimal/
+	(cd $(KRML_INCLUDE) && tar cf - $$(find . -type f -and -not -name 'steel_types.h')) | (cd dist/karamel/include && tar xf -)
 
 package-compile-mozilla: dist/mozilla/libevercrypt.a
 
@@ -1013,8 +1015,8 @@ compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-krmlli
 
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
-  -O3 -I$(KRML_HOME)/krmllib/dist/minimal \
-  -I$(KRML_HOME)/include -Idist/gcc-compatible
+  -O3 -I$(KRML_LIB)/dist/minimal \
+  -I$(KRML_INCLUDE) -Idist/gcc-compatible
 
 ifneq ($(shell uname -m),arm64)
 CFLAGS += -march=native -mtune=native
@@ -1033,7 +1035,7 @@ dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
 	$(call run-with-log,\
 	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
 	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
-	    $(KRML_HOME)/krmllib/dist/generic/libkrmllib.a \
+	    $(KRML_LIB)/dist/generic/libkrmllib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
 .PHONY: %.test
@@ -1048,8 +1050,7 @@ test-c-%: dist/test/c/%.test
 ##########################
 
 test-handwritten: compile-gcc-compatible
-	$(LD_EXTRA) KRML_HOME="$(KRML_HOME)" \
-	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
+	$(LD_EXTRA) LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test
 
 obj/vale_testInline.exe: vale/code/test/TestInline.c obj/vale_testInline.h

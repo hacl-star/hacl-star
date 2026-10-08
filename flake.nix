@@ -25,18 +25,33 @@
     flake-utils.lib.eachSystem ["x86_64-linux"] (system: let
       pkgs = import nixpkgs {inherit system;};
       fstarPackages = fstar.packages.${system};
-      karamel-home = karamel.packages.${system}.karamel.home;
+      fstarPackage = fstarPackages.fstar;
+      karamelPackage = karamel.packages.${system}.karamel.override {
+        fstar = fstarPackage;
+      };
       vale = pkgs.callPackage ./.nix/vale.nix {};
       hacl = pkgs.callPackage ./.nix/hacl.nix {
-        inherit (fstarPackages) ocamlPackages z3 fstar;
+        inherit (fstarPackages) ocamlPackages z3;
+        fstar = fstarPackage;
         inherit vale;
-        karamel = karamel-home;
+        karamel = karamelPackage;
         fstar-scripts = "${fstar}/.scripts";
+      };
+      mkDevShell = package: pkgs.mkShell {
+        inputsFrom = [package];
+        VALE_HOME = vale;
+        shellHook = ''
+          export KRML_LIB="$(krml -locate-krmllib)"
+          export KRML_INCLUDE="$(krml -locate-include)"
+        '';
       };
     in {
       packages = {
         inherit hacl vale;
         default = hacl;
+      };
+      devShells = {
+        default = mkDevShell hacl;
       };
     });
 }
