@@ -37,6 +37,16 @@
         karamel = karamelPackage;
         fstar-scripts = "${fstar}/.scripts";
       };
+      # Keep admission explicit, including when bootstrapping the toolchain.
+      fstarAdmit = fstarPackage.overrideAttrs (_: {ADMIT = "1";});
+      karamelAdmit = (karamelPackage.override {fstar = fstarAdmit;}).overrideAttrs (_: {
+        OTHERFLAGS = "--admit_smt_queries true";
+      });
+      haclAdmit = hacl.override {
+        admit = true;
+        fstar = fstarAdmit;
+        karamel = karamelAdmit;
+      };
       mkDevShell = package: pkgs.mkShell {
         inputsFrom = [package];
         VALE_HOME = vale;
@@ -49,9 +59,11 @@
       packages = {
         inherit hacl vale;
         default = hacl;
+        hacl-admit = haclAdmit;
       };
       devShells = {
         default = mkDevShell hacl;
+        admit = mkDevShell haclAdmit;
       };
     });
 }

@@ -10,6 +10,7 @@
 #
 # This Makefile honors the following variables:
 # - NOSHORTLOG=1 disables pretty (short) logs
+# - ADMIT=1 admits SMT queries while checking and extracting code
 # - NODEPEND=1 disables .depend re-generation (use for debugging only)
 # - SKIPDEPEND=1 disables even *including* .depend files (not meant for end users)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files

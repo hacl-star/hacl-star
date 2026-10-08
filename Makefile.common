@@ -149,6 +149,12 @@ FSTAR_NO_FLAGS = $(FSTAR_EXE) $(FSTAR_HINTS) \
 # newer versions are addressed.
 FSTAR_NO_FLAGS += --z3version 4.8.5
 
+# Admit SMT queries while retaining the checked files needed for extraction.
+# Unlike --lax, this also runs the metaprograms that generate Low* code.
+ifeq ($(ADMIT),1)
+FSTAR_NO_FLAGS += --admit_smt_queries true
+endif
+
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 
 %.fst-in %.fsti-in:
