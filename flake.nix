@@ -3,12 +3,13 @@
 
   inputs = {
     fstar = {
-      url = "github:fstarlang/fstar?ref=v2025.10.06";
+      # HACL* still needs the legacy Low* libraries maintained by F* 1.
+      url = "github:fstarlang/fstar?ref=fstar1";
     };
     flake-utils.follows = "fstar/flake-utils";
     nixpkgs.follows = "fstar/nixpkgs";
     karamel = {
-      url = "github:fstarlang/karamel?ref=254e099bd586b17461845f6b0cab44c3ef5080e9";
+      url = "github:fstarlang/karamel?rev=340ff12aa6ba5cb020c4eecbd2547b1147af3582";
       inputs.fstar.follows = "fstar";
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";

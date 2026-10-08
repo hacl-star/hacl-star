@@ -1,0 +1,114 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "id": "flake-utils",
+        "type": "indirect"
+      }
+    },
+    "fstar": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1791759289,
+        "narHash": "sha256-SNORmd0Y668s531KORdHz92VsuykPTUYl43E2VOP9/4=",
+        "owner": "fstarlang",
+        "repo": "fstar",
+        "rev": "019f4e3e38531387ea8534b587aaa23b685edeb5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "fstarlang",
+        "ref": "fstar1",
+        "repo": "fstar",
+        "type": "github"
+      }
+    },
+    "karamel": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "fstar": [
+          "fstar"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791680034,
+        "narHash": "sha256-qxXUssykDEmz8JAbmYNOmuet0Rn6U3Ogik9sAD/AtFY=",
+        "owner": "fstarlang",
+        "repo": "karamel",
+        "rev": "340ff12aa6ba5cb020c4eecbd2547b1147af3582",
+        "type": "github"
+      },
+      "original": {
+        "owner": "fstarlang",
+        "repo": "karamel",
+        "rev": "340ff12aa6ba5cb020c4eecbd2547b1147af3582",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1759381078,
+        "narHash": "sha256-gTrEEp5gEspIcCOx9PD8kMaF1iEmfBcTbO0Jag2QhQs=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "7df7ff7d8e00218376575f0acdcc5d66741351ee",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "ref": "nixos-unstable",
+        "type": "indirect"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": [
+          "fstar",
+          "flake-utils"
+        ],
+        "fstar": "fstar",
+        "karamel": "karamel",
+        "nixpkgs": [
+          "fstar",
+          "nixpkgs"
+        ]
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
