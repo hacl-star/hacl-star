@@ -917,7 +917,7 @@ dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_GEN += \
   $(wildcard lib/ml/*_gen.ml)
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES += \
-  dist/META dist/hacl-star-raw.opam dist/configure
+  dist/META dist/configure
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
@@ -998,7 +998,7 @@ copy-krmllib:
 package-compile-mozilla: dist/mozilla/libevercrypt.a
 
 .PHONY: dist/mozilla/libevercrypt.a
-dist/mozilla/libevercrypt.a: compile-gcc-compatible
+dist/mozilla/libevercrypt.a: compile-msvc-compatible
 	cd dist && ./package-mozilla.sh
 	$(MAKE) -C dist/mozilla
 

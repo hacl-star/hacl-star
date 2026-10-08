@@ -71,6 +71,8 @@ endif
 sanitize_path=$(call maybe_cygpath,$(realpath $(1)))
 
 HACL_HOME := $(call sanitize_path,$(HACL_HOME))
+# Test harnesses and recursive builds also locate project files through this.
+export HACL_HOME
 KRML_HOME := $(call sanitize_path,$(KRML_HOME))
 FSTAR_ULIB_CHECKED := $(call sanitize_path,$(FSTAR_ULIB_CHECKED))
 VALE_HOME := $(call sanitize_path,$(VALE_HOME))
