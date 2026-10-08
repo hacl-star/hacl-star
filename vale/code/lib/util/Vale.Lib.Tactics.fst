@@ -1,8 +1,8 @@
 module Vale.Lib.Tactics
 open FStar.Mul
-open FStar.Tactics
-open FStar.Tactics.Derived
-open FStar.Reflection.Formula
+open FStar.Tactics.V2
+open FStar.Tactics.V2.Derived
+open FStar.Reflection.V2.Formula
 
 
 (***** Tactic to destruct conjuctions in context *)
@@ -22,16 +22,16 @@ let tf (t : term) : Tot (term -> Tac unit) =
   | None -> and_elim
   | _ -> squash_and_elim
 
-let rec iterate_env (bs : binders) : Tac unit =
+let rec iterate_env (bs : bindings) : Tac unit =
     match bs with
     | [] -> ()
     | b :: bs ->
-        let ty = type_of_binder b in
+        let ty = type_of_binding b in
         let elim = tf ty in
         begin
           match term_as_formula_total ty with
           | And _ _  ->
-            elim (pack (Tv_Var (bv_of_binder b)));
+            elim (binding_to_term b);
             clear b;
             let t1 = implies_intro () in
             let t2 = implies_intro () in
@@ -41,5 +41,4 @@ let rec iterate_env (bs : binders) : Tac unit =
 
 // Destructs all propositions of the form [A /\ B] (or [squash (A /\ B)]) in the context
 let destruct_conj () : Tac unit =
-   let e = cur_env () in
-   iterate_env (binders_of_env e)
+   iterate_env (cur_vars ())
