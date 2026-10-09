@@ -22,7 +22,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "5c34c38a218ad3aa207d8e2f254b244c"
+      "0a7f7d80a28057890a1bd5cadb184871"
     ],
     [
       "Hacl.Streaming.SHA1.state_t_sha1",
@@ -45,7 +45,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "0e37fc7e54ee534245d5298cf5d25bec"
+      "0e7c3967ebb2e88dbac254596456befa"
     ],
     [
       "Hacl.Streaming.SHA1.alloca",
@@ -53,7 +53,9 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Hacl.Streaming.Interface.Erased",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Spec.Hash.Definitions.SHA1@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
@@ -61,19 +63,20 @@
         "equation_Hacl.Streaming.MD.hacl_md",
         "equation_Hacl.Streaming.SHA1.hacl_sha1",
         "equation_Hacl.Streaming.SHA1.state_t_sha1",
-        "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
-        "proj_equation_Hacl.Streaming.Interface.Block_key",
-        "proj_equation_Hacl.Streaming.Interface.Block_km",
-        "proj_equation_Hacl.Streaming.Interface.Block_state",
-        "proj_equation_Hacl.Streaming.Interface.Stateful_t",
-        "projection_inverse_Hacl.Streaming.Interface.Block_key",
-        "projection_inverse_Hacl.Streaming.Interface.Block_km",
-        "projection_inverse_Hacl.Streaming.Interface.Block_state",
-        "projection_inverse_Hacl.Streaming.Interface.Stateful_t",
-        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
+        "interpretation_Tm_abs_a5657fce126a261e7f7a7e51f5eed705",
+        "proj_equation_Hacl.Streaming.Interface.Block_@key",
+        "proj_equation_Hacl.Streaming.Interface.Block_@km",
+        "proj_equation_Hacl.Streaming.Interface.Block_@state",
+        "proj_equation_Hacl.Streaming.Interface.Stateful_@t",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@key",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@km",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@state",
+        "projection_inverse_Hacl.Streaming.Interface.Stateful_@t",
+        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t",
+        "unit_typing"
       ],
       0,
-      "1bd04f414c9005b1163a62f02dab5424"
+      "1b8a47561a2cb4c6468b50d338cafb49"
     ],
     [
       "Hacl.Streaming.SHA1.malloc",
@@ -81,7 +84,9 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Hacl.Streaming.Interface.Erased",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Spec.Hash.Definitions.SHA1@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
@@ -89,19 +94,20 @@
         "equation_Hacl.Streaming.MD.hacl_md",
         "equation_Hacl.Streaming.SHA1.hacl_sha1",
         "equation_Hacl.Streaming.SHA1.state_t_sha1",
-        "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
-        "proj_equation_Hacl.Streaming.Interface.Block_key",
-        "proj_equation_Hacl.Streaming.Interface.Block_km",
-        "proj_equation_Hacl.Streaming.Interface.Block_state",
-        "proj_equation_Hacl.Streaming.Interface.Stateful_t",
-        "projection_inverse_Hacl.Streaming.Interface.Block_key",
-        "projection_inverse_Hacl.Streaming.Interface.Block_km",
-        "projection_inverse_Hacl.Streaming.Interface.Block_state",
-        "projection_inverse_Hacl.Streaming.Interface.Stateful_t",
-        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
+        "interpretation_Tm_abs_a5657fce126a261e7f7a7e51f5eed705",
+        "proj_equation_Hacl.Streaming.Interface.Block_@key",
+        "proj_equation_Hacl.Streaming.Interface.Block_@km",
+        "proj_equation_Hacl.Streaming.Interface.Block_@state",
+        "proj_equation_Hacl.Streaming.Interface.Stateful_@t",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@key",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@km",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@state",
+        "projection_inverse_Hacl.Streaming.Interface.Stateful_@t",
+        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t",
+        "unit_typing"
       ],
       0,
-      "499fc0d7cd6fdb51b2a10c6a7bc242bf"
+      "8c3d7068e7a02d44ecd88abe1d097c1a"
     ],
     [
       "Hacl.Streaming.SHA1.reset",
@@ -109,7 +115,9 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Hacl.Streaming.Interface.Erased",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Spec.Hash.Definitions.SHA1@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
@@ -117,19 +125,20 @@
         "equation_Hacl.Streaming.MD.hacl_md",
         "equation_Hacl.Streaming.SHA1.hacl_sha1",
         "equation_Hacl.Streaming.SHA1.state_t_sha1",
-        "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
-        "proj_equation_Hacl.Streaming.Interface.Block_key",
-        "proj_equation_Hacl.Streaming.Interface.Block_km",
-        "proj_equation_Hacl.Streaming.Interface.Block_state",
-        "proj_equation_Hacl.Streaming.Interface.Stateful_t",
-        "projection_inverse_Hacl.Streaming.Interface.Block_key",
-        "projection_inverse_Hacl.Streaming.Interface.Block_km",
-        "projection_inverse_Hacl.Streaming.Interface.Block_state",
-        "projection_inverse_Hacl.Streaming.Interface.Stateful_t",
-        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
+        "interpretation_Tm_abs_a5657fce126a261e7f7a7e51f5eed705",
+        "proj_equation_Hacl.Streaming.Interface.Block_@key",
+        "proj_equation_Hacl.Streaming.Interface.Block_@km",
+        "proj_equation_Hacl.Streaming.Interface.Block_@state",
+        "proj_equation_Hacl.Streaming.Interface.Stateful_@t",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@key",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@km",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@state",
+        "projection_inverse_Hacl.Streaming.Interface.Stateful_@t",
+        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t",
+        "unit_typing"
       ],
       0,
-      "6d3f53e4b45bed1d2f7318c27312d829"
+      "f41d9be8f12e2dd52243b9c19fdfcd31"
     ],
     [
       "Hacl.Streaming.SHA1.update",
@@ -137,7 +146,9 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Hacl.Streaming.Interface.Erased",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Spec.Hash.Definitions.SHA1@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
@@ -145,19 +156,20 @@
         "equation_Hacl.Streaming.MD.hacl_md",
         "equation_Hacl.Streaming.SHA1.hacl_sha1",
         "equation_Hacl.Streaming.SHA1.state_t_sha1",
-        "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
-        "proj_equation_Hacl.Streaming.Interface.Block_key",
-        "proj_equation_Hacl.Streaming.Interface.Block_km",
-        "proj_equation_Hacl.Streaming.Interface.Block_state",
-        "proj_equation_Hacl.Streaming.Interface.Stateful_t",
-        "projection_inverse_Hacl.Streaming.Interface.Block_key",
-        "projection_inverse_Hacl.Streaming.Interface.Block_km",
-        "projection_inverse_Hacl.Streaming.Interface.Block_state",
-        "projection_inverse_Hacl.Streaming.Interface.Stateful_t",
-        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
+        "interpretation_Tm_abs_a5657fce126a261e7f7a7e51f5eed705",
+        "proj_equation_Hacl.Streaming.Interface.Block_@key",
+        "proj_equation_Hacl.Streaming.Interface.Block_@km",
+        "proj_equation_Hacl.Streaming.Interface.Block_@state",
+        "proj_equation_Hacl.Streaming.Interface.Stateful_@t",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@key",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@km",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@state",
+        "projection_inverse_Hacl.Streaming.Interface.Stateful_@t",
+        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t",
+        "unit_typing"
       ],
       0,
-      "a4fa31ada75d5d9620b32a4bea1f5c2f"
+      "5a4378b226da687617217c27fd10dcd7"
     ],
     [
       "Hacl.Streaming.SHA1.digest",
@@ -165,7 +177,9 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Hacl.Streaming.Interface.Erased",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Spec.Hash.Definitions.SHA1@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
@@ -173,19 +187,20 @@
         "equation_Hacl.Streaming.MD.hacl_md",
         "equation_Hacl.Streaming.SHA1.hacl_sha1",
         "equation_Hacl.Streaming.SHA1.state_t_sha1",
-        "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
-        "proj_equation_Hacl.Streaming.Interface.Block_key",
-        "proj_equation_Hacl.Streaming.Interface.Block_km",
-        "proj_equation_Hacl.Streaming.Interface.Block_state",
-        "proj_equation_Hacl.Streaming.Interface.Stateful_t",
-        "projection_inverse_Hacl.Streaming.Interface.Block_key",
-        "projection_inverse_Hacl.Streaming.Interface.Block_km",
-        "projection_inverse_Hacl.Streaming.Interface.Block_state",
-        "projection_inverse_Hacl.Streaming.Interface.Stateful_t",
-        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
+        "interpretation_Tm_abs_a5657fce126a261e7f7a7e51f5eed705",
+        "proj_equation_Hacl.Streaming.Interface.Block_@key",
+        "proj_equation_Hacl.Streaming.Interface.Block_@km",
+        "proj_equation_Hacl.Streaming.Interface.Block_@state",
+        "proj_equation_Hacl.Streaming.Interface.Stateful_@t",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@key",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@km",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@state",
+        "projection_inverse_Hacl.Streaming.Interface.Stateful_@t",
+        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t",
+        "unit_typing"
       ],
       0,
-      "0b6bdfe597b4450bca9d1980c765c7e3"
+      "6fc0638abac03b6bdf89afe5bf525420"
     ],
     [
       "Hacl.Streaming.SHA1.free",
@@ -193,7 +208,9 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Hacl.Streaming.Interface.Erased",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Spec.Hash.Definitions.SHA1@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
@@ -201,19 +218,20 @@
         "equation_Hacl.Streaming.MD.hacl_md",
         "equation_Hacl.Streaming.SHA1.hacl_sha1",
         "equation_Hacl.Streaming.SHA1.state_t_sha1",
-        "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
-        "proj_equation_Hacl.Streaming.Interface.Block_key",
-        "proj_equation_Hacl.Streaming.Interface.Block_km",
-        "proj_equation_Hacl.Streaming.Interface.Block_state",
-        "proj_equation_Hacl.Streaming.Interface.Stateful_t",
-        "projection_inverse_Hacl.Streaming.Interface.Block_key",
-        "projection_inverse_Hacl.Streaming.Interface.Block_km",
-        "projection_inverse_Hacl.Streaming.Interface.Block_state",
-        "projection_inverse_Hacl.Streaming.Interface.Stateful_t",
-        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
+        "interpretation_Tm_abs_a5657fce126a261e7f7a7e51f5eed705",
+        "proj_equation_Hacl.Streaming.Interface.Block_@key",
+        "proj_equation_Hacl.Streaming.Interface.Block_@km",
+        "proj_equation_Hacl.Streaming.Interface.Block_@state",
+        "proj_equation_Hacl.Streaming.Interface.Stateful_@t",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@key",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@km",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@state",
+        "projection_inverse_Hacl.Streaming.Interface.Stateful_@t",
+        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t",
+        "unit_typing"
       ],
       0,
-      "a458cb2ed0c20a3b3ebfd9344dfbd95f"
+      "dbeede28b6e751707b6217df1befa87e"
     ],
     [
       "Hacl.Streaming.SHA1.copy",
@@ -221,7 +239,9 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Hacl.Streaming.Interface.Erased",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Spec.Hash.Definitions.SHA1@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
@@ -229,19 +249,20 @@
         "equation_Hacl.Streaming.MD.hacl_md",
         "equation_Hacl.Streaming.SHA1.hacl_sha1",
         "equation_Hacl.Streaming.SHA1.state_t_sha1",
-        "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
-        "proj_equation_Hacl.Streaming.Interface.Block_key",
-        "proj_equation_Hacl.Streaming.Interface.Block_km",
-        "proj_equation_Hacl.Streaming.Interface.Block_state",
-        "proj_equation_Hacl.Streaming.Interface.Stateful_t",
-        "projection_inverse_Hacl.Streaming.Interface.Block_key",
-        "projection_inverse_Hacl.Streaming.Interface.Block_km",
-        "projection_inverse_Hacl.Streaming.Interface.Block_state",
-        "projection_inverse_Hacl.Streaming.Interface.Stateful_t",
-        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
+        "interpretation_Tm_abs_a5657fce126a261e7f7a7e51f5eed705",
+        "proj_equation_Hacl.Streaming.Interface.Block_@key",
+        "proj_equation_Hacl.Streaming.Interface.Block_@km",
+        "proj_equation_Hacl.Streaming.Interface.Block_@state",
+        "proj_equation_Hacl.Streaming.Interface.Stateful_@t",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@key",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@km",
+        "projection_inverse_Hacl.Streaming.Interface.Block_@state",
+        "projection_inverse_Hacl.Streaming.Interface.Stateful_@t",
+        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t",
+        "unit_typing"
       ],
       0,
-      "d591c15b3bbf68583563b68848934c22"
+      "836c0b1b4f7d3d25eaa57db341e1244d"
     ],
     [
       "Hacl.Streaming.SHA1.hash",
@@ -255,7 +276,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "7755283bd69434370a5c0f7d9f05a231"
+      "63f9b33d89167588049f3a89a42af3ae"
     ]
   ]
 ]

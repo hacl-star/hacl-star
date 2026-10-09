@@ -9,13 +9,11 @@
       [
         "@MaxIFuel_assumption", "@query",
         "assumption_FStar.Pervasives.Native.option__uu___haseq",
-        "equation_Prims.eqtype",
-        "equation_Vale.X64.Machine_Semantics_s.flag_val_t",
-        "function_token_typing_Prims.bool",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "equation_Prims.eqtype", "function_token_typing_Prims.bool",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f"
       ],
       0,
-      "a30edbe01f71834de2dfbfc666aced37"
+      "d9ae11696846f2b97be6ada8e1858c92"
     ],
     [
       "Vale.X64.Leakage_s.publicOfFlagValuesAreSame",
@@ -25,13 +23,11 @@
       [
         "@MaxIFuel_assumption", "@query",
         "assumption_FStar.Pervasives.Native.option__uu___haseq",
-        "equation_Prims.eqtype",
-        "equation_Vale.X64.Machine_Semantics_s.flag_val_t",
-        "function_token_typing_Prims.bool",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "equation_Prims.eqtype", "function_token_typing_Prims.bool",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f"
       ],
       0,
-      "902d5fc6ca3ce808d22d5eba36e071a3"
+      "3eabd33c1ab8458744c4ee73374a3697"
     ],
     [
       "Vale.X64.Leakage_s.publicRegisterValuesAreSame",
@@ -40,8 +36,8 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_s.n_reg_files",
         "equation_Vale.X64.Machine_s.reg_file_id",
         "equation_Vale.X64.Machine_s.t_reg",
@@ -49,16 +45,16 @@
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_inversion",
-        "proj_equation_Vale.X64.Machine_s.Reg_rf",
+        "proj_equation_Vale.X64.Machine_s.Reg_@rf",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "refinement_interpretation_Tm_refine_d9979b96a3f2b18961b3dd63a2783b64",
         "typing_Vale.Def.Types_s.quad32",
         "typing_Vale.X64.Machine_s.__proj__Reg__item__rf"
       ],
       0,
-      "9f2896cee27e5c4ccf22bc8bb9819e32"
+      "d779e2205b702a0dfe39b0c32cdea995"
     ],
     [
       "Vale.X64.Leakage_s.constTimeInvariant",
@@ -71,10 +67,10 @@
         "assumption_Vale.X64.Machine_s.observation__uu___haseq",
         "equation_Prims.eqtype",
         "kinding_Vale.X64.Machine_s.observation@tok",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f"
       ],
       0,
-      "4525a0806e55688d26cd397ac14def34"
+      "57fef0dedec5af00adaad686b88a1c40"
     ],
     [
       "Vale.X64.Leakage_s.isConstantTimeGivenStates",
@@ -87,10 +83,10 @@
         "assumption_Vale.X64.Machine_s.observation__uu___haseq",
         "equation_Prims.eqtype",
         "kinding_Vale.X64.Machine_s.observation@tok",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f"
       ],
       0,
-      "151a75b007a4d315c10098c4bbc28efe"
+      "c2aaf77232bf33aca33b23ff051563f0"
     ],
     [
       "Vale.X64.Leakage_s.is_explicit_leakage_free_lhs",
@@ -99,7 +95,7 @@
       0,
       [ "@query" ],
       0,
-      "04603f549a178ecaeea3dc5cc0f5c576"
+      "a2d7e1eec9737b15eebb93061b868fdd"
     ],
     [
       "Vale.X64.Leakage_s.is_explicit_leakage_free_rhs",
@@ -108,7 +104,7 @@
       0,
       [ "@query" ],
       0,
-      "17b940bd23594fa4898f88be4690223d"
+      "89f885718c781766bb8534c8ccdd5bf4"
     ]
   ]
 ]

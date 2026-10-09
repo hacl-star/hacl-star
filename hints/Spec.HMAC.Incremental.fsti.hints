@@ -40,7 +40,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok", "unit_typing"
       ],
       0,
-      "103867f9a72f98b8676e9b6f980101d2"
+      "b65fe3a3e5687afb81e8a0e46b3486a0"
     ],
     [
       "Spec.HMAC.Incremental.init_input",
@@ -49,7 +49,7 @@
       0,
       [ "@query" ],
       0,
-      "701765f79abcbe1a61ee6fc70eeee727"
+      "cdc057a1132cf28001c0878c43e0f75e"
     ],
     [
       "Spec.HMAC.Incremental.hmac_incremental",
@@ -60,15 +60,8 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
         "constructor_distinct_FStar.Pervasives.Native.Some",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U128",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_FStar.Pervasives.Native.Some",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.seq",
+        "equation_Lib.Sequence.seq",
         "equation_Lib.UpdateMulti.split_at_last_lazy_nb_rem",
         "equation_Lib.UpdateMulti.split_at_last_nb_rem",
         "equation_Lib.UpdateMulti.uint8", "equation_Prims.nat",
@@ -87,7 +80,7 @@
         "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Incremental.Definitions.prev_length_t",
         "equation_Spec.Hash.Incremental.Definitions.split_blocks",
-        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_Lib.UpdateMulti.uint8",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
         "lemma_FStar.Seq.Base.lemma_len_append",
@@ -98,19 +91,20 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_FStar.Pervasives.Native.Some_a",
-        "projection_inverse_FStar.Pervasives.Native.Some_v",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_2",
+        "projection_inverse_FStar.Pervasives.Native.Some_@0",
+        "projection_inverse_FStar.Pervasives.Native.Some_@a",
+        "projection_inverse_FStar.Pervasives.Native.Some_@v",
         "refinement_interpretation_Tm_refine_042ec925769949f282ab80a26a462500",
-        "refinement_interpretation_Tm_refine_06cb76dcd5dde254a55e6dbfd7916db9",
         "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
         "refinement_interpretation_Tm_refine_0dd7d82d89ad57ee72279b3caed814b3",
-        "refinement_interpretation_Tm_refine_362e2dfd5fc10941f1049c892a15d4e9",
+        "refinement_interpretation_Tm_refine_3b8253456c8c1a2f4ba1fe1987cbb17f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_98f096c5968ce62263a32d49dc7c11ac",
-        "refinement_interpretation_Tm_refine_cc936e5a549dcdc2e3f9713145143490",
-        "refinement_interpretation_Tm_refine_ee39f9357cbd63bb5cf348fb8515eff7",
+        "refinement_interpretation_Tm_refine_887750514c76d74fb14def701faa7298",
+        "refinement_interpretation_Tm_refine_a1ca90406a28f7cb5c841a912d561208",
+        "refinement_interpretation_Tm_refine_bc025feafba14212e4701da26dca8782",
+        "refinement_interpretation_Tm_refine_ffa20843fc2299644b8e3e996aa5fc5c",
         "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.length",
         "typing_Lib.UpdateMulti.split_at_last_lazy",
         "typing_Lib.UpdateMulti.split_at_last_lazy_nb_rem",
@@ -124,7 +118,7 @@
         "unit_typing"
       ],
       0,
-      "516cf7a48b6038a45e232ff5bb1870eb"
+      "d322c89ee2d27f8de1562578c1d551b8"
     ],
     [
       "Spec.HMAC.Incremental.hmac_is_hmac_incremental",
@@ -135,11 +129,11 @@
         "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.squash",
         "equation_Spec.HMAC.Incremental.init_input_length",
         "equation_Spec.HMAC.Incremental.sized_key",
-        "refinement_interpretation_Tm_refine_06cb76dcd5dde254a55e6dbfd7916db9",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_3b8253456c8c1a2f4ba1fe1987cbb17f"
       ],
       0,
-      "fa60df0993037cd80bb9968b4bcc3cf6"
+      "be9d339bd2278bc5cd07cbb8daa2dcec"
     ]
   ]
 ]
