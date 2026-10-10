@@ -48,9 +48,6 @@ extern "C" {
 
 #define HACL_HASH_BLAKE2S_SIMD128_PERSONAL_BYTES (8U)
 
-typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
-Hacl_Hash_Blake2s_Simd128_block_state_t;
-
 typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s Hacl_Hash_Blake2s_Simd128_state_t;
 
 /**

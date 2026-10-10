@@ -151,15 +151,7 @@ static inline void sha256_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st)
 static inline void
 sha256_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
 {
-  uint32_t blocks;
-  if (len + 8U + 1U <= 64U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 8U + 1U <= 64U ? 1U : 2U;
   uint32_t fin = blocks * 64U;
   uint8_t last[128U] = { 0U };
   uint8_t totlen_buf[8U] = { 0U };
@@ -168,7 +160,7 @@ sha256_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
   uint8_t *b0 = b;
   memcpy(last, b0, len * sizeof (uint8_t));
   last[len] = 0x80U;
-  memcpy(last + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + 64U;
   uint8_t *l0 = last00;
@@ -350,15 +342,7 @@ static inline void sha512_update_nblocks(uint32_t len, uint8_t *b, uint64_t *st)
 static inline void
 sha512_update_last(FStar_UInt128_uint128 totlen, uint32_t len, uint8_t *b, uint64_t *hash)
 {
-  uint32_t blocks;
-  if (len + 16U + 1U <= 128U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 16U + 1U <= 128U ? 1U : 2U;
   uint32_t fin = blocks * 128U;
   uint8_t last[256U] = { 0U };
   uint8_t totlen_buf[16U] = { 0U };
@@ -367,7 +351,7 @@ sha512_update_last(FStar_UInt128_uint128 totlen, uint32_t len, uint8_t *b, uint6
   uint8_t *b0 = b;
   memcpy(last, b0, len * sizeof (uint8_t));
   last[len] = 0x80U;
-  memcpy(last + fin - 16U, totlen_buf, 16U * sizeof (uint8_t));
+  memcpy(last + (fin - 16U), totlen_buf, 16U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + 128U;
   uint8_t *l0 = last00;
@@ -438,7 +422,7 @@ static void hash_256(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha256_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 64U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha256_update_last(len_, rem, lb, st);
   sha256_finish(st, rb);
 }
@@ -457,7 +441,7 @@ static void hash_224(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha224_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 64U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha224_update_last(len_, rem, lb, st);
   sha224_finish(st, rb);
 }
@@ -476,7 +460,7 @@ static void hash_512(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha512_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 128U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha512_update_last(len_, rem, lb, st);
   sha512_finish(st, rb);
 }
@@ -495,7 +479,7 @@ static void hash_384(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha384_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 128U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha384_update_last(len_, rem, lb, st);
   sha384_finish(st, rb);
 }
@@ -525,19 +509,19 @@ test_sha2(
   hash_512(test512, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(28U, test224, expected224))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(32U, test256, expected256))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(48U, test384, expected384))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(64U, test512, expected512))
   {
-    exit((int32_t)255);
+    exit(255);
   }
 }
 

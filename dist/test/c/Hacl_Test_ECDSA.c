@@ -806,7 +806,7 @@ typedef struct lbuffer__uint8_t_s
 lbuffer__uint8_t;
 
 typedef struct
-__Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool_s
+__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool_s
 {
   lbuffer__uint8_t fst;
   lbuffer__uint8_t snd;
@@ -815,9 +815,9 @@ __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstariz
   lbuffer__uint8_t f4;
   bool f5;
 }
-__Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool;
+__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool;
 
-static __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
 sigver_vectors256_low75[15U] =
   {
     {
@@ -928,15 +928,15 @@ sigver_vectors256_low75[15U] =
   };
 
 typedef struct
-lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___bool__s
+lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___bool__s
 {
   uint32_t len;
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
   *b;
 }
-lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___bool_;
+lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___bool_;
 
-static lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___bool_
+static lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___bool_
 sigver_vectors256_low = { .len = 15U, .b = sigver_vectors256_low75 };
 
 static uint8_t
@@ -1554,7 +1554,7 @@ sigver_vectors384_low74[32U] =
     168U, 128U, 224U, 90U, 204U, 33U, 202U, 86U, 87U, 29U, 137U, 244U, 95U, 96U, 58U
   };
 
-static __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
 sigver_vectors384_low75[15U] =
   {
     {
@@ -1664,7 +1664,7 @@ sigver_vectors384_low75[15U] =
     }
   };
 
-static lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___bool_
+static lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___bool_
 sigver_vectors384_low = { .len = 15U, .b = sigver_vectors384_low75 };
 
 static uint8_t
@@ -2282,7 +2282,7 @@ sigver_vectors512_low74[32U] =
     76U, 117U, 68U, 127U, 153U, 29U, 90U, 175U, 77U, 234U, 114U, 12U, 37U, 152U, 92U, 140U
   };
 
-static __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
 sigver_vectors512_low75[15U] =
   {
     {
@@ -2392,7 +2392,7 @@ sigver_vectors512_low75[15U] =
     }
   };
 
-static lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___bool_
+static lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___bool_
 sigver_vectors512_low = { .len = 15U, .b = sigver_vectors512_low75 };
 
 static uint8_t
@@ -3221,7 +3221,7 @@ siggen_vectors256_low104[32U] =
   };
 
 typedef struct
-__Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_s
+__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
 {
   lbuffer__uint8_t fst;
   lbuffer__uint8_t snd;
@@ -3231,9 +3231,9 @@ __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstariz
   lbuffer__uint8_t f5;
   lbuffer__uint8_t f6;
 }
-__Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t;
+__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
 
-static __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 siggen_vectors256_low105[15U] =
   {
     {
@@ -3374,15 +3374,15 @@ siggen_vectors256_low105[15U] =
   };
 
 typedef struct
-lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t__s
+lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__s
 {
   uint32_t len;
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   *b;
 }
-lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t_;
+lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_;
 
-static lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t_
+static lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_
 siggen_vectors256_low = { .len = 15U, .b = siggen_vectors256_low105 };
 
 static uint8_t
@@ -4210,7 +4210,7 @@ siggen_vectors384_low104[32U] =
     246U, 34U, 190U, 125U, 97U, 58U, 160U, 69U, 48U, 173U, 37U, 7U, 211U, 162U
   };
 
-static __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 siggen_vectors384_low105[15U] =
   {
     {
@@ -4350,7 +4350,7 @@ siggen_vectors384_low105[15U] =
     }
   };
 
-static lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t_
+static lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_
 siggen_vectors384_low = { .len = 15U, .b = siggen_vectors384_low105 };
 
 static uint8_t
@@ -5178,7 +5178,7 @@ siggen_vectors512_low104[32U] =
     43U, 129U, 86U, 89U, 229U, 170U, 42U, 106U, 24U, 82U, 204U, 178U, 80U, 29U, 243U
   };
 
-static __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 siggen_vectors512_low105[15U] =
   {
     {
@@ -5318,7 +5318,7 @@ siggen_vectors512_low105[15U] =
     }
   };
 
-static lbuffer___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t_
+static lbuffer___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_
 siggen_vectors512_low = { .len = 15U, .b = siggen_vectors512_low105 };
 
 static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
@@ -5350,7 +5350,7 @@ static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
 
 static void
 test_sigver256(
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
   vec
 )
 {
@@ -5367,7 +5367,7 @@ test_sigver256(
   uint32_t msg_len = vec.fst.len;
   if (!(qx_len == 32U && qy_len == 32U && r_len == 32U && s_len == 32U))
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   else
   {
@@ -5378,14 +5378,14 @@ test_sigver256(
     if (!(result_ == result))
     {
       LowStar_Printf_print_string("FAIL\n");
-      exit((int32_t)1);
+      exit(1);
     }
   }
 }
 
 static void
 test_sigver384(
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
   vec
 )
 {
@@ -5402,7 +5402,7 @@ test_sigver384(
   uint32_t msg_len = vec.fst.len;
   if (!(qx_len == 32U && qy_len == 32U && r_len == 32U && s_len == 32U))
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   else
   {
@@ -5413,14 +5413,14 @@ test_sigver384(
     if (!(result_ == result))
     {
       LowStar_Printf_print_string("FAIL\n");
-      exit((int32_t)1);
+      exit(1);
     }
   }
 }
 
 static void
 test_sigver512(
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
   vec
 )
 {
@@ -5437,7 +5437,7 @@ test_sigver512(
   uint32_t msg_len = vec.fst.len;
   if (!(qx_len == 32U && qy_len == 32U && r_len == 32U && s_len == 32U))
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   else
   {
@@ -5448,7 +5448,7 @@ test_sigver512(
     if (!(result_ == result))
     {
       LowStar_Printf_print_string("FAIL\n");
-      exit((int32_t)1);
+      exit(1);
     }
   }
 }
@@ -5481,7 +5481,7 @@ static bool check_bound(uint8_t *b)
 
 static void
 test_siggen_256(
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
@@ -5501,13 +5501,13 @@ test_siggen_256(
   uint32_t msg_len = vec.fst.len;
   if (!(k_len == 32U && d_len == 32U))
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   bool bound_k = check_bound(k);
   bool bound_d = check_bound(d);
   if (!(bound_k && bound_d && qx_len == 32U && qy_len == 32U && r_len == 32U && s_len == 32U))
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   else
   {
@@ -5526,26 +5526,26 @@ test_siggen_256(
         if (!result)
         {
           LowStar_Printf_print_string("FAIL: verification\n");
-          exit((int32_t)1);
+          exit(1);
         }
       }
       else
       {
         LowStar_Printf_print_string("FAIL: signing\n");
-        exit((int32_t)1);
+        exit(1);
       }
     }
     else
     {
       LowStar_Printf_print_string("FAIL: signing\n");
-      exit((int32_t)1);
+      exit(1);
     }
   }
 }
 
 static void
 test_siggen_384(
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
@@ -5565,13 +5565,13 @@ test_siggen_384(
   uint32_t msg_len = vec.fst.len;
   if (!(k_len == 32U && d_len == 32U))
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   bool bound_k = check_bound(k);
   bool bound_d = check_bound(d);
   if (!(bound_k && bound_d && qx_len == 32U && qy_len == 32U && r_len == 32U && s_len == 32U))
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   else
   {
@@ -5590,26 +5590,26 @@ test_siggen_384(
         if (!result)
         {
           LowStar_Printf_print_string("FAIL: verification\n");
-          exit((int32_t)1);
+          exit(1);
         }
       }
       else
       {
         LowStar_Printf_print_string("FAIL: signing\n");
-        exit((int32_t)1);
+        exit(1);
       }
     }
     else
     {
       LowStar_Printf_print_string("FAIL: signing\n");
-      exit((int32_t)1);
+      exit(1);
     }
   }
 }
 
 static void
 test_siggen_512(
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
@@ -5629,13 +5629,13 @@ test_siggen_512(
   uint32_t msg_len = vec.fst.len;
   if (!(k_len == 32U && d_len == 32U))
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   bool bound_k = check_bound(k);
   bool bound_d = check_bound(d);
   if (!(bound_k && bound_d && qx_len == 32U && qy_len == 32U && r_len == 32U && s_len == 32U))
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   else
   {
@@ -5654,19 +5654,19 @@ test_siggen_512(
         if (!result)
         {
           LowStar_Printf_print_string("FAIL: verification\n");
-          exit((int32_t)1);
+          exit(1);
         }
       }
       else
       {
         LowStar_Printf_print_string("FAIL: signing\n");
-        exit((int32_t)1);
+        exit(1);
       }
     }
     else
     {
       LowStar_Printf_print_string("FAIL: signing\n");
-      exit((int32_t)1);
+      exit(1);
     }
   }
 }
@@ -5676,7 +5676,7 @@ exit_code main(void)
   C_String_print("[ECDSA SigVer]");
   C_String_print("\n");
   uint32_t len = sigver_vectors256_low.len;
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
   *vs0 = sigver_vectors256_low.b;
   for (uint32_t i = 0U; i < len; i++)
   {
@@ -5690,7 +5690,7 @@ exit_code main(void)
   C_String_print("[ECDSA SigGen]");
   C_String_print("\n");
   uint32_t len0 = siggen_vectors256_low.len;
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   *vs1 = siggen_vectors256_low.b;
   for (uint32_t i = 0U; i < len0; i++)
   {
@@ -5704,7 +5704,7 @@ exit_code main(void)
   C_String_print("[ECDSA SigVer - SHA384]");
   C_String_print("\n");
   uint32_t len1 = sigver_vectors384_low.len;
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
   *vs2 = sigver_vectors384_low.b;
   for (uint32_t i = 0U; i < len1; i++)
   {
@@ -5718,7 +5718,7 @@ exit_code main(void)
   C_String_print("[ECDSA SigGen - SHA384]");
   C_String_print("\n");
   uint32_t len2 = siggen_vectors384_low.len;
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   *vs3 = siggen_vectors384_low.b;
   for (uint32_t i = 0U; i < len2; i++)
   {
@@ -5732,7 +5732,7 @@ exit_code main(void)
   C_String_print("[ECDSA SigVer - SHA512]");
   C_String_print("\n");
   uint32_t len3 = sigver_vectors512_low.len;
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_bool
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
   *vs4 = sigver_vectors512_low.b;
   for (uint32_t i = 0U; i < len3; i++)
   {
@@ -5746,7 +5746,7 @@ exit_code main(void)
   C_String_print("[ECDSA SigGen - SHA512]");
   C_String_print("\n");
   uint32_t len4 = siggen_vectors512_low.len;
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   *vs = siggen_vectors512_low.b;
   for (uint32_t i = 0U; i < len4; i++)
   {

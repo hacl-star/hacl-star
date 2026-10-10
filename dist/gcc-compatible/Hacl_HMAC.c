@@ -57,16 +57,7 @@ Hacl_HMAC_compute_md5(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 16U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 16U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -167,16 +158,7 @@ Hacl_HMAC_compute_sha1(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 20U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 20U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -277,16 +259,7 @@ Hacl_HMAC_compute_sha2_224(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 28U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 28U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -324,7 +297,7 @@ Hacl_HMAC_compute_sha2_224(
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
-    Hacl_Hash_SHA2_sha224_update_last(0ULL + (uint64_t)64U, 64U, ipad, s);
+    Hacl_Hash_SHA2_sha224_update_last((uint64_t)64U, 64U, ipad, s);
   }
   else
   {
@@ -401,16 +374,7 @@ Hacl_HMAC_compute_sha2_256(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 32U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 32U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -448,7 +412,7 @@ Hacl_HMAC_compute_sha2_256(
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
-    Hacl_Hash_SHA2_sha256_update_last(0ULL + (uint64_t)64U, 64U, ipad, s);
+    Hacl_Hash_SHA2_sha256_update_last((uint64_t)64U, 64U, ipad, s);
   }
   else
   {
@@ -525,16 +489,7 @@ Hacl_HMAC_compute_sha2_384(
   uint8_t key_block[128U];
   memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 128U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 48U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 128U ? key_len : 48U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 128U)
   {
@@ -657,16 +612,7 @@ Hacl_HMAC_compute_sha2_512(
   uint8_t key_block[128U];
   memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 128U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 64U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 128U ? key_len : 64U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 128U)
   {
@@ -789,16 +735,7 @@ Hacl_HMAC_compute_sha3_224(
   uint8_t key_block[144U];
   memset(key_block, 0U, 144U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 144U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 28U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 144U ? key_len : 28U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 144U)
   {
@@ -862,7 +799,7 @@ Hacl_HMAC_compute_sha3_224(
   {
     store64_le(hbuf0 + i * 8U, ws0[i]);
   }
-  memcpy(dst1 + 28U - remOut, hbuf0, remOut * sizeof (uint8_t));
+  memcpy(dst1 + (28U - remOut), hbuf0, remOut * sizeof (uint8_t));
   uint8_t *hash1 = ipad;
   Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_224, s);
   uint32_t block_len = 144U;
@@ -894,7 +831,7 @@ Hacl_HMAC_compute_sha3_224(
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(dst + 28U - remOut0, hbuf, remOut0 * sizeof (uint8_t));
+  memcpy(dst + (28U - remOut0), hbuf, remOut0 * sizeof (uint8_t));
 }
 
 /**
@@ -915,16 +852,7 @@ Hacl_HMAC_compute_sha3_256(
   uint8_t key_block[136U];
   memset(key_block, 0U, 136U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 136U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 32U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 136U ? key_len : 32U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 136U)
   {
@@ -988,7 +916,7 @@ Hacl_HMAC_compute_sha3_256(
   {
     store64_le(hbuf0 + i * 8U, ws0[i]);
   }
-  memcpy(dst1 + 32U - remOut, hbuf0, remOut * sizeof (uint8_t));
+  memcpy(dst1 + (32U - remOut), hbuf0, remOut * sizeof (uint8_t));
   uint8_t *hash1 = ipad;
   Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_256, s);
   uint32_t block_len = 136U;
@@ -1020,7 +948,7 @@ Hacl_HMAC_compute_sha3_256(
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(dst + 32U - remOut0, hbuf, remOut0 * sizeof (uint8_t));
+  memcpy(dst + (32U - remOut0), hbuf, remOut0 * sizeof (uint8_t));
 }
 
 /**
@@ -1041,16 +969,7 @@ Hacl_HMAC_compute_sha3_384(
   uint8_t key_block[104U];
   memset(key_block, 0U, 104U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 104U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 48U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 104U ? key_len : 48U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 104U)
   {
@@ -1114,7 +1033,7 @@ Hacl_HMAC_compute_sha3_384(
   {
     store64_le(hbuf0 + i * 8U, ws0[i]);
   }
-  memcpy(dst1 + 48U - remOut, hbuf0, remOut * sizeof (uint8_t));
+  memcpy(dst1 + (48U - remOut), hbuf0, remOut * sizeof (uint8_t));
   uint8_t *hash1 = ipad;
   Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_384, s);
   uint32_t block_len = 104U;
@@ -1146,7 +1065,7 @@ Hacl_HMAC_compute_sha3_384(
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(dst + 48U - remOut0, hbuf, remOut0 * sizeof (uint8_t));
+  memcpy(dst + (48U - remOut0), hbuf, remOut0 * sizeof (uint8_t));
 }
 
 /**
@@ -1167,16 +1086,7 @@ Hacl_HMAC_compute_sha3_512(
   uint8_t key_block[72U];
   memset(key_block, 0U, 72U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 72U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 64U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 72U ? key_len : 64U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 72U)
   {
@@ -1240,7 +1150,7 @@ Hacl_HMAC_compute_sha3_512(
   {
     store64_le(hbuf0 + i * 8U, ws0[i]);
   }
-  memcpy(dst1 + 64U - remOut, hbuf0, remOut * sizeof (uint8_t));
+  memcpy(dst1 + (64U - remOut), hbuf0, remOut * sizeof (uint8_t));
   uint8_t *hash1 = ipad;
   Hacl_Hash_SHA3_init_(Spec_Hash_Definitions_SHA3_512, s);
   uint32_t block_len = 72U;
@@ -1272,7 +1182,7 @@ Hacl_HMAC_compute_sha3_512(
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(dst + 64U - remOut0, hbuf, remOut0 * sizeof (uint8_t));
+  memcpy(dst + (64U - remOut0), hbuf, remOut0 * sizeof (uint8_t));
 }
 
 /**
@@ -1293,16 +1203,7 @@ Hacl_HMAC_compute_blake2s_32(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 32U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 32U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -1434,16 +1335,7 @@ Hacl_HMAC_compute_blake2b_32(
   uint8_t key_block[128U];
   memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 128U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 64U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 128U ? key_len : 64U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 128U)
   {

@@ -114,7 +114,7 @@ static inline void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
   memcpy(k, ctx, 16U * sizeof (uint32_t));
   uint32_t ctr_u32 = ctr;
-  k[12U] = k[12U] + ctr_u32;
+  k[12U] += ctr_u32;
   rounds(k);
   KRML_MAYBE_FOR16(i,
     0U,
@@ -123,7 +123,7 @@ static inline void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
     uint32_t *os = k;
     uint32_t x = k[i] + ctx[i];
     os[i] = x;);
-  k[12U] = k[12U] + ctr_u32;
+  k[12U] += ctr_u32;
 }
 
 /* SNIPPET_END: chacha20_core */

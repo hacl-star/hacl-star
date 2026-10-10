@@ -46,8 +46,9 @@ typedef double float64_t;
 #  define KRML_HOST_PRINTF printf
 #endif
 
-#if (                                                                          \
-    (defined __STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&             \
+#if (                                                                   \
+    ((defined(__cplusplus) && __cplusplus > 199711L) ||                 \
+     (defined __STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)) &&    \
     (!(defined KRML_HOST_EPRINTF)))
 #  define KRML_HOST_EPRINTF(...) fprintf(stderr, __VA_ARGS__)
 #elif !(defined KRML_HOST_EPRINTF) && defined(_MSC_VER)

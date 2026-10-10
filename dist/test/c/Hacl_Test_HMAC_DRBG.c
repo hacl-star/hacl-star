@@ -168,15 +168,7 @@ static inline void sha256_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st)
 static inline void
 sha256_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
 {
-  uint32_t blocks;
-  if (len + 8U + 1U <= 64U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 8U + 1U <= 64U ? 1U : 2U;
   uint32_t fin = blocks * 64U;
   uint8_t last[128U] = { 0U };
   uint8_t totlen_buf[8U] = { 0U };
@@ -185,7 +177,7 @@ sha256_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
   uint8_t *b0 = b;
   memcpy(last, b0, len * sizeof (uint8_t));
   last[len] = 0x80U;
-  memcpy(last + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + 64U;
   uint8_t *l0 = last00;
@@ -337,15 +329,7 @@ static inline void sha512_update_nblocks(uint32_t len, uint8_t *b, uint64_t *st)
 static inline void
 sha512_update_last(FStar_UInt128_uint128 totlen, uint32_t len, uint8_t *b, uint64_t *hash)
 {
-  uint32_t blocks;
-  if (len + 16U + 1U <= 128U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 16U + 1U <= 128U ? 1U : 2U;
   uint32_t fin = blocks * 128U;
   uint8_t last[256U] = { 0U };
   uint8_t totlen_buf[16U] = { 0U };
@@ -354,7 +338,7 @@ sha512_update_last(FStar_UInt128_uint128 totlen, uint32_t len, uint8_t *b, uint6
   uint8_t *b0 = b;
   memcpy(last, b0, len * sizeof (uint8_t));
   last[len] = 0x80U;
-  memcpy(last + fin - 16U, totlen_buf, 16U * sizeof (uint8_t));
+  memcpy(last + (fin - 16U), totlen_buf, 16U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + 128U;
   uint8_t *l0 = last00;
@@ -456,37 +440,14 @@ static void update(uint32_t *h, uint8_t *l)
     uint32_t _d = h[3U];
     uint32_t _e = h[4U];
     uint32_t wmit = _w[i];
-    uint32_t ite0;
-    if (i < 20U)
-    {
-      ite0 = (_b & _c) ^ (~_b & _d);
-    }
-    else if (39U < i && i < 60U)
-    {
-      ite0 = (_b & _c) ^ ((_b & _d) ^ (_c & _d));
-    }
-    else
-    {
-      ite0 = _b ^ (_c ^ _d);
-    }
-    uint32_t ite;
-    if (i < 20U)
-    {
-      ite = 0x5a827999U;
-    }
-    else if (i < 40U)
-    {
-      ite = 0x6ed9eba1U;
-    }
-    else if (i < 60U)
-    {
-      ite = 0x8f1bbcdcU;
-    }
-    else
-    {
-      ite = 0xca62c1d6U;
-    }
-    uint32_t _T = (_a << 5U | _a >> 27U) + ite0 + _e + ite + wmit;
+    uint32_t
+    _T =
+      (_a << 5U | _a >> 27U) +
+        (i < 20U ? (_b & _c) ^ (~_b & _d)
+                 : 39U < i && i < 60U ? (_b & _c) ^ ((_b & _d) ^ (_c & _d)) : _b ^ (_c ^ _d))
+      + _e
+      + (i < 20U ? 0x5a827999U : i < 40U ? 0x6ed9eba1U : i < 60U ? 0x8f1bbcdcU : 0xca62c1d6U)
+      + wmit;
     h[0U] = _T;
     h[1U] = _a;
     h[2U] = _b << 30U | _b >> 2U;
@@ -518,7 +479,7 @@ static void pad(uint64_t len, uint8_t *dst)
   {
     dst2[i] = 0U;
   }
-  uint8_t *dst3 = dst + 1U + (128U - (9U + (uint32_t)(len % (uint64_t)64U))) % 64U;
+  uint8_t *dst3 = dst + (1U + (128U - (9U + (uint32_t)(len % (uint64_t)64U))) % 64U);
   store64_be(dst3, len << 3U);
 }
 
@@ -564,15 +525,7 @@ static void hash_oneshot(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t s[5U] = { 0x67452301U, 0xefcdab89U, 0x98badcfeU, 0x10325476U, 0xc3d2e1f0U };
   uint32_t blocks_n0 = input_len / 64U;
-  uint32_t blocks_n1;
-  if (input_len % 64U == 0U && blocks_n0 > 0U)
-  {
-    blocks_n1 = blocks_n0 - 1U;
-  }
-  else
-  {
-    blocks_n1 = blocks_n0;
-  }
+  uint32_t blocks_n1 = input_len % 64U == 0U && blocks_n0 > 0U ? blocks_n0 - 1U : blocks_n0;
   uint32_t blocks_len0 = blocks_n1 * 64U;
   uint8_t *blocks0 = input;
   uint32_t rest_len0 = input_len - blocks_len0;
@@ -601,7 +554,7 @@ static void hash_256(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha256_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 64U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha256_update_last(len_, rem, lb, st);
   sha256_finish(st, rb);
 }
@@ -620,7 +573,7 @@ static void hash_512(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha512_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 128U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha512_update_last(len_, rem, lb, st);
   sha512_finish(st, rb);
 }
@@ -639,7 +592,7 @@ static void hash_384(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha384_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 128U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha384_update_last(len_, rem, lb, st);
   sha384_finish(st, rb);
 }
@@ -665,16 +618,7 @@ compute_sha1(uint8_t *dst, uint8_t *key, uint32_t key_len, uint8_t *data, uint32
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 20U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 20U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -775,16 +719,7 @@ compute_sha2_256(
   uint8_t key_block[64U];
   memset(key_block, 0U, 64U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 64U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 32U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 64U ? key_len : 32U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 64U)
   {
@@ -821,7 +756,7 @@ compute_sha2_256(
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
-    sha256_update_last(0ULL + (uint64_t)64U, 64U, ipad, s);
+    sha256_update_last((uint64_t)64U, 64U, ipad, s);
   }
   else
   {
@@ -898,16 +833,7 @@ compute_sha2_384(
   uint8_t key_block[128U];
   memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 128U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 48U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 128U ? key_len : 48U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 128U)
   {
@@ -1029,16 +955,7 @@ compute_sha2_512(
   uint8_t key_block[128U];
   memset(key_block, 0U, 128U * sizeof (uint8_t));
   uint8_t *nkey = key_block;
-  uint32_t ite;
-  if (key_len <= 128U)
-  {
-    ite = key_len;
-  }
-  else
-  {
-    ite = 64U;
-  }
-  uint8_t *zeroes = key_block + ite;
+  uint8_t *zeroes = key_block + (key_len <= 128U ? key_len : 64U);
   KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 128U)
   {
@@ -1262,7 +1179,7 @@ instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -1271,7 +1188,7 @@ instantiate(
         memset(k, 0U, 20U * sizeof (uint8_t));
         memset(v, 1U, 20U * sizeof (uint8_t));
         ctr[0U] = 1U;
-        uint32_t input_len = 21U + entropy_input_len + nonce_len + personalization_string_len;
+        uint32_t input_len = 21U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1289,7 +1206,7 @@ instantiate(
         memcpy(k, k_, 20U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != 0U)
         {
-          uint32_t input_len0 = 21U + entropy_input_len + nonce_len + personalization_string_len;
+          uint32_t input_len0 = 21U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1318,7 +1235,7 @@ instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -1327,7 +1244,7 @@ instantiate(
         memset(k, 0U, 32U * sizeof (uint8_t));
         memset(v, 1U, 32U * sizeof (uint8_t));
         ctr[0U] = 1U;
-        uint32_t input_len = 33U + entropy_input_len + nonce_len + personalization_string_len;
+        uint32_t input_len = 33U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1345,7 +1262,7 @@ instantiate(
         memcpy(k, k_, 32U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != 0U)
         {
-          uint32_t input_len0 = 33U + entropy_input_len + nonce_len + personalization_string_len;
+          uint32_t input_len0 = 33U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1374,7 +1291,7 @@ instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -1383,7 +1300,7 @@ instantiate(
         memset(k, 0U, 48U * sizeof (uint8_t));
         memset(v, 1U, 48U * sizeof (uint8_t));
         ctr[0U] = 1U;
-        uint32_t input_len = 49U + entropy_input_len + nonce_len + personalization_string_len;
+        uint32_t input_len = 49U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1401,7 +1318,7 @@ instantiate(
         memcpy(k, k_, 48U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != 0U)
         {
-          uint32_t input_len0 = 49U + entropy_input_len + nonce_len + personalization_string_len;
+          uint32_t input_len0 = 49U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1430,7 +1347,7 @@ instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -1439,7 +1356,7 @@ instantiate(
         memset(k, 0U, 64U * sizeof (uint8_t));
         memset(v, 1U, 64U * sizeof (uint8_t));
         ctr[0U] = 1U;
-        uint32_t input_len = 65U + entropy_input_len + nonce_len + personalization_string_len;
+        uint32_t input_len = 65U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1457,7 +1374,7 @@ instantiate(
         memcpy(k, k_, 64U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != 0U)
         {
-          uint32_t input_len0 = 65U + entropy_input_len + nonce_len + personalization_string_len;
+          uint32_t input_len0 = 65U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1520,7 +1437,7 @@ reseed(
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
-        uint32_t input_len = 21U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = 21U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1538,7 +1455,7 @@ reseed(
         memcpy(k, k_, 20U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != 0U)
         {
-          uint32_t input_len0 = 21U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = 21U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1572,7 +1489,7 @@ reseed(
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
-        uint32_t input_len = 33U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = 33U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1590,7 +1507,7 @@ reseed(
         memcpy(k, k_, 32U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != 0U)
         {
-          uint32_t input_len0 = 33U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = 33U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1624,7 +1541,7 @@ reseed(
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
-        uint32_t input_len = 49U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = 49U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1642,7 +1559,7 @@ reseed(
         memcpy(k, k_, 48U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != 0U)
         {
-          uint32_t input_len0 = 49U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = 49U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1676,7 +1593,7 @@ reseed(
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
-        uint32_t input_len = 65U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = 65U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1694,7 +1611,7 @@ reseed(
         memcpy(k, k_, 64U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != 0U)
         {
-          uint32_t input_len0 = 65U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = 65U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -3444,15 +3361,15 @@ typedef struct lbuffer__uint8_t_s
 }
 lbuffer__uint8_t;
 
-typedef struct __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_s
+typedef struct __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
 {
   lbuffer__uint8_t fst;
   lbuffer__uint8_t snd;
 }
-__Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t;
+__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
 
 typedef struct
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t_s
+__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t_s
 {
   hash_alg fst;
   lbuffer__uint8_t snd;
@@ -3460,12 +3377,12 @@ __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize
   lbuffer__uint8_t f3;
   lbuffer__uint8_t f4;
   lbuffer__uint8_t f5;
-  __Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t f6;
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t f6;
   lbuffer__uint8_t f7;
 }
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t;
+__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t;
 
-static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t
+static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
 vectors_low177[28U] =
   {
     {
@@ -3683,15 +3600,15 @@ vectors_low177[28U] =
   };
 
 typedef struct
-lbuffer___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t__s
+lbuffer___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t____Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t____Test_Lowstarize_lbuffer__uint8_t__s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t
+  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
   *b;
 }
-lbuffer___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t_;
+lbuffer___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t____Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t____Test_Lowstarize_lbuffer__uint8_t_;
 
-static lbuffer___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t____Test_Lowstarize_lbuffer_uint8_t_
+static lbuffer___Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t____Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t____Test_Lowstarize_lbuffer__uint8_t_
 vectors_low = { .len = 28U, .b = vectors_low177 };
 
 static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
@@ -3723,7 +3640,7 @@ static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
 
 static void
 test_one(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t
+  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
@@ -3759,7 +3676,7 @@ test_one(
     && returned_bits_len <= max_output_length)
   )
   {
-    exit((int32_t)-1);
+    exit(-1);
   }
   else
   {
@@ -3859,17 +3776,17 @@ test_one(
         bool ok2 = compare_and_print(returned_bits, output, returned_bits_len);
         if (!ok2)
         {
-          exit((int32_t)1);
+          exit(1);
         }
       }
       else
       {
-        exit((int32_t)1);
+        exit(1);
       }
     }
     else
     {
-      exit((int32_t)1);
+      exit(1);
     }
   }
 }
@@ -3879,7 +3796,7 @@ exit_code main(void)
   C_String_print("[HMAC_DRBG]");
   C_String_print("\n");
   uint32_t len = vectors_low.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t__Test_Lowstarize_lbuffer_uint8_t
+  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t__Test_Lowstarize_lbuffer__uint8_t
   *vs = vectors_low.b;
   for (uint32_t i = 0U; i < len; i++)
   {

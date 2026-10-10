@@ -80,27 +80,11 @@ static inline bool Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(uint64_
   uint64_t f2 = f[2U];
   uint64_t f3 = f[3U];
   uint64_t f4 = f[4U];
-  if (f4 > 0ULL || f3 > 0ULL)
-  {
-    return false;
-  }
-  if (f2 < 0x1455123ULL)
-  {
-    return true;
-  }
-  if (f2 > 0x1455123ULL)
-  {
-    return false;
-  }
-  if (f1 < 0x1950b75fc4402ULL)
-  {
-    return true;
-  }
-  if (f1 > 0x1950b75fc4402ULL)
-  {
-    return false;
-  }
-  return f0 < 0xda1722fc9baeeULL;
+  return
+    !(f4 > 0ULL || f3 > 0ULL) &&
+      (f2 < 0x1455123ULL ||
+        (!(f2 > 0x1455123ULL) &&
+          (f1 < 0x1950b75fc4402ULL || (!(f1 > 0x1950b75fc4402ULL) && f0 < 0xda1722fc9baeeULL))));
 }
 
 /* SNIPPET_END: Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime */

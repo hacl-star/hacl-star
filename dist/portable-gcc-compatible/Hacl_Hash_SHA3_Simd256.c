@@ -310,7 +310,7 @@ Hacl_Hash_SHA3_Simd256_absorb_inner_256(
       0U,
       5U,
       1U,
-      Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+      Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
       Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
       Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
       _C[i] =
@@ -352,7 +352,7 @@ Hacl_Hash_SHA3_Simd256_absorb_inner_256(
       0U,
       5U,
       1U,
-      Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+      Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
       Lib_IntVector_Intrinsics_vec256
       uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
       Lib_IntVector_Intrinsics_vec256
@@ -379,15 +379,14 @@ Hacl_Hash_SHA3_Simd256_absorb_inner_256(
       Lib_IntVector_Intrinsics_vec256
       v37 =
         Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-          Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+          Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
       Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
-      Lib_IntVector_Intrinsics_vec256
-      uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+      Lib_IntVector_Intrinsics_vec256 uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
       Lib_IntVector_Intrinsics_vec256
       v4 =
         Lib_IntVector_Intrinsics_vec256_xor(uu____14,
           Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-      s[0U + 5U * i] = v07;
+      s[5U * i] = v07;
       s[1U + 5U * i] = v17;
       s[2U + 5U * i] = v27;
       s[3U + 5U * i] = v37;
@@ -461,10 +460,10 @@ Hacl_Hash_SHA3_Simd256_shake128(
   uint8_t *bl2 = b_.snd.snd.fst;
   uint8_t *bl1 = b_.snd.fst;
   uint8_t *bl0 = b_.fst;
-  memcpy(bl0, b01 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl1, b11 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl2, b21 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl3, b31 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b01 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl1, b11 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl2, b21 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl3, b31 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b32 = b_.snd.snd.snd;
   uint8_t *b22 = b_.snd.snd.fst;
   uint8_t *b12 = b_.snd.fst;
@@ -1001,7 +1000,7 @@ Hacl_Hash_SHA3_Simd256_shake128(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -1044,7 +1043,7 @@ Hacl_Hash_SHA3_Simd256_shake128(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -1071,15 +1070,15 @@ Hacl_Hash_SHA3_Simd256_shake128(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -1327,10 +1326,10 @@ Hacl_Hash_SHA3_Simd256_shake128(
   uint8_t *b2 = rb.snd.snd.fst;
   uint8_t *b1 = rb.snd.fst;
   uint8_t *b0 = rb.fst;
-  memcpy(b0 + outputByteLen - remOut, hbuf, remOut * sizeof (uint8_t));
-  memcpy(b1 + outputByteLen - remOut, hbuf + 256U, remOut * sizeof (uint8_t));
-  memcpy(b2 + outputByteLen - remOut, hbuf + 512U, remOut * sizeof (uint8_t));
-  memcpy(b35 + outputByteLen - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
+  memcpy(b0 + (outputByteLen - remOut), hbuf, remOut * sizeof (uint8_t));
+  memcpy(b1 + (outputByteLen - remOut), hbuf + 256U, remOut * sizeof (uint8_t));
+  memcpy(b2 + (outputByteLen - remOut), hbuf + 512U, remOut * sizeof (uint8_t));
+  memcpy(b35 + (outputByteLen - remOut), hbuf + 768U, remOut * sizeof (uint8_t));
 }
 
 /* SNIPPET_END: Hacl_Hash_SHA3_Simd256_shake128 */
@@ -1394,10 +1393,10 @@ Hacl_Hash_SHA3_Simd256_shake256(
   uint8_t *bl2 = b_.snd.snd.fst;
   uint8_t *bl1 = b_.snd.fst;
   uint8_t *bl0 = b_.fst;
-  memcpy(bl0, b01 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl1, b11 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl2, b21 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl3, b31 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b01 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl1, b11 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl2, b21 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl3, b31 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b32 = b_.snd.snd.snd;
   uint8_t *b22 = b_.snd.snd.fst;
   uint8_t *b12 = b_.snd.fst;
@@ -1934,7 +1933,7 @@ Hacl_Hash_SHA3_Simd256_shake256(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -1977,7 +1976,7 @@ Hacl_Hash_SHA3_Simd256_shake256(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -2004,15 +2003,15 @@ Hacl_Hash_SHA3_Simd256_shake256(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -2260,10 +2259,10 @@ Hacl_Hash_SHA3_Simd256_shake256(
   uint8_t *b2 = rb.snd.snd.fst;
   uint8_t *b1 = rb.snd.fst;
   uint8_t *b0 = rb.fst;
-  memcpy(b0 + outputByteLen - remOut, hbuf, remOut * sizeof (uint8_t));
-  memcpy(b1 + outputByteLen - remOut, hbuf + 256U, remOut * sizeof (uint8_t));
-  memcpy(b2 + outputByteLen - remOut, hbuf + 512U, remOut * sizeof (uint8_t));
-  memcpy(b35 + outputByteLen - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
+  memcpy(b0 + (outputByteLen - remOut), hbuf, remOut * sizeof (uint8_t));
+  memcpy(b1 + (outputByteLen - remOut), hbuf + 256U, remOut * sizeof (uint8_t));
+  memcpy(b2 + (outputByteLen - remOut), hbuf + 512U, remOut * sizeof (uint8_t));
+  memcpy(b35 + (outputByteLen - remOut), hbuf + 768U, remOut * sizeof (uint8_t));
 }
 
 /* SNIPPET_END: Hacl_Hash_SHA3_Simd256_shake256 */
@@ -2326,10 +2325,10 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
   uint8_t *bl2 = b_.snd.snd.fst;
   uint8_t *bl1 = b_.snd.fst;
   uint8_t *bl0 = b_.fst;
-  memcpy(bl0, b01 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl1, b11 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl2, b21 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl3, b31 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b01 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl1, b11 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl2, b21 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl3, b31 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b32 = b_.snd.snd.snd;
   uint8_t *b22 = b_.snd.snd.fst;
   uint8_t *b12 = b_.snd.fst;
@@ -2866,7 +2865,7 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -2909,7 +2908,7 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -2936,15 +2935,15 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -3192,10 +3191,10 @@ Hacl_Hash_SHA3_Simd256_sha3_224(
   uint8_t *b2 = rb.snd.snd.fst;
   uint8_t *b1 = rb.snd.fst;
   uint8_t *b0 = rb.fst;
-  memcpy(b0 + 28U - remOut, hbuf, remOut * sizeof (uint8_t));
-  memcpy(b1 + 28U - remOut, hbuf + 256U, remOut * sizeof (uint8_t));
-  memcpy(b2 + 28U - remOut, hbuf + 512U, remOut * sizeof (uint8_t));
-  memcpy(b35 + 28U - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
+  memcpy(b0 + (28U - remOut), hbuf, remOut * sizeof (uint8_t));
+  memcpy(b1 + (28U - remOut), hbuf + 256U, remOut * sizeof (uint8_t));
+  memcpy(b2 + (28U - remOut), hbuf + 512U, remOut * sizeof (uint8_t));
+  memcpy(b35 + (28U - remOut), hbuf + 768U, remOut * sizeof (uint8_t));
 }
 
 /* SNIPPET_END: Hacl_Hash_SHA3_Simd256_sha3_224 */
@@ -3258,10 +3257,10 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
   uint8_t *bl2 = b_.snd.snd.fst;
   uint8_t *bl1 = b_.snd.fst;
   uint8_t *bl0 = b_.fst;
-  memcpy(bl0, b01 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl1, b11 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl2, b21 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl3, b31 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b01 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl1, b11 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl2, b21 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl3, b31 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b32 = b_.snd.snd.snd;
   uint8_t *b22 = b_.snd.snd.fst;
   uint8_t *b12 = b_.snd.fst;
@@ -3798,7 +3797,7 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -3841,7 +3840,7 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -3868,15 +3867,15 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -4124,10 +4123,10 @@ Hacl_Hash_SHA3_Simd256_sha3_256(
   uint8_t *b2 = rb.snd.snd.fst;
   uint8_t *b1 = rb.snd.fst;
   uint8_t *b0 = rb.fst;
-  memcpy(b0 + 32U - remOut, hbuf, remOut * sizeof (uint8_t));
-  memcpy(b1 + 32U - remOut, hbuf + 256U, remOut * sizeof (uint8_t));
-  memcpy(b2 + 32U - remOut, hbuf + 512U, remOut * sizeof (uint8_t));
-  memcpy(b35 + 32U - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
+  memcpy(b0 + (32U - remOut), hbuf, remOut * sizeof (uint8_t));
+  memcpy(b1 + (32U - remOut), hbuf + 256U, remOut * sizeof (uint8_t));
+  memcpy(b2 + (32U - remOut), hbuf + 512U, remOut * sizeof (uint8_t));
+  memcpy(b35 + (32U - remOut), hbuf + 768U, remOut * sizeof (uint8_t));
 }
 
 /* SNIPPET_END: Hacl_Hash_SHA3_Simd256_sha3_256 */
@@ -4190,10 +4189,10 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
   uint8_t *bl2 = b_.snd.snd.fst;
   uint8_t *bl1 = b_.snd.fst;
   uint8_t *bl0 = b_.fst;
-  memcpy(bl0, b01 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl1, b11 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl2, b21 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl3, b31 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b01 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl1, b11 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl2, b21 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl3, b31 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b32 = b_.snd.snd.snd;
   uint8_t *b22 = b_.snd.snd.fst;
   uint8_t *b12 = b_.snd.fst;
@@ -4730,7 +4729,7 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -4773,7 +4772,7 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -4800,15 +4799,15 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -5056,10 +5055,10 @@ Hacl_Hash_SHA3_Simd256_sha3_384(
   uint8_t *b2 = rb.snd.snd.fst;
   uint8_t *b1 = rb.snd.fst;
   uint8_t *b0 = rb.fst;
-  memcpy(b0 + 48U - remOut, hbuf, remOut * sizeof (uint8_t));
-  memcpy(b1 + 48U - remOut, hbuf + 256U, remOut * sizeof (uint8_t));
-  memcpy(b2 + 48U - remOut, hbuf + 512U, remOut * sizeof (uint8_t));
-  memcpy(b35 + 48U - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
+  memcpy(b0 + (48U - remOut), hbuf, remOut * sizeof (uint8_t));
+  memcpy(b1 + (48U - remOut), hbuf + 256U, remOut * sizeof (uint8_t));
+  memcpy(b2 + (48U - remOut), hbuf + 512U, remOut * sizeof (uint8_t));
+  memcpy(b35 + (48U - remOut), hbuf + 768U, remOut * sizeof (uint8_t));
 }
 
 /* SNIPPET_END: Hacl_Hash_SHA3_Simd256_sha3_384 */
@@ -5122,10 +5121,10 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
   uint8_t *bl2 = b_.snd.snd.fst;
   uint8_t *bl1 = b_.snd.fst;
   uint8_t *bl0 = b_.fst;
-  memcpy(bl0, b01 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl1, b11 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl2, b21 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl3, b31 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b01 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl1, b11 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl2, b21 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl3, b31 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b32 = b_.snd.snd.snd;
   uint8_t *b22 = b_.snd.snd.fst;
   uint8_t *b12 = b_.snd.fst;
@@ -5662,7 +5661,7 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = s[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = s[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = s[i + 10U];
         _C[i] =
@@ -5705,7 +5704,7 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = s[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = s[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(s[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -5732,15 +5731,15 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
         Lib_IntVector_Intrinsics_vec256
         v315 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, s[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = s[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(s[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, s[1U + 5U * i]));
-        s[0U + 5U * i] = v015;
+        s[5U * i] = v015;
         s[1U + 5U * i] = v115;
         s[2U + 5U * i] = v215;
         s[3U + 5U * i] = v315;
@@ -5988,10 +5987,10 @@ Hacl_Hash_SHA3_Simd256_sha3_512(
   uint8_t *b2 = rb.snd.snd.fst;
   uint8_t *b1 = rb.snd.fst;
   uint8_t *b0 = rb.fst;
-  memcpy(b0 + 64U - remOut, hbuf, remOut * sizeof (uint8_t));
-  memcpy(b1 + 64U - remOut, hbuf + 256U, remOut * sizeof (uint8_t));
-  memcpy(b2 + 64U - remOut, hbuf + 512U, remOut * sizeof (uint8_t));
-  memcpy(b35 + 64U - remOut, hbuf + 768U, remOut * sizeof (uint8_t));
+  memcpy(b0 + (64U - remOut), hbuf, remOut * sizeof (uint8_t));
+  memcpy(b1 + (64U - remOut), hbuf + 256U, remOut * sizeof (uint8_t));
+  memcpy(b2 + (64U - remOut), hbuf + 512U, remOut * sizeof (uint8_t));
+  memcpy(b35 + (64U - remOut), hbuf + 768U, remOut * sizeof (uint8_t));
 }
 
 /* SNIPPET_END: Hacl_Hash_SHA3_Simd256_sha3_512 */
@@ -6121,10 +6120,10 @@ Hacl_Hash_SHA3_Simd256_shake128_absorb_final(
   uint8_t *bl2 = b_.snd.snd.fst;
   uint8_t *bl1 = b_.snd.fst;
   uint8_t *bl0 = b_.fst;
-  memcpy(bl0, b01 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl1, b11 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl2, b21 + inputByteLen - rem, rem * sizeof (uint8_t));
-  memcpy(bl3, b31 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b01 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl1, b11 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl2, b21 + (inputByteLen - rem), rem * sizeof (uint8_t));
+  memcpy(bl3, b31 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b32 = b_.snd.snd.snd;
   uint8_t *b22 = b_.snd.snd.fst;
   uint8_t *b12 = b_.snd.fst;
@@ -6689,7 +6688,7 @@ Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____0 = state[i + 0U];
+        Lib_IntVector_Intrinsics_vec256 uu____0 = state[i];
         Lib_IntVector_Intrinsics_vec256 uu____1 = state[i + 5U];
         Lib_IntVector_Intrinsics_vec256 uu____2 = state[i + 10U];
         _C[i] =
@@ -6732,7 +6731,7 @@ Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks(
         0U,
         5U,
         1U,
-        Lib_IntVector_Intrinsics_vec256 uu____6 = state[0U + 5U * i];
+        Lib_IntVector_Intrinsics_vec256 uu____6 = state[5U * i];
         Lib_IntVector_Intrinsics_vec256
         uu____7 = Lib_IntVector_Intrinsics_vec256_lognot(state[1U + 5U * i]);
         Lib_IntVector_Intrinsics_vec256
@@ -6759,15 +6758,15 @@ Hacl_Hash_SHA3_Simd256_shake128_squeeze_nblocks(
         Lib_IntVector_Intrinsics_vec256
         v37 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____12,
-            Lib_IntVector_Intrinsics_vec256_and(uu____13, state[0U + 5U * i]));
+            Lib_IntVector_Intrinsics_vec256_and(uu____13, state[5U * i]));
         Lib_IntVector_Intrinsics_vec256 uu____14 = state[4U + 5U * i];
         Lib_IntVector_Intrinsics_vec256
-        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(state[0U + 5U * i]);
+        uu____15 = Lib_IntVector_Intrinsics_vec256_lognot(state[5U * i]);
         Lib_IntVector_Intrinsics_vec256
         v4 =
           Lib_IntVector_Intrinsics_vec256_xor(uu____14,
             Lib_IntVector_Intrinsics_vec256_and(uu____15, state[1U + 5U * i]));
-        state[0U + 5U * i] = v07;
+        state[5U * i] = v07;
         state[1U + 5U * i] = v17;
         state[2U + 5U * i] = v27;
         state[3U + 5U * i] = v37;

@@ -68,13 +68,6 @@ extern "C" {
 
 /* SNIPPET_END: HACL_HASH_BLAKE2S_SIMD128_PERSONAL_BYTES */
 
-/* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_block_state_t */
-
-typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
-Hacl_Hash_Blake2s_Simd128_block_state_t;
-
-/* SNIPPET_END: Hacl_Hash_Blake2s_Simd128_block_state_t */
-
 /* SNIPPET_START: Hacl_Hash_Blake2s_Simd128_state_t */
 
 typedef struct Hacl_Hash_Blake2s_Simd128_state_t_s Hacl_Hash_Blake2s_Simd128_state_t;

@@ -101,14 +101,14 @@ static void absorb_inner_32(uint8_t *b, uint64_t *s)
   ws[31U] = u30;
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws[i];
+    s[i] ^= ws[i];
   }
   for (uint32_t i0 = 0U; i0 < 24U; i0++)
   {
     uint64_t _C[5U] = { 0U };
     for (uint32_t i = 0U; i < 5U; i++)
     {
-      _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+      _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
     }
     for (uint32_t i1 = 0U; i1 < 5U; i1++)
     {
@@ -116,7 +116,7 @@ static void absorb_inner_32(uint8_t *b, uint64_t *s)
       uint64_t _D = _C[(i1 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        s[i1 + 5U * i] = s[i1 + 5U * i] ^ _D;
+        s[i1 + 5U * i] ^= _D;
       }
     }
     uint64_t x = s[1U];
@@ -132,19 +132,19 @@ static void absorb_inner_32(uint8_t *b, uint64_t *s)
     }
     for (uint32_t i = 0U; i < 5U; i++)
     {
-      uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+      uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
       uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
       uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-      uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-      uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-      s[0U + 5U * i] = v0;
+      uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+      uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+      s[5U * i] = v0;
       s[1U + 5U * i] = v1;
       s[2U + 5U * i] = v2;
       s[3U + 5U * i] = v3;
       s[4U + 5U * i] = v4;
     }
     uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i0];
-    s[0U] = s[0U] ^ c;
+    s[0U] ^= c;
   }
 }
 
@@ -169,7 +169,7 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x1FU;
   uint64_t ws0[32U] = { 0U };
@@ -240,7 +240,7 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   ws0[31U] = u30;
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -263,7 +263,7 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -271,7 +271,7 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -287,19 +287,19 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = outputByteLen % rateInBytes1;
@@ -310,7 +310,7 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + outputByteLen - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (outputByteLen - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void
@@ -334,7 +334,7 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x1FU;
   uint64_t ws0[32U] = { 0U };
@@ -405,7 +405,7 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   ws0[31U] = u30;
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -428,7 +428,7 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -436,7 +436,7 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -452,19 +452,19 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = outputByteLen % rateInBytes1;
@@ -475,7 +475,7 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + outputByteLen - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (outputByteLen - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
@@ -498,7 +498,7 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x06U;
   uint64_t ws0[32U] = { 0U };
@@ -569,7 +569,7 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   ws0[31U] = u30;
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -592,7 +592,7 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -600,7 +600,7 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -616,19 +616,19 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = 28U % rateInBytes1;
@@ -639,7 +639,7 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + 28U - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (28U - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
@@ -662,7 +662,7 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x06U;
   uint64_t ws0[32U] = { 0U };
@@ -733,7 +733,7 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   ws0[31U] = u30;
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -756,7 +756,7 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -764,7 +764,7 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -780,19 +780,19 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = 32U % rateInBytes1;
@@ -803,7 +803,7 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + 32U - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (32U - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
@@ -826,7 +826,7 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x06U;
   uint64_t ws0[32U] = { 0U };
@@ -897,7 +897,7 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   ws0[31U] = u30;
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -920,7 +920,7 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -928,7 +928,7 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -944,19 +944,19 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = 48U % rateInBytes1;
@@ -967,7 +967,7 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + 48U - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (48U - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
@@ -990,7 +990,7 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x06U;
   uint64_t ws0[32U] = { 0U };
@@ -1061,7 +1061,7 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   ws0[31U] = u30;
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -1084,7 +1084,7 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -1092,7 +1092,7 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -1108,19 +1108,19 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = 64U % rateInBytes1;
@@ -1131,7 +1131,7 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + 64U - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (64U - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 extern void C_String_print(Prims_string uu___);
@@ -1159,19 +1159,19 @@ test_sha3(
   sha3_512(test512, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(28U, test224, expected224))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(32U, test256, expected256))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(48U, test384, expected384))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(64U, test512, expected512))
   {
-    exit((int32_t)255);
+    exit(255);
   }
 }
 
@@ -1183,7 +1183,7 @@ static void test_shake128(uint32_t msg_len, uint8_t *msg, uint32_t out_len, uint
   shake128(test, out_len, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(out_len, test, expected))
   {
-    exit((int32_t)255);
+    exit(255);
   }
 }
 
@@ -1195,7 +1195,7 @@ static void test_shake256(uint32_t msg_len, uint8_t *msg, uint32_t out_len, uint
   shake256(test, out_len, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(out_len, test, expected))
   {
-    exit((int32_t)255);
+    exit(255);
   }
 }
 

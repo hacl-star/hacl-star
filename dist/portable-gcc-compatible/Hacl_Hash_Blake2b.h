@@ -98,12 +98,6 @@ Hacl_Hash_Blake2b_index;
 
 /* SNIPPET_END: HACL_HASH_BLAKE2B_PERSONAL_BYTES */
 
-/* SNIPPET_START: Hacl_Hash_Blake2b_block_state_t */
-
-typedef struct Hacl_Hash_Blake2b_block_state_t_s Hacl_Hash_Blake2b_block_state_t;
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_block_state_t */
-
 /* SNIPPET_START: Hacl_Hash_Blake2b_state_t */
 
 typedef struct Hacl_Hash_Blake2b_state_t_s Hacl_Hash_Blake2b_state_t;

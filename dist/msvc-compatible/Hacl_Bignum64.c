@@ -320,7 +320,7 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
   for (uint32_t i = 0U; i < len; i++)
   {
     uint64_t uu____0 = FStar_UInt64_eq_mask(a[i], bn_zero[i]);
-    mask = uu____0 & mask;
+    mask &= uu____0;
   }
   uint64_t mask1 = mask;
   uint64_t res10 = mask1;
@@ -353,13 +353,13 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
         uint64_t *res_i0 = res1 + 4U * i;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, 0ULL, res_i0);
         uint64_t t10 = a1[4U * i + 1U];
-        uint64_t *res_i1 = res1 + 4U * i + 1U;
+        uint64_t *res_i1 = res1 + (4U * i + 1U);
         c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, 0ULL, res_i1);
         uint64_t t11 = a1[4U * i + 2U];
-        uint64_t *res_i2 = res1 + 4U * i + 2U;
+        uint64_t *res_i2 = res1 + (4U * i + 2U);
         c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, 0ULL, res_i2);
         uint64_t t12 = a1[4U * i + 3U];
-        uint64_t *res_i = res1 + 4U * i + 3U;
+        uint64_t *res_i = res1 + (4U * i + 3U);
         c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, 0ULL, res_i);
       }
       for (uint32_t i = (len - 1U) / 4U * 4U; i < len - 1U; i++)
@@ -585,13 +585,13 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
       uint64_t *res_i0 = res1 + 4U * i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, 0ULL, res_i0);
       uint64_t t10 = a1[4U * i + 1U];
-      uint64_t *res_i1 = res1 + 4U * i + 1U;
+      uint64_t *res_i1 = res1 + (4U * i + 1U);
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, 0ULL, res_i1);
       uint64_t t11 = a1[4U * i + 2U];
-      uint64_t *res_i2 = res1 + 4U * i + 2U;
+      uint64_t *res_i2 = res1 + (4U * i + 2U);
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, 0ULL, res_i2);
       uint64_t t12 = a1[4U * i + 3U];
-      uint64_t *res_i = res1 + 4U * i + 3U;
+      uint64_t *res_i = res1 + (4U * i + 3U);
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, 0ULL, res_i);
     }
     for (uint32_t i = (len1 - 1U) / 4U * 4U; i < len1 - 1U; i++)
@@ -654,7 +654,7 @@ uint64_t *Hacl_Bignum64_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t *tmp = (uint8_t *)alloca(tmpLen * sizeof (uint8_t));
   memset(tmp, 0U, tmpLen * sizeof (uint8_t));
-  memcpy(tmp + tmpLen - len, b, len * sizeof (uint8_t));
+  memcpy(tmp + (tmpLen - len), b, len * sizeof (uint8_t));
   for (uint32_t i = 0U; i < bnLen; i++)
   {
     uint64_t *os = res2;
@@ -725,7 +725,7 @@ void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
   {
     store64_be(tmp + i * 8U, b[bnLen - i - 1U]);
   }
-  memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
+  memcpy(res, tmp + (tmpLen - len), len * sizeof (uint8_t));
 }
 
 /**
@@ -782,7 +782,7 @@ uint64_t Hacl_Bignum64_eq_mask(uint32_t len, uint64_t *a, uint64_t *b)
   for (uint32_t i = 0U; i < len; i++)
   {
     uint64_t uu____0 = FStar_UInt64_eq_mask(a[i], b[i]);
-    mask = uu____0 & mask;
+    mask &= uu____0;
   }
   uint64_t mask1 = mask;
   return mask1;

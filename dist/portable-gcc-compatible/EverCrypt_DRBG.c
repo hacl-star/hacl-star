@@ -102,11 +102,7 @@ EverCrypt_DRBG_uu___is_SHA1_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == EverCrypt_DRBG_SHA1_s)
-  {
-    return true;
-  }
-  return false;
+  return projectee.tag == EverCrypt_DRBG_SHA1_s;
 }
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA1_s */
@@ -120,11 +116,7 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == EverCrypt_DRBG_SHA2_256_s)
-  {
-    return true;
-  }
-  return false;
+  return projectee.tag == EverCrypt_DRBG_SHA2_256_s;
 }
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_256_s */
@@ -138,11 +130,7 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == EverCrypt_DRBG_SHA2_384_s)
-  {
-    return true;
-  }
-  return false;
+  return projectee.tag == EverCrypt_DRBG_SHA2_384_s;
 }
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_384_s */
@@ -156,11 +144,7 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 )
 {
   KRML_MAYBE_UNUSED_VAR(uu___);
-  if (projectee.tag == EverCrypt_DRBG_SHA2_512_s)
-  {
-    return true;
-  }
-  return false;
+  return projectee.tag == EverCrypt_DRBG_SHA2_512_s;
 }
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_512_s */
@@ -315,7 +299,7 @@ instantiate_sha1(
     (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
   memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
   memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-  memcpy(seed_material + entropy_input_len + nonce_len,
+  memcpy(seed_material + (entropy_input_len + nonce_len),
     personalization_string,
     personalization_string_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
@@ -333,7 +317,7 @@ instantiate_sha1(
   memset(k, 0U, 20U * sizeof (uint8_t));
   memset(v, 1U, 20U * sizeof (uint8_t));
   ctr[0U] = 1U;
-  uint32_t input_len = 21U + entropy_input_len + nonce_len + personalization_string_len;
+  uint32_t input_len = 21U + (entropy_input_len + nonce_len + personalization_string_len);
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
   memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -351,7 +335,7 @@ instantiate_sha1(
   memcpy(k, k_, 20U * sizeof (uint8_t));
   if (entropy_input_len + nonce_len + personalization_string_len != 0U)
   {
-    uint32_t input_len0 = 21U + entropy_input_len + nonce_len + personalization_string_len;
+    uint32_t input_len0 = 21U + (entropy_input_len + nonce_len + personalization_string_len);
     KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
     uint8_t input[input_len0];
     memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -407,7 +391,7 @@ instantiate_sha2_256(
     (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
   memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
   memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-  memcpy(seed_material + entropy_input_len + nonce_len,
+  memcpy(seed_material + (entropy_input_len + nonce_len),
     personalization_string,
     personalization_string_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
@@ -425,7 +409,7 @@ instantiate_sha2_256(
   memset(k, 0U, 32U * sizeof (uint8_t));
   memset(v, 1U, 32U * sizeof (uint8_t));
   ctr[0U] = 1U;
-  uint32_t input_len = 33U + entropy_input_len + nonce_len + personalization_string_len;
+  uint32_t input_len = 33U + (entropy_input_len + nonce_len + personalization_string_len);
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
   memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -443,7 +427,7 @@ instantiate_sha2_256(
   memcpy(k, k_, 32U * sizeof (uint8_t));
   if (entropy_input_len + nonce_len + personalization_string_len != 0U)
   {
-    uint32_t input_len0 = 33U + entropy_input_len + nonce_len + personalization_string_len;
+    uint32_t input_len0 = 33U + (entropy_input_len + nonce_len + personalization_string_len);
     KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
     uint8_t input[input_len0];
     memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -499,7 +483,7 @@ instantiate_sha2_384(
     (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
   memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
   memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-  memcpy(seed_material + entropy_input_len + nonce_len,
+  memcpy(seed_material + (entropy_input_len + nonce_len),
     personalization_string,
     personalization_string_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
@@ -517,7 +501,7 @@ instantiate_sha2_384(
   memset(k, 0U, 48U * sizeof (uint8_t));
   memset(v, 1U, 48U * sizeof (uint8_t));
   ctr[0U] = 1U;
-  uint32_t input_len = 49U + entropy_input_len + nonce_len + personalization_string_len;
+  uint32_t input_len = 49U + (entropy_input_len + nonce_len + personalization_string_len);
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
   memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -535,7 +519,7 @@ instantiate_sha2_384(
   memcpy(k, k_, 48U * sizeof (uint8_t));
   if (entropy_input_len + nonce_len + personalization_string_len != 0U)
   {
-    uint32_t input_len0 = 49U + entropy_input_len + nonce_len + personalization_string_len;
+    uint32_t input_len0 = 49U + (entropy_input_len + nonce_len + personalization_string_len);
     KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
     uint8_t input[input_len0];
     memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -591,7 +575,7 @@ instantiate_sha2_512(
     (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
   memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
   memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-  memcpy(seed_material + entropy_input_len + nonce_len,
+  memcpy(seed_material + (entropy_input_len + nonce_len),
     personalization_string,
     personalization_string_len * sizeof (uint8_t));
   Hacl_HMAC_DRBG_state scrut;
@@ -609,7 +593,7 @@ instantiate_sha2_512(
   memset(k, 0U, 64U * sizeof (uint8_t));
   memset(v, 1U, 64U * sizeof (uint8_t));
   ctr[0U] = 1U;
-  uint32_t input_len = 65U + entropy_input_len + nonce_len + personalization_string_len;
+  uint32_t input_len = 65U + (entropy_input_len + nonce_len + personalization_string_len);
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
   memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -627,7 +611,7 @@ instantiate_sha2_512(
   memcpy(k, k_, 64U * sizeof (uint8_t));
   if (entropy_input_len + nonce_len + personalization_string_len != 0U)
   {
-    uint32_t input_len0 = 65U + entropy_input_len + nonce_len + personalization_string_len;
+    uint32_t input_len0 = 65U + (entropy_input_len + nonce_len + personalization_string_len);
     KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
     uint8_t input[input_len0];
     memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -691,7 +675,7 @@ reseed_sha1(
   uint8_t *k = scrut.k;
   uint8_t *v = scrut.v;
   uint32_t *ctr = scrut.reseed_counter;
-  uint32_t input_len = 21U + entropy_input_len + additional_input_len;
+  uint32_t input_len = 21U + (entropy_input_len + additional_input_len);
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
   memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -709,7 +693,7 @@ reseed_sha1(
   memcpy(k, k_, 20U * sizeof (uint8_t));
   if (entropy_input_len + additional_input_len != 0U)
   {
-    uint32_t input_len0 = 21U + entropy_input_len + additional_input_len;
+    uint32_t input_len0 = 21U + (entropy_input_len + additional_input_len);
     KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
     uint8_t input[input_len0];
     memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -774,7 +758,7 @@ reseed_sha2_256(
   uint8_t *k = scrut.k;
   uint8_t *v = scrut.v;
   uint32_t *ctr = scrut.reseed_counter;
-  uint32_t input_len = 33U + entropy_input_len + additional_input_len;
+  uint32_t input_len = 33U + (entropy_input_len + additional_input_len);
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
   memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -792,7 +776,7 @@ reseed_sha2_256(
   memcpy(k, k_, 32U * sizeof (uint8_t));
   if (entropy_input_len + additional_input_len != 0U)
   {
-    uint32_t input_len0 = 33U + entropy_input_len + additional_input_len;
+    uint32_t input_len0 = 33U + (entropy_input_len + additional_input_len);
     KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
     uint8_t input[input_len0];
     memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -857,7 +841,7 @@ reseed_sha2_384(
   uint8_t *k = scrut.k;
   uint8_t *v = scrut.v;
   uint32_t *ctr = scrut.reseed_counter;
-  uint32_t input_len = 49U + entropy_input_len + additional_input_len;
+  uint32_t input_len = 49U + (entropy_input_len + additional_input_len);
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
   memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -875,7 +859,7 @@ reseed_sha2_384(
   memcpy(k, k_, 48U * sizeof (uint8_t));
   if (entropy_input_len + additional_input_len != 0U)
   {
-    uint32_t input_len0 = 49U + entropy_input_len + additional_input_len;
+    uint32_t input_len0 = 49U + (entropy_input_len + additional_input_len);
     KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
     uint8_t input[input_len0];
     memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -940,7 +924,7 @@ reseed_sha2_512(
   uint8_t *k = scrut.k;
   uint8_t *v = scrut.v;
   uint32_t *ctr = scrut.reseed_counter;
-  uint32_t input_len = 65U + entropy_input_len + additional_input_len;
+  uint32_t input_len = 65U + (entropy_input_len + additional_input_len);
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
   memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -958,7 +942,7 @@ reseed_sha2_512(
   memcpy(k, k_, 64U * sizeof (uint8_t));
   if (entropy_input_len + additional_input_len != 0U)
   {
-    uint32_t input_len0 = 65U + entropy_input_len + additional_input_len;
+    uint32_t input_len0 = 65U + (entropy_input_len + additional_input_len);
     KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
     uint8_t input[input_len0];
     memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1041,7 +1025,7 @@ generate_sha1(
       uint8_t *k = scrut.k;
       uint8_t *v = scrut.v;
       uint32_t *ctr = scrut.reseed_counter;
-      uint32_t input_len = 21U + entropy_input_len + additional_input_len;
+      uint32_t input_len = 21U + (entropy_input_len + additional_input_len);
       KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
       uint8_t input0[input_len];
       memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1059,7 +1043,7 @@ generate_sha1(
       memcpy(k, k_, 20U * sizeof (uint8_t));
       if (entropy_input_len + additional_input_len != 0U)
       {
-        uint32_t input_len0 = 21U + entropy_input_len + additional_input_len;
+        uint32_t input_len0 = 21U + (entropy_input_len + additional_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
         uint8_t input[input_len0];
         memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1257,7 +1241,7 @@ generate_sha2_256(
       uint8_t *k = scrut.k;
       uint8_t *v = scrut.v;
       uint32_t *ctr = scrut.reseed_counter;
-      uint32_t input_len = 33U + entropy_input_len + additional_input_len;
+      uint32_t input_len = 33U + (entropy_input_len + additional_input_len);
       KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
       uint8_t input0[input_len];
       memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1275,7 +1259,7 @@ generate_sha2_256(
       memcpy(k, k_, 32U * sizeof (uint8_t));
       if (entropy_input_len + additional_input_len != 0U)
       {
-        uint32_t input_len0 = 33U + entropy_input_len + additional_input_len;
+        uint32_t input_len0 = 33U + (entropy_input_len + additional_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
         uint8_t input[input_len0];
         memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1473,7 +1457,7 @@ generate_sha2_384(
       uint8_t *k = scrut.k;
       uint8_t *v = scrut.v;
       uint32_t *ctr = scrut.reseed_counter;
-      uint32_t input_len = 49U + entropy_input_len + additional_input_len;
+      uint32_t input_len = 49U + (entropy_input_len + additional_input_len);
       KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
       uint8_t input0[input_len];
       memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1491,7 +1475,7 @@ generate_sha2_384(
       memcpy(k, k_, 48U * sizeof (uint8_t));
       if (entropy_input_len + additional_input_len != 0U)
       {
-        uint32_t input_len0 = 49U + entropy_input_len + additional_input_len;
+        uint32_t input_len0 = 49U + (entropy_input_len + additional_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
         uint8_t input[input_len0];
         memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1689,7 +1673,7 @@ generate_sha2_512(
       uint8_t *k = scrut.k;
       uint8_t *v = scrut.v;
       uint32_t *ctr = scrut.reseed_counter;
-      uint32_t input_len = 65U + entropy_input_len + additional_input_len;
+      uint32_t input_len = 65U + (entropy_input_len + additional_input_len);
       KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
       uint8_t input0[input_len];
       memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1707,7 +1691,7 @@ generate_sha2_512(
       memcpy(k, k_, 64U * sizeof (uint8_t));
       if (entropy_input_len + additional_input_len != 0U)
       {
-        uint32_t input_len0 = 65U + entropy_input_len + additional_input_len;
+        uint32_t input_len0 = 65U + (entropy_input_len + additional_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
         uint8_t input[input_len0];
         memset(input, 0U, input_len0 * sizeof (uint8_t));

@@ -202,7 +202,7 @@ Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x(uint32_t n, uint8_t *seed, uint16_
   memset(res, 0U, n * n * sizeof (uint16_t));
   for (uint32_t i = 0U; i < n / 4U; i++)
   {
-    uint8_t *r0 = r + 0U * n;
+    uint8_t *r0 = r;
     uint8_t *r1 = r + 2U * n;
     uint8_t *r2 = r + 4U * n;
     uint8_t *r3 = r + 6U * n;
@@ -210,7 +210,7 @@ Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x(uint32_t n, uint8_t *seed, uint16_
     uint8_t *tmp_seed1 = tmp_seed + 18U;
     uint8_t *tmp_seed2 = tmp_seed + 36U;
     uint8_t *tmp_seed3 = tmp_seed + 54U;
-    store16_le(tmp_seed0, (uint16_t)(4U * i + 0U));
+    store16_le(tmp_seed0, (uint16_t)(4U * i));
     store16_le(tmp_seed1, (uint16_t)(4U * i + 1U));
     store16_le(tmp_seed2, (uint16_t)(4U * i + 2U));
     store16_le(tmp_seed3, (uint16_t)(4U * i + 3U));
@@ -231,7 +231,7 @@ Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x(uint32_t n, uint8_t *seed, uint16_
       uint8_t *resij2 = r2 + i0 * 2U;
       uint8_t *resij3 = r3 + i0 * 2U;
       uint16_t u = load16_le(resij0);
-      res[(4U * i + 0U) * n + i0] = u;
+      res[4U * i * n + i0] = u;
       uint16_t u0 = load16_le(resij1);
       res[(4U * i + 1U) * n + i0] = u0;
       uint16_t u1 = load16_le(resij2);
@@ -307,11 +307,12 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix64(
       {
         uint16_t sample0 = sample;
         uint16_t ti = Hacl_Impl_Frodo_Params_cdf_table640[i];
-        uint16_t samplei = (uint32_t)(uint16_t)(uint32_t)((uint32_t)ti - (uint32_t)prnd) >> 15U;
+        uint16_t
+        samplei = (uint32_t)(uint16_t)(uint32_t)(((uint32_t)ti - (uint32_t)prnd) & 0xFFFFU) >> 15U;
         sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
+      res[i0 * n2 + i1] = (((~(uint32_t)sign & 0xFFFFU) + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -340,11 +341,12 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(
       {
         uint16_t sample0 = sample;
         uint16_t ti = Hacl_Impl_Frodo_Params_cdf_table640[i];
-        uint16_t samplei = (uint32_t)(uint16_t)(uint32_t)((uint32_t)ti - (uint32_t)prnd) >> 15U;
+        uint16_t
+        samplei = (uint32_t)(uint16_t)(uint32_t)(((uint32_t)ti - (uint32_t)prnd) & 0xFFFFU) >> 15U;
         sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
+      res[i0 * n2 + i1] = (((~(uint32_t)sign & 0xFFFFU) + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -373,11 +375,12 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix976(
       {
         uint16_t sample0 = sample;
         uint16_t ti = Hacl_Impl_Frodo_Params_cdf_table976[i];
-        uint16_t samplei = (uint32_t)(uint16_t)(uint32_t)((uint32_t)ti - (uint32_t)prnd) >> 15U;
+        uint16_t
+        samplei = (uint32_t)(uint16_t)(uint32_t)(((uint32_t)ti - (uint32_t)prnd) & 0xFFFFU) >> 15U;
         sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
+      res[i0 * n2 + i1] = (((~(uint32_t)sign & 0xFFFFU) + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -406,11 +409,12 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344(
       {
         uint16_t sample0 = sample;
         uint16_t ti = Hacl_Impl_Frodo_Params_cdf_table1344[i];
-        uint16_t samplei = (uint32_t)(uint16_t)(uint32_t)((uint32_t)ti - (uint32_t)prnd) >> 15U;
+        uint16_t
+        samplei = (uint32_t)(uint16_t)(uint32_t)(((uint32_t)ti - (uint32_t)prnd) & 0xFFFFU) >> 15U;
         sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
+      res[i0 * n2 + i1] = (((~(uint32_t)sign & 0xFFFFU) + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -443,17 +447,22 @@ Hacl_Impl_Frodo_Pack_frodo_pack(
     uint16_t a7 = (uint32_t)a1[7U] & (uint32_t)maskd;
     FStar_UInt128_uint128
     templong =
-      FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a0),
+      FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)a0),
                       7U * d),
-                    FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a11), 6U * d)),
-                  FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a2), 5U * d)),
-                FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a3), 4U * d)),
-              FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a4), 3U * d)),
-            FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a5), 2U * d)),
-          FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a6), 1U * d)),
-        FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a7), 0U * d));
+                    FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)a11),
+                      6U * d)),
+                  FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)a2),
+                    5U * d)),
+                FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)a3),
+                  4U * d)),
+              FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)a4),
+                3U * d)),
+            FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)a5),
+              2U * d)),
+          FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)a6), d)),
+        FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)a7), 0U));
     store128_be(v16, templong);
-    uint8_t *src = v16 + 16U - d;
+    uint8_t *src = v16 + (16U - d);
     memcpy(r, src, d * sizeof (uint8_t));
   }
 }
@@ -474,7 +483,7 @@ Hacl_Impl_Frodo_Pack_frodo_unpack(
     uint16_t *r = res + 8U * i;
     uint16_t maskd = (uint32_t)(uint16_t)(1U << d) - 1U;
     uint8_t src[16U] = { 0U };
-    memcpy(src + 16U - d, b1, d * sizeof (uint8_t));
+    memcpy(src + (16U - d), b1, d * sizeof (uint8_t));
     FStar_UInt128_uint128 u = load128_be(src);
     FStar_UInt128_uint128 templong = u;
     r[0U] =
@@ -502,13 +511,11 @@ Hacl_Impl_Frodo_Pack_frodo_unpack(
           2U * d))
       & (uint32_t)maskd;
     r[6U] =
-      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          1U * d))
-      & (uint32_t)maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, d)) &
+        (uint32_t)maskd;
     r[7U] =
-      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          0U * d))
-      & (uint32_t)maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 0U)) &
+        (uint32_t)maskd;
   }
 }
 
@@ -556,7 +563,7 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(
       1U,
       uint16_t aik = a[i0 * n + i];
       uint16_t res1 = (((uint32_t)aik + (1U << (logq - b - 1U))) & 0xFFFFU) >> (logq - b);
-      templong = templong | (uint64_t)((uint32_t)res1 & ((1U << b) - 1U)) << b * i;);
+      templong |= (uint64_t)(((uint32_t)res1 & ((1U << b) - 1U)) & 0xFFFFU) << b * i;);
     uint64_t templong0 = templong;
     uint8_t v8[8U] = { 0U };
     store64_le(v8, templong0);

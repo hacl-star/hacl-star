@@ -150,7 +150,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
     uint64_t *swap1 = p01_tmp1_swap + 40U;
     uint64_t *nq2 = p01_tmp12;
     uint64_t *nq_p12 = p01_tmp12 + 10U;
-    uint64_t bit = (uint64_t)((uint32_t)key[(253U - i) / 8U] >> (253U - i) % 8U & 1U);
+    uint64_t bit = (uint64_t)(((uint32_t)key[(253U - i) / 8U] >> (253U - i) % 8U & 1U) & 0xFFU);
     uint64_t sw = swap1[0U] ^ bit;
     Hacl_Impl_Curve25519_Field51_cswap2(sw, nq2, nq_p12);
     point_add_and_double(init, p01_tmp12, tmp2);

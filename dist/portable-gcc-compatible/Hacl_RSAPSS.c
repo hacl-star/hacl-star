@@ -178,7 +178,7 @@ static inline uint64_t check_num_bits_u64(uint32_t bs, uint64_t *b)
   memset(b2, 0U, bLen * sizeof (uint64_t));
   uint32_t i0 = bs / 64U;
   uint32_t j = bs % 64U;
-  b2[i0] = b2[i0] | 1ULL << j;
+  b2[i0] |= 1ULL << j;
   uint64_t acc = 0ULL;
   for (uint32_t i = 0U; i < bLen; i++)
   {
@@ -204,7 +204,7 @@ static inline uint64_t check_modulus_u64(uint32_t modBits, uint64_t *n)
   memset(b2, 0U, nLen * sizeof (uint64_t));
   uint32_t i0 = (modBits - 1U) / 64U;
   uint32_t j = (modBits - 1U) % 64U;
-  b2[i0] = b2[i0] | 1ULL << j;
+  b2[i0] |= 1ULL << j;
   uint64_t acc = 0ULL;
   for (uint32_t i = 0U; i < nLen; i++)
   {
@@ -232,7 +232,7 @@ static inline uint64_t check_exponent_u64(uint32_t eBits, uint64_t *e)
   for (uint32_t i = 0U; i < eLen; i++)
   {
     uint64_t uu____0 = FStar_UInt64_eq_mask(e[i], bn_zero[i]);
-    mask = uu____0 & mask;
+    mask &= uu____0;
   }
   uint64_t mask1 = mask;
   uint64_t res = mask1;
@@ -265,7 +265,7 @@ pss_encode(
   uint8_t m1[m1Len];
   memset(m1, 0U, m1Len * sizeof (uint8_t));
   hash(a, m1 + 8U, msgLen, msg);
-  memcpy(m1 + 8U + hLen, salt, saltLen * sizeof (uint8_t));
+  memcpy(m1 + (8U + hLen), salt, saltLen * sizeof (uint8_t));
   hash(a, m1Hash, m1Len, m1);
   uint32_t emLen = (emBits - 1U) / 8U + 1U;
   uint32_t dbLen = emLen - hLen - 1U;
@@ -274,7 +274,7 @@ pss_encode(
   memset(db, 0U, dbLen * sizeof (uint8_t));
   uint32_t last_before_salt = dbLen - saltLen - 1U;
   db[last_before_salt] = 1U;
-  memcpy(db + last_before_salt + 1U, salt, saltLen * sizeof (uint8_t));
+  memcpy(db + (last_before_salt + 1U), salt, saltLen * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
   uint8_t dbMask[dbLen];
   memset(dbMask, 0U, dbLen * sizeof (uint8_t));
@@ -311,15 +311,7 @@ pss_verify(
 {
   uint32_t emLen = (emBits - 1U) / 8U + 1U;
   uint32_t msBits = emBits % 8U;
-  uint8_t em_0;
-  if (msBits > 0U)
-  {
-    em_0 = (uint32_t)em[0U] & 0xffU << msBits;
-  }
-  else
-  {
-    em_0 = 0U;
-  }
+  uint8_t em_0 = msBits > 0U ? (uint32_t)em[0U] & 0xffU << msBits : 0U;
   uint8_t em_last = em[emLen - 1U];
   if (emLen < saltLen + hash_len(a) + 2U || !(em_last == 0xbcU && em_0 == 0U))
   {
@@ -371,7 +363,7 @@ pss_verify(
   uint8_t m1[m1Len];
   memset(m1, 0U, m1Len * sizeof (uint8_t));
   hash(a, m1 + 8U, msgLen, msg);
-  memcpy(m1 + 8U + hLen, salt, saltLen * sizeof (uint8_t));
+  memcpy(m1 + (8U + hLen), salt, saltLen * sizeof (uint8_t));
   hash(a, m1Hash0, m1Len, m1);
   uint8_t res0 = 255U;
   for (uint32_t i = 0U; i < hLen; i++)
@@ -395,7 +387,7 @@ load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb, uint64_t *
   uint32_t nLen = (modBits - 1U) / 64U + 1U;
   uint64_t *n = pkey;
   uint64_t *r2 = pkey + nLen;
-  uint64_t *e = pkey + nLen + nLen;
+  uint64_t *e = pkey + (nLen + nLen);
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(nbLen, nb, n);
   Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64((modBits - 1U) / 64U + 1U, modBits - 1U, n, r2);
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(ebLen, eb, e);
@@ -497,8 +489,8 @@ Hacl_RSAPSS_rsapss_sign(
     uint32_t eLen = (eBits - 1U) / 64U + 1U;
     uint64_t *n = skey;
     uint64_t *r2 = skey + nLen2;
-    uint64_t *e = skey + nLen2 + nLen2;
-    uint64_t *d = skey + nLen2 + nLen2 + eLen;
+    uint64_t *e = skey + (nLen2 + nLen2);
+    uint64_t *d = skey + (nLen2 + nLen2 + eLen);
     uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
     Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64((modBits - 1U) / 64U + 1U,
       n,
@@ -521,7 +513,7 @@ Hacl_RSAPSS_rsapss_sign(
     for (uint32_t i = 0U; i < nLen2; i++)
     {
       uint64_t uu____0 = FStar_UInt64_eq_mask(m[i], m_[i]);
-      mask = uu____0 & mask;
+      mask &= uu____0;
     }
     uint64_t mask1 = mask;
     uint64_t eq_m = mask1;
@@ -592,7 +584,7 @@ Hacl_RSAPSS_rsapss_verify(
     uint32_t nLen2 = (modBits - 1U) / 64U + 1U;
     uint64_t *n = pkey;
     uint64_t *r2 = pkey + nLen2;
-    uint64_t *e = pkey + nLen2 + nLen2;
+    uint64_t *e = pkey + (nLen2 + nLen2);
     uint64_t acc = 0ULL;
     for (uint32_t i = 0U; i < nLen2; i++)
     {
@@ -697,7 +689,7 @@ uint64_t
   uint32_t nLen1 = (modBits - 1U) / 64U + 1U;
   uint64_t *n = pkey2;
   uint64_t *r2 = pkey2 + nLen1;
-  uint64_t *e = pkey2 + nLen1 + nLen1;
+  uint64_t *e = pkey2 + (nLen1 + nLen1);
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(nbLen, nb, n);
   Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64((modBits - 1U) / 64U + 1U, modBits - 1U, n, r2);
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(ebLen, eb, e);
@@ -789,7 +781,7 @@ uint64_t
   uint32_t nLen2 = (modBits - 1U) / 64U + 1U;
   uint64_t *n = pkey;
   uint64_t *r2 = pkey + nLen2;
-  uint64_t *e = pkey + nLen2 + nLen2;
+  uint64_t *e = pkey + (nLen2 + nLen2);
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(nbLen1, nb, n);
   Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64((modBits - 1U) / 64U + 1U, modBits - 1U, n, r2);
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(ebLen1, eb, e);
@@ -850,12 +842,12 @@ Hacl_RSAPSS_rsapss_skey_sign(
 )
 {
   KRML_CHECK_SIZE(sizeof (uint64_t),
-    2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U + (dBits - 1U) / 64U + 1U);
+    2U * ((modBits - 1U) / 64U + 1U) + ((eBits - 1U) / 64U + 1U) + ((dBits - 1U) / 64U + 1U));
   uint64_t
-  skey[2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U + (dBits - 1U) / 64U + 1U];
+  skey[2U * ((modBits - 1U) / 64U + 1U) + ((eBits - 1U) / 64U + 1U) + ((dBits - 1U) / 64U + 1U)];
   memset(skey,
     0U,
-    (2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U + (dBits - 1U) / 64U + 1U) *
+    (2U * ((modBits - 1U) / 64U + 1U) + ((eBits - 1U) / 64U + 1U) + ((dBits - 1U) / 64U + 1U)) *
       sizeof (uint64_t));
   bool b = load_skey(modBits, eBits, dBits, nb, eb, db, skey);
   if (b)
@@ -912,11 +904,12 @@ Hacl_RSAPSS_rsapss_pkey_verify(
   uint8_t *msg
 )
 {
-  KRML_CHECK_SIZE(sizeof (uint64_t), 2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U);
-  uint64_t pkey[2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U];
+  KRML_CHECK_SIZE(sizeof (uint64_t),
+    2U * ((modBits - 1U) / 64U + 1U) + ((eBits - 1U) / 64U + 1U));
+  uint64_t pkey[2U * ((modBits - 1U) / 64U + 1U) + ((eBits - 1U) / 64U + 1U)];
   memset(pkey,
     0U,
-    (2U * ((modBits - 1U) / 64U + 1U) + (eBits - 1U) / 64U + 1U) * sizeof (uint64_t));
+    (2U * ((modBits - 1U) / 64U + 1U) + ((eBits - 1U) / 64U + 1U)) * sizeof (uint64_t));
   bool b = load_pkey(modBits, eBits, nb, eb, pkey);
   if (b)
   {
