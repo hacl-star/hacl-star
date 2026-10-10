@@ -298,17 +298,18 @@ let map_blocks_vec_equiv_pre_k
   (k:nat{k < rem})
   : prop
  =
+  let out_v = l_v n rem b_v in
   let j = w * n + k / blocksize in
   div_mul_lt blocksize k w;
 
   if k < rem / blocksize * blocksize then begin
     let block = get_block_s #a #rem blocksize b_v k in
-    Seq.index (l_v n rem b_v) k == Seq.index (f j block) (k % blocksize) end
+    Seq.index out_v k == Seq.index (f j block) (k % blocksize) end
   else begin
     let block_l = get_last_s blocksize b_v in
     mod_div_lt blocksize k rem;
     assert (k % blocksize < rem % blocksize);
-    Seq.index (l_v n rem b_v) k == Seq.index (l j (rem % blocksize) block_l) (k % blocksize) end
+    Seq.index out_v k == Seq.index (l j (rem % blocksize) block_l) (k % blocksize) end
 #pop-options
 
 val lemma_map_blocks_vec:

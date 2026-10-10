@@ -141,6 +141,9 @@ let eea_pow2_odd a n =
   Math.Lemmas.cancel_mul_div n (pow2 a);
   assert (d < n);
   assert (n * k == d * pow2 a + 1);
+  Math.Lemmas.neg_mul_right (pow2 a) d;
+  Math.Lemmas.neg_mul_left k n;
+  assert (pow2 a * (- d) == 1 + (- k) * n);
   (- d, - k)
 
 

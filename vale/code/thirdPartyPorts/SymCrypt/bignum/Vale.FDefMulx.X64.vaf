@@ -117,7 +117,7 @@ procedure MulAdd18(
         ghost bA:buffer64,
         ghost bB:buffer64,
         ghost bD:buffer64)
-    {:options z3rlimit(80), max_fuel(1), max_ifuel(0)}
+    {:options z3rlimit(160), max_fuel(1), max_ifuel(0)}
     lets
         pD @= rdi; pA @= rcx; pB @= rsi; T0 @= rax; T1 @= rbx;
         as0 := s64(heap0, bA);

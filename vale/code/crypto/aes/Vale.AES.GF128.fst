@@ -19,6 +19,7 @@ let lemma_shift_left_1 a =
   lemma_quad32_vec_equal (to_quad32 (shift a 1)) (quad32_shift_left_1 (to_quad32 a));
   ()
 
+#push-options "--z3rlimit 40"
 let lemma_shift_2_left_1 lo hi =
   let n = monomial 128 in
   let a = hi *. n +. lo in
@@ -37,6 +38,7 @@ let lemma_shift_2_left_1 lo hi =
   lemma_add_define_all ();
   lemma_reverse_define_all ();
   lemma_div_mod a' n;
+  lemma_split_define_forward a' 128;
   lemma_shift_is_mul hi 128;
   lemma_shift_define hi 128;
   lemma_shift_is_mul (a' /. n) 128;
@@ -55,6 +57,7 @@ let lemma_shift_2_left_1 lo hi =
   lemma_lo ();
   lemma_hi ();
   ()
+#pop-options
 #reset-options
 
 let lemma_reverse_reverse a n =

@@ -486,6 +486,11 @@ let lemma_mod_264_aux t =
   assert_norm (pow2 184 * pow2 264 == pow2 448);
   assert_norm (pow2 240 * pow2 264 == pow2 504);
 
+  assert (wide_as_nat5 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) ==
+    v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224 +
+    (v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) * pow2 264)
+    by (Tactics.norm [delta; primops]; int_semiring ());
+
   calc (==) {
     (wide_as_nat5 t) % pow2 264;
   == { }

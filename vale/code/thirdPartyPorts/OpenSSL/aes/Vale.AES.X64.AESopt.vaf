@@ -946,6 +946,10 @@ procedure Loop6x_partial(
     Loop6x_round9(alg, count, in_b, scratch_b, key_words, round_keys, keys_b);
 }
 
+#verbatim{:interface}
+#push-options "--z3rlimit 30"
+#endverbatim
+
 procedure Loop6x(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -1145,6 +1149,10 @@ procedure Loop6x(
     }
     gctr_registers_reveal();
 }
+
+#verbatim{:interface}
+#pop-options
+#endverbatim
 
 /*
 procedure Loop6x_loop(

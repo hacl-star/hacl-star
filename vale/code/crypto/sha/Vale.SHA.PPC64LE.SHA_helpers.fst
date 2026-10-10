@@ -406,8 +406,8 @@ let lemma_quads_to_block_be qs
 #reset-options "--z3rlimit 20"
 let lemma_shuffle_core_properties (t:counter) (block:block_w) (hash_orig:hash256) : Lemma
   (requires t < size_k_w_256)
-  (ensures (let hash = Spec.Loops.repeat_range 0 t (shuffle_core_opaque block) hash_orig in
-            let h = Spec.Loops.repeat_range 0 (t + 1) (shuffle_core_opaque block) hash_orig in
+  (ensures (let hash:hash256 = Spec.Loops.repeat_range 0 t (shuffle_core_opaque block) hash_orig in
+            let h:hash256 = Spec.Loops.repeat_range 0 (t + 1) (shuffle_core_opaque block) hash_orig in
             let a0 = word_to_nat32 hash.[0] in
             let b0 = word_to_nat32 hash.[1] in
             let c0 = word_to_nat32 hash.[2] in
@@ -427,7 +427,7 @@ let lemma_shuffle_core_properties (t:counter) (block:block_w) (hash_orig:hash256
             word_to_nat32 h.[6] == f0 /\
             word_to_nat32 h.[7] == g0))
   =
-  let hash = Spec.Loops.repeat_range 0 t (shuffle_core_opaque block) hash_orig in
+  let hash:hash256 = Spec.Loops.repeat_range 0 t (shuffle_core_opaque block) hash_orig in
   let a0 = word_to_nat32 hash.[0] in
   let b0 = word_to_nat32 hash.[1] in
   let c0 = word_to_nat32 hash.[2] in
@@ -519,6 +519,7 @@ let lemma_ws_opaque (block:block_w) (t:counter) : Lemma
   }
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 20"
+#push-options "--split_queries always --z3rlimit 50"
 let translate_hash_update (a b c d e f g h a' b' c' d' e' f' g' h' a_old b_old c_old d_old e_old f_old g_old h_old:quad32) : Lemma
   (requires a' == add_wrap_quad32 a a_old /\
             b' == add_wrap_quad32 b b_old /\
@@ -533,17 +534,18 @@ let translate_hash_update (a b c d e f g h a' b' c' d' e' f' g' h' a_old b_old c
          let a = make_seperated_hash_quad32 a_old b_old c_old d_old e_old f_old g_old h_old in
          let h' = make_seperated_hash_quad32 a' b' c' d' e' f' g' h' in
          let open Lib.IntTypes in
-         let mapped = Spec.Loops.seq_map2 ( +. ) h a in
+         let mapped = Spec.Loops.seq_map2 #uint32 #uint32 #uint32 (( +. ) #U32 #SEC) h a in
          mapped == h'))
   =
   let h = make_seperated_hash_quad32 a b c d e f g h in
   let a = make_seperated_hash_quad32 a_old b_old c_old d_old e_old f_old g_old h_old in
   let h' = make_seperated_hash_quad32 a' b' c' d' e' f' g' h' in
   let open Lib.IntTypes in
-  let mapped = Spec.Loops.seq_map2 ( +. ) h a in
+  let mapped = Spec.Loops.seq_map2 #uint32 #uint32 #uint32 (( +. ) #U32 #SEC) h a in
   FStar.Classical.forall_intro_2 lemma_add_wrap_is_add_mod;
   assert (equal mapped h');
   ()
+#pop-options
 
 let update_lemma (a b c d e f g h a_old b_old c_old d_old e_old f_old g_old h_old a' b' c' d' e' f' g' h':quad32) (block:block_w) : Lemma
   (requires (let hash_orig = make_seperated_hash_quad32 a_old b_old c_old d_old e_old f_old g_old h_old in

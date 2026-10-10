@@ -375,8 +375,11 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
       (Sequence.generate_blocks_inner t (v len) (v n) a_spec (spec h0)) (refl' h0 0) (v i);
     assert ((v i + 1) * v len == v i * v len + v len);
     assert (v i * v len <= max_size_t);
-    let block = sub output (i *! len) len in
     let h0_ = ST.get() in
+    B.modifies_liveness_insensitive_buffer
+      (footprint (v i)) (loc (gsub output 0ul (i *! len))) h0 h0_
+      #t #(B.trivial_preorder t) #(B.trivial_preorder t) output;
+    let block = sub output (i *! len) len in
     impl i;
     let h = ST.get() in
     assert(modifies (B.loc_union (footprint (v i + 1)) (loc block)) h0_ h);
@@ -596,6 +599,7 @@ let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
   Math.Lemmas.swap_mul (v len / v blocksize) (v blocksize);
   Math.Lemmas.multiply_fractions (v len) (v blocksize);
+  Seq.lemma_map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0);
   let ib = sub inp 0ul blen in
   let ob = sub output 0ul blen in
   let il = sub inp blen rem in

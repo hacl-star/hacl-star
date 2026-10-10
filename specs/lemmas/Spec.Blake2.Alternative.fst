@@ -85,7 +85,9 @@ val split_one_more_block:
     let nb', rem' = split a (length d) in
     nb == nb' + 1 /\ rem == rem')
 
-let split_one_more_block a b d = ()
+let split_one_more_block a b d =
+  Seq.lemma_len_append b d;
+  Math.Lemmas.add_div_mod_1 (length d) (size_block a)
 
 let lemma_unfold_update_blocks a last_node b d s =
   let nb, rem = split a (length (b `Seq.append` d)) in

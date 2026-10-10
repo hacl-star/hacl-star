@@ -6,6 +6,7 @@ open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Buffer.Lemmas
 
 module ST = FStar.HyperStack.ST
 
@@ -158,21 +159,60 @@ let lemma_exp_four_fw_local b =
   assert (S.to_aff_point (S.point_mul_g (BD.bn_v b)) == LE.pow cm g_aff (BD.bn_v b))
 
 
+#push-options "--split_queries always"
 [@CInline]
 let point_mul_g out scalar =
+  let hi = ST.get () in
   push_frame ();
   let h0 = ST.get () in
   let q1 = create 15ul (u64 0) in
+  fresh_buffer_disjoint #uint64 #uint64 h0 out q1;
+  fresh_buffer_disjoint #uint64 #uint64 h0 scalar q1;
+  let h1 = ST.get () in
   make_g q1;
+  let h2 = ST.get () in
+  LowStar.Buffer.modifies_trans_linear LowStar.Buffer.loc_none (loc q1) h0 h1 h2;
+  inline_stack_inv_trans h0 h1 h2;
   let q2 = mk_proj_g_pow2_64 () in
+  fresh_buffer_disjoint #uint64 #uint64 h2 out q2;
+  fresh_buffer_disjoint #uint64 #uint64 h2 q1 q2;
+  let h3 = ST.get () in
+  LowStar.Buffer.modifies_trans_linear (loc q1) (loc q1) h0 h2 h3;
+  inline_stack_inv_trans h0 h2 h3;
   let q3 = mk_proj_g_pow2_128 () in
+  fresh_buffer_disjoint #uint64 #uint64 h3 out q3;
+  fresh_buffer_disjoint #uint64 #uint64 h3 q1 q3;
+  fresh_buffer_disjoint #uint64 #uint64 h3 q2 q3;
+  let h4 = ST.get () in
+  LowStar.Buffer.modifies_trans_linear (loc q1) (loc q1) h0 h3 h4;
+  inline_stack_inv_trans h0 h3 h4;
   let q4 = mk_proj_g_pow2_192 () in
+  fresh_buffer_disjoint #uint64 #uint64 h4 out q4;
+  fresh_buffer_disjoint #uint64 #uint64 h4 q1 q4;
+  fresh_buffer_disjoint #uint64 #uint64 h4 q2 q4;
+  fresh_buffer_disjoint #uint64 #uint64 h4 q3 q4;
   proj_g_pow2_64_lseq_lemma ();
   proj_g_pow2_128_lseq_lemma ();
   proj_g_pow2_192_lseq_lemma ();
+  let h_pre = ST.get () in
+  LowStar.Buffer.modifies_trans_linear (loc q1) (loc q1) h0 h4 h_pre;
+  inline_stack_inv_trans h0 h4 h_pre;
+  assert (qas_nat h_pre scalar == qas_nat h0 scalar);
   point_mul_g_noalloc out scalar q1 q2 q3 q4;
   lemma_exp_four_fw_local (as_seq h0 scalar);
-  pop_frame ()
+  let h_post = ST.get () in
+  LowStar.Buffer.modifies_trans (loc q1) h0 h_pre (loc out) h_post;
+  pop_frame ();
+  let hf = ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h0 (loc out) h_post hf;
+  buffer_fresh_frame_popped hi h0 h_post hf out;
+  stack_frame_equal_domains hi h0 h_pre h_post hf;
+  assert (ST.equal_domains hi hf);
+  assert (modifies (loc out) hi hf);
+  assert (point_inv hf out);
+  assert (S.to_aff_point (point_eval hf out) ==
+    S.to_aff_point (S.point_mul_g (qas_nat hi scalar)))
+#pop-options
 
 
 //-------------------------
@@ -229,8 +269,10 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
     (point_eval h0 q2) (qas_nat h0 scalar2) 5
 
 
+#push-options "--split_queries always"
 [@CInline]
 let point_mul_g_double_vartime out scalar1 scalar2 q2 =
+  let hi = ST.get () in
   push_frame ();
   [@inline_let] let len = 15ul in
   [@inline_let] let ctx_len = 0ul in
@@ -238,12 +280,44 @@ let point_mul_g_double_vartime out scalar1 scalar2 q2 =
   [@inline_let] let table_len = 32ul in
   assert_norm (pow2 5 == v table_len);
 
+  let h0 = ST.get () in
   let q1 = create 15ul (u64 0) in
+  fresh_buffer_disjoint #uint64 #uint64 h0 out q1;
+  fresh_buffer_disjoint #uint64 #uint64 h0 scalar1 q1;
+  fresh_buffer_disjoint #uint64 #uint64 h0 scalar2 q1;
+  fresh_buffer_disjoint #uint64 #uint64 h0 q2 q1;
+  let h_q1 = ST.get () in
   make_g q1;
 
+  let h_g = ST.get () in
+  LowStar.Buffer.modifies_trans_linear LowStar.Buffer.loc_none (loc q1) h0 h_q1 h_g;
+  inline_stack_inv_trans h0 h_q1 h_g;
   let table2 = create (table_len *! len) (u64 0) in
+  fresh_buffer_disjoint #uint64 #uint64 h_g out table2;
+  fresh_buffer_disjoint #uint64 #uint64 h_g scalar1 table2;
+  fresh_buffer_disjoint #uint64 #uint64 h_g scalar2 table2;
+  fresh_buffer_disjoint #uint64 #uint64 h_g q1 table2;
+  fresh_buffer_disjoint #uint64 #uint64 h_g q2 table2;
+  let h_table = ST.get () in
+  LowStar.Buffer.modifies_trans_linear (loc q1) (loc q1) h0 h_g h_table;
+  inline_stack_inv_trans h0 h_g h_table;
   PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2;
   let h = ST.get () in
+  LowStar.Buffer.modifies_trans (loc q1) h0 h_table (loc table2) h;
+  inline_stack_inv_trans h0 h_table h;
   assert (table_inv_w5 (as_seq h q2) (as_seq h table2));
   point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2;
-  pop_frame ()
+  let h_post = ST.get () in
+  LowStar.Buffer.modifies_trans (loc q1 |+| loc table2) h0 h (loc out) h_post;
+  pop_frame ();
+  let hf = ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h0 (loc out) h_post hf;
+  buffer_fresh_frame_popped hi h0 h_post hf out;
+  stack_frame_equal_domains hi h0 h h_post hf;
+  assert (ST.equal_domains hi hf);
+  assert (modifies (loc out) hi hf);
+  assert (point_inv hf out);
+  assert (S.to_aff_point (point_eval hf out) ==
+    S.to_aff_point (S.point_mul_double_g
+      (qas_nat hi scalar1) (qas_nat hi scalar2) (point_eval hi q2)))
+#pop-options

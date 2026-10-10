@@ -164,7 +164,7 @@ val ladder_step:
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1)))
 
-#push-options "--z3rlimit 200 --fuel 0 --ifuel 1"
+#push-options "--z3rlimit 400 --fuel 0 --ifuel 1"
 [@ Meta.Attribute.inline_ ]
 let ladder_step #s k q i p01_tmp1_swap tmp2 =
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in

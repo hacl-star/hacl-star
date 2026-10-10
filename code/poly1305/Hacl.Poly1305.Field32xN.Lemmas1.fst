@@ -59,17 +59,15 @@ let carry26_wide_lemma_i #w #m l cin i =
 
 
 let carry26_wide_fits_lemma #w #m l cin =
-  match w with
-  | 1 ->
-    carry26_wide_lemma_i #w #m l cin 0
-  | 2 ->
-    carry26_wide_lemma_i #w #m l cin 0;
-    carry26_wide_lemma_i #w #m l cin 1
-  | 4 ->
-    carry26_wide_lemma_i #w #m l cin 0;
-    carry26_wide_lemma_i #w #m l cin 1;
-    carry26_wide_lemma_i #w #m l cin 2;
-    carry26_wide_lemma_i #w #m l cin 3
+  let l0, l1 = carry26 #w l cin in
+  let aux (i:nat{i < w}) : Lemma
+    (uint_v (vec_v l0).[i] <= max26 /\ uint_v (vec_v l1).[i] < (m + 1) * max26) =
+    carry26_wide_lemma_i #w #m l cin i;
+    assert ((uint64xN_v l).[i] <= m * max26 * max26);
+    assert ((uint64xN_v cin).[i] < 4096 * max26) in
+  Classical.forall_intro aux;
+  assert (felem_fits1 l0 1);
+  assert (uint64xN_fits l1 ((m + 1) * max26))
 
 let carry26_wide_eval_lemma #w #m l cin =
   carry26_wide_fits_lemma #w #m l cin;

@@ -386,6 +386,7 @@ let block_len_positive (a: hash_alg): Lemma (D.block_len a `FStar.UInt32.gt` 0ul
 let hash_lt_block (a: fixed_len_alg): Lemma (hash_length a < block_length a) = ()
 
 #set-options "--z3rlimit 200"
+#push-options "--split_queries always"
 let mk_compute i hash alloca init update_multi update_last finish dst key key_len data data_len =
   [@inline_let] let a = D.get_alg i in
   [@inline_let] let m = D.get_spec i in
@@ -428,6 +429,7 @@ let mk_compute i hash alloca init update_multi update_last finish dst key key_le
   (**) assert B.(modifies (loc_buffer key_block `loc_union` loc_buffer ipad `loc_union`
   (**)                     loc_buffer opad `loc_union` loc_buffer s) h1 h2);
   (**) LowStar.Monotonic.Buffer.modifies_fresh_frame_popped h0 h1 (B.loc_buffer dst) h6 h7
+#pop-options
 
 let compute_md5: compute_st MD5 =
   let open Hacl.Hash.MD5 in

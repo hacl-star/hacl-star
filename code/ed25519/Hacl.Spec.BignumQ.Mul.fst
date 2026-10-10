@@ -355,7 +355,7 @@ let lemma_mult_distr_3 (a b c:nat) (n:nat) : Lemma
 
 #set-options "--z3rlimit 300"
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --split_queries always"
 let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
   let xy00 = mul64_wide_5 x0 y0 in
   let xy01 = mul64_wide_5 x0 y1 in
