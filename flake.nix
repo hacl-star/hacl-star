@@ -9,7 +9,7 @@
     flake-utils.follows = "fstar/flake-utils";
     nixpkgs.follows = "fstar/nixpkgs";
     karamel = {
-      url = "github:fstarlang/karamel?rev=ff60d2cfc63136229bebbbaa48d69187cd708307";
+      url = "github:fstarlang/karamel?rev=ab115ec786399e0139f62cf23bb2d7d09e04bef2";
       inputs.fstar.follows = "fstar";
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
