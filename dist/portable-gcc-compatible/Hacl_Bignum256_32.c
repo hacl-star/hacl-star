@@ -1110,17 +1110,17 @@ bool Hacl_Bignum256_32_mod_inv_prime_vartime(uint32_t *n, uint32_t *a, uint32_t 
     uint32_t *res1 = n2 + 1U;
     uint32_t c = c0;
     {
-      uint32_t t1 = a1[4U * 0U];
-      uint32_t *res_i0 = res1 + 4U * 0U;
+      uint32_t t1 = a1[0U];
+      uint32_t *res_i0 = res1;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, 0U, res_i0);
-      uint32_t t10 = a1[4U * 0U + 1U];
-      uint32_t *res_i1 = res1 + (4U * 0U + 1U);
+      uint32_t t10 = a1[1U];
+      uint32_t *res_i1 = res1 + 1U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, 0U, res_i1);
-      uint32_t t11 = a1[4U * 0U + 2U];
-      uint32_t *res_i2 = res1 + (4U * 0U + 2U);
+      uint32_t t11 = a1[2U];
+      uint32_t *res_i2 = res1 + 2U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, 0U, res_i2);
-      uint32_t t12 = a1[4U * 0U + 3U];
-      uint32_t *res_i = res1 + (4U * 0U + 3U);
+      uint32_t t12 = a1[3U];
+      uint32_t *res_i = res1 + 3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, 0U, res_i);
     }
     KRML_MAYBE_FOR3(i,
@@ -1331,17 +1331,17 @@ Hacl_Bignum256_32_mod_inv_prime_vartime_precomp(
   uint32_t *res1 = n2 + 1U;
   uint32_t c = c0;
   {
-    uint32_t t1 = a1[4U * 0U];
-    uint32_t *res_i0 = res1 + 4U * 0U;
+    uint32_t t1 = a1[0U];
+    uint32_t *res_i0 = res1;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, 0U, res_i0);
-    uint32_t t10 = a1[4U * 0U + 1U];
-    uint32_t *res_i1 = res1 + (4U * 0U + 1U);
+    uint32_t t10 = a1[1U];
+    uint32_t *res_i1 = res1 + 1U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, 0U, res_i1);
-    uint32_t t11 = a1[4U * 0U + 2U];
-    uint32_t *res_i2 = res1 + (4U * 0U + 2U);
+    uint32_t t11 = a1[2U];
+    uint32_t *res_i2 = res1 + 2U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, 0U, res_i2);
-    uint32_t t12 = a1[4U * 0U + 3U];
-    uint32_t *res_i = res1 + (4U * 0U + 3U);
+    uint32_t t12 = a1[3U];
+    uint32_t *res_i = res1 + 3U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, 0U, res_i);
   }
   KRML_MAYBE_FOR3(i,
