@@ -644,8 +644,7 @@ Hacl_GenericField64_inverse(
       uint64_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, 0ULL, res_i);
     }
-    uint64_t c10 = c;
-    c1 = c10;
+    c1 = c;
   }
   else
   {

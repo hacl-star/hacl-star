@@ -53,25 +53,24 @@ Hacl_HPKE_Curve51_CP128_SHA512_setupBaseS(
     uint8_t o_dh[32U] = { 0U };
     uint8_t zeros[32U] = { 0U };
     Hacl_Curve25519_51_scalarmult(o_dh, skE, pkR);
-    uint8_t res2 = 255U;
+    uint8_t res = 255U;
     for (uint32_t i = 0U; i < 32U; i++)
     {
       uint8_t uu____0 = FStar_UInt8_eq_mask(o_dh[i], zeros[i]);
-      res2 = (uint32_t)uu____0 & (uint32_t)res2;
+      res = (uint32_t)uu____0 & (uint32_t)res;
     }
-    uint8_t z = res2;
-    uint32_t res;
+    uint8_t z = res;
+    uint32_t res2;
     if (z == 255U)
     {
-      res = 1U;
+      res2 = 1U;
     }
     else
     {
-      res = 0U;
+      res2 = 0U;
     }
-    uint32_t res20 = res;
     uint8_t o_kemcontext[64U] = { 0U };
-    if (res20 == 0U)
+    if (res2 == 0U)
     {
       memcpy(o_kemcontext, o_pkE, 32U * sizeof (uint8_t));
       uint8_t *o_pkRm = o_kemcontext + 32U;
@@ -308,23 +307,22 @@ Hacl_HPKE_Curve51_CP128_SHA512_setupBaseR(
     uint8_t dh[32U] = { 0U };
     uint8_t zeros[32U] = { 0U };
     Hacl_Curve25519_51_scalarmult(dh, skR, pkE);
-    uint8_t res0 = 255U;
+    uint8_t res = 255U;
     for (uint32_t i = 0U; i < 32U; i++)
     {
       uint8_t uu____0 = FStar_UInt8_eq_mask(dh[i], zeros[i]);
-      res0 = (uint32_t)uu____0 & (uint32_t)res0;
+      res = (uint32_t)uu____0 & (uint32_t)res;
     }
-    uint8_t z = res0;
-    uint32_t res;
+    uint8_t z = res;
+    uint32_t res11;
     if (z == 255U)
     {
-      res = 1U;
+      res11 = 1U;
     }
     else
     {
-      res = 0U;
+      res11 = 0U;
     }
-    uint32_t res11 = res;
     uint32_t res2;
     uint8_t kemcontext[64U] = { 0U };
     if (res11 == 0U)
@@ -603,19 +601,13 @@ Hacl_HPKE_Curve51_CP128_SHA512_sealBase(
       o_ctx.ctx_key,
       nonce);
     uint64_t s1 = o_ctx.ctx_seq[0U];
-    uint32_t res1;
     if (s1 == 18446744073709551615ULL)
     {
-      res1 = 1U;
+      return 1U;
     }
-    else
-    {
-      uint64_t s_ = s1 + 1ULL;
-      o_ctx.ctx_seq[0U] = s_;
-      res1 = 0U;
-    }
-    uint32_t res10 = res1;
-    return res10;
+    uint64_t s_ = s1 + 1ULL;
+    o_ctx.ctx_seq[0U] = s_;
+    return 0U;
   }
   return 1U;
 }

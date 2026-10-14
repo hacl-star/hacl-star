@@ -564,19 +564,13 @@ Hacl_HPKE_P256_CP128_SHA256_sealBase(
       o_ctx.ctx_key,
       nonce);
     uint64_t s1 = o_ctx.ctx_seq[0U];
-    uint32_t res1;
     if (s1 == 18446744073709551615ULL)
     {
-      res1 = 1U;
+      return 1U;
     }
-    else
-    {
-      uint64_t s_ = s1 + 1ULL;
-      o_ctx.ctx_seq[0U] = s_;
-      res1 = 0U;
-    }
-    uint32_t res10 = res1;
-    return res10;
+    uint64_t s_ = s1 + 1ULL;
+    o_ctx.ctx_seq[0U] = s_;
+    return 0U;
   }
   return 1U;
 }

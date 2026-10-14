@@ -59,8 +59,7 @@ static void update(uint32_t *h, uint8_t *l)
     if (i < 16U)
     {
       uint8_t *b = l + i * 4U;
-      uint32_t u = load32_be(b);
-      v = u;
+      v = load32_be(b);
     }
     else
     {

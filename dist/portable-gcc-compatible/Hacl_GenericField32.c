@@ -644,8 +644,7 @@ Hacl_GenericField32_inverse(
       uint32_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, 0U, res_i);
     }
-    uint32_t c10 = c;
-    c1 = c10;
+    c1 = c;
   }
   else
   {

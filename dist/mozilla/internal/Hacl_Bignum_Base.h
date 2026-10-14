@@ -74,8 +74,7 @@ Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *
   for (uint32_t i = 0U; i < bnLen; i++)
   {
     uint64_t *os = res;
-    uint64_t u = load64_be(tmp + (bnLen - i - 1U) * 8U);
-    uint64_t x = u;
+    uint64_t x = load64_be(tmp + (bnLen - i - 1U) * 8U);
     os[i] = x;
   }
 }
@@ -303,8 +302,7 @@ Hacl_Bignum_Multiplication_bn_mul_u32(
       uint32_t *res_i = res_j + i;
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, bj, c, res_i);
     }
-    uint32_t r = c;
-    res[aLen + i0] = r;
+    res[aLen + i0] = c;
   }
 }
 
@@ -344,8 +342,7 @@ Hacl_Bignum_Multiplication_bn_mul_u64(
       uint64_t *res_i = res_j + i;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i);
     }
-    uint64_t r = c;
-    res[aLen + i0] = r;
+    res[aLen + i0] = c;
   }
 }
 
@@ -380,8 +377,7 @@ Hacl_Bignum_Multiplication_bn_sqr_u32(uint32_t aLen, uint32_t *a, uint32_t *res)
       uint32_t *res_i = res_j + i;
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, a_j, c, res_i);
     }
-    uint32_t r = c;
-    res[i0 + i0] = r;
+    res[i0 + i0] = c;
   }
   uint32_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, res, res, res);
   KRML_MAYBE_UNUSED_VAR(c0);
@@ -431,8 +427,7 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
       uint64_t *res_i = res_j + i;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i);
     }
-    uint64_t r = c;
-    res[i0 + i0] = r;
+    res[i0 + i0] = c;
   }
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, res, res, res);
   KRML_MAYBE_UNUSED_VAR(c0);

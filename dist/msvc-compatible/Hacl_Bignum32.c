@@ -396,9 +396,7 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
     uint32_t uu____0 = FStar_UInt32_eq_mask(a[i], bn_zero[i]);
     mask &= uu____0;
   }
-  uint32_t mask1 = mask;
-  uint32_t res10 = mask1;
-  uint32_t m10 = res10;
+  uint32_t m10 = mask;
   uint32_t acc = 0U;
   for (uint32_t i = 0U; i < len; i++)
   {
@@ -442,8 +440,7 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
         uint32_t *res_i = res1 + i;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, 0U, res_i);
       }
-      uint32_t c10 = c;
-      c1 = c10;
+      c1 = c;
     }
     else
     {
@@ -688,8 +685,7 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
       uint32_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, 0U, res_i);
     }
-    uint32_t c10 = c;
-    c1 = c10;
+    c1 = c;
   }
   else
   {
@@ -746,8 +742,7 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   for (uint32_t i = 0U; i < bnLen; i++)
   {
     uint32_t *os = res2;
-    uint32_t u = load32_be(tmp + (bnLen - i - 1U) * 4U);
-    uint32_t x = u;
+    uint32_t x = load32_be(tmp + (bnLen - i - 1U) * 4U);
     os[i] = x;
   }
   return res2;
@@ -788,9 +783,7 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   {
     uint32_t *os = res2;
     uint8_t *bj = tmp + i * 4U;
-    uint32_t u = load32_le(bj);
-    uint32_t r1 = u;
-    uint32_t x = r1;
+    uint32_t x = load32_le(bj);
     os[i] = x;
   }
   return res2;
@@ -886,7 +879,6 @@ uint32_t Hacl_Bignum32_eq_mask(uint32_t len, uint32_t *a, uint32_t *b)
     uint32_t uu____0 = FStar_UInt32_eq_mask(a[i], b[i]);
     mask &= uu____0;
   }
-  uint32_t mask1 = mask;
-  return mask1;
+  return mask;
 }
 

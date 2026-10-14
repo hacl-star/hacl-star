@@ -163,8 +163,7 @@ Hacl_Impl_Matrix_matrix_eq(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
     uint16_t uu____0 = FStar_UInt16_eq_mask(a[i], b[i]);
     res = (uint32_t)uu____0 & (uint32_t)res;
   }
-  uint16_t r = res;
-  return r;
+  return res;
 }
 
 static inline void
@@ -182,8 +181,7 @@ Hacl_Impl_Matrix_matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint16
   for (uint32_t i = 0U; i < n1 * n2; i++)
   {
     uint16_t *os = res;
-    uint16_t u = load16_le(b + 2U * i);
-    uint16_t x = u;
+    uint16_t x = load16_le(b + 2U * i);
     os[i] = x;
   }
 }
@@ -230,14 +228,10 @@ Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x(uint32_t n, uint8_t *seed, uint16_
       uint8_t *resij1 = r1 + i0 * 2U;
       uint8_t *resij2 = r2 + i0 * 2U;
       uint8_t *resij3 = r3 + i0 * 2U;
-      uint16_t u = load16_le(resij0);
-      res[4U * i * n + i0] = u;
-      uint16_t u0 = load16_le(resij1);
-      res[(4U * i + 1U) * n + i0] = u0;
-      uint16_t u1 = load16_le(resij2);
-      res[(4U * i + 2U) * n + i0] = u1;
-      uint16_t u2 = load16_le(resij3);
-      res[(4U * i + 3U) * n + i0] = u2;
+      res[4U * i * n + i0] = load16_le(resij0);
+      res[(4U * i + 1U) * n + i0] = load16_le(resij1);
+      res[(4U * i + 2U) * n + i0] = load16_le(resij2);
+      res[(4U * i + 3U) * n + i0] = load16_le(resij3);
     }
   }
 }
@@ -297,8 +291,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix64(
     for (uint32_t i1 = 0U; i1 < n2; i1++)
     {
       uint8_t *resij = r + 2U * (n2 * i0 + i1);
-      uint16_t u = load16_le(resij);
-      uint16_t uu____0 = u;
+      uint16_t uu____0 = load16_le(resij);
       uint16_t prnd = (uint32_t)uu____0 >> 1U;
       uint16_t sign = (uint32_t)uu____0 & 1U;
       uint16_t sample = 0U;
@@ -331,8 +324,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(
     for (uint32_t i1 = 0U; i1 < n2; i1++)
     {
       uint8_t *resij = r + 2U * (n2 * i0 + i1);
-      uint16_t u = load16_le(resij);
-      uint16_t uu____0 = u;
+      uint16_t uu____0 = load16_le(resij);
       uint16_t prnd = (uint32_t)uu____0 >> 1U;
       uint16_t sign = (uint32_t)uu____0 & 1U;
       uint16_t sample = 0U;
@@ -365,8 +357,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix976(
     for (uint32_t i1 = 0U; i1 < n2; i1++)
     {
       uint8_t *resij = r + 2U * (n2 * i0 + i1);
-      uint16_t u = load16_le(resij);
-      uint16_t uu____0 = u;
+      uint16_t uu____0 = load16_le(resij);
       uint16_t prnd = (uint32_t)uu____0 >> 1U;
       uint16_t sign = (uint32_t)uu____0 & 1U;
       uint16_t sample = 0U;
@@ -399,8 +390,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344(
     for (uint32_t i1 = 0U; i1 < n2; i1++)
     {
       uint8_t *resij = r + 2U * (n2 * i0 + i1);
-      uint16_t u = load16_le(resij);
-      uint16_t uu____0 = u;
+      uint16_t uu____0 = load16_le(resij);
       uint16_t prnd = (uint32_t)uu____0 >> 1U;
       uint16_t sign = (uint32_t)uu____0 & 1U;
       uint16_t sample = 0U;
@@ -484,8 +474,7 @@ Hacl_Impl_Frodo_Pack_frodo_unpack(
     uint16_t maskd = (uint32_t)(uint16_t)(1U << d) - 1U;
     uint8_t src[16U] = { 0U };
     memcpy(src + (16U - d), b1, d * sizeof (uint8_t));
-    FStar_UInt128_uint128 u = load128_be(src);
-    FStar_UInt128_uint128 templong = u;
+    FStar_UInt128_uint128 templong = load128_be(src);
     r[0U] =
       (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
           7U * d))
@@ -533,14 +522,12 @@ Hacl_Impl_Frodo_Encode_frodo_key_encode(
     uint8_t v8[8U] = { 0U };
     uint8_t *chunk = a + i0 * b;
     memcpy(v8, chunk, b * sizeof (uint8_t));
-    uint64_t u = load64_le(v8);
-    uint64_t x = u;
-    uint64_t x0 = x;
+    uint64_t x = load64_le(v8);
     KRML_MAYBE_FOR8(i,
       0U,
       8U,
       1U,
-      uint64_t rk = x0 >> b * i & ((1ULL << b) - 1ULL);
+      uint64_t rk = x >> b * i & ((1ULL << b) - 1ULL);
       res[i0 * n + i] = (uint32_t)(uint16_t)rk << (logq - b););
   }
 }

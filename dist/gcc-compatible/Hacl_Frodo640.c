@@ -207,7 +207,6 @@ uint32_t Hacl_Frodo640_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint16_t b1 = Hacl_Impl_Matrix_matrix_eq(8U, 640U, bp_matrix, bpp_matrix);
   uint16_t b2 = Hacl_Impl_Matrix_matrix_eq(8U, 8U, c_matrix, cp_matrix);
   uint16_t mask = (uint32_t)b1 & (uint32_t)b2;
-  uint16_t mask0 = mask;
   uint8_t kp_s[16U] = { 0U };
   KRML_MAYBE_FOR16(i,
     0U,
@@ -218,7 +217,7 @@ uint32_t Hacl_Frodo640_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
     uint8_t
     x =
       (uint32_t)uu____0 ^
-        ((uint32_t)(uint8_t)(uint32_t)mask0 & ((uint32_t)kp[i] ^ (uint32_t)uu____0));
+        ((uint32_t)(uint8_t)(uint32_t)mask & ((uint32_t)kp[i] ^ (uint32_t)uu____0));
     os[i] = x;);
   uint32_t ss_init_len = 9736U;
   KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);

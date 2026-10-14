@@ -1291,8 +1291,7 @@ decrypt_aes128_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    uint64_t
-    c0 =
+    c =
       gcm128_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1310,7 +1309,6 @@ decrypt_aes128_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   else
   {
@@ -1323,8 +1321,7 @@ decrypt_aes128_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    uint64_t
-    c0 =
+    c =
       gcm128_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1342,7 +1339,6 @@ decrypt_aes128_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
     inout_b,
@@ -1426,8 +1422,7 @@ decrypt_aes256_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    uint64_t
-    c0 =
+    c =
       gcm256_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1445,7 +1440,6 @@ decrypt_aes256_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   else
   {
@@ -1458,8 +1452,7 @@ decrypt_aes256_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    uint64_t
-    c0 =
+    c =
       gcm256_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1477,7 +1470,6 @@ decrypt_aes256_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
     inout_b,
@@ -1682,8 +1674,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    uint64_t
-    c0 =
+    c =
       gcm128_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1701,7 +1692,6 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   else
   {
@@ -1714,8 +1704,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    uint64_t
-    c0 =
+    c =
       gcm128_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1733,7 +1722,6 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
     inout_b,
@@ -1832,8 +1820,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    uint64_t
-    c0 =
+    c =
       gcm256_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1851,7 +1838,6 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   else
   {
@@ -1864,8 +1850,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    uint64_t
-    c0 =
+    c =
       gcm256_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1883,7 +1868,6 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
     inout_b,
@@ -1981,8 +1965,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128x6_ = len128x6 / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
-      uint64_t
-      c0 =
+      c =
         gcm128_decrypt_opt(auth_b_,
           (uint64_t)ad_len,
           auth_num,
@@ -2000,7 +1983,6 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
           (uint64_t)cipher_len,
           scratch_b1,
           tag);
-      c = c0;
     }
     else
     {
@@ -2013,8 +1995,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
       uint64_t len128x6_ = 0ULL;
-      uint64_t
-      c0 =
+      c =
         gcm128_decrypt_opt(auth_b_,
           (uint64_t)ad_len,
           auth_num,
@@ -2032,7 +2013,6 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
           (uint64_t)cipher_len,
           scratch_b1,
           tag);
-      c = c0;
     }
     memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
       inout_b,
@@ -2128,8 +2108,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128x6_ = len128x6 / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
-      uint64_t
-      c0 =
+      c =
         gcm256_decrypt_opt(auth_b_,
           (uint64_t)ad_len,
           auth_num,
@@ -2147,7 +2126,6 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
           (uint64_t)cipher_len,
           scratch_b1,
           tag);
-      c = c0;
     }
     else
     {
@@ -2160,8 +2138,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
       uint64_t len128x6_ = 0ULL;
-      uint64_t
-      c0 =
+      c =
         gcm256_decrypt_opt(auth_b_,
           (uint64_t)ad_len,
           auth_num,
@@ -2179,7 +2156,6 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
           (uint64_t)cipher_len,
           scratch_b1,
           tag);
-      c = c0;
     }
     memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
       inout_b,
@@ -2214,9 +2190,7 @@ EverCrypt_AEAD_decrypt_expand_chacha20_poly1305(
   EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek };
   memcpy(ek, k, 32U * sizeof (uint8_t));
   EverCrypt_AEAD_state_s *s = &p;
-  EverCrypt_Error_error_code
-  r = decrypt_chacha20_poly1305(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst);
-  return r;
+  return decrypt_chacha20_poly1305(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst);
 }
 
 /* SNIPPET_END: EverCrypt_AEAD_decrypt_expand_chacha20_poly1305 */

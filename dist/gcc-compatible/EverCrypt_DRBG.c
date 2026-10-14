@@ -914,10 +914,9 @@ generate_sha1(
     uint8_t entropy_input[entropy_input_len];
     memset(entropy_input, 0U, entropy_input_len * sizeof (uint8_t));
     bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len);
-    bool result;
     if (!ok)
     {
-      result = false;
+      ok0 = false;
     }
     else
     {
@@ -979,9 +978,8 @@ generate_sha1(
         memcpy(k, k_0, 20U * sizeof (uint8_t));
       }
       ctr[0U] = 1U;
-      result = true;
+      ok0 = true;
     }
-    ok0 = result;
   }
   if (!ok0)
   {
@@ -1126,10 +1124,9 @@ generate_sha2_256(
     uint8_t entropy_input[entropy_input_len];
     memset(entropy_input, 0U, entropy_input_len * sizeof (uint8_t));
     bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len);
-    bool result;
     if (!ok)
     {
-      result = false;
+      ok0 = false;
     }
     else
     {
@@ -1191,9 +1188,8 @@ generate_sha2_256(
         memcpy(k, k_0, 32U * sizeof (uint8_t));
       }
       ctr[0U] = 1U;
-      result = true;
+      ok0 = true;
     }
-    ok0 = result;
   }
   if (!ok0)
   {
@@ -1338,10 +1334,9 @@ generate_sha2_384(
     uint8_t entropy_input[entropy_input_len];
     memset(entropy_input, 0U, entropy_input_len * sizeof (uint8_t));
     bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len);
-    bool result;
     if (!ok)
     {
-      result = false;
+      ok0 = false;
     }
     else
     {
@@ -1403,9 +1398,8 @@ generate_sha2_384(
         memcpy(k, k_0, 48U * sizeof (uint8_t));
       }
       ctr[0U] = 1U;
-      result = true;
+      ok0 = true;
     }
-    ok0 = result;
   }
   if (!ok0)
   {
@@ -1550,10 +1544,9 @@ generate_sha2_512(
     uint8_t entropy_input[entropy_input_len];
     memset(entropy_input, 0U, entropy_input_len * sizeof (uint8_t));
     bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len);
-    bool result;
     if (!ok)
     {
-      result = false;
+      ok0 = false;
     }
     else
     {
@@ -1615,9 +1608,8 @@ generate_sha2_512(
         memcpy(k, k_0, 64U * sizeof (uint8_t));
       }
       ctr[0U] = 1U;
-      result = true;
+      ok0 = true;
     }
-    ok0 = result;
   }
   if (!ok0)
   {

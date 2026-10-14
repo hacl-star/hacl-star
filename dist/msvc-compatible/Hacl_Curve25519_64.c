@@ -342,9 +342,7 @@ void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
     1U,
     uint64_t *os = tmp;
     uint8_t *bj = pub + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   uint64_t tmp3 = tmp[3U];
   tmp[3U] = tmp3 & 0x7fffffffffffffffULL;

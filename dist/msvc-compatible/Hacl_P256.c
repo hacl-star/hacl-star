@@ -42,9 +42,7 @@ static inline uint64_t bn_is_zero_mask4(uint64_t *f)
     1U,
     uint64_t uu____0 = FStar_UInt64_eq_mask(f[i], bn_zero[i]);
     mask &= uu____0;);
-  uint64_t mask1 = mask;
-  uint64_t res = mask1;
-  return res;
+  return mask;
 }
 
 static inline bool bn_is_zero_vartime4(uint64_t *f)
@@ -62,8 +60,7 @@ static inline uint64_t bn_is_eq_mask4(uint64_t *a, uint64_t *b)
     1U,
     uint64_t uu____0 = FStar_UInt64_eq_mask(a[i], b[i]);
     mask &= uu____0;);
-  uint64_t mask1 = mask;
-  return mask1;
+  return mask;
 }
 
 static inline bool bn_is_eq_vartime4(uint64_t *a, uint64_t *b)
@@ -159,8 +156,7 @@ static inline uint64_t bn_sub4(uint64_t *res, uint64_t *x, uint64_t *y)
     uint64_t *res_i = res + 3U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, res_i);
   }
-  uint64_t c0 = c;
-  return c0;
+  return c;
 }
 
 static inline void bn_sub_mod4(uint64_t *res, uint64_t *n, uint64_t *x, uint64_t *y)
@@ -241,8 +237,7 @@ static inline void bn_mul4(uint64_t *res, uint64_t *x, uint64_t *y)
       uint64_t *res_i = res_j + 3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
     }
-    uint64_t r = c;
-    res[4U + i0] = r;);
+    res[4U + i0] = c;);
 }
 
 static inline void bn_sqr4(uint64_t *res, uint64_t *x)
@@ -277,8 +272,7 @@ static inline void bn_sqr4(uint64_t *res, uint64_t *x)
       uint64_t *res_i = res_j + i;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i);
     }
-    uint64_t r = c;
-    res[i0 + i0] = r;);
+    res[i0 + i0] = c;);
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, res, res);
   KRML_MAYBE_UNUSED_VAR(c0);
   uint64_t tmp[8U] = { 0U };
@@ -309,8 +303,7 @@ static inline void bn_from_bytes_be4(uint64_t *res, uint8_t *b)
     4U,
     1U,
     uint64_t *os = res;
-    uint64_t u = load64_be(b + (4U - i - 1U) * 8U);
-    uint64_t x = u;
+    uint64_t x = load64_be(b + (4U - i - 1U) * 8U);
     os[i] = x;);
 }
 
@@ -402,8 +395,7 @@ static inline uint64_t bn_is_lt_prime_mask4(uint64_t *f)
 
 static inline uint64_t feq_mask(uint64_t *a, uint64_t *b)
 {
-  uint64_t r = bn_is_eq_mask4(a, b);
-  return r;
+  return bn_is_eq_mask4(a, b);
 }
 
 static inline void fadd0(uint64_t *res, uint64_t *x, uint64_t *y)
@@ -455,8 +447,7 @@ static inline void mont_reduction(uint64_t *res, uint64_t *x)
       uint64_t *res_i = res_j0 + 3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, qj, c, res_i);
     }
-    uint64_t r = c;
-    uint64_t c1 = r;
+    uint64_t c1 = c;
     uint64_t *resb = x + (4U + i0);
     uint64_t res_j = x[4U + i0];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c1, res_j, resb););
@@ -713,8 +704,7 @@ static inline bool is_on_curve_vartime(uint64_t *p)
   fadd0(rp, tmp, rp);
   fsqr0(ty, ty);
   uint64_t r = feq_mask(ty, rp);
-  bool r0 = r == 0xFFFFFFFFFFFFFFFFULL;
-  return r0;
+  return r == 0xFFFFFFFFFFFFFFFFULL;
 }
 
 static inline void aff_point_store(uint8_t *res, uint64_t *p)
@@ -796,8 +786,7 @@ static inline bool aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_
   fsqr0(yM, yM);
   uint64_t r = feq_mask(yM, y2M);
   bool is_y_valid = r == 0xFFFFFFFFFFFFFFFFULL;
-  bool is_y_valid0 = is_y_valid;
-  if (!is_y_valid0)
+  if (!is_y_valid)
   {
     return false;
   }
@@ -1165,8 +1154,7 @@ static inline void qmont_reduction(uint64_t *res, uint64_t *x)
       uint64_t *res_i = res_j0 + 3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, qj, c, res_i);
     }
-    uint64_t r = c;
-    uint64_t c1 = r;
+    uint64_t c1 = c;
     uint64_t *resb = x + (4U + i0);
     uint64_t res_j = x[4U + i0];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c1, res_j, resb););
@@ -1438,8 +1426,7 @@ ecdsa_verify_msg_as_qelem(
   uint64_t x[4U] = { 0U };
   to_aff_point_x(x, res);
   qmod_short(x, x);
-  bool res1 = bn_is_eq_vartime4(x, r_q);
-  return res1;
+  return bn_is_eq_vartime4(x, r_q);
 }
 
 static inline bool
@@ -1502,8 +1489,7 @@ ecdsa_sign_msg_as_qelem(
   uint64_t is_r_zero = bn_is_zero_mask4(r_q);
   uint64_t is_s_zero = bn_is_zero_mask4(s_q);
   uint64_t m = are_sk_nonce_valid & (~is_r_zero & ~is_s_zero);
-  bool res = m == 0xFFFFFFFFFFFFFFFFULL;
-  return res;
+  return m == 0xFFFFFFFFFFFFFFFFULL;
 }
 
 
@@ -1554,8 +1540,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);
-  bool res = ecdsa_sign_msg_as_qelem(signature, m_q, private_key, nonce);
-  return res;
+  return ecdsa_sign_msg_as_qelem(signature, m_q, private_key, nonce);
 }
 
 /**
@@ -1587,8 +1572,7 @@ Hacl_P256_ecdsa_sign_p256_sha384(
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);
-  bool res = ecdsa_sign_msg_as_qelem(signature, m_q, private_key, nonce);
-  return res;
+  return ecdsa_sign_msg_as_qelem(signature, m_q, private_key, nonce);
 }
 
 /**
@@ -1620,8 +1604,7 @@ Hacl_P256_ecdsa_sign_p256_sha512(
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);
-  bool res = ecdsa_sign_msg_as_qelem(signature, m_q, private_key, nonce);
-  return res;
+  return ecdsa_sign_msg_as_qelem(signature, m_q, private_key, nonce);
 }
 
 /**
@@ -1663,8 +1646,7 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);
-  bool res = ecdsa_sign_msg_as_qelem(signature, m_q, private_key, nonce);
-  return res;
+  return ecdsa_sign_msg_as_qelem(signature, m_q, private_key, nonce);
 }
 
 
@@ -1699,8 +1681,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);
-  bool res = ecdsa_verify_msg_as_qelem(m_q, public_key, signature_r, signature_s);
-  return res;
+  return ecdsa_verify_msg_as_qelem(m_q, public_key, signature_r, signature_s);
 }
 
 /**
@@ -1730,8 +1711,7 @@ Hacl_P256_ecdsa_verif_p256_sha384(
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);
-  bool res = ecdsa_verify_msg_as_qelem(m_q, public_key, signature_r, signature_s);
-  return res;
+  return ecdsa_verify_msg_as_qelem(m_q, public_key, signature_r, signature_s);
 }
 
 /**
@@ -1761,8 +1741,7 @@ Hacl_P256_ecdsa_verif_p256_sha512(
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);
-  bool res = ecdsa_verify_msg_as_qelem(m_q, public_key, signature_r, signature_s);
-  return res;
+  return ecdsa_verify_msg_as_qelem(m_q, public_key, signature_r, signature_s);
 }
 
 /**
@@ -1797,8 +1776,7 @@ Hacl_P256_ecdsa_verif_without_hash(
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);
-  bool res = ecdsa_verify_msg_as_qelem(m_q, public_key, signature_r, signature_s);
-  return res;
+  return ecdsa_verify_msg_as_qelem(m_q, public_key, signature_r, signature_s);
 }
 
 
@@ -1823,8 +1801,7 @@ Public key validation.
 bool Hacl_P256_validate_public_key(uint8_t *public_key)
 {
   uint64_t point_jac[12U] = { 0U };
-  bool res = load_point_vartime(point_jac, public_key);
-  return res;
+  return load_point_vartime(point_jac, public_key);
 }
 
 /**

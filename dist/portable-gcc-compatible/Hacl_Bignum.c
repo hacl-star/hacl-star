@@ -102,13 +102,11 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(
   uint32_t c5 = (mask & c41) | (~mask & c31);
   uint32_t aLen2 = aLen / 2U;
   uint32_t *r0 = res + aLen2;
-  uint32_t r10 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen, r0, t45, r0);
-  uint32_t c6 = r10;
-  uint32_t c60 = c6;
-  uint32_t c7 = c5 + c60;
+  uint32_t c6 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen, r0, t45, r0);
+  uint32_t c7 = c5 + c6;
   uint32_t *r = res + (aLen + aLen2);
   uint32_t c01 = Lib_IntTypes_Intrinsics_add_carry_u32(0U, r[0U], c7, r);
-  uint32_t r1;
+  uint32_t c8;
   if (1U < aLen + aLen - (aLen + aLen2))
   {
     uint32_t *a11 = r + 1U;
@@ -139,17 +137,13 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(
       uint32_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t11, 0U, res_i);
     }
-    uint32_t c110 = c;
-    r1 = c110;
+    c8 = c;
   }
   else
   {
-    r1 = c01;
+    c8 = c01;
   }
-  uint32_t c8 = r1;
-  uint32_t c = c8;
-  uint32_t c9 = c;
-  KRML_MAYBE_UNUSED_VAR(c9);
+  KRML_MAYBE_UNUSED_VAR(c8);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32 */
@@ -227,13 +221,11 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
   uint64_t c5 = (mask & c41) | (~mask & c31);
   uint32_t aLen2 = aLen / 2U;
   uint64_t *r0 = res + aLen2;
-  uint64_t r10 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen, r0, t45, r0);
-  uint64_t c6 = r10;
-  uint64_t c60 = c6;
-  uint64_t c7 = c5 + c60;
+  uint64_t c6 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen, r0, t45, r0);
+  uint64_t c7 = c5 + c6;
   uint64_t *r = res + (aLen + aLen2);
   uint64_t c01 = Lib_IntTypes_Intrinsics_add_carry_u64(0ULL, r[0U], c7, r);
-  uint64_t r1;
+  uint64_t c8;
   if (1U < aLen + aLen - (aLen + aLen2))
   {
     uint64_t *a11 = r + 1U;
@@ -264,17 +256,13 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
       uint64_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, 0ULL, res_i);
     }
-    uint64_t c110 = c;
-    r1 = c110;
+    c8 = c;
   }
   else
   {
-    r1 = c01;
+    c8 = c01;
   }
-  uint64_t c8 = r1;
-  uint64_t c = c8;
-  uint64_t c9 = c;
-  KRML_MAYBE_UNUSED_VAR(c9);
+  KRML_MAYBE_UNUSED_VAR(c8);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64 */
@@ -327,13 +315,11 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32(
   uint32_t c5 = c2 - c3;
   uint32_t aLen2 = aLen / 2U;
   uint32_t *r0 = res + aLen2;
-  uint32_t r10 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen, r0, t45, r0);
-  uint32_t c4 = r10;
-  uint32_t c6 = c4;
+  uint32_t c6 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen, r0, t45, r0);
   uint32_t c7 = c5 + c6;
   uint32_t *r = res + (aLen + aLen2);
   uint32_t c01 = Lib_IntTypes_Intrinsics_add_carry_u32(0U, r[0U], c7, r);
-  uint32_t r1;
+  uint32_t c4;
   if (1U < aLen + aLen - (aLen + aLen2))
   {
     uint32_t *a11 = r + 1U;
@@ -364,17 +350,13 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32(
       uint32_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t1, 0U, res_i);
     }
-    uint32_t c10 = c;
-    r1 = c10;
+    c4 = c;
   }
   else
   {
-    r1 = c01;
+    c4 = c01;
   }
-  uint32_t c8 = r1;
-  uint32_t c = c8;
-  uint32_t c9 = c;
-  KRML_MAYBE_UNUSED_VAR(c9);
+  KRML_MAYBE_UNUSED_VAR(c4);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32 */
@@ -427,13 +409,11 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint64_t c5 = c2 - c3;
   uint32_t aLen2 = aLen / 2U;
   uint64_t *r0 = res + aLen2;
-  uint64_t r10 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen, r0, t45, r0);
-  uint64_t c4 = r10;
-  uint64_t c6 = c4;
+  uint64_t c6 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen, r0, t45, r0);
   uint64_t c7 = c5 + c6;
   uint64_t *r = res + (aLen + aLen2);
   uint64_t c01 = Lib_IntTypes_Intrinsics_add_carry_u64(0ULL, r[0U], c7, r);
-  uint64_t r1;
+  uint64_t c4;
   if (1U < aLen + aLen - (aLen + aLen2))
   {
     uint64_t *a11 = r + 1U;
@@ -464,17 +444,13 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
       uint64_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, 0ULL, res_i);
     }
-    uint64_t c10 = c;
-    r1 = c10;
+    c4 = c;
   }
   else
   {
-    r1 = c01;
+    c4 = c01;
   }
-  uint64_t c8 = r1;
-  uint64_t c = c8;
-  uint64_t c9 = c;
-  KRML_MAYBE_UNUSED_VAR(c9);
+  KRML_MAYBE_UNUSED_VAR(c4);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64 */
@@ -933,8 +909,7 @@ bn_mont_reduction_u32(uint32_t len, uint32_t *n, uint32_t nInv, uint32_t *c, uin
       uint32_t *res_i = res_j0 + i;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c1, res_i);
     }
-    uint32_t r = c1;
-    uint32_t c10 = r;
+    uint32_t c10 = c1;
     uint32_t *resb = c + (len + i0);
     uint32_t res_j = c[len + i0];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, c10, res_j, resb);
@@ -1152,8 +1127,7 @@ bn_mont_reduction_u64(uint32_t len, uint64_t *n, uint64_t nInv, uint64_t *c, uin
       uint64_t *res_i = res_j0 + i;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, qj, c1, res_i);
     }
-    uint64_t r = c1;
-    uint64_t c10 = r;
+    uint64_t c10 = c1;
     uint64_t *resb = c + (len + i0);
     uint64_t res_j = c[len + i0];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c10, res_j, resb);
@@ -1331,8 +1305,7 @@ Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32(
       uint32_t *res_i = res_j0 + i;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c1, res_i);
     }
-    uint32_t r = c1;
-    uint32_t c10 = r;
+    uint32_t c10 = c1;
     uint32_t *resb = c + (len + i0);
     uint32_t res_j = c[len + i0];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, c10, res_j, resb);
@@ -1440,8 +1413,7 @@ Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64(
       uint64_t *res_i = res_j0 + i;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, qj, c1, res_i);
     }
-    uint64_t r = c1;
-    uint64_t c10 = r;
+    uint64_t c10 = c1;
     uint64_t *resb = c + (len + i0);
     uint64_t res_j = c[len + i0];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c10, res_j, resb);
@@ -1555,8 +1527,7 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u32(
       uint32_t blt = ~FStar_UInt32_gte_mask(b[i], b2[i]);
       acc = (beq & acc) | (~beq & blt);
     }
-    uint32_t res = acc;
-    m1 = res;
+    m1 = acc;
   }
   else
   {
@@ -1945,8 +1916,7 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64(
       uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
       acc = (beq & acc) | (~beq & blt);
     }
-    uint64_t res = acc;
-    m1 = res;
+    m1 = acc;
   }
   else
   {

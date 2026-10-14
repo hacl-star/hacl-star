@@ -50,9 +50,7 @@ update_block(
     1U,
     uint64_t *os = m_w;
     uint8_t *bj = d + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   uint64_t mask[4U] = { 0U };
   uint64_t wv_14 = flag ? 0xFFFFFFFFFFFFFFFFULL : 0ULL;
@@ -519,9 +517,7 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
     1U,
     uint64_t *os = tmp + 4U;
     uint8_t *bj = p.salt + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   KRML_MAYBE_FOR2(i,
     0U,
@@ -529,9 +525,7 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
     1U,
     uint64_t *os = tmp + 6U;
     uint8_t *bj = p.personal + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   tmp[0U] =
     (uint64_t)(uint32_t)nn1 ^
@@ -846,9 +840,7 @@ static Hacl_Hash_Blake2b_state_t
             1U,
             uint64_t *os = tmp + 4U;
             uint8_t *bj = pv.salt + i0 * 8U;
-            uint64_t u = load64_le(bj);
-            uint64_t r4 = u;
-            uint64_t x = r4;
+            uint64_t x = load64_le(bj);
             os[i0] = x;);
           KRML_MAYBE_FOR2(i0,
             0U,
@@ -856,9 +848,7 @@ static Hacl_Hash_Blake2b_state_t
             1U,
             uint64_t *os = tmp + 6U;
             uint8_t *bj = pv.personal + i0 * 8U;
-            uint64_t u = load64_le(bj);
-            uint64_t r4 = u;
-            uint64_t x = r4;
+            uint64_t x = load64_le(bj);
             os[i0] = x;);
           tmp[0U] =
             (uint64_t)(uint32_t)nn1 ^
@@ -969,8 +959,7 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint8_t
       .personal = personal
     };
   Hacl_Hash_Blake2b_blake2_params p0 = p;
-  Hacl_Hash_Blake2b_state_t *s = Hacl_Hash_Blake2b_malloc_with_params_and_key(&p0, false, k);
-  return s;
+  return Hacl_Hash_Blake2b_malloc_with_params_and_key(&p0, false, k);
 }
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_malloc_with_key */
@@ -1061,9 +1050,7 @@ static void reset_raw(Hacl_Hash_Blake2b_state_t *state, Hacl_Hash_Blake2b_params
     1U,
     uint64_t *os = tmp + 4U;
     uint8_t *bj = pv.salt + i0 * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i0] = x;);
   KRML_MAYBE_FOR2(i0,
     0U,
@@ -1071,9 +1058,7 @@ static void reset_raw(Hacl_Hash_Blake2b_state_t *state, Hacl_Hash_Blake2b_params
     1U,
     uint64_t *os = tmp + 6U;
     uint8_t *bj = pv.personal + i0 * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i0] = x;);
   tmp[0U] =
     (uint64_t)(uint32_t)nn1 ^
@@ -1678,9 +1663,7 @@ Hacl_Hash_Blake2b_hash_with_key_and_params(
     1U,
     uint64_t *os = tmp + 4U;
     uint8_t *bj = params.salt + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   KRML_MAYBE_FOR2(i,
     0U,
@@ -1688,9 +1671,7 @@ Hacl_Hash_Blake2b_hash_with_key_and_params(
     1U,
     uint64_t *os = tmp + 6U;
     uint8_t *bj = params.personal + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   tmp[0U] =
     (uint64_t)(uint32_t)nn ^

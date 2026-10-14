@@ -216,8 +216,7 @@ box_easy_afternm(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n, uint8_t *m)
 {
   uint8_t *tag = c;
   uint8_t *cip = c + 16U;
-  uint32_t res = box_detached_afternm(mlen, cip, tag, k, n, m);
-  return res;
+  return box_detached_afternm(mlen, cip, tag, k, n, m);
 }
 
 static inline uint32_t
@@ -225,8 +224,7 @@ box_easy(uint32_t mlen, uint8_t *c, uint8_t *sk, uint8_t *pk, uint8_t *n, uint8_
 {
   uint8_t *tag = c;
   uint8_t *cip = c + 16U;
-  uint32_t res = box_detached(mlen, cip, tag, sk, pk, n, m);
-  return res;
+  return box_detached(mlen, cip, tag, sk, pk, n, m);
 }
 
 static inline uint32_t

@@ -50,9 +50,7 @@ update_block(
     1U,
     uint64_t *os = m_w;
     uint8_t *bj = d + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   Lib_IntVector_Intrinsics_vec256 mask = Lib_IntVector_Intrinsics_vec256_zero;
   uint64_t wv_14 = flag ? 0xFFFFFFFFFFFFFFFFULL : 0ULL;
@@ -243,9 +241,7 @@ Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t k
     1U,
     uint64_t *os = tmp + 4U;
     uint8_t *bj = p.salt + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   KRML_MAYBE_FOR2(i,
     0U,
@@ -253,9 +249,7 @@ Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t k
     1U,
     uint64_t *os = tmp + 6U;
     uint8_t *bj = p.personal + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   tmp[0U] =
     (uint64_t)(uint32_t)nn1 ^
@@ -452,9 +446,7 @@ Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32(
     1U,
     uint64_t *os = b0;
     uint8_t *bj = b8 + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   uint8_t b80[32U] = { 0U };
   Lib_IntVector_Intrinsics_vec256_store64_le(b80, r1[0U]);
@@ -464,9 +456,7 @@ Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32(
     1U,
     uint64_t *os = b1;
     uint8_t *bj = b80 + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   uint8_t b81[32U] = { 0U };
   Lib_IntVector_Intrinsics_vec256_store64_le(b81, r2[0U]);
@@ -476,9 +466,7 @@ Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32(
     1U,
     uint64_t *os = b2;
     uint8_t *bj = b81 + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   uint8_t b82[32U] = { 0U };
   Lib_IntVector_Intrinsics_vec256_store64_le(b82, r3[0U]);
@@ -488,9 +476,7 @@ Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32(
     1U,
     uint64_t *os = b3;
     uint8_t *bj = b82 + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
 }
 
@@ -694,9 +680,7 @@ static Hacl_Hash_Blake2b_Simd256_state_t
             1U,
             uint64_t *os = tmp + 4U;
             uint8_t *bj = pv.salt + i0 * 8U;
-            uint64_t u = load64_le(bj);
-            uint64_t r4 = u;
-            uint64_t x = r4;
+            uint64_t x = load64_le(bj);
             os[i0] = x;);
           KRML_MAYBE_FOR2(i0,
             0U,
@@ -704,9 +688,7 @@ static Hacl_Hash_Blake2b_Simd256_state_t
             1U,
             uint64_t *os = tmp + 6U;
             uint8_t *bj = pv.personal + i0 * 8U;
-            uint64_t u = load64_le(bj);
-            uint64_t r4 = u;
-            uint64_t x = r4;
+            uint64_t x = load64_le(bj);
             os[i0] = x;);
           tmp[0U] =
             (uint64_t)(uint32_t)nn1 ^
@@ -804,9 +786,7 @@ Hacl_Hash_Blake2b_Simd256_state_t
       .personal = personal
     };
   Hacl_Hash_Blake2b_blake2_params p0 = p;
-  Hacl_Hash_Blake2b_Simd256_state_t
-  *s = Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key(&p0, false, k);
-  return s;
+  return Hacl_Hash_Blake2b_Simd256_malloc_with_params_and_key(&p0, false, k);
 }
 
 /**
@@ -880,9 +860,7 @@ reset_raw(Hacl_Hash_Blake2b_Simd256_state_t *state, Hacl_Hash_Blake2b_params_and
     1U,
     uint64_t *os = tmp + 4U;
     uint8_t *bj = pv.salt + i0 * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i0] = x;);
   KRML_MAYBE_FOR2(i0,
     0U,
@@ -890,9 +868,7 @@ reset_raw(Hacl_Hash_Blake2b_Simd256_state_t *state, Hacl_Hash_Blake2b_params_and
     1U,
     uint64_t *os = tmp + 6U;
     uint8_t *bj = pv.personal + i0 * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i0] = x;);
   tmp[0U] =
     (uint64_t)(uint32_t)nn1 ^
@@ -1468,9 +1444,7 @@ Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params(
     1U,
     uint64_t *os = tmp + 4U;
     uint8_t *bj = params.salt + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   KRML_MAYBE_FOR2(i,
     0U,
@@ -1478,9 +1452,7 @@ Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params(
     1U,
     uint64_t *os = tmp + 6U;
     uint8_t *bj = params.personal + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   tmp[0U] =
     (uint64_t)(uint32_t)nn ^

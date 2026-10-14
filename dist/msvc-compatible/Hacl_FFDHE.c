@@ -187,8 +187,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
       uint64_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, 0ULL, res_i);
     }
-    uint64_t c10 = c;
-    c1 = c10;
+    c1 = c;
   }
   else
   {
@@ -208,8 +207,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
     uint64_t blt = ~FStar_UInt64_gte_mask(b2[i], pk_n[i]);
     acc0 = (beq & acc0) | (~beq & blt);
   }
-  uint64_t res = acc0;
-  uint64_t m0 = res;
+  uint64_t m0 = acc0;
   uint64_t acc = 0ULL;
   for (uint32_t i = 0U; i < nLen; i++)
   {
@@ -343,7 +341,6 @@ Hacl_FFDHE_ffdhe_shared_secret(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk,
   uint64_t *p_n = (uint64_t *)alloca((nLen + nLen) * sizeof (uint64_t));
   memset(p_n, 0U, (nLen + nLen) * sizeof (uint64_t));
   ffdhe_precomp_p(a, p_n);
-  uint64_t m = Hacl_FFDHE_ffdhe_shared_secret_precomp(a, p_n, sk, pk, ss);
-  return m;
+  return Hacl_FFDHE_ffdhe_shared_secret_precomp(a, p_n, sk, pk, ss);
 }
 

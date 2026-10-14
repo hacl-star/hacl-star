@@ -100,9 +100,7 @@ static inline void Hacl_K256_Field_load_felem(uint64_t *f, uint8_t *b)
     1U,
     uint64_t *os = tmp;
     uint8_t *bj = b + i * 8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_be(bj);
     os[i] = x;);
   uint64_t s0 = tmp[3U];
   uint64_t s1 = tmp[2U];
