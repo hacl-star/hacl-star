@@ -19,66 +19,89 @@ include Spec.K256.PointOps
  https://www.hyperelliptic.org/EFD/g1p/auto-shortw.html
 *)
 
-let mk_k256_comm_monoid : LE.comm_monoid aff_point = {
+// Valid affine points: on the curve, or the point at infinity
+let aff_point_c = p:aff_point{aff_point_inv p}
+
+let aff_point_add_c (p q:aff_point_c) : aff_point_c =
+  KL.aff_point_add_inv_lemma p q;
+  aff_point_add p q
+
+let aff_point_negate_c (p:aff_point_c) : aff_point_c =
+  KL.aff_point_negate_inv p;
+  aff_point_negate p
+
+let mk_k256_comm_monoid : LE.comm_monoid aff_point_c = {
   LE.one = aff_point_at_inf;
-  LE.mul = aff_point_add;
+  LE.mul = aff_point_add_c;
   LE.lemma_one = KL.aff_point_at_inf_lemma;
-  LE.lemma_mul_assoc = KL.aff_point_add_assoc_lemma;
+  LE.lemma_mul_assoc = (fun (p q s:aff_point_c) -> KL.aff_point_add_assoc_lemma p q s);
   LE.lemma_mul_comm = KL.aff_point_add_comm_lemma;
 }
 
-let mk_k256_abelian_group : LE.abelian_group aff_point = {
+let mk_k256_abelian_group : LE.abelian_group aff_point_c = {
   LE.cm = mk_k256_comm_monoid;
-  LE.inverse = aff_point_negate;
+  LE.inverse = aff_point_negate_c;
   LE.lemma_inverse = KL.aff_point_negate_lemma;
 }
 
-let mk_to_k256_comm_monoid : SE.to_comm_monoid proj_point = {
-  SE.a_spec = aff_point;
+// Valid projective points: on the curve, not (0, 0, 0)
+let proj_point_c = p:proj_point{point_inv p}
+
+let to_aff_point_c (p:proj_point_c) : aff_point_c =
+  KL.to_aff_point_inv p;
+  to_aff_point p
+
+let mk_to_k256_comm_monoid : SE.to_comm_monoid proj_point_c = {
+  SE.a_spec = aff_point_c;
   SE.comm_monoid = mk_k256_comm_monoid;
-  SE.refl = to_aff_point;
+  SE.refl = to_aff_point_c;
 }
 
-val point_at_inf_c: SE.one_st proj_point mk_to_k256_comm_monoid
+val point_at_inf_c: SE.one_st proj_point_c mk_to_k256_comm_monoid
 let point_at_inf_c _ =
   KL.to_aff_point_at_infinity_lemma ();
+  KL.point_at_inf_inv ();
   point_at_inf
 
-val point_add_c : SE.mul_st proj_point mk_to_k256_comm_monoid
+val point_add_c : SE.mul_st proj_point_c mk_to_k256_comm_monoid
 let point_add_c p q =
   KL.to_aff_point_add_lemma p q;
   point_add p q
 
-val point_double_c : SE.sqr_st proj_point mk_to_k256_comm_monoid
+val point_double_c : SE.sqr_st proj_point_c mk_to_k256_comm_monoid
 let point_double_c p =
   KL.to_aff_point_double_lemma p;
   point_double p
 
-let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
+let mk_k256_concrete_ops : SE.concrete_ops proj_point_c = {
   SE.to = mk_to_k256_comm_monoid;
   SE.one = point_at_inf_c;
   SE.mul = point_add_c;
   SE.sqr = point_double_c;
 }
 
+let g_c : proj_point_c =
+  KL.g_inv ();
+  g
+
 // [a]P in affine coordinates
-let aff_point_mul (a:nat) (p:aff_point) : aff_point =
+let aff_point_mul (a:nat) (p:aff_point_c) : aff_point_c =
   LE.pow mk_k256_comm_monoid p a
 
 // [a]P
-let point_mul (a:qelem) (p:proj_point) : proj_point =
+let point_mul (a:qelem) (p:proj_point_c) : proj_point_c =
   SE.exp_fw mk_k256_concrete_ops p 256 a 4
 
 // [a1]P1 + [a2]P2
-let point_mul_double (a1:qelem) (p1:proj_point) (a2:qelem) (p2:proj_point) : proj_point =
+let point_mul_double (a1:qelem) (p1:proj_point_c) (a2:qelem) (p2:proj_point_c) : proj_point_c =
   SE.exp_double_fw mk_k256_concrete_ops p1 256 a1 p2 a2 5
 
 // [a]G
-let point_mul_g (a:qelem) : proj_point = point_mul a g
+let point_mul_g (a:qelem) : proj_point_c = point_mul a g_c
 
 // [a1]G + [a2]P
-let point_mul_double_g (a1:qelem) (a2:qelem) (p:proj_point) : proj_point =
-  point_mul_double a1 g a2 p
+let point_mul_double_g (a1:qelem) (a2:qelem) (p:proj_point_c) : proj_point_c =
+  point_mul_double a1 g_c a2 p
 
 ///  ECDSA with a prehashed message
 
@@ -120,6 +143,7 @@ let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64)
     let sinv = qinv s in
     let u1 = z *^ sinv in
     let u2 = r *^ sinv in
+    KL.load_point_inv public_key;
     let _X, _Y, _Z = point_mul_double_g u1 u2 (Some?.v pk) in
 
     if is_proj_point_at_inf (_X, _Y, _Z) then false
@@ -167,9 +191,10 @@ let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 6
   let pk = load_point their_public_key in
   let sk = nat_from_bytes_be private_key in
   let is_sk_valid = 0 < sk && sk < q in
-  if Some? pk && is_sk_valid then
+  if Some? pk && is_sk_valid then begin
+    KL.load_point_inv their_public_key;
     let ss = point_mul sk (Some?.v pk) in
-    Some (point_store ss)
+    Some (point_store ss) end
   else None
 
 

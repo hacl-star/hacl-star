@@ -22,16 +22,22 @@ open Hacl.Impl.K256.Point
 unfold
 let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
+// The exponentiation invariant: `point_inv_lseq` (limb bounds) and the
+// curve invariant `S.point_inv`
 unfold
-let refl (p:LSeq.lseq uint64 15{point_inv_lseq p}) : GTot S.aff_point =
-  S.to_aff_point (point_eval_lseq p)
+let linv (p:LSeq.lseq uint64 15) : Type0 =
+  point_inv_lseq p /\ S.point_inv (point_eval_lseq p)
+
+unfold
+let refl (p:LSeq.lseq uint64 15{linv p}) : GTot S.aff_point_c =
+  S.to_aff_point_c (point_eval_lseq p)
 
 inline_for_extraction noextract
 let mk_to_k256_comm_monoid : BE.to_comm_monoid U64 15ul 0ul = {
-  BE.a_spec = S.aff_point;
+  BE.a_spec = S.aff_point_c;
   BE.comm_monoid = S.mk_k256_comm_monoid;
   BE.linv_ctx = linv_ctx;
-  BE.linv = point_inv_lseq;
+  BE.linv = linv;
   BE.refl = refl;
 }
 
@@ -54,7 +60,7 @@ let point_double ctx x xx =
 
 inline_for_extraction noextract
 val point_zero : BE.lone_st U64 15ul 0ul mk_to_k256_comm_monoid
-let point_zero ctx one = make_point_at_inf one
+let point_zero ctx one = SL.point_at_inf_inv (); make_point_at_inf one
 
 
 inline_for_extraction noextract

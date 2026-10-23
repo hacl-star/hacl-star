@@ -216,7 +216,9 @@ let ecdh shared_secret their_pubkey private_key =
   let ss = sub tmp 15ul 15ul in
   let sk = sub tmp 30ul 4ul in
 
+  let h0 = ST.get () in
   let is_pk_valid = P.load_point_vartime pk their_pubkey in
+  Spec.K256.Lemmas.load_point_inv (as_seq h0 their_pubkey);
   let is_sk_valid = load_qelem_conditional sk private_key in
 
   if is_pk_valid then begin

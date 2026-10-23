@@ -31,22 +31,23 @@ let lemma_refl x =
 //-----------------
 
 inline_for_extraction noextract
-let proj_g_pow2_64 : S.proj_point =
+let proj_g_pow2_64 : S.proj_point_c =
   [@inline_let]
   let rX : S.felem = 0x46ec0aa60b0b98c37b29371784676ad967b7beb1a941ddb6fbbff95b44cb788b in
   [@inline_let]
   let rY : S.felem = 0x6b946755bbc6b677576579c990a1ccf14a710545251a1428fabbf02f40268e63 in
   [@inline_let]
   let rZ : S.felem = 0x3c114b2ac17c199ec9eba9f7cc64dc459ca2e53f5bbead2b4e618b318ffcc00e in
+  assert_norm (S.point_inv (rX, rY, rZ));
   (rX, rY, rZ)
 
 val lemma_proj_g_pow2_64_eval : unit ->
-  Lemma (SE.exp_pow2 S.mk_k256_concrete_ops S.g 64 == proj_g_pow2_64)
+  Lemma (SE.exp_pow2 S.mk_k256_concrete_ops S.g_c 64 == proj_g_pow2_64)
 
 let lemma_proj_g_pow2_64_eval () =
-  SPT256.exp_pow2_rec_is_exp_pow2 S.mk_k256_concrete_ops S.g 64;
-  let qX, qY, qZ = normalize_term (SPT256.exp_pow2_rec S.mk_k256_concrete_ops S.g 64) in
-  normalize_term_spec (SPT256.exp_pow2_rec S.mk_k256_concrete_ops S.g 64);
+  SPT256.exp_pow2_rec_is_exp_pow2 S.mk_k256_concrete_ops S.g_c 64;
+  let qX, qY, qZ = normalize_term (SPT256.exp_pow2_rec S.mk_k256_concrete_ops S.g_c 64) in
+  normalize_term_spec (SPT256.exp_pow2_rec S.mk_k256_concrete_ops S.g_c 64);
   let rX : S.felem = 0x46ec0aa60b0b98c37b29371784676ad967b7beb1a941ddb6fbbff95b44cb788b in
   let rY : S.felem = 0x6b946755bbc6b677576579c990a1ccf14a710545251a1428fabbf02f40268e63 in
   let rZ : S.felem = 0x3c114b2ac17c199ec9eba9f7cc64dc459ca2e53f5bbead2b4e618b318ffcc00e in
@@ -54,13 +55,14 @@ let lemma_proj_g_pow2_64_eval () =
 
 
 inline_for_extraction noextract
-let proj_g_pow2_128 : S.proj_point =
+let proj_g_pow2_128 : S.proj_point_c =
   [@inline_let]
   let rX : S.felem = 0x98299efbc8e459915404ae015b48cac3b929e0158665f3c7fa5489fbd25c4297 in
   [@inline_let]
   let rY : S.felem = 0xf1e5cbc9579e7d11a31681e947c2959ae0298a006d1c06ab1ad93d6716ea50cc in
   [@inline_let]
   let rZ : S.felem = 0x5c53ffe15001674a2eacb60c9327a8b0ddbd93a0fa6d90309de6cc124133938b in
+  assert_norm (S.point_inv (rX, rY, rZ));
   (rX, rY, rZ)
 
 val lemma_proj_g_pow2_128_eval : unit ->
@@ -77,13 +79,14 @@ let lemma_proj_g_pow2_128_eval () =
 
 
 inline_for_extraction noextract
-let proj_g_pow2_192 : S.proj_point =
+let proj_g_pow2_192 : S.proj_point_c =
   [@inline_let]
   let rX : S.felem = 0xbd382b67d20492b1480ca58a6d7d617ba413a9bc7c2f1cff51301ef960fb245c in
   [@inline_let]
   let rY : S.felem = 0x0b232afcf692673aa714357c524c07867a64ea3b9dfab53f0e74622159e86b0d in
   [@inline_let]
   let rZ : S.felem = 0x028a1380449aede5df8219420b458d464a6a4773ac91e8305237878cef1cffa6 in
+  assert_norm (S.point_inv (rX, rY, rZ));
   (rX, rY, rZ)
 
 val lemma_proj_g_pow2_192_eval : unit ->
@@ -99,13 +102,13 @@ let lemma_proj_g_pow2_192_eval () =
   assert_norm (qX == rX /\ qY == rY /\ qZ == rZ)
 
 
-// let proj_g_pow2_64 : S.proj_point =
-//   normalize_term (SPT256.exp_pow2_rec S.mk_k256_concrete_ops S.g 64)
+// let proj_g_pow2_64 : S.proj_point_c =
+//   normalize_term (SPT256.exp_pow2_rec S.mk_k256_concrete_ops S.g_c 64)
 
-// let proj_g_pow2_128 : S.proj_point =
+// let proj_g_pow2_128 : S.proj_point_c =
 //   normalize_term (SPT256.exp_pow2_rec S.mk_k256_concrete_ops proj_g_pow2_64 64)
 
-// let proj_g_pow2_192 : S.proj_point =
+// let proj_g_pow2_192 : S.proj_point_c =
 //   normalize_term (SPT256.exp_pow2_rec S.mk_k256_concrete_ops proj_g_pow2_128 64)
 
 
@@ -140,7 +143,7 @@ val proj_g_pow2_64_lemma: unit ->
 
 let proj_g_pow2_64_lemma () =
   lemma_proj_g_pow2_64_eval ();
-  SPT256.a_pow2_64_lemma S.mk_k256_concrete_ops S.g
+  SPT256.a_pow2_64_lemma S.mk_k256_concrete_ops S.g_c
 
 
 val proj_g_pow2_128_lemma: unit ->
@@ -149,7 +152,7 @@ val proj_g_pow2_128_lemma: unit ->
 let proj_g_pow2_128_lemma () =
   lemma_proj_g_pow2_128_eval ();
   lemma_proj_g_pow2_64_eval ();
-  SPT256.a_pow2_128_lemma S.mk_k256_concrete_ops S.g
+  SPT256.a_pow2_128_lemma S.mk_k256_concrete_ops S.g_c
 
 
 val proj_g_pow2_192_lemma: unit ->
@@ -159,7 +162,7 @@ let proj_g_pow2_192_lemma () =
   lemma_proj_g_pow2_192_eval ();
   lemma_proj_g_pow2_128_eval ();
   lemma_proj_g_pow2_64_eval ();
-  SPT256.a_pow2_192_lemma S.mk_k256_concrete_ops S.g
+  SPT256.a_pow2_192_lemma S.mk_k256_concrete_ops S.g_c
 
 
 let proj_g_pow2_64_lseq_lemma () =
@@ -195,15 +198,15 @@ let mk_proj_g_pow2_192 () =
 
 inline_for_extraction noextract
 let precomp_basepoint_table_list_w4: x:list uint64{FStar.List.Tot.length x = 240} =
-  normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 15)
+  normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g_c 15)
 
 let precomp_basepoint_table_lseq_w4 : LSeq.lseq uint64 240 =
-  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 15);
+  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g_c 15);
   Seq.seq_of_list precomp_basepoint_table_list_w4
 
 let precomp_basepoint_table_lemma_w4 () =
-  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 15);
-  SPT.precomp_base_table_lemma mk_k256_precomp_base_table S.g 16 precomp_basepoint_table_lseq_w4
+  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g_c 15);
+  SPT.precomp_base_table_lemma mk_k256_precomp_base_table S.g_c 16 precomp_basepoint_table_lseq_w4
 
 let precomp_basepoint_table_w4:
   x:glbuffer uint64 240ul{witnessed x precomp_basepoint_table_lseq_w4 /\ recallable x} =
@@ -277,15 +280,15 @@ let precomp_g_pow2_192_table_w4:
 
 inline_for_extraction noextract
 let precomp_basepoint_table_list_w5: x:list uint64{FStar.List.Tot.length x = 480} =
-  normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 31)
+  normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g_c 31)
 
 let precomp_basepoint_table_lseq_w5 : LSeq.lseq uint64 480 =
-  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 31);
+  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g_c 31);
   Seq.seq_of_list precomp_basepoint_table_list_w5
 
 let precomp_basepoint_table_lemma_w5 () =
-  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 31);
-  SPT.precomp_base_table_lemma mk_k256_precomp_base_table S.g 32 precomp_basepoint_table_lseq_w5
+  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g_c 31);
+  SPT.precomp_base_table_lemma mk_k256_precomp_base_table S.g_c 32 precomp_basepoint_table_lseq_w5
 
 let precomp_basepoint_table_w5:
   x:glbuffer uint64 480ul{witnessed x precomp_basepoint_table_lseq_w5 /\ recallable x} =

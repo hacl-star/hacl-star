@@ -21,7 +21,8 @@ val point_mul_g_double_split_lambda_vartime:
   (requires fun h ->
     live h out /\ live h scalar1 /\ live h scalar2 /\ live h p2 /\
     disjoint p2 out /\ disjoint out scalar1 /\ disjoint out scalar2 /\
-    point_inv h p2 /\ qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
+    point_inv h p2 /\ S.point_inv (point_eval h p2) /\
+    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_eval h1 out) ==

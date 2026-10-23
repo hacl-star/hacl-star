@@ -79,10 +79,10 @@ val point_mul_g_noalloc: out:point -> scalar:qelem
     disjoint q1 q2 /\ disjoint q1 q3 /\ disjoint q1 q4 /\
     disjoint q2 q3 /\ disjoint q2 q4 /\ disjoint q3 q4 /\
     qas_nat h scalar < S.q /\
-    point_inv h q1 /\ refl (as_seq h q1) == g_aff /\
-    point_inv h q2 /\ refl (as_seq h q2) == g_pow2_64 /\
-    point_inv h q3 /\ refl (as_seq h q3) == g_pow2_128 /\
-    point_inv h q4 /\ refl (as_seq h q4) == g_pow2_192)
+    linv (as_seq h q1) /\ refl (as_seq h q1) == g_aff /\
+    linv (as_seq h q2) /\ refl (as_seq h q2) == g_pow2_64 /\
+    linv (as_seq h q3) /\ refl (as_seq h q3) == g_pow2_128 /\
+    linv (as_seq h q4) /\ refl (as_seq h q4) == g_pow2_192)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
    (let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (qas_nat h0 scalar) in
@@ -153,17 +153,19 @@ let lemma_exp_four_fw_local b =
   assert (res == SPT256.exp_as_exp_four_nat256_precomp cm g_aff (BD.bn_v b));
   SPT256.lemma_point_mul_base_precomp4 cm g_aff (BD.bn_v b);
   assert (res == LE.pow cm g_aff (BD.bn_v b));
-  SE.exp_fw_lemma S.mk_k256_concrete_ops S.g 256 (BD.bn_v b) 4;
+  SE.exp_fw_lemma S.mk_k256_concrete_ops S.g_c 256 (BD.bn_v b) 4;
   LE.exp_fw_lemma cm g_aff 256 (BD.bn_v b) 4;
   assert (S.to_aff_point (S.point_mul_g (BD.bn_v b)) == LE.pow cm g_aff (BD.bn_v b))
 
 
+#push-options "--z3rlimit 200"
 [@CInline]
 let point_mul_g out scalar =
   push_frame ();
   let h0 = ST.get () in
   let q1 = create 15ul (u64 0) in
   make_g q1;
+  Spec.K256.Lemmas.g_inv ();
   let q2 = mk_proj_g_pow2_64 () in
   let q3 = mk_proj_g_pow2_128 () in
   let q4 = mk_proj_g_pow2_192 () in
@@ -173,6 +175,7 @@ let point_mul_g out scalar =
   point_mul_g_noalloc out scalar q1 q2 q3 q4;
   lemma_exp_four_fw_local (as_seq h0 scalar);
   pop_frame ()
+#pop-options
 
 
 //-------------------------
@@ -192,7 +195,8 @@ val point_mul_g_double_vartime_noalloc:
     disjoint out scalar1 /\ disjoint out scalar2 /\ disjoint out table2 /\
 
     qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q /\
-    point_inv h q1 /\ point_eval h q1 == S.g /\ point_inv h q2 /\
+    point_inv h q1 /\ point_eval h q1 == S.g /\
+    point_inv h q2 /\ S.point_inv (point_eval h q2) /\
     table_inv_w5 (as_seq h q2) (as_seq h table2))
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
@@ -211,6 +215,7 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   assert_norm (pow2 (v l) == v table_len);
 
   let h0 = ST.get () in
+  Spec.K256.Lemmas.g_inv ();
   recall_contents precomp_basepoint_table_w5 precomp_basepoint_table_lseq_w5;
   let h1 = ST.get () in
   precomp_basepoint_table_lemma_w5 ();

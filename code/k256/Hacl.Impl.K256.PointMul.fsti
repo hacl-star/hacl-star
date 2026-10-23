@@ -18,7 +18,7 @@ val point_mul: out:point -> scalar:qelem -> q:point -> Stack unit
   (requires fun h ->
     live h out /\ live h scalar /\ live h q /\
     disjoint out q /\ disjoint out scalar /\ disjoint q scalar /\
-    point_inv h q /\ qas_nat h scalar < S.q)
+    point_inv h q /\ S.point_inv (point_eval h q) /\ qas_nat h scalar < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_eval h1 out) ==
@@ -40,7 +40,8 @@ val point_mul_g_double_vartime: out:point -> scalar1:qelem -> scalar2:qelem -> q
   (requires fun h ->
     live h out /\ live h scalar1 /\ live h scalar2 /\ live h q2 /\
     disjoint q2 out /\ disjoint out scalar1 /\ disjoint out scalar2 /\
-    point_inv h q2 /\ qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
+    point_inv h q2 /\ S.point_inv (point_eval h q2) /\
+    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_eval h1 out) ==
