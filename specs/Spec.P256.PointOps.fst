@@ -100,6 +100,28 @@ let to_aff_point (p:proj_point) : aff_point =
   (x, y)
 
 
+///  Valid points: the invariant under which the group-law lemmas of
+///  `Spec.P256.Lemmas` hold
+
+// On the curve, or the point at infinity `(0, 0)` (which is not on the curve)
+let aff_point_inv (p:aff_point) : bool =
+  is_on_curve p || is_aff_point_at_inf p
+
+// The curve in projective coordinates: `Y^2 Z = X^3 + a X Z^2 + b Z^3`
+let is_on_proj_curve (p:proj_point) : bool =
+  let (x, y, z) = p in
+  y *% y *% z = x *% x *% x +% a_coeff *% x *% z *% z +% b_coeff *% z *% z *% z
+
+// On the projective curve and not `(0, 0, 0)`. Equivalently
+// (`Spec.P256.Lemmas.point_inv_lemma`): `Z <> 0` and `(X/Z, Y/Z)` is on the curve,
+// or `(X, Y, Z) = (0, Y, 0)` with `Y <> 0`.
+// NB: `is_on_curve (to_aff_point p) || is_point_at_inf p` is not enough: it holds
+// for `(0, 0, 0)`, and `point_add (0, 0, 0) q = (0, 0, 0)` for every `q`.
+let point_inv (p:proj_point) : bool =
+  let (x, y, z) = p in
+  is_on_proj_curve p && not (x = 0 && y = 0 && z = 0)
+
+
 ///  Point addition in affine coordinates
 
 let aff_point_double (p:aff_point) : aff_point =

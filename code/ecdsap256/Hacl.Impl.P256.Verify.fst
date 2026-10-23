@@ -103,7 +103,8 @@ val ecdsa_verification_cmpr: r:felem -> pk:point -> u1:felem -> u2:felem -> Stac
     live h r /\ live h pk /\ live h u1 /\ live h u2 /\
     disjoint r u1 /\ disjoint r u2 /\ disjoint r pk /\
     disjoint pk u1 /\ disjoint pk u2 /\
-    point_inv h pk /\ as_nat h u1 < S.order /\ as_nat h u2 < S.order /\
+    point_inv h pk /\ S.point_inv (from_mont_point (as_point_nat h pk)) /\
+    as_nat h u1 < S.order /\ as_nat h u2 < S.order /\
     0 < as_nat h r /\ as_nat h r < S.order)
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
     (let _X, _Y, _Z = S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2)
@@ -176,7 +177,9 @@ let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
   let u1  = sub tmp 20ul 4ul in
   let u2  = sub tmp 24ul 4ul in
 
+  let h0 = ST.get () in
   let is_pk_valid = load_point_vartime pk public_key in
+  SL.load_point_inv (as_seq h0 public_key);
   let is_rs_valid = load_signature r_q s_q signature_r signature_s in
 
   let res =

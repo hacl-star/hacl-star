@@ -12,8 +12,9 @@ val aff_point_add_lemma: p:aff_point -> q:aff_point -> Lemma
   (requires is_on_curve p /\ is_on_curve q)
   (ensures  is_on_curve (aff_point_add p q))
 
-val aff_point_add_assoc_lemma: p:aff_point -> q:aff_point -> s:aff_point ->
-  Lemma (aff_point_add (aff_point_add p q) s == aff_point_add p (aff_point_add q s))
+val aff_point_add_assoc_lemma: p:aff_point -> q:aff_point -> s:aff_point -> Lemma
+  (requires is_on_curve p /\ is_on_curve q /\ is_on_curve s)
+  (ensures  aff_point_add (aff_point_add p q) s == aff_point_add p (aff_point_add q s))
 
 val aff_point_at_infinity_lemma: p:aff_point ->
   Lemma (aff_point_add p aff_point_at_infinity == p)
