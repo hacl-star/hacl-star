@@ -3,6 +3,11 @@
 set -e
 set -o pipefail
 
+if [[ $(uname) == "Darwin" ]]; then
+  brew install jq openssl
+  brew info --json openssl | jq .[0].installed[0].sbom | xargs dirname
+fi
+
 if [[ $OS == "Windows_NT" ]]; then
   # The usual issue of return codes not being forwarded.
   .ci/script.bat 2>&1 | tee log
@@ -41,9 +46,6 @@ if [[ $TARGET == "IA32" ]]; then
   popd
   exit 0
 fi
-
-# For OSX... install openssl via brew and let Makefile.openssl figure it out.
-brew install openssl jq
 
 # Most likely running without OCaml -- need to configure
 pushd dist/gcc-compatible
