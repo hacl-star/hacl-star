@@ -43,7 +43,7 @@ if [[ $TARGET == "IA32" ]]; then
 fi
 
 # For OSX... install openssl via brew and let Makefile.openssl figure it out.
-brew install openssl
+brew install openssl jq
 
 # Most likely running without OCaml -- need to configure
 pushd dist/gcc-compatible
