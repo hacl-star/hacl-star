@@ -5,6 +5,7 @@ set -o pipefail
 
 if [[ $(uname) == "Darwin" ]]; then
   brew install jq openssl
+  brew info --json openssl
   brew info --json openssl | jq .[0].installed[0].sbom | xargs dirname
 fi
 
