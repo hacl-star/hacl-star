@@ -42,10 +42,8 @@ if [[ $TARGET == "IA32" ]]; then
   exit 0
 fi
 
-# For OSX... seems like the most reliable way to figure out which OpenSSL is
-# installed? We have both 1.1.1d and 1.1.1f and neither can be installed on the
-# other configuration.
-for p in /usr/local/Cellar/openssl@1.1/*; do export CFLAGS="-I$p/include/"; export LDFLAGS="-L$p/lib"; done
+# For OSX... install openssl via brew and let Makefile.openssl figure it out.
+brew install openssl
 
 # Most likely running without OCaml -- need to configure
 pushd dist/gcc-compatible
