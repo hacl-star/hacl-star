@@ -3,6 +3,12 @@
 set -e
 set -o pipefail
 
+if [[ $(uname) == "Darwin" ]]; then
+  brew install jq openssl
+  brew info --json openssl
+  brew info --json openssl | jq .[0].installed[0].sbom | xargs dirname
+fi
+
 if [[ $OS == "Windows_NT" ]]; then
   # The usual issue of return codes not being forwarded.
   .ci/script.bat 2>&1 | tee log
@@ -41,11 +47,6 @@ if [[ $TARGET == "IA32" ]]; then
   popd
   exit 0
 fi
-
-# For OSX... seems like the most reliable way to figure out which OpenSSL is
-# installed? We have both 1.1.1d and 1.1.1f and neither can be installed on the
-# other configuration.
-for p in /usr/local/Cellar/openssl@1.1/*; do export CFLAGS="-I$p/include/"; export LDFLAGS="-L$p/lib"; done
 
 # Most likely running without OCaml -- need to configure
 pushd dist/gcc-compatible
