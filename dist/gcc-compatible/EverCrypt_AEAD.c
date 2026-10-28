@@ -53,7 +53,7 @@ Return the algorithm used in the AEAD state.
 */
 Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
 {
-  Spec_Cipher_Expansion_impl impl = (*s).impl;
+  Spec_Cipher_Expansion_impl impl = s->impl;
   switch (impl)
   {
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
@@ -228,7 +228,7 @@ encrypt_aes128_gcm(
   {
     return EverCrypt_Error_InvalidIVLength;
   }
-  uint8_t *ek = (*s).ek;
+  uint8_t *ek = s->ek;
   uint8_t *scratch_b = ek + 304U;
   uint8_t *ek1 = ek;
   uint8_t *keys_b = ek1;
@@ -351,7 +351,7 @@ encrypt_aes256_gcm(
   {
     return EverCrypt_Error_InvalidIVLength;
   }
-  uint8_t *ek = (*s).ek;
+  uint8_t *ek = s->ek;
   uint8_t *scratch_b = ek + 368U;
   uint8_t *ek1 = ek;
   uint8_t *keys_b = ek1;
@@ -558,7 +558,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
   }
   else
   {
-    uint8_t *ek = (*s).ek;
+    uint8_t *ek = s->ek;
     uint8_t *scratch_b = ek + 304U;
     uint8_t *ek1 = ek;
     uint8_t *keys_b = ek1;
@@ -702,7 +702,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
   }
   else
   {
-    uint8_t *ek = (*s).ek;
+    uint8_t *ek = s->ek;
     uint8_t *scratch_b = ek + 368U;
     uint8_t *ek1 = ek;
     uint8_t *keys_b = ek1;
@@ -845,7 +845,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
     }
     else
     {
-      uint8_t *ek = (*s).ek;
+      uint8_t *ek = s->ek;
       uint8_t *scratch_b = ek + 304U;
       uint8_t *ek1 = ek;
       uint8_t *keys_b = ek1;
@@ -986,7 +986,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
     }
     else
     {
-      uint8_t *ek = (*s).ek;
+      uint8_t *ek = s->ek;
       uint8_t *scratch_b = ek + 368U;
       uint8_t *ek1 = ek;
       uint8_t *keys_b = ek1;
@@ -1097,7 +1097,7 @@ EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
   EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek };
   memcpy(ek, k, 32U * sizeof (uint8_t));
   EverCrypt_AEAD_state_s *s = &p;
-  uint8_t *ek0 = (*s).ek;
+  uint8_t *ek0 = s->ek;
   EverCrypt_Chacha20Poly1305_aead_encrypt(ek0, iv, ad_len, ad, plain_len, plain, cipher, tag);
   return EverCrypt_Error_Success;
 }
@@ -1196,7 +1196,7 @@ decrypt_aes128_gcm(
   {
     return EverCrypt_Error_InvalidIVLength;
   }
-  uint8_t *ek = (*s).ek;
+  uint8_t *ek = s->ek;
   uint8_t *scratch_b = ek + 304U;
   uint8_t *ek1 = ek;
   uint8_t *keys_b = ek1;
@@ -1229,8 +1229,7 @@ decrypt_aes128_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    uint64_t
-    c0 =
+    c =
       gcm128_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1248,7 +1247,6 @@ decrypt_aes128_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   else
   {
@@ -1261,8 +1259,7 @@ decrypt_aes128_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    uint64_t
-    c0 =
+    c =
       gcm128_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1280,17 +1277,12 @@ decrypt_aes128_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
     inout_b,
     (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
   uint64_t r = c;
-  if (r == 0ULL)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -1331,7 +1323,7 @@ decrypt_aes256_gcm(
   {
     return EverCrypt_Error_InvalidIVLength;
   }
-  uint8_t *ek = (*s).ek;
+  uint8_t *ek = s->ek;
   uint8_t *scratch_b = ek + 368U;
   uint8_t *ek1 = ek;
   uint8_t *keys_b = ek1;
@@ -1364,8 +1356,7 @@ decrypt_aes256_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    uint64_t
-    c0 =
+    c =
       gcm256_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1383,7 +1374,6 @@ decrypt_aes256_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   else
   {
@@ -1396,8 +1386,7 @@ decrypt_aes256_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    uint64_t
-    c0 =
+    c =
       gcm256_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1415,17 +1404,12 @@ decrypt_aes256_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
     inout_b,
     (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
   uint64_t r = c;
-  if (r == 0ULL)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -1456,14 +1440,10 @@ decrypt_chacha20_poly1305(
   {
     return EverCrypt_Error_InvalidIVLength;
   }
-  uint8_t *ek = (*s).ek;
+  uint8_t *ek = s->ek;
   uint32_t
   r = EverCrypt_Chacha20Poly1305_aead_decrypt(ek, iv, ad_len, ad, cipher_len, dst, cipher, tag);
-  if (r == 0U)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0U ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
 }
 
 /**
@@ -1514,7 +1494,7 @@ EverCrypt_AEAD_decrypt(
   {
     return EverCrypt_Error_InvalidKey;
   }
-  Spec_Cipher_Expansion_impl i = (*s).impl;
+  Spec_Cipher_Expansion_impl i = s->impl;
   switch (i)
   {
     case Spec_Cipher_Expansion_Vale_AES128:
@@ -1583,7 +1563,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
   {
     return EverCrypt_Error_InvalidIVLength;
   }
-  uint8_t *ek0 = (*s).ek;
+  uint8_t *ek0 = s->ek;
   uint8_t *scratch_b = ek0 + 304U;
   uint8_t *ek1 = ek0;
   uint8_t *keys_b = ek1;
@@ -1616,8 +1596,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    uint64_t
-    c0 =
+    c =
       gcm128_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1635,7 +1614,6 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   else
   {
@@ -1648,8 +1626,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    uint64_t
-    c0 =
+    c =
       gcm128_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1667,17 +1644,12 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
     inout_b,
     (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
   uint64_t r = c;
-  if (r == 0ULL)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -1733,7 +1705,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
   {
     return EverCrypt_Error_InvalidIVLength;
   }
-  uint8_t *ek0 = (*s).ek;
+  uint8_t *ek0 = s->ek;
   uint8_t *scratch_b = ek0 + 368U;
   uint8_t *ek1 = ek0;
   uint8_t *keys_b = ek1;
@@ -1766,8 +1738,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    uint64_t
-    c0 =
+    c =
       gcm256_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1785,7 +1756,6 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   else
   {
@@ -1798,8 +1768,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    uint64_t
-    c0 =
+    c =
       gcm256_decrypt_opt(auth_b_,
         (uint64_t)ad_len,
         auth_num,
@@ -1817,17 +1786,12 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
     inout_b,
     (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
   uint64_t r = c;
-  if (r == 0ULL)
-  {
-    return EverCrypt_Error_Success;
-  }
-  return EverCrypt_Error_AuthenticationFailure;
+  return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   #else
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -1882,7 +1846,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
     {
       return EverCrypt_Error_InvalidIVLength;
     }
-    uint8_t *ek0 = (*s).ek;
+    uint8_t *ek0 = s->ek;
     uint8_t *scratch_b = ek0 + 304U;
     uint8_t *ek1 = ek0;
     uint8_t *keys_b = ek1;
@@ -1915,8 +1879,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128x6_ = len128x6 / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
-      uint64_t
-      c0 =
+      c =
         gcm128_decrypt_opt(auth_b_,
           (uint64_t)ad_len,
           auth_num,
@@ -1934,7 +1897,6 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
           (uint64_t)cipher_len,
           scratch_b1,
           tag);
-      c = c0;
     }
     else
     {
@@ -1947,8 +1909,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
       uint64_t len128x6_ = 0ULL;
-      uint64_t
-      c0 =
+      c =
         gcm128_decrypt_opt(auth_b_,
           (uint64_t)ad_len,
           auth_num,
@@ -1966,17 +1927,12 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
           (uint64_t)cipher_len,
           scratch_b1,
           tag);
-      c = c0;
     }
     memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
       inout_b,
       (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
     uint64_t r = c;
-    if (r == 0ULL)
-    {
-      return EverCrypt_Error_Success;
-    }
-    return EverCrypt_Error_AuthenticationFailure;
+    return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   }
   return EverCrypt_Error_UnsupportedAlgorithm;
   #else
@@ -2029,7 +1985,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
     {
       return EverCrypt_Error_InvalidIVLength;
     }
-    uint8_t *ek0 = (*s).ek;
+    uint8_t *ek0 = s->ek;
     uint8_t *scratch_b = ek0 + 368U;
     uint8_t *ek1 = ek0;
     uint8_t *keys_b = ek1;
@@ -2062,8 +2018,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128x6_ = len128x6 / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
-      uint64_t
-      c0 =
+      c =
         gcm256_decrypt_opt(auth_b_,
           (uint64_t)ad_len,
           auth_num,
@@ -2081,7 +2036,6 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
           (uint64_t)cipher_len,
           scratch_b1,
           tag);
-      c = c0;
     }
     else
     {
@@ -2094,8 +2048,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
       uint64_t len128x6_ = 0ULL;
-      uint64_t
-      c0 =
+      c =
         gcm256_decrypt_opt(auth_b_,
           (uint64_t)ad_len,
           auth_num,
@@ -2113,17 +2066,12 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
           (uint64_t)cipher_len,
           scratch_b1,
           tag);
-      c = c0;
     }
     memcpy(dst + (uint32_t)(uint64_t)cipher_len / 16U * 16U,
       inout_b,
       (uint32_t)(uint64_t)cipher_len % 16U * sizeof (uint8_t));
     uint64_t r = c;
-    if (r == 0ULL)
-    {
-      return EverCrypt_Error_Success;
-    }
-    return EverCrypt_Error_AuthenticationFailure;
+    return r == 0ULL ? EverCrypt_Error_Success : EverCrypt_Error_AuthenticationFailure;
   }
   return EverCrypt_Error_UnsupportedAlgorithm;
   #else
@@ -2148,9 +2096,7 @@ EverCrypt_AEAD_decrypt_expand_chacha20_poly1305(
   EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek };
   memcpy(ek, k, 32U * sizeof (uint8_t));
   EverCrypt_AEAD_state_s *s = &p;
-  EverCrypt_Error_error_code
-  r = decrypt_chacha20_poly1305(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst);
-  return r;
+  return decrypt_chacha20_poly1305(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst);
 }
 
 EverCrypt_Error_error_code
@@ -2223,7 +2169,7 @@ Cleanup and free the AEAD state.
 */
 void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *s)
 {
-  uint8_t *ek = (*s).ek;
+  uint8_t *ek = s->ek;
   KRML_HOST_FREE(ek);
   KRML_HOST_FREE(s);
 }

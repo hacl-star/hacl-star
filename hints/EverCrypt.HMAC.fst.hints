@@ -1,5 +1,5 @@
 [
-  "f13e945785592b6c6929c6cfd540dd93",
+  "0673c522012f283f5e1d95cfbcebe8fd",
   [
     [
       "EverCrypt.HMAC.key_and_data_fits",
@@ -10,75 +10,41 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_FStar.Integers.W128",
-        "constructor_distinct_FStar.Integers.W16",
-        "constructor_distinct_FStar.Integers.W32",
-        "constructor_distinct_FStar.Integers.W64",
-        "constructor_distinct_FStar.Integers.W8",
-        "constructor_distinct_FStar.Integers.Winfinite",
+        "bool_inversion",
         "constructor_distinct_FStar.Pervasives.Native.None",
         "constructor_distinct_FStar.Pervasives.Native.Some",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S32",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U128",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Blake2.Blake2B",
-        "constructor_distinct_Spec.Hash.Definitions.Blake2B",
-        "constructor_distinct_Spec.Hash.Definitions.Blake2S",
-        "constructor_distinct_Spec.Hash.Definitions.MD5",
-        "constructor_distinct_Spec.Hash.Definitions.SHA1",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
-        "constructor_distinct_Spec.Hash.Definitions.SHA2_384",
-        "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
-        "constructor_distinct_Spec.Hash.Definitions.SHA3_256",
         "constructor_distinct_Tm_unit",
-        "equality_tok_FStar.Integers.W128@tok",
-        "equality_tok_FStar.Integers.W16@tok",
-        "equality_tok_FStar.Integers.W32@tok",
-        "equality_tok_FStar.Integers.W64@tok",
-        "equality_tok_FStar.Integers.W8@tok",
-        "equality_tok_FStar.Integers.Winfinite@tok",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Prims.pos", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
+        "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.less_than_max_input_length",
         "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.word_length",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.option",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
-        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "int_inversion", "int_typing", "lemma_FStar.Int.pow2_values",
         "lemma_Lib.IntTypes.pow2_127", "primitive_Prims.op_Addition",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Integers.Signed__0",
-        "projection_inverse_FStar.Integers.Unsigned__0",
-        "projection_inverse_FStar.Pervasives.Native.Some_a",
-        "projection_inverse_FStar.Pervasives.Native.Some_v",
-        "projection_inverse_Spec.GaloisField.GF_t",
+        "projection_inverse_FStar.Pervasives.Native.Some_@0",
+        "projection_inverse_FStar.Pervasives.Native.Some_@a",
+        "projection_inverse_FStar.Pervasives.Native.Some_@v",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "token_correspondence_Prims.pow2.fuel_instrumented",
-        "typing_Lib.IntTypes.bits", "typing_Spec.AES.gf8",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Prims.pow2",
         "typing_Spec.Hash.Definitions.less_than_max_input_length",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Spec.Hash.Definitions.max_input_length",
+        "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "b3958d3e6f7a9eeedd09e217cbbdec14"
+      "3f5a4a73e6019730892158c80b929802"
     ],
     [
       "EverCrypt.HMAC.compute_st",
@@ -113,7 +79,20 @@
         "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "ccacbf6d0b1c86e677e43b5996abef5d"
+      "38cfdfc8615c52ec85f5c8c2b6c34dc1"
+    ],
+    [
+      "EverCrypt.HMAC.super_hack",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_FStar.Tactics.NamedView.Sg_Let",
+        "disc_equation_FStar.Tactics.NamedView.Unk",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "f73418c80d3be97919e57c289a6e2f98"
     ],
     [
       "EverCrypt.HMAC.compute_sha1",
@@ -127,7 +106,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "953fd561f1c81f2d7c648ad325cf9245"
+      "3b8986ec5549113a0da2b7af4baf2672"
     ],
     [
       "EverCrypt.HMAC.compute_sha2_256",
@@ -141,7 +120,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "d5a9011972d5cbe85694b2698f2b05f2"
+      "ea7a7a79e37ca26da72c3e3fa934d06e"
     ],
     [
       "EverCrypt.HMAC.compute_sha2_384",
@@ -155,7 +134,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "89e0a4bfa25e8598e8c1822748b0ddc2"
+      "06c47a93e4a3a70dba50fdbf62321465"
     ],
     [
       "EverCrypt.HMAC.compute_sha2_512",
@@ -169,7 +148,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "1f74e708efd41af0bc43b08b60d58a8d"
+      "2d8c865d6fc8197450d88d47523364b8"
     ],
     [
       "EverCrypt.HMAC.compute_blake2s",
@@ -183,7 +162,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "40091081714e5bed4dd3a1c5c6c52986"
+      "881db639eb6688febbe38e904c772f10"
     ],
     [
       "EverCrypt.HMAC.compute_blake2b",
@@ -197,7 +176,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "c5dc18bbfb72c46756447ab85d8e5c35"
+      "9914ae8fbfc4cf45606b3311442278fc"
     ],
     [
       "EverCrypt.HMAC.compute_sha1",
@@ -209,12 +188,12 @@
         "equality_tok_Spec.Hash.Definitions.SHA1@tok",
         "equation_FStar.Pervasives.dfst",
         "equation_Spec.Hash.Definitions.is_shake",
-        "proj_equation_Prims.Mkdtuple2__1",
+        "proj_equation_Prims.Mkdtuple2_@_1",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Prims.Mkdtuple2__1"
+        "projection_inverse_Prims.Mkdtuple2_@_1"
       ],
       0,
-      "c06a992a574bcfbc2f07ca2d1aa5b854"
+      "8c6c03b682c26c86c1e0e01c5518f9de"
     ],
     [
       "EverCrypt.HMAC.compute_sha2_256",
@@ -226,12 +205,12 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equation_FStar.Pervasives.dfst",
         "equation_Spec.Hash.Definitions.is_shake",
-        "proj_equation_Prims.Mkdtuple2__1",
+        "proj_equation_Prims.Mkdtuple2_@_1",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Prims.Mkdtuple2__1"
+        "projection_inverse_Prims.Mkdtuple2_@_1"
       ],
       0,
-      "bf2809664827f6420523f9abf4a778a0"
+      "e36539a5504b3409ad9a056c50806df1"
     ],
     [
       "EverCrypt.HMAC.compute_sha2_384",
@@ -243,12 +222,12 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
         "equation_FStar.Pervasives.dfst",
         "equation_Spec.Hash.Definitions.is_shake",
-        "proj_equation_Prims.Mkdtuple2__1",
+        "proj_equation_Prims.Mkdtuple2_@_1",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Prims.Mkdtuple2__1"
+        "projection_inverse_Prims.Mkdtuple2_@_1"
       ],
       0,
-      "cc9e8e755fc79417d2bff0407966369b"
+      "e4646c3c77730b0809436b8ca8a9aa81"
     ],
     [
       "EverCrypt.HMAC.compute_sha2_512",
@@ -260,12 +239,12 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
         "equation_FStar.Pervasives.dfst",
         "equation_Spec.Hash.Definitions.is_shake",
-        "proj_equation_Prims.Mkdtuple2__1",
+        "proj_equation_Prims.Mkdtuple2_@_1",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Prims.Mkdtuple2__1"
+        "projection_inverse_Prims.Mkdtuple2_@_1"
       ],
       0,
-      "31e3891a7d30dcdc27ad19c0f7ac3111"
+      "a74acefe8992977e25047945a5285cfd"
     ],
     [
       "EverCrypt.HMAC.compute_blake2s",
@@ -278,12 +257,12 @@
         "equality_tok_Spec.Hash.Definitions.Blake2S@tok",
         "equation_FStar.Pervasives.dfst",
         "equation_Spec.Hash.Definitions.is_shake",
-        "proj_equation_Prims.Mkdtuple2__1",
+        "proj_equation_Prims.Mkdtuple2_@_1",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Prims.Mkdtuple2__1"
+        "projection_inverse_Prims.Mkdtuple2_@_1"
       ],
       0,
-      "f65f2cacbbb08f587b956a24bc711278"
+      "87194399cc7cb94bf18bd369304d80af"
     ],
     [
       "EverCrypt.HMAC.compute_blake2b",
@@ -296,12 +275,12 @@
         "equality_tok_Spec.Hash.Definitions.Blake2B@tok",
         "equation_FStar.Pervasives.dfst",
         "equation_Spec.Hash.Definitions.is_shake",
-        "proj_equation_Prims.Mkdtuple2__1",
+        "proj_equation_Prims.Mkdtuple2_@_1",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Prims.Mkdtuple2__1"
+        "projection_inverse_Prims.Mkdtuple2_@_1"
       ],
       0,
-      "714bde6c7f14c03206294c2356e423ef"
+      "af32b9c1e8e6a8c919f9b5bc26ec68bd"
     ],
     [
       "EverCrypt.HMAC.compute",
@@ -321,7 +300,7 @@
         "typing_Spec.Hash.Definitions.is_shake"
       ],
       0,
-      "0888ae43ec19c58a1d34f39bf231770f"
+      "9f5790cabf1b6617ecd000d2a931bf2d"
     ],
     [
       "EverCrypt.HMAC.compute",
@@ -355,7 +334,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "e3e16eb35de2b558a022192af3bed523"
+      "3e229e8eb3bfab8bd116648a4001953f"
     ],
     [
       "EverCrypt.HMAC.compute",
@@ -375,7 +354,7 @@
         "typing_Spec.Hash.Definitions.is_shake"
       ],
       0,
-      "fae421b7dc8f05e4c32839e3130747ea"
+      "d09d265fdda0e79df9efc7cf4a3f624f"
     ]
   ]
 ]

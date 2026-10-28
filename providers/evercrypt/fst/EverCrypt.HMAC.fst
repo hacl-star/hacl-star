@@ -11,13 +11,14 @@ open Hacl.HMAC
 // interface. Fortunately, we can use tactics to stealthily gain access to a
 // private definition that F* normally won't let us access.
 let super_hack () =
-  let open FStar.Tactics in
+  let open FStar.Tactics.V2 in
   let hash_256 = [ "EverCrypt"; "Hash"; "Incremental"; "hash_256"] in
-  let hash_256 = FStar.Tactics.pack_fv hash_256 in
+  let hash_256 = pack_fv hash_256 in
   let hash_256 = pack (Tv_FVar hash_256) in
   let fv = pack_fv (cur_module () `FStar.List.Tot.append` [ "hash_256" ]) in
   let t: term = pack Tv_Unknown in
-  let se = pack_sigelt (Sg_Let false [ pack_lb ({ lb_fv = fv; lb_us = []; lb_typ = t; lb_def = hash_256 }) ]) in
+  let lb = { lb_fv = fv; lb_us = []; lb_typ = t; lb_def = hash_256 } in
+  let se = pack_sigelt (Sg_Let { isrec = false; lbs = [lb] }) in
   let se = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se in
   [ se ]
 

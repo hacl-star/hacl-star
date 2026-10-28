@@ -16,15 +16,15 @@
         "int_inversion", "int_typing",
         "interpretation_Tm_abs_259010ef4609d7dd0da72e157405369f",
         "primitive_Prims.op_Modulus",
-        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_one",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_@one",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@refl",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_one",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_@one",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@refl",
         "refinement_interpretation_Tm_refine_3abfe4124fc12c50f5f1600a0293cedd",
         "refinement_kinding_Tm_refine_3abfe4124fc12c50f5f1600a0293cedd",
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl",
@@ -34,7 +34,7 @@
         "typing_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__comm_monoid"
       ],
       0,
-      "eaed8b6f615c6260ea460dc482bb58dc"
+      "ef9c3715416200a154542cd56c784288"
     ],
     [
       "Hacl.Spec.K256.Qinv.mul_mod",
@@ -42,26 +42,31 @@
       0,
       0,
       [
-        "@query", "equation_Hacl.Spec.K256.Qinv.mk_to_nat_mod_comm_monoid",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.K256.Qinv.mk_to_nat_mod_comm_monoid",
         "equation_Hacl.Spec.K256.Qinv.nat_mod_comm_monoid",
         "equation_Lib.NatMod.mk_nat_mod_comm_monoid",
         "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.nat_mod",
-        "equation_Spec.K256.PointOps.q", "equation_Spec.K256.PointOps.qelem",
-        "equation_Spec.K256.PointOps.qmul",
+        "equation_Prims.nat", "equation_Spec.K256.PointOps.q",
+        "equation_Spec.K256.PointOps.qelem",
+        "equation_Spec.K256.PointOps.qmul", "int_inversion",
         "interpretation_Tm_abs_259010ef4609d7dd0da72e157405369f",
-        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_refl",
-        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_@mul",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@refl",
+        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_@mul",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@refl",
+        "refinement_interpretation_Tm_refine_3abfe4124fc12c50f5f1600a0293cedd",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "token_correspondence_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__mul",
         "token_correspondence_Lib.NatMod.mul_mod",
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl"
       ],
       0,
-      "6440fc8ee47672f88ec07c4e4901a4d4"
+      "6eee13e9b453cf1bca76cfc0ab44f118"
     ],
     [
       "Hacl.Spec.K256.Qinv.sqr_mod",
@@ -69,26 +74,31 @@
       0,
       0,
       [
-        "@query", "equation_Hacl.Spec.K256.Qinv.mk_to_nat_mod_comm_monoid",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.K256.Qinv.mk_to_nat_mod_comm_monoid",
         "equation_Hacl.Spec.K256.Qinv.nat_mod_comm_monoid",
         "equation_Lib.NatMod.mk_nat_mod_comm_monoid",
         "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.nat_mod",
-        "equation_Spec.K256.PointOps.q", "equation_Spec.K256.PointOps.qelem",
-        "equation_Spec.K256.PointOps.qmul",
+        "equation_Prims.nat", "equation_Spec.K256.PointOps.q",
+        "equation_Spec.K256.PointOps.qelem",
+        "equation_Spec.K256.PointOps.qmul", "int_inversion",
         "interpretation_Tm_abs_259010ef4609d7dd0da72e157405369f",
-        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_refl",
-        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_@mul",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@refl",
+        "projection_inverse_Lib.Exponentiation.Definition.Mkcomm_monoid_@mul",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@refl",
+        "refinement_interpretation_Tm_refine_3abfe4124fc12c50f5f1600a0293cedd",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "token_correspondence_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__mul",
         "token_correspondence_Lib.NatMod.mul_mod",
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl"
       ],
       0,
-      "44d55ad6625237021771d2fbdbd70743"
+      "c99b9f26d00d9c1b6885a5e9d34c1ffa"
     ],
     [
       "Hacl.Spec.K256.Qinv.qsquare_times_lemma",
@@ -100,7 +110,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a2631f59fc27f0aa1bc09806672402b1"
+      "a282bc7fef576d42817c4f0c4d5880db"
     ],
     [
       "Hacl.Spec.K256.Qinv.qsquare_times_lemma",
@@ -118,15 +128,15 @@
         "equation_Spec.K256.PointOps.q", "equation_Spec.K256.PointOps.qelem",
         "fuel_guarded_inversion_Lib.Exponentiation.Definition.comm_monoid",
         "interpretation_Tm_abs_259010ef4609d7dd0da72e157405369f",
-        "proj_equation_Spec.Exponentiation.Mkconcrete_ops_to",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "proj_equation_Spec.Exponentiation.Mkconcrete_ops_@to",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_@refl",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.Exponentiation.Mkconcrete_ops_to",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
-        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_refl",
+        "projection_inverse_Spec.Exponentiation.Mkconcrete_ops_@to",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@a_spec",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@comm_monoid",
+        "projection_inverse_Spec.Exponentiation.Mkto_comm_monoid_@refl",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_kinding_Tm_refine_3abfe4124fc12c50f5f1600a0293cedd",
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl",
@@ -137,7 +147,7 @@
         "typing_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__comm_monoid"
       ],
       0,
-      "6b396554b08eb9bc616cbe48121e79de"
+      "88d2c76b1f2d85aef9093aeab2a24c36"
     ],
     [
       "Hacl.Spec.K256.Qinv.lemma_pow_mod_1",
@@ -146,7 +156,7 @@
       0,
       [ "@query" ],
       0,
-      "90eb33101d096889efcceafe0561cc24"
+      "90ece83616398b4d8a7d9a366bb11cf4"
     ],
     [
       "Hacl.Spec.K256.Qinv.lemma_pow_mod_1",
@@ -160,7 +170,7 @@
         "refinement_interpretation_Tm_refine_3abfe4124fc12c50f5f1600a0293cedd"
       ],
       0,
-      "fd6998764fe66d7cdd77dc313d972a45"
+      "bf401983578d629b4179d4ac239322f7"
     ],
     [
       "Hacl.Spec.K256.Qinv.lemma_pow_mod_mul",
@@ -175,7 +185,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "4052be1a6ade1b6c9b98a48f0dd8480d"
+      "134e74f3fa6f0dfb6a68d98c1f4db9ce"
     ],
     [
       "Hacl.Spec.K256.Qinv.lemma_pow_mod_mul",
@@ -190,7 +200,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "50772029c214b94b0008ccba3a0c5b66"
+      "5061e1b8129f05974566d7ba1a1c06d2"
     ],
     [
       "Hacl.Spec.K256.Qinv.lemma_pow_pow_mod_mul",
@@ -205,7 +215,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "87111dce9b92a87fa5e7f1b3ac1621f3"
+      "b3b4dda751d8c9d10d8cb36d0a78488a"
     ],
     [
       "Hacl.Spec.K256.Qinv.lemma_pow_pow_mod_mul",
@@ -221,7 +231,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "92a8c4c91783e139929f822ffc3dd5c8"
+      "ad12e40de175aeb469ae1fa63da9567e"
     ],
     [
       "Hacl.Spec.K256.Qinv.qinv_lemma",
@@ -233,7 +243,7 @@
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "af3b8877560860294efdfb8f7e76c3ea"
+      "46dd45009066dd8636aadc6eb6fb0d04"
     ],
     [
       "Hacl.Spec.K256.Qinv.qinv_lemma",
@@ -256,7 +266,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "618b7e76146b05281537a916248ae6f2"
+      "49b79460a2307d58ee6f90a6ff92d941"
     ],
     [
       "Hacl.Spec.K256.Qinv.qinv_is_qinv_lemma",
@@ -272,7 +282,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "64aeff3400e19b5d63db18f3d424b802"
+      "f35c4085c3598edaf0901f5a472f94a4"
     ]
   ]
 ]

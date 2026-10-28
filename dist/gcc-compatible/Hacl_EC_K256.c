@@ -268,8 +268,7 @@ void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out)
     4U,
     1U,
     uint64_t *os = scalar_q;
-    uint64_t u = load64_be(scalar + (4U - i - 1U) * 8U);
-    uint64_t x = u;
+    uint64_t x = load64_be(scalar + (4U - i - 1U) * 8U);
     os[i] = x;);
   Hacl_Impl_K256_PointMul_point_mul(out, scalar_q, p);
 }
@@ -339,7 +338,6 @@ Check whether a point is valid.
 bool Hacl_EC_K256_is_point_valid(uint8_t *b)
 {
   uint64_t p[10U] = { 0U };
-  bool res = Hacl_Impl_K256_Point_aff_point_load_vartime(p, b);
-  return res;
+  return Hacl_Impl_K256_Point_aff_point_load_vartime(p, b);
 }
 

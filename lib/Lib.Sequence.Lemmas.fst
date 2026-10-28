@@ -652,7 +652,22 @@ let map_blocks_acc #a blocksize mi hi inp f l acc0 =
     (repeat_gen_blocks_map_f blocksize hi f)
     (repeat_gen_blocks_map_l blocksize hi l) acc0
 
-let map_blocks_acc_length #a blocksize mi hi inp f l acc0 = ()
+let map_blocks_acc_length #a blocksize mi hi inp f l acc0 =
+  let len = length inp in
+  let nb = len / blocksize in
+  let rem = len % blocksize in
+  Math.Lemmas.lemma_div_mod len blocksize;
+  let blocks = Seq.slice inp 0 (nb * blocksize) in
+  let last = Seq.slice inp (nb * blocksize) len in
+  Seq.lemma_len_slice inp 0 (nb * blocksize);
+  Seq.lemma_len_slice inp (nb * blocksize) len;
+  let a_map = map_blocks_a a blocksize hi in
+  let f_map = repeat_gen_blocks_map_f blocksize hi f in
+  let l_map = repeat_gen_blocks_map_l blocksize hi l in
+  let acc = repeat_gen_blocks_multi blocksize mi hi nb blocks a_map f_map acc0 in
+  lemma_repeat_gen_blocks blocksize mi hi inp a_map f_map l_map acc0;
+  repeat_gen_blocks_map_l_length blocksize hi l (mi + nb) rem last acc;
+  Math.Lemmas.distributivity_add_left mi nb blocksize
 
 let map_blocks_multi_acc_is_repeat_gen_blocks_multi #a blocksize mi hi n inp f acc0 = ()
 

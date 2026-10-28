@@ -41,6 +41,11 @@ let lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h =
   assert (s' == seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s)));
   let s_f = seq_nat8_to_seq_uint8 s' in
   UV.length_eq ub;
+  assert (Seq.length s_f == Seq.length s');
+  assert (Seq.length s' == 16 * Seq.length s);
+  assert (Seq.length s == B.length b / 16);
+  assert (B.length b % 16 == 0);
+  assert (Seq.length s_f == Seq.length s_init);
   let aux (i:nat{i < Seq.length s_f}) : Lemma (Seq.index s_init i == Seq.index s_f i) =
     reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
     reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);

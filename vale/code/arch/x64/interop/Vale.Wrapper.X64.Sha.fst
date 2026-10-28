@@ -182,6 +182,11 @@ let simplify_le_bytes_to_hash_uint32 b h =
   assert (Seq.equal sf s_init)
 #pop-options
 
+private let packed_word_length (len n:nat) : Lemma
+  (requires len == 4 * n)
+  (ensures (len * 4) / 16 == n) =
+  FStar.Math.Lemmas.cancel_mul_div n 16
+
 #push-options "--ext compat:normalizer_memo_ignore_cfg"
 let sha256_update ctx_b in_b num_val k_b =
   let h0 = get() in
@@ -192,11 +197,21 @@ let sha256_update ctx_b in_b num_val k_b =
   lemma_k_reqs_equiv k_b h0;
   math_aux (UInt64.v num_val);
   as_vale_buffer_len #TUInt8 #TUInt128 in_b;
+  as_vale_buffer_len #TUInt32 #TUInt128 ctx_b;
+  as_vale_immbuffer_len #TUInt32 #TUInt128 k_b;
+  packed_word_length (B.length ctx_b) 2;
+  packed_word_length (B.length k_b) 16;
   let (x, _) = Vale.Stdcalls.X64.Sha.sha256_update ctx_b in_b num_val k_b () in
   let h1 = get() in
+  B.modifies_loc_includes (B.loc_buffer ctx_b) h0 h1
+    (B.loc_union (B.loc_buffer ctx_b) B.loc_none);
+  B.modifies_buffer_elim in_b (B.loc_buffer ctx_b) h0 h1;
+  B.length_as_seq h0 in_b;
+  FStar.Math.Lemmas.cancel_mul_mod (UInt64.v num_val) 64;
   reveal_word();
   simplify_le_bytes_to_hash_uint32 ctx_b h0;
   simplify_le_bytes_to_hash_uint32 ctx_b h1;
   lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 in_b h0;
+  lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 in_b h1;
   ()
 #pop-options

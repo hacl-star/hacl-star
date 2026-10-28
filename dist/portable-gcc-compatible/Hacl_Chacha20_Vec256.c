@@ -186,9 +186,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     1U,
     uint32_t *os = ctx1 + 4U;
     uint8_t *bj = k + i * 4U;
-    uint32_t u = load32_le(bj);
-    uint32_t r = u;
-    uint32_t x = r;
+    uint32_t x = load32_le(bj);
     os[i] = x;);
   ctx1[12U] = ctr;
   KRML_MAYBE_FOR3(i,
@@ -197,9 +195,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     1U,
     uint32_t *os = ctx1 + 13U;
     uint8_t *bj = n + i * 4U;
-    uint32_t u = load32_le(bj);
-    uint32_t r = u;
-    uint32_t x = r;
+    uint32_t x = load32_le(bj);
     os[i] = x;);
   KRML_MAYBE_FOR16(i,
     0U,

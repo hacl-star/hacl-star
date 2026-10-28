@@ -213,7 +213,7 @@ let lemma_whileFalse_total (b:ocmp) (c:code) (s0:state) (sW:state) (fW:fuel) =
   assert (eval_code (While b c) s0 f1 s1);
   (s1, f1)
 
-#reset-options "--fuel 2 --z3rlimit 30"
+#reset-options "--fuel 2 --z3rlimit 60"
 let lemma_whileMerge_total (c:code) (s0:state) (f0:fuel) (sM:state) (fM:fuel) (sN:state) =
   let cond = While?.whileCond c in
   let fN:nat = f0 + fM + 1 in

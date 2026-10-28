@@ -70,6 +70,7 @@ val secretbox_detached_cipher:
     (let (tag, cipher) = Spec.secretbox_detached (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) in
      as_seq h1 c == cipher))
 
+#push-options "--z3rlimit 200"
 let secretbox_detached_cipher mlen c k xkeys n m =
   let h0 = ST.get () in
   push_frame ();
@@ -84,6 +85,9 @@ let secretbox_detached_cipher mlen c k xkeys n m =
   let m1 = sub m mlen0 mlen1 in
 
   let block0 = create 32ul (u8 0) in
+  assert_spinoff (disjoint block0 m0);
+  assert_spinoff (disjoint block0 ekey0);
+  assert_spinoff (disjoint block0 c);
   update_sub block0 0ul mlen0 m0;
   map2T 32ul block0 ( ^. ) block0 ekey0;
 
@@ -92,17 +96,18 @@ let secretbox_detached_cipher mlen c k xkeys n m =
   let h1 = ST.get () in
   copy c0 (sub block0 0ul mlen0);
   let h2 = ST.get () in
-  //assert (as_seq h2 c0 == LSeq.sub (as_seq h1 block0) 0 (v mlen0));
+  assert_spinoff (as_seq h2 c0 == LSeq.sub (as_seq h1 block0) 0 (v mlen0));
   salsa20_encrypt mlen1 c1 m1 subkey n1 1ul;
   let h3 = ST.get () in
   //assert (as_seq h3 c1 == Spec.Salsa20.salsa20_encrypt_bytes (as_seq h2 subkey) (as_seq h2 n1) 1 (as_seq h2 m1));
   FStar.Seq.Properties.lemma_split (as_seq h3 c) (v mlen0);
   //FStar.Seq.Properties.lemma_split (Seq.append (as_seq h2 c0) (as_seq h3 c1)) (v mlen0);
-  assert (as_seq h3 c == Seq.append (as_seq h2 c0) (as_seq h3 c1));
-  assert (
+  assert_spinoff (as_seq h3 c == Seq.append (as_seq h2 c0) (as_seq h3 c1));
+  assert_spinoff (
     let (tag, cipher) = Spec.secretbox_detached (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) in
     as_seq h3 c == cipher);
   pop_frame ()
+#pop-options
 
 
 val secretbox_detached:
@@ -120,6 +125,7 @@ val secretbox_detached:
   (ensures  fun h0 _ h1 -> modifies (loc c |+| loc tag) h0 h1 /\
     (as_seq h1 tag, as_seq h1 c) == Spec.secretbox_detached (as_seq h0 k) (as_seq h0 n) (as_seq h0 m))
 
+#push-options "--split_queries always"
 let secretbox_detached mlen c tag k n m =
   let h0 = ST.get () in
   push_frame();
@@ -133,6 +139,7 @@ let secretbox_detached mlen c tag k n m =
     let (tag1, cipher) = Spec.secretbox_detached (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) in
     (as_seq h1 tag, as_seq h1 c) == (tag1, cipher));
   pop_frame()
+#pop-options
 
 
 inline_for_extraction noextract
@@ -177,6 +184,9 @@ let secretbox_open_detached_plain mlen m xkeys n c =
   let c1 = sub c mlen0 mlen1 in
 
   let block0 = create 32ul (u8 0) in
+  assert_spinoff (disjoint block0 c0);
+  assert_spinoff (disjoint block0 ekey0);
+  assert_spinoff (disjoint block0 m);
   update_sub block0 0ul mlen0 c0;
   map2T 32ul block0 ( ^. ) block0 ekey0;
 
@@ -206,6 +216,7 @@ val secretbox_open_detached:
     | 0ul -> Some? msg /\ as_seq h1 m == Some?.v msg
     | _ -> None? msg))
 
+#push-options "--split_queries always"
 let secretbox_open_detached mlen m k n c tag =
   push_frame();
   let xkeys = create 96ul (u8 0) in
@@ -223,6 +234,7 @@ let secretbox_open_detached mlen m k n c tag =
       0xfffffffful in
   pop_frame ();
   res
+#pop-options
 
 
 val secretbox_easy:

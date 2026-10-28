@@ -30,6 +30,10 @@ extern uint64_t FStar_UInt64_zero;
 
 extern uint64_t FStar_UInt64_one;
 
+extern uint64_t FStar_UInt64_rotate_right(uint64_t a, uint32_t s);
+
+extern uint64_t FStar_UInt64_rotate_left(uint64_t a, uint32_t s);
+
 extern bool FStar_UInt64_ne(uint64_t a, uint64_t b);
 
 extern uint64_t FStar_UInt64_minus(uint64_t a);
@@ -81,6 +85,10 @@ extern uint32_t FStar_UInt32_uint_to_t(krml_checked_int_t x);
 extern uint32_t FStar_UInt32_zero;
 
 extern uint32_t FStar_UInt32_one;
+
+extern uint32_t FStar_UInt32_rotate_right(uint32_t a, uint32_t s);
+
+extern uint32_t FStar_UInt32_rotate_left(uint32_t a, uint32_t s);
 
 extern bool FStar_UInt32_ne(uint32_t a, uint32_t b);
 
@@ -134,6 +142,10 @@ extern uint16_t FStar_UInt16_zero;
 
 extern uint16_t FStar_UInt16_one;
 
+extern uint16_t FStar_UInt16_rotate_right(uint16_t a, uint32_t s);
+
+extern uint16_t FStar_UInt16_rotate_left(uint16_t a, uint32_t s);
+
 extern bool FStar_UInt16_ne(uint16_t a, uint16_t b);
 
 extern uint16_t FStar_UInt16_minus(uint16_t a);
@@ -143,7 +155,7 @@ extern uint32_t FStar_UInt16_n_minus_one;
 static KRML_NOINLINE uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b)
 {
   uint16_t x = (uint32_t)a ^ (uint32_t)b;
-  uint16_t minus_x = (uint32_t)~x + 1U;
+  uint16_t minus_x = (~(uint32_t)x & 0xFFFFU) + 1U;
   uint16_t x_or_minus_x = (uint32_t)x | (uint32_t)minus_x;
   uint16_t xnx = (uint32_t)x_or_minus_x >> 15U;
   return (uint32_t)xnx - 1U;
@@ -186,6 +198,10 @@ extern uint8_t FStar_UInt8_zero;
 
 extern uint8_t FStar_UInt8_one;
 
+extern uint8_t FStar_UInt8_rotate_right(uint8_t a, uint32_t s);
+
+extern uint8_t FStar_UInt8_rotate_left(uint8_t a, uint32_t s);
+
 extern bool FStar_UInt8_ne(uint8_t a, uint8_t b);
 
 extern uint8_t FStar_UInt8_minus(uint8_t a);
@@ -195,7 +211,7 @@ extern uint32_t FStar_UInt8_n_minus_one;
 static KRML_NOINLINE uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b)
 {
   uint8_t x = (uint32_t)a ^ (uint32_t)b;
-  uint8_t minus_x = (uint32_t)~x + 1U;
+  uint8_t minus_x = (~(uint32_t)x & 0xFFU) + 1U;
   uint8_t x_or_minus_x = (uint32_t)x | (uint32_t)minus_x;
   uint8_t xnx = (uint32_t)x_or_minus_x >> 7U;
   return (uint32_t)xnx - 1U;

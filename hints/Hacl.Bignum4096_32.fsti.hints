@@ -35,7 +35,7 @@
         "typing_FStar.UInt32.uint_to_t"
       ],
       0,
-      "fcc949217cdebcb4cb0db8ebd312b80f"
+      "e2fd1918c9dfe1517c0c3749c14cf205"
     ],
     [
       "Hacl.Bignum4096_32.n_bytes",
@@ -71,7 +71,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum4096_32.n_limbs"
       ],
       0,
-      "9017427f20480a253e2ae783850038e3"
+      "9a4ac886aa83fbab7a04975e6115679a"
     ],
     [
       "Hacl.Bignum4096_32.uu___0",
@@ -83,8 +83,6 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.UInt.fits",
@@ -100,29 +98,27 @@
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Prims.abs", "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
-        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.pow2_2",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_GreaterThanOrEqual",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
+        "int_inversion", "int_typing", "lemma_FStar.Int.pow2_values",
+        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
+        "lemma_Lib.IntTypes.pow2_2", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0565159ca1a4309c5fab2a6822440faa",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_1ccfb21903aa30ace8832f7a4d067d9b",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
-        "refinement_interpretation_Tm_refine_4a0c4ee040b1b12e8de79f9e258b9858",
+        "refinement_interpretation_Tm_refine_23f8b897e5349f0c8b915bf6b9c389d9",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_6e0e4c5d967bb767ca120a6649c20c22",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_799d6c030257a5be7ad8373ff8f15ffc",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_8eb0aedf531fbd32cde4f9bbc27f9306",
+        "refinement_interpretation_Tm_refine_869ea6bf1d3d8f9cae90e6b828df71bf",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.mul",
@@ -130,11 +126,11 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum4096_32.n_bytes",
         "typing_Hacl.Bignum4096_32.n_limbs",
         "typing_Hacl.Spec.Bignum.Definitions.blocks",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.v",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Lib.IntTypes.v", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f22b01c3e026b911c4697af7130c391b"
+      "b9e2f822cf659787826fe183439f6c0e"
     ],
     [
       "Hacl.Bignum4096_32.uu___1",
@@ -180,7 +176,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cd3724f1f1f015b3dd12430272f39168"
+      "a09500111e1b9bccb97dcb8b85d64af2"
     ],
     [
       "Hacl.Bignum4096_32.add_mod",
@@ -189,7 +185,7 @@
       0,
       [ "@query" ],
       0,
-      "08cf45e4287063edb1a28c749d5acc74"
+      "d2928313c0d61302a1f60fa105684bf9"
     ],
     [
       "Hacl.Bignum4096_32.sub_mod",
@@ -198,7 +194,7 @@
       0,
       [ "@query" ],
       0,
-      "739c3267bfcff552f7b245f4de55e921"
+      "b018017e943d3d366d712606c3a5b96e"
     ],
     [
       "Hacl.Bignum4096_32.mul",
@@ -218,7 +214,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "8e8d3f8be4a4b86da01d3d2670d250bf"
+      "a44ce95f537a0fa1fa94665fc91061f2"
     ],
     [
       "Hacl.Bignum4096_32.sqr",
@@ -238,7 +234,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "283d5a8a85878eef1d7566ba86480ca6"
+      "32f1c11ab632cb913628c7040ec43760"
     ],
     [
       "Hacl.Bignum4096_32.bn_to_bytes_be",
@@ -296,7 +292,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bd89e017c770b8a16c4f1fcc5e7a39a4"
+      "63691a20d8b19547d481c2d3301cf4fe"
     ],
     [
       "Hacl.Bignum4096_32.bn_to_bytes_le",
@@ -354,7 +350,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "65c04150c6925f0e80592208141d66fb"
+      "976fc8187c9e3f24fe2507d43e469bb8"
     ]
   ]
 ]

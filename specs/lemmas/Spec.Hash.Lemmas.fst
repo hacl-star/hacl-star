@@ -49,6 +49,7 @@ let update_multi_update (a: md_alg) (h: words_state a) (input: bytes_block a): L
     end
 #pop-options
 
+#push-options "--z3rlimit 20"
 let update_multi_associative (a: hash_alg{not (is_blake a)})
   (h: words_state a)
   (input1: bytes)
@@ -71,6 +72,7 @@ let update_multi_associative (a: hash_alg{not (is_blake a)})
     assert (input1 `S.equal` S.slice input 0 (S.length input1));
     assert (input2 `S.equal` S.slice input (S.length input1) (S.length input));
     Lib.Sequence.Lemmas.repeat_blocks_multi_split (block_length a) (S.length input1) input f h
+#pop-options
 
 let lemma_blocki_aux1 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s1 / block_length a})
   : Lemma (Spec.Blake2.get_blocki (to_blake_alg a) s1 i == Spec.Blake2.get_blocki (to_blake_alg a) (S.append s1 s2) i)
@@ -150,6 +152,7 @@ let lemma_update_aux2 (a:blake_alg) (s1 s2:bytes) (nb1 nb2:nat) (prevlen1 prevle
 
     }
 
+#push-options "--ifuel 1"
 let update_multi_associative_blake (a: blake_alg)
   (h: words_state a)
   (prevlen1: nat)
@@ -202,9 +205,11 @@ let update_multi_associative_blake (a: blake_alg)
       == { repeati_def nb2 f2 (update_multi a h prevlen1 input1) }
       update_multi a (update_multi a h prevlen1 input1) prevlen2 input2;
     }
+#pop-options
 
 (* *)
 let block_length_smaller_than_max_input (a:hash_alg) =
   normalize_term_spec(pow2 61 - 1);
   normalize_term_spec(pow2 125 - 1);
   normalize_term_spec(pow2 64 - 1)
+#pop-options

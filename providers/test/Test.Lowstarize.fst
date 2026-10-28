@@ -1,7 +1,7 @@
 module Test.Lowstarize
 
 open FStar.List.Tot
-open FStar.Tactics
+open FStar.Tactics.V2
 open LowStar.BufferOps
 open Lib.Meta
 
@@ -16,7 +16,7 @@ assume val h: string -> hex_encoded
 
 noextract
 let mk_int (i: int): term =
-  pack_ln (Tv_Const (C_Int i))
+  pack (Tv_Const (C_Int i))
 
 noextract
 let mk_uint8 (x: int): Tac term =
@@ -42,7 +42,7 @@ let rec as_uint8s acc
 
 noextract
 let destruct_string e =
-  match inspect_ln e with
+  match inspect e with
   | Tv_Const (C_String s) -> Some s
   | _ -> None
 
@@ -62,7 +62,7 @@ let must (x: option 'a): Tac 'a =
 noextract
 let rec destruct_list (e: term): Tac (option (list term)) =
   let hd, args = collect_app e in
-  match inspect_ln hd, args with
+  match inspect hd, args with
   | Tv_UInst fv _, [ _; hd, _; tl, _ ]
   | Tv_FVar fv, [ _; hd, _; tl, _ ] ->
       if inspect_fv fv = cons_qn then
@@ -93,9 +93,9 @@ let mktuple_qns =
     mktuple7_qn; mktuple8_qn ]
 
 noextract
-let destruct_tuple (e: term): option (list term) =
-  let hd, args = collect_app_ln e in
-  match inspect_ln hd with
+let destruct_tuple (e: term): Tac (option (list term)) =
+  let hd, args = collect_app e in
+  match inspect hd with
   | Tv_UInst fv _
   | Tv_FVar fv ->
       if List.Tot.contains (inspect_fv fv) mktuple_qns then
@@ -164,11 +164,11 @@ let mk_gcmalloc_of_list (uniq: gensym) (arg: term) (l:int) (t: option term):
   let uniq, name = fresh uniq in
   let fv: fv = pack_fv name in
   let t: term = match t with None -> pack Tv_Unknown | Some t -> t in
-  let lb = pack_lb ({lb_fv = fv;
+  let lb = {lb_fv = fv;
                        lb_us = [];
                        lb_typ = t;
-                       lb_def = def}) in
-  let se: sigelt = pack_sigelt (Sg_Let false [lb]) in
+                       lb_def = def} in
+  let se: sigelt = pack_sigelt (Sg_Let { isrec = false; lbs = [lb] }) in
   uniq, se, mk_e_app (`LB) [mk_uint32 l; pack (Tv_FVar fv)]
 
 noextract
@@ -237,16 +237,16 @@ let lowstarize_toplevel src dst: Tac decls =
   let str = lookup_typ (top_env ()) fv  in
   let str = must str in
   let def = match inspect_sigelt str with
-            | Sg_Let _ lbs -> let lbv = lookup_lb_view lbs fv in lbv.lb_def
+            | Sg_Let { lbs } -> let lbv = lookup_lb lbs fv in lbv.lb_def
 	    | _ -> fail "must" in
   let _, ses, def = lowstarize_expr (dst, 0) def in
   let fv = pack_fv (cur_module () @ [ dst ]) in
   let t: term = pack Tv_Unknown in
-  let lb = pack_lb ({lb_fv = fv;
+  let lb = {lb_fv = fv;
                      lb_us = [];
                      lb_typ = t;
-                     lb_def = def}) in
-  let se: sigelt = pack_sigelt (Sg_Let false [lb]) in
+                     lb_def = def} in
+  let se: sigelt = pack_sigelt (Sg_Let { isrec = false; lbs = [lb] }) in
   normalize_term (ses @ [ se ])
 
 

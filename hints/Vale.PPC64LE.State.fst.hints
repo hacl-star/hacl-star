@@ -8,7 +8,7 @@
       0,
       [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
       0,
-      "9ac3ac47a80fa94a87ca1e7f649cdc4e"
+      "fdad97ffa634e4e236898de9bf8c1ce2"
     ],
     [
       "Vale.PPC64LE.State.coerce",
@@ -17,10 +17,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_754b00004f4a881ff74d076ab276dfe1"
+        "refinement_interpretation_Tm_refine_3c1a05fd19e5cc3241063afcfaaaa451"
       ],
       0,
-      "8dda2ddd79655816ea0c19e0736f5ee5"
+      "bfd9e30e3603fa221674e65c20aca74b"
     ],
     [
       "Vale.PPC64LE.State.eval_mem",
@@ -29,7 +29,7 @@
       0,
       [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
       0,
-      "58268d59012685443cd937322f59ebb3"
+      "b7851b585b0348657e90c469f53fb9a9"
     ],
     [
       "Vale.PPC64LE.State.eval_cmp_opr",
@@ -44,7 +44,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "6104d69809be8691768360102984434f"
+      "9ad1be632d2b14adfc9a17ac641b4a4e"
     ],
     [
       "Vale.PPC64LE.State.update_reg",
@@ -56,10 +56,10 @@
         "equation_Vale.PPC64LE.Machine_s.reg",
         "function_token_typing_Prims.int",
         "haseqTm_refine_10933b2b7d83031ac55f8752406bdc16",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f"
       ],
       0,
-      "f316725c96ec5dbabb1c6c9092a06fca"
+      "5fa3e6cf670d82365c80eafbe026387c"
     ],
     [
       "Vale.PPC64LE.State.update_vec",
@@ -71,10 +71,10 @@
         "equation_Vale.PPC64LE.Machine_s.vec",
         "function_token_typing_Prims.int",
         "haseqTm_refine_10933b2b7d83031ac55f8752406bdc16",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f"
       ],
       0,
-      "5f695e16a966b538190328b4997a19d9"
+      "afdc6766fe0f41d51df4c0b219298c11"
     ],
     [
       "Vale.PPC64LE.State.valid_maddr",
@@ -83,7 +83,7 @@
       0,
       [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
       0,
-      "3b2777807dabcfe455dbb28a877cd23f"
+      "d7f53df55483f580c4fa35b3b2a1552b"
     ],
     [
       "Vale.PPC64LE.State.valid_mem128",
@@ -92,7 +92,7 @@
       0,
       [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
       0,
-      "b533134df05629ad58a613188e7e1e19"
+      "0ee4817d44f528d33bec59f803d8d770"
     ],
     [
       "Vale.PPC64LE.State.state_eta",
@@ -101,7 +101,7 @@
       0,
       [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
       0,
-      "d0718afb833c7dc7449133fac1f2f396"
+      "fb5987bfd00af177feba04803074d731"
     ],
     [
       "Vale.PPC64LE.State.state_eq",
@@ -110,7 +110,7 @@
       0,
       [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
       0,
-      "d5e475e82fefed15fbd90a5e322d8329"
+      "04acb0e89315a8af779d691a7e9de5f7"
     ],
     [
       "Vale.PPC64LE.State.use_machine_state_equal",
@@ -127,19 +127,19 @@
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
         "lemma_Vale.PPC64LE.Regs.lemma_equal_elim",
         "lemma_Vale.PPC64LE.Vecs.lemma_equal_elim",
-        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_cr0",
-        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ms_heap",
-        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ms_stack",
-        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ms_stackTaint",
-        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ok",
-        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_regs",
-        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_vecs",
-        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_xer",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_@cr0",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_@ms_heap",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_@ms_stack",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_@ms_stackTaint",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_@ok",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_@regs",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_@vecs",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_@xer",
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__regs",
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__vecs"
       ],
       0,
-      "f290175107520a895d702394916d974d"
+      "a6ffafbce57490ad25de381da190ab90"
     ]
   ]
 ]

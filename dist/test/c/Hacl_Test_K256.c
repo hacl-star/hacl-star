@@ -254,7 +254,7 @@ static void test_secret_to_public(uint8_t *sk, uint8_t *pk)
   else
   {
     C_String_print("Failure :(\n");
-    exit((int32_t)255);
+    exit(255);
   }
 }
 
@@ -269,7 +269,7 @@ static void test_verify_sha256(uint32_t msg_len, uint8_t *msg, uint8_t *pk, uint
   else
   {
     C_String_print("Failure :(\n");
-    exit((int32_t)255);
+    exit(255);
   }
 }
 
@@ -284,7 +284,7 @@ static void test_verify_hashed(uint8_t *msgHash, uint8_t *pk, uint8_t *sgnt)
   else
   {
     C_String_print("Failure :(\n");
-    exit((int32_t)255);
+    exit(255);
   }
 }
 
@@ -296,7 +296,7 @@ test_sign_hashed(uint8_t *msgHash, uint8_t *sk, uint8_t *nonce, uint8_t *expecte
   C_String_print("\n Test K256 ecdsa signing:\n");
   if (!Lib_PrintBuffer_result_compare_display(64U, sgnt, expected_sgnt))
   {
-    exit((int32_t)255);
+    exit(255);
   }
 }
 
@@ -324,13 +324,13 @@ static void test_public_key_compressed(uint8_t *pk)
   {
     if (!Lib_PrintBuffer_result_compare_display(64U, pk, pk_raw_c))
     {
-      exit((int32_t)255);
+      exit(255);
     }
   }
   else
   {
     C_String_print("Failure :(\n");
-    exit((int32_t)255);
+    exit(255);
   }
 }
 
@@ -345,13 +345,13 @@ static void test_public_key_uncompressed(uint8_t *pk)
   {
     if (!Lib_PrintBuffer_result_compare_display(64U, pk, pk_raw_u))
     {
-      exit((int32_t)255);
+      exit(255);
     }
   }
   else
   {
     C_String_print("Failure :(\n");
-    exit((int32_t)255);
+    exit(255);
   }
 }
 

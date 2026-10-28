@@ -267,7 +267,7 @@ let lemma_four_zero (_:unit) : Lemma
   ()
 
 let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
-  let n = num_bytes in
+  let n:nat = num_bytes in
   let new_hi = ((hi64 q / pow2 ((8 - n) * 8)) * pow2 ((8 - n) * 8)) % pow2_64 in
   hi64_reveal ();
   let f (n:nat{1 <= n /\ n < 8}) = (hi64_def q / pow2 ((8 - n) * 8)) * pow2 ((8 - n) * 8) == ((hi64_def q / pow2 ((8 - n) * 8)) * pow2 ((8 - n) * 8)) % pow2_64 in
@@ -279,7 +279,7 @@ let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
   assert_norm (f 6);
   assert_norm (f 7);
   assert (((hi64 q) / pow2 ((8 - n) * 8)) * pow2 ((8 - n) * 8) == (((hi64 q) / pow2 ((8 - n) * 8)) * pow2 ((8 - n) * 8)) % pow2_64);
-  let s = be_quad32_to_bytes q in
+  let s:seq16 nat8 = be_quad32_to_bytes q in
   let s' = slice s 0 n in
   let q' = two_two_to_four (Mktwo (nat_to_two 32 0) (nat_to_two 32 new_hi)) in
   let s'' = pad_to_128_bits s' in
@@ -322,7 +322,7 @@ let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
 #reset-options "--smtencoding.elim_box true --z3rlimit 100 --z3refresh --initial_ifuel 0 --max_ifuel 1 --fuel 1"
 
 let pad_to_128_bits_lower (q:quad32) (num_bytes:int) =
-  let n = num_bytes in
+  let n:nat = num_bytes in
   let new_lo = (((lo64 q) / pow2 ((16 - n) * 8)) * pow2 ((16 - n) * 8)) % pow2_64 in
   lo64_reveal ();
   hi64_reveal ();
@@ -336,7 +336,7 @@ let pad_to_128_bits_lower (q:quad32) (num_bytes:int) =
   assert_norm (f 14);
   assert_norm (f 15);
   assert (((lo64 q) / pow2 ((16 - n) * 8)) * pow2 ((16 - n) * 8) == (((lo64 q) / pow2 ((16 - n) * 8)) * pow2 ((16 - n) * 8)) % pow2_64);
-  let s = be_quad32_to_bytes q in
+  let s:seq16 nat8 = be_quad32_to_bytes q in
   let s' = slice s 0 n in
   let q' = two_two_to_four (Mktwo (nat_to_two 32 new_lo) (nat_to_two 32 (hi64 q))) in
   let s'' = pad_to_128_bits s' in

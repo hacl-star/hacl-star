@@ -8,6 +8,7 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Buffer.Lemmas
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
@@ -98,6 +99,7 @@ val get_bpp_cp_matrices_:
       S.get_bpp_cp_matrices_ a gen_a (as_seq h0 mu_decode) (as_seq h0 sk)
         (as_matrix h0 sp_matrix) (as_matrix h0 ep_matrix) (as_matrix h0 epp_matrix))
 
+#push-options "--split_queries always"
 let get_bpp_cp_matrices_ a gen_a mu_decode sk bpp_matrix cp_matrix sp_matrix ep_matrix epp_matrix =
   FP.expand_crypto_secretkeybytes a;
   FP.expand_crypto_publickeybytes a;
@@ -109,9 +111,10 @@ let get_bpp_cp_matrices_ a gen_a mu_decode sk bpp_matrix cp_matrix sp_matrix ep_
   frodo_mul_add_sb_plus_e_plus_mu a mu_decode b sp_matrix epp_matrix cp_matrix;
   mod_pow2 (params_logq a) bpp_matrix;
   mod_pow2 (params_logq a) cp_matrix
+#pop-options
 
 
-#push-options "--z3rlimit 150"
+#push-options "--z3rlimit 150 --split_queries always"
 inline_for_extraction noextract
 val get_bpp_cp_matrices:
     a:FP.frodo_alg
@@ -131,14 +134,34 @@ val get_bpp_cp_matrices:
       S.get_bpp_cp_matrices a gen_a (as_seq h0 mu_decode) (as_seq h0 seed_se) (as_seq h0 sk))
 
 let get_bpp_cp_matrices a gen_a mu_decode seed_se sk bpp_matrix cp_matrix =
+  let hi = FStar.HyperStack.ST.get () in
   push_frame ();
+  let h0 = FStar.HyperStack.ST.get () in
   let sp_matrix  = matrix_create params_nbar (params_n a) in
   let ep_matrix  = matrix_create params_nbar (params_n a) in
   let epp_matrix = matrix_create params_nbar params_nbar in
+  let h_alloc = FStar.HyperStack.ST.get () in
+  let matrices_loc = loc sp_matrix |+| loc ep_matrix |+| loc epp_matrix in
+  assert_spinoff (fresh_loc matrices_loc h0 h_alloc);
+  assert_spinoff (modifies loc_none h0 h_alloc);
+  assert (FStar.HyperStack.ST.inline_stack_inv h0 h_alloc);
   get_sp_ep_epp_matrices a seed_se sp_matrix ep_matrix epp_matrix;
   get_bpp_cp_matrices_ a gen_a mu_decode sk bpp_matrix cp_matrix sp_matrix ep_matrix epp_matrix;
   clear_matrix3 a sp_matrix ep_matrix epp_matrix;
-  pop_frame ()
+  let h1 = FStar.HyperStack.ST.get () in
+  let outputs_loc = loc bpp_matrix |+| loc cp_matrix in
+  assert_spinoff (modifies (matrices_loc |+| outputs_loc) h_alloc h1);
+  modifies_remove_new_locs matrices_loc loc_none outputs_loc h0 h_alloc h1;
+  assert ((as_matrix h1 bpp_matrix, as_matrix h1 cp_matrix) ==
+    S.get_bpp_cp_matrices a gen_a (as_seq h0 mu_decode) (as_seq h0 seed_se) (as_seq h0 sk));
+  pop_frame ();
+  let hf = FStar.HyperStack.ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h0 outputs_loc h1 hf;
+  stack_frame_equal_domains hi h0 h_alloc h1 hf;
+  assert (FStar.HyperStack.ST.equal_domains hi hf);
+  assert (modifies outputs_loc hi hf);
+  assert ((as_matrix hf bpp_matrix, as_matrix hf cp_matrix) ==
+    S.get_bpp_cp_matrices a gen_a (as_seq hi mu_decode) (as_seq hi seed_se) (as_seq hi sk))
 #pop-options
 
 
@@ -181,14 +204,32 @@ val crypto_kem_dec_kp_s:
       r == S.crypto_kem_dec_kp_s a gen_a (as_seq h0 mu_decode) (as_seq h0 seed_se)
         (as_seq h0 sk) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
 
+#push-options "--split_queries always"
 let crypto_kem_dec_kp_s a gen_a mu_decode seed_se sk bp_matrix c_matrix =
+  let hi = FStar.HyperStack.ST.get () in
   push_frame ();
+  let h0 = FStar.HyperStack.ST.get () in
   let bpp_matrix = matrix_create params_nbar (params_n a) in
   let cp_matrix  = matrix_create params_nbar params_nbar in
+  let h_alloc = FStar.HyperStack.ST.get () in
+  let matrices_loc = loc bpp_matrix |+| loc cp_matrix in
+  assert_spinoff (fresh_loc matrices_loc h0 h_alloc);
+  assert_spinoff (modifies loc_none h0 h_alloc);
+  assert (FStar.HyperStack.ST.inline_stack_inv h0 h_alloc);
   get_bpp_cp_matrices a gen_a mu_decode seed_se sk bpp_matrix cp_matrix;
   let mask = crypto_kem_dec_kp_s_cond a bp_matrix bpp_matrix c_matrix cp_matrix in
+  let h1 = FStar.HyperStack.ST.get () in
+  assert_spinoff (modifies matrices_loc h_alloc h1);
+  modifies_remove_new_locs matrices_loc loc_none loc_none h0 h_alloc h1;
   pop_frame ();
+  let hf = FStar.HyperStack.ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h0 loc_none h1 hf;
+  stack_frame_equal_domains hi h0 h_alloc h1 hf;
+  assert (modifies0 hi hf);
+  assert (mask == S.crypto_kem_dec_kp_s a gen_a (as_seq hi mu_decode) (as_seq hi seed_se)
+    (as_seq hi sk) (as_matrix hi bp_matrix) (as_matrix hi c_matrix));
   mask
+#pop-options
 
 
 inline_for_extraction noextract
@@ -295,13 +336,31 @@ val crypto_kem_dec_ss2:
       as_seq h1 ss == S.crypto_kem_dec_ss2 a gen_a (as_seq h0 ct) (as_seq h0 sk)
         (as_seq h0 mu_decode) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
 
+#push-options "--split_queries always"
 let crypto_kem_dec_ss2 a gen_a ct sk mu_decode bp_matrix c_matrix ss =
+  let hi = FStar.HyperStack.ST.get () in
   push_frame ();
+  let h0 = FStar.HyperStack.ST.get () in
   let seed_se_k = create (2ul *! crypto_bytes a) (u8 0) in
+  let h_alloc = FStar.HyperStack.ST.get () in
+  assert_spinoff (fresh_loc (loc seed_se_k) h0 h_alloc);
+  assert_spinoff (modifies loc_none h0 h_alloc);
   crypto_kem_dec_seed_se_k a mu_decode sk seed_se_k;
   crypto_kem_dec_ss1 a gen_a ct sk mu_decode seed_se_k bp_matrix c_matrix ss;
   clear_words_u8 seed_se_k;
-  pop_frame ()
+  let h1 = FStar.HyperStack.ST.get () in
+  assert_spinoff (modifies (loc seed_se_k |+| loc ss) h_alloc h1);
+  modifies_remove_new_locs (loc seed_se_k) loc_none (loc ss) h0 h_alloc h1;
+  assert (as_seq h1 ss == S.crypto_kem_dec_ss2 a gen_a (as_seq h0 ct) (as_seq h0 sk)
+    (as_seq h0 mu_decode) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix));
+  pop_frame ();
+  let hf = FStar.HyperStack.ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h0 (loc ss) h1 hf;
+  stack_frame_equal_domains hi h0 h_alloc h1 hf;
+  assert (modifies (loc ss) hi hf);
+  assert (as_seq hf ss == S.crypto_kem_dec_ss2 a gen_a (as_seq hi ct) (as_seq hi sk)
+    (as_seq hi mu_decode) (as_matrix hi bp_matrix) (as_matrix hi c_matrix))
+#pop-options
 
 
 inline_for_extraction noextract

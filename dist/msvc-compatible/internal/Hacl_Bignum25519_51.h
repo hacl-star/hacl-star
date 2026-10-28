@@ -602,7 +602,7 @@ static inline void Hacl_Impl_Curve25519_Field51_store_felem(uint64_t *u64s, uint
   uint64_t f2 = f[2U];
   uint64_t f3 = f[3U];
   uint64_t f4 = f[4U];
-  uint64_t l_ = f0 + 0ULL;
+  uint64_t l_ = f0;
   uint64_t tmp0 = l_ & 0x7ffffffffffffULL;
   uint64_t c0 = l_ >> 51U;
   uint64_t l_0 = f1 + c0;
@@ -664,8 +664,8 @@ Hacl_Impl_Curve25519_Field51_cswap2(uint64_t bit, uint64_t *p1, uint64_t *p2)
     10U,
     1U,
     uint64_t dummy = mask & (p1[i] ^ p2[i]);
-    p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;);
+    p1[i] ^= dummy;
+    p2[i] ^= dummy;);
 }
 
 #if defined(__cplusplus)
