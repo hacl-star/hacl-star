@@ -2,16 +2,19 @@ module Vale.Wrapper.X64.GCMencryptOpt256
 
 module UV = LowStar.BufferView.Up
 module HS = FStar.HyperStack
+module V = Vale.X64.Decls
+module ME = Vale.X64.Memory
 open FStar.Mul
 open Vale.Stdcalls.X64.GCMencryptOpt
 open Vale.AsLowStar.MemoryHelpers
+open Vale.Wrapper.X64.GCM.Helpers
 open Vale.X64.MemoryAdapters
 open Vale.SHA.Simplify_Sha
 open Vale.AES.Gcm_simplify
 open Vale.AES.GCM_helpers
 open FStar.Calc
 open FStar.Int.Cast
-open FStar.Integers
+
 open Vale.Arch.Types
 open Vale.Lib.BufferViewHelpers
 
@@ -27,31 +30,16 @@ let length_div (b:uint8_p) : Lemma
   (ensures DV.length (get_downview b) / 16 = 1)
   = DV.length_eq (get_downview b)
 
-inline_for_extraction
-val gcm256_encrypt_opt':
-  key:Ghost.erased (Seq.seq nat32) ->
-  iv:Ghost.erased supported_iv_LE ->
-  auth_b:uint8_p ->
-  auth_bytes:uint64 ->
-  auth_num:uint64 ->
-  keys_b:uint8_p ->
-  iv_b:uint8_p ->
-  hkeys_b:uint8_p ->
-  abytes_b:uint8_p ->
-  in128x6_b:uint8_p ->
-  out128x6_b:uint8_p ->
-  len128x6:uint64 ->
-  in128_b:uint8_p ->
-  out128_b:uint8_p ->
-  len128_num:uint64 ->
-  inout_b:uint8_p ->
-  plain_num:uint64 ->
+module IX = Vale.Interop.X64
+module LS = Vale.AsLowStar.LowStarSig
+module IB = Vale.Interop.Base
 
-  scratch_b:uint8_p ->
-  tag_b:uint8_p ->
-
-  Stack unit
-    (requires fun h0 ->
+private unfold let gcm256_encrypt_pre
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (plain_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) : GTot Type0 =
       B.disjoint tag_b keys_b /\ B.disjoint tag_b auth_b /\
       B.disjoint tag_b abytes_b /\ B.disjoint tag_b iv_b /\
       B.disjoint tag_b in128x6_b /\ B.disjoint tag_b out128x6_b /\
@@ -149,8 +137,82 @@ val gcm256_encrypt_opt':
        (low_buffer_read TUInt8 TUInt128 h0 iv_b 0) ==
          compute_iv_BE (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv)
       )
-    )
-    (ensures fun h0 _ h1 ->
+
+[@__reduce__]
+noextract
+private let gcm256_args
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (plain_num:uint64) (scratch_b tag_b:b128)
+  : l:IX.arg_list{FStar.List.Tot.length l == 17} =
+  let args : list IB.arg =
+    [(|t128_mod, tag_b|); (|t128_mod, scratch_b|); (|tuint64, plain_num|);
+     (|t128_mod, inout_b|); (|tuint64, len128_num|); (|t128_mod, out128_b|);
+     (|t128_no_mod, in128_b|); (|tuint64, len128x6|); (|t128_mod, out128x6_b|);
+     (|t128_no_mod, in128x6_b|); (|t128_no_mod, abytes_b|);
+     (|t128_no_mod, hkeys_b|); (|t128_mod_pub, iv_b|); (|t128_no_mod, keys_b|);
+     (|tuint64, auth_num|); (|tuint64, auth_bytes|); (|t128_no_mod, auth_b|)] in
+  assert_norm (FStar.List.Tot.length args == 17);
+  args
+
+// Keep the assembly precondition separate from the stateful wrapper proof.
+private unfold let gcm256_call_pre
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (plain_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) : GTot Type0 =
+  normal (
+    let args = gcm256_args auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+      in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+      inout_b plain_num scratch_b tag_b in
+    IB.mem_roots_p h0 args /\
+    (forall (s0:V.va_state).
+      V.va_get_ok s0 /\
+      LS.vale_pre_hyp #IX.max_stdcall #IX.arg_reg_stdcall args s0 /\
+      LS.mem_correspondence args h0 s0 ==>
+      gcm256_pre key iv code_gcm256 auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+        in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+        inout_b plain_num scratch_b tag_b s0))
+
+#push-options "--split_queries no --z3refresh --ifuel 1 --z3rlimit 300"
+private let prove_gcm256_call_pre
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (plain_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) : Lemma
+  (requires gcm256_encrypt_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0)
+  (ensures gcm256_call_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0) =
+  prepare_buffers 15 h0 auth_b auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b scratch_b tag_b;
+  stdcall_constants ();
+  // Normalization can leave this length symbolic in stack-address expressions.
+  assert (FStar.List.Tot.length
+    (gcm256_args auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+      in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+      inout_b plain_num scratch_b tag_b) == 17);
+  assert (gcm256_call_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0)
+#pop-options
+
+private unfold let gcm256_encrypt_post
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (plain_num:uint64) (scratch_b tag_b:b128)
+  (h0:HS.mem{gcm256_encrypt_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0})
+  (h1:HS.mem) : GTot Type0 =
       B.modifies (B.loc_union (B.loc_buffer tag_b)
                   (B.loc_union (B.loc_buffer iv_b)
                   (B.loc_union (B.loc_buffer scratch_b)
@@ -198,98 +260,127 @@ val gcm256_encrypt_opt':
       (length_div tag_b;
       le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h1 tag_b 0) == tag
       ))))
-    )
+
+private unfold let gcm256_call_post
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (plain_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) (c:uint64) (h1:HS.mem) : GTot Type0 =
+  normal (
+    let args = gcm256_args auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+      in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+      inout_b plain_num scratch_b tag_b in
+    IB.mem_roots_p h1 args /\
+    B.modifies (IB.loc_modified_args args) h0 h1 /\
+    (exists (s0 s1:V.va_state) (f:V.va_fuel).
+      LS.mem_correspondence args h0 s0 /\
+      LS.mem_correspondence args h1 s1 /\
+      UInt64.v c == Vale.X64.State.eval_reg_64 Vale.X64.Machine_s.rRax s1 /\
+      gcm256_post key iv code_gcm256 auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+        in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+        inout_b plain_num scratch_b tag_b s0 s1 f))
+
+#push-options "--split_queries no --z3refresh --ifuel 1 --z3rlimit 300"
+private let prove_gcm256_call_post
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (plain_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) (c:uint64) (h1:HS.mem) : Lemma
+  (requires gcm256_encrypt_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0 /\
+    gcm256_call_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0 c h1)
+  (ensures gcm256_encrypt_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0 h1) =
+  prepare_buffers 15 h0 auth_b auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b scratch_b tag_b;
+  B.modifies_loc_includes
+    (B.loc_union (B.loc_buffer tag_b)
+      (B.loc_union (B.loc_buffer iv_b)
+        (B.loc_union (B.loc_buffer scratch_b)
+          (B.loc_union (B.loc_buffer out128x6_b)
+            (B.loc_union (B.loc_buffer out128_b) (B.loc_buffer inout_b))))))
+    h0 h1
+    (B.loc_union (B.loc_buffer tag_b)
+      (B.loc_union (B.loc_buffer scratch_b)
+        (B.loc_union (B.loc_buffer inout_b)
+          (B.loc_union (B.loc_buffer out128_b)
+            (B.loc_union (B.loc_buffer out128x6_b)
+              (B.loc_union (B.loc_buffer iv_b) B.loc_none))))));
+  assert (gcm256_encrypt_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0 h1)
+#pop-options
+
+inline_for_extraction
+val gcm256_encrypt_opt':
+  key:Ghost.erased (Seq.seq nat32) ->
+  iv:Ghost.erased supported_iv_LE ->
+  auth_b:b128 ->
+  auth_bytes:uint64 ->
+  auth_num:uint64 ->
+  keys_b:b128 ->
+  iv_b:b128 ->
+  hkeys_b:b128 ->
+  abytes_b:b128 ->
+  in128x6_b:b128 ->
+  out128x6_b:b128 ->
+  len128x6:uint64 ->
+  in128_b:b128 ->
+  out128_b:b128 ->
+  len128_num:uint64 ->
+  inout_b:b128 ->
+  plain_num:uint64 ->
+
+  scratch_b:b128 ->
+  tag_b:b128 ->
+
+  Stack unit
+    (requires fun h0 -> gcm256_encrypt_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0)
+    (ensures fun h0 c h1 -> gcm256_encrypt_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0 h1)
 
 
-#push-options "--smtencoding.nl_arith_repr boxwrap"
-#set-options "--ext compat:normalizer_memo_ignore_cfg"
+
+#push-options "--split_queries no --z3refresh --ifuel 1 --z3rlimit 400"
 #restart-solver
 inline_for_extraction
 let gcm256_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b =
 
   let h0 = get() in
+  prepare_buffers 15 h0 auth_b auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b scratch_b tag_b;
 
-  B.disjoint_neq iv_b auth_b;
-  B.disjoint_neq iv_b keys_b;
-  B.disjoint_neq iv_b hkeys_b;
-  B.disjoint_neq iv_b abytes_b;
-  B.disjoint_neq iv_b in128x6_b;
-  B.disjoint_neq iv_b out128x6_b;
-  B.disjoint_neq iv_b in128_b;
-  B.disjoint_neq iv_b out128_b;
-  B.disjoint_neq iv_b inout_b;
-  B.disjoint_neq iv_b scratch_b;
-  B.disjoint_neq iv_b tag_b;
+  prove_gcm256_call_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0;
 
-  DV.length_eq (get_downview auth_b);
-  DV.length_eq (get_downview keys_b);
-  DV.length_eq (get_downview iv_b);
-  DV.length_eq (get_downview hkeys_b);
-  DV.length_eq (get_downview abytes_b);
-  DV.length_eq (get_downview in128x6_b);
-  DV.length_eq (get_downview out128x6_b);
-  DV.length_eq (get_downview in128_b);
-  DV.length_eq (get_downview out128_b);
-  DV.length_eq (get_downview inout_b);
-  DV.length_eq (get_downview scratch_b);
-  DV.length_eq (get_downview tag_b);
+  stdcall_constants ();
 
-  math_aux (B.length auth_b);
-  math_aux (B.length keys_b);
-  math_aux (B.length iv_b);
-  math_aux (B.length hkeys_b);
-  math_aux (B.length in128x6_b);
-  math_aux (B.length scratch_b);
-  math_aux (B.length out128_b);
-  FStar.Math.Lemmas.cancel_mul_mod (UInt64.v auth_num) 16;
-  assert_norm (240 % 16 = 0);
-  assert_norm (16 % 16 = 0);
-  assert_norm (144 % 16 = 0);
-  FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128x6) 16;
-  FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128_num) 16;
-
-  calc (<=) {
-    256 * ((16 * UInt64.v len128_num) / 16);
-    == {  FStar.Math.Lemmas.cancel_mul_div (UInt64.v len128_num) 16 }
-    256 * (UInt64.v len128_num);
-    ( <= ) { assert_norm (256 <= 4096); FStar.Math.Lemmas.lemma_mult_le_right (UInt64.v len128_num) 256 4096 }
-    4096 * (UInt64.v len128_num);
-  };
-
-  assert (DV.length (get_downview tag_b) % 16 = 0);
-  assert (DV.length (get_downview scratch_b) % 16 = 0);
-  assert (DV.length (get_downview out128_b) % 16 = 0);
-
-  as_vale_buffer_len #TUInt8 #TUInt128 auth_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 keys_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 iv_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 hkeys_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 abytes_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 out128x6_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 in128x6_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 out128x6_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 in128_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 inout_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 scratch_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 tag_b;
-
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 auth_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in128x6_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out128x6_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in128_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out128_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 inout_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 iv_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 hkeys_b;
-
-  let (x, _) = gcm256_encrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
-  in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b () in
+  let (x, _) = gcm256_encrypt_opt key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b () in
 
   let h1 = get() in
+  prove_gcm256_call_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b plain_num scratch_b tag_b h0 x h1;
   ()
 #pop-options
+
+open FStar.Integers
+open Vale.Arch.Types
+open Vale.Lib.BufferViewHelpers
 
 inline_for_extraction
 val gcm256_encrypt_opt_alloca:

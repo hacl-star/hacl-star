@@ -497,6 +497,8 @@ let lemma_ws_computed_is_ws (b:block_w) (t:counter{t < size_k_w_256}) :
   =
   Pervasives.reveal_opaque (`%ws) ws;
   if t < block_word_length SHA2_256 then (
+    assert (ws_computed b t == to_uint32 (ws_opaque b t));
+    assert (vv (to_uint32 (ws_opaque b t)) == ws_opaque b t);
     assert (vv (ws_computed b t) == ws_opaque b t);
     assert (to_uint32 (ws_opaque b t) == ws SHA2_256 b t);
     ()

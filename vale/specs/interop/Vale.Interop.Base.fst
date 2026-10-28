@@ -159,7 +159,7 @@ let intro_n_arrow_cons (hd:td) (b:Type) (tl:list td)
 [@(unifier_hint_injective) (__reduce__)]
 let rec n_dep_arrow (dom:list td) (codom: n_arrow dom Type) =
   match dom with
-  | [] -> codom
+  | [] -> elim_nil codom
   | hd::tl -> x:td_as_type hd -> n_dep_arrow tl (elim_1 codom x)
 
 [@__reduce__]

@@ -9,8 +9,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_b19283e90b47034162373413c6a19933",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented",
+        "@kick_partial_app_c03907c8f5b35e48037e03b86aebb2c8", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
         "bool_typing", "data_elim_Vale.PPC64LE.Machine_s.Machine_stack",
         "equation_Prims.nat", "equation_Prims.pos",
@@ -24,7 +24,6 @@
         "equation_Vale.PPC64LE.Stack_i.valid_src_stack64",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.machine_stack",
-        "function_token_typing_FStar.Map.upd",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.update_heap64",
@@ -38,17 +37,17 @@
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi2",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi3",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo0",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo1",
-        "proj_equation_Vale.Def.Words_s.Mktwo_hi",
-        "proj_equation_Vale.Def.Words_s.Mktwo_lo",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi2",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi3",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo0",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo1",
+        "proj_equation_Vale.Def.Words_s.Mktwo_@hi",
+        "proj_equation_Vale.Def.Words_s.Mktwo_@lo",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.Def.Words_s.Mktwo_hi",
-        "projection_inverse_Vale.Def.Words_s.Mktwo_lo",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.Def.Words_s.Mktwo_@hi",
+        "projection_inverse_Vale.Def.Words_s.Mktwo_@lo",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
@@ -65,7 +64,7 @@
         "typing_Vale.PPC64LE.Stack_i.valid_src_stack64"
       ],
       0,
-      "f2b1b18b9e71fd840ae1f6cec47f518c"
+      "222be3540f2c7b7c4875310bfef8f7e2"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_free_stack_same_valid64",
@@ -91,15 +90,15 @@
         "lemma_FStar.Map.lemma_InDomRestrict", "primitive_Prims.op_AmpAmp",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "typing_FStar.Map.domain",
         "typing_Vale.Arch.MachineHeap_s.valid_addr",
         "typing_Vale.Lib.Set.remove_between",
         "typing_Vale.PPC64LE.Stack_i.valid_src_stack64"
       ],
       0,
-      "16854e5dc4499dd4f6da93f3bf9447bd"
+      "5ae1bd60acaf668eebfb7c31c50ea6b9"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_store_stack_same_valid128",
@@ -109,8 +108,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_b19283e90b47034162373413c6a19933",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented",
+        "@kick_partial_app_c03907c8f5b35e48037e03b86aebb2c8", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
         "bool_typing", "data_elim_Vale.PPC64LE.Machine_s.Machine_stack",
         "equation_Prims.nat",
@@ -126,7 +125,6 @@
         "equation_Vale.PPC64LE.Stack_i.valid_src_stack128",
         "fuel_guarded_inversion_Vale.Def.Words_s.four",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.machine_stack",
-        "function_token_typing_FStar.Map.upd",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.update_heap128",
@@ -141,13 +139,13 @@
         "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.Set.mem_union",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_BarBar",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi2",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi3",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo0",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo1",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi2",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi3",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo0",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo1",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_kinding_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "token_correspondence_Vale.Arch.MachineHeap_s.update_heap128_def",
@@ -164,7 +162,7 @@
         "typing_Vale.PPC64LE.Stack_i.valid_src_stack128"
       ],
       0,
-      "fb6c87134ca746e9ba86a8a15bd78403"
+      "9e4d465b78d3c76b08b0671bdc768541"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_free_stack_same_valid128",
@@ -190,15 +188,15 @@
         "lemma_FStar.Map.lemma_InDomRestrict", "primitive_Prims.op_AmpAmp",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "typing_FStar.Map.domain",
         "typing_Vale.Arch.MachineHeap_s.valid_addr",
         "typing_Vale.Lib.Set.remove_between",
         "typing_Vale.PPC64LE.Stack_i.valid_src_stack128"
       ],
       0,
-      "bf19a7072356faa4d3cd7f168e87245a"
+      "1c45b50baf2c311bc3518667a0d1a50a"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_store_new_valid64",
@@ -208,9 +206,9 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_b19283e90b47034162373413c6a19933",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented",
+        "@kick_partial_app_c03907c8f5b35e48037e03b86aebb2c8", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "data_elim_Vale.PPC64LE.Machine_s.Machine_stack",
         "equation_Prims.nat", "equation_Prims.pos",
         "equation_Vale.Arch.MachineHeap_s.machine_heap",
@@ -223,7 +221,6 @@
         "equation_Vale.PPC64LE.Stack_i.valid_src_stack64",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.machine_stack",
-        "function_token_typing_FStar.Map.upd",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.update_heap64",
@@ -237,36 +234,33 @@
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi2",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi3",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo0",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo1",
-        "proj_equation_Vale.Def.Words_s.Mktwo_hi",
-        "proj_equation_Vale.Def.Words_s.Mktwo_lo",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi2",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi3",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo0",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo1",
+        "proj_equation_Vale.Def.Words_s.Mktwo_@hi",
+        "proj_equation_Vale.Def.Words_s.Mktwo_@lo",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.Def.Words_s.Mktwo_hi",
-        "projection_inverse_Vale.Def.Words_s.Mktwo_lo",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.Def.Words_s.Mktwo_@hi",
+        "projection_inverse_Vale.Def.Words_s.Mktwo_@lo",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_kinding_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "token_correspondence_Vale.Arch.MachineHeap_s.update_heap64_def",
-        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
-        "typing_FStar.Map.upd", "typing_FStar.Set.singleton",
-        "typing_FStar.Set.union", "typing_Prims.pow2",
-        "typing_Vale.Arch.MachineHeap_s.update_heap64",
+        "typing_FStar.Map.domain", "typing_FStar.Map.upd",
+        "typing_FStar.Set.singleton", "typing_FStar.Set.union",
+        "typing_Prims.pow2", "typing_Vale.Arch.MachineHeap_s.update_heap64",
         "typing_Vale.Def.Words.Four_s.nat_to_four",
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__hi2",
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__hi3",
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo0",
-        "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1",
-        "typing_Vale.PPC64LE.Stack_i.store_stack64",
-        "typing_Vale.PPC64LE.Stack_i.valid_src_stack64"
+        "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "716970580150be369ee0c4f2252688b7"
+      "597844ea901a7b21b1c2db62629a896f"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_store_new_valid128",
@@ -276,8 +270,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_b19283e90b47034162373413c6a19933",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented",
+        "@kick_partial_app_c03907c8f5b35e48037e03b86aebb2c8", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "data_elim_Vale.PPC64LE.Machine_s.Machine_stack",
         "equation_Prims.nat",
@@ -293,7 +287,6 @@
         "equation_Vale.PPC64LE.Stack_i.valid_src_stack128",
         "fuel_guarded_inversion_Vale.Def.Words_s.four",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.machine_stack",
-        "function_token_typing_FStar.Map.upd",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.update_heap128",
@@ -308,13 +301,13 @@
         "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.Set.mem_union",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi2",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi3",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo0",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo1",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi2",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi3",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo0",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo1",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_kinding_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "token_correspondence_Vale.Arch.MachineHeap_s.update_heap128_def",
@@ -330,7 +323,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "ebe1bf87a07d4c7191937954f06a3766"
+      "9d439996c664b3f363151cebd37c032e"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_correct_store_load_stack64",
@@ -340,11 +333,11 @@
       [
         "@query", "equation_Vale.PPC64LE.Stack_i.load_stack64",
         "equation_Vale.PPC64LE.Stack_i.store_stack64",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem"
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem"
       ],
       0,
-      "e99118737f8cc5cd7f92daa3f430cb17"
+      "bc2031d5524be2fd7c40de92282b5fb0"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_frame_store_load_stack64",
@@ -358,12 +351,12 @@
         "equation_Vale.PPC64LE.Stack_i.store_stack64",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val64",
         "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "token_correspondence_Vale.Arch.MachineHeap_s.get_heap_val64_def"
       ],
       0,
-      "6a9e8e1d709d3382786438bd6d825fb3"
+      "de4b025cb488aff20e2f1786fb249584"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_free_stack_same_load64",
@@ -372,36 +365,24 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_Vale.Arch.MachineHeap_s.get_heap_val64_def",
-        "equation_Vale.Arch.MachineHeap_s.machine_heap",
-        "equation_Vale.Arch.MachineHeap_s.valid_addr",
         "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.PPC64LE.Semantics_s.free_stack_",
         "equation_Vale.PPC64LE.Stack_i.free_stack64",
         "equation_Vale.PPC64LE.Stack_i.load_stack64",
-        "equation_Vale.PPC64LE.Stack_i.valid_src_stack64",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val64",
-        "function_token_typing_Vale.Arch.MachineHeap_s.valid_addr64",
         "function_token_typing_Vale.Def.Words_s.nat8", "int_inversion",
-        "int_typing",
-        "interpretation_Tm_abs_1eab5700ef81b3c102d114cb086eb6dc",
-        "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.Map.lemma_SelRestrict", "primitive_Prims.op_AmpAmp",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "int_typing", "lemma_FStar.Map.lemma_SelRestrict",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "token_correspondence_Vale.Arch.MachineHeap_s.get_heap_val64_def",
-        "typing_FStar.Map.domain",
-        "typing_Vale.Arch.MachineHeap_s.valid_addr",
-        "typing_Vale.Lib.Set.remove_between",
-        "typing_Vale.PPC64LE.Stack_i.valid_src_stack64"
+        "typing_FStar.Map.domain", "typing_Vale.Lib.Set.remove_between"
       ],
       0,
-      "d6056979754315c1e1ee253250fb1988"
+      "ab49c8b8f410ac5084348d6d00007349"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_correct_store_load_stack128",
@@ -411,11 +392,11 @@
       [
         "@query", "equation_Vale.PPC64LE.Stack_i.load_stack128",
         "equation_Vale.PPC64LE.Stack_i.store_stack128",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem"
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem"
       ],
       0,
-      "2d5c23ac8c3dd037a1509263dd3f1277"
+      "4d524047318880d3c0776539ce5d5312"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_frame_store_load_stack128",
@@ -431,13 +412,13 @@
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val128",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val32",
         "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "token_correspondence_Vale.Arch.MachineHeap_s.get_heap_val128_def",
         "token_correspondence_Vale.Arch.MachineHeap_s.get_heap_val32_def"
       ],
       0,
-      "27cfee01c297010d2abb0e59978e8651"
+      "9fa7c76c235bd3565f612580ebd67530"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_free_stack_same_load128",
@@ -446,39 +427,27 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_Vale.Arch.MachineHeap_s.get_heap_val128_def",
         "equation_Vale.Arch.MachineHeap_s.get_heap_val32_def",
-        "equation_Vale.Arch.MachineHeap_s.machine_heap",
-        "equation_Vale.Arch.MachineHeap_s.valid_addr",
         "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.PPC64LE.Semantics_s.free_stack_",
         "equation_Vale.PPC64LE.Stack_i.free_stack128",
         "equation_Vale.PPC64LE.Stack_i.load_stack128",
-        "equation_Vale.PPC64LE.Stack_i.valid_src_stack128",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val128",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val32",
-        "function_token_typing_Vale.Arch.MachineHeap_s.valid_addr128",
         "function_token_typing_Vale.Def.Words_s.nat8", "int_inversion",
-        "int_typing",
-        "interpretation_Tm_abs_14d403333eed8abd9b38f58babfc702d",
-        "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.Map.lemma_SelRestrict", "primitive_Prims.op_AmpAmp",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "int_typing", "lemma_FStar.Map.lemma_SelRestrict",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "token_correspondence_Vale.Arch.MachineHeap_s.get_heap_val128_def",
         "token_correspondence_Vale.Arch.MachineHeap_s.get_heap_val32_def",
-        "typing_FStar.Map.domain",
-        "typing_Vale.Arch.MachineHeap_s.valid_addr",
-        "typing_Vale.Lib.Set.remove_between",
-        "typing_Vale.PPC64LE.Stack_i.valid_src_stack128"
+        "typing_FStar.Map.domain", "typing_Vale.Lib.Set.remove_between"
       ],
       0,
-      "f4d7306ddfeef71b6b38500774ad5a1a"
+      "35770dd1d8a1150ed2eee471c2c2a2ee"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_compose_free_stack64",
@@ -502,14 +471,14 @@
         "lemma_FStar.Map.lemma_equal_elim",
         "lemma_FStar.Map.lemma_equal_intro", "primitive_Prims.op_AmpAmp",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
         "typing_FStar.Map.restrict", "typing_Vale.Lib.Set.remove_between"
       ],
       0,
-      "f6846246cb47d4fd59dc1d3cb488104a"
+      "91dc4035107ae2e19ea5379e98272ca3"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_same_init_r1_free_stack64",
@@ -518,7 +487,7 @@
       0,
       [ "@query" ],
       0,
-      "fd18c0070bb01fe5eb351b54e98f97a7"
+      "86f949129a3601c6ba03ebfc639ab697"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_same_init_r1_free_stack64",
@@ -533,11 +502,11 @@
         "equation_Vale.PPC64LE.Stack_i.vale_stack",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.machine_stack",
         "int_inversion",
-        "proj_equation_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1"
+        "proj_equation_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1"
       ],
       0,
-      "94794cee4be34e9a2cf4948bc95d82ee"
+      "9860791dc44b9aea1a4e95dfeb222426"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_same_init_r1_store_stack64",
@@ -546,7 +515,7 @@
       0,
       [ "@query" ],
       0,
-      "0a28af47acf0f1aecb04ce320d589301"
+      "d65a6c0c12d2e1e645ab7c0d3814bb12"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_same_init_r1_store_stack64",
@@ -559,11 +528,11 @@
         "equation_Vale.PPC64LE.Stack_i.store_stack64",
         "equation_Vale.PPC64LE.Stack_i.vale_stack",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.machine_stack",
-        "proj_equation_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1"
+        "proj_equation_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1"
       ],
       0,
-      "34d78999af836b8ff5861362ad3f9e46"
+      "e5ef9753d01fb54d1635df3276a33bd8"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_same_init_r1_free_stack128",
@@ -572,7 +541,7 @@
       0,
       [ "@query" ],
       0,
-      "9c0aca151b966c81a359690359f0da8f"
+      "32b401682bd094fe33d5aa9ac5bff471"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_same_init_r1_free_stack128",
@@ -587,11 +556,11 @@
         "equation_Vale.PPC64LE.Stack_i.vale_stack",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.machine_stack",
         "int_inversion",
-        "proj_equation_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1"
+        "proj_equation_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1"
       ],
       0,
-      "84dd9b95e1fc5fd8528d2c1198245c63"
+      "4feda97a48aefd282f66110df5fcb17a"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_same_init_r1_store_stack128",
@@ -600,7 +569,7 @@
       0,
       [ "@query" ],
       0,
-      "9835367e78f24a1f5ec49eaa5f5c6dc8"
+      "94b20f1086d64a1e4319971c20c2860c"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_same_init_r1_store_stack128",
@@ -613,11 +582,11 @@
         "equation_Vale.PPC64LE.Stack_i.store_stack128",
         "equation_Vale.PPC64LE.Stack_i.vale_stack",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.machine_stack",
-        "proj_equation_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1"
+        "proj_equation_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1"
       ],
       0,
-      "7063baa6be09322072a43b49dbd7413f"
+      "20ed26bfb7d79bb67ee87059d1576bb9"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_valid_taint_stack64",
@@ -631,7 +600,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "03e2b382ae1fdb451d78d1081f3efebd"
+      "96dbe963c49e868c67dd5f89b5ef5796"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_valid_taint_stack128",
@@ -645,7 +614,7 @@
         "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "062610ec6f3c181ff453537dc758dd7c"
+      "6266d86d0fc17a9bc01ec2032b9108be"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_valid_taint_stack64_reveal",
@@ -663,7 +632,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "ba66ab743fd9566049847d59eb02b525"
+      "13b6b37d1e88f7060c7d7ce944ee8928"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_correct_store_load_taint_stack64",
@@ -671,7 +640,8 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@kick_partial_app_719ed52359a712951013ed6dce9f3d7c", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Vale.Arch.HeapTypes_s_pretyping_b2ecc36deaf346c775ae2b728a51b51e",
         "b2t_def", "equality_tok_Vale.Arch.HeapTypes_s.Public@tok",
@@ -679,19 +649,18 @@
         "equation_Vale.PPC64LE.Semantics_s.op_String_Access",
         "equation_Vale.PPC64LE.Stack_i.store_taint_stack64",
         "equation_Vale.PPC64LE.Stack_i.valid_taint_stack64",
-        "function_token_typing_FStar.Map.sel",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_11a20bb739238d6310bcbb7f00b21101",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_f10f68624e3f255ef4feec3ac429852d",
         "token_correspondence_Vale.PPC64LE.Semantics_s.op_String_Access",
         "typing_Vale.PPC64LE.Semantics_s.update_n",
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "008312977ce4e0e3ae1136dc4ef7f4f5"
+      "893cf2a2f4cd74abb0eb6621f618987d"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_frame_store_load_taint_stack64",
@@ -699,7 +668,8 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@kick_partial_app_719ed52359a712951013ed6dce9f3d7c", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Vale.Arch.HeapTypes_s_pretyping_b2ecc36deaf346c775ae2b728a51b51e",
         "equality_tok_Vale.Arch.HeapTypes_s.Public@tok",
@@ -707,17 +677,16 @@
         "equation_Vale.PPC64LE.Semantics_s.op_String_Access",
         "equation_Vale.PPC64LE.Stack_i.store_taint_stack64",
         "equation_Vale.PPC64LE.Stack_i.valid_taint_stack64",
-        "function_token_typing_FStar.Map.sel",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_11a20bb739238d6310bcbb7f00b21101",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_f10f68624e3f255ef4feec3ac429852d",
         "token_correspondence_Vale.PPC64LE.Semantics_s.op_String_Access",
         "typing_Vale.PPC64LE.Semantics_s.update_n",
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "3bf62eba63b52a070292e520c509f724"
+      "2d718de0c65c7e0aab1e32d5ed6dad62"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_valid_taint_stack128_reveal",
@@ -735,7 +704,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "85f7597b60864b0bd086cc42a49dcdf7"
+      "47cebbd7a6155583c9407d9d72dadea0"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_correct_store_load_taint_stack128",
@@ -743,7 +712,8 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@kick_partial_app_719ed52359a712951013ed6dce9f3d7c", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Vale.Arch.HeapTypes_s_pretyping_b2ecc36deaf346c775ae2b728a51b51e",
         "b2t_def", "equality_tok_Vale.Arch.HeapTypes_s.Public@tok",
@@ -751,19 +721,18 @@
         "equation_Vale.PPC64LE.Semantics_s.op_String_Access",
         "equation_Vale.PPC64LE.Stack_i.store_taint_stack128",
         "equation_Vale.PPC64LE.Stack_i.valid_taint_stack128",
-        "function_token_typing_FStar.Map.sel",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_11a20bb739238d6310bcbb7f00b21101",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_f10f68624e3f255ef4feec3ac429852d",
         "token_correspondence_Vale.PPC64LE.Semantics_s.op_String_Access",
         "typing_Vale.PPC64LE.Semantics_s.update_n",
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "5e8836a2e34802183d75e10f3f949f1e"
+      "2d62e73b34309202920b2dff6d0cd159"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_frame_store_load_taint_stack128",
@@ -771,7 +740,8 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@kick_partial_app_719ed52359a712951013ed6dce9f3d7c", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Vale.Arch.HeapTypes_s_pretyping_b2ecc36deaf346c775ae2b728a51b51e",
         "equality_tok_Vale.Arch.HeapTypes_s.Public@tok",
@@ -779,17 +749,16 @@
         "equation_Vale.PPC64LE.Semantics_s.op_String_Access",
         "equation_Vale.PPC64LE.Stack_i.store_taint_stack128",
         "equation_Vale.PPC64LE.Stack_i.valid_taint_stack128",
-        "function_token_typing_FStar.Map.sel",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_11a20bb739238d6310bcbb7f00b21101",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_f10f68624e3f255ef4feec3ac429852d",
         "token_correspondence_Vale.PPC64LE.Semantics_s.op_String_Access",
         "typing_Vale.PPC64LE.Semantics_s.update_n",
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "ee73a4eb3c99366ea87963c98a624eb3"
+      "01d25caf5c0ef7055f1c9697bb7da25e"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_store_stack_same_valid64_128",
@@ -799,8 +768,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_b19283e90b47034162373413c6a19933",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented",
+        "@kick_partial_app_c03907c8f5b35e48037e03b86aebb2c8", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
         "bool_typing", "data_elim_Vale.PPC64LE.Machine_s.Machine_stack",
         "equation_Prims.nat",
@@ -816,7 +785,6 @@
         "equation_Vale.PPC64LE.Stack_i.valid_src_stack64",
         "fuel_guarded_inversion_Vale.Def.Words_s.four",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.machine_stack",
-        "function_token_typing_FStar.Map.upd",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.update_heap128",
@@ -831,13 +799,13 @@
         "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.Set.mem_union",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_BarBar",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi2",
-        "proj_equation_Vale.Def.Words_s.Mkfour_hi3",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo0",
-        "proj_equation_Vale.Def.Words_s.Mkfour_lo1",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi2",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@hi3",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo0",
+        "proj_equation_Vale.Def.Words_s.Mkfour_@lo1",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_kinding_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "token_correspondence_Vale.Arch.MachineHeap_s.update_heap128_def",
@@ -854,7 +822,7 @@
         "typing_Vale.PPC64LE.Stack_i.valid_src_stack64"
       ],
       0,
-      "c166e5a31e0fac00eaf43c75281028d6"
+      "7b399121730cc9870da9c0fbf606388d"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_frame_store_load_stack64_128",
@@ -868,12 +836,12 @@
         "equation_Vale.PPC64LE.Stack_i.store_stack128",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val64",
         "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_initial_r1",
-        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_stack_mem",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@initial_r1",
+        "projection_inverse_Vale.PPC64LE.Machine_s.Machine_stack_@stack_mem",
         "token_correspondence_Vale.Arch.MachineHeap_s.get_heap_val64_def"
       ],
       0,
-      "8d20d95194babdee408ede19f5843ad7"
+      "e3483733ab74a75cafa68da7c8cc50d0"
     ],
     [
       "Vale.PPC64LE.Stack_i.lemma_frame_store_load_taint_stack64_128",
@@ -881,7 +849,8 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@kick_partial_app_719ed52359a712951013ed6dce9f3d7c", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Vale.Arch.HeapTypes_s_pretyping_b2ecc36deaf346c775ae2b728a51b51e",
         "equality_tok_Vale.Arch.HeapTypes_s.Public@tok",
@@ -889,17 +858,16 @@
         "equation_Vale.PPC64LE.Semantics_s.op_String_Access",
         "equation_Vale.PPC64LE.Stack_i.store_taint_stack128",
         "equation_Vale.PPC64LE.Stack_i.valid_taint_stack64",
-        "function_token_typing_FStar.Map.sel",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_11a20bb739238d6310bcbb7f00b21101",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_f10f68624e3f255ef4feec3ac429852d",
         "token_correspondence_Vale.PPC64LE.Semantics_s.op_String_Access",
         "typing_Vale.PPC64LE.Semantics_s.update_n",
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "699b376d4729973ca24d6a3be4d65387"
+      "79ae7c9f31e710f21749aeae06f99812"
     ]
   ]
 ]

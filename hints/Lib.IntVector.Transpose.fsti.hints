@@ -24,7 +24,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "37658f278c981afc826a94ffdc2e360e"
+      "187327b5addda7e13381aad50445b5ed"
     ],
     [
       "Lib.IntVector.Transpose.vec_t8",
@@ -49,7 +49,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "af776f2ee561048bb7209b415781b165"
+      "53120be2cf6869e69489cac186f82e23"
     ],
     [
       "Lib.IntVector.Transpose.transpose4x4",
@@ -58,7 +58,7 @@
       0,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "ec186eaf0af5e9b3faf7ecb7ed594794"
+      "9c1630eb296b8cc0cca07c335f559891"
     ],
     [
       "Lib.IntVector.Transpose.transpose8x8",
@@ -67,7 +67,7 @@
       0,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "dc2783a39a471b357586b61871f2beee"
+      "14cacd21c580ce105e015ff1a086f32f"
     ],
     [
       "Lib.IntVector.Transpose.transpose4x4_lseq",
@@ -93,7 +93,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "35b9a1d51fce78bca4698d594ff6443a"
+      "4d99a88e5ef786dc871fa6702c16aec1"
     ],
     [
       "Lib.IntVector.Transpose.transpose4x4_lseq",
@@ -119,7 +119,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "3387777989f40858d532b78fc250841e"
+      "a11db03ae5205d440339bc246f2a6ded"
     ],
     [
       "Lib.IntVector.Transpose.transpose8x8_lseq",
@@ -145,7 +145,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "ee3f6e711cdecbb08bd3df77547d11f1"
+      "654a1430ae8f5d30fbb3337de789247b"
     ],
     [
       "Lib.IntVector.Transpose.transpose8x8_lseq",
@@ -171,7 +171,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "98a3ad59a98c75bf84c5b3da2f493ddd"
+      "26a236417a595023d22d9864400b0641"
     ],
     [
       "Lib.IntVector.Transpose.transpose4x4_lemma",
@@ -182,27 +182,17 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "assumption_Lib.IntTypes.inttype__uu___haseq",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equality_tok_Lib.IntTypes.SEC@tok", "equation_Lib.IntTypes.int_t",
         "equation_Lib.IntVector.vec_v_t", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.GaloisField.gf", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.GaloisField.GF_t",
+        "equation_Lib.Sequence.to_seq", "equation_Prims.nat", "int_typing",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_7acf795d50ec256996534a97e12bfa61",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3"
       ],
       0,
-      "696efcaed1523d348002acf1044f2c1a"
+      "8dbacba5617123c6b1a57df2d695d50d"
     ],
     [
       "Lib.IntVector.Transpose.transpose8x8_lemma",
@@ -213,28 +203,19 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "assumption_Lib.IntTypes.inttype__uu___haseq",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.vec_v_t",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.GaloisField.GF_t",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntVector.vec_v_t", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.to_seq", "equation_Prims.nat", "int_typing",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_26d768cc241c6628db9e0d45d45d9136",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "refinement_interpretation_Tm_refine_f2c003e1f9af1b282679d2285040c7f6",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_f2c003e1f9af1b282679d2285040c7f6"
       ],
       0,
-      "0cbd2e1a98a6195d2943f825ff0c3d92"
+      "3bcded0f7636b1f91383644e4647e600"
     ]
   ]
 ]

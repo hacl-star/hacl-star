@@ -1,7 +1,7 @@
 # Exporting proper linking flags -- used by Makefile and tests/Makefile
 
 ifeq ($(shell uname),Darwin)
-OPENSSL_ROOT=$(shell which brew >/dev/null && which jq >/dev/null && brew info --json openssl | jq .[0].installed[0].sbom | xargs dirname)
+OPENSSL_ROOT ?= $(shell command -v brew >/dev/null && brew --prefix openssl@3)
 ifneq (,$(OPENSSL_ROOT))
 CFLAGS := -I$(OPENSSL_ROOT)/include/ $(CFLAGS)
 LDFLAGS:= -L$(OPENSSL_ROOT)/lib $(LDFLAGS)

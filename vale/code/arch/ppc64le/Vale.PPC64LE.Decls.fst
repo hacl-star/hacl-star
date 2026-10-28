@@ -26,6 +26,7 @@ let mul_nat_helper x y =
 
 let va_fuel_default () = 0
 
+#push-options "--z3rlimit 20"
 let lemma_opr_Mem64 (id:heaplet_id) (s:va_state) (address:reg_opr) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma
   (requires (
     let h = Map16.sel s.ms_heap.vf_heaplets id in
@@ -46,8 +47,12 @@ let lemma_opr_Mem64 (id:heaplet_id) (s:va_state) (address:reg_opr) (offset:int) 
   let t = va_opr_code_Mem64 id address offset t in
   M.lemma_valid_mem64 b index h;
   let (m, t) = t in
+  assert (valid_src_addr h b index);
+  assert (M.valid_taint_buf64 b h s.ms_heap.vf_layout.vl_taint t);
+  assert (eval_maddr m s == M.buffer_addr b h + 8 * index);
   assert (valid_buf_maddr64 (eval_maddr m s) h s.ms_heap.vf_layout b index t);
   M.lemma_load_mem64 b index h
+#pop-options
 
 let va_cmp_eq o1 o2 = S.OEq o1 o2
 let va_cmp_ne o1 o2 = S.ONe o1 o2

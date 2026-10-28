@@ -475,10 +475,26 @@ let load_last4 #a #m totlen_buf len b fin last =
 #pop-options
 
 
+// Prove the slice disjointness before introducing the heap and input buffers.
+noextract
+let load_last8_disjoint (#a:sha2_alg)
+    (last:lbuffer uint8 (16ul *! HD.block_len a))
+  : Lemma (internally_disjoint8
+      (gsub last 0ul (2ul *! HD.block_len a))
+      (gsub last (2ul *! HD.block_len a) (2ul *! HD.block_len a))
+      (gsub last (4ul *! HD.block_len a) (2ul *! HD.block_len a))
+      (gsub last (6ul *! HD.block_len a) (2ul *! HD.block_len a))
+      (gsub last (8ul *! HD.block_len a) (2ul *! HD.block_len a))
+      (gsub last (10ul *! HD.block_len a) (2ul *! HD.block_len a))
+      (gsub last (12ul *! HD.block_len a) (2ul *! HD.block_len a))
+      (gsub last (14ul *! HD.block_len a) (2ul *! HD.block_len a)))
+  = ()
+
 inline_for_extraction noextract
 val load_last8: #a:sha2_alg -> #m:m_spec{lanes a m = 8} -> load_last_t a m
 #push-options "--z3rlimit 600"
 let load_last8 #a #m totlen_buf len b fin last =
+  load_last8_disjoint #a last;
   let h0 = ST.get() in
   let (b0,(b1,(b2,(b3,(b4,(b5,(b6,b7))))))) = NTup.tup8 b in
   let last0 = sub last 0ul (2ul *! HD.block_len a) in
@@ -492,6 +508,7 @@ let load_last8 #a #m totlen_buf len b fin last =
   assert (internally_disjoint8 last0 last1 last2 last3 last4 last5 last6 last7);
   let h1 = ST.get() in
   assert (h0 == h1);
+  as_seq_gsub h1 last 0ul (2ul *! HD.block_len a);
   LSeq.eq_intro (as_seq h1 last0) (LSeq.create (2 * block_length a) (u8 0));
   LSeq.eq_intro (as_seq h1 last1) (LSeq.create (2 * block_length a) (u8 0));
   LSeq.eq_intro (as_seq h1 last2) (LSeq.create (2 * block_length a) (u8 0));

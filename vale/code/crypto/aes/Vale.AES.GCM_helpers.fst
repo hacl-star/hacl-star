@@ -254,7 +254,7 @@ let lemma_pad_to_32_bits_helper (s s'':seq4 nat8) (n:nat) : Lemma
   assert (n == 0 ==> x % pow2 (8 * n) == x % 0x1);
   assert (n == 1 ==> x % pow2 (8 * n) == x % 0x100);
   assert (n == 2 ==> x % pow2 (8 * n) == x % 0x10000);
-  ()
+  if n = 0 then () else if n = 1 then () else ()
 
 let lemma_pad_to_32_bits (s s'':seq4 nat8) (n:nat) : Lemma
   (requires

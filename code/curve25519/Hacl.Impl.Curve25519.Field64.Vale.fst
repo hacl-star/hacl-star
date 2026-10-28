@@ -46,12 +46,14 @@ let _: squash (Vale.Curve25519.Fast_defs.prime = Spec.Curve25519.prime) =
 
 // This one only goes through in a reasonable amount of rlimit thanks to
 // ``as_nat_is_as_nat`` and ``buffer_is_buffer`` above.
+#push-options "--split_queries always"
 [@ CInline]
 let add_scalar out f1 f2 =
   if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then
     Vale.Inline.X64.Fadd_inline.add_scalar out f1 f2
   else
     Vale.Wrapper.X64.Fadd.add_scalar_e out f1 f2
+#pop-options
 
 // Spec discrepancy. Need to call the right lemma from FStar.Math.Lemmas.
 #push-options "--fuel 0 --ifuel 0 --z3rlimit 400"
@@ -143,7 +145,7 @@ let fmul out f1 f2 tmp =
   ) else
     Vale.Wrapper.X64.Fmul.fmul_e (sub tmp 0ul 8ul) f1 out f2
 
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 500 --split_queries always"
 [@ CInline]
 let fmul2 out f1 f2 tmp =
   let h0 = ST.get() in

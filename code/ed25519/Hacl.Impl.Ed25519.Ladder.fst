@@ -6,6 +6,7 @@ open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Buffer.Lemmas
 
 open Hacl.Bignum25519
 module F51 = Hacl.Impl.Ed25519.Field51
@@ -29,6 +30,16 @@ include Hacl.Ed25519.PrecompTable
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 #set-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
 
+let point_eval_refl (h:FStar.HyperStack.mem) (p:point) : Lemma
+  (requires live h p)
+  (ensures F51.point_eval h p == F51.refl_ext_point (as_seq h p))
+  [SMTPat (F51.point_eval h p)] = ()
+
+let point_inv_linv (h:FStar.HyperStack.mem) (p:point) : Lemma
+  (requires live h p /\ F51.point_inv_t h p /\ F51.inv_ext_point (as_seq h p))
+  (ensures F51.linv (as_seq h p)) = ()
+
+
 inline_for_extraction noextract
 let table_inv_w4 : BE.table_inv_t U64 20ul 16ul =
   [@inline_let] let len = 20ul in
@@ -48,6 +59,17 @@ let table_inv_w5 : BE.table_inv_t U64 20ul 32ul =
   [@inline_let] let table_len = 32ul in
   assert_norm (pow2 (v l) = v table_len);
   BE.table_inv_precomp len ctx_len k l table_len
+
+
+let table_inv_w4_lemma
+  (a:Lib.Sequence.lseq uint64 20{F51.linv a})
+  (table:Lib.Sequence.lseq uint64 320) : Lemma
+  (requires forall (i:nat{i < 16}). precomp_table_acc_inv (refl a) 16 table i)
+  (ensures table_inv_w4 a table) =
+  let aux (i:nat{i < 16}) :
+    Lemma (PT.precomp_table_inv 20ul 0ul mk_ed25519_concrete_ops a 16ul table i) =
+    assert (precomp_table_acc_inv (refl a) 16 table i) in
+  FStar.Classical.forall_intro aux
 
 
 inline_for_extraction noextract
@@ -146,21 +168,25 @@ let point_mul_g_noalloc out bscalar q1 q2 q3 q4 =
   recall_contents precomp_basepoint_table_w4 precomp_basepoint_table_lseq_w4;
   let h1 = ST.get () in
   precomp_basepoint_table_lemma_w4 ();
+  table_inv_w4_lemma (as_seq h1 q1) (as_seq h1 precomp_basepoint_table_w4);
   assert (table_inv_w4 (as_seq h1 q1) (as_seq h1 precomp_basepoint_table_w4));
 
   recall_contents precomp_g_pow2_64_table_w4 precomp_g_pow2_64_table_lseq_w4;
   let h1 = ST.get () in
   precomp_g_pow2_64_table_lemma_w4 ();
+  table_inv_w4_lemma (as_seq h1 q2) (as_seq h1 precomp_g_pow2_64_table_w4);
   assert (table_inv_w4 (as_seq h1 q2) (as_seq h1 precomp_g_pow2_64_table_w4));
 
   recall_contents precomp_g_pow2_128_table_w4 precomp_g_pow2_128_table_lseq_w4;
   let h1 = ST.get () in
   precomp_g_pow2_128_table_lemma_w4 ();
+  table_inv_w4_lemma (as_seq h1 q3) (as_seq h1 precomp_g_pow2_128_table_w4);
   assert (table_inv_w4 (as_seq h1 q3) (as_seq h1 precomp_g_pow2_128_table_w4));
 
   recall_contents precomp_g_pow2_192_table_w4 precomp_g_pow2_192_table_lseq_w4;
   let h1 = ST.get () in
   precomp_g_pow2_192_table_lemma_w4 ();
+  table_inv_w4_lemma (as_seq h1 q4) (as_seq h1 precomp_g_pow2_192_table_w4);
   assert (table_inv_w4 (as_seq h1 q4) (as_seq h1 precomp_g_pow2_192_table_w4));
 
   let r1 = sub bscalar 0ul 1ul in
@@ -188,6 +214,17 @@ let point_mul_g_noalloc out bscalar q1 q2 q3 q4 =
   
 
 
+let split_tmp_disjoint (#a:Type0) (p:buffer a) (tmp:lbuffer uint64 28ul) : Lemma
+  (requires disjoint #MUT #MUT #a #uint64 p tmp)
+  (ensures
+    disjoint #MUT #MUT #a #uint64 p (gsub tmp 0ul 20ul) /\
+    disjoint #MUT #MUT #a #uint64 p (gsub tmp 20ul 4ul) /\
+    disjoint #MUT #MUT #a #uint64 p (gsub tmp 24ul 4ul)) =
+  LowStar.Buffer.loc_disjoint_includes_r (loc #MUT #a p) (loc tmp) (loc (gsub tmp 0ul 20ul));
+  LowStar.Buffer.loc_disjoint_includes_r (loc #MUT #a p) (loc tmp) (loc (gsub tmp 20ul 4ul));
+  LowStar.Buffer.loc_disjoint_includes_r (loc #MUT #a p) (loc tmp) (loc (gsub tmp 24ul 4ul))
+
+
 inline_for_extraction noextract
 val point_mul_g_mk_q1234: out:point -> bscalar:lbuffer uint64 4ul -> q1:point ->
   Stack unit
@@ -203,16 +240,42 @@ val point_mul_g_mk_q1234: out:point -> bscalar:lbuffer uint64 4ul -> q1:point ->
     LE.exp_four_fw S.mk_ed25519_comm_monoid
       g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
 
+#push-options "--z3rlimit 100"
 let point_mul_g_mk_q1234 out bscalar q1 =
+  let h0 = ST.get () in
   push_frame ();
+  let h2 = ST.get () in
   let q2 = mk_ext_g_pow2_64 () in
+  fresh_buffer_disjoint #uint64 #uint64 h2 out q2;
+  fresh_buffer_disjoint #uint64 #uint64 h2 q1 q2;
+  assert (disjoint out q2 /\ disjoint q1 q2);
+  let h3 = ST.get () in
   let q3 = mk_ext_g_pow2_128 () in
+  fresh_buffer_disjoint #uint64 #uint64 h3 out q3;
+  fresh_buffer_disjoint #uint64 #uint64 h3 q1 q3;
+  fresh_buffer_disjoint #uint64 #uint64 h3 q2 q3;
+  assert (disjoint out q3 /\ disjoint q1 q3 /\ disjoint q2 q3);
+  let h4 = ST.get () in
   let q4 = mk_ext_g_pow2_192 () in
+  fresh_buffer_disjoint #uint64 #uint64 h4 out q4;
+  fresh_buffer_disjoint #uint64 #uint64 h4 q1 q4;
+  fresh_buffer_disjoint #uint64 #uint64 h4 q2 q4;
+  fresh_buffer_disjoint #uint64 #uint64 h4 q3 q4;
+  assert (disjoint out q4 /\ disjoint q1 q4 /\ disjoint q2 q4 /\ disjoint q3 q4);
   ext_g_pow2_64_lseq_lemma ();
   ext_g_pow2_128_lseq_lemma ();
   ext_g_pow2_192_lseq_lemma ();
+  let h_pre = ST.get () in
+  assert (BD.bn_v h_pre bscalar == BD.bn_v h0 bscalar);
   point_mul_g_noalloc out bscalar q1 q2 q3 q4;
-  pop_frame ()
+  let h_post = ST.get () in
+  pop_frame ();
+  let h1 = ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped h0 h2 (loc out) h_post h1;
+  buffer_fresh_frame_popped h0 h2 h_post h1 out;
+  assert (as_seq h1 out == as_seq h_post out);
+  assert (modifies (loc out) h0 h1)
+#pop-options
 
 
 val lemma_exp_four_fw_local: b:BSeq.lbytes 32 ->
@@ -238,17 +301,34 @@ let lemma_exp_four_fw_local b =
 #push-options "--z3rlimit 100"
 [@CInline]
 let point_mul_g out scalar =
+  let hi = ST.get () in
   push_frame ();
   let h0 = ST.get () in
   let bscalar = create 4ul (u64 0) in
+  fresh_buffer_disjoint #uint8 #uint64 h0 scalar bscalar;
+  fresh_buffer_disjoint #uint64 #uint64 h0 out bscalar;
   convert_scalar scalar bscalar;
+  let h_q1 = ST.get () in
   let q1 = create 20ul (u64 0) in
+  fresh_buffer_disjoint #uint64 #uint64 h_q1 out q1;
+  fresh_buffer_disjoint #uint64 #uint64 h_q1 bscalar q1;
+  fresh_buffer_disjoint #uint8 #uint64 h_q1 scalar q1;
   make_g q1;
+  let h_g = ST.get () in
+  point_inv_linv h_g q1;
+  point_eval_refl h_g q1;
+  assert (F51.refl_ext_point (as_seq h_g q1) == S.g);
+  assert (refl (as_seq h_g q1) == g_aff);
   point_mul_g_mk_q1234 out bscalar q1;
   lemma_exp_four_fw_local (as_seq h0 scalar);
-  pop_frame ()
+  let h_post = ST.get () in
+  pop_frame ();
+  let hf = ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h0 (loc out) h_post hf;
+  buffer_fresh_frame_popped hi h0 h_post hf out
 #pop-options
 
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 val point_mul_g_double_vartime_noalloc:
     out:point
@@ -273,6 +353,7 @@ val point_mul_g_double_vartime_noalloc:
     LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
       (S.to_aff_point (F51.point_eval h0 q1)) 256 (BD.bn_v h0 scalar1)
       (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h0 scalar2) 5)
+#pop-options
 
 let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   [@inline_let] let len = 20ul in
@@ -328,12 +409,23 @@ let point_mul_g_double_vartime_table out scalar1 q1 scalar2 q2 =
   [@inline_let] let table_len = 32ul in
   assert_norm (pow2 5 == v table_len);
 
+  let hi = ST.get () in
   push_frame ();
+  let h0 = ST.get () in
   let table2 = create (table_len *! len) (u64 0) in
+  fresh_buffer_disjoint #uint64 #uint64 h0 out table2;
+  fresh_buffer_disjoint #uint64 #uint64 h0 scalar1 table2;
+  fresh_buffer_disjoint #uint64 #uint64 h0 q1 table2;
+  fresh_buffer_disjoint #uint64 #uint64 h0 scalar2 table2;
+  fresh_buffer_disjoint #uint64 #uint64 h0 q2 table2;
   PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2;
 
   point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2;
-  pop_frame ()
+  let h_post = ST.get () in
+  pop_frame ();
+  let hf = ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h0 (loc out) h_post hf;
+  buffer_fresh_frame_popped hi h0 h_post hf out
 
 
 inline_for_extraction noextract
@@ -393,16 +485,34 @@ val point_mul_g_double_vartime:
       (S.to_aff_point g_c) 256 (BSeq.nat_from_bytes_le (as_seq h0 scalar1))
       (S.to_aff_point (F51.point_eval h0 q2)) (BSeq.nat_from_bytes_le (as_seq h0 scalar2)) 5)
 
+#push-options "--z3rlimit 100"
 [@CInline]
 let point_mul_g_double_vartime out scalar1 scalar2 q2 =
+  let hi = ST.get () in
   push_frame ();
+  let h0 = ST.get () in
   let tmp = create 28ul (u64 0) in
+  fresh_buffer_disjoint #uint64 #uint64 h0 out tmp;
+  fresh_buffer_disjoint #uint8 #uint64 h0 scalar1 tmp;
+  fresh_buffer_disjoint #uint8 #uint64 h0 scalar2 tmp;
+  fresh_buffer_disjoint #uint64 #uint64 h0 q2 tmp;
   let g = sub tmp 0ul 20ul in
   let bscalar1 = sub tmp 20ul 4ul in
   let bscalar2 = sub tmp 24ul 4ul in
+  split_tmp_disjoint #uint64 out tmp;
+  split_tmp_disjoint #uint8 scalar1 tmp;
+  split_tmp_disjoint #uint8 scalar2 tmp;
+  split_tmp_disjoint #uint64 q2 tmp;
   make_g g;
+  let h_g = ST.get () in
+  point_inv_linv h_g g;
   point_mul_g_double_vartime_aux out scalar1 g scalar2 q2 bscalar1 bscalar2;
-  pop_frame ()
+  let h_post = ST.get () in
+  pop_frame ();
+  let hf = ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h0 (loc out) h_post hf;
+  buffer_fresh_frame_popped hi h0 h_post hf out
+#pop-options
 
 
 [@CInline]

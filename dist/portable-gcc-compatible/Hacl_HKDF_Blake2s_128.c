@@ -57,7 +57,7 @@ Hacl_HKDF_Blake2s_128_expand_blake2s_128(
   memset(text, 0U, (tlen + infolen + 1U) * sizeof (uint8_t));
   uint8_t *text0 = text + tlen;
   uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
+  uint8_t *ctr = text + (tlen + infolen);
   memcpy(text + tlen, info, infolen * sizeof (uint8_t));
   for (uint32_t i = 0U; i < n; i++)
   {

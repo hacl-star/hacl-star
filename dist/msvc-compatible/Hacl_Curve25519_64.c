@@ -213,7 +213,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
     uint64_t *swap1 = p01_tmp1_swap + 32U;
     uint64_t *nq2 = p01_tmp12;
     uint64_t *nq_p12 = p01_tmp12 + 8U;
-    uint64_t bit = (uint64_t)((uint32_t)key[(253U - i) / 8U] >> (253U - i) % 8U & 1U);
+    uint64_t bit = (uint64_t)(((uint32_t)key[(253U - i) / 8U] >> (253U - i) % 8U & 1U) & 0xFFU);
     uint64_t sw = swap1[0U] ^ bit;
     cswap20(sw, nq2, nq_p12);
     point_add_and_double(init, p01_tmp12, tmp2);
@@ -342,9 +342,7 @@ void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
     1U,
     uint64_t *os = tmp;
     uint8_t *bj = pub + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_le(bj);
     os[i] = x;);
   uint64_t tmp3 = tmp[3U];
   tmp[3U] = tmp3 & 0x7fffffffffffffffULL;

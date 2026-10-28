@@ -189,16 +189,16 @@ let load_signature r_q s_q signature =
 
 
 inline_for_extraction noextract
-val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul)
-  (public_key signature:lbytes 64ul) : Stack bool
+val ecdsa_verify_hashed_msg_prealloc (tmp:lbuffer uint64 35ul)
+  (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool
   (requires fun h ->
-    live h msgHash /\ live h public_key /\ live h signature)
-  (ensures fun h0 b h1 -> modifies0 h0 h1 /\
+    live h tmp /\ live h msgHash /\ live h public_key /\ live h signature /\
+    disjoint tmp msgHash /\ disjoint tmp public_key /\ disjoint tmp signature)
+  (ensures fun h0 b h1 -> modifies (loc tmp) h0 h1 /\
     b == S.ecdsa_verify_hashed_msg (as_seq h0 msgHash) (as_seq h0 public_key) (as_seq h0 signature))
 
-let ecdsa_verify_hashed_msg msgHash public_key signature =
-  push_frame ();
-  let tmp = create 35ul (u64 0) in
+#push-options "--z3rlimit 100 --split_queries always"
+let ecdsa_verify_hashed_msg_prealloc tmp msgHash public_key signature =
   let pk  = sub tmp 0ul 15ul in
   let r_q = sub tmp 15ul 4ul in
   let s_q = sub tmp 19ul 4ul in
@@ -210,10 +210,24 @@ let ecdsa_verify_hashed_msg msgHash public_key signature =
   let is_rs_valid = load_signature r_q s_q signature in
   QA.load_qelem_modq m_q msgHash;
 
-  let res =
-    if not (is_pk_valid && is_rs_valid) then false
-    else begin
-      ecdsa_verify_get_u12 u1 u2 r_q s_q m_q;
-      ecdsa_verify_cmpr r_q pk u1 u2 end in
+  if not (is_pk_valid && is_rs_valid) then false
+  else begin
+    ecdsa_verify_get_u12 u1 u2 r_q s_q m_q;
+    ecdsa_verify_cmpr r_q pk u1 u2 end
+#pop-options
+
+
+inline_for_extraction noextract
+val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul)
+  (public_key signature:lbytes 64ul) : Stack bool
+  (requires fun h ->
+    live h msgHash /\ live h public_key /\ live h signature)
+  (ensures fun h0 b h1 -> modifies0 h0 h1 /\
+    b == S.ecdsa_verify_hashed_msg (as_seq h0 msgHash) (as_seq h0 public_key) (as_seq h0 signature))
+
+let ecdsa_verify_hashed_msg msgHash public_key signature =
+  push_frame ();
+  let tmp = create 35ul (u64 0) in
+  let res = ecdsa_verify_hashed_msg_prealloc tmp msgHash public_key signature in
   pop_frame ();
   res

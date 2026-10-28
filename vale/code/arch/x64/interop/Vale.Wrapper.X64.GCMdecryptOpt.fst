@@ -2,16 +2,19 @@ module Vale.Wrapper.X64.GCMdecryptOpt
 
 module UV = LowStar.BufferView.Up
 module HS = FStar.HyperStack
+module V = Vale.X64.Decls
+module ME = Vale.X64.Memory
 open FStar.Mul
 open Vale.Stdcalls.X64.GCMdecryptOpt
 open Vale.AsLowStar.MemoryHelpers
+open Vale.Wrapper.X64.GCM.Helpers
 open Vale.X64.MemoryAdapters
 open Vale.SHA.Simplify_Sha
 open Vale.AES.Gcm_simplify
 open Vale.AES.GCM_helpers
 open FStar.Calc
 open FStar.Int.Cast
-open FStar.Integers
+
 open Vale.Arch.Types
 open Vale.Lib.BufferViewHelpers
 
@@ -27,267 +30,352 @@ let length_div (b:uint8_p) : Lemma
   (ensures DV.length (get_downview b) / 16 = 1)
   = DV.length_eq (get_downview b)
 
+module IX = Vale.Interop.X64
+module LS = Vale.AsLowStar.LowStarSig
+module IB = Vale.Interop.Base
+
+private unfold let gcm128_decrypt_pre
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (cipher_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) : GTot Type0 =
+  B.disjoint tag_b in128x6_b /\ B.disjoint tag_b out128x6_b /\
+  B.disjoint tag_b in128_b /\ B.disjoint tag_b out128_b /\
+  B.disjoint tag_b inout_b /\ B.disjoint tag_b scratch_b /\
+  B.disjoint tag_b iv_b /\
+
+  B.disjoint iv_b keys_b /\ B.disjoint iv_b auth_b /\
+  B.disjoint iv_b abytes_b /\ B.disjoint iv_b in128x6_b /\
+  B.disjoint iv_b out128x6_b /\ B.disjoint iv_b in128_b /\
+  B.disjoint iv_b out128_b /\ B.disjoint iv_b inout_b /\
+  B.disjoint iv_b scratch_b /\ B.disjoint iv_b hkeys_b /\
+
+  B.disjoint scratch_b keys_b /\ B.disjoint scratch_b auth_b /\
+  B.disjoint scratch_b abytes_b /\ B.disjoint scratch_b in128x6_b /\
+  B.disjoint scratch_b out128x6_b /\ B.disjoint scratch_b in128_b /\
+  B.disjoint scratch_b out128_b /\ B.disjoint scratch_b inout_b /\
+  B.disjoint scratch_b hkeys_b /\
+
+  B.disjoint inout_b keys_b /\ B.disjoint inout_b auth_b /\
+  B.disjoint inout_b abytes_b /\ B.disjoint inout_b in128x6_b /\
+  B.disjoint inout_b out128x6_b /\ B.disjoint inout_b in128_b /\
+  B.disjoint inout_b out128_b /\ B.disjoint inout_b hkeys_b /\
+
+  B.disjoint out128x6_b keys_b /\ B.disjoint out128x6_b auth_b /\
+  B.disjoint out128x6_b abytes_b /\ B.disjoint out128x6_b hkeys_b /\
+  B.disjoint out128x6_b in128_b /\ B.disjoint out128x6_b inout_b /\
+
+  B.disjoint in128x6_b keys_b /\ B.disjoint in128x6_b auth_b /\
+  B.disjoint in128x6_b abytes_b /\ B.disjoint in128x6_b hkeys_b /\
+  B.disjoint in128x6_b in128_b /\ B.disjoint in128x6_b inout_b /\
+
+  B.disjoint out128_b keys_b /\ B.disjoint out128_b auth_b /\
+  B.disjoint out128_b abytes_b /\ B.disjoint out128_b hkeys_b /\
+  B.disjoint out128_b in128x6_b /\ B.disjoint out128_b out128x6_b /\
+  B.disjoint out128_b inout_b /\
+
+  B.disjoint in128_b keys_b /\ B.disjoint in128_b auth_b /\
+  B.disjoint in128_b abytes_b /\ B.disjoint in128_b hkeys_b /\
+  B.disjoint in128_b in128x6_b /\ B.disjoint in128_b out128x6_b /\
+  B.disjoint in128_b inout_b /\
+
+  B.disjoint tag_b abytes_b /\ B.disjoint tag_b auth_b /\
+  B.disjoint keys_b abytes_b /\ B.disjoint hkeys_b auth_b /\
+  B.disjoint hkeys_b abytes_b /\ B.disjoint auth_b abytes_b /\
+
+  disjoint_or_eq in128x6_b out128x6_b /\
+  disjoint_or_eq in128_b out128_b /\
+  disjoint_or_eq tag_b hkeys_b /\ disjoint_or_eq tag_b keys_b /\
+  disjoint_or_eq keys_b hkeys_b /\ B.disjoint keys_b auth_b /\
+
+  B.live h0 auth_b /\ B.live h0 abytes_b /\ B.live h0 keys_b /\
+  B.live h0 iv_b /\ B.live h0 hkeys_b /\
+  B.live h0 in128x6_b /\ B.live h0 out128x6_b /\
+  B.live h0 in128_b /\ B.live h0 out128_b /\
+  B.live h0 inout_b /\ B.live h0 tag_b /\ B.live h0 scratch_b /\
+
+  B.length auth_b = 16 * UInt64.v auth_num /\
+  B.length abytes_b == 16 /\
+  B.length iv_b = 16 /\
+  B.length in128x6_b == 16 * UInt64.v len128x6 /\
+  B.length out128x6_b == B.length in128x6_b /\
+  B.length in128_b == 16 * UInt64.v len128_num /\
+  B.length out128_b == B.length in128_b /\
+  B.length inout_b == 16 /\
+  B.length scratch_b == 144 /\
+  B.length hkeys_b = 128 /\
+  B.length tag_b == 16 /\
+  B.length keys_b = 176 /\
+
+  UInt64.v cipher_num < pow2_32 /\
+  UInt64.v auth_bytes < pow2_32 /\
+
+  UInt64.v len128x6 % 6 == 0 /\
+  (UInt64.v len128x6 > 0 ==> UInt64.v len128x6 >= 6) /\
+  12 + UInt64.v len128x6 + 6 < pow2_32 /\
+
+  UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) <= UInt64.v cipher_num /\
+  UInt64.v cipher_num < UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) + 128/8 /\
+  UInt64.v auth_num * (128/8) <= UInt64.v auth_bytes /\
+  UInt64.v auth_bytes < UInt64.v auth_num * (128/8) + 128/8 /\
+
+  aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled /\ movbe_enabled /\
+  is_aes_key_LE AES_128 (Ghost.reveal key) /\
+  (let db = get_downview keys_b in
+  length_aux keys_b;
+  let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
+  Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key))) /\
+
+  (let db = get_downview hkeys_b in
+   length_aux5 hkeys_b;
+   let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
+   hkeys_reqs_pub (UV.as_seq h0 ub) (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))) /\
+  (length_div iv_b;
+   (low_buffer_read TUInt8 TUInt128 h0 iv_b 0 ==
+     compute_iv_BE (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv))
+  )
+
+[@__reduce__]
+noextract
+private let gcm128_args
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (cipher_num:uint64) (scratch_b tag_b:b128)
+  : l:IX.arg_list{FStar.List.Tot.length l == 17} =
+  let args : list IB.arg =
+    [(|t128_no_mod, tag_b|); (|t128_mod, scratch_b|); (|tuint64, cipher_num|);
+     (|t128_mod, inout_b|); (|tuint64, len128_num|); (|t128_mod, out128_b|);
+     (|t128_no_mod, in128_b|); (|tuint64, len128x6|); (|t128_mod, out128x6_b|);
+     (|t128_no_mod, in128x6_b|); (|t128_no_mod, abytes_b|);
+     (|t128_no_mod, hkeys_b|); (|t128_mod_pub, iv_b|); (|t128_no_mod, keys_b|);
+     (|tuint64, auth_num|); (|tuint64, auth_bytes|); (|t128_no_mod, auth_b|)] in
+  assert_norm (FStar.List.Tot.length args == 17);
+  args
+
+// Keep the assembly precondition separate from the stateful wrapper proof.
+private unfold let gcm128_call_pre
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (cipher_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) : GTot Type0 =
+  normal (
+    let args = gcm128_args auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+      in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+      inout_b cipher_num scratch_b tag_b in
+    IB.mem_roots_p h0 args /\
+    (forall (s0:V.va_state).
+      V.va_get_ok s0 /\
+      LS.vale_pre_hyp #IX.max_stdcall #IX.arg_reg_stdcall args s0 /\
+      LS.mem_correspondence args h0 s0 ==>
+      gcm128_pre key iv code_gcm128 auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+        in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+        inout_b cipher_num scratch_b tag_b s0))
+
+#push-options "--split_queries no --z3refresh --ifuel 1 --z3rlimit 300"
+private let prove_gcm128_call_pre
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (cipher_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) : Lemma
+  (requires gcm128_decrypt_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0)
+  (ensures gcm128_call_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0) =
+  prepare_buffers 11 h0 auth_b auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b scratch_b tag_b;
+  stdcall_constants ();
+  // Normalization can leave this length symbolic in stack-address expressions.
+  assert (FStar.List.Tot.length
+    (gcm128_args auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+      in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+      inout_b cipher_num scratch_b tag_b) == 17);
+  assert (gcm128_call_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0)
+#pop-options
+
+private unfold let gcm128_decrypt_post
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (cipher_num:uint64) (scratch_b tag_b:b128)
+  (h0:HS.mem{gcm128_decrypt_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0})
+  (c:uint64) (h1:HS.mem) : GTot Type0 =
+  B.modifies  (B.loc_union (B.loc_buffer iv_b)
+              (B.loc_union (B.loc_buffer scratch_b)
+              (B.loc_union (B.loc_buffer out128x6_b)
+              (B.loc_union (B.loc_buffer out128_b)
+              (B.loc_buffer inout_b))))) h0 h1 /\
+  (UInt64.v cipher_num < pow2_32 /\
+   UInt64.v auth_bytes < pow2_32 /\ (
+   let in128x6_d = get_downview in128x6_b in
+   length_aux3 in128x6_b (UInt64.v len128x6);
+   let in128x6_u = UV.mk_buffer in128x6_d Vale.Interop.Views.up_view128 in
+   let in128_d = get_downview in128_b in
+   length_aux3 in128_b (UInt64.v len128_num);
+   let in128_u = UV.mk_buffer in128_d Vale.Interop.Views.up_view128 in
+   let inout_d = get_downview inout_b in
+   length_aux3 inout_b 1;
+   let inout_u = UV.mk_buffer inout_d Vale.Interop.Views.up_view128 in
+   let out128x6_d = get_downview out128x6_b in
+   length_aux3 out128x6_b (UInt64.v len128x6);
+   let out128x6_u = UV.mk_buffer out128x6_d Vale.Interop.Views.up_view128 in
+   let out128_d = get_downview out128_b in
+   length_aux3 out128_b (UInt64.v len128_num);
+   let out128_u = UV.mk_buffer out128_d Vale.Interop.Views.up_view128 in
+   let cipher_in =
+       Seq.append (Seq.append (UV.as_seq h0 in128x6_u) (UV.as_seq h0 in128_u))
+                  (UV.as_seq h0 inout_u)
+   in let cipher_bytes = wrap_slice (le_seq_quad32_to_bytes cipher_in) (UInt64.v cipher_num)
+   in let plain_out =
+       Seq.append (Seq.append (UV.as_seq h1 out128x6_u) (UV.as_seq h1 out128_u))
+                  (UV.as_seq h1 inout_u)
+   in let plain_bytes = wrap_slice (le_seq_quad32_to_bytes plain_out) (UInt64.v cipher_num)
+   in let auth_d = get_downview auth_b in
+   length_aux3 auth_b (UInt64.v auth_num);
+   let auth_u = UV.mk_buffer auth_d Vale.Interop.Views.up_view128 in
+   let abytes_d = get_downview abytes_b in
+   length_aux3 abytes_b 1;
+   let abytes_u = UV.mk_buffer abytes_d Vale.Interop.Views.up_view128 in
+   let auth_in = Seq.append (UV.as_seq h0 auth_u) (UV.as_seq h0 abytes_u) in
+   let auth_bytes = wrap_slice (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_bytes) in
+  (length_div tag_b;
+   let expected_tag = le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 tag_b 0) in
+  Seq.length cipher_bytes < pow2_32 /\
+  Seq.length auth_bytes < pow2_32 /\
+  is_aes_key AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) /\
+  (let plain, result = gcm_decrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (Ghost.reveal iv) cipher_bytes auth_bytes expected_tag in
+  Seq.equal plain plain_bytes /\
+  (UInt64.v c = 0) == result
+  ))))
+
+// Relate the assembly result to the existing Low* postcondition in a pure lemma.
+private unfold let gcm128_call_post
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (cipher_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) (c:uint64) (h1:HS.mem) : GTot Type0 =
+  normal (
+    let args = gcm128_args auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+      in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+      inout_b cipher_num scratch_b tag_b in
+    IB.mem_roots_p h1 args /\
+    B.modifies (IB.loc_modified_args args) h0 h1 /\
+    (exists (s0 s1:V.va_state) (f:V.va_fuel).
+      LS.mem_correspondence args h0 s0 /\
+      LS.mem_correspondence args h1 s1 /\
+      UInt64.v c == Vale.X64.State.eval_reg_64 Vale.X64.Machine_s.rRax s1 /\
+      gcm128_post key iv code_gcm128 auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+        in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+        inout_b cipher_num scratch_b tag_b s0 s1 f))
+
+#push-options "--split_queries no --z3refresh --ifuel 1 --z3rlimit 300"
+private let prove_gcm128_call_post
+  (key:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE)
+  (auth_b:b128) (auth_bytes auth_num:uint64)
+  (keys_b iv_b hkeys_b abytes_b in128x6_b out128x6_b:b128)
+  (len128x6:uint64) (in128_b out128_b:b128) (len128_num:uint64)
+  (inout_b:b128) (cipher_num:uint64) (scratch_b tag_b:b128) (h0:HS.mem) (c:uint64) (h1:HS.mem) : Lemma
+  (requires gcm128_decrypt_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0 /\
+    gcm128_call_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0 c h1)
+  (ensures gcm128_decrypt_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0 c h1) =
+  prepare_buffers 11 h0 auth_b auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b scratch_b tag_b;
+  B.modifies_loc_includes
+    (B.loc_union (B.loc_buffer iv_b)
+      (B.loc_union (B.loc_buffer scratch_b)
+        (B.loc_union (B.loc_buffer out128x6_b)
+          (B.loc_union (B.loc_buffer out128_b) (B.loc_buffer inout_b)))))
+    h0 h1
+    (B.loc_union (B.loc_buffer scratch_b)
+      (B.loc_union (B.loc_buffer inout_b)
+        (B.loc_union (B.loc_buffer out128_b)
+          (B.loc_union (B.loc_buffer out128x6_b)
+            (B.loc_union (B.loc_buffer iv_b) B.loc_none)))));
+  assert (gcm128_decrypt_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0 c h1)
+#pop-options
+
 inline_for_extraction
 val gcm128_decrypt_opt':
   key:Ghost.erased (Seq.seq nat32) ->
   iv:Ghost.erased supported_iv_LE ->
-  auth_b:uint8_p ->
+  auth_b:b128 ->
   auth_bytes:uint64 ->
   auth_num:uint64 ->
-  keys_b:uint8_p ->
-  iv_b:uint8_p ->
-  hkeys_b:uint8_p ->
-  abytes_b:uint8_p ->
-  in128x6_b:uint8_p ->
-  out128x6_b:uint8_p ->
+  keys_b:b128 ->
+  iv_b:b128 ->
+  hkeys_b:b128 ->
+  abytes_b:b128 ->
+  in128x6_b:b128 ->
+  out128x6_b:b128 ->
   len128x6:uint64 ->
-  in128_b:uint8_p ->
-  out128_b:uint8_p ->
+  in128_b:b128 ->
+  out128_b:b128 ->
   len128_num:uint64 ->
-  inout_b:uint8_p ->
+  inout_b:b128 ->
   cipher_num:uint64 ->
 
-  scratch_b:uint8_p ->
-  tag_b:uint8_p ->
+  scratch_b:b128 ->
+  tag_b:b128 ->
 
   Stack UInt64.t
-    (requires fun h0 ->
-      B.disjoint tag_b in128x6_b /\ B.disjoint tag_b out128x6_b /\
-      B.disjoint tag_b in128_b /\ B.disjoint tag_b out128_b /\
-      B.disjoint tag_b inout_b /\ B.disjoint tag_b scratch_b /\
-      B.disjoint tag_b iv_b /\
-
-      B.disjoint iv_b keys_b /\ B.disjoint iv_b auth_b /\
-      B.disjoint iv_b abytes_b /\ B.disjoint iv_b in128x6_b /\
-      B.disjoint iv_b out128x6_b /\ B.disjoint iv_b in128_b /\
-      B.disjoint iv_b out128_b /\ B.disjoint iv_b inout_b /\
-      B.disjoint iv_b scratch_b /\ B.disjoint iv_b hkeys_b /\
-
-      B.disjoint scratch_b keys_b /\ B.disjoint scratch_b auth_b /\
-      B.disjoint scratch_b abytes_b /\ B.disjoint scratch_b in128x6_b /\
-      B.disjoint scratch_b out128x6_b /\ B.disjoint scratch_b in128_b /\
-      B.disjoint scratch_b out128_b /\ B.disjoint scratch_b inout_b /\
-      B.disjoint scratch_b hkeys_b /\
-
-      B.disjoint inout_b keys_b /\ B.disjoint inout_b auth_b /\
-      B.disjoint inout_b abytes_b /\ B.disjoint inout_b in128x6_b /\
-      B.disjoint inout_b out128x6_b /\ B.disjoint inout_b in128_b /\
-      B.disjoint inout_b out128_b /\ B.disjoint inout_b hkeys_b /\
-
-      B.disjoint out128x6_b keys_b /\ B.disjoint out128x6_b auth_b /\
-      B.disjoint out128x6_b abytes_b /\ B.disjoint out128x6_b hkeys_b /\
-      B.disjoint out128x6_b in128_b /\ B.disjoint out128x6_b inout_b /\
-
-      B.disjoint in128x6_b keys_b /\ B.disjoint in128x6_b auth_b /\
-      B.disjoint in128x6_b abytes_b /\ B.disjoint in128x6_b hkeys_b /\
-      B.disjoint in128x6_b in128_b /\ B.disjoint in128x6_b inout_b /\
-
-      B.disjoint out128_b keys_b /\ B.disjoint out128_b auth_b /\
-      B.disjoint out128_b abytes_b /\ B.disjoint out128_b hkeys_b /\
-      B.disjoint out128_b in128x6_b /\ B.disjoint out128_b out128x6_b /\
-      B.disjoint out128_b inout_b /\
-
-      B.disjoint in128_b keys_b /\ B.disjoint in128_b auth_b /\
-      B.disjoint in128_b abytes_b /\ B.disjoint in128_b hkeys_b /\
-      B.disjoint in128_b in128x6_b /\ B.disjoint in128_b out128x6_b /\
-      B.disjoint in128_b inout_b /\
-
-      B.disjoint tag_b abytes_b /\ B.disjoint tag_b auth_b /\
-      B.disjoint keys_b abytes_b /\ B.disjoint hkeys_b auth_b /\
-      B.disjoint hkeys_b abytes_b /\ B.disjoint auth_b abytes_b /\
-
-      disjoint_or_eq in128x6_b out128x6_b /\
-      disjoint_or_eq in128_b out128_b /\
-      disjoint_or_eq tag_b hkeys_b /\ disjoint_or_eq tag_b keys_b /\
-      disjoint_or_eq keys_b hkeys_b /\ B.disjoint keys_b auth_b /\
-
-      B.live h0 auth_b /\ B.live h0 abytes_b /\ B.live h0 keys_b /\
-      B.live h0 iv_b /\ B.live h0 hkeys_b /\
-      B.live h0 in128x6_b /\ B.live h0 out128x6_b /\
-      B.live h0 in128_b /\ B.live h0 out128_b /\
-      B.live h0 inout_b /\ B.live h0 tag_b /\ B.live h0 scratch_b /\
-
-      B.length auth_b = 16 * UInt64.v auth_num /\
-      B.length abytes_b == 16 /\
-      B.length iv_b = 16 /\
-      B.length in128x6_b == 16 * UInt64.v len128x6 /\
-      B.length out128x6_b == B.length in128x6_b /\
-      B.length in128_b == 16 * UInt64.v len128_num /\
-      B.length out128_b == B.length in128_b /\
-      B.length inout_b == 16 /\
-      B.length scratch_b == 144 /\
-      B.length hkeys_b = 128 /\
-      B.length tag_b == 16 /\
-      B.length keys_b = 176 /\
-
-      UInt64.v cipher_num < pow2_32 /\
-      UInt64.v auth_bytes < pow2_32 /\
-
-      UInt64.v len128x6 % 6 == 0 /\
-      (UInt64.v len128x6 > 0 ==> UInt64.v len128x6 >= 6) /\
-      12 + UInt64.v len128x6 + 6 < pow2_32 /\
-
-      UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) <= UInt64.v cipher_num /\
-      UInt64.v cipher_num < UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) + 128/8 /\
-      UInt64.v auth_num * (128/8) <= UInt64.v auth_bytes /\
-      UInt64.v auth_bytes < UInt64.v auth_num * (128/8) + 128/8 /\
-
-      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled /\ movbe_enabled /\
-      is_aes_key_LE AES_128 (Ghost.reveal key) /\
-      (let db = get_downview keys_b in
-      length_aux keys_b;
-      let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
-      Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key))) /\
-
-      (let db = get_downview hkeys_b in
-       length_aux5 hkeys_b;
-       let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
-       hkeys_reqs_pub (UV.as_seq h0 ub) (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))) /\
-      (length_div iv_b;
-       (low_buffer_read TUInt8 TUInt128 h0 iv_b 0 ==
-         compute_iv_BE (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv))
-      )
-
-    )
-    (ensures fun h0 c h1 ->
-      B.modifies  (B.loc_union (B.loc_buffer iv_b)
-                  (B.loc_union (B.loc_buffer scratch_b)
-                  (B.loc_union (B.loc_buffer out128x6_b)
-                  (B.loc_union (B.loc_buffer out128_b)
-                  (B.loc_buffer inout_b))))) h0 h1 /\
-      (UInt64.v cipher_num < pow2_32 /\
-       UInt64.v auth_bytes < pow2_32 /\ (
-       let in128x6_d = get_downview in128x6_b in
-       length_aux3 in128x6_b (UInt64.v len128x6);
-       let in128x6_u = UV.mk_buffer in128x6_d Vale.Interop.Views.up_view128 in
-       let in128_d = get_downview in128_b in
-       length_aux3 in128_b (UInt64.v len128_num);
-       let in128_u = UV.mk_buffer in128_d Vale.Interop.Views.up_view128 in
-       let inout_d = get_downview inout_b in
-       length_aux3 inout_b 1;
-       let inout_u = UV.mk_buffer inout_d Vale.Interop.Views.up_view128 in
-       let out128x6_d = get_downview out128x6_b in
-       length_aux3 out128x6_b (UInt64.v len128x6);
-       let out128x6_u = UV.mk_buffer out128x6_d Vale.Interop.Views.up_view128 in
-       let out128_d = get_downview out128_b in
-       length_aux3 out128_b (UInt64.v len128_num);
-       let out128_u = UV.mk_buffer out128_d Vale.Interop.Views.up_view128 in
-       let cipher_in =
-           Seq.append (Seq.append (UV.as_seq h0 in128x6_u) (UV.as_seq h0 in128_u))
-                      (UV.as_seq h0 inout_u)
-       in let cipher_bytes = wrap_slice (le_seq_quad32_to_bytes cipher_in) (UInt64.v cipher_num)
-       in let plain_out =
-           Seq.append (Seq.append (UV.as_seq h1 out128x6_u) (UV.as_seq h1 out128_u))
-                      (UV.as_seq h1 inout_u)
-       in let plain_bytes = wrap_slice (le_seq_quad32_to_bytes plain_out) (UInt64.v cipher_num)
-       in let auth_d = get_downview auth_b in
-       length_aux3 auth_b (UInt64.v auth_num);
-       let auth_u = UV.mk_buffer auth_d Vale.Interop.Views.up_view128 in
-       let abytes_d = get_downview abytes_b in
-       length_aux3 abytes_b 1;
-       let abytes_u = UV.mk_buffer abytes_d Vale.Interop.Views.up_view128 in
-       let auth_in = Seq.append (UV.as_seq h0 auth_u) (UV.as_seq h0 abytes_u) in
-       let auth_bytes = wrap_slice (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_bytes) in
-      (length_div tag_b;
-       let expected_tag = le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 tag_b 0) in
-      Seq.length cipher_bytes < pow2_32 /\
-      Seq.length auth_bytes < pow2_32 /\
-      is_aes_key AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) /\
-      (let plain, result = gcm_decrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (Ghost.reveal iv) cipher_bytes auth_bytes expected_tag in
-      Seq.equal plain plain_bytes /\
-      (UInt64.v c = 0) == result
-      ))))
-    )
+    (requires fun h0 -> gcm128_decrypt_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0)
+    (ensures fun h0 c h1 -> gcm128_decrypt_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0 c h1)
 
 
-#push-options "--z3cliopt smt.arith.nl=true --smtencoding.nl_arith_repr boxwrap --ext compat:normalizer_memo_ignore_cfg --retry 3"
+
+#push-options "--split_queries no --z3refresh --ifuel 1"
 #restart-solver
 inline_for_extraction
 let gcm128_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b cipher_num scratch_b tag_b =
 
   let h0 = get() in
-  B.disjoint_neq iv_b auth_b;
-  B.disjoint_neq iv_b keys_b;
-  B.disjoint_neq iv_b hkeys_b;
-  B.disjoint_neq iv_b abytes_b;
-  B.disjoint_neq iv_b in128x6_b;
-  B.disjoint_neq iv_b out128x6_b;
-  B.disjoint_neq iv_b in128_b;
-  B.disjoint_neq iv_b out128_b;
-  B.disjoint_neq iv_b inout_b;
-  B.disjoint_neq iv_b scratch_b;
-  B.disjoint_neq iv_b tag_b;
+  prepare_buffers 11 h0 auth_b auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b scratch_b tag_b;
 
+  prove_gcm128_call_pre key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0;
 
-  DV.length_eq (get_downview auth_b);
-  DV.length_eq (get_downview keys_b);
-  DV.length_eq (get_downview iv_b);
-  DV.length_eq (get_downview hkeys_b);
-  DV.length_eq (get_downview abytes_b);
-  DV.length_eq (get_downview in128x6_b);
-  DV.length_eq (get_downview out128x6_b);
-  DV.length_eq (get_downview in128_b);
-  DV.length_eq (get_downview out128_b);
-  DV.length_eq (get_downview inout_b);
-  DV.length_eq (get_downview scratch_b);
-  DV.length_eq (get_downview tag_b);
+  stdcall_constants ();
 
-  math_aux (B.length auth_b);
-  math_aux (B.length keys_b);
-  math_aux (B.length iv_b);
-  math_aux (B.length hkeys_b);
-  math_aux (B.length in128x6_b);
-  math_aux (B.length scratch_b);
-  math_aux (B.length out128_b);
-  FStar.Math.Lemmas.cancel_mul_mod (UInt64.v auth_num) 16;
-  assert_norm (176 % 16 = 0);
-  assert_norm (16 % 16 = 0);
-  assert_norm (144 % 16 = 0);
-  FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128x6) 16;
-  FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128_num) 16;
-
-  calc (<=) {
-    256 * ((16 * UInt64.v len128_num) / 16);
-    == {  FStar.Math.Lemmas.cancel_mul_div (UInt64.v len128_num) 16 }
-    256 * (UInt64.v len128_num);
-    ( <= ) { assert_norm (256 <= 4096); FStar.Math.Lemmas.lemma_mult_le_right (UInt64.v len128_num) 256 4096 }
-    4096 * (UInt64.v len128_num);
-  };
-
-  assert (DV.length (get_downview tag_b) % 16 = 0);
-  assert (DV.length (get_downview scratch_b) % 16 = 0);
-  assert (DV.length (get_downview out128_b) % 16 = 0);
-
-  as_vale_buffer_len #TUInt8 #TUInt128 auth_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 keys_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 iv_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 hkeys_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 abytes_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 out128x6_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 in128x6_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 out128x6_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 in128_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 inout_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 scratch_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 tag_b;
-
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 auth_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in128x6_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out128x6_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in128_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out128_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 inout_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 iv_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
-  bounded_buffer_addrs_all TUInt8 TUInt128 h0 hkeys_b;
-
-  let (x, _) = gcm128_decrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
-  in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b cipher_num scratch_b tag_b () in
+  let (x, _) = gcm128_decrypt_opt key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b cipher_num scratch_b tag_b () in
 
   let h1 = get() in
+  prove_gcm128_call_post key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+    in128x6_b out128x6_b len128x6 in128_b out128_b len128_num
+    inout_b cipher_num scratch_b tag_b h0 x h1;
   x
 #pop-options
+
+open FStar.Integers
 
 inline_for_extraction
 val gcm128_decrypt_opt_alloca:

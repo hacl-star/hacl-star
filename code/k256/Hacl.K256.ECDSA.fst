@@ -127,6 +127,7 @@ let public_key_uncompressed_from_raw pk pk_raw =
   LSeq.eq_intro (as_seq h1 pk) (S.pk_uncompressed_from_raw (as_seq h0 pk_raw))
 
 
+#push-options "--split_queries always"
 let public_key_compressed_to_raw pk_raw pk =
   push_frame ();
   let xa = create_felem () in
@@ -146,6 +147,7 @@ let public_key_compressed_to_raw pk_raw pk =
       (LSeq.concat #_ #32 #32(as_seq h0 pk_xb) (BSeq.nat_to_bytes_be 32 (feval h0 ya))) end;
   pop_frame ();
   b
+#pop-options
 
 
 inline_for_extraction noextract
@@ -209,6 +211,7 @@ let secret_to_public public_key private_key =
   BB.unsafe_bool_of_limb is_sk_valid
 
 
+#push-options "--z3rlimit 100 --split_queries always"
 let ecdh shared_secret their_pubkey private_key =
   push_frame ();
   let tmp = create 34ul (u64 0) in
@@ -224,3 +227,4 @@ let ecdh shared_secret their_pubkey private_key =
     P.point_store shared_secret ss end;
   pop_frame ();
   BB.unsafe_bool_of_limb is_sk_valid && is_pk_valid
+#pop-options

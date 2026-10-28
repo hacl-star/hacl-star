@@ -394,6 +394,10 @@ val wrap_variadic (c:BS.code) : as_lowstar_sig c
 [@__reduce__]
 let (++) (#t:td) (x:td_as_type t) (args:list arg) = (| t, x |) :: args
 
+let length_push_arg (#t:td) (x:td_as_type t) (args:list arg) : Lemma
+  (List.length (x ++ args) == 1 + List.length args)
+  [SMTPat (List.length (x ++ args))] = ()
+
 [@__reduce__]
 let rec rel_gen_t
       (c:BS.code)

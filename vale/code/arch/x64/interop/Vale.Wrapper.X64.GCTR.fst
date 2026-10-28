@@ -163,6 +163,16 @@ let length_aux2 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
+#push-options "--fuel 0 --ifuel 0"
+private let buffer_block_length (b:uint8_p) (n:nat) : Lemma
+  (requires B.length b == 16 * n)
+  (ensures Vale.X64.Decls.buffer_length (as_vale_buffer #TUInt8 #TUInt128 b) == n) =
+  DV.length_eq (get_downview b);
+  FStar.Math.Lemmas.cancel_mul_mod n 16;
+  FStar.Math.Lemmas.cancel_mul_div n 16;
+  as_vale_buffer_len #TUInt8 #TUInt128 b
+#pop-options
+
 #push-options "--z3rlimit 200 --fuel 0 --ifuel 0 --ext compat:normalizer_memo_ignore_cfg"
 inline_for_extraction
 let gctr128_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blocks =
@@ -183,6 +193,8 @@ let gctr128_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blo
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 in_b;
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 out_b;
+  buffer_block_length inout_b 1;
+  buffer_block_length ctr_b 1;
 
   let lemma_uv_key () : Lemma
     (let db = get_downview keys_b in
@@ -236,6 +248,8 @@ let gctr256_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blo
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 in_b;
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 out_b;
+  buffer_block_length inout_b 1;
+  buffer_block_length ctr_b 1;
 
   let lemma_uv_key () : Lemma
     (let db = get_downview keys_b in

@@ -68,6 +68,7 @@ val sign_expanded:
         (as_seq h0 (gsub expanded_keys 64ul 32ul))
         (as_seq h0 msg))
 
+#push-options "--split_queries always"
 let sign_expanded signature expanded_keys msg_len msg =
   push_frame ();
   let rs = sub signature 0ul 32ul in
@@ -90,3 +91,4 @@ let sign_expanded signature expanded_keys msg_len msg =
   LSeq.eq_intro (as_seq h1 signature)
     (Spec.Ed25519.sign_expanded (as_seq h1 public_key) (as_seq h1 s) (as_seq h1 prefix) (as_seq h1 msg));
   pop_frame ()
+#pop-options

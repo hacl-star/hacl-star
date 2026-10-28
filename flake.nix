@@ -3,12 +3,13 @@
 
   inputs = {
     fstar = {
-      url = "github:fstarlang/fstar?ref=v2025.10.06";
+      # HACL* still needs the legacy Low* libraries maintained by F* 1.
+      url = "github:fstarlang/fstar?ref=fstar1";
     };
     flake-utils.follows = "fstar/flake-utils";
     nixpkgs.follows = "fstar/nixpkgs";
     karamel = {
-      url = "github:fstarlang/karamel?ref=254e099bd586b17461845f6b0cab44c3ef5080e9";
+      url = "github:fstarlang/karamel?rev=bd2d4fa8a61344042c7cd7a31013d72bfe4568ce";
       inputs.fstar.follows = "fstar";
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -25,18 +26,45 @@
     flake-utils.lib.eachSystem ["x86_64-linux"] (system: let
       pkgs = import nixpkgs {inherit system;};
       fstarPackages = fstar.packages.${system};
-      karamel-home = karamel.packages.${system}.karamel.home;
+      fstarPackage = fstarPackages.fstar;
+      karamelPackage = karamel.packages.${system}.karamel.override {
+        fstar = fstarPackage;
+      };
       vale = pkgs.callPackage ./.nix/vale.nix {};
       hacl = pkgs.callPackage ./.nix/hacl.nix {
-        inherit (fstarPackages) ocamlPackages z3 fstar;
+        inherit (fstarPackages) ocamlPackages z3;
+        fstar = fstarPackage;
         inherit vale;
-        karamel = karamel-home;
+        karamel = karamelPackage;
         fstar-scripts = "${fstar}/.scripts";
+      };
+      # Keep admission explicit, including when bootstrapping the toolchain.
+      fstarAdmit = fstarPackage.overrideAttrs (_: {ADMIT = "1";});
+      karamelAdmit = (karamelPackage.override {fstar = fstarAdmit;}).overrideAttrs (_: {
+        OTHERFLAGS = "--admit_smt_queries true";
+      });
+      haclAdmit = hacl.override {
+        admit = true;
+        fstar = fstarAdmit;
+        karamel = karamelAdmit;
+      };
+      mkDevShell = package: pkgs.mkShell {
+        inputsFrom = [package];
+        VALE_HOME = vale;
+        shellHook = ''
+          export KRML_LIB="$(krml -locate-krmllib)"
+          export KRML_INCLUDE="$(krml -locate-include)"
+        '';
       };
     in {
       packages = {
         inherit hacl vale;
         default = hacl;
+        hacl-admit = haclAdmit;
+      };
+      devShells = {
+        default = mkDevShell hacl;
+        admit = mkDevShell haclAdmit;
       };
     });
 }

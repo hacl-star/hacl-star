@@ -91,6 +91,7 @@ let update_multi_sha3 (a: keccak_alg): update_multi_sha3_st a = fun s () blocks 
   let l = block_len a *! n_blocks in
   Lib.IntVector.reveal_vec_1 U64;
   Hacl.Impl.SHA3.Vec.absorb_inner_nblocks #M32 absorb_inner_32 (block_len a) l (ntup1 blocks) s;
+  B.length_as_seq h0 s;
   Hacl.Spec.SHA3.Equiv.absorb_inner_repeat_blocks_multi_lemma (v (block_len a)) (v l)
     (as_seq_multi h0 (ntup1 blocks)) (B.as_seq h0 s)
 

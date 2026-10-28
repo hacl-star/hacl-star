@@ -7,10 +7,10 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.X64.Flags.flag_val_t", "equation_Vale.X64.Flags.t",
-        "equation_Vale.X64.Machine_s.flag",
-        "function_token_typing_Vale.X64.Flags.flag_val_t", "int_inversion",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Vale.X64.Flags.t", "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Prims.bool", "int_inversion",
+        "kinding_FStar.Pervasives.Native.option@tok",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_InDomUpd1",
         "lemma_FStar.Set.lemma_equal_elim",
@@ -18,14 +18,15 @@
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_empty",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Negation",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_2ea34cbc8e73c89468af536d5146da5a",
         "refinement_interpretation_Tm_refine_72758763fd3a331db555502c82719e64",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "refinement_interpretation_Tm_refine_d7b4bfa9eb5ff309a4d3f43d8ca319bf",
         "typing_FStar.Map.domain", "typing_FStar.Map.upd",
         "typing_FStar.Set.complement", "typing_FStar.Set.empty",
         "typing_Vale.X64.Machine_s.flag"
       ],
       0,
-      "a1bbbf35c700e1f32fac2cb858a2ee1d"
+      "b5c74967699d36077b6b0d487cfc2eb7"
     ],
     [
       "Vale.X64.Flags.of_fun",
@@ -34,15 +35,14 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Flags_interpretation_Tm_arrow_6d1d81ae558d658d7d34082785eb5144",
+        "Vale.X64.Flags_interpretation_Tm_arrow_152fcedcb80444a2b3095a3a1303f59b",
         "data_typing_intro_FStar.Pervasives.Native.None@tok",
-        "equation_Prims.eqtype", "equation_Vale.X64.Flags.flag_val_t",
-        "equation_Vale.X64.Machine_s.flag",
+        "equation_Prims.eqtype", "equation_Vale.X64.Machine_s.flag",
         "function_token_typing_Prims.bool",
         "function_token_typing_Prims.int",
-        "function_token_typing_Vale.X64.Flags.flag_val_t",
         "haseqTm_refine_a29663a141e931174462ff96f2d1bbb5", "int_inversion",
-        "int_typing", "lemma_FStar.Map.lemma_ContainsDom",
+        "int_typing", "kinding_FStar.Pervasives.Native.option@tok",
+        "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_InDomConstMap",
         "lemma_FStar.Map.lemma_SelUpd1", "lemma_FStar.Map.lemma_SelUpd2",
         "lemma_FStar.Map.lemma_UpdDomain",
@@ -53,8 +53,8 @@
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_72758763fd3a331db555502c82719e64",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "refinement_interpretation_Tm_refine_a29663a141e931174462ff96f2d1bbb5",
         "refinement_kinding_Tm_refine_a29663a141e931174462ff96f2d1bbb5",
         "typing_FStar.Map.const", "typing_FStar.Map.domain",
@@ -63,7 +63,7 @@
         "typing_FStar.Set.union", "typing_Vale.X64.Machine_s.flag"
       ],
       0,
-      "31ea17d0f3a8073db3201656beaa205a"
+      "c6435b3879ecd0d86eaa91a145d93f20"
     ],
     [
       "Vale.X64.Flags.lemma_upd_eq",
@@ -73,11 +73,11 @@
       [
         "@query", "function_token_typing_Vale.X64.Flags.sel",
         "function_token_typing_Vale.X64.Flags.upd",
-        "interpretation_Tm_abs_9fabf848a1a32f51b141d5916bad7662",
-        "interpretation_Tm_abs_dee13f6801a03886b79150447bc19803"
+        "interpretation_Tm_abs_1c14d8e030deadb2b09287cba8d3ab2a",
+        "interpretation_Tm_abs_271d7d117fc527ee83dd1be3effe7ebd"
       ],
       0,
-      "532409e3b1897f5be86ddaec695e39de"
+      "c51a64872cb0a54ad996913cfbf4baa0"
     ],
     [
       "Vale.X64.Flags.lemma_upd_ne",
@@ -87,11 +87,11 @@
       [
         "@query", "function_token_typing_Vale.X64.Flags.sel",
         "function_token_typing_Vale.X64.Flags.upd",
-        "interpretation_Tm_abs_9fabf848a1a32f51b141d5916bad7662",
-        "interpretation_Tm_abs_dee13f6801a03886b79150447bc19803"
+        "interpretation_Tm_abs_1c14d8e030deadb2b09287cba8d3ab2a",
+        "interpretation_Tm_abs_271d7d117fc527ee83dd1be3effe7ebd"
       ],
       0,
-      "0d23d35fb6babe3156c2d22ef40438e4"
+      "d5401d56fd959de6c3e918f0ab40b5e8"
     ],
     [
       "Vale.X64.Flags.lemma_equal_intro",
@@ -100,19 +100,20 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.X64.Flags.equal",
-        "equation_Vale.X64.Flags.flag_val_t", "equation_Vale.X64.Flags.t",
-        "equation_Vale.X64.Machine_s.flag",
-        "function_token_typing_Vale.X64.Flags.flag_val_t",
+        "equation_Prims.eqtype", "equation_Vale.X64.Flags.equal",
+        "equation_Vale.X64.Flags.t", "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Prims.bool",
+        "kinding_FStar.Pervasives.Native.option@tok",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_equal_elim",
         "lemma_FStar.Set.lemma_equal_elim",
-        "refinement_interpretation_Tm_refine_2ea34cbc8e73c89468af536d5146da5a",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "refinement_interpretation_Tm_refine_d7b4bfa9eb5ff309a4d3f43d8ca319bf",
         "typing_FStar.Map.domain", "typing_FStar.Set.complement",
         "typing_FStar.Set.empty", "typing_Vale.X64.Machine_s.flag"
       ],
       0,
-      "8c75f114c5e0b70216e171dd4cd52544"
+      "8abc98ddfdb99905cfcb0def04dfd7d7"
     ],
     [
       "Vale.X64.Flags.lemma_equal_elim",
@@ -124,7 +125,7 @@
         "equation_Vale.X64.Flags.t"
       ],
       0,
-      "eca0bb1a3f600dd540ae2fb62e6d5a25"
+      "60d4bc44c736d7729c930350363cbce0"
     ]
   ]
 ]

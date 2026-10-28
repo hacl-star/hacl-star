@@ -49,15 +49,7 @@ secretbox_detached(uint32_t mlen, uint8_t *c, uint8_t *tag, uint8_t *k, uint8_t 
   uint8_t *n1 = n + 16U;
   uint8_t *subkey = xkeys;
   uint8_t *ekey0 = xkeys + 64U;
-  uint32_t mlen0;
-  if (mlen <= 32U)
-  {
-    mlen0 = mlen;
-  }
-  else
-  {
-    mlen0 = 32U;
-  }
+  uint32_t mlen0 = mlen <= 32U ? mlen : 32U;
   uint32_t mlen1 = mlen - mlen0;
   uint8_t *m0 = m;
   uint8_t *m1 = m + mlen0;
@@ -104,15 +96,7 @@ secretbox_open_detached(
     uint8_t *subkey = xkeys;
     uint8_t *ekey0 = xkeys + 64U;
     uint8_t *n1 = n + 16U;
-    uint32_t mlen0;
-    if (mlen <= 32U)
-    {
-      mlen0 = mlen;
-    }
-    else
-    {
-      mlen0 = 32U;
-    }
+    uint32_t mlen0 = mlen <= 32U ? mlen : 32U;
     uint32_t mlen1 = mlen - mlen0;
     uint8_t *c0 = c;
     uint8_t *c1 = c + mlen0;
@@ -232,8 +216,7 @@ box_easy_afternm(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n, uint8_t *m)
 {
   uint8_t *tag = c;
   uint8_t *cip = c + 16U;
-  uint32_t res = box_detached_afternm(mlen, cip, tag, k, n, m);
-  return res;
+  return box_detached_afternm(mlen, cip, tag, k, n, m);
 }
 
 static inline uint32_t
@@ -241,8 +224,7 @@ box_easy(uint32_t mlen, uint8_t *c, uint8_t *sk, uint8_t *pk, uint8_t *n, uint8_
 {
   uint8_t *tag = c;
   uint8_t *cip = c + 16U;
-  uint32_t res = box_detached(mlen, cip, tag, sk, pk, n, m);
-  return res;
+  return box_detached(mlen, cip, tag, sk, pk, n, m);
 }
 
 static inline uint32_t

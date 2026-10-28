@@ -121,6 +121,7 @@ let mul_wide_add2 #t a b c d =
     let lo = to_u32 res in
     assert (v lo == v res % pow2 32);
     Math.Lemmas.euclidean_division_definition (v res) (pow2 32);
+    assert (v lo + v hi * pow2 32 == v res);
     hi, lo
   | U64 ->
     let res = mul64_wide a b +! to_u128 c +! to_u128 d in
@@ -130,6 +131,7 @@ let mul_wide_add2 #t a b c d =
     let lo = to_u64 res in
     assert (v lo == v res % pow2 64);
     Math.Lemmas.euclidean_division_definition (v res) (pow2 64);
+    assert (v lo + v hi * pow2 64 == v res);
     hi, lo
 
 

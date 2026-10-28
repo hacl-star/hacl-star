@@ -230,7 +230,14 @@ let poly1305_init #s ctx key =
 
   let kr = sub key 0ul 16ul in
   set_zero acc;
-  poly1305_encode_r #s pre kr
+  let h_acc = ST.get () in
+  assert (felem_fits h_acc acc (2, 2, 2, 2, 2));
+  poly1305_encode_r #s pre kr;
+  let h1 = ST.get () in
+  LowStar.Buffer.modifies_buffer_elim (acc <: LowStar.Buffer.buffer (limb s))
+    (loc pre) h_acc h1;
+  assert (felem_fits h1 acc (2, 2, 2, 2, 2));
+  assert (state_inv_t #s h1 ctx)
 
 
 inline_for_extraction noextract
@@ -547,7 +554,7 @@ val poly1305_update_vec:
     (feval h1 acc).[0] ==
       Vec.poly1305_update_vec #(width s) (as_seq h0 text) (feval h0 acc).[0] (feval h0 (gsub pre 0ul 5ul)).[0])
 
-#push-options "--split_queries always"
+#push-options "--split_queries always --z3rlimit 100"
 let poly1305_update_vec #s len text pre acc =
   let sz_block = blocklen s in
   FStar.Math.Lemmas.multiply_fractions (v len) (v sz_block);

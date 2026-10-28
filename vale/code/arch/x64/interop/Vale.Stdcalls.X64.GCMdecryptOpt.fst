@@ -21,11 +21,19 @@ open Vale.AES.GCM_s
 
 let uint64 = UInt64.t
 
+noextract
+let uint64_as_nat64 (x:uint64) : ME.nat64 = UInt64.v x
+
 (* A little utility to trigger normalization in types *)
 noextract
 let as_t (#a:Type) (x:normal a) : a = x
 noextract
-let as_normal_t (#a:Type) (x:a) : normal a = x
+let as_normal_t (#a:Type) (x:a) :
+  norm [iota; zeta; primops; simplify;
+    delta_attr [`%__reduce__];
+    delta_only [`%normal; `%IX64.max_stdcall; `%IX64.arg_reg_stdcall;
+      `%IX64.register_of_arg_i; `%List.Tot.length]]
+    (normal a) = x
 
 [@__reduce__] noextract
 let b128 = buf_t TUInt8 TUInt128
@@ -69,7 +77,8 @@ let gcm128_pre : (Ghost.erased (Seq.seq nat32)) -> (Ghost.erased supported_iv_LE
     (scratch_b:b128)
     (tag_b:b128)
     (va_s0:V.va_state) ->
-      GC.va_req_Gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_128
+      norm [delta_only [`%GC.va_req_Gcm_blocks_decrypt_stdcall; `%GC.aes_reqs]]
+      (GC.va_req_Gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_128
         (as_vale_buffer auth_b) (UInt64.v auth_bytes)
         (UInt64.v auth_num) (as_vale_buffer keys_b)
         (as_vale_buffer iv_b) (Ghost.reveal iv) (as_vale_buffer hkeys_b)
@@ -78,7 +87,7 @@ let gcm128_pre : (Ghost.erased (Seq.seq nat32)) -> (Ghost.erased supported_iv_LE
         (as_vale_buffer in128_b)  (as_vale_buffer out128_b)
         (UInt64.v len128_num) (as_vale_buffer inout_b)
         (UInt64.v cipher_num)
-        (as_vale_buffer scratch_b) (as_vale_buffer tag_b) (Ghost.reveal s)
+        (as_vale_buffer scratch_b) (as_vale_buffer tag_b) (Ghost.reveal s))
 
 [@__reduce__] noextract
 let gcm128_post : Ghost.erased (Seq.seq nat32) -> (Ghost.erased supported_iv_LE) -> VSig.vale_post dom =
@@ -241,7 +250,8 @@ let gcm256_pre : (Ghost.erased (Seq.seq nat32)) -> (Ghost.erased supported_iv_LE
     (scratch_b:b128)
     (tag_b:b128)
     (va_s0:V.va_state) ->
-      GC.va_req_Gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_256
+      norm [delta_only [`%GC.va_req_Gcm_blocks_decrypt_stdcall; `%GC.aes_reqs]]
+      (GC.va_req_Gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_256
         (as_vale_buffer auth_b) (UInt64.v auth_bytes)
         (UInt64.v auth_num) (as_vale_buffer keys_b)
         (as_vale_buffer iv_b) (Ghost.reveal iv) (as_vale_buffer hkeys_b)
@@ -250,7 +260,7 @@ let gcm256_pre : (Ghost.erased (Seq.seq nat32)) -> (Ghost.erased supported_iv_LE
         (as_vale_buffer in128_b)  (as_vale_buffer out128_b)
         (UInt64.v len128_num) (as_vale_buffer inout_b)
         (UInt64.v cipher_num)
-        (as_vale_buffer scratch_b) (as_vale_buffer tag_b) (Ghost.reveal s)
+        (as_vale_buffer scratch_b) (as_vale_buffer tag_b) (Ghost.reveal s))
 
 [@__reduce__] noextract
 let gcm256_post : Ghost.erased (Seq.seq nat32) -> (Ghost.erased supported_iv_LE) -> VSig.vale_post dom =
@@ -290,6 +300,7 @@ let gcm256_post : Ghost.erased (Seq.seq nat32) -> (Ghost.erased supported_iv_LE)
 
 #set-options "--z3rlimit 100"
 
+#push-options "--split_queries always"
 [@__reduce__] noextract
 let gcm256_lemma'
     (s:Ghost.erased (Seq.seq nat32))
@@ -337,14 +348,14 @@ let gcm256_lemma'
        ME.buffer_writeable (as_vale_buffer tag_b)
  )) =
     let va_s1, f = GC.va_lemma_Gcm_blocks_decrypt_stdcall code va_s0 IA.win AES_256
-       (as_vale_buffer auth_b) (UInt64.v auth_bytes)
-        (UInt64.v auth_num) (as_vale_buffer keys_b)
+       (as_vale_buffer auth_b) (uint64_as_nat64 auth_bytes)
+        (uint64_as_nat64 auth_num) (as_vale_buffer keys_b)
         (as_vale_buffer iv_b) (Ghost.reveal iv) (as_vale_buffer hkeys_b)
         (as_vale_buffer abytes_b) (as_vale_buffer in128x6_b)
-        (as_vale_buffer out128x6_b) (UInt64.v len128x6_num)
+        (as_vale_buffer out128x6_b) (uint64_as_nat64 len128x6_num)
         (as_vale_buffer in128_b)  (as_vale_buffer out128_b)
-        (UInt64.v len128_num) (as_vale_buffer inout_b)
-        (UInt64.v cipher_num)
+        (uint64_as_nat64 len128_num) (as_vale_buffer inout_b)
+        (uint64_as_nat64 cipher_num)
         (as_vale_buffer scratch_b) (as_vale_buffer tag_b)
        (Ghost.reveal s) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 auth_b;
@@ -359,7 +370,20 @@ let gcm256_lemma'
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 inout_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 scratch_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 tag_b;
+   assert (V.eval_code code va_s0 f va_s1);
+   let save_reg (r:MS.reg_64) : Lemma
+     (not (IX64.regs_modified_stdcall r) ==> VSig.vale_save_reg r va_s0 va_s1) = () in
+   Classical.forall_intro save_reg;
+   let save_xmm (r:MS.reg_xmm) : Lemma
+     (not (IX64.xmms_modified_stdcall r) ==> VSig.vale_save_xmm r va_s0 va_s1) = () in
+   Classical.forall_intro save_xmm;
+   assert (VSig.vale_calling_conventions_stdcall va_s0 va_s1);
+   assert (norm [delta_only [`%gcm256_post]]
+     (gcm256_post s iv code auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+       in128x6_b out128x6_b len128x6_num in128_b out128_b len128_num inout_b cipher_num scratch_b tag_b va_s0 va_s1 f));
    va_s1, f
+
+#pop-options
 
 (* Prove that gcm256_lemma' has the required type *)
 noextract

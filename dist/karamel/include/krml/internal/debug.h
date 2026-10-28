@@ -30,6 +30,8 @@ void WasmSupport_check_buffer_size(uint32_t s);
   int16_t : "0x%08" PRIx16,                                                    \
   int32_t : "0x%08" PRIx32,                                                    \
   int64_t : "0x%08" PRIx64,                                                    \
+  float   : "%a",                                                              \
+  double  : "%a",                                                              \
   default : "%s")
 
 #define KRML_FORMAT_ARG(X) _Generic((X),                                       \
@@ -41,6 +43,8 @@ void WasmSupport_check_buffer_size(uint32_t s);
   int16_t : X,                                                                 \
   int32_t : X,                                                                 \
   int64_t : X,                                                                 \
+  float   : X,                                                                 \
+  double  : X,                                                                 \
   default : "unknown")
 /* clang-format on */
 

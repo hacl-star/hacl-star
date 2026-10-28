@@ -7,6 +7,7 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Buffer.Lemmas
 
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
@@ -159,26 +160,63 @@ let lemma_exp_four_fw_local b =
   assert (S.to_aff_point (S.point_mul_g (BD.bn_v b)) == LE.pow cm g_aff (BD.bn_v b))
 
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+#push-options "--split_queries always --z3smtopt '(set-option :smt.arith.solver 2)'"
 [@CInline]
 let point_mul_g res scalar =
+  let hi = ST.get () in
   push_frame ();
   let h0 = ST.get () in
   let q1 = create_point () in
+  fresh_buffer_disjoint #uint64 #uint64 h0 res q1;
+  fresh_buffer_disjoint #uint64 #uint64 h0 scalar q1;
+  let h1 = ST.get () in
   make_base_point q1;
+  let h2 = ST.get () in
+  LowStar.Buffer.modifies_trans_linear LowStar.Buffer.loc_none (loc q1) h0 h1 h2;
+  inline_stack_inv_trans h0 h1 h2;
   let q2 = mk_proj_g_pow2_64 () in
+  fresh_buffer_disjoint #uint64 #uint64 h2 res q2;
+  fresh_buffer_disjoint #uint64 #uint64 h2 q1 q2;
+  let h3 = ST.get () in
+  LowStar.Buffer.modifies_trans_linear (loc q1) (loc q1) h0 h2 h3;
+  inline_stack_inv_trans h0 h2 h3;
   let q3 = mk_proj_g_pow2_128 () in
+  fresh_buffer_disjoint #uint64 #uint64 h3 res q3;
+  fresh_buffer_disjoint #uint64 #uint64 h3 q1 q3;
+  fresh_buffer_disjoint #uint64 #uint64 h3 q2 q3;
+  let h4 = ST.get () in
+  LowStar.Buffer.modifies_trans_linear (loc q1) (loc q1) h0 h3 h4;
+  inline_stack_inv_trans h0 h3 h4;
   let q4 = mk_proj_g_pow2_192 () in
+  fresh_buffer_disjoint #uint64 #uint64 h4 res q4;
+  fresh_buffer_disjoint #uint64 #uint64 h4 q1 q4;
+  fresh_buffer_disjoint #uint64 #uint64 h4 q2 q4;
+  fresh_buffer_disjoint #uint64 #uint64 h4 q3 q4;
   proj_g_pow2_64_lseq_lemma ();
   proj_g_pow2_128_lseq_lemma ();
   proj_g_pow2_192_lseq_lemma ();
+  let h_pre = ST.get () in
+  LowStar.Buffer.modifies_trans_linear (loc q1) (loc q1) h0 h4 h_pre;
+  inline_stack_inv_trans h0 h4 h_pre;
+  assert (as_nat h_pre scalar == as_nat h0 scalar);
   point_mul_g_noalloc res scalar q1 q2 q3 q4;
   LowStar.Ignore.ignore q1;
   LowStar.Ignore.ignore q2;
   LowStar.Ignore.ignore q3;
   LowStar.Ignore.ignore q4;
   lemma_exp_four_fw_local (as_seq h0 scalar);
-  pop_frame ()
+  let h_post = ST.get () in
+  LowStar.Buffer.modifies_trans (loc q1) h0 h_pre (loc res) h_post;
+  pop_frame ();
+  let hf = ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h0 (loc res) h_post hf;
+  buffer_fresh_frame_popped hi h0 h_post hf res;
+  stack_frame_equal_domains hi h0 h_pre h_post hf;
+  assert (ST.equal_domains hi hf);
+  assert (modifies (loc res) hi hf);
+  assert (point_inv hf res);
+  assert (S.to_aff_point (from_mont_point (as_point_nat hf res)) ==
+    S.to_aff_point (S.point_mul_g (as_nat hi scalar)))
 #pop-options
 
 //-------------------------

@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "16e2a267fa7a119e98e7289b60ec1ae5"
+      "ef71084b48e2b0e6e1e2f71ed1fcc9cc"
     ],
     [
       "Spec.Box.secretkey",
@@ -31,7 +31,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "a226d6acf3dfbe0ab7fafa20ecddf02f"
+      "407793ed52927d6a20c72eaa77b6bba2"
     ],
     [
       "Spec.Box.ecdh",
@@ -48,19 +48,18 @@
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.Box.secretkey",
-        "equation_Spec.Box.size_publickey",
-        "equation_Spec.Box.size_secretkey", "lemma_FStar.Int.pow2_values",
+        "equation_Prims.pos", "equation_Spec.Box.publickey",
+        "equation_Spec.Box.size_publickey", "lemma_FStar.Int.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
         "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
         "typing_Lib.IntTypes.int_t", "typing_Prims.pow2",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "36699769fa427b5f30d5b9fa87669730"
+      "c69001ee954d4b144822c5fef3072709"
     ],
     [
       "Spec.Box.box_beforenm",
@@ -81,24 +80,26 @@
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Prims.nat",
         "equation_Prims.pos", "equation_Spec.Box.ecdh",
-        "equation_Spec.Box.secretkey", "equation_Spec.Box.size_secretkey",
-        "equation_Spec.Curve25519.one", "equation_Spec.Curve25519.zero",
-        "equation_Spec.SecretBox.key", "equation_Spec.SecretBox.size_key",
+        "equation_Spec.Box.publickey", "equation_Spec.Box.secretkey",
+        "equation_Spec.Box.size_publickey",
+        "equation_Spec.Box.size_secretkey", "equation_Spec.Curve25519.one",
+        "equation_Spec.Curve25519.zero", "equation_Spec.SecretBox.key",
+        "equation_Spec.SecretBox.size_key",
+        "function_token_typing_Spec.SecretBox.key",
         "lemma_FStar.Int.pow2_values", "lemma_FStar.Pervasives.invertOption",
         "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
         "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
         "typing_Lib.IntTypes.int_t", "typing_Lib.IntTypes.unsigned",
         "typing_Prims.pow2", "typing_Spec.Box.ecdh",
-        "typing_Spec.SecretBox.key", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "984f2dea12578c63827a5b51f11a3fe5"
+      "d672fc4623b58c6b2b5f29764170f440"
     ],
     [
       "Spec.Box.box_detached_afternm",
@@ -109,10 +110,10 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat", "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f"
       ],
       0,
-      "6882ba2dadba3093d4780ca45d6414be"
+      "284d29ec9090e7d9615e8b15caeb2477"
     ],
     [
       "Spec.Box.box_detached_afternm",
@@ -124,7 +125,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "3ed23d184350dd88d503a91259902127"
+      "5b2e2ef171694bfc6c170eeca4165d84"
     ],
     [
       "Spec.Box.box_detached",
@@ -142,11 +143,11 @@
         "function_token_typing_Spec.Curve25519.scalar",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "lemma_FStar.Pervasives.invertOption",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "typing_Spec.Box.box_beforenm"
       ],
       0,
-      "789ba6e664d3c66f7274df50834b5fa4"
+      "0dc928f50a52fefc63d6157a71bf7dee"
     ],
     [
       "Spec.Box.box_detached",
@@ -158,7 +159,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d2eeca0b535f909dcb3a85d7c3c0b404"
+      "0b66eb0345ae4e4bc5e250e18e9eca2d"
     ],
     [
       "Spec.Box.box_open_detached_afternm",
@@ -169,10 +170,10 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat", "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f"
       ],
       0,
-      "f34fec051a9154eac31b003af47c7f54"
+      "bb68d20709afbfdbf675ad4cbff555ff"
     ],
     [
       "Spec.Box.box_open_detached_afternm",
@@ -184,7 +185,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "03d08f8b9e9ba71eec906184f2af2c32"
+      "99f41d10296e27c7a75898ce44c0ca9f"
     ],
     [
       "Spec.Box.box_open_detached",
@@ -202,11 +203,11 @@
         "function_token_typing_Spec.Curve25519.scalar",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "lemma_FStar.Pervasives.invertOption",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "typing_Spec.Box.box_beforenm"
       ],
       0,
-      "86d5f73d219d526f912d7dd38aabe6da"
+      "284f26c4d8c2474a4828596f71de221b"
     ],
     [
       "Spec.Box.box_open_detached",
@@ -218,7 +219,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "34c49867e456ff538f40f71207202888"
+      "f02b4e3dc034074868b788284ba42fa2"
     ],
     [
       "Spec.Box.box_easy_afternm",
@@ -226,21 +227,24 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint8",
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.Salsa20.size_xnonce",
         "equation_Spec.SecretBox.size_tag", "equation_Spec.SecretBox.tag",
-        "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "lemma_FStar.Seq.Base.lemma_len_append",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_6ea782d20d3a5b4d53411900c5408b2a",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "typing_Lib.IntTypes.int_t", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ea2132c48b77505d5a9c6343fe398cb8"
+      "c4aac74fc078083539bbcc3654eae370"
     ],
     [
       "Spec.Box.box_easy_afternm",
@@ -252,7 +256,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "cd1e1fbb339cb36cb83af4396412f7d5"
+      "bb5e8bdcd38e59bb840ca589ad339bc0"
     ],
     [
       "Spec.Box.box_easy",
@@ -260,27 +264,28 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint8",
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.Poly1305.block",
-        "equation_Spec.Poly1305.size_block",
-        "equation_Spec.Salsa20.size_xnonce",
-        "equation_Spec.SecretBox.size_tag", "equation_Spec.SecretBox.tag",
-        "function_token_typing_Lib.IntTypes.uint8",
-        "function_token_typing_Prims.int",
-        "function_token_typing_Spec.Poly1305.block",
+        "equation_Prims.nat", "equation_Spec.Salsa20.size_xnonce",
+        "equation_Spec.Salsa20.xnonce", "equation_Spec.SecretBox.size_tag",
+        "equation_Spec.SecretBox.tag", "function_token_typing_Prims.int",
+        "function_token_typing_Spec.Salsa20.xnonce",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "kinding_FStar.Pervasives.Native.tuple2@tok",
         "lemma_FStar.Pervasives.invertOption",
         "lemma_FStar.Seq.Base.lemma_len_append",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_6ea782d20d3a5b4d53411900c5408b2a",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_kinding_Tm_refine_6ea782d20d3a5b4d53411900c5408b2a"
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "refinement_kinding_Tm_refine_6ea782d20d3a5b4d53411900c5408b2a",
+        "typing_Lib.IntTypes.int_t", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5580b5bf026cf6453a8bbe69a2b63ed8"
+      "c01f1111479d3ed42eca57077e2b1d17"
     ],
     [
       "Spec.Box.box_easy",
@@ -292,7 +297,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "adec54363bfd48739916e5a35822e3d9"
+      "0a4591793b09eb50d5378ed5dd4c21a8"
     ],
     [
       "Spec.Box.box_open_easy_afternm",
@@ -302,11 +307,11 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.length",
-        "equation_Lib.Sequence.seq", "equation_Prims.nat",
-        "equation_Spec.Poly1305.size_block",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "equation_Spec.Poly1305.size_block",
         "equation_Spec.SecretBox.size_tag",
-        "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
@@ -314,13 +319,15 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_5a92b6e4e7af9363bc35e43d9d7f3f13",
         "refinement_interpretation_Tm_refine_b8859f4c59722f8f9b8b07bfce2bf7aa",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "typing_Lib.Sequence.length", "typing_Spec.Poly1305.size_block"
+        "typing_Lib.IntTypes.int_t", "typing_Lib.Sequence.length",
+        "typing_Spec.Poly1305.size_block", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "53ad1713ee2fa75ec969a95f31b64f15"
+      "6878547877bdbfb8467ad09164b5cf80"
     ],
     [
       "Spec.Box.box_open_easy_afternm",
@@ -332,7 +339,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "cdb54b1b8a15fe0742236507d8c3c90f"
+      "66d2841a3aee1b3d4ec15e51994f1341"
     ],
     [
       "Spec.Box.box_open_easy",
@@ -342,11 +349,11 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.length",
-        "equation_Lib.Sequence.seq", "equation_Prims.nat",
-        "equation_Spec.Poly1305.size_block",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "equation_Spec.Poly1305.size_block",
         "equation_Spec.SecretBox.size_tag",
-        "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
@@ -354,13 +361,15 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_5a92b6e4e7af9363bc35e43d9d7f3f13",
         "refinement_interpretation_Tm_refine_b8859f4c59722f8f9b8b07bfce2bf7aa",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "typing_Lib.Sequence.length", "typing_Spec.Poly1305.size_block"
+        "typing_Lib.IntTypes.int_t", "typing_Lib.Sequence.length",
+        "typing_Spec.Poly1305.size_block", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8de1371a4ab7d2fdf32e4bb99bc028db"
+      "b63e4f8d809f7c32d3017162d25f51e4"
     ],
     [
       "Spec.Box.box_open_easy",
@@ -372,7 +381,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c4cd55965e7bf26e8475543915591d66"
+      "1dd5dbb67d7156c27575e6de164d7b36"
     ]
   ]
 ]

@@ -35,80 +35,48 @@ static void absorb_inner_32(uint8_t *b, uint64_t *s)
 {
   uint64_t ws[32U] = { 0U };
   uint8_t *b1 = b;
-  uint64_t u = load64_le(b1);
-  ws[0U] = u;
-  uint64_t u0 = load64_le(b1 + 8U);
-  ws[1U] = u0;
-  uint64_t u1 = load64_le(b1 + 16U);
-  ws[2U] = u1;
-  uint64_t u2 = load64_le(b1 + 24U);
-  ws[3U] = u2;
-  uint64_t u3 = load64_le(b1 + 32U);
-  ws[4U] = u3;
-  uint64_t u4 = load64_le(b1 + 40U);
-  ws[5U] = u4;
-  uint64_t u5 = load64_le(b1 + 48U);
-  ws[6U] = u5;
-  uint64_t u6 = load64_le(b1 + 56U);
-  ws[7U] = u6;
-  uint64_t u7 = load64_le(b1 + 64U);
-  ws[8U] = u7;
-  uint64_t u8 = load64_le(b1 + 72U);
-  ws[9U] = u8;
-  uint64_t u9 = load64_le(b1 + 80U);
-  ws[10U] = u9;
-  uint64_t u10 = load64_le(b1 + 88U);
-  ws[11U] = u10;
-  uint64_t u11 = load64_le(b1 + 96U);
-  ws[12U] = u11;
-  uint64_t u12 = load64_le(b1 + 104U);
-  ws[13U] = u12;
-  uint64_t u13 = load64_le(b1 + 112U);
-  ws[14U] = u13;
-  uint64_t u14 = load64_le(b1 + 120U);
-  ws[15U] = u14;
-  uint64_t u15 = load64_le(b1 + 128U);
-  ws[16U] = u15;
-  uint64_t u16 = load64_le(b1 + 136U);
-  ws[17U] = u16;
-  uint64_t u17 = load64_le(b1 + 144U);
-  ws[18U] = u17;
-  uint64_t u18 = load64_le(b1 + 152U);
-  ws[19U] = u18;
-  uint64_t u19 = load64_le(b1 + 160U);
-  ws[20U] = u19;
-  uint64_t u20 = load64_le(b1 + 168U);
-  ws[21U] = u20;
-  uint64_t u21 = load64_le(b1 + 176U);
-  ws[22U] = u21;
-  uint64_t u22 = load64_le(b1 + 184U);
-  ws[23U] = u22;
-  uint64_t u23 = load64_le(b1 + 192U);
-  ws[24U] = u23;
-  uint64_t u24 = load64_le(b1 + 200U);
-  ws[25U] = u24;
-  uint64_t u25 = load64_le(b1 + 208U);
-  ws[26U] = u25;
-  uint64_t u26 = load64_le(b1 + 216U);
-  ws[27U] = u26;
-  uint64_t u27 = load64_le(b1 + 224U);
-  ws[28U] = u27;
-  uint64_t u28 = load64_le(b1 + 232U);
-  ws[29U] = u28;
-  uint64_t u29 = load64_le(b1 + 240U);
-  ws[30U] = u29;
-  uint64_t u30 = load64_le(b1 + 248U);
-  ws[31U] = u30;
+  ws[0U] = load64_le(b1);
+  ws[1U] = load64_le(b1 + 8U);
+  ws[2U] = load64_le(b1 + 16U);
+  ws[3U] = load64_le(b1 + 24U);
+  ws[4U] = load64_le(b1 + 32U);
+  ws[5U] = load64_le(b1 + 40U);
+  ws[6U] = load64_le(b1 + 48U);
+  ws[7U] = load64_le(b1 + 56U);
+  ws[8U] = load64_le(b1 + 64U);
+  ws[9U] = load64_le(b1 + 72U);
+  ws[10U] = load64_le(b1 + 80U);
+  ws[11U] = load64_le(b1 + 88U);
+  ws[12U] = load64_le(b1 + 96U);
+  ws[13U] = load64_le(b1 + 104U);
+  ws[14U] = load64_le(b1 + 112U);
+  ws[15U] = load64_le(b1 + 120U);
+  ws[16U] = load64_le(b1 + 128U);
+  ws[17U] = load64_le(b1 + 136U);
+  ws[18U] = load64_le(b1 + 144U);
+  ws[19U] = load64_le(b1 + 152U);
+  ws[20U] = load64_le(b1 + 160U);
+  ws[21U] = load64_le(b1 + 168U);
+  ws[22U] = load64_le(b1 + 176U);
+  ws[23U] = load64_le(b1 + 184U);
+  ws[24U] = load64_le(b1 + 192U);
+  ws[25U] = load64_le(b1 + 200U);
+  ws[26U] = load64_le(b1 + 208U);
+  ws[27U] = load64_le(b1 + 216U);
+  ws[28U] = load64_le(b1 + 224U);
+  ws[29U] = load64_le(b1 + 232U);
+  ws[30U] = load64_le(b1 + 240U);
+  ws[31U] = load64_le(b1 + 248U);
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws[i];
+    s[i] ^= ws[i];
   }
   for (uint32_t i0 = 0U; i0 < 24U; i0++)
   {
     uint64_t _C[5U] = { 0U };
     for (uint32_t i = 0U; i < 5U; i++)
     {
-      _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+      _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
     }
     for (uint32_t i1 = 0U; i1 < 5U; i1++)
     {
@@ -116,7 +84,7 @@ static void absorb_inner_32(uint8_t *b, uint64_t *s)
       uint64_t _D = _C[(i1 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        s[i1 + 5U * i] = s[i1 + 5U * i] ^ _D;
+        s[i1 + 5U * i] ^= _D;
       }
     }
     uint64_t x = s[1U];
@@ -132,19 +100,19 @@ static void absorb_inner_32(uint8_t *b, uint64_t *s)
     }
     for (uint32_t i = 0U; i < 5U; i++)
     {
-      uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+      uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
       uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
       uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-      uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-      uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-      s[0U + 5U * i] = v0;
+      uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+      uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+      s[5U * i] = v0;
       s[1U + 5U * i] = v1;
       s[2U + 5U * i] = v2;
       s[3U + 5U * i] = v3;
       s[4U + 5U * i] = v4;
     }
     uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i0];
-    s[0U] = s[0U] ^ c;
+    s[0U] ^= c;
   }
 }
 
@@ -169,78 +137,46 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x1FU;
   uint64_t ws0[32U] = { 0U };
   uint8_t *b = b_;
-  uint64_t u = load64_le(b);
-  ws0[0U] = u;
-  uint64_t u0 = load64_le(b + 8U);
-  ws0[1U] = u0;
-  uint64_t u1 = load64_le(b + 16U);
-  ws0[2U] = u1;
-  uint64_t u2 = load64_le(b + 24U);
-  ws0[3U] = u2;
-  uint64_t u3 = load64_le(b + 32U);
-  ws0[4U] = u3;
-  uint64_t u4 = load64_le(b + 40U);
-  ws0[5U] = u4;
-  uint64_t u5 = load64_le(b + 48U);
-  ws0[6U] = u5;
-  uint64_t u6 = load64_le(b + 56U);
-  ws0[7U] = u6;
-  uint64_t u7 = load64_le(b + 64U);
-  ws0[8U] = u7;
-  uint64_t u8 = load64_le(b + 72U);
-  ws0[9U] = u8;
-  uint64_t u9 = load64_le(b + 80U);
-  ws0[10U] = u9;
-  uint64_t u10 = load64_le(b + 88U);
-  ws0[11U] = u10;
-  uint64_t u11 = load64_le(b + 96U);
-  ws0[12U] = u11;
-  uint64_t u12 = load64_le(b + 104U);
-  ws0[13U] = u12;
-  uint64_t u13 = load64_le(b + 112U);
-  ws0[14U] = u13;
-  uint64_t u14 = load64_le(b + 120U);
-  ws0[15U] = u14;
-  uint64_t u15 = load64_le(b + 128U);
-  ws0[16U] = u15;
-  uint64_t u16 = load64_le(b + 136U);
-  ws0[17U] = u16;
-  uint64_t u17 = load64_le(b + 144U);
-  ws0[18U] = u17;
-  uint64_t u18 = load64_le(b + 152U);
-  ws0[19U] = u18;
-  uint64_t u19 = load64_le(b + 160U);
-  ws0[20U] = u19;
-  uint64_t u20 = load64_le(b + 168U);
-  ws0[21U] = u20;
-  uint64_t u21 = load64_le(b + 176U);
-  ws0[22U] = u21;
-  uint64_t u22 = load64_le(b + 184U);
-  ws0[23U] = u22;
-  uint64_t u23 = load64_le(b + 192U);
-  ws0[24U] = u23;
-  uint64_t u24 = load64_le(b + 200U);
-  ws0[25U] = u24;
-  uint64_t u25 = load64_le(b + 208U);
-  ws0[26U] = u25;
-  uint64_t u26 = load64_le(b + 216U);
-  ws0[27U] = u26;
-  uint64_t u27 = load64_le(b + 224U);
-  ws0[28U] = u27;
-  uint64_t u28 = load64_le(b + 232U);
-  ws0[29U] = u28;
-  uint64_t u29 = load64_le(b + 240U);
-  ws0[30U] = u29;
-  uint64_t u30 = load64_le(b + 248U);
-  ws0[31U] = u30;
+  ws0[0U] = load64_le(b);
+  ws0[1U] = load64_le(b + 8U);
+  ws0[2U] = load64_le(b + 16U);
+  ws0[3U] = load64_le(b + 24U);
+  ws0[4U] = load64_le(b + 32U);
+  ws0[5U] = load64_le(b + 40U);
+  ws0[6U] = load64_le(b + 48U);
+  ws0[7U] = load64_le(b + 56U);
+  ws0[8U] = load64_le(b + 64U);
+  ws0[9U] = load64_le(b + 72U);
+  ws0[10U] = load64_le(b + 80U);
+  ws0[11U] = load64_le(b + 88U);
+  ws0[12U] = load64_le(b + 96U);
+  ws0[13U] = load64_le(b + 104U);
+  ws0[14U] = load64_le(b + 112U);
+  ws0[15U] = load64_le(b + 120U);
+  ws0[16U] = load64_le(b + 128U);
+  ws0[17U] = load64_le(b + 136U);
+  ws0[18U] = load64_le(b + 144U);
+  ws0[19U] = load64_le(b + 152U);
+  ws0[20U] = load64_le(b + 160U);
+  ws0[21U] = load64_le(b + 168U);
+  ws0[22U] = load64_le(b + 176U);
+  ws0[23U] = load64_le(b + 184U);
+  ws0[24U] = load64_le(b + 192U);
+  ws0[25U] = load64_le(b + 200U);
+  ws0[26U] = load64_le(b + 208U);
+  ws0[27U] = load64_le(b + 216U);
+  ws0[28U] = load64_le(b + 224U);
+  ws0[29U] = load64_le(b + 232U);
+  ws0[30U] = load64_le(b + 240U);
+  ws0[31U] = load64_le(b + 248U);
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -263,7 +199,7 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -271,7 +207,7 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -287,19 +223,19 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = outputByteLen % rateInBytes1;
@@ -310,7 +246,7 @@ shake128(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + outputByteLen - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (outputByteLen - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void
@@ -334,78 +270,46 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x1FU;
   uint64_t ws0[32U] = { 0U };
   uint8_t *b = b_;
-  uint64_t u = load64_le(b);
-  ws0[0U] = u;
-  uint64_t u0 = load64_le(b + 8U);
-  ws0[1U] = u0;
-  uint64_t u1 = load64_le(b + 16U);
-  ws0[2U] = u1;
-  uint64_t u2 = load64_le(b + 24U);
-  ws0[3U] = u2;
-  uint64_t u3 = load64_le(b + 32U);
-  ws0[4U] = u3;
-  uint64_t u4 = load64_le(b + 40U);
-  ws0[5U] = u4;
-  uint64_t u5 = load64_le(b + 48U);
-  ws0[6U] = u5;
-  uint64_t u6 = load64_le(b + 56U);
-  ws0[7U] = u6;
-  uint64_t u7 = load64_le(b + 64U);
-  ws0[8U] = u7;
-  uint64_t u8 = load64_le(b + 72U);
-  ws0[9U] = u8;
-  uint64_t u9 = load64_le(b + 80U);
-  ws0[10U] = u9;
-  uint64_t u10 = load64_le(b + 88U);
-  ws0[11U] = u10;
-  uint64_t u11 = load64_le(b + 96U);
-  ws0[12U] = u11;
-  uint64_t u12 = load64_le(b + 104U);
-  ws0[13U] = u12;
-  uint64_t u13 = load64_le(b + 112U);
-  ws0[14U] = u13;
-  uint64_t u14 = load64_le(b + 120U);
-  ws0[15U] = u14;
-  uint64_t u15 = load64_le(b + 128U);
-  ws0[16U] = u15;
-  uint64_t u16 = load64_le(b + 136U);
-  ws0[17U] = u16;
-  uint64_t u17 = load64_le(b + 144U);
-  ws0[18U] = u17;
-  uint64_t u18 = load64_le(b + 152U);
-  ws0[19U] = u18;
-  uint64_t u19 = load64_le(b + 160U);
-  ws0[20U] = u19;
-  uint64_t u20 = load64_le(b + 168U);
-  ws0[21U] = u20;
-  uint64_t u21 = load64_le(b + 176U);
-  ws0[22U] = u21;
-  uint64_t u22 = load64_le(b + 184U);
-  ws0[23U] = u22;
-  uint64_t u23 = load64_le(b + 192U);
-  ws0[24U] = u23;
-  uint64_t u24 = load64_le(b + 200U);
-  ws0[25U] = u24;
-  uint64_t u25 = load64_le(b + 208U);
-  ws0[26U] = u25;
-  uint64_t u26 = load64_le(b + 216U);
-  ws0[27U] = u26;
-  uint64_t u27 = load64_le(b + 224U);
-  ws0[28U] = u27;
-  uint64_t u28 = load64_le(b + 232U);
-  ws0[29U] = u28;
-  uint64_t u29 = load64_le(b + 240U);
-  ws0[30U] = u29;
-  uint64_t u30 = load64_le(b + 248U);
-  ws0[31U] = u30;
+  ws0[0U] = load64_le(b);
+  ws0[1U] = load64_le(b + 8U);
+  ws0[2U] = load64_le(b + 16U);
+  ws0[3U] = load64_le(b + 24U);
+  ws0[4U] = load64_le(b + 32U);
+  ws0[5U] = load64_le(b + 40U);
+  ws0[6U] = load64_le(b + 48U);
+  ws0[7U] = load64_le(b + 56U);
+  ws0[8U] = load64_le(b + 64U);
+  ws0[9U] = load64_le(b + 72U);
+  ws0[10U] = load64_le(b + 80U);
+  ws0[11U] = load64_le(b + 88U);
+  ws0[12U] = load64_le(b + 96U);
+  ws0[13U] = load64_le(b + 104U);
+  ws0[14U] = load64_le(b + 112U);
+  ws0[15U] = load64_le(b + 120U);
+  ws0[16U] = load64_le(b + 128U);
+  ws0[17U] = load64_le(b + 136U);
+  ws0[18U] = load64_le(b + 144U);
+  ws0[19U] = load64_le(b + 152U);
+  ws0[20U] = load64_le(b + 160U);
+  ws0[21U] = load64_le(b + 168U);
+  ws0[22U] = load64_le(b + 176U);
+  ws0[23U] = load64_le(b + 184U);
+  ws0[24U] = load64_le(b + 192U);
+  ws0[25U] = load64_le(b + 200U);
+  ws0[26U] = load64_le(b + 208U);
+  ws0[27U] = load64_le(b + 216U);
+  ws0[28U] = load64_le(b + 224U);
+  ws0[29U] = load64_le(b + 232U);
+  ws0[30U] = load64_le(b + 240U);
+  ws0[31U] = load64_le(b + 248U);
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -428,7 +332,7 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -436,7 +340,7 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -452,19 +356,19 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = outputByteLen % rateInBytes1;
@@ -475,7 +379,7 @@ shake256(uint8_t *output, uint32_t outputByteLen, uint8_t *input, uint32_t input
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + outputByteLen - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (outputByteLen - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
@@ -498,78 +402,46 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x06U;
   uint64_t ws0[32U] = { 0U };
   uint8_t *b = b_;
-  uint64_t u = load64_le(b);
-  ws0[0U] = u;
-  uint64_t u0 = load64_le(b + 8U);
-  ws0[1U] = u0;
-  uint64_t u1 = load64_le(b + 16U);
-  ws0[2U] = u1;
-  uint64_t u2 = load64_le(b + 24U);
-  ws0[3U] = u2;
-  uint64_t u3 = load64_le(b + 32U);
-  ws0[4U] = u3;
-  uint64_t u4 = load64_le(b + 40U);
-  ws0[5U] = u4;
-  uint64_t u5 = load64_le(b + 48U);
-  ws0[6U] = u5;
-  uint64_t u6 = load64_le(b + 56U);
-  ws0[7U] = u6;
-  uint64_t u7 = load64_le(b + 64U);
-  ws0[8U] = u7;
-  uint64_t u8 = load64_le(b + 72U);
-  ws0[9U] = u8;
-  uint64_t u9 = load64_le(b + 80U);
-  ws0[10U] = u9;
-  uint64_t u10 = load64_le(b + 88U);
-  ws0[11U] = u10;
-  uint64_t u11 = load64_le(b + 96U);
-  ws0[12U] = u11;
-  uint64_t u12 = load64_le(b + 104U);
-  ws0[13U] = u12;
-  uint64_t u13 = load64_le(b + 112U);
-  ws0[14U] = u13;
-  uint64_t u14 = load64_le(b + 120U);
-  ws0[15U] = u14;
-  uint64_t u15 = load64_le(b + 128U);
-  ws0[16U] = u15;
-  uint64_t u16 = load64_le(b + 136U);
-  ws0[17U] = u16;
-  uint64_t u17 = load64_le(b + 144U);
-  ws0[18U] = u17;
-  uint64_t u18 = load64_le(b + 152U);
-  ws0[19U] = u18;
-  uint64_t u19 = load64_le(b + 160U);
-  ws0[20U] = u19;
-  uint64_t u20 = load64_le(b + 168U);
-  ws0[21U] = u20;
-  uint64_t u21 = load64_le(b + 176U);
-  ws0[22U] = u21;
-  uint64_t u22 = load64_le(b + 184U);
-  ws0[23U] = u22;
-  uint64_t u23 = load64_le(b + 192U);
-  ws0[24U] = u23;
-  uint64_t u24 = load64_le(b + 200U);
-  ws0[25U] = u24;
-  uint64_t u25 = load64_le(b + 208U);
-  ws0[26U] = u25;
-  uint64_t u26 = load64_le(b + 216U);
-  ws0[27U] = u26;
-  uint64_t u27 = load64_le(b + 224U);
-  ws0[28U] = u27;
-  uint64_t u28 = load64_le(b + 232U);
-  ws0[29U] = u28;
-  uint64_t u29 = load64_le(b + 240U);
-  ws0[30U] = u29;
-  uint64_t u30 = load64_le(b + 248U);
-  ws0[31U] = u30;
+  ws0[0U] = load64_le(b);
+  ws0[1U] = load64_le(b + 8U);
+  ws0[2U] = load64_le(b + 16U);
+  ws0[3U] = load64_le(b + 24U);
+  ws0[4U] = load64_le(b + 32U);
+  ws0[5U] = load64_le(b + 40U);
+  ws0[6U] = load64_le(b + 48U);
+  ws0[7U] = load64_le(b + 56U);
+  ws0[8U] = load64_le(b + 64U);
+  ws0[9U] = load64_le(b + 72U);
+  ws0[10U] = load64_le(b + 80U);
+  ws0[11U] = load64_le(b + 88U);
+  ws0[12U] = load64_le(b + 96U);
+  ws0[13U] = load64_le(b + 104U);
+  ws0[14U] = load64_le(b + 112U);
+  ws0[15U] = load64_le(b + 120U);
+  ws0[16U] = load64_le(b + 128U);
+  ws0[17U] = load64_le(b + 136U);
+  ws0[18U] = load64_le(b + 144U);
+  ws0[19U] = load64_le(b + 152U);
+  ws0[20U] = load64_le(b + 160U);
+  ws0[21U] = load64_le(b + 168U);
+  ws0[22U] = load64_le(b + 176U);
+  ws0[23U] = load64_le(b + 184U);
+  ws0[24U] = load64_le(b + 192U);
+  ws0[25U] = load64_le(b + 200U);
+  ws0[26U] = load64_le(b + 208U);
+  ws0[27U] = load64_le(b + 216U);
+  ws0[28U] = load64_le(b + 224U);
+  ws0[29U] = load64_le(b + 232U);
+  ws0[30U] = load64_le(b + 240U);
+  ws0[31U] = load64_le(b + 248U);
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -592,7 +464,7 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -600,7 +472,7 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -616,19 +488,19 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = 28U % rateInBytes1;
@@ -639,7 +511,7 @@ static void sha3_224(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + 28U - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (28U - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
@@ -662,78 +534,46 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x06U;
   uint64_t ws0[32U] = { 0U };
   uint8_t *b = b_;
-  uint64_t u = load64_le(b);
-  ws0[0U] = u;
-  uint64_t u0 = load64_le(b + 8U);
-  ws0[1U] = u0;
-  uint64_t u1 = load64_le(b + 16U);
-  ws0[2U] = u1;
-  uint64_t u2 = load64_le(b + 24U);
-  ws0[3U] = u2;
-  uint64_t u3 = load64_le(b + 32U);
-  ws0[4U] = u3;
-  uint64_t u4 = load64_le(b + 40U);
-  ws0[5U] = u4;
-  uint64_t u5 = load64_le(b + 48U);
-  ws0[6U] = u5;
-  uint64_t u6 = load64_le(b + 56U);
-  ws0[7U] = u6;
-  uint64_t u7 = load64_le(b + 64U);
-  ws0[8U] = u7;
-  uint64_t u8 = load64_le(b + 72U);
-  ws0[9U] = u8;
-  uint64_t u9 = load64_le(b + 80U);
-  ws0[10U] = u9;
-  uint64_t u10 = load64_le(b + 88U);
-  ws0[11U] = u10;
-  uint64_t u11 = load64_le(b + 96U);
-  ws0[12U] = u11;
-  uint64_t u12 = load64_le(b + 104U);
-  ws0[13U] = u12;
-  uint64_t u13 = load64_le(b + 112U);
-  ws0[14U] = u13;
-  uint64_t u14 = load64_le(b + 120U);
-  ws0[15U] = u14;
-  uint64_t u15 = load64_le(b + 128U);
-  ws0[16U] = u15;
-  uint64_t u16 = load64_le(b + 136U);
-  ws0[17U] = u16;
-  uint64_t u17 = load64_le(b + 144U);
-  ws0[18U] = u17;
-  uint64_t u18 = load64_le(b + 152U);
-  ws0[19U] = u18;
-  uint64_t u19 = load64_le(b + 160U);
-  ws0[20U] = u19;
-  uint64_t u20 = load64_le(b + 168U);
-  ws0[21U] = u20;
-  uint64_t u21 = load64_le(b + 176U);
-  ws0[22U] = u21;
-  uint64_t u22 = load64_le(b + 184U);
-  ws0[23U] = u22;
-  uint64_t u23 = load64_le(b + 192U);
-  ws0[24U] = u23;
-  uint64_t u24 = load64_le(b + 200U);
-  ws0[25U] = u24;
-  uint64_t u25 = load64_le(b + 208U);
-  ws0[26U] = u25;
-  uint64_t u26 = load64_le(b + 216U);
-  ws0[27U] = u26;
-  uint64_t u27 = load64_le(b + 224U);
-  ws0[28U] = u27;
-  uint64_t u28 = load64_le(b + 232U);
-  ws0[29U] = u28;
-  uint64_t u29 = load64_le(b + 240U);
-  ws0[30U] = u29;
-  uint64_t u30 = load64_le(b + 248U);
-  ws0[31U] = u30;
+  ws0[0U] = load64_le(b);
+  ws0[1U] = load64_le(b + 8U);
+  ws0[2U] = load64_le(b + 16U);
+  ws0[3U] = load64_le(b + 24U);
+  ws0[4U] = load64_le(b + 32U);
+  ws0[5U] = load64_le(b + 40U);
+  ws0[6U] = load64_le(b + 48U);
+  ws0[7U] = load64_le(b + 56U);
+  ws0[8U] = load64_le(b + 64U);
+  ws0[9U] = load64_le(b + 72U);
+  ws0[10U] = load64_le(b + 80U);
+  ws0[11U] = load64_le(b + 88U);
+  ws0[12U] = load64_le(b + 96U);
+  ws0[13U] = load64_le(b + 104U);
+  ws0[14U] = load64_le(b + 112U);
+  ws0[15U] = load64_le(b + 120U);
+  ws0[16U] = load64_le(b + 128U);
+  ws0[17U] = load64_le(b + 136U);
+  ws0[18U] = load64_le(b + 144U);
+  ws0[19U] = load64_le(b + 152U);
+  ws0[20U] = load64_le(b + 160U);
+  ws0[21U] = load64_le(b + 168U);
+  ws0[22U] = load64_le(b + 176U);
+  ws0[23U] = load64_le(b + 184U);
+  ws0[24U] = load64_le(b + 192U);
+  ws0[25U] = load64_le(b + 200U);
+  ws0[26U] = load64_le(b + 208U);
+  ws0[27U] = load64_le(b + 216U);
+  ws0[28U] = load64_le(b + 224U);
+  ws0[29U] = load64_le(b + 232U);
+  ws0[30U] = load64_le(b + 240U);
+  ws0[31U] = load64_le(b + 248U);
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -756,7 +596,7 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -764,7 +604,7 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -780,19 +620,19 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = 32U % rateInBytes1;
@@ -803,7 +643,7 @@ static void sha3_256(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + 32U - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (32U - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
@@ -826,78 +666,46 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x06U;
   uint64_t ws0[32U] = { 0U };
   uint8_t *b = b_;
-  uint64_t u = load64_le(b);
-  ws0[0U] = u;
-  uint64_t u0 = load64_le(b + 8U);
-  ws0[1U] = u0;
-  uint64_t u1 = load64_le(b + 16U);
-  ws0[2U] = u1;
-  uint64_t u2 = load64_le(b + 24U);
-  ws0[3U] = u2;
-  uint64_t u3 = load64_le(b + 32U);
-  ws0[4U] = u3;
-  uint64_t u4 = load64_le(b + 40U);
-  ws0[5U] = u4;
-  uint64_t u5 = load64_le(b + 48U);
-  ws0[6U] = u5;
-  uint64_t u6 = load64_le(b + 56U);
-  ws0[7U] = u6;
-  uint64_t u7 = load64_le(b + 64U);
-  ws0[8U] = u7;
-  uint64_t u8 = load64_le(b + 72U);
-  ws0[9U] = u8;
-  uint64_t u9 = load64_le(b + 80U);
-  ws0[10U] = u9;
-  uint64_t u10 = load64_le(b + 88U);
-  ws0[11U] = u10;
-  uint64_t u11 = load64_le(b + 96U);
-  ws0[12U] = u11;
-  uint64_t u12 = load64_le(b + 104U);
-  ws0[13U] = u12;
-  uint64_t u13 = load64_le(b + 112U);
-  ws0[14U] = u13;
-  uint64_t u14 = load64_le(b + 120U);
-  ws0[15U] = u14;
-  uint64_t u15 = load64_le(b + 128U);
-  ws0[16U] = u15;
-  uint64_t u16 = load64_le(b + 136U);
-  ws0[17U] = u16;
-  uint64_t u17 = load64_le(b + 144U);
-  ws0[18U] = u17;
-  uint64_t u18 = load64_le(b + 152U);
-  ws0[19U] = u18;
-  uint64_t u19 = load64_le(b + 160U);
-  ws0[20U] = u19;
-  uint64_t u20 = load64_le(b + 168U);
-  ws0[21U] = u20;
-  uint64_t u21 = load64_le(b + 176U);
-  ws0[22U] = u21;
-  uint64_t u22 = load64_le(b + 184U);
-  ws0[23U] = u22;
-  uint64_t u23 = load64_le(b + 192U);
-  ws0[24U] = u23;
-  uint64_t u24 = load64_le(b + 200U);
-  ws0[25U] = u24;
-  uint64_t u25 = load64_le(b + 208U);
-  ws0[26U] = u25;
-  uint64_t u26 = load64_le(b + 216U);
-  ws0[27U] = u26;
-  uint64_t u27 = load64_le(b + 224U);
-  ws0[28U] = u27;
-  uint64_t u28 = load64_le(b + 232U);
-  ws0[29U] = u28;
-  uint64_t u29 = load64_le(b + 240U);
-  ws0[30U] = u29;
-  uint64_t u30 = load64_le(b + 248U);
-  ws0[31U] = u30;
+  ws0[0U] = load64_le(b);
+  ws0[1U] = load64_le(b + 8U);
+  ws0[2U] = load64_le(b + 16U);
+  ws0[3U] = load64_le(b + 24U);
+  ws0[4U] = load64_le(b + 32U);
+  ws0[5U] = load64_le(b + 40U);
+  ws0[6U] = load64_le(b + 48U);
+  ws0[7U] = load64_le(b + 56U);
+  ws0[8U] = load64_le(b + 64U);
+  ws0[9U] = load64_le(b + 72U);
+  ws0[10U] = load64_le(b + 80U);
+  ws0[11U] = load64_le(b + 88U);
+  ws0[12U] = load64_le(b + 96U);
+  ws0[13U] = load64_le(b + 104U);
+  ws0[14U] = load64_le(b + 112U);
+  ws0[15U] = load64_le(b + 120U);
+  ws0[16U] = load64_le(b + 128U);
+  ws0[17U] = load64_le(b + 136U);
+  ws0[18U] = load64_le(b + 144U);
+  ws0[19U] = load64_le(b + 152U);
+  ws0[20U] = load64_le(b + 160U);
+  ws0[21U] = load64_le(b + 168U);
+  ws0[22U] = load64_le(b + 176U);
+  ws0[23U] = load64_le(b + 184U);
+  ws0[24U] = load64_le(b + 192U);
+  ws0[25U] = load64_le(b + 200U);
+  ws0[26U] = load64_le(b + 208U);
+  ws0[27U] = load64_le(b + 216U);
+  ws0[28U] = load64_le(b + 224U);
+  ws0[29U] = load64_le(b + 232U);
+  ws0[30U] = load64_le(b + 240U);
+  ws0[31U] = load64_le(b + 248U);
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -920,7 +728,7 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -928,7 +736,7 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -944,19 +752,19 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = 48U % rateInBytes1;
@@ -967,7 +775,7 @@ static void sha3_384(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + 48U - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (48U - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
@@ -990,78 +798,46 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   uint32_t rem = inputByteLen % rateInBytes1;
   uint8_t *b00 = ib;
   uint8_t *bl0 = b_;
-  memcpy(bl0, b00 + inputByteLen - rem, rem * sizeof (uint8_t));
+  memcpy(bl0, b00 + (inputByteLen - rem), rem * sizeof (uint8_t));
   uint8_t *b01 = b_;
   b01[inputByteLen % rateInBytes1] = 0x06U;
   uint64_t ws0[32U] = { 0U };
   uint8_t *b = b_;
-  uint64_t u = load64_le(b);
-  ws0[0U] = u;
-  uint64_t u0 = load64_le(b + 8U);
-  ws0[1U] = u0;
-  uint64_t u1 = load64_le(b + 16U);
-  ws0[2U] = u1;
-  uint64_t u2 = load64_le(b + 24U);
-  ws0[3U] = u2;
-  uint64_t u3 = load64_le(b + 32U);
-  ws0[4U] = u3;
-  uint64_t u4 = load64_le(b + 40U);
-  ws0[5U] = u4;
-  uint64_t u5 = load64_le(b + 48U);
-  ws0[6U] = u5;
-  uint64_t u6 = load64_le(b + 56U);
-  ws0[7U] = u6;
-  uint64_t u7 = load64_le(b + 64U);
-  ws0[8U] = u7;
-  uint64_t u8 = load64_le(b + 72U);
-  ws0[9U] = u8;
-  uint64_t u9 = load64_le(b + 80U);
-  ws0[10U] = u9;
-  uint64_t u10 = load64_le(b + 88U);
-  ws0[11U] = u10;
-  uint64_t u11 = load64_le(b + 96U);
-  ws0[12U] = u11;
-  uint64_t u12 = load64_le(b + 104U);
-  ws0[13U] = u12;
-  uint64_t u13 = load64_le(b + 112U);
-  ws0[14U] = u13;
-  uint64_t u14 = load64_le(b + 120U);
-  ws0[15U] = u14;
-  uint64_t u15 = load64_le(b + 128U);
-  ws0[16U] = u15;
-  uint64_t u16 = load64_le(b + 136U);
-  ws0[17U] = u16;
-  uint64_t u17 = load64_le(b + 144U);
-  ws0[18U] = u17;
-  uint64_t u18 = load64_le(b + 152U);
-  ws0[19U] = u18;
-  uint64_t u19 = load64_le(b + 160U);
-  ws0[20U] = u19;
-  uint64_t u20 = load64_le(b + 168U);
-  ws0[21U] = u20;
-  uint64_t u21 = load64_le(b + 176U);
-  ws0[22U] = u21;
-  uint64_t u22 = load64_le(b + 184U);
-  ws0[23U] = u22;
-  uint64_t u23 = load64_le(b + 192U);
-  ws0[24U] = u23;
-  uint64_t u24 = load64_le(b + 200U);
-  ws0[25U] = u24;
-  uint64_t u25 = load64_le(b + 208U);
-  ws0[26U] = u25;
-  uint64_t u26 = load64_le(b + 216U);
-  ws0[27U] = u26;
-  uint64_t u27 = load64_le(b + 224U);
-  ws0[28U] = u27;
-  uint64_t u28 = load64_le(b + 232U);
-  ws0[29U] = u28;
-  uint64_t u29 = load64_le(b + 240U);
-  ws0[30U] = u29;
-  uint64_t u30 = load64_le(b + 248U);
-  ws0[31U] = u30;
+  ws0[0U] = load64_le(b);
+  ws0[1U] = load64_le(b + 8U);
+  ws0[2U] = load64_le(b + 16U);
+  ws0[3U] = load64_le(b + 24U);
+  ws0[4U] = load64_le(b + 32U);
+  ws0[5U] = load64_le(b + 40U);
+  ws0[6U] = load64_le(b + 48U);
+  ws0[7U] = load64_le(b + 56U);
+  ws0[8U] = load64_le(b + 64U);
+  ws0[9U] = load64_le(b + 72U);
+  ws0[10U] = load64_le(b + 80U);
+  ws0[11U] = load64_le(b + 88U);
+  ws0[12U] = load64_le(b + 96U);
+  ws0[13U] = load64_le(b + 104U);
+  ws0[14U] = load64_le(b + 112U);
+  ws0[15U] = load64_le(b + 120U);
+  ws0[16U] = load64_le(b + 128U);
+  ws0[17U] = load64_le(b + 136U);
+  ws0[18U] = load64_le(b + 144U);
+  ws0[19U] = load64_le(b + 152U);
+  ws0[20U] = load64_le(b + 160U);
+  ws0[21U] = load64_le(b + 168U);
+  ws0[22U] = load64_le(b + 176U);
+  ws0[23U] = load64_le(b + 184U);
+  ws0[24U] = load64_le(b + 192U);
+  ws0[25U] = load64_le(b + 200U);
+  ws0[26U] = load64_le(b + 208U);
+  ws0[27U] = load64_le(b + 216U);
+  ws0[28U] = load64_le(b + 224U);
+  ws0[29U] = load64_le(b + 232U);
+  ws0[30U] = load64_le(b + 240U);
+  ws0[31U] = load64_le(b + 248U);
   for (uint32_t i = 0U; i < 25U; i++)
   {
-    s[i] = s[i] ^ ws0[i];
+    s[i] ^= ws0[i];
   }
   uint8_t b2[256U] = { 0U };
   uint8_t *b3 = b2;
@@ -1084,7 +860,7 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       uint64_t _C[5U] = { 0U };
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
+        _C[i] = s[i] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U])));
       }
       for (uint32_t i2 = 0U; i2 < 5U; i2++)
       {
@@ -1092,7 +868,7 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
         uint64_t _D = _C[(i2 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
         for (uint32_t i = 0U; i < 5U; i++)
         {
-          s[i2 + 5U * i] = s[i2 + 5U * i] ^ _D;
+          s[i2 + 5U * i] ^= _D;
         }
       }
       uint64_t x = s[1U];
@@ -1108,19 +884,19 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
       }
       for (uint32_t i = 0U; i < 5U; i++)
       {
-        uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+        uint64_t v0 = s[5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
         uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
         uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
-        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
-        uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
-        s[0U + 5U * i] = v0;
+        uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[5U * i]);
+        uint64_t v4 = s[4U + 5U * i] ^ (~s[5U * i] & s[1U + 5U * i]);
+        s[5U * i] = v0;
         s[1U + 5U * i] = v1;
         s[2U + 5U * i] = v2;
         s[3U + 5U * i] = v3;
         s[4U + 5U * i] = v4;
       }
       uint64_t c = Hacl_Impl_SHA3_Vec_keccak_rndc[i1];
-      s[0U] = s[0U] ^ c;
+      s[0U] ^= c;
     }
   }
   uint32_t remOut = 64U % rateInBytes1;
@@ -1131,7 +907,7 @@ static void sha3_512(uint8_t *output, uint8_t *input, uint32_t inputByteLen)
   {
     store64_le(hbuf + i * 8U, ws[i]);
   }
-  memcpy(rb + 64U - remOut, hbuf, remOut * sizeof (uint8_t));
+  memcpy(rb + (64U - remOut), hbuf, remOut * sizeof (uint8_t));
 }
 
 extern void C_String_print(Prims_string uu___);
@@ -1159,19 +935,19 @@ test_sha3(
   sha3_512(test512, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(28U, test224, expected224))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(32U, test256, expected256))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(48U, test384, expected384))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(64U, test512, expected512))
   {
-    exit((int32_t)255);
+    exit(255);
   }
 }
 
@@ -1183,7 +959,7 @@ static void test_shake128(uint32_t msg_len, uint8_t *msg, uint32_t out_len, uint
   shake128(test, out_len, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(out_len, test, expected))
   {
-    exit((int32_t)255);
+    exit(255);
   }
 }
 
@@ -1195,7 +971,7 @@ static void test_shake256(uint32_t msg_len, uint8_t *msg, uint32_t out_len, uint
   shake256(test, out_len, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(out_len, test, expected))
   {
-    exit((int32_t)255);
+    exit(255);
   }
 }
 

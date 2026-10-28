@@ -3,12 +3,6 @@
 set -e
 set -o pipefail
 
-if [[ $(uname) == "Darwin" ]]; then
-  brew install jq openssl
-  brew info --json openssl
-  brew info --json openssl | jq .[0].installed[0].sbom | xargs dirname
-fi
-
 if [[ $OS == "Windows_NT" ]]; then
   # The usual issue of return codes not being forwarded.
   .ci/script.bat 2>&1 | tee log
@@ -30,10 +24,10 @@ if [[ $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
 fi
 
 # Cross compile for other targets. Build and static library only.
-if [ ! -z "$CROSS_CI" ]; then
+if [[ -n $CROSS_CI ]]; then
   pushd dist/gcc-compatible
-  rm -rf *.o *.d libevercrypt.a
-  ./configure -target $CROSS_CI
+  rm -f -- ./*.o ./*.d libevercrypt.a
+  ./configure -target "$CROSS_CI"
   make -j libevercrypt.a
   popd
   exit 0
@@ -56,12 +50,11 @@ popd
 
 make -C tests -j test
 
-# Extracted C tests -- need full krmllib, don't work on ARM because of
-# intrinsics for x86 in cpu cycle count routines in testlib.c
+# Extracted C tests need full krmllib.
 pushd dist/test/c/
 git clone https://github.com/fstarlang/karamel --depth 10
-export KRML_LIBDIR=$(pwd)/karamel/krmllib
-export KRML_INCLUDEDIR=$(pwd)/karamel/include
+export KRML_LIBDIR="$PWD/karamel/krmllib"
+export KRML_INCLUDEDIR="$PWD/karamel/include"
 make -C karamel/krmllib/dist/generic -f Makefile.basic -j
 make -j -k
 popd

@@ -8,6 +8,17 @@ if [[ $HACL_HOME == "" ]]; then
   exit 1
 fi
 
+# Non-Windows builds run Vale with dotnet; runtimeconfig.json requires .NET 6.0.
+if [[ $OS != "Windows_NT" ]]; then
+  if ! command -v dotnet >/dev/null 2>&1 || \
+     ! dotnet --list-runtimes | grep -Eq '^Microsoft\.NETCore\.App 6\.0\.[0-9]+ '; then
+    echo "Vale requires the .NET 6.0 runtime (Microsoft.NETCore.App 6.0.x)." >&2
+    echo "Install it from https://dotnet.microsoft.com/en-us/download/dotnet/6.0 and ensure dotnet is on PATH." >&2
+    echo "Check installed runtimes with: dotnet --list-runtimes" >&2
+    exit 1
+  fi
+fi
+
 HACL_HOME=$(realpath $HACL_HOME)
 
 echo -n "Will install vale into $(realpath $HACL_HOME/..)/vale, hit Ctrl-C to abort"
