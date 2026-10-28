@@ -83,6 +83,7 @@ let copy_point res p =
 
 ///  Point conversion between Projective and Affine coordinates representations
 
+#push-options "--z3rlimit 100"
 [@CInline]
 let to_aff_point res p =
   push_frame ();
@@ -100,6 +101,7 @@ let to_aff_point res p =
   from_mont x x;
   from_mont y y;
   pop_frame ()
+#pop-options
 
 
 [@CInline]

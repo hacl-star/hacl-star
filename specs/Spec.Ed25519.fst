@@ -40,7 +40,7 @@ let mk_ed25519_comm_monoid: LE.comm_monoid aff_point_c = {
   LE.one = aff_point_at_infinity;
   LE.mul = aff_point_add_c;
   LE.lemma_one = EL.aff_point_at_infinity_lemma;
-  LE.lemma_mul_assoc = EL.aff_point_add_assoc_lemma;
+  LE.lemma_mul_assoc = (fun (p q s:aff_point_c) -> EL.aff_point_add_assoc_lemma p q s);
   LE.lemma_mul_comm = EL.aff_point_add_comm_lemma;
   }
 

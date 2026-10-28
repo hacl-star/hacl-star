@@ -18,52 +18,70 @@ include Spec.P256.PointOps
 
 ///  Elliptic curve scalar multiplication
 
-let mk_p256_comm_monoid : LE.comm_monoid aff_point = {
+// Valid affine points: on the curve, or the point at infinity
+let aff_point_c = p:aff_point{aff_point_inv p}
+
+let aff_point_add_c (p q:aff_point_c) : aff_point_c =
+  PL.aff_point_add_inv_lemma p q;
+  aff_point_add p q
+
+let mk_p256_comm_monoid : LE.comm_monoid aff_point_c = {
   LE.one = aff_point_at_inf;
-  LE.mul = aff_point_add;
+  LE.mul = aff_point_add_c;
   LE.lemma_one = PL.aff_point_at_inf_lemma;
-  LE.lemma_mul_assoc = PL.aff_point_add_assoc_lemma;
+  LE.lemma_mul_assoc = (fun (p q s:aff_point_c) -> PL.aff_point_add_assoc_lemma p q s);
   LE.lemma_mul_comm = PL.aff_point_add_comm_lemma;
 }
 
-let mk_to_p256_comm_monoid : SE.to_comm_monoid proj_point = {
-  SE.a_spec = aff_point;
+// Valid projective points: on the curve, not (0, 0, 0)
+let proj_point_c = p:proj_point{point_inv p}
+
+let to_aff_point_c (p:proj_point_c) : aff_point_c =
+  PL.to_aff_point_inv p;
+  to_aff_point p
+
+let mk_to_p256_comm_monoid : SE.to_comm_monoid proj_point_c = {
+  SE.a_spec = aff_point_c;
   SE.comm_monoid = mk_p256_comm_monoid;
-  SE.refl = to_aff_point;
+  SE.refl = to_aff_point_c;
 }
 
-val point_at_inf_c: SE.one_st proj_point mk_to_p256_comm_monoid
+val point_at_inf_c: SE.one_st proj_point_c mk_to_p256_comm_monoid
 let point_at_inf_c _ =
   PL.to_aff_point_at_infinity_lemma ();
   point_at_inf
 
-val point_add_c : SE.mul_st proj_point mk_to_p256_comm_monoid
+val point_add_c : SE.mul_st proj_point_c mk_to_p256_comm_monoid
 let point_add_c p q =
   PL.to_aff_point_add_lemma p q;
   point_add p q
 
-val point_double_c : SE.sqr_st proj_point mk_to_p256_comm_monoid
+val point_double_c : SE.sqr_st proj_point_c mk_to_p256_comm_monoid
 let point_double_c p =
   PL.to_aff_point_double_lemma p;
   point_double p
 
-let mk_p256_concrete_ops : SE.concrete_ops proj_point = {
+let mk_p256_concrete_ops : SE.concrete_ops proj_point_c = {
   SE.to = mk_to_p256_comm_monoid;
   SE.one = point_at_inf_c;
   SE.mul = point_add_c;
   SE.sqr = point_double_c;
 }
 
+let base_point_c : proj_point_c =
+  PL.base_point_inv ();
+  base_point
+
 // [a]P
-let point_mul (a:qelem) (p:proj_point) : proj_point =
+let point_mul (a:qelem) (p:proj_point_c) : proj_point_c =
   SE.exp_fw mk_p256_concrete_ops p 256 a 4
 
 // [a]G
-let point_mul_g (a:qelem) : proj_point = point_mul a base_point
+let point_mul_g (a:qelem) : proj_point_c = point_mul a base_point_c
 
 // [a1]G + [a2]P
-let point_mul_double_g (a1 a2:qelem) (p:proj_point) : proj_point =
-  SE.exp_double_fw mk_p256_concrete_ops base_point 256 a1 p a2 5
+let point_mul_double_g (a1 a2:qelem) (p:proj_point_c) : proj_point_c =
+  SE.exp_double_fw mk_p256_concrete_ops base_point_c 256 a1 p a2 5
 
 
 ///  ECDSA over the P256 elliptic curve
@@ -125,6 +143,7 @@ let ecdsa_verify_msg_as_qelem (m:qelem) (public_key:lbytes 64) (sign_r sign_s:lb
     let sinv = qinv s in
     let u1 = sinv *^ m in
     let u2 = sinv *^ r in
+    PL.load_point_inv public_key;
     let _X, _Y, _Z = point_mul_double_g u1 u2 (Some?.v pk) in
     if is_point_at_inf (_X, _Y, _Z) then false
     else begin
@@ -185,9 +204,10 @@ let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 6
   let pk = load_point their_public_key in
   let sk = nat_from_bytes_be private_key in
   let is_sk_valid = 0 < sk && sk < order in
-  if Some? pk && is_sk_valid then
+  if Some? pk && is_sk_valid then begin
+    PL.load_point_inv their_public_key;
     let ss = point_mul sk (Some?.v pk) in
-    Some (point_store ss)
+    Some (point_store ss) end
   else None
 
 

@@ -18,7 +18,8 @@ val point_mul: res:point -> scalar:felem -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ live h scalar /\
     disjoint p res /\ disjoint scalar res /\ disjoint p scalar /\
-    point_inv h p /\ as_nat h scalar < S.order)
+    point_inv h p /\ S.point_inv (from_mont_point (as_point_nat h p)) /\
+    as_nat h scalar < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
     S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
@@ -40,7 +41,8 @@ val point_mul_double_g: res:point -> scalar1:felem -> scalar2:felem -> p:point -
     live h res /\ live h scalar1 /\ live h scalar2 /\ live h p /\
     disjoint res scalar1 /\ disjoint res scalar2 /\ disjoint res p /\
     disjoint p scalar1 /\ disjoint p scalar2 /\
-    point_inv h p /\ as_nat h scalar1 < S.order /\ as_nat h scalar2 < S.order)
+    point_inv h p /\ S.point_inv (from_mont_point (as_point_nat h p)) /\
+    as_nat h scalar1 < S.order /\ as_nat h scalar2 < S.order)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
     S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
