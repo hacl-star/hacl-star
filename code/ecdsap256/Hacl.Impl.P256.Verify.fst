@@ -7,6 +7,7 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Buffer.Lemmas
 
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Point
@@ -113,9 +114,18 @@ val ecdsa_verification_cmpr: r:felem -> pk:point -> u1:felem -> u2:felem -> Stac
       else S.fmul _X (S.finv _Z) % S.order = as_nat h0 r)))
 
 let ecdsa_verification_cmpr r pk u1 u2 =
+  let hi = ST.get () in
   push_frame ();
+  let h_frame = ST.get () in
   let res = create_point () in
+  fresh_buffer_disjoint #uint64 #uint64 h_frame r res;
+  fresh_buffer_disjoint #uint64 #uint64 h_frame pk res;
+  fresh_buffer_disjoint #uint64 #uint64 h_frame u1 res;
+  fresh_buffer_disjoint #uint64 #uint64 h_frame u2 res;
   let h0 = ST.get () in
+  assert (as_seq h0 pk == as_seq hi pk);
+  assert (as_seq h0 u1 == as_seq hi u1 /\ as_seq h0 u2 == as_seq hi u2);
+  assert (as_seq h0 r == as_seq hi r);
   point_mul_double_g res u1 u2 pk;
   let h1 = ST.get () in
   assert (S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
@@ -129,7 +139,10 @@ let ecdsa_verification_cmpr r pk u1 u2 =
   let b =
     if is_point_at_inf_vartime res then false
     else ecdsa_verify_finv res r in
+  let h2 = ST.get () in
   pop_frame ();
+  let hf = ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped hi h_frame LowStar.Buffer.loc_none h2 hf;
   b
 
 
@@ -167,6 +180,7 @@ val ecdsa_verify_msg_as_qelem:
     result == S.ecdsa_verify_msg_as_qelem (as_nat h0 m_q)
       (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
 
+#push-options "--z3rlimit 100"
 [@CInline]
 let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
   push_frame ();
@@ -189,3 +203,4 @@ let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
       ecdsa_verification_cmpr r_q pk u1 u2 end in
   pop_frame ();
   res
+#pop-options
