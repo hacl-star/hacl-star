@@ -642,10 +642,8 @@ Hacl_MAC_Poly1305_Simd256_poly1305_init(Lib_IntVector_Intrinsics_vec256 *ctx, ui
   acc[2U] = Lib_IntVector_Intrinsics_vec256_zero;
   acc[3U] = Lib_IntVector_Intrinsics_vec256_zero;
   acc[4U] = Lib_IntVector_Intrinsics_vec256_zero;
-  uint64_t u0 = load64_le(kr);
-  uint64_t lo = u0;
-  uint64_t u = load64_le(kr + 8U);
-  uint64_t hi = u;
+  uint64_t lo = load64_le(kr);
+  uint64_t hi = load64_le(kr + 8U);
   uint64_t mask0 = 0x0ffffffc0fffffffULL;
   uint64_t mask1 = 0x0ffffffc0ffffffcULL;
   uint64_t lo1 = lo & mask0;
@@ -1223,10 +1221,8 @@ static void poly1305_update(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, 
   {
     uint8_t *block = t1 + i * 16U;
     KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 e[5U] KRML_POST_ALIGN(32) = { 0U };
-    uint64_t u0 = load64_le(block);
-    uint64_t lo = u0;
-    uint64_t u = load64_le(block + 8U);
-    uint64_t hi = u;
+    uint64_t lo = load64_le(block);
+    uint64_t hi = load64_le(block + 8U);
     Lib_IntVector_Intrinsics_vec256 f0 = Lib_IntVector_Intrinsics_vec256_load64(lo);
     Lib_IntVector_Intrinsics_vec256 f1 = Lib_IntVector_Intrinsics_vec256_load64(hi);
     Lib_IntVector_Intrinsics_vec256
@@ -1419,10 +1415,8 @@ static void poly1305_update(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, 
     KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 e[5U] KRML_POST_ALIGN(32) = { 0U };
     uint8_t tmp[16U] = { 0U };
     memcpy(tmp, last, rem * sizeof (uint8_t));
-    uint64_t u0 = load64_le(tmp);
-    uint64_t lo = u0;
-    uint64_t u = load64_le(tmp + 8U);
-    uint64_t hi = u;
+    uint64_t lo = load64_le(tmp);
+    uint64_t hi = load64_le(tmp + 8U);
     Lib_IntVector_Intrinsics_vec256 f0 = Lib_IntVector_Intrinsics_vec256_load64(lo);
     Lib_IntVector_Intrinsics_vec256 f1 = Lib_IntVector_Intrinsics_vec256_load64(hi);
     Lib_IntVector_Intrinsics_vec256
@@ -1754,16 +1748,14 @@ Hacl_MAC_Poly1305_Simd256_poly1305_finish(
   uint64_t f212 = Lib_IntVector_Intrinsics_vec256_extract64(f2, 0U);
   uint64_t f312 = Lib_IntVector_Intrinsics_vec256_extract64(f3, 0U);
   uint64_t f41 = Lib_IntVector_Intrinsics_vec256_extract64(f4, 0U);
-  uint64_t lo = (f01 | f112 << 26U) | f212 << 52U;
-  uint64_t hi = (f212 >> 12U | f312 << 14U) | f41 << 40U;
-  uint64_t f10 = lo;
-  uint64_t f11 = hi;
-  uint64_t u0 = load64_le(ks);
-  uint64_t lo0 = u0;
-  uint64_t u = load64_le(ks + 8U);
-  uint64_t hi0 = u;
-  uint64_t f20 = lo0;
-  uint64_t f21 = hi0;
+  uint64_t lo0 = (f01 | f112 << 26U) | f212 << 52U;
+  uint64_t hi0 = (f212 >> 12U | f312 << 14U) | f41 << 40U;
+  uint64_t f10 = lo0;
+  uint64_t f11 = hi0;
+  uint64_t lo = load64_le(ks);
+  uint64_t hi = load64_le(ks + 8U);
+  uint64_t f20 = lo;
+  uint64_t f21 = hi;
   uint64_t r0 = f10 + f20;
   uint64_t r1 = f11 + f21;
   uint64_t c = (r0 ^ ((r0 ^ f20) | ((r0 - f20) ^ f20))) >> 63U;
@@ -1805,16 +1797,15 @@ Hacl_MAC_Poly1305_Simd256_state_t *Hacl_MAC_Poly1305_Simd256_malloc(uint8_t *key
   {
     memset(r1, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
   }
-  option___Lib_IntVector_Intrinsics_vec256_ block_state;
-  if (r1 == NULL)
-  {
-    block_state = ((option___Lib_IntVector_Intrinsics_vec256_){ .tag = Hacl_Streaming_Types_None });
-  }
-  else
-  {
-    block_state =
-      ((option___Lib_IntVector_Intrinsics_vec256_){ .tag = Hacl_Streaming_Types_Some, .v = r1 });
-  }
+  option___Lib_IntVector_Intrinsics_vec256_
+  block_state =
+    r1 == NULL ? ((option___Lib_IntVector_Intrinsics_vec256_){ .tag = Hacl_Streaming_Types_None })
+               : (
+                 (option___Lib_IntVector_Intrinsics_vec256_){
+                   .tag = Hacl_Streaming_Types_Some,
+                   .v = r1
+                 }
+               );
   if (block_state.tag == Hacl_Streaming_Types_None)
   {
     KRML_HOST_FREE(buf1);
@@ -1824,15 +1815,15 @@ Hacl_MAC_Poly1305_Simd256_state_t *Hacl_MAC_Poly1305_Simd256_malloc(uint8_t *key
   {
     Lib_IntVector_Intrinsics_vec256 *block_state1 = block_state.v;
     uint8_t *b = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
-    FStar_Pervasives_Native_option___uint8_t_ k_;
-    if (b == NULL)
-    {
-      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_None });
-    }
-    else
-    {
-      k_ = ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_Some, .v = b });
-    }
+    FStar_Pervasives_Native_option___uint8_t_
+    k_ =
+      b == NULL ? ((FStar_Pervasives_Native_option___uint8_t_){ .tag = Hacl_Streaming_Types_None })
+                : (
+                  (FStar_Pervasives_Native_option___uint8_t_){
+                    .tag = Hacl_Streaming_Types_Some,
+                    .v = b
+                  }
+                );
     FStar_Pervasives_Native_option___uint8_t_ k_0;
     if (k_.tag == Hacl_Streaming_Types_None)
     {
@@ -1932,15 +1923,10 @@ Hacl_MAC_Poly1305_Simd256_update(
   {
     return Hacl_Streaming_Types_MaximumLengthExceeded;
   }
-  uint32_t sz;
-  if (total_len % (uint64_t)64U == 0ULL && total_len > 0ULL)
-  {
-    sz = 64U;
-  }
-  else
-  {
-    sz = (uint32_t)(total_len % (uint64_t)64U);
-  }
+  uint32_t
+  sz =
+    total_len % (uint64_t)64U == 0ULL && total_len > 0ULL ? 64U
+                                                          : (uint32_t)(total_len % (uint64_t)64U);
   if (chunk_len <= 64U - sz)
   {
     Hacl_MAC_Poly1305_Simd256_state_t s1 = *state;
@@ -1948,15 +1934,11 @@ Hacl_MAC_Poly1305_Simd256_update(
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint8_t *k_1 = s1.p_key;
-    uint32_t sz1;
-    if (total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL)
-    {
-      sz1 = 64U;
-    }
-    else
-    {
-      sz1 = (uint32_t)(total_len1 % (uint64_t)64U);
-    }
+    uint32_t
+    sz1 =
+      total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL ? 64U
+                                                              : (uint32_t)(total_len1 %
+                                                                (uint64_t)64U);
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
@@ -1977,29 +1959,22 @@ Hacl_MAC_Poly1305_Simd256_update(
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint8_t *k_1 = s1.p_key;
-    uint32_t sz1;
-    if (total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL)
-    {
-      sz1 = 64U;
-    }
-    else
-    {
-      sz1 = (uint32_t)(total_len1 % (uint64_t)64U);
-    }
+    uint32_t
+    sz1 =
+      total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL ? 64U
+                                                              : (uint32_t)(total_len1 %
+                                                                (uint64_t)64U);
     if (!(sz1 == 0U))
     {
       poly1305_update(block_state1, 64U, buf);
     }
-    uint32_t ite;
-    if ((uint64_t)chunk_len % (uint64_t)64U == 0ULL && (uint64_t)chunk_len > 0ULL)
-    {
-      ite = 64U;
-    }
-    else
-    {
-      ite = (uint32_t)((uint64_t)chunk_len % (uint64_t)64U);
-    }
-    uint32_t n_blocks = (chunk_len - ite) / 64U;
+    uint32_t
+    n_blocks =
+      (chunk_len -
+        ((uint64_t)chunk_len % (uint64_t)64U == 0ULL && (uint64_t)chunk_len > 0ULL ? 64U
+                                                                                   : (uint32_t)((uint64_t)chunk_len
+                                                                                   % (uint64_t)64U)))
+      / 64U;
     uint32_t data1_len = n_blocks * 64U;
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
@@ -2027,15 +2002,11 @@ Hacl_MAC_Poly1305_Simd256_update(
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
     uint8_t *k_1 = s1.p_key;
-    uint32_t sz10;
-    if (total_len10 % (uint64_t)64U == 0ULL && total_len10 > 0ULL)
-    {
-      sz10 = 64U;
-    }
-    else
-    {
-      sz10 = (uint32_t)(total_len10 % (uint64_t)64U);
-    }
+    uint32_t
+    sz10 =
+      total_len10 % (uint64_t)64U == 0ULL && total_len10 > 0ULL ? 64U
+                                                                : (uint32_t)(total_len10 %
+                                                                  (uint64_t)64U);
     uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
@@ -2053,30 +2024,25 @@ Hacl_MAC_Poly1305_Simd256_update(
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
     uint8_t *k_10 = s10.p_key;
-    uint32_t sz1;
-    if (total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL)
-    {
-      sz1 = 64U;
-    }
-    else
-    {
-      sz1 = (uint32_t)(total_len1 % (uint64_t)64U);
-    }
+    uint32_t
+    sz1 =
+      total_len1 % (uint64_t)64U == 0ULL && total_len1 > 0ULL ? 64U
+                                                              : (uint32_t)(total_len1 %
+                                                                (uint64_t)64U);
     if (!(sz1 == 0U))
     {
       poly1305_update(block_state1, 64U, buf);
     }
-    uint32_t ite;
-    if
-    ((uint64_t)(chunk_len - diff) % (uint64_t)64U == 0ULL && (uint64_t)(chunk_len - diff) > 0ULL)
-    {
-      ite = 64U;
-    }
-    else
-    {
-      ite = (uint32_t)((uint64_t)(chunk_len - diff) % (uint64_t)64U);
-    }
-    uint32_t n_blocks = (chunk_len - diff - ite) / 64U;
+    uint32_t
+    n_blocks =
+      (chunk_len - diff -
+        ((uint64_t)(chunk_len - diff) % (uint64_t)64U == 0ULL && (uint64_t)(chunk_len - diff) > 0ULL ? 64U
+                                                                                                     : (uint32_t)((uint64_t)(chunk_len
+                                                                                                     -
+                                                                                                       diff)
+                                                                                                     %
+                                                                                                       (uint64_t)64U)))
+      / 64U;
     uint32_t data1_len = n_blocks * 64U;
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
@@ -2109,50 +2075,18 @@ Hacl_MAC_Poly1305_Simd256_digest(Hacl_MAC_Poly1305_Simd256_state_t *state, uint8
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
   uint8_t *k_ = scrut.p_key;
-  uint32_t r;
-  if (total_len % (uint64_t)64U == 0ULL && total_len > 0ULL)
-  {
-    r = 64U;
-  }
-  else
-  {
-    r = (uint32_t)(total_len % (uint64_t)64U);
-  }
+  uint32_t
+  r =
+    total_len % (uint64_t)64U == 0ULL && total_len > 0ULL ? 64U
+                                                          : (uint32_t)(total_len % (uint64_t)64U);
   uint8_t *buf_1 = buf_;
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 r1[25U] KRML_POST_ALIGN(32) = { 0U };
   Lib_IntVector_Intrinsics_vec256 *tmp_block_state = r1;
   memcpy(tmp_block_state, block_state, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
-  uint32_t ite0;
-  if (r % 16U == 0U && r > 0U)
-  {
-    ite0 = 16U;
-  }
-  else
-  {
-    ite0 = r % 16U;
-  }
-  uint8_t *buf_last = buf_1 + r - ite0;
+  uint8_t *buf_last = buf_1 + (r - (r % 16U == 0U && r > 0U ? 16U : r % 16U));
   uint8_t *buf_multi = buf_1;
-  uint32_t ite;
-  if (r % 16U == 0U && r > 0U)
-  {
-    ite = 16U;
-  }
-  else
-  {
-    ite = r % 16U;
-  }
-  poly1305_update(tmp_block_state, r - ite, buf_multi);
-  uint32_t ite1;
-  if (r % 16U == 0U && r > 0U)
-  {
-    ite1 = 16U;
-  }
-  else
-  {
-    ite1 = r % 16U;
-  }
-  poly1305_update(tmp_block_state, ite1, buf_last);
+  poly1305_update(tmp_block_state, r - (r % 16U == 0U && r > 0U ? 16U : r % 16U), buf_multi);
+  poly1305_update(tmp_block_state, r % 16U == 0U && r > 0U ? 16U : r % 16U, buf_last);
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 tmp[25U] KRML_POST_ALIGN(32) = { 0U };
   memcpy(tmp, tmp_block_state, 25U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Hacl_MAC_Poly1305_Simd256_poly1305_finish(output, k_, tmp);

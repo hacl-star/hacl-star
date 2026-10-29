@@ -218,6 +218,7 @@ let bn_mont_reduction_f_eval_lemma #t #nLen n mu j (c0, res0) =
   bn_eval_extensionality_j res res1 (nLen + j);
   assert (eval_ resLen res (nLen + j) == eval_ resLen res1 (nLen + j));
   bn_eval_unfold_i res (nLen + j + 1);
+  Math.Lemmas.swap_mul (v res.[nLen + j]) p;
   assert (eval_ resLen res (nLen + j + 1) == eval_ resLen res1 (nLen + j) + p * v res.[nLen + j]);
 
   calc (==) {

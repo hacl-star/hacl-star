@@ -45,6 +45,7 @@ val lemma_hash_init (h0 h1:HS.mem) (ctx_b:PS.uint8_p) (is_zero:bool) : Lemma
       PM.lowerUpper192 (PM.lowerUpper128 h0_in h1_in) h2_in == 0)
   ))
 
+#set-options "--z3rlimit 20"
 val lemma_call_poly1305 (h0 h1:HS.mem) (ctx_b:PS.uint8_p) (inp_b:PS.uint8_p) (src key:bytes) : Lemma
   (requires (
     let open PU in

@@ -12,11 +12,13 @@
 # - libevercrypt.so, a shared object where unused symbols have been removed
 # - libevercrypt.a
 
-# By default, this Makefile relies on the local checkout of krmllib
+# Use the bundled runtime, so distributions build without a KaRaMeL install.
 KRML_HOME ?= ../karamel
+KRML_LIBDIR ?= $(KRML_HOME)/krmllib
+KRML_INCLUDEDIR ?= $(KRML_HOME)/include
 
-ifeq (,$(wildcard $(KRML_HOME)/include/krmllib.h))
-	$(error Incorrect KRML_HOME)
+ifeq (,$(wildcard $(KRML_INCLUDEDIR)/krmllib.h))
+	$(error Incorrect KRML_INCLUDEDIR)
 endif
 
 -include Makefile.config

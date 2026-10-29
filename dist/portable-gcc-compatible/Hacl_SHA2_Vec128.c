@@ -339,15 +339,7 @@ sha224_update_last4(
   Lib_IntVector_Intrinsics_vec128 *hash
 )
 {
-  uint32_t blocks;
-  if (len + 8U + 1U <= 64U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 8U + 1U <= 64U ? 1U : 2U;
   uint32_t fin = blocks * 64U;
   uint8_t last[512U] = { 0U };
   uint8_t totlen_buf[8U] = { 0U };
@@ -363,28 +355,28 @@ sha224_update_last4(
   uint8_t *last3 = last + 384U;
   memcpy(last00, b0, len * sizeof (uint8_t));
   last00[len] = 0x80U;
-  memcpy(last00 + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last00 + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last010 = last00;
   uint8_t *last110 = last00 + 64U;
   uint8_t *l00 = last010;
   uint8_t *l01 = last110;
   memcpy(last10, b1, len * sizeof (uint8_t));
   last10[len] = 0x80U;
-  memcpy(last10 + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last10 + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last011 = last10;
   uint8_t *last111 = last10 + 64U;
   uint8_t *l10 = last011;
   uint8_t *l11 = last111;
   memcpy(last2, b2, len * sizeof (uint8_t));
   last2[len] = 0x80U;
-  memcpy(last2 + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last2 + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last012 = last2;
   uint8_t *last112 = last2 + 64U;
   uint8_t *l20 = last012;
   uint8_t *l21 = last112;
   memcpy(last3, b3, len * sizeof (uint8_t));
   last3[len] = 0x80U;
-  memcpy(last3 + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last3 + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last01 = last3;
   uint8_t *last11 = last3 + 64U;
   uint8_t *l30 = last01;
@@ -522,10 +514,10 @@ Hacl_SHA2_Vec128_sha224_4(
   uint8_t *b2 = ib.snd.snd.fst;
   uint8_t *b1 = ib.snd.fst;
   uint8_t *b0 = ib.fst;
-  uint8_t *bl0 = b0 + input_len - rem1;
-  uint8_t *bl1 = b1 + input_len - rem1;
-  uint8_t *bl2 = b2 + input_len - rem1;
-  uint8_t *bl3 = b3 + input_len - rem1;
+  uint8_t *bl0 = b0 + (input_len - rem1);
+  uint8_t *bl1 = b1 + (input_len - rem1);
+  uint8_t *bl2 = b2 + (input_len - rem1);
+  uint8_t *bl3 = b3 + (input_len - rem1);
   Hacl_Hash_SHA2_uint8_4p
   lb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
   sha224_update_last4(len_, rem, lb, st);
@@ -843,15 +835,7 @@ sha256_update_last4(
   Lib_IntVector_Intrinsics_vec128 *hash
 )
 {
-  uint32_t blocks;
-  if (len + 8U + 1U <= 64U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 8U + 1U <= 64U ? 1U : 2U;
   uint32_t fin = blocks * 64U;
   uint8_t last[512U] = { 0U };
   uint8_t totlen_buf[8U] = { 0U };
@@ -867,28 +851,28 @@ sha256_update_last4(
   uint8_t *last3 = last + 384U;
   memcpy(last00, b0, len * sizeof (uint8_t));
   last00[len] = 0x80U;
-  memcpy(last00 + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last00 + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last010 = last00;
   uint8_t *last110 = last00 + 64U;
   uint8_t *l00 = last010;
   uint8_t *l01 = last110;
   memcpy(last10, b1, len * sizeof (uint8_t));
   last10[len] = 0x80U;
-  memcpy(last10 + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last10 + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last011 = last10;
   uint8_t *last111 = last10 + 64U;
   uint8_t *l10 = last011;
   uint8_t *l11 = last111;
   memcpy(last2, b2, len * sizeof (uint8_t));
   last2[len] = 0x80U;
-  memcpy(last2 + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last2 + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last012 = last2;
   uint8_t *last112 = last2 + 64U;
   uint8_t *l20 = last012;
   uint8_t *l21 = last112;
   memcpy(last3, b3, len * sizeof (uint8_t));
   last3[len] = 0x80U;
-  memcpy(last3 + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last3 + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last01 = last3;
   uint8_t *last11 = last3 + 64U;
   uint8_t *l30 = last01;
@@ -1026,10 +1010,10 @@ Hacl_SHA2_Vec128_sha256_4(
   uint8_t *b2 = ib.snd.snd.fst;
   uint8_t *b1 = ib.snd.fst;
   uint8_t *b0 = ib.fst;
-  uint8_t *bl0 = b0 + input_len - rem1;
-  uint8_t *bl1 = b1 + input_len - rem1;
-  uint8_t *bl2 = b2 + input_len - rem1;
-  uint8_t *bl3 = b3 + input_len - rem1;
+  uint8_t *bl0 = b0 + (input_len - rem1);
+  uint8_t *bl1 = b1 + (input_len - rem1);
+  uint8_t *bl2 = b2 + (input_len - rem1);
+  uint8_t *bl3 = b3 + (input_len - rem1);
   Hacl_Hash_SHA2_uint8_4p
   lb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
   sha256_update_last4(len_, rem, lb, st);

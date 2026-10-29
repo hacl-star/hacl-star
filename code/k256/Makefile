@@ -33,7 +33,7 @@ dist/Makefile.basic: $(ALL_KRML_FILES)
 	-skip-compilation
 
 dist/k256-test.exe: dist/libk256.a \
-	$(KRML_HOME)/krmllib/dist/generic/libkrmllib.a $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
+	$(KRML_LIB)/dist/generic/libkrmllib.a $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 %.exe:
 	$(CC) $(CFLAGS) $^ -o $@

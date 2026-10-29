@@ -234,7 +234,7 @@ Hacl_HMAC_DRBG_instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -243,7 +243,7 @@ Hacl_HMAC_DRBG_instantiate(
         memset(k, 0U, 20U * sizeof (uint8_t));
         memset(v, 1U, 20U * sizeof (uint8_t));
         ctr[0U] = 1U;
-        uint32_t input_len = 21U + entropy_input_len + nonce_len + personalization_string_len;
+        uint32_t input_len = 21U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -261,7 +261,7 @@ Hacl_HMAC_DRBG_instantiate(
         memcpy(k, k_, 20U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != 0U)
         {
-          uint32_t input_len0 = 21U + entropy_input_len + nonce_len + personalization_string_len;
+          uint32_t input_len0 = 21U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -290,7 +290,7 @@ Hacl_HMAC_DRBG_instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -299,7 +299,7 @@ Hacl_HMAC_DRBG_instantiate(
         memset(k, 0U, 32U * sizeof (uint8_t));
         memset(v, 1U, 32U * sizeof (uint8_t));
         ctr[0U] = 1U;
-        uint32_t input_len = 33U + entropy_input_len + nonce_len + personalization_string_len;
+        uint32_t input_len = 33U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -317,7 +317,7 @@ Hacl_HMAC_DRBG_instantiate(
         memcpy(k, k_, 32U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != 0U)
         {
-          uint32_t input_len0 = 33U + entropy_input_len + nonce_len + personalization_string_len;
+          uint32_t input_len0 = 33U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -346,7 +346,7 @@ Hacl_HMAC_DRBG_instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -355,7 +355,7 @@ Hacl_HMAC_DRBG_instantiate(
         memset(k, 0U, 48U * sizeof (uint8_t));
         memset(v, 1U, 48U * sizeof (uint8_t));
         ctr[0U] = 1U;
-        uint32_t input_len = 49U + entropy_input_len + nonce_len + personalization_string_len;
+        uint32_t input_len = 49U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -373,7 +373,7 @@ Hacl_HMAC_DRBG_instantiate(
         memcpy(k, k_, 48U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != 0U)
         {
-          uint32_t input_len0 = 49U + entropy_input_len + nonce_len + personalization_string_len;
+          uint32_t input_len0 = 49U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -402,7 +402,7 @@ Hacl_HMAC_DRBG_instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -411,7 +411,7 @@ Hacl_HMAC_DRBG_instantiate(
         memset(k, 0U, 64U * sizeof (uint8_t));
         memset(v, 1U, 64U * sizeof (uint8_t));
         ctr[0U] = 1U;
-        uint32_t input_len = 65U + entropy_input_len + nonce_len + personalization_string_len;
+        uint32_t input_len = 65U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -429,7 +429,7 @@ Hacl_HMAC_DRBG_instantiate(
         memcpy(k, k_, 64U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != 0U)
         {
-          uint32_t input_len0 = 65U + entropy_input_len + nonce_len + personalization_string_len;
+          uint32_t input_len0 = 65U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -496,7 +496,7 @@ Hacl_HMAC_DRBG_reseed(
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
-        uint32_t input_len = 21U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = 21U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -514,7 +514,7 @@ Hacl_HMAC_DRBG_reseed(
         memcpy(k, k_, 20U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != 0U)
         {
-          uint32_t input_len0 = 21U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = 21U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -548,7 +548,7 @@ Hacl_HMAC_DRBG_reseed(
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
-        uint32_t input_len = 33U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = 33U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -566,7 +566,7 @@ Hacl_HMAC_DRBG_reseed(
         memcpy(k, k_, 32U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != 0U)
         {
-          uint32_t input_len0 = 33U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = 33U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -600,7 +600,7 @@ Hacl_HMAC_DRBG_reseed(
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
-        uint32_t input_len = 49U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = 49U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -618,7 +618,7 @@ Hacl_HMAC_DRBG_reseed(
         memcpy(k, k_, 48U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != 0U)
         {
-          uint32_t input_len0 = 49U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = 49U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -652,7 +652,7 @@ Hacl_HMAC_DRBG_reseed(
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
-        uint32_t input_len = 65U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = 65U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -670,7 +670,7 @@ Hacl_HMAC_DRBG_reseed(
         memcpy(k, k_, 64U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != 0U)
         {
-          uint32_t input_len0 = 65U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = 65U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));

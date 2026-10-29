@@ -11,17 +11,17 @@ some types of timing side-channels).
 
 ## Status
 
-*Warning*: This is the research home of HACL\*. If you are looking for
-documentation, releases, language bindings and code that can be satisfactorily
-integrated into a production project, please check out [HACL
-packages](https://github.com/cryspen/hacl-packages/).
+> [!WARNING]
+> HACL\* is in maintenance mode, meaning it will not receive new features or
+> undergo major evolutions. We will happily take PRs to fix up defects
+> (side-channel issues, proof strengthening), but will not consider feature
+> work.
+>
+> HACL\* builds and verifies using a frozen F\* version, prior to the removal of
+> the Low\* toolchain. We recommend using `nix develop` to work on HACL\*.
 
 The code in this repository is divided into three closely-related sub-projects,
 all developed as part of [Project Everest](https://project-everest.github.io/).
-
-We are actively developing and integrating our code on the
-[main](https://github.com/project-everest/hacl-star/tree/main/)
-branch, which tracks F\*'s `master` branch.
 
 ## HACL\*
 

@@ -57,6 +57,7 @@ let hmac_input_fits a =
 
 #push-options "--z3rlimit 300"
 
+#push-options "--split_queries always"
 let mk_expand a hmac okm prk prklen info infolen len =
   let tlen = Hash.Definitions.hash_len a in
   let n = len /. tlen in
@@ -167,6 +168,7 @@ let mk_expand a hmac okm prk prklen info infolen len =
       (B.as_seq h4 okm)
       (output' @| Seq.sub (B.as_seq h4 tag) 0 (v len - v n * v tlen)));
   pop_frame ()
+#pop-options
 
 let expand_sha2_256: expand_st SHA2_256 =
   mk_expand SHA2_256 Hacl.HMAC.compute_sha2_256

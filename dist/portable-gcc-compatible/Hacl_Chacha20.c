@@ -114,7 +114,7 @@ static inline void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
   memcpy(k, ctx, 16U * sizeof (uint32_t));
   uint32_t ctr_u32 = ctr;
-  k[12U] = k[12U] + ctr_u32;
+  k[12U] += ctr_u32;
   rounds(k);
   KRML_MAYBE_FOR16(i,
     0U,
@@ -123,7 +123,7 @@ static inline void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
     uint32_t *os = k;
     uint32_t x = k[i] + ctx[i];
     os[i] = x;);
-  k[12U] = k[12U] + ctr_u32;
+  k[12U] += ctr_u32;
 }
 
 /* SNIPPET_END: chacha20_core */
@@ -153,9 +153,7 @@ void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uin
     1U,
     uint32_t *os = ctx + 4U;
     uint8_t *bj = k + i * 4U;
-    uint32_t u = load32_le(bj);
-    uint32_t r = u;
-    uint32_t x = r;
+    uint32_t x = load32_le(bj);
     os[i] = x;);
   ctx[12U] = ctr;
   KRML_MAYBE_FOR3(i,
@@ -164,9 +162,7 @@ void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uin
     1U,
     uint32_t *os = ctx + 13U;
     uint8_t *bj = n + i * 4U;
-    uint32_t u = load32_le(bj);
-    uint32_t r = u;
-    uint32_t x = r;
+    uint32_t x = load32_le(bj);
     os[i] = x;);
 }
 
@@ -185,9 +181,7 @@ static void chacha20_encrypt_block(uint32_t *ctx, uint8_t *out, uint32_t incr, u
     1U,
     uint32_t *os = bl;
     uint8_t *bj = text + i * 4U;
-    uint32_t u = load32_le(bj);
-    uint32_t r = u;
-    uint32_t x = r;
+    uint32_t x = load32_le(bj);
     os[i] = x;);
   KRML_MAYBE_FOR16(i,
     0U,

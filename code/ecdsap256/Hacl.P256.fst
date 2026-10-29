@@ -6,6 +6,7 @@ open FStar.HyperStack
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Buffer.Lemmas
 
 open Spec.Hash.Definitions
 open Hacl.Hash.SHA2
@@ -75,7 +76,12 @@ inline_for_extraction noextract
 val ecdsa_verification: alg:S.hash_alg_ecdsa -> ecdsa_verify_p256_st alg
 let ecdsa_verification alg msg_len msg public_key signature_r signature_s =
   push_frame ();
+  let h_alloc = FStar.HyperStack.ST.get () in
   let m_q = BN.create_felem () in
+  fresh_buffer_disjoint #uint8 #uint64 h_alloc msg m_q;
+  fresh_buffer_disjoint #uint8 #uint64 h_alloc public_key m_q;
+  fresh_buffer_disjoint #uint8 #uint64 h_alloc signature_r m_q;
+  fresh_buffer_disjoint #uint8 #uint64 h_alloc signature_s m_q;
   msg_as_felem alg msg_len msg m_q;
   let res = ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s in
   pop_frame ();

@@ -247,7 +247,7 @@ val init_label_version:
    (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
      as_seq h1 b `Seq.equal` S.label_version)
 
-#push-options "--z3rlimit 40 --fuel 7"
+#push-options "--z3rlimit 80 --fuel 7 --split_queries always"
 
 let init_label_version b =
   upd b 0ul (u8 0x48);
@@ -535,15 +535,44 @@ val labeled_expand_hash_pre:
       )
   )
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 300 --split_queries always"
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_hash_pre #cs suite_id_len suite_id labellen label infolen info l tmplen tmp =
+  let h0 = ST.get () in
+  let label_start = 9ul +. suite_id_len in
+  let info_start = label_start +. labellen in
+  assert (v label_start == 9 + v suite_id_len);
+  assert (v info_start == 9 + v suite_id_len + v labellen);
+  MB.loc_includes_gsub_buffer_r' #uint8
+    #(B.trivial_preorder uint8) #(B.trivial_preorder uint8)
+    tmp 9ul suite_id_len (B.trivial_preorder uint8);
+  MB.loc_includes_gsub_buffer_r' #uint8
+    #(B.trivial_preorder uint8) #(B.trivial_preorder uint8)
+    tmp label_start labellen (B.trivial_preorder uint8);
+  MB.loc_includes_gsub_buffer_r' #uint8
+    #(B.trivial_preorder uint8) #(B.trivial_preorder uint8)
+    tmp info_start infolen (B.trivial_preorder uint8);
+  MB.loc_disjoint_includes_r (loc suite_id) (loc tmp)
+    (loc (gsub tmp 9ul suite_id_len));
+  MB.loc_disjoint_includes_r (loc label) (loc tmp)
+    (loc (gsub tmp label_start labellen));
+  MB.loc_disjoint_includes_r (loc info) (loc tmp)
+    (loc (gsub tmp info_start infolen));
   nat_to_bytes_2 l (sub tmp 0ul 2ul);
   init_label_version (sub tmp 2ul 7ul);
   copy (sub tmp 9ul suite_id_len) suite_id;
-  copy (sub tmp (9ul +. suite_id_len) labellen) label;
-  copy (sub tmp (9ul +. suite_id_len +. labellen) infolen) info
+  copy (sub tmp label_start labellen) label;
+  copy (sub tmp info_start infolen) info;
+  let h1 = ST.get () in
+  assert (modifies (loc tmp) h0 h1);
+  assert (ST.equal_domains h0 h1);
+  assert (as_seq h1 tmp `Seq.equal`
+    ((((Lib.ByteSequence.nat_to_bytes_be 2 (v l)
+      `Seq.append` S.label_version)
+      `Seq.append` as_seq h0 suite_id)
+      `Seq.append` as_seq h0 label)
+      `Seq.append` as_seq h0 info))
 
 #pop-options
 
@@ -684,6 +713,7 @@ val extract_and_expand:
      (ensures fun h0 _ h1 -> modifies (loc o_shared) h0 h1 /\
        as_seq h1 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h0 dh) (as_seq h0 kemcontext))
 
+#push-options "--z3rlimit 40"
 [@ Meta.Attribute.inline_]
 let extract_and_expand #cs o_shared dh ctxlen kemcontext =
   push_frame ();
@@ -712,6 +742,17 @@ let extract_and_expand #cs o_shared dh ctxlen kemcontext =
   labeled_expand_kem #cs 5ul suite_id_kem (nsize_kem_hash_length cs) o_eae_prk 13ul label_shared_secret ctxlen kemcontext (nsize_kem_key cs) o_shared;
 
   pop_frame ()
+#pop-options
+
+let lemma_extract_and_expand_bound (cs:S.ciphersuite) : Lemma
+  (SHa.hash_length (S.kem_hash_of_cs cs) + 2 * S.size_dh_public cs + 28 +
+    SHa.block_length (S.kem_hash_of_cs cs) <= max_size_t) =
+  assert (S.kem_hash_of_cs cs == SHa.SHA2_256);
+  assert_norm (SHa.hash_length SHa.SHA2_256 == 32 /\
+    SHa.block_length SHa.SHA2_256 == 64 /\ max_size_t == 4294967295);
+  match cs with
+  | SDH.DH_Curve25519, _, _, _ -> ()
+  | SDH.DH_P256, _, _, _ -> ()
 
 noextract
 val encap:
@@ -736,7 +777,7 @@ val encap:
      )
 
 #restart-solver
-#push-options "--z3rlimit 600 --z3refresh --ifuel 1"
+#push-options "--z3rlimit 600 --z3refresh --ifuel 1 --split_queries always"
 
 [@ Meta.Attribute.inline_]
 let encap #cs o_shared o_enc skE pkR =
@@ -768,11 +809,21 @@ let encap #cs o_shared o_enc skE pkR =
       let o_dhm = prepare_dh #cs o_dh in
       let h5 = ST.get () in
       assert (as_seq h5 o_kemcontext `Seq.equal` (as_seq h2 o_enc `Seq.append` as_seq h4 o_pkRm));
+      lemma_extract_and_expand_bound cs;
       extract_and_expand o_shared o_dhm (nsize_two_public_dh cs) o_kemcontext;
       let h6 = ST.get () in
       assert (as_seq h6 o_enc `Seq.equal` as_seq h2 o_enc);
       assert (as_seq h6 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h5 o_dhm) (as_seq h5 o_kemcontext));
+      assert (let output = S.encap cs (as_seq h0 skE) (as_seq h0 pkR) in
+        Some? output /\ (let shared, enc = Some?.v output in
+          as_seq h6 o_shared `Seq.equal` shared /\
+          as_seq h6 o_enc `Seq.equal` enc));
       pop_frame();
+      let h7 = ST.get () in
+      assert (as_seq h7 o_shared `Seq.equal` as_seq h6 o_shared);
+      assert (as_seq h7 o_enc `Seq.equal` as_seq h6 o_enc);
+      assert (modifies (loc o_shared |+| loc o_enc) h0 h7);
+      assert (ST.equal_domains h0 h7);
       0ul
     ) else (
       pop_frame ();
@@ -805,7 +856,7 @@ val decap:
        | _ -> False)
      )
 
-#push-options "--z3rlimit 150 --ifuel 1 --split_queries no"
+#push-options "--z3rlimit 300 --ifuel 1 --split_queries always"
 #restart-solver
 
 [@ Meta.Attribute.inline_ ]
@@ -903,7 +954,7 @@ val key_schedule_core_base:
           as_seq h1 o_secret `Seq.equal` secret)
        )
 
-#push-options "--z3rlimit 300 --z3refresh"
+#push-options "--z3rlimit 300 --z3refresh --split_queries always"
 
 [@ Meta.Attribute.inline_]
 let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen info =
@@ -971,8 +1022,19 @@ let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen 
   let hf = ST.get () in
   assert (modifies (loc o_ctx.ctx_exporter) h4 hf);
   assert (modifies (loc suite_id |+| loc o_psk_id_hash |+| loc o_info_hash |+| loc o_context |+| loc o_secret |+| loc o_ctx.ctx_exporter) hi hf);
+  assert (let context, exp_secret, secret =
+    S.key_schedule_core cs S.Base (as_seq h0' shared) (as_seq h0' info) None in
+    as_seq hf o_context `Seq.equal` context /\
+    as_seq hf o_ctx.ctx_exporter `Seq.equal` exp_secret /\
+    as_seq hf o_secret `Seq.equal` secret);
 
-  pop_frame()
+  pop_frame();
+  let h_final = ST.get () in
+  assert (as_seq h_final o_context `Seq.equal` as_seq hf o_context);
+  assert (as_seq h_final o_ctx.ctx_exporter `Seq.equal` as_seq hf o_ctx.ctx_exporter);
+  assert (as_seq h_final o_secret `Seq.equal` as_seq hf o_secret);
+  assert (modifies (loc o_ctx.ctx_exporter |+| loc o_context |+| loc o_secret) h0' h_final);
+  assert (ST.equal_domains h0' h_final)
 
 #pop-options
 
@@ -995,6 +1057,7 @@ val key_schedule_end_base:
       as_ctx h1 o_ctx == S.key_schedule_end cs S.Base (as_seq h0 context) (as_seq h0 o_ctx.ctx_exporter) (as_seq h0 secret)
     )
 
+#push-options "--split_queries always --z3rlimit 80"
 [@ Meta.Attribute.inline_]
 let key_schedule_end_base #cs o_ctx suite_id context secret =
   match cs with
@@ -1022,6 +1085,7 @@ let key_schedule_end_base #cs o_ctx suite_id context secret =
 
     upd o_ctx.ctx_seq 0ul 0uL;
     pop_frame ()
+#pop-options
 
 
 noextract
@@ -1042,7 +1106,7 @@ val key_schedule_base:
          (let ctx = S.key_schedule cs S.Base (as_seq h0 shared) (as_seq h0 info) None in
          as_ctx h1 o_ctx == ctx))
 
-#push-options "--z3rlimit 100 --z3refresh"
+#push-options "--z3rlimit 200 --z3refresh --split_queries always"
 
 [@ Meta.Attribute.inline_ ]
 let key_schedule_base #cs o_ctx shared infolen info =
@@ -1059,7 +1123,7 @@ let key_schedule_base #cs o_ctx shared infolen info =
 
 #pop-options
 
-#push-options "--z3rlimit 200 --z3refresh"
+#push-options "--z3rlimit 400 --z3refresh --ifuel 1 --split_queries always"
 
 [@ Meta.Attribute.specialize]
 let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
@@ -1074,7 +1138,7 @@ let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
 
 #pop-options
 
-#push-options "--z3rlimit 600 --z3refresh --ifuel 1"
+#push-options "--z3rlimit 600 --z3refresh --ifuel 1 --split_queries always"
 
 [@ Meta.Attribute.specialize]
 let setupBaseR #cs o_ctx enc skR infolen info =
@@ -1256,7 +1320,7 @@ let context_seal #cs _ ctx aadlen aad plainlen plain o_ct =
 #pop-options
 
 #restart-solver
-#push-options "--z3rlimit 300 --z3refresh"
+#push-options "--z3rlimit 600 --z3refresh --split_queries always"
 
 [@ Meta.Attribute.specialize]
 let sealBase #cs skE pkR infolen info aadlen aad plainlen plain o_enc o_ct =
@@ -1310,6 +1374,7 @@ val context_open:
          | _ -> False)
        )
 
+#push-options "--z3rlimit 100 --z3refresh --split_queries always"
 [@ Meta.Attribute.inline_ ]
 let context_open #cs _ ctx aadlen aad ctlen ct o_pt =
   push_frame ();
@@ -1325,8 +1390,9 @@ let context_open #cs _ ctx aadlen aad ctlen ct o_pt =
     pop_frame();
     1ul
   )
+#pop-options
 
-#push-options "--z3rlimit 600 --z3refresh"
+#push-options "--z3rlimit 600 --z3refresh --split_queries always"
 
 [@ Meta.Attribute.specialize]
 let openBase #cs pkE skR infolen info aadlen aad ctlen ct o_pt =

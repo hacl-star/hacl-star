@@ -202,7 +202,11 @@ let mk_generate #a hmac output st n additional_input additional_input_len =
   if additional_input_len >. max_additional_input_length || n >. max_output_length then
     false
   else (
+  let h0 = get () in
   push_frame();
+  let h_start = get () in
+  B.fresh_frame_modifies h0 h_start;
+  frame_invariant B.loc_none st h0 h_start;
   let ok = mk_reseed hmac st additional_input additional_input_len in
   let result =
     if not ok then

@@ -204,7 +204,7 @@ FStar_UInt128_logor(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b) {
 
 inline static FStar_UInt128_uint128 FStar_UInt128_lognot(FStar_UInt128_uint128 a) {
 #if HAS_OPTIMIZED
-  return _mm_andnot_si128(a, a);
+  return _mm_xor_si128(a, _mm_set_epi64x(-1LL, -1LL));
 #else
   FStar_UInt128_uint128 lit;
   lit.low = ~a.low;

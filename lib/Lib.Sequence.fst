@@ -260,6 +260,7 @@ let mod_prop n a b =
   Math.Lemmas.modulo_lemma (b - a * n) n;
   Math.Lemmas.lemma_mod_sub b n a
 
+#push-options "--z3rlimit 20"
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in
   let map_blocks_f = map_blocks_f #a bs max inp f in
@@ -277,6 +278,7 @@ let rec index_map_blocks_multi #a bs max n inp f i =
     Seq.lemma_index_app2 s s' i;
     mod_prop bs (n-1) i
   end
+#pop-options
 
 let map_blocks #a blocksize inp f g =
   let len = length inp in
@@ -296,6 +298,7 @@ let index_map_blocks #a bs inp f g i =
   let nb  = len / bs in
   let rem = len % bs in
   let blocks = Seq.slice inp 0 (nb * bs) in
+  Seq.lemma_len_slice inp 0 (nb * bs);
   if rem > 0 then
     begin
     let s1 = map_blocks_multi #a bs nb nb blocks f in
@@ -344,6 +347,7 @@ let rec index_generate_blocks #t len max n f i =
   let _,s' = f (n-1) () in
   let _,s1 = generate_blocks #t len max n a_spec f () in
   unfold_generate_blocks #t len max a_spec f () (n-1);
+  Math.Lemmas.lemma_mult_le_right len 1 n;
   Seq.Properties.lemma_split s1 (n * len - len);
   Seq.Properties.lemma_split (Seq.append s s') (n * len - len);
   Seq.lemma_eq_intro s1 (Seq.append s s');

@@ -7,11 +7,29 @@
 
 include Makefile.include
 
-ifeq (,$(KRML_HOME))
-  $(error please define KRML_HOME to point to the root of your KaRaMeL git checkout)
+# This makefile either needs
+# a) KRML_INCLUDEDIR set to the include/ directory in karamel repo root,
+#    *and* KRML_LIBDIR set to krmllib/ in the root.
+# b) Or, a working karamel install, either as krml in the PATH or passed via KRML_EXE
+#
+# The (b) case just calls karamel to find the relevant include directories
+
+ifeq ($(KRML_INCLUDEDIR),)
+ KRML_EXE ?= krml
+ KRML_INCLUDEDIR != $(KRML_EXE) -locate-include
+ ifeq ($(KRML_INCLUDEDIR),)
+  $(error "Could not find a proper include directory for karamel. Either set KRML_INCLUDEDIR to it, or add krml to the PATH, or set KRML_EXE.")
+ endif
+endif
+ifeq ($(KRML_LIBDIR),)
+ KRML_EXE ?= krml
+ KRML_LIBDIR != $(KRML_EXE) -locate-krmllib
+ ifeq ($(KRML_LIBDIR),)
+  $(error "Could not find a proper library directory for karamel. Either set KRML_LIBDIR to it, or add krml to the PATH, or set KRML_EXE.")
+ endif
 endif
 
-CFLAGS 	+= -I. -I $(KRML_HOME)/include -I $(KRML_HOME)/krmllib/dist/minimal
+CFLAGS 	+= -I. -I $(KRML_INCLUDEDIR) -I $(KRML_LIBDIR)/dist/minimal
 CFLAGS 	+= -Wall -Wextra -Werror -std=c11 \
   -Wno-unknown-warning-option \
   -Wno-infinite-recursion \
@@ -39,7 +57,7 @@ AR ?= ar
 	$(AR) cr $@ $^
 
 %.exe:
-	$(CC) $(CFLAGS) -o $@ $^ $(KRML_HOME)/krmllib/dist/generic/libkrmllib.a
+	$(CC) $(CFLAGS) -o $@ $^ $(KRML_LIBDIR)/dist/generic/libkrmllib.a
 
 %.so:
 	$(CC) $(CFLAGS) -shared -o $@ $^

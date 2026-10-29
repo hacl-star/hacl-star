@@ -258,7 +258,7 @@ val crypto_kem_enc_ct:
     (ensures fun h0 _ h1 -> modifies (loc ct) h0 h1 /\
       as_seq h1 ct == S.crypto_kem_enc_ct a gen_a (as_seq h0 mu) (as_seq h0 pk) (as_seq h0 seed_se))
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 200 --split_queries always"
 let crypto_kem_enc_ct a gen_a mu pk seed_se ct =
   push_frame ();
   let h0 = ST.get () in
@@ -269,11 +269,17 @@ let crypto_kem_enc_ct a gen_a mu pk seed_se ct =
   let sp_matrix = matrix_create params_nbar (params_n a) in
   let ep_matrix = matrix_create params_nbar (params_n a) in
   let epp_matrix = matrix_create params_nbar params_nbar in
+  let h_alloc = ST.get () in
+  let matrices_loc = loc sp_matrix |+| loc ep_matrix |+| loc epp_matrix in
+  assert_spinoff (fresh_loc matrices_loc h0 h_alloc);
+  assert_spinoff (modifies loc_none h0 h_alloc);
   get_sp_ep_epp_matrices a seed_se sp_matrix ep_matrix epp_matrix;
   crypto_kem_enc_ct0 a gen_a seed_a b mu sp_matrix ep_matrix epp_matrix ct;
 
   clear_matrix3 a sp_matrix ep_matrix epp_matrix;
   let h1 = ST.get () in
+  assert_spinoff (modifies (matrices_loc |+| loc ct) h_alloc h1);
+  modifies_remove_new_locs matrices_loc loc_none (loc ct) h0 h_alloc h1;
   LSeq.eq_intro
     (as_seq h1 ct)
     (S.crypto_kem_enc_ct a gen_a (as_seq h0 mu) (as_seq h0 pk) (as_seq h0 seed_se));

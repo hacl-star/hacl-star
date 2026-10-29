@@ -70,27 +70,11 @@ static inline bool Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(uint64_
   uint64_t f2 = f[2U];
   uint64_t f3 = f[3U];
   uint64_t f4 = f[4U];
-  if (f4 > 0ULL || f3 > 0ULL)
-  {
-    return false;
-  }
-  if (f2 < 0x1455123ULL)
-  {
-    return true;
-  }
-  if (f2 > 0x1455123ULL)
-  {
-    return false;
-  }
-  if (f1 < 0x1950b75fc4402ULL)
-  {
-    return true;
-  }
-  if (f1 > 0x1950b75fc4402ULL)
-  {
-    return false;
-  }
-  return f0 < 0xda1722fc9baeeULL;
+  return
+    !(f4 > 0ULL || f3 > 0ULL) &&
+      (f2 < 0x1455123ULL ||
+        (!(f2 > 0x1455123ULL) &&
+          (f1 < 0x1950b75fc4402ULL || (!(f1 > 0x1950b75fc4402ULL) && f0 < 0xda1722fc9baeeULL))));
 }
 
 static inline void Hacl_K256_Field_load_felem(uint64_t *f, uint8_t *b)
@@ -102,9 +86,7 @@ static inline void Hacl_K256_Field_load_felem(uint64_t *f, uint8_t *b)
     1U,
     uint64_t *os = tmp;
     uint8_t *bj = b + i * 8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
+    uint64_t x = load64_be(bj);
     os[i] = x;);
   uint64_t s0 = tmp[3U];
   uint64_t s1 = tmp[2U];

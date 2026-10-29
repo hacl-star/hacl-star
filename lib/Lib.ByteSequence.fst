@@ -441,7 +441,10 @@ let uints_from_bytes_le_slice_lemma_rp #t #l #len b i j k =
 let uints_from_bytes_le_slice_lemma #t #l #len b i j =
   FStar.Classical.forall_intro (uints_from_bytes_le_slice_lemma_lp #t #l #len b i j);
   FStar.Classical.forall_intro (uints_from_bytes_le_slice_lemma_rp #t #l #len b i j);
-  eq_intro (slice (uints_from_bytes_le #t #l #len b) i j) (uints_from_bytes_le #t #l #(j-i) (slice b (i * numbytes t) (j * numbytes t)))
+  let lhs = slice (uints_from_bytes_le #t #l #len b) i j in
+  let rhs = uints_from_bytes_le #t #l #(j-i) (slice b (i * numbytes t) (j * numbytes t)) in
+  eq_intro lhs rhs;
+  eq_elim lhs rhs
 
 #push-options "--max_fuel 1"
 val uints_from_bytes_le_nat_lemma_aux:

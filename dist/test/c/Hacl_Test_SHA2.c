@@ -41,38 +41,22 @@ static inline void sha256_update(uint8_t *b, uint32_t *hash)
   uint32_t ws[16U] = { 0U };
   memcpy(hash_old, hash, 8U * sizeof (uint32_t));
   uint8_t *b10 = b;
-  uint32_t u = load32_be(b10);
-  ws[0U] = u;
-  uint32_t u0 = load32_be(b10 + 4U);
-  ws[1U] = u0;
-  uint32_t u1 = load32_be(b10 + 8U);
-  ws[2U] = u1;
-  uint32_t u2 = load32_be(b10 + 12U);
-  ws[3U] = u2;
-  uint32_t u3 = load32_be(b10 + 16U);
-  ws[4U] = u3;
-  uint32_t u4 = load32_be(b10 + 20U);
-  ws[5U] = u4;
-  uint32_t u5 = load32_be(b10 + 24U);
-  ws[6U] = u5;
-  uint32_t u6 = load32_be(b10 + 28U);
-  ws[7U] = u6;
-  uint32_t u7 = load32_be(b10 + 32U);
-  ws[8U] = u7;
-  uint32_t u8 = load32_be(b10 + 36U);
-  ws[9U] = u8;
-  uint32_t u9 = load32_be(b10 + 40U);
-  ws[10U] = u9;
-  uint32_t u10 = load32_be(b10 + 44U);
-  ws[11U] = u10;
-  uint32_t u11 = load32_be(b10 + 48U);
-  ws[12U] = u11;
-  uint32_t u12 = load32_be(b10 + 52U);
-  ws[13U] = u12;
-  uint32_t u13 = load32_be(b10 + 56U);
-  ws[14U] = u13;
-  uint32_t u14 = load32_be(b10 + 60U);
-  ws[15U] = u14;
+  ws[0U] = load32_be(b10);
+  ws[1U] = load32_be(b10 + 4U);
+  ws[2U] = load32_be(b10 + 8U);
+  ws[3U] = load32_be(b10 + 12U);
+  ws[4U] = load32_be(b10 + 16U);
+  ws[5U] = load32_be(b10 + 20U);
+  ws[6U] = load32_be(b10 + 24U);
+  ws[7U] = load32_be(b10 + 28U);
+  ws[8U] = load32_be(b10 + 32U);
+  ws[9U] = load32_be(b10 + 36U);
+  ws[10U] = load32_be(b10 + 40U);
+  ws[11U] = load32_be(b10 + 44U);
+  ws[12U] = load32_be(b10 + 48U);
+  ws[13U] = load32_be(b10 + 52U);
+  ws[14U] = load32_be(b10 + 56U);
+  ws[15U] = load32_be(b10 + 60U);
   for (uint32_t i0 = 0U; i0 < 4U; i0++)
   {
     for (uint32_t i = 0U; i < 16U; i++)
@@ -151,15 +135,7 @@ static inline void sha256_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st)
 static inline void
 sha256_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
 {
-  uint32_t blocks;
-  if (len + 8U + 1U <= 64U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 8U + 1U <= 64U ? 1U : 2U;
   uint32_t fin = blocks * 64U;
   uint8_t last[128U] = { 0U };
   uint8_t totlen_buf[8U] = { 0U };
@@ -168,7 +144,7 @@ sha256_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
   uint8_t *b0 = b;
   memcpy(last, b0, len * sizeof (uint8_t));
   last[len] = 0x80U;
-  memcpy(last + fin - 8U, totlen_buf, 8U * sizeof (uint8_t));
+  memcpy(last + (fin - 8U), totlen_buf, 8U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + 64U;
   uint8_t *l0 = last00;
@@ -240,38 +216,22 @@ static inline void sha512_update(uint8_t *b, uint64_t *hash)
   uint64_t ws[16U] = { 0U };
   memcpy(hash_old, hash, 8U * sizeof (uint64_t));
   uint8_t *b10 = b;
-  uint64_t u = load64_be(b10);
-  ws[0U] = u;
-  uint64_t u0 = load64_be(b10 + 8U);
-  ws[1U] = u0;
-  uint64_t u1 = load64_be(b10 + 16U);
-  ws[2U] = u1;
-  uint64_t u2 = load64_be(b10 + 24U);
-  ws[3U] = u2;
-  uint64_t u3 = load64_be(b10 + 32U);
-  ws[4U] = u3;
-  uint64_t u4 = load64_be(b10 + 40U);
-  ws[5U] = u4;
-  uint64_t u5 = load64_be(b10 + 48U);
-  ws[6U] = u5;
-  uint64_t u6 = load64_be(b10 + 56U);
-  ws[7U] = u6;
-  uint64_t u7 = load64_be(b10 + 64U);
-  ws[8U] = u7;
-  uint64_t u8 = load64_be(b10 + 72U);
-  ws[9U] = u8;
-  uint64_t u9 = load64_be(b10 + 80U);
-  ws[10U] = u9;
-  uint64_t u10 = load64_be(b10 + 88U);
-  ws[11U] = u10;
-  uint64_t u11 = load64_be(b10 + 96U);
-  ws[12U] = u11;
-  uint64_t u12 = load64_be(b10 + 104U);
-  ws[13U] = u12;
-  uint64_t u13 = load64_be(b10 + 112U);
-  ws[14U] = u13;
-  uint64_t u14 = load64_be(b10 + 120U);
-  ws[15U] = u14;
+  ws[0U] = load64_be(b10);
+  ws[1U] = load64_be(b10 + 8U);
+  ws[2U] = load64_be(b10 + 16U);
+  ws[3U] = load64_be(b10 + 24U);
+  ws[4U] = load64_be(b10 + 32U);
+  ws[5U] = load64_be(b10 + 40U);
+  ws[6U] = load64_be(b10 + 48U);
+  ws[7U] = load64_be(b10 + 56U);
+  ws[8U] = load64_be(b10 + 64U);
+  ws[9U] = load64_be(b10 + 72U);
+  ws[10U] = load64_be(b10 + 80U);
+  ws[11U] = load64_be(b10 + 88U);
+  ws[12U] = load64_be(b10 + 96U);
+  ws[13U] = load64_be(b10 + 104U);
+  ws[14U] = load64_be(b10 + 112U);
+  ws[15U] = load64_be(b10 + 120U);
   for (uint32_t i0 = 0U; i0 < 5U; i0++)
   {
     for (uint32_t i = 0U; i < 16U; i++)
@@ -350,15 +310,7 @@ static inline void sha512_update_nblocks(uint32_t len, uint8_t *b, uint64_t *st)
 static inline void
 sha512_update_last(FStar_UInt128_uint128 totlen, uint32_t len, uint8_t *b, uint64_t *hash)
 {
-  uint32_t blocks;
-  if (len + 16U + 1U <= 128U)
-  {
-    blocks = 1U;
-  }
-  else
-  {
-    blocks = 2U;
-  }
+  uint32_t blocks = len + 16U + 1U <= 128U ? 1U : 2U;
   uint32_t fin = blocks * 128U;
   uint8_t last[256U] = { 0U };
   uint8_t totlen_buf[16U] = { 0U };
@@ -367,7 +319,7 @@ sha512_update_last(FStar_UInt128_uint128 totlen, uint32_t len, uint8_t *b, uint6
   uint8_t *b0 = b;
   memcpy(last, b0, len * sizeof (uint8_t));
   last[len] = 0x80U;
-  memcpy(last + fin - 16U, totlen_buf, 16U * sizeof (uint8_t));
+  memcpy(last + (fin - 16U), totlen_buf, 16U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + 128U;
   uint8_t *l0 = last00;
@@ -438,7 +390,7 @@ static void hash_256(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha256_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 64U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha256_update_last(len_, rem, lb, st);
   sha256_finish(st, rb);
 }
@@ -457,7 +409,7 @@ static void hash_224(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha224_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 64U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha224_update_last(len_, rem, lb, st);
   sha224_finish(st, rb);
 }
@@ -476,7 +428,7 @@ static void hash_512(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha512_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 128U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha512_update_last(len_, rem, lb, st);
   sha512_finish(st, rb);
 }
@@ -495,7 +447,7 @@ static void hash_384(uint8_t *output, uint8_t *input, uint32_t input_len)
   sha384_update_nblocks(input_len, ib, st);
   uint32_t rem1 = input_len % 128U;
   uint8_t *b0 = ib;
-  uint8_t *lb = b0 + input_len - rem1;
+  uint8_t *lb = b0 + (input_len - rem1);
   sha384_update_last(len_, rem, lb, st);
   sha384_finish(st, rb);
 }
@@ -525,19 +477,19 @@ test_sha2(
   hash_512(test512, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(28U, test224, expected224))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(32U, test256, expected256))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(48U, test384, expected384))
   {
-    exit((int32_t)255);
+    exit(255);
   }
   if (!Lib_PrintBuffer_result_compare_display(64U, test512, expected512))
   {
-    exit((int32_t)255);
+    exit(255);
   }
 }
 

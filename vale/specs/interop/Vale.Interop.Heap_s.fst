@@ -25,7 +25,8 @@ unfold
 let list_live mem (ptrs:list b8) =
   forall (p:b8).{:pattern (L.memP p ptrs)} L.memP p ptrs ==> B.live mem p.bsrc
 
-assume val global_addrs_map : addr_map
+// Expose the arrow so extraction emits a function with matching argument names.
+assume val global_addrs_map : m:(b8 -> nat64){addr_map_pred m}
 
 let mk_addr_map (ptrs:list b8{list_disjoint_or_eq ptrs}) : GTot addr_map =
   global_addrs_map

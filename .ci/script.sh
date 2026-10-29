@@ -24,10 +24,10 @@ if [[ $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
 fi
 
 # Cross compile for other targets. Build and static library only.
-if [ ! -z "$CROSS_CI" ]; then
+if [[ -n $CROSS_CI ]]; then
   pushd dist/gcc-compatible
-  rm -rf *.o *.d libevercrypt.a
-  ./configure -target $CROSS_CI
+  rm -f -- ./*.o ./*.d libevercrypt.a
+  ./configure -target "$CROSS_CI"
   make -j libevercrypt.a
   popd
   exit 0
@@ -42,11 +42,6 @@ if [[ $TARGET == "IA32" ]]; then
   exit 0
 fi
 
-# For OSX... seems like the most reliable way to figure out which OpenSSL is
-# installed? We have both 1.1.1d and 1.1.1f and neither can be installed on the
-# other configuration.
-for p in /usr/local/Cellar/openssl@1.1/*; do export CFLAGS="-I$p/include/"; export LDFLAGS="-L$p/lib"; done
-
 # Most likely running without OCaml -- need to configure
 pushd dist/gcc-compatible
 ./configure
@@ -55,12 +50,11 @@ popd
 
 make -C tests -j test
 
-# Extracted C tests -- need full krmllib, don't work on ARM because of
-# intrinsics for x86 in cpu cycle count routines in testlib.c
+# Extracted C tests need full krmllib.
 pushd dist/test/c/
 git clone https://github.com/fstarlang/karamel --depth 10
-export KRML_LIBDIR=$(pwd)/karamel/krmllib
-export KRML_INCLUDEDIR=$(pwd)/karamel/include
+export KRML_LIBDIR="$PWD/karamel/krmllib"
+export KRML_INCLUDEDIR="$PWD/karamel/include"
 make -C karamel/krmllib/dist/generic -f Makefile.basic -j
 make -j -k
 popd

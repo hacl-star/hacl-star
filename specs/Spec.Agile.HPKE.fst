@@ -111,6 +111,10 @@ let extract_and_expand_dh_pred (cs:ciphersuite) (dh_length:nat) =
 let extract_and_expand_ctx_pred (cs:ciphersuite) (ctx_length:nat) =
   labeled_expand_info_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_shared_secret + ctx_length)
 
+let lemma_extract_and_expand_ctx_pred (cs:ciphersuite) (ctx_length:nat{ctx_length <= 195})
+  : Lemma (extract_and_expand_ctx_pred cs ctx_length) =
+  assert (kem_hash_of_cs cs == Hash.SHA2_256)
+
 val extract_and_expand:
     cs:ciphersuite
   -> dh:bytes
@@ -218,8 +222,9 @@ let decap cs enc skR =
       let pkRm = serialize_public_key cs pkR in
       let kem_context = concat enc pkRm in
       let dhm = prepare_dh cs dh in
-      assert (Seq.length kem_context = 2*size_dh_public cs);
-      assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
+      assert_spinoff (Seq.length kem_context = 2*size_dh_public cs);
+      assert_spinoff (extract_and_expand_ctx_pred cs (Seq.length kem_context));
+      assert_spinoff (extract_and_expand_dh_pred cs (Seq.length dhm));
       let shared_secret = extract_and_expand cs dhm kem_context in
       Some (shared_secret)
 #pop-options
@@ -291,11 +296,12 @@ let auth_decap cs enc skR pkS =
         let pkRm = serialize_public_key cs pkR in
         let pkSm = serialize_public_key cs pkS in
         let kem_context = concat enc (concat pkRm pkSm) in
-        assert (Seq.length kem_context = 3*size_dh_public cs);
-        assert (labeled_expand_info_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_shared_secret + Seq.length kem_context));
+        assert_spinoff (Seq.length kem_context = 3*size_dh_public cs);
+        assert_spinoff (size_dh_public cs <= 65);
+        lemma_extract_and_expand_ctx_pred cs (Seq.length kem_context);
         assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
-        assert (Seq.length dh = 64);
-        assert (labeled_extract_ikm_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_eae_prk + Seq.length dh));
+        assert_spinoff (Seq.length dh = 64);
+        assert_spinoff (labeled_extract_ikm_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_eae_prk + Seq.length dh));
         assert (extract_and_expand_dh_pred cs (Seq.length dh));
         let shared_secret = extract_and_expand cs dh kem_context in
         Some (shared_secret)
@@ -338,6 +344,7 @@ val key_schedule:
     (requires verify_psk_inputs cs m opsk)
     (ensures fun _ -> True)
 
+#push-options "--split_queries always"
 let key_schedule_core
   (cs:ciphersuite)
   (m:mode)
@@ -357,6 +364,7 @@ let key_schedule_core
 
   let exporter_secret = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_exp context (size_kdf cs) in
   context, exporter_secret, secret
+#pop-options
 
 let key_schedule_end
   (cs:ciphersuite)
@@ -437,6 +445,25 @@ let context_open cs ctx aad ct =
     | None -> None
     | Some new_ctx -> Some (new_ctx, pt)
 
+let lemma_context_open_decrypted
+  (cs:ciphersuite_not_export_only)
+  (ctx:encryption_context cs)
+  (aad:AEAD.ad (aead_alg_of cs))
+  (ct:AEAD.cipher (aead_alg_of cs))
+  : Lemma
+    (match context_open cs ctx aad ct with
+     | None -> True
+     | Some (_, pt) -> Seq.length ct == AEAD.cipher_length pt) =
+  let key = key_of_ctx cs ctx in
+  let seq = seq_of_ctx cs ctx in
+  let nonce = context_compute_nonce cs ctx seq in
+  match AEAD.decrypt key nonce aad ct with
+  | None -> ()
+  | Some pt ->
+    match context_increment_seq cs ctx with
+    | None -> ()
+    | Some _ -> ()
+
 ///
 /// Base Mode
 ///
@@ -464,13 +491,16 @@ let sealBase cs skE pkR info aad pt =
     | None -> None
     | Some (_, ct) -> Some (enc, ct)
 
+#push-options "--split_queries always"
 let openBase cs enc skR info aad ct =
   match setupBaseR cs enc skR info with
   | None -> None
   | Some ctx ->
+    lemma_context_open_decrypted cs ctx aad ct;
     match context_open cs ctx aad ct with
     | None -> None
     | Some (_, pt) -> Some pt
+#pop-options
 
 let sendExportBase cs skE pkR info exp_ctx l =
   match setupBaseS cs skE pkR info with
@@ -516,6 +546,7 @@ let openPSK cs enc skR info aad ct psk psk_id =
   match setupPSKR cs enc skR info psk psk_id with
   | None -> None
   | Some ctx ->
+    lemma_context_open_decrypted cs ctx aad ct;
     match context_open cs ctx aad ct with
     | None -> None
     | Some (_, pt) -> Some pt
@@ -563,6 +594,7 @@ let openAuth cs enc skR info aad ct pkS =
   match setupAuthR cs enc skR info pkS with
   | None -> None
   | Some ctx ->
+    lemma_context_open_decrypted cs ctx aad ct;
     match context_open cs ctx aad ct with
     | None -> None
     | Some (_, pt) -> Some pt
@@ -610,6 +642,7 @@ let openAuthPSK cs enc skR info aad ct psk psk_id pkS =
   match setupAuthPSKR cs enc skR info psk psk_id pkS with
   | None -> None
   | Some ctx ->
+    lemma_context_open_decrypted cs ctx aad ct;
     match context_open cs ctx aad ct with
     | None -> None
     | Some (_, pt) -> Some pt

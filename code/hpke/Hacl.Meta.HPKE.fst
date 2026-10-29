@@ -2,6 +2,7 @@ module Hacl.Meta.HPKE
 
 friend Hacl.Impl.HPKE
 
+#push-options "--split_queries always"
 %splice[
   hpke_setupBaseS_higher;
   hpke_setupBaseR_higher;
@@ -13,3 +14,4 @@ friend Hacl.Impl.HPKE
     `Hacl.Impl.HPKE.sealBase;
     `Hacl.Impl.HPKE.openBase
 ])
+#pop-options

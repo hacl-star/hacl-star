@@ -263,10 +263,8 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
   {
     uint8_t *block = t10 + i * 16U;
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 e[5U] KRML_POST_ALIGN(16) = { 0U };
-    uint64_t u0 = load64_le(block);
-    uint64_t lo = u0;
-    uint64_t u = load64_le(block + 8U);
-    uint64_t hi = u;
+    uint64_t lo = load64_le(block);
+    uint64_t hi = load64_le(block + 8U);
     Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
     Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
     Lib_IntVector_Intrinsics_vec128
@@ -459,10 +457,8 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 e[5U] KRML_POST_ALIGN(16) = { 0U };
     uint8_t tmp[16U] = { 0U };
     memcpy(tmp, last, rem1 * sizeof (uint8_t));
-    uint64_t u0 = load64_le(tmp);
-    uint64_t lo = u0;
-    uint64_t u = load64_le(tmp + 8U);
-    uint64_t hi = u;
+    uint64_t lo = load64_le(tmp);
+    uint64_t hi = load64_le(tmp + 8U);
     Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
     Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
     Lib_IntVector_Intrinsics_vec128
@@ -656,10 +652,8 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     Lib_IntVector_Intrinsics_vec128 *pre = ctx + 5U;
     Lib_IntVector_Intrinsics_vec128 *acc = ctx;
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 e[5U] KRML_POST_ALIGN(16) = { 0U };
-    uint64_t u0 = load64_le(tmp);
-    uint64_t lo = u0;
-    uint64_t u = load64_le(tmp + 8U);
-    uint64_t hi = u;
+    uint64_t lo = load64_le(tmp);
+    uint64_t hi = load64_le(tmp + 8U);
     Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
     Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
     Lib_IntVector_Intrinsics_vec128
@@ -875,10 +869,8 @@ poly1305_do_128(
   Lib_IntVector_Intrinsics_vec128 *pre = ctx + 5U;
   Lib_IntVector_Intrinsics_vec128 *acc = ctx;
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 e[5U] KRML_POST_ALIGN(16) = { 0U };
-  uint64_t u0 = load64_le(block);
-  uint64_t lo = u0;
-  uint64_t u = load64_le(block + 8U);
-  uint64_t hi = u;
+  uint64_t lo = load64_le(block);
+  uint64_t hi = load64_le(block + 8U);
   Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
   Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
   Lib_IntVector_Intrinsics_vec128

@@ -43,10 +43,8 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
   {
     uint8_t *block = blocks + i * 16U;
     uint64_t e[5U] = { 0U };
-    uint64_t u0 = load64_le(block);
-    uint64_t lo = u0;
-    uint64_t u = load64_le(block + 8U);
-    uint64_t hi = u;
+    uint64_t lo = load64_le(block);
+    uint64_t hi = load64_le(block + 8U);
     uint64_t f0 = lo;
     uint64_t f1 = hi;
     uint64_t f010 = f0 & 0x3ffffffULL;
@@ -165,10 +163,8 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     uint64_t e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
     memcpy(tmp, last, rem1 * sizeof (uint8_t));
-    uint64_t u0 = load64_le(tmp);
-    uint64_t lo = u0;
-    uint64_t u = load64_le(tmp + 8U);
-    uint64_t hi = u;
+    uint64_t lo = load64_le(tmp);
+    uint64_t hi = load64_le(tmp + 8U);
     uint64_t f0 = lo;
     uint64_t f1 = hi;
     uint64_t f010 = f0 & 0x3ffffffULL;
@@ -288,10 +284,8 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     uint64_t *pre = ctx + 5U;
     uint64_t *acc = ctx;
     uint64_t e[5U] = { 0U };
-    uint64_t u0 = load64_le(tmp);
-    uint64_t lo = u0;
-    uint64_t u = load64_le(tmp + 8U);
-    uint64_t hi = u;
+    uint64_t lo = load64_le(tmp);
+    uint64_t hi = load64_le(tmp + 8U);
     uint64_t f0 = lo;
     uint64_t f1 = hi;
     uint64_t f010 = f0 & 0x3ffffffULL;
@@ -433,10 +427,8 @@ poly1305_do_32(
   uint64_t *pre = ctx + 5U;
   uint64_t *acc = ctx;
   uint64_t e[5U] = { 0U };
-  uint64_t u0 = load64_le(block);
-  uint64_t lo = u0;
-  uint64_t u = load64_le(block + 8U);
-  uint64_t hi = u;
+  uint64_t lo = load64_le(block);
+  uint64_t hi = load64_le(block + 8U);
   uint64_t f0 = lo;
   uint64_t f1 = hi;
   uint64_t f010 = f0 & 0x3ffffffULL;

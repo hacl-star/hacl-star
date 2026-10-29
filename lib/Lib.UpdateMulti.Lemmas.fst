@@ -133,6 +133,9 @@ let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
 let rec update_full_is_repeat_blocks #a block_length update update_last acc input input' =
   // Lib.UpdateMulti side
   let n_blocks = S.length input / block_length in
+  Math.Lemmas.nat_over_pos_is_nat (S.length input) block_length;
+  Math.Lemmas.nat_times_nat_is_nat n_blocks block_length;
+  Math.Lemmas.euclidean_division_definition (S.length input) block_length;
   let blocks, rest = S.split input (n_blocks * block_length) in
 
   // Lib.Sequence side
@@ -147,7 +150,6 @@ let rec update_full_is_repeat_blocks #a block_length update update_last acc inpu
   assert (repeat_final_acc == Lib.Sequence.repeat_blocks #uint8 block_length input repeat_f repeat_l acc);
 
   // General, useful facts.
-  Math.Lemmas.euclidean_division_definition (S.length input) block_length;
   S.lemma_eq_intro last rest;
   assert (S.length rest == S.length input % block_length);
   Math.Lemmas.multiple_modulo_lemma n_blocks block_length;
@@ -185,6 +187,8 @@ let rec update_full_is_repeat_blocks #a block_length update update_last acc inpu
     (* These assertions make the lemma_eq_intro calls below work
     reliably. The _spinoff is so that they run each in a separate query,
     which helps for stability, and is apparently even faster. *)
+    Math.Lemmas.distributivity_sub_left n_blocks 1 block_length;
+    assert (S.length tail == (n_blocks - 1) * block_length);
     let as1 = fst (S.split (tail `S.append` rest) ((n_blocks - 1) * block_length)) in
     let as2 = snd (S.split (tail `S.append` rest) ((n_blocks - 1) * block_length)) in
     assert_spinoff (S.length as1 == S.length tail);
@@ -242,9 +246,11 @@ let update_multi_one #a (block_length: pos)
 let rec update_multi_is_repeat_blocks_multi #a block_length update acc input =
   // Lib.UpdateMulti side
   let n_blocks = S.length input / block_length in
+  Math.Lemmas.nat_over_pos_is_nat (S.length input) block_length;
+  Math.Lemmas.nat_times_nat_is_nat n_blocks block_length;
+  Math.Lemmas.euclidean_division_definition (S.length input) block_length;
   // triggers!
   let blocks, rest = S.split input (n_blocks * block_length) in
-  FStar.Math.Lemmas.nat_over_pos_is_nat (S.length input) block_length;
 
   // Lib.Sequence side
   let repeat_f = repeat_f block_length update in
@@ -254,27 +260,31 @@ let rec update_multi_is_repeat_blocks_multi #a block_length update acc input =
     Lib.Sequence.lemma_repeat_blocks_multi block_length input repeat_f acc;
     Lib.LoopCombinators.eq_repeati0 n_blocks (Lib.Sequence.repeat_blocks_f block_length input repeat_f n_blocks) acc;
     Lib.UpdateMulti.update_multi_zero block_length update acc
-  end else
-    let split_index = S.length input - block_length in
+  end else begin
+    assert (n_blocks > 0);
+    Math.Lemmas.lemma_mult_le_right block_length 1 n_blocks;
+    let split_index:nat = S.length input - block_length in
     FStar.Math.Lemmas.modulo_lemma 0 block_length;
     FStar.Math.Lemmas.lemma_mod_plus (S.length input) (-1) block_length;
     Lib.Sequence.Lemmas.repeat_blocks_multi_split block_length split_index input repeat_f acc;
-    let acc0 = Lib.UpdateMulti.mk_update_multi block_length update acc (S.slice input 0 split_index) in
-    let f = repeat_blocks_f block_length (S.slice input split_index (S.length input)) repeat_f 1 in
+    let prefix = S.slice input 0 split_index in
+    let last:Lib.Sequence.lseq uint8 block_length = S.slice input split_index (S.length input) in
+    let acc0 = Lib.UpdateMulti.mk_update_multi block_length update acc prefix in
+    let f = repeat_blocks_f block_length last repeat_f 1 in
     calc (==) {
       Lib.Sequence.repeat_blocks_multi #uint8 block_length input repeat_f acc;
     == { Lib.Sequence.Lemmas.repeat_blocks_multi_split block_length split_index input repeat_f acc }
-      Lib.Sequence.repeat_blocks_multi #uint8 block_length (S.slice input split_index (S.length input)) repeat_f
-        (Lib.Sequence.repeat_blocks_multi #uint8 block_length (S.slice input 0 split_index) repeat_f acc);
-    == { update_multi_is_repeat_blocks_multi block_length update acc (S.slice input 0 split_index) }
-      Lib.Sequence.repeat_blocks_multi #uint8 block_length (S.slice input split_index (S.length input)) repeat_f
+      Lib.Sequence.repeat_blocks_multi #uint8 block_length last repeat_f
+        (Lib.Sequence.repeat_blocks_multi #uint8 block_length prefix repeat_f acc);
+    == { update_multi_is_repeat_blocks_multi block_length update acc prefix }
+      Lib.Sequence.repeat_blocks_multi #uint8 block_length last repeat_f
         acc0;
-    == { Lib.Sequence.lemma_repeat_blocks_multi block_length (S.slice input split_index (S.length input)) repeat_f
+    == { Lib.Sequence.lemma_repeat_blocks_multi block_length last repeat_f
         acc0
     }
-      Lib.LoopCombinators.repeati 1 (repeat_blocks_f block_length (S.slice input split_index (S.length input)) repeat_f 1) acc0;
+      Lib.LoopCombinators.repeati 1 (repeat_blocks_f block_length last repeat_f 1) acc0;
     == { Lib.LoopCombinators.unfold_repeati 1
-      (repeat_blocks_f block_length (S.slice input split_index (S.length input)) repeat_f 1)
+      (repeat_blocks_f block_length last repeat_f 1)
       acc0
       0
     }
@@ -282,16 +292,16 @@ let rec update_multi_is_repeat_blocks_multi #a block_length update acc input =
     == { Lib.LoopCombinators.eq_repeati0 0 f acc0 }
       f 0 acc0;
     == { }
-      update acc0 (S.slice input split_index (S.length input));
-    == { update_multi_one block_length update acc0 (S.slice input split_index (S.length input)) }
-      Lib.UpdateMulti.mk_update_multi block_length update acc0 (S.slice input split_index (S.length input));
+      update acc0 last;
+    == { update_multi_one block_length update acc0 last }
+      Lib.UpdateMulti.mk_update_multi block_length update acc0 last;
     == { Lib.UpdateMulti.update_multi_associative block_length update acc
-      (S.slice input 0 split_index) (S.slice input split_index (S.length input)) }
-      Lib.UpdateMulti.mk_update_multi block_length update acc (S.append
-        (S.slice input 0 split_index) (S.slice input split_index (S.length input)));
+      prefix last }
+      Lib.UpdateMulti.mk_update_multi block_length update acc (S.append prefix last);
     == { assert (
-        (S.append (S.slice input 0 split_index) (S.slice input split_index (S.length input))) `S.equal`
+        (S.append prefix last) `S.equal`
         input) }
       Lib.UpdateMulti.mk_update_multi block_length update acc input;
     }
+  end
 #pop-options

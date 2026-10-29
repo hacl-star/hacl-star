@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "c9921d85836662a959a5bea959cf4581"
+      "c1bbcc2ef2bc9a31c23653e08505b73a"
     ],
     [
       "Spec.Salsa20.block",
@@ -31,7 +31,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ba7142077b60c51c90990b62cc6c08d3"
+      "a759f322afa351c2f67b4f4bd3cfae4d"
     ],
     [
       "Spec.Salsa20.nonce",
@@ -47,7 +47,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "4ad0f65e961780aba1a5e5885694e61e"
+      "596ebf8b04fd6b3ebe0b0fa2e9e27cd5"
     ],
     [
       "Spec.Salsa20.xnonce",
@@ -63,7 +63,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6e1ccd493489ca885f2d8fd1ef1ace12"
+      "996644787def677e05d1852ed9ba9935"
     ],
     [
       "Spec.Salsa20.state",
@@ -78,7 +78,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "8ef4d237343cff3c8636c8a011d5ea50"
+      "9798b351abf8775f9182dac50f77e650"
     ],
     [
       "Spec.Salsa20.line",
@@ -89,27 +89,24 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.rotval", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Spec.Salsa20.idx", "equation_Spec.Salsa20.state",
-        "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.to_seq", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.Salsa20.idx",
+        "equation_Spec.Salsa20.state", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0da46ef8643a6f8ea97a3358bc923338",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_6f7719d2e9422e645682674727002c0b",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_7c4161c9505fe096ba66623182cf5f6d",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "63b5fb64881b457e87f83fad37f3b486"
+      "9fad050d0ac4aa90d680da81d812e506"
     ],
     [
       "Spec.Salsa20.quarter_round",
@@ -134,7 +131,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f31e294fb681890ad7863308c98a5d2d"
+      "80be84c07cb2cfa5d832bd7f69331e42"
     ],
     [
       "Spec.Salsa20.column_round",
@@ -152,7 +149,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "23e8f1ad4c139765907a468c492947eb"
+      "37f3e3bb35f9a596b5216f7ab291dcd1"
     ],
     [
       "Spec.Salsa20.row_round",
@@ -170,7 +167,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "f49e4a814d01adf78e85ad6f1c67a3da"
+      "b0a07d33259ed46ca4cf4a6455a4f928"
     ],
     [
       "Spec.Salsa20.salsa20_add_counter",
@@ -191,7 +188,7 @@
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "da07deff2ce19ce9c209f4a662f6ba0e"
+      "921886f69a78d8143f6bb14d7f1357b6"
     ],
     [
       "Spec.Salsa20.salsa20_core",
@@ -206,7 +203,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "16e946f7aafa2c8e9284b651e476aa17"
+      "cc8307b62cca6af6c8ac393b731b36aa"
     ],
     [
       "Spec.Salsa20.constant0",
@@ -227,7 +224,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "75918d6c99eba62665afc3946570b04e"
+      "4898c4be94fd70b95d13b55dbb7719bb"
     ],
     [
       "Spec.Salsa20.constant1",
@@ -248,7 +245,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "972e33214e7af474abfba2b520e8691d"
+      "cb114c08e02b371662789a828a48f76f"
     ],
     [
       "Spec.Salsa20.constant2",
@@ -269,7 +266,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ecdde88bb12056d4bde7b96f0bd35c47"
+      "26a335b71d95b8e9dc2551b5771b2aad"
     ],
     [
       "Spec.Salsa20.constant3",
@@ -290,7 +287,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ba9b8eaf60795d5aa33303e61e73e569"
+      "fa71af6ddd522bcc69bf3ddfe30a9cd7"
     ],
     [
       "Spec.Salsa20.setup",
@@ -300,43 +297,42 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Lib.Sequence.to_seq", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.Salsa20.counter",
-        "equation_Spec.Salsa20.key", "equation_Spec.Salsa20.size_key",
-        "equation_Spec.Salsa20.state",
-        "function_token_typing_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.Salsa20.counter", "equation_Spec.Salsa20.key",
+        "equation_Spec.Salsa20.size_key", "equation_Spec.Salsa20.state",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0c04719c5107fda0b78f983e4f1487bc",
         "refinement_interpretation_Tm_refine_17eb0b9d8c560b31f7749972be12ed74",
         "refinement_interpretation_Tm_refine_1c31ca88fe307e934f4c6728801e3754",
-        "refinement_interpretation_Tm_refine_33fafd0014916a55b52c85d4d77a1f5d",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_3e941556224ec52b55c20a1dedaedd73",
         "refinement_interpretation_Tm_refine_44e5fc474a070a18a3b076585da92fd5",
+        "refinement_interpretation_Tm_refine_4542685900c044e94e7a2b5f5e37274a",
         "refinement_interpretation_Tm_refine_4a0d4304a3a1dfdb80a3b3dddc3e3f20",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_719ff7b2ff98fd64eace28b528e77052",
         "refinement_interpretation_Tm_refine_7d4ad4ab76779619b6b2cf8d5c76be32",
-        "refinement_interpretation_Tm_refine_894c71c4a0a5d40195e843f426784941",
-        "refinement_interpretation_Tm_refine_c4794e93f4c92c788d3105d63e685464",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_8df4ac35cf17cdaa73a1b3e98662eb84",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_dc78a780d2226d259ab6e78c431a3f1d",
-        "typing_FStar.Seq.Base.length"
+        "refinement_interpretation_Tm_refine_d23687a79e2c60297ece4d31cfeb8538",
+        "refinement_interpretation_Tm_refine_e30ff80988612938c90a42947e5c58ea",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "741c521617afed78409b1055efa1b78d"
+      "e6dbc3d79406199453ca24b3e1ba7781"
     ],
     [
       "Spec.Salsa20.salsa20_init",
@@ -347,20 +343,21 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Spec.Salsa20.key",
-        "equation_Spec.Salsa20.size_key",
-        "function_token_typing_Lib.IntTypes.uint8",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.length"
+        "equation_Spec.Salsa20.size_key", "lemma_FStar.Int.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "08f01933d40059757c74d5da1557065d"
+      "4e7e425886704984c07e912b29de68ea"
     ],
     [
       "Spec.Salsa20.xsetup",
@@ -371,34 +368,35 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Spec.Salsa20.key", "equation_Spec.Salsa20.size_key",
-        "equation_Spec.Salsa20.state",
-        "function_token_typing_Lib.IntTypes.uint8",
+        "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Lib.Sequence.to_seq", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.Salsa20.key",
+        "equation_Spec.Salsa20.size_key", "equation_Spec.Salsa20.state",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0c04719c5107fda0b78f983e4f1487bc",
         "refinement_interpretation_Tm_refine_17eb0b9d8c560b31f7749972be12ed74",
         "refinement_interpretation_Tm_refine_1c31ca88fe307e934f4c6728801e3754",
-        "refinement_interpretation_Tm_refine_25627535ed6381b0cc34ccf1030238a7",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_2b05b38fb19ca3dcce11a7e4024fa921",
+        "refinement_interpretation_Tm_refine_3e941556224ec52b55c20a1dedaedd73",
         "refinement_interpretation_Tm_refine_4a0d4304a3a1dfdb80a3b3dddc3e3f20",
-        "refinement_interpretation_Tm_refine_894c71c4a0a5d40195e843f426784941",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "refinement_interpretation_Tm_refine_b8165395463969fbe87a6448c1f75b07",
         "refinement_interpretation_Tm_refine_bc23993b76acb07c71baac3d1798b4fa",
         "refinement_interpretation_Tm_refine_c740246281d0ffa10a1422d129fa0039",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.length"
+        "refinement_interpretation_Tm_refine_e30ff80988612938c90a42947e5c58ea",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "18385bc7fc0d55daa433e9c73f71f7fc"
+      "8380b31302bbebbdd414f2155823a61a"
     ],
     [
       "Spec.Salsa20.hsalsa20_init",
@@ -408,23 +406,22 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Spec.Salsa20.key",
-        "equation_Spec.Salsa20.size_key",
-        "function_token_typing_Lib.IntTypes.uint8",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.length"
+        "equation_Spec.Salsa20.size_key", "lemma_FStar.Int.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "51d1f3124b2e078f3069081016c3d0ce"
+      "558ef58d384740e97bc6208dce75a2f3"
     ],
     [
       "Spec.Salsa20.hsalsa20",
@@ -434,31 +431,18 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.numbytes",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Spec.Salsa20.constant2", "equation_Spec.Salsa20.key",
-        "equation_Spec.Salsa20.size_key",
-        "function_token_typing_Lib.IntTypes.uint8",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_a0af5ec1cd802f74642c75324f1476af",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.v",
-        "typing_Spec.Salsa20.constant2", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Spec.Salsa20.key", "equation_Spec.Salsa20.size_key",
+        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7cc97761e8d85fb2c77446f0c7aa6597"
+      "b6b9723c261c9c25c4656bc99294aae0"
     ],
     [
       "Spec.Salsa20.salsa20_key_block",
@@ -478,7 +462,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "468d0b4c6873015da3ad39d58d096b84"
+      "2b74cc6a3aad8559b948e0293fbc46ea"
     ],
     [
       "Spec.Salsa20.salsa20_key_block0",
@@ -488,20 +472,20 @@
       [
         "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Prims.pos", "equation_Spec.Salsa20.key",
-        "equation_Spec.Salsa20.size_key",
-        "function_token_typing_Lib.IntTypes.uint8",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Spec.Salsa20.size_key", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.length", "typing_Prims.pow2"
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "typing_Prims.pow2", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9f33c433c54144c653851433868fc217"
+      "dee5060858c75a2db48bd8f6b9a094fa"
     ],
     [
       "Spec.Salsa20.xor_block",
@@ -520,7 +504,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "2857a008729613423593057281db914d"
+      "299a447528bf8f8997766e354f599503"
     ],
     [
       "Spec.Salsa20.salsa20_encrypt_last",
@@ -531,28 +515,30 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.Salsa20.size_block",
-        "equation_Spec.Salsa20.size_key", "equation_Spec.Salsa20.size_nonce",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "lemma_Lib.IntTypes.pow2_3", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.Salsa20.size_block", "equation_Spec.Salsa20.size_key",
+        "equation_Spec.Salsa20.size_nonce", "int_typing",
+        "lemma_FStar.Int.pow2_values", "lemma_Lib.IntTypes.pow2_3",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_49ff64d43fee5ff411e5dd89e03b7f42",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5e3db7d7bacc9d8fc6388cb0e7eb8499",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
         "refinement_interpretation_Tm_refine_9422d419556855bb96a4044bcf637786",
-        "refinement_interpretation_Tm_refine_a2edd2054ec8619a5dc566d75e1a5f28",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_Prims.pow2", "typing_Spec.Salsa20.size_key",
         "typing_Spec.Salsa20.size_nonce"
       ],
       0,
-      "94b12c3d1680e99898c7317815828972"
+      "f55d56486ac845c6c2df392cba5983b2"
     ],
     [
       "Spec.Salsa20.salsa20_update",
@@ -567,7 +553,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ba39b4964986451366cba4378b9a4ee6"
+      "d966243616fc5bb98d220939c4bec63f"
     ],
     [
       "Spec.Salsa20.salsa20_update",
@@ -584,7 +570,7 @@
         "refinement_interpretation_Tm_refine_dda759161d804d4dfe5d3e277dc0badd"
       ],
       0,
-      "54406a049cf812556075de984147723d"
+      "043da415dd76b3b9789677c434c7b9fb"
     ],
     [
       "Spec.Salsa20.salsa20_update",
@@ -602,7 +588,7 @@
         "typing_Spec.Salsa20.size_key"
       ],
       0,
-      "86cab8a54ebc92f7e00b433b0f607c37"
+      "27400bd9f58839630f67ada14c8a4928"
     ],
     [
       "Spec.Salsa20.salsa20_encrypt_bytes",
@@ -617,7 +603,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "dfd12341111caaea2048a686c5028bf7"
+      "1d3d08db53370f0a2c0156eb8f10549b"
     ],
     [
       "Spec.Salsa20.salsa20_encrypt_bytes",
@@ -632,7 +618,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a624711fff2c07d28507dc48c2dcf1b0"
+      "fc1775603a2f94db7a0157407f14808b"
     ],
     [
       "Spec.Salsa20.salsa20_decrypt_bytes",
@@ -647,7 +633,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "8944ba8d3012799ea8841bf2fd8e127d"
+      "b3452b1d61f75a4f210bfffb5755867b"
     ],
     [
       "Spec.Salsa20.salsa20_decrypt_bytes",
@@ -662,7 +648,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "55e2a2f65d1f3aa714d2d5c3f94b342d"
+      "31bb6c5ad7b3e2ef10dbdb33671c06fb"
     ],
     [
       "Spec.Salsa20.salsa20_decrypt_bytes",
@@ -674,7 +660,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "badb04e4196a271c99efff51ea8d9921"
+      "83574aed8f74134196e225756f2f91fd"
     ]
   ]
 ]

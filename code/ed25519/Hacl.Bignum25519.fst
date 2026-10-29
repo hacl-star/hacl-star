@@ -92,6 +92,7 @@ let carry51 l cin =
   (l' &. mask_51, l' >>. 51ul)
 
 
+#push-options "--split_queries always"
 let reduce_513 a =
   let (f0, f1, f2, f3, f4) = (a.(0ul), a.(1ul), a.(2ul), a.(3ul), a.(4ul)) in
   let tmp0, c0 = carry51 #9 f0 (u64 0) in
@@ -110,8 +111,12 @@ let reduce_513 a =
 
   [@inline_let]
   let tmp1' = tmp1 +! c5 in
+  assert_spinoff (
+    S51.as_nat5 (tmp0', tmp1', tmp2, tmp3, tmp4) ==
+    S51.as_nat5 (tmp0, tmp1, tmp2, tmp3, tmp4) + v c4 * 19);
   Hacl.Spec.Curve25519.Field51.lemma_mul_inv (tmp0', tmp1, tmp2, tmp3, tmp4) c5;
   make_u64_5 a tmp0' tmp1' tmp2 tmp3 tmp4
+#pop-options
 
 
 [@CInline]

@@ -137,7 +137,9 @@ let compute_expected_y2 y2 x =
   let b = create_felem () in
   make_u52_5 b (make_b_k256 ());
   let h0 = ST.get () in
-  assert (inv_fully_reduced h0 b /\ as_nat h0 b = S.b);
+  assert (inv_fully_reduced h0 b /\ as_nat h0 b == S.b);
+  assert (inv_fully_reduced h0 x);
+  assert (felem_fits5 (as_felem5 h0 x) (64,64,64,64,64));
 
   fsqr y2 x;
   fmul y2 y2 x;
