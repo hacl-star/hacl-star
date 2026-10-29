@@ -318,7 +318,7 @@ val point_mul: scalar:lbuffer uint8 32ul -> p:P.point -> out:P.point -> Stack un
   (requires fun h ->
     live h scalar /\ live h p /\ live h out /\
     disjoint out p /\ disjoint out scalar /\ disjoint p scalar /\
-    P.point_inv h p /\
+    P.point_inv h p /\ S.point_inv (P.point_eval h p) /\
     BSeq.nat_from_bytes_be (as_seq h scalar) < S.q) // it's still safe to invoke this function with scalar >= S.q
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     P.point_inv h1 out /\

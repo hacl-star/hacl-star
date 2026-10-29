@@ -211,7 +211,7 @@ let secret_to_public public_key private_key =
   BB.unsafe_bool_of_limb is_sk_valid
 
 
-#push-options "--z3rlimit 100 --split_queries always"
+#push-options "--z3rlimit 200 --split_queries always"
 let ecdh shared_secret their_pubkey private_key =
   push_frame ();
   let tmp = create 34ul (u64 0) in
@@ -219,7 +219,9 @@ let ecdh shared_secret their_pubkey private_key =
   let ss = sub tmp 15ul 15ul in
   let sk = sub tmp 30ul 4ul in
 
+  let h0 = ST.get () in
   let is_pk_valid = P.load_point_vartime pk their_pubkey in
+  Spec.K256.Lemmas.load_point_inv (as_seq h0 their_pubkey);
   let is_sk_valid = load_qelem_conditional sk private_key in
 
   if is_pk_valid then begin

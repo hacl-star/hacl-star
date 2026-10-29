@@ -50,12 +50,19 @@ let beta : S.felem = 0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c287
 // [a]P in affine coordinates
 let aff_point_mul = S.aff_point_mul
 
+let beta_cube () : Lemma (S.(beta *% beta *% beta) == S.one) =
+  assert_norm (S.(beta *% beta *% beta) == S.one)
+
 // fast computation of [lambda]P in affine coordinates
-let aff_point_mul_lambda (p:S.aff_point) : S.aff_point =
+let aff_point_mul_lambda (p:S.aff_point_c) : S.aff_point_c =
+  beta_cube ();
+  Spec.K256.Lemmas.aff_point_mul_x_inv beta p;
   let (px, py) = p in (S.(beta *% px), py)
 
 // fast computation of [lambda]P in projective coordinates
-let point_mul_lambda (p:S.proj_point) : S.proj_point =
+let point_mul_lambda (p:S.proj_point_c) : S.proj_point_c =
+  beta_cube ();
+  Spec.K256.Lemmas.point_mul_x_inv beta p;
   let (_X, _Y, _Z) = p in (S.(beta *% _X), _Y, _Z)
 
 (**
@@ -125,20 +132,22 @@ let scalar_split_lambda (k:S.qelem) : S.qelem & S.qelem =
  Fast computation of [k]P in affine coordinates
 *)
 
-let aff_point_negate_cond (p:S.aff_point) (is_negate:bool) : S.aff_point =
+let aff_point_negate_cond (p:S.aff_point_c) (is_negate:bool) : S.aff_point_c =
+  Spec.K256.Lemmas.aff_point_negate_inv p;
   if is_negate then S.aff_point_negate p else p
 
-let aff_negate_point_and_scalar_cond (k:S.qelem) (p:S.aff_point) : S.qelem & S.aff_point =
+let aff_negate_point_and_scalar_cond (k:S.qelem) (p:S.aff_point_c) : S.qelem & S.aff_point_c =
   if S.scalar_is_high k then begin
     let k_neg = S.qnegate k in
-    let p_neg = S.aff_point_negate p in
+    Spec.K256.Lemmas.aff_point_negate_inv p;
+    let p_neg : S.aff_point_c = S.aff_point_negate p in
     k_neg, p_neg end
   else k, p
 
 // https://github.com/bitcoin-core/secp256k1/blob/master/src/ecmult_impl.h
 // [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
-let aff_ecmult_endo_split (k:S.qelem) (p:S.aff_point) :
-  S.qelem & S.aff_point & S.qelem & S.aff_point
+let aff_ecmult_endo_split (k:S.qelem) (p:S.aff_point_c) :
+  S.qelem & S.aff_point_c & S.qelem & S.aff_point_c
  =
   let r1, r2 = scalar_split_lambda k in
   let lambda_p = aff_point_mul_lambda p in
@@ -148,27 +157,29 @@ let aff_ecmult_endo_split (k:S.qelem) (p:S.aff_point) :
 
 // [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
 // which can be computed as a double exponentiation ([a]P + [b]Q)
-let aff_point_mul_endo_split (k:S.qelem) (p:S.aff_point) : S.aff_point =
+let aff_point_mul_endo_split (k:S.qelem) (p:S.aff_point_c) : S.aff_point_c =
   let r1, p1, r2, p2 = aff_ecmult_endo_split k p in
-  S.aff_point_add (aff_point_mul r1 p1) (aff_point_mul r2 p2)
+  S.aff_point_add_c (aff_point_mul r1 p1) (aff_point_mul r2 p2)
 
 (**
  Fast computation of [k]P in projective coordinates
 *)
 
-let point_negate_cond (p:S.proj_point) (is_negate:bool) : S.proj_point =
+let point_negate_cond (p:S.proj_point_c) (is_negate:bool) : S.proj_point_c =
+  Spec.K256.Lemmas.point_negate_inv p;
   if is_negate then S.point_negate p else p
 
-let negate_point_and_scalar_cond (k:S.qelem) (p:S.proj_point) : S.qelem & S.proj_point =
+let negate_point_and_scalar_cond (k:S.qelem) (p:S.proj_point_c) : S.qelem & S.proj_point_c =
   if S.scalar_is_high k then begin
     let k_neg = S.qnegate k in
-    let p_neg = S.point_negate p in
+    Spec.K256.Lemmas.point_negate_inv p;
+    let p_neg : S.proj_point_c = S.point_negate p in
     k_neg, p_neg end
   else k, p
 
 
-let ecmult_endo_split (k:S.qelem) (p:S.proj_point) :
-  S.qelem & S.proj_point & S.qelem & S.proj_point
+let ecmult_endo_split (k:S.qelem) (p:S.proj_point_c) :
+  S.qelem & S.proj_point_c & S.qelem & S.proj_point_c
  =
   let r1, r2 = scalar_split_lambda k in
   let lambda_p = point_mul_lambda p in

@@ -140,7 +140,8 @@ val ecdsa_verify_cmpr: r:QA.qelem -> pk:point -> u1:QA.qelem -> u2:QA.qelem -> S
     live h r /\ live h pk /\ live h u1 /\ live h u2 /\
     disjoint r u1 /\ disjoint r u2 /\ disjoint r pk /\
     disjoint pk u1 /\ disjoint pk u2 /\
-    point_inv h pk /\ QA.qas_nat h u1 < S.q /\ QA.qas_nat h u2 < S.q /\
+    point_inv h pk /\ S.point_inv (point_eval h pk) /\
+    QA.qas_nat h u1 < S.q /\ QA.qas_nat h u2 < S.q /\
     0 < QA.qas_nat h r /\ QA.qas_nat h r < S.q)
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
     (let _X, _Y, _Z = S.point_mul_double_g (QA.qas_nat h0 u1) (QA.qas_nat h0 u2)
@@ -206,7 +207,9 @@ let ecdsa_verify_hashed_msg_prealloc tmp msgHash public_key signature =
   let u2  = sub tmp 27ul 4ul in
   let m_q = sub tmp 31ul 4ul in
 
+  let h0 = ST.get () in
   let is_pk_valid = load_point_vartime pk public_key in
+  KL.load_point_inv (as_seq h0 public_key);
   let is_rs_valid = load_signature r_q s_q signature in
   QA.load_qelem_modq m_q msgHash;
 

@@ -128,7 +128,8 @@ val create_point: unit -> StackInline point
 val make_point_at_inf: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\ S.to_aff_point (point_eval h1 p) == S.aff_point_at_inf)
+    point_inv h1 p /\ point_eval h1 p == S.point_at_inf /\
+    S.to_aff_point (point_eval h1 p) == S.aff_point_at_inf)
 
 
 inline_for_extraction noextract

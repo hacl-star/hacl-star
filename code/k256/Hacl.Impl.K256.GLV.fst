@@ -52,7 +52,7 @@ let table_inv_w5 : BE.table_inv_t U64 15ul 32ul =
 
 inline_for_extraction noextract
 let table_neg_inv_precomp
-  (q:LSeq.lseq uint64 15) (is_negate:bool) : BE.table_inv_t U64 15ul 32ul =
+  (q:LSeq.lseq uint64 15{linv q}) (is_negate:bool) : BE.table_inv_t U64 15ul 32ul =
   fun a table ->
     point_eval_lseq a == SG.point_negate_cond (point_eval_lseq q) is_negate /\
     (forall (j:nat{j < 32}).
@@ -63,7 +63,7 @@ let table_neg_inv_precomp
 // using a precomputed table [0; Q; 2Q; ...; 15Q]
 inline_for_extraction noextract
 val lprecomp_get_vartime_neg:
-    q:Ghost.erased (LSeq.lseq uint64 15){point_inv_lseq q} -> is_negate:bool ->
+    q:Ghost.erased (LSeq.lseq uint64 15){linv q} -> is_negate:bool ->
   BE.pow_a_to_small_b_st U64 15ul 0ul mk_k256_concrete_ops 5ul 32ul
     (table_neg_inv_precomp q is_negate)
 
@@ -93,7 +93,7 @@ let lprecomp_get_vartime_neg q is_negate ctx lambda_q table r_small res =
 
 inline_for_extraction noextract
 let table_lambda_neg_inv_precomp
-  (q:LSeq.lseq uint64 15) (is_negate:bool) : BE.table_inv_t U64 15ul 32ul =
+  (q:LSeq.lseq uint64 15{linv q}) (is_negate:bool) : BE.table_inv_t U64 15ul 32ul =
   fun a table ->
     point_eval_lseq a ==
       SG.point_negate_cond (SG.point_mul_lambda (point_eval_lseq q)) is_negate /\
@@ -105,7 +105,7 @@ let table_lambda_neg_inv_precomp
 // using a precomputed table [0; Q; 2Q; ...; 15Q]
 inline_for_extraction noextract
 val lprecomp_get_vartime_lambda_neg:
-    q:Ghost.erased (LSeq.lseq uint64 15){point_inv_lseq q} -> is_negate:bool ->
+    q:Ghost.erased (LSeq.lseq uint64 15){linv q} -> is_negate:bool ->
   BE.pow_a_to_small_b_st U64 15ul 0ul mk_k256_concrete_ops 5ul 32ul
     (table_lambda_neg_inv_precomp q is_negate)
 
@@ -144,6 +144,7 @@ let lprecomp_get_vartime_lambda_neg q is_negate ctx lambda_q table r_small res =
 
 //------------------------------
 
+#push-options "--split_queries always"
 inline_for_extraction noextract
 val point_mul_g_double_split_lambda_table_noalloc:
     out:point
@@ -173,8 +174,9 @@ val point_mul_g_double_split_lambda_table_noalloc:
     disjoint table2 p2 /\ disjoint table2 q1 /\ disjoint table2 q2 /\
     disjoint table2 q3 /\ disjoint table2 q4 /\
 
-    point_inv h q1 /\ point_inv h q2 /\ point_inv h q3 /\ point_inv h q4 /\
-    point_inv h p1 /\ point_inv h p2 /\
+    linv (as_seq h q1) /\ linv (as_seq h q2) /\ linv (as_seq h q3) /\ linv (as_seq h q4) /\
+    linv (as_seq h p1) /\ linv (as_seq h p2) /\
+    S.point_inv (point_eval h p1) /\ S.point_inv (point_eval h p2) /\
     point_eval h p1 == S.g /\
     point_eval h q1==SG.point_negate_cond (point_eval h p1) is_negate1 /\
     point_eval h q2==SG.point_negate_cond (SG.point_mul_lambda (point_eval h p1)) is_negate2 /\
@@ -186,15 +188,16 @@ val point_mul_g_double_split_lambda_table_noalloc:
     qas_nat h r4 < S.q /\ qas_nat h r4 < pow2 128 /\
     table_inv_w5 (as_seq h p2) (as_seq h table2))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    point_inv h1 out /\
+    linv (as_seq h1 out) /\
     refl (as_seq h1 out) ==
       LE.exp_four_fw S.mk_k256_comm_monoid
         (refl (as_seq h0 q1)) 128 (qas_nat h0 r1)
         (refl (as_seq h0 q2)) (qas_nat h0 r2)
         (refl (as_seq h0 q3)) (qas_nat h0 r3)
         (refl (as_seq h0 q4)) (qas_nat h0 r4) 5)
+#pop-options
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)'"
+#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --split_queries always"
 let point_mul_g_double_split_lambda_table_noalloc out table2 r1 q1 r2 q2 r3 q3 r4 q4 p1 p2
   is_negate1 is_negate2 is_negate3 is_negate4 =
   [@inline_let] let len = 15ul in
@@ -270,8 +273,9 @@ val point_mul_g_double_split_lambda_table:
     disjoint out q1 /\ disjoint out q2 /\ disjoint out q3 /\ disjoint out q4 /\
     disjoint out r1 /\ disjoint out r2 /\ disjoint out r3 /\ disjoint out r4 /\
     disjoint out p1  /\ disjoint out p2 /\
-    point_inv h q1 /\ point_inv h q2 /\ point_inv h q3 /\ point_inv h q4 /\
-    point_inv h p1 /\ point_inv h p2 /\
+    linv (as_seq h q1) /\ linv (as_seq h q2) /\ linv (as_seq h q3) /\ linv (as_seq h q4) /\
+    linv (as_seq h p1) /\ linv (as_seq h p2) /\
+    S.point_inv (point_eval h p1) /\ S.point_inv (point_eval h p2) /\
     point_eval h p1 == S.g /\
     point_eval h q1==SG.point_negate_cond (point_eval h p1) is_negate1 /\
     point_eval h q2==SG.point_negate_cond (SG.point_mul_lambda (point_eval h p1)) is_negate2 /\
@@ -282,7 +286,7 @@ val point_mul_g_double_split_lambda_table:
     qas_nat h r3 < S.q /\ qas_nat h r3 < pow2 128 /\
     qas_nat h r4 < S.q /\ qas_nat h r4 < pow2 128)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    point_inv h1 out /\
+    linv (as_seq h1 out) /\
     refl (as_seq h1 out) ==
       LE.exp_four_fw S.mk_k256_comm_monoid
         (refl (as_seq h0 q1)) 128 (qas_nat h0 r1)
@@ -290,7 +294,7 @@ val point_mul_g_double_split_lambda_table:
         (refl (as_seq h0 q3)) (qas_nat h0 r3)
         (refl (as_seq h0 q4)) (qas_nat h0 r4) 5)
 
-#push-options "--z3smtopt '(set-option :smt.arith.solver 2)' --split_queries always"
+#push-options "--z3rlimit 200 --z3smtopt '(set-option :smt.arith.solver 2)' --split_queries always"
 [@CInline]
 let point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
   p1 p2 is_negate1 is_negate2 is_negate3 is_negate4 =
@@ -300,7 +304,7 @@ let point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
   [@inline_let] let table_len = 32ul in
 
   let h0 = ST.get () in
-  assert (point_inv_lseq (as_seq h0 p2));
+  assert (linv (as_seq h0 p2));
   push_frame ();
   let h_alloc = ST.get () in
   LowStar.Buffer.fresh_frame_modifies h0 h_alloc;
@@ -309,8 +313,8 @@ let point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
   let h_table = ST.get () in
   LowStar.Buffer.modifies_buffer_elim (p2 <: LowStar.Buffer.buffer uint64)
     LowStar.Buffer.loc_none h0 h_table;
-  assert (point_inv_lseq (as_seq h_table p2));
-  assert_norm (k.BE.to.BE.linv == point_inv_lseq);
+  assert (linv (as_seq h_table p2));
+  assert_norm (k.BE.to.BE.linv == linv);
   assert_norm (k.BE.to.BE.linv_ctx == linv_ctx);
   PT.lprecomp_table len ctx_len k (null uint64) p2 table_len table2;
   point_mul_g_double_split_lambda_table_noalloc out table2 r1 q1 r2 q2 r3 q3 r4 q4
@@ -324,7 +328,7 @@ let point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
   assert (as_seq h1 out == as_seq h2 out);
   assert (modifies (loc out) h0 h2);
   stack_frame_equal_domains h0 h_alloc h_table h1 h2;
-  assert (point_inv h2 out);
+  assert (linv (as_seq h2 out));
   assert (refl (as_seq h2 out) ==
     LE.exp_four_fw S.mk_k256_comm_monoid
       (refl (as_seq h0 q1)) 128 (qas_nat h0 r1)
@@ -373,13 +377,13 @@ val point_mul_g_double_split_lambda_vartime_endo_split:
 
     disjoint q4 scalar1 /\ disjoint q4 scalar2 /\ disjoint q4 p1 /\ disjoint q4 p2 /\
 
-    point_inv h p1 /\ point_inv h p2 /\
+    linv (as_seq h p1) /\ linv (as_seq h p2) /\
     qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures  fun h0 (is_high1, is_high2, is_high3, is_high4) h1 ->
     modifies (loc r1 |+| loc r2 |+| loc r3 |+| loc r4 |+|
       loc q1 |+| loc q2 |+| loc q3 |+| loc q4) h0 h1 /\
 
-    point_inv h1 q1 /\ point_inv h1 q2 /\ point_inv h1 q3 /\ point_inv h1 q4 /\
+    linv (as_seq h1 q1) /\ linv (as_seq h1 q2) /\ linv (as_seq h1 q3) /\ linv (as_seq h1 q4) /\
    (let r1_s0, r2_s0 = SG.scalar_split_lambda (qas_nat h0 scalar1) in
     let r3_s0, r4_s0 = SG.scalar_split_lambda (qas_nat h0 scalar2) in
     let r1_s, q1_s, r2_s, q2_s = SG.ecmult_endo_split (qas_nat h0 scalar1) (point_eval h0 p1) in
@@ -420,6 +424,9 @@ let check_ecmult_endo_split r1 r2 r3 r4 =
   b1 && b2 && b3 && b4
 
 
+// The curve invariant `S.point_inv` only needs to be carried through here.
+// Hiding its definition (a field equation) keeps Z3 from unfolding it.
+#push-options "--using_facts_from '* -Spec.K256.PointOps.is_on_proj_curve -Spec.K256.PointOps.point_inv'"
 inline_for_extraction noextract
 val point_mul_g_double_split_lambda_vartime_noalloc:
     out:point
@@ -465,20 +472,21 @@ val point_mul_g_double_split_lambda_vartime_noalloc:
 
     disjoint q4 scalar1 /\ disjoint q4 scalar2 /\ disjoint q4 p1 /\ disjoint q4 p2 /\
 
-    point_inv h p1 /\ point_inv h p2 /\ point_eval h p1 == S.g /\
+    linv (as_seq h p1) /\ linv (as_seq h p2) /\ point_eval h p1 == S.g /\
     qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc r1 |+| loc r2 |+| loc r3 |+| loc r4 |+|
     loc q1 |+| loc q2 |+| loc q3 |+| loc q4 |+| loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_eval h1 out) ==
     S.aff_point_add
-      (S.aff_point_mul (qas_nat h0 scalar1) (S.to_aff_point (point_eval h0 p1)))
-      (S.aff_point_mul (qas_nat h0 scalar2) (S.to_aff_point (point_eval h0 p2))))
+      (S.aff_point_mul (qas_nat h0 scalar1) (S.to_aff_point_c (point_eval h0 p1)))
+      (S.aff_point_mul (qas_nat h0 scalar2) (S.to_aff_point_c (point_eval h0 p2))))
 
 let point_modifies_elim (p:point) (l:LowStar.Buffer.loc) (h0 h1:mem) : Lemma
-  (requires live h0 p /\ point_inv h0 p /\
+  (requires live h0 p /\
     LowStar.Buffer.loc_disjoint (loc p) l /\ modifies l h0 h1)
-  (ensures live h1 p /\ point_inv h1 p /\ point_eval h0 p == point_eval h1 p) =
+  (ensures live h1 p /\ as_seq h1 p == as_seq h0 p /\
+    (point_inv h0 p ==> point_inv h1 p) /\ point_eval h0 p == point_eval h1 p) =
   LowStar.Buffer.modifies_buffer_elim (p <: LowStar.Buffer.buffer uint64) l h0 h1;
   LowStar.Buffer.modifies_buffer_elim
     (gsub p 0ul 5ul <: LowStar.Buffer.buffer uint64) l h0 h1;
@@ -488,7 +496,7 @@ let point_modifies_elim (p:point) (l:LowStar.Buffer.loc) (h0 h1:mem) : Lemma
     (gsub p 10ul 5ul <: LowStar.Buffer.buffer uint64) l h0 h1
 
 #push-options "--fuel 2"
-let ecmult_endo_split_points (k:S.qelem) (p:S.proj_point) : Lemma
+let ecmult_endo_split_points (k:S.qelem) (p:S.proj_point_c) : Lemma
   (let r10, r20 = SG.scalar_split_lambda k in
    let _, p1, _, p2 = SG.ecmult_endo_split k p in
    p1 == SG.point_negate_cond p (S.scalar_is_high r10) /\
@@ -500,25 +508,41 @@ let ecmult_endo_split_points (k:S.qelem) (p:S.proj_point) : Lemma
 #pop-options
 
 let point_reflection (h:mem) (p:point) : Lemma
-  (requires live h p /\ point_inv h p)
-  (ensures refl (as_seq h p) == S.to_aff_point (point_eval h p)) = ()
+  (requires live h p /\ linv (as_seq h p))
+  (ensures point_inv h p /\ S.point_inv (point_eval h p) /\
+    refl (as_seq h p) == S.to_aff_point (point_eval h p)) = ()
+
+let point_linv_intro (h:mem) (p:point) : Lemma
+  (requires live h p /\ point_inv h p /\ S.point_inv (point_eval h p))
+  (ensures linv (as_seq h p)) = ()
 
 #push-options "--fuel 1"
-let ecmult_endo_split_result (k1:S.qelem) (p1:S.proj_point)
-  (k2:S.qelem) (p2:S.proj_point) : Lemma
+let ecmult_endo_split_result (k1:S.qelem) (p1:S.proj_point_c)
+  (k2:S.qelem) (p2:S.proj_point_c) : Lemma
   (let r1, q1, r2, q2 = SG.ecmult_endo_split k1 p1 in
    let r3, q3, r4, q4 = SG.ecmult_endo_split k2 p2 in
    r1 < pow2 128 /\ r2 < pow2 128 /\ r3 < pow2 128 /\ r4 < pow2 128 ==>
    LE.exp_four_fw S.mk_k256_comm_monoid
-     (S.to_aff_point q1) 128 r1 (S.to_aff_point q2) r2
-     (S.to_aff_point q3) r3 (S.to_aff_point q4) r4 5 ==
+     (S.to_aff_point_c q1) 128 r1 (S.to_aff_point_c q2) r2
+     (S.to_aff_point_c q3) r3 (S.to_aff_point_c q4) r4 5 ==
    SGL.aff_proj_point_mul_double_split_lambda k1 p1 k2 p2) = ()
 #pop-options
 
-#push-options "--split_queries always --z3rlimit 100 --z3smtopt '(set-option :smt.arith.solver 2)'"
+let ecmult_endo_split_fallback (k1:S.qelem) (p1:S.proj_point_c)
+  (k2:S.qelem) (p2:S.proj_point_c) : Lemma
+  (requires p1 == S.g /\
+   (let r1, _, r2, _ = SG.ecmult_endo_split k1 p1 in
+    let r3, _, r4, _ = SG.ecmult_endo_split k2 p2 in
+    not (r1 < pow2 128 && r2 < pow2 128 && r3 < pow2 128 && r4 < pow2 128)))
+  (ensures S.to_aff_point (S.point_mul_double_g k1 k2 p2) ==
+    SGL.aff_proj_point_mul_double_split_lambda k1 p1 k2 p2) = ()
+
+#push-options "--split_queries always --z3rlimit 150 --z3smtopt '(set-option :smt.arith.solver 2)'"
 let point_mul_g_double_split_lambda_vartime_noalloc out r1 q1 r2 q2 r3 q3 r4 q4
   scalar1 scalar2 p1 p2 =
   let h0 = ST.get () in
+  point_reflection h0 p1;
+  point_reflection h0 p2;
   ecmult_endo_split_result (qas_nat h0 scalar1) (point_eval h0 p1)
     (qas_nat h0 scalar2) (point_eval h0 p2);
   SGL.lemma_aff_proj_point_mul_double_split_lambda
@@ -555,16 +579,29 @@ let point_mul_g_double_split_lambda_vartime_noalloc out r1 q1 r2 q2 r3 q3 r4 q4
   point_reflection h_checked q3;
   point_reflection h_checked q4;
   ST.lemma_equal_domains_trans h0 h_split h_checked;
-  if is_r1234_valid then
+  if is_r1234_valid then begin
     point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
-      p1 p2 is_high1 is_high2 is_high3 is_high4
-  else
+      p1 p2 is_high1 is_high2 is_high3 is_high4;
+    let h_table = ST.get () in
+    point_reflection h_table out end
+  else begin
+    ecmult_endo_split_fallback (qas_nat h0 scalar1) (point_eval h0 p1)
+      (qas_nat h0 scalar2) (point_eval h0 p2);
+    assert (qas_nat h_checked scalar1 == qas_nat h0 scalar1);
+    assert (qas_nat h_checked scalar2 == qas_nat h0 scalar2);
+    assert (point_eval h_checked p2 == point_eval h0 p2);
     PM.point_mul_g_double_vartime out scalar1 scalar2 p2;
+    let h_pm = ST.get () in
+    assert (modifies (loc out) h_checked h_pm);
+    assert (point_inv h_pm out);
+    assert (S.to_aff_point (point_eval h_pm out) ==
+      SGL.aff_proj_point_mul_double_split_lambda
+        (qas_nat h0 scalar1) (point_eval h0 p1)
+        (qas_nat h0 scalar2) (point_eval h0 p2)) end;
   let h1 = ST.get () in
   ST.lemma_equal_domains_trans h0 h_checked h1;
   assert (modifies (l_split |+| loc out) h0 h1);
   assert (point_inv h1 out);
-  point_reflection h1 out;
   assert (S.to_aff_point (point_eval h1 out) ==
     SGL.aff_proj_point_mul_double_split_lambda
       (qas_nat h0 scalar1) (point_eval h0 p1)
@@ -596,14 +633,14 @@ val point_mul_g_double_split_lambda_vartime_noalloc_aux:
 
     disjoint q1234 scalar1 /\ disjoint q1234 scalar2 /\ disjoint q1234 p1 /\ disjoint q1234 p2 /\
 
-    point_inv h p1 /\ point_inv h p2 /\ point_eval h p1 == S.g /\
+    linv (as_seq h p1) /\ linv (as_seq h p2) /\ point_eval h p1 == S.g /\
     qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc r1234 |+| loc q1234 |+| loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_eval h1 out) ==
     S.aff_point_add
-      (S.aff_point_mul (qas_nat h0 scalar1) (S.to_aff_point (point_eval h0 p1)))
-      (S.aff_point_mul (qas_nat h0 scalar2) (S.to_aff_point (point_eval h0 p2))))
+      (S.aff_point_mul (qas_nat h0 scalar1) (S.to_aff_point_c (point_eval h0 p1)))
+      (S.aff_point_mul (qas_nat h0 scalar2) (S.to_aff_point_c (point_eval h0 p2))))
 
 let point_mul_g_double_split_lambda_vartime_noalloc_aux out r1234 q1234 scalar1 scalar2 p1 p2 =
   let r1 = sub r1234 0ul 4ul in
@@ -619,6 +656,8 @@ let point_mul_g_double_split_lambda_vartime_noalloc_aux out r1234 q1234 scalar1 
     out r1 q1 r2 q2 r3 q3 r4 q4 scalar1 scalar2 p1 p2
 
 
+#pop-options
+
 inline_for_extraction noextract
 val point_mul_g_double_split_lambda_vartime_alloc:
   out:point -> scalar1:qelem -> p1:point -> scalar2:qelem -> p2:point -> Stack unit
@@ -626,14 +665,14 @@ val point_mul_g_double_split_lambda_vartime_alloc:
     live h out /\ live h scalar1 /\ live h p1 /\ live h scalar2 /\ live h p2 /\
     disjoint p1 out /\ disjoint p2 out /\ eq_or_disjoint p1 p2 /\
     disjoint scalar1 out /\ disjoint scalar2 out /\
-    point_inv h p1 /\ point_inv h p2 /\ point_eval h p1 == S.g /\
+    linv (as_seq h p1) /\ linv (as_seq h p2) /\ point_eval h p1 == S.g /\
     qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_eval h1 out) ==
     S.aff_point_add
-      (S.aff_point_mul (qas_nat h0 scalar1) (S.to_aff_point (point_eval h0 p1)))
-      (S.aff_point_mul (qas_nat h0 scalar2) (S.to_aff_point (point_eval h0 p2))))
+      (S.aff_point_mul (qas_nat h0 scalar1) (S.to_aff_point_c (point_eval h0 p1)))
+      (S.aff_point_mul (qas_nat h0 scalar2) (S.to_aff_point_c (point_eval h0 p2))))
 
 let point_mul_g_double_split_lambda_vartime_alloc out scalar1 p1 scalar2 p2 =
   push_frame ();
@@ -646,13 +685,37 @@ let point_mul_g_double_split_lambda_vartime_alloc out scalar1 p1 scalar2 p2 =
 [@CInline]
 let point_mul_g_double_split_lambda_vartime out scalar1 scalar2 p2 =
   let h0 = ST.get () in
-  SE.exp_double_fw_lemma S.mk_k256_concrete_ops S.g 256
+  SL.g_inv ();
+  SE.exp_double_fw_lemma S.mk_k256_concrete_ops S.g_c 256
     (qas_nat h0 scalar1) (point_eval h0 p2) (qas_nat h0 scalar2) 5;
   LE.exp_double_fw_lemma S.mk_k256_comm_monoid
-    (S.to_aff_point S.g) 256 (qas_nat h0 scalar1)
-    (S.to_aff_point (point_eval h0 p2)) (qas_nat h0 scalar2) 5;
+    (S.to_aff_point_c S.g_c) 256 (qas_nat h0 scalar1)
+    (S.to_aff_point_c (point_eval h0 p2)) (qas_nat h0 scalar2) 5;
   push_frame ();
+  let h_frame = ST.get () in
+  LowStar.Buffer.fresh_frame_modifies h0 h_frame;
+  point_modifies_elim p2 LowStar.Buffer.loc_none h0 h_frame;
   let g = create 15ul (u64 0) in
+  fresh_buffer_disjoint #uint64 #uint64 h_frame out g;
+  fresh_buffer_disjoint #uint64 #uint64 h_frame scalar1 g;
+  fresh_buffer_disjoint #uint64 #uint64 h_frame scalar2 g;
+  fresh_buffer_disjoint #uint64 #uint64 h_frame p2 g;
+  let h_g = ST.get () in
   make_g g;
+  let h1 = ST.get () in
+  LowStar.Buffer.modifies_trans_linear LowStar.Buffer.loc_none (loc g) h_frame h_g h1;
+  inline_stack_inv_trans h_frame h_g h1;
+  point_modifies_elim p2 (loc g) h_frame h1;
+  point_linv_intro h1 g;
+  point_linv_intro h1 p2;
   point_mul_g_double_split_lambda_vartime_alloc out scalar1 g scalar2 p2;
-  pop_frame ()
+  let h_post = ST.get () in
+  LowStar.Buffer.modifies_trans (loc g) h_frame h1 (loc out) h_post;
+  pop_frame ();
+  let hf = ST.get () in
+  LowStar.Buffer.modifies_fresh_frame_popped h0 h_frame (loc out) h_post hf;
+  buffer_fresh_frame_disjoint h0 h_frame out;
+  LowStar.Buffer.popped_modifies h_post hf;
+  point_modifies_elim out
+    (LowStar.Buffer.loc_region_only false (get_tip h_frame)) h_post hf;
+  stack_frame_equal_domains h0 h_frame h1 h_post hf

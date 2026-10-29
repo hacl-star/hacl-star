@@ -193,8 +193,12 @@ let scalar_split_lambda r1 r2 k =
  Fast computation of [lambda]P as (beta * px, py, pz) in projective coordinates
 *)
 
+#push-options "--z3rlimit 200"
 [@CInline]
 let point_mul_lambda res p =
+  let h0 = ST.get () in
+  SG.beta_cube ();
+  Spec.K256.Lemmas.point_mul_x_inv SG.beta (point_eval h0 p);
   push_frame ();
   let rx, ry, rz = getx res, gety res, getz res in
   let px, py, pz = getx p, gety p, getz p in
@@ -205,16 +209,22 @@ let point_mul_lambda res p =
   copy_felem ry py;
   copy_felem rz pz;
   pop_frame ()
+#pop-options
 
 
+#push-options "--z3rlimit 200"
 [@CInline]
 let point_mul_lambda_inplace res =
+  let h0 = ST.get () in
+  SG.beta_cube ();
+  Spec.K256.Lemmas.point_mul_x_inv SG.beta (point_eval h0 res);
   push_frame ();
   let rx, ry, rz = getx res, gety res, getz res in
   let beta = create_felem () in
   make_beta beta;
   fmul rx beta rx;
   pop_frame ()
+#pop-options
 
 
 inline_for_extraction noextract
@@ -225,9 +235,9 @@ val point_mul_lambda_and_split_lambda:
     disjoint r1 r2 /\ disjoint r1 lambda_q /\ disjoint r1 scalar /\ disjoint r1 q /\
     disjoint r2 lambda_q /\ disjoint r2 scalar /\ disjoint r2 q /\
     disjoint lambda_q scalar /\ disjoint lambda_q q /\
-    point_inv h q /\ qas_nat h scalar < S.q)
+    point_inv_c h q /\ qas_nat h scalar < S.q)
   (ensures fun h0 _ h1 -> modifies (loc r1 |+| loc r2 |+| loc lambda_q) h0 h1 /\
-    point_inv h1 lambda_q /\
+    point_inv_c h1 lambda_q /\
     point_eval h1 lambda_q == SG.point_mul_lambda (point_eval h0 q) /\
    (let r1_s, r2_s = SG.scalar_split_lambda (qas_nat h0 scalar) in
     qas_nat h1 r1 == r1_s /\ qas_nat h1 r2 == r2_s))
@@ -241,13 +251,15 @@ inline_for_extraction noextract
 val negate_point_and_scalar_cond_vartime: k:qelem -> p:point -> Stack bool
   (requires fun h ->
     live h k /\ live h p /\ disjoint k p /\
-    qas_nat h k < S.q /\ point_inv h p)
+    qas_nat h k < S.q /\ point_inv_c h p)
   (ensures  fun h0 b h1 -> modifies (loc k |+| loc p) h0 h1 /\
-    b == S.scalar_is_high (qas_nat h0 k) /\ point_inv h1 p /\
+    b == S.scalar_is_high (qas_nat h0 k) /\ point_inv_c h1 p /\
     (let k_s, p_s = SG.negate_point_and_scalar_cond (qas_nat h0 k) (point_eval h0 p) in
     qas_nat h1 k == k_s /\ point_eval h1 p == p_s))
 
 let negate_point_and_scalar_cond_vartime k p =
+  let h0 = ST.get () in
+  Spec.K256.Lemmas.point_negate_inv (point_eval h0 p);
   let b = is_qelem_le_q_halved_vartime k in
   [@inline_let] let if_high = not b in
   qnegate_conditional_vartime k if_high;
