@@ -1,6 +1,35 @@
 [
-  "ae5f6d2736ba6fb834b8d47856cef76f",
+  "3c083c6d9cdf6f07a33a7380a8e8bda0",
   [
+    [
+      "Spec.P256.Lemmas.base_point_inv",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.P256.PointOps.felem",
+        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "typing_Spec.P256.PointOps.g_x", "typing_Spec.P256.PointOps.g_y"
+      ],
+      0,
+      "665466e7c9cd7948e49c65f2339cfcf8"
+    ],
+    [
+      "Spec.P256.Lemmas.load_point_inv",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "44b73925656579ca8e4ab66087136c27"
+    ],
     [
       "Spec.P256.Lemmas.aff_point_at_inf_lemma",
       1,
@@ -18,7 +47,7 @@
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3b04ac832eabd12e805bfd23f6214f95"
+      "2ca408f9d1f885b678ce8a66761463c0"
     ],
     [
       "Spec.P256.Lemmas.aff_point_add_comm_lemma",
@@ -37,7 +66,7 @@
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "add10ec657d47e8d3d21cd262fcc4b9d"
+      "b8e031bbd7fc444095e2d6ceb5439203"
     ]
   ]
 ]

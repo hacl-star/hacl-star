@@ -1,5 +1,5 @@
 [
-  "416c7ff32f6253903ea7b69b3d5f390d",
+  "036ec871d7f2c94fa8b20e312ffb33d6",
   [
     [
       "Hacl.P256.ecdsa_sign_p256_st",
@@ -73,7 +73,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a79bc111c93e8dcdf0e641e628fa46b4"
+      "2b5285c7eb1382bd3565e67b5791ac45"
     ],
     [
       "Hacl.P256.ecdsa_verify_p256_st",
@@ -111,7 +111,7 @@
         "typing_Spec.P256.min_input_length"
       ],
       0,
-      "ea30e7f40f93d2497cc393f31d61af7d"
+      "767bd31bb707bb7eb6b8400a28e81a98"
     ],
     [
       "Hacl.P256.msg_as_felem",
@@ -190,7 +190,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0f0e5e117998010c2475138a2d76ec7e"
+      "1776be89a0a6828cb5f2767450cace72"
     ],
     [
       "Hacl.P256.msg_as_felem",
@@ -423,7 +423,7 @@
         "unit_typing"
       ],
       0,
-      "d30b41025b68b057142fc5e7fab6aed1"
+      "8a27e197ef7b2d78e217763c29d2bb04"
     ],
     [
       "Hacl.P256.ecdsa_signature",
@@ -583,52 +583,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "cae7582667d90b63008f85fbb93580b6"
-    ],
-    [
-      "Hacl.P256.fresh_buffer_disjoint",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
-        "constructor_distinct_Lib.Buffer.MUT",
-        "equality_tok_Lib.Buffer.MUT@tok",
-        "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_tip",
-        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
-        "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
-        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
-        "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.loc_not_in",
-        "equation_Prims.eqtype", "equation_Prims.logical",
-        "equation_Prims.nat",
-        "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Prims.int",
-        "function_token_typing_Prims.logical",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
-        "projection_inverse_Tm_type_0",
-        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
-        "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
-        "typing_FStar.Set.singleton",
-        "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.as_addr",
-        "typing_LowStar.Monotonic.Buffer.frameOf",
-        "typing_LowStar.Monotonic.Buffer.loc_addresses",
-        "typing_LowStar.Monotonic.Buffer.loc_buffer"
-      ],
-      0,
-      "0ae02965994a4532a7edee6cbd70cd6f"
+      "0ec57fd488128a1bc6cf360308637eb7"
     ],
     [
       "Hacl.P256.ecdsa_verification",
@@ -789,7 +744,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "49a36d08767ede9a02d115361ef79650"
+      "7011d5a99abe23dcb0ed78d1aa3aa284"
     ],
     [
       "Hacl.P256.validate_public_key",
@@ -926,7 +881,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d25bfb9b78d8a3b60fbddb5b369bc8f3"
+      "22ed0c85c5d7054d9162bfa1330d71e5"
     ],
     [
       "Hacl.P256.validate_private_key",
@@ -959,7 +914,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "995105acd0bfca3cba61e824654fda00"
+      "7a2d90c3fe0bbc05b0587e5bb36312b8"
     ],
     [
       "Hacl.P256.validate_private_key",
@@ -1119,7 +1074,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "dda0de92cd0752706d5011de1ff193e4"
+      "3b1442eca1c8262821d329e3105b2a64"
     ],
     [
       "Hacl.P256.uncompressed_to_raw",
@@ -1155,7 +1110,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "13f5df43f781f88c4032836df3c739d7"
+      "71a15479d663279b453c883e3c474d08"
     ],
     [
       "Hacl.P256.compressed_to_raw",
@@ -1191,7 +1146,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "59f7515d2e6afa7b4d7d5bfdcc4365f3"
+      "52a23719896c710b8a24bfa1f6fdcf8a"
     ],
     [
       "Hacl.P256.raw_to_uncompressed",
@@ -1230,7 +1185,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "d9926c6f86ed4eff4900a6c974b5f1ab"
+      "05d1dac8bef7eec68b7830e18ca77c33"
     ],
     [
       "Hacl.P256.raw_to_compressed",
@@ -1269,7 +1224,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "545849071a6ad8ba51ca701f857195dc"
+      "c40353ee9d72e001a36abc523eb13fb6"
     ],
     [
       "Hacl.P256.dh_initiator",
@@ -1317,7 +1272,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "741a7fbd5147bd09a87e40d275ea4954"
+      "773f90f1546161488cb037d91953e7bd"
     ],
     [
       "Hacl.P256.dh_responder",
@@ -1363,7 +1318,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "f66fb71c40eb15e970f383b13e2470e0"
+      "f7afff06f6757914e4a5a869b7060851"
     ]
   ]
 ]

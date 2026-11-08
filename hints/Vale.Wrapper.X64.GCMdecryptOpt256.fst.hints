@@ -1,5 +1,5 @@
 [
-  "ec2321b7ff97362f03a204d0fd955e90",
+  "185ccce4c713278e821fb246868013d8",
   [
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.length_aux",
@@ -33,7 +33,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "eb17060d06d7c84805e1e0b1d98d5b51"
+      "827a41fcbc8674a0cfdddf93b629ff70"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.length_aux2",
@@ -67,7 +67,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "533df568322b56aaed670394ec5bac81"
+      "f6f44d992c16d8f3f39d41a0e0770ce9"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.length_aux3",
@@ -101,7 +101,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "92db2b5366828ef1440ac62f792ac2f3"
+      "d05b36b2050e73eceb4519b37fea8e52"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.length_aux4",
@@ -135,7 +135,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "4cf89fe28364bc032fa065d82903284a"
+      "d23b464b26a7a16d13087ba393a7cf20"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.length_aux5",
@@ -169,100 +169,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "522af77dc02c38809d0a462b85f3cc9e"
-    ],
-    [
-      "Vale.Wrapper.X64.GCMdecryptOpt256.stdcall_constants",
-      1,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "1771b3be51f3387711a251fcc16f81da"
-    ],
-    [
-      "Vale.Wrapper.X64.GCMdecryptOpt256.block_length_bound",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
-      ],
-      0,
-      "8e95ff94fb6a40f3bf051c69dbac474d"
-    ],
-    [
-      "Vale.Wrapper.X64.GCMdecryptOpt256.prepare_buffer",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128",
-        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt8",
-        "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
-        "equality_tok_Vale.Arch.HeapTypes_s.TUInt8@tok",
-        "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Vale.Interop.Types.base_typ_as_type",
-        "equation_Vale.Interop.Types.down_view",
-        "equation_Vale.Interop.Types.get_downview",
-        "equation_Vale.Interop.Types.view_n",
-        "equation_Vale.Interop.Views.down_view8",
-        "equation_Vale.Wrapper.X64.GCMdecryptOpt256.uint8_p",
-        "int_inversion",
-        "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
-        "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
-        "proj_equation_FStar.Pervasives.Mkdtuple4_@_1",
-        "proj_equation_FStar.Pervasives.Mkdtuple4_@_2",
-        "proj_equation_FStar.Pervasives.Mkdtuple4_@_3",
-        "proj_equation_LowStar.BufferView.Down.View_@n",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_LowStar.BufferView.Down.View_@n",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "refinement_interpretation_Tm_refine_9fb8478d2e99870983e47bb162883c67",
-        "typing_FStar.UInt8.t", "typing_LowStar.Buffer.trivial_preorder",
-        "typing_Vale.Interop.Types.down_view",
-        "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
-      ],
-      0,
-      "cd89c7f5a0c56ba48dc7152795a12deb"
-    ],
-    [
-      "Vale.Wrapper.X64.GCMdecryptOpt256.prepare_buffers",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128",
-        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt8",
-        "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
-        "equality_tok_Vale.Arch.HeapTypes_s.TUInt8@tok",
-        "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
-        "equation_Vale.Interop.Base.buf_t",
-        "equation_Vale.Interop.Types.base_typ_as_type",
-        "equation_Vale.Interop.Types.view_n",
-        "equation_Vale.Wrapper.X64.GCMdecryptOpt256.uint8_p",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0a1e6882aa4f5cac449abd1b272d45e6",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_83bd940927020bb51199658f6752ed80",
-        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
-        "typing_FStar.UInt8.t", "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.length",
-        "typing_Vale.X64.MemoryAdapters.as_vale_buffer",
-        "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
-        "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
-      ],
-      0,
-      "0f4373ba65093d1ddeb4089b05c8ce96"
+      "76637babb711b0b8d81e4c2c1803306e"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.wrap_slice",
@@ -277,7 +184,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "4491dd0fbfdd571c57a366248953f6b9"
+      "6fbd138a858f8b181ff68e5034687001"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.math_aux",
@@ -290,7 +197,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "743208f2c795fb69711365f69791cfe5"
+      "089ebcb2f1ec4e2adf09e10c0d00481f"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.length_div",
@@ -324,7 +231,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "2f072263cdb4a4e0377935e2dc427f01"
+      "e17c6b734b538306f697baeebbbb64e7"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_pre",
@@ -345,7 +252,7 @@
         "projection_inverse_LowStar.BufferView.Up.View_@n"
       ],
       0,
-      "43d7014ed8606abdf055c05007ed7870"
+      "fe6e3688ca1f128416f18840e364eec7"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_args",
@@ -354,7 +261,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "61b989873879e3fef7ea9c5503533463"
+      "f417912b41a691c338a707f611a51027"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.prove_gcm256_call_pre",
@@ -501,7 +408,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "56d9fd0310552fc70494d9b5e38f605b"
+      "81a659189aa1ae48e0156d338eaa45b1"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_post",
@@ -533,7 +440,7 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "0ad019d60e14e0e6edca12ec2e1a5c82"
+      "0800b1a3b4e50d49fe0ce25f93009771"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_call_post",
@@ -542,7 +449,7 @@
       0,
       [ "@query" ],
       0,
-      "f912ae78dc29c051a5029ffc31471fc9"
+      "1b360896f1039c54e2b4995b7bc1dab6"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.prove_gcm256_call_post",
@@ -691,7 +598,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "2238a41862a7dc308ed44b748aa7672c"
+      "f25ffddd317a1047cee4cb0fc8a60966"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_opt'",
@@ -703,7 +610,7 @@
         "refinement_interpretation_Tm_refine_841943125d6eb80be68c743e8ca45157"
       ],
       0,
-      "c46a2595c299cab945345fa3af3146c4"
+      "4a062b737bf29c08786d93e9cc25c5ee"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_opt'",
@@ -831,7 +738,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "db4a8dc6d36a71040536f996ffd6df52"
+      "9daf924f8d50632490b7e978dd1a58de"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_opt_alloca",
@@ -890,7 +797,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "df7a96ba2e563b653e5b68c17cbda640"
+      "9679a86602a5599298724fdc545e4b9f"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.lemma_same_seq_dv",
@@ -957,7 +864,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "7ece0c34ee3727595ec2676e491a515c"
+      "696891127fbfd032559d0eadfea8f7d9"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.lemma_uv_split",
@@ -1076,7 +983,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "2df69d835e70b8829019f7f8c0fb7300"
+      "a99f2123a70e0a71cfc431f745505dc6"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.math_cast_aux",
@@ -1098,7 +1005,7 @@
         "typing_FStar.Int.Cast.uint64_to_uint32", "typing_FStar.UInt64.v"
       ],
       0,
-      "af279d9334b618459c73d602b7375be7"
+      "9afd717dc7e36361bd3914b52554bb0f"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_opt_alloca",
@@ -1254,7 +1161,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "effb74bafb0b67643d5899958a52997b"
+      "5883964ae2e701b2484d921d98415290"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.lemma_identical_uv",
@@ -1295,7 +1202,7 @@
         "typing_Vale.Interop.Views.up_view128"
       ],
       0,
-      "ca15ab900bd69aa6d45e54c5d8745532"
+      "95711b6e1ac35bf3f06ed17a337ce3b8"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.length_aux6",
@@ -1334,7 +1241,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "1684cb7a2c998109790b0d24569ac3dd"
+      "df40bda40575ff09113c025d36265279"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.lemma_slice_uv_extra",
@@ -1431,7 +1338,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8"
       ],
       0,
-      "05301508b952bd8d1b01f224ea5df3a2"
+      "a1e0304617b749a0027f696e19041577"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.lemma_slice_sub",
@@ -1503,7 +1410,7 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "002d8bdde939b63281a47742f4b4ef27"
+      "8a38f53ee71f26c7e1e4e7bbcbb971af"
     ],
     [
       "Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_opt_stdcall",
@@ -1706,7 +1613,7 @@
         "typing_Vale.X64.CPU_Features_s.movbe_enabled"
       ],
       0,
-      "8e218d9ececd30224c2dda84595438ca"
+      "575171b2c0ee465e596dcac6f3e5f490"
     ]
   ]
 ]

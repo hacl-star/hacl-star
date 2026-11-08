@@ -1,5 +1,5 @@
 [
-  "4d05a8214b00c628ed3b8a058a871d80",
+  "492087746b691891e6c18861f62abe5c",
   [
     [
       "Spec.P256.PointOps.prime",
@@ -286,6 +286,27 @@
       "984ab524a808122c79f88d69c61b0cc3"
     ],
     [
+      "Spec.P256.PointOps.is_on_proj_curve",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "equation_Spec.P256.PointOps.proj_point",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3_@_1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3_@_2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3_@_3",
+        "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
+        "refinement_interpretation_Tm_refine_fa8bfe8bc41f90e935200158e1975ad9"
+      ],
+      0,
+      "b3e255a1f13c85df695e1a3f0325c064"
+    ],
+    [
       "Spec.P256.PointOps.aff_point_double",
       1,
       0,
@@ -304,7 +325,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "eb89cb2b56112811873d6bd80a573273"
+      "6d67b7f443a49718af72b0c4466f3a4f"
     ],
     [
       "Spec.P256.PointOps.aff_point_add",
@@ -328,7 +349,7 @@
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "474b991792c4efec17fa1f8bd88eda05"
+      "54ec7978c9b10a8fedcf0b9fd1ad00ba"
     ],
     [
       "Spec.P256.PointOps.point_add",
@@ -353,7 +374,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "6683d637bb63b1316eaefef5e4a7d248"
+      "a5b6a546a388d39a53d0920a73a9f3ce"
     ],
     [
       "Spec.P256.PointOps.point_double",
@@ -382,7 +403,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "aa66efb95122d7956900cfe4850fca17"
+      "852855ab9b5a739aa748ead143b19409"
     ],
     [
       "Spec.P256.PointOps.aff_point_load",
@@ -400,7 +421,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "177273637ea3fbed4ace16b460595a92"
+      "55834050132f0420be551842f054a2e4"
     ],
     [
       "Spec.P256.PointOps.aff_point_load",
@@ -418,7 +439,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "721e638e21f49f43642a0727b18b74a4"
+      "2ad46a66e79b55bbfd1b6dde2aff4d01"
     ],
     [
       "Spec.P256.PointOps.load_point",
@@ -435,7 +456,7 @@
         "typing_Spec.P256.PointOps.aff_point_load"
       ],
       0,
-      "0b8fec7ed418df940c9eb89f6f47d530"
+      "b629be846872137bd1ea2a96dbff9dab"
     ],
     [
       "Spec.P256.PointOps.load_point",
@@ -450,7 +471,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d4c1948390fcb42463587d4749ebecd1"
+      "b30e21443d1947fcf77ddabe7802ef9f"
     ],
     [
       "Spec.P256.PointOps.aff_point_store",
@@ -476,7 +497,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "b740d4b938877e134ca3946b7e98a951"
+      "a683dbd60037a4373f14570f31d00bef"
     ],
     [
       "Spec.P256.PointOps.point_store",
@@ -491,7 +512,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6f667a3302327dc1cfe5060b9dc46876"
+      "09cb790fb6307066eb0abaa2fdb5ab4a"
     ],
     [
       "Spec.P256.PointOps.recover_y",
@@ -511,7 +532,7 @@
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "09b3ef5cd4ccc0005e81aea300e93633"
+      "e8340ca2ccff45c4eda22f59fb978d3b"
     ],
     [
       "Spec.P256.PointOps.aff_point_decompress",
@@ -537,7 +558,7 @@
         "refinement_kinding_Tm_refine_0cf5133af1b6c35f069d9573d9abce08"
       ],
       0,
-      "54a3a224e535b3e878cddd1e0c8a439c"
+      "d6f1633dc8b23bd650e0a3329ddf70c0"
     ],
     [
       "Spec.P256.PointOps.aff_point_decompress",
@@ -563,7 +584,7 @@
         "refinement_kinding_Tm_refine_0cf5133af1b6c35f069d9573d9abce08"
       ],
       0,
-      "04c00fd281c517172c9da01d837b7bbe"
+      "186efb577660252d66daddd860a33f93"
     ]
   ]
 ]
