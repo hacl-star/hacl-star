@@ -1,5 +1,5 @@
 [
-  "6740509e6ab73bf3c860fea50973096e",
+  "ed0d2447c8f53ad59db51c9f3c82381a",
   [
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_get_u12",
@@ -12,7 +12,7 @@
         "refinement_interpretation_Tm_refine_448314089a7eb91c6bada742aa904fea"
       ],
       0,
-      "d2f843720869397238b08f2ba826d0b7"
+      "007643c1d2dd3bb7b27e6d4875ba61c4"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_get_u12",
@@ -152,7 +152,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "be1052978b0538b08479af4e108a9b0d"
+      "a33d20df16dacd9001a2fb5eee63e677"
     ],
     [
       "Hacl.Impl.K256.Verify.fmul_eq_vartime",
@@ -167,7 +167,7 @@
         "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f"
       ],
       0,
-      "dc9bd35df7dc200c12c3b7d6f7dbd78f"
+      "7d01cd21911047d0f3d70666e3636d0f"
     ],
     [
       "Hacl.Impl.K256.Verify.fmul_eq_vartime",
@@ -324,7 +324,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "4f759720790ad6d25e1d1c07a94b56bd"
+      "11ec6069442963011dca3d842dd967f6"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_avoid_finv",
@@ -333,7 +333,7 @@
       0,
       [ "@query" ],
       0,
-      "9936ee263b25ec800b424b69cbae685e"
+      "795b2e729019e629ad1a1b2b1541c610"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_avoid_finv",
@@ -570,7 +570,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e814b15382f7bc2e08958d910e27e59b"
+      "e0bf351205fcd7ea5f5387086c8b6e52"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_cmpr",
@@ -579,10 +579,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_Tm_refine_c4da98cd6b0fcf6f94a0cef576a4097a"
+        "refinement_interpretation_Tm_refine_69e4afeb975ebecff9dcac8cd9e7fb84"
       ],
       0,
-      "5fa687e90ceefbded44e1f8d9b83248c"
+      "e50647a8c8a235ecf153e2ad0af6bb10"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_cmpr",
@@ -637,24 +637,30 @@
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
         "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies0",
-        "equation_Lib.Buffer.stack_allocated", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.Buffer.stack_allocated", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.v", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length",
         "equation_LowStar.Monotonic.Buffer.loc_not_in",
-        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Prims.squash", "equation_Spec.K256.PointOps.felem",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.K256.PointOps.felem",
         "equation_Spec.K256.PointOps.is_aff_point_at_inf",
+        "equation_Spec.K256.PointOps.is_on_proj_curve",
         "equation_Spec.K256.PointOps.is_proj_point_at_inf",
         "equation_Spec.K256.PointOps.op_Star_Percent",
+        "equation_Spec.K256.PointOps.point_inv",
+        "equation_Spec.K256.PointOps.proj_point",
         "equation_Spec.K256.PointOps.q",
         "equation_Spec.K256.PointOps.to_aff_point",
-        "equation_Spec.K256.PointOps.zero", "equation_Spec.K256.uu___0",
+        "equation_Spec.K256.PointOps.zero",
+        "equation_Spec.K256.proj_point_c",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
-        "function_token_typing_Spec.K256.uu___0",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing",
         "interpretation_Tm_abs_fc7581d1404ec0600e616d09ce9872ec",
@@ -703,9 +709,9 @@
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_GreaterThan", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Negation",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_1",
@@ -715,16 +721,15 @@
         "refinement_interpretation_Tm_refine_0c48d373c23468c2cd49677ec2323c06",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_3d7275d437e1d1ad228fb5d923429f54",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_69e4afeb975ebecff9dcac8cd9e7fb84",
         "refinement_interpretation_Tm_refine_9d6af3f3535473623f7aec2f0501897f",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_c4da98cd6b0fcf6f94a0cef576a4097a",
         "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_fcb8a54b290d87e6f78f2724b41d3a66",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "true_interp", "typing_FStar.Map.contains",
         "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
@@ -739,8 +744,8 @@
         "typing_FStar.Monotonic.HyperStack.remove_elt",
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
-        "typing_FStar.UInt32.v", "typing_Hacl.Impl.K256.Point.point_eval",
+        "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
+        "typing_Hacl.Impl.K256.Point.point_eval",
         "typing_Hacl.K256.Field.nlimb", "typing_Hacl.K256.Scalar.qnlimb",
         "typing_Lib.Buffer.gsub", "typing_Lib.Buffer.length",
         "typing_Lib.Buffer.loc", "typing_Lib.IntTypes.int_t",
@@ -752,13 +757,15 @@
         "typing_LowStar.Monotonic.Buffer.loc_addresses",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_none",
-        "typing_LowStar.Monotonic.Buffer.loc_regions", "typing_Prims.pow2",
+        "typing_LowStar.Monotonic.Buffer.loc_regions",
+        "typing_Spec.K256.PointOps.is_on_proj_curve",
         "typing_Spec.K256.PointOps.is_proj_point_at_inf",
+        "typing_Spec.K256.PointOps.point_inv",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "b3d6f7631c584740380797f67e0b80e8"
+      "8410e87b2766587a1934c665b2ebcd16"
     ],
     [
       "Hacl.Impl.K256.Verify.load_signature",
@@ -821,7 +828,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6486a99b7b333a4ebe25937ef926c420"
+      "2e272519958b74cc337f6cf07ef7c8ac"
     ],
     [
       "Hacl.Impl.K256.Verify.load_signature",
@@ -910,7 +917,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "874226dc629881ea110b49a60c335a1d"
+      "709793c17c874a9c370f29466ecdf0d5"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -964,7 +971,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f8cab0eb7a86e8ebc2b0c488f97ab23f"
+      "81c33ec77af3fc24e207b94f29a7d4a7"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -976,7 +983,7 @@
         "refinement_interpretation_Tm_refine_f815b50a6b9f2d33319b49c241820185"
       ],
       0,
-      "b76da7978f68b51da181e5a3ae7b9ac9"
+      "3221441ff11770030fcf04ffc464904b"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1032,7 +1039,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fed78d2f8859e3984ae892987be8d658"
+      "ad38364bc4b14854b96cc400f2a9be8e"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1044,7 +1051,7 @@
         "refinement_interpretation_Tm_refine_c619c9be0855680e08b091538a3dd905"
       ],
       0,
-      "ba8dede0c4872943feede8b903334aa4"
+      "6184fb170f1ef5c17c439c3d61149b74"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1103,7 +1110,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "444e45df37da67eff2b44a93f2bb05c4"
+      "cecb4b2b35e638a8a3708adb5cf379f0"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1115,7 +1122,7 @@
         "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185"
       ],
       0,
-      "ae2ee4b7426eba70409cd6518994350c"
+      "9a7e95dc8230f71b7b57f4bee48a0f1d"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1172,7 +1179,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "580a8950c485bec23222e892f6f6be87"
+      "c53f236eb0352736dba7245db39387c7"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1184,7 +1191,7 @@
         "refinement_interpretation_Tm_refine_94b6bb77ac63b00719e80a97ae821381"
       ],
       0,
-      "76b46cb8188c71ca3b0ab7b631650acd"
+      "312b66ceef9c7052ffe77c840170835e"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1241,7 +1248,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "655d402ffd90fffdfd6fbf56f7fd5acd"
+      "759af4b3844c922acccf4403b30ae3c6"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1253,7 +1260,7 @@
         "refinement_interpretation_Tm_refine_ac96207ae24a30a1ae7ea1aba69e9193"
       ],
       0,
-      "149ed089c32583fbbbde1589fe3e359b"
+      "7b92dbc8681c07f34dfd866eb9683ae4"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1310,7 +1317,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1795b36583716e9c7c1c70b69f0ad8e6"
+      "6fe55cd00549e481d3331214cf24c749"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1322,7 +1329,7 @@
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78"
       ],
       0,
-      "d6fa86a66922b90a29a1aa8b4d79889f"
+      "63ac727df392429d5708ce8bb84e77d1"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1332,6 +1339,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185",
         "refinement_interpretation_Tm_refine_94b6bb77ac63b00719e80a97ae821381",
         "refinement_interpretation_Tm_refine_ac96207ae24a30a1ae7ea1aba69e9193",
@@ -1339,7 +1347,7 @@
         "refinement_interpretation_Tm_refine_de6d2d3f39326fe1952edc7f29c146df"
       ],
       0,
-      "ff8c9a2a0fbc4ea6ae9414b6cd2d3f1c"
+      "6dfe90077a2b791f9f223886a0d295d1"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1349,6 +1357,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185",
         "refinement_interpretation_Tm_refine_94b6bb77ac63b00719e80a97ae821381",
         "refinement_interpretation_Tm_refine_ac96207ae24a30a1ae7ea1aba69e9193",
@@ -1357,7 +1366,7 @@
         "refinement_interpretation_Tm_refine_f815b50a6b9f2d33319b49c241820185"
       ],
       0,
-      "73cfa24e84cbdb758a4429ac7f994dcb"
+      "2d7e371c0cb869d87c9462e20eff7484"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1413,7 +1422,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fc57eb60604041991317baded81d257f"
+      "f7ac8e04219319c4d7104479750c3dab"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1433,6 +1442,7 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
         "refinement_interpretation_Tm_refine_933131d3d6e82a88980ec1fc2f2558a5",
         "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185",
@@ -1448,7 +1458,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "82c99125228625545b55c826f51824e5"
+      "6dcd28d9737f39aa2117ec50400cda9b"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1466,6 +1476,7 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
         "refinement_interpretation_Tm_refine_933131d3d6e82a88980ec1fc2f2558a5",
         "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185",
@@ -1479,7 +1490,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "89aa7c8675cd785df4d71daebbdbef5a"
+      "b1427bbac493b33d50fc77363540f728"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1497,6 +1508,7 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
         "refinement_interpretation_Tm_refine_933131d3d6e82a88980ec1fc2f2558a5",
         "refinement_interpretation_Tm_refine_94b6bb77ac63b00719e80a97ae821381",
@@ -1509,7 +1521,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "a93f8b0bc8d63821b30f52e1797c3539"
+      "79bead28db167b9fc4385357c38a90eb"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1592,7 +1604,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "79d31bf2e6d06627afccc5b19fd8d9ce"
+      "b060fdc03f126812053c43d93e197a82"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1635,7 +1647,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e4a4e83991b80d8492fea1df8b8630a0"
+      "f6ed6ded147fb3763646a5997ef22e53"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1719,7 +1731,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "08465362af5c70238e18ae6cf11f39cd"
+      "5fd6aed444300d609966d2348c586f34"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1738,6 +1750,7 @@
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "refinement_interpretation_Tm_refine_3109849c947f86ba6634dfbc63de210a",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
         "refinement_interpretation_Tm_refine_9327a471ab579597fe92bd9e1ba29dc5",
         "refinement_interpretation_Tm_refine_933131d3d6e82a88980ec1fc2f2558a5",
@@ -1749,7 +1762,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "05e31135af2a3f51defa040cbcc7f06c"
+      "5e6b419fe984d0fcb24751cb2c263842"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1771,6 +1784,7 @@
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "refinement_interpretation_Tm_refine_3109849c947f86ba6634dfbc63de210a",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
         "refinement_interpretation_Tm_refine_9327a471ab579597fe92bd9e1ba29dc5",
         "refinement_interpretation_Tm_refine_933131d3d6e82a88980ec1fc2f2558a5",
@@ -1787,7 +1801,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6ef2abe6f37efc13e0f5887db94f8ce6"
+      "dee1990e606a1c0dfd26e301f14614e6"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1872,7 +1886,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c89044ed550134c30053a53914a7c932"
+      "24855dfa14f57d4bfb304f16f83ae804"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -1880,13 +1894,10 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "bool_typing",
-        "constructor_distinct_Lib.Buffer.MUT",
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "bool_typing", "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
-        "disc_equation_FStar.Pervasives.Native.Some",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
@@ -1905,23 +1916,21 @@
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
         "equation_Lib.Buffer.modifies",
         "equation_Lib.Buffer.op_Bar_Plus_Bar", "equation_Lib.Buffer.union",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
-        "equation_Spec.K256.PointOps.proj_point",
+        "equation_Spec.K256.PointOps.q",
         "equation_Spec.K256.ecdsa_verify_hashed_msg", "int_inversion",
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
-        "lemma_FStar.Int.pow2_values", "lemma_FStar.UInt32.uv_inv",
-        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.Buffer.as_seq_gsub",
-        "lemma_Lib.Buffer.modifies_sub",
+        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
+        "lemma_Lib.Buffer.as_seq_gsub", "lemma_Lib.Buffer.modifies_sub",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
-        "lemma_LowStar.Monotonic.Buffer.length_null_1",
-        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "lemma_LowStar.Monotonic.Buffer.len_gsub",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
@@ -1932,17 +1941,20 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
+        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0dee8cb03258a67c2f7ec66427696212",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_3109849c947f86ba6634dfbc63de210a",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_616f57e023c93921420754bbdb26261e",
         "refinement_interpretation_Tm_refine_654cec261e35fcb94e822e5f6b7c4bc2",
         "refinement_interpretation_Tm_refine_656324f894b1132f50338b342b505fca",
+        "refinement_interpretation_Tm_refine_798ef6aa40f93fde5849957f4e535eab",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
         "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
         "refinement_interpretation_Tm_refine_9310924c0f6615a20c31e6189acbaf39",
         "refinement_interpretation_Tm_refine_9327a471ab579597fe92bd9e1ba29dc5",
@@ -1950,14 +1962,13 @@
         "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185",
         "refinement_interpretation_Tm_refine_94b6bb77ac63b00719e80a97ae821381",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_a2bd50e76eb284927bf57817ca049f85",
-        "refinement_interpretation_Tm_refine_ac67baac401b91c97b1f4fe6e594fc07",
         "refinement_interpretation_Tm_refine_ac96207ae24a30a1ae7ea1aba69e9193",
         "refinement_interpretation_Tm_refine_adae3ae9e71c243b3c65bbba05507aa3",
         "refinement_interpretation_Tm_refine_b3ac59c1196dea0287a0f32cdd505f44",
         "refinement_interpretation_Tm_refine_b64671e12b7bed191ea1ef66664f5256",
         "refinement_interpretation_Tm_refine_b6c2c6118c365f640c7298127e900fbb",
         "refinement_interpretation_Tm_refine_c619c9be0855680e08b091538a3dd905",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_cb0a37d34a0203f2b2899fecdf6f96d7",
         "refinement_interpretation_Tm_refine_de6d2d3f39326fe1952edc7f29c146df",
         "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
@@ -1966,16 +1977,15 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
         "typing_FStar.UInt32.v", "typing_Hacl.K256.Scalar.qnlimb",
         "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.int_t", "typing_Lib.IntTypes.minint",
+        "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.int_t",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
+        "typing_LowStar.Monotonic.Buffer.mgsub",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ec2145fc1ad87e6ac0bd4abe050dc327"
+      "1b8a73d9f525e1c64cf1a036932c0fbc"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2004,7 +2014,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "f7b414914a6125979f90f757173dcf01"
+      "6e48a8759a135c7959c34fee22cfbf11"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2033,7 +2043,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "afa903ff3d6d929dec1acefb3aca62a6"
+      "0df9892c1b0bcd2fa659812fc37c76e8"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2060,7 +2070,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "f24ad3c76491ab2a7f6dc1f259b246b5"
+      "16b9b4303cb844b39af1795a4cbbd1de"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2080,6 +2090,7 @@
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "refinement_interpretation_Tm_refine_3109849c947f86ba6634dfbc63de210a",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
         "refinement_interpretation_Tm_refine_9310924c0f6615a20c31e6189acbaf39",
         "refinement_interpretation_Tm_refine_9327a471ab579597fe92bd9e1ba29dc5",
@@ -2093,7 +2104,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0b50664ad10892b9fc89866fb09fbd71"
+      "d501057a74940920d5e47fe9557d49ae"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2113,6 +2124,7 @@
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "refinement_interpretation_Tm_refine_3109849c947f86ba6634dfbc63de210a",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
         "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
         "refinement_interpretation_Tm_refine_9310924c0f6615a20c31e6189acbaf39",
         "refinement_interpretation_Tm_refine_9327a471ab579597fe92bd9e1ba29dc5",
@@ -2125,7 +2137,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "13969f459664c472b0be0b47506f4c57"
+      "25f8ac7f3731c54a4ef765076b394ebb"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2205,7 +2217,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fdced472d1965013a21d6931916c5f43"
+      "0081da1ac4f99f759c08da0219678e19"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2286,7 +2298,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "77c6351713bebf9cec8cb13565c04227"
+      "512f63d94db8fb8b8329c82381eb0ed9"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2368,7 +2380,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "35085b16041c1ed7a2a5cebf251f2f06"
+      "05599ed333fd44b83bd27c2eab1e1171"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2448,7 +2460,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "4796696555f900eeda062d4e12a37b73"
+      "15cb8ccc0cb494ea0031ef1fb0770405"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2529,7 +2541,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "4f5a8028aee907c13212edefc44c3341"
+      "5255d1c0fe04567748f830639819427f"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2611,7 +2623,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b4eb7f500b98e0399e80d37820d58e73"
+      "da7c3c6ca8301ea6a689d8bdb2865449"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2691,7 +2703,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "96e52a2019361ba5cad37633fb35943b"
+      "a141c45f59ceb81b6e8e8fdc32f5de5c"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2785,7 +2797,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "68fc28cb815a3b1a4b4de019f2acf778"
+      "49340ee6b03cee230614accab50d2765"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2798,7 +2810,7 @@
         "refinement_interpretation_Tm_refine_9310924c0f6615a20c31e6189acbaf39"
       ],
       0,
-      "497758638cf26d2615ab1c23a75c9ce6"
+      "0a65cc5d42578af49ab08727274a14c6"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2900,7 +2912,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b59b29c7acc735066d5acd4ab7424f21"
+      "513ec718502bc6fa5e6d310710729223"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2927,7 +2939,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "4b3fce1868e8dd6fd28bf126918fc36c"
+      "ee3af423eb5ccea2acf6fea255bece04"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2960,7 +2972,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "548d8aac7cc77855fc304f6fb4256210"
+      "3692f3ab5b2c38b3f38c168091922de6"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -2987,7 +2999,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0f71f24ee5d97e7c15275ba90d47f541"
+      "934578f3b1601c7c39bbfca1a8ff73e2"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3014,7 +3026,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c61c80c8a3fa1323529600ebc42370dc"
+      "301bee1c948c617dd2c3bb5d0ad31263"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3036,7 +3048,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "60903a835fc7c411b36f0913c36b97bd"
+      "36c8ce23b1690c3d0fde27930f9946b5"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3058,7 +3070,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "59e4465b4b32d07d87ca6b5872feb085"
+      "1b772c8f020788da2613a520f0dce3fa"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3133,7 +3145,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e0bb04a5669a21bfaeeebc08fd4f5282"
+      "77afdbd3aacec84aa63e738f497ef739"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3217,7 +3229,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0b9adcb0f88dffb0667d32870fcca3b7"
+      "771a3d13e2d03aaf1715d33244021a3a"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3301,7 +3313,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f685cad38e02436e50e5ba01ebadf0e4"
+      "d359e71a5af2cac1e047b3c2923c1983"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3404,7 +3416,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "95296201110924a856a660b4b7ed5c75"
+      "fab4d71f14dfb5534a8ed2353857bb2b"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3412,12 +3424,98 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Spec.K256.PointOps.q",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_6fb50075f93a7382e91191e7f6fe0feb"
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Impl.K256.Point.point",
+        "equation_Hacl.Impl.K256.Point.point_eval",
+        "equation_Hacl.Impl.K256.Verify.lbytes",
+        "equation_Hacl.K256.Field.as_felem5",
+        "equation_Hacl.K256.Field.as_nat", "equation_Hacl.K256.Field.feval",
+        "equation_Hacl.K256.Field.nlimb",
+        "equation_Hacl.K256.Scalar.qe_lt_q",
+        "equation_Hacl.K256.Scalar.qelem",
+        "equation_Hacl.K256.Scalar.qnlimb",
+        "equation_Hacl.Spec.Bignum.Definitions.limb",
+        "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
+        "equation_Lib.Buffer.gsub", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
+        "equation_Lib.Buffer.op_Bar_Plus_Bar", "equation_Lib.Buffer.union",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
+        "equation_Spec.K256.PointOps.point_inv",
+        "equation_Spec.K256.PointOps.proj_point", "int_typing",
+        "lemma_FStar.UInt32.vu_inv",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_gsub_buffer",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
+        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Negation",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_3109849c947f86ba6634dfbc63de210a",
+        "refinement_interpretation_Tm_refine_448314089a7eb91c6bada742aa904fea",
+        "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_654cec261e35fcb94e822e5f6b7c4bc2",
+        "refinement_interpretation_Tm_refine_6fb50075f93a7382e91191e7f6fe0feb",
+        "refinement_interpretation_Tm_refine_798ef6aa40f93fde5849957f4e535eab",
+        "refinement_interpretation_Tm_refine_869e8da12abe97a869a9323d83966159",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
+        "refinement_interpretation_Tm_refine_9310924c0f6615a20c31e6189acbaf39",
+        "refinement_interpretation_Tm_refine_9327a471ab579597fe92bd9e1ba29dc5",
+        "refinement_interpretation_Tm_refine_933131d3d6e82a88980ec1fc2f2558a5",
+        "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185",
+        "refinement_interpretation_Tm_refine_94b6bb77ac63b00719e80a97ae821381",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_ac96207ae24a30a1ae7ea1aba69e9193",
+        "refinement_interpretation_Tm_refine_adae3ae9e71c243b3c65bbba05507aa3",
+        "refinement_interpretation_Tm_refine_b64671e12b7bed191ea1ef66664f5256",
+        "refinement_interpretation_Tm_refine_c1feff4f65faf6f5bfdfe24c5b9da414",
+        "refinement_interpretation_Tm_refine_c619c9be0855680e08b091538a3dd905",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_de6d2d3f39326fe1952edc7f29c146df",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
+        "typing_FStar.UInt32.v", "typing_Hacl.Impl.K256.Point.point_eval",
+        "typing_Hacl.K256.Field.nlimb", "typing_Hacl.K256.Scalar.qe_lt_q",
+        "typing_Hacl.K256.Scalar.qnlimb", "typing_Lib.Buffer.length",
+        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
+        "typing_Lib.IntTypes.int_t",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
+        "typing_LowStar.Monotonic.Buffer.len",
+        "typing_Spec.K256.PointOps.point_inv",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f61b3b85ad8b36770a37d631c067242a"
+      "d30b76da24c56e4d0a5918aebc4a72f0"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3430,7 +3528,7 @@
         "refinement_interpretation_Tm_refine_6fb50075f93a7382e91191e7f6fe0feb"
       ],
       0,
-      "94ab43a758e264ff9fdc754f9bb2cc40"
+      "361fc6f261a8b21d620befe7a77d01ee"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3438,10 +3536,21 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "bool_typing",
-        "constructor_distinct_Lib.Buffer.MUT",
+        "@MaxIFuel_assumption", "@query", "equation_Spec.K256.PointOps.q",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_6fb50075f93a7382e91191e7f6fe0feb"
+      ],
+      0,
+      "ba26bfd0a956c6a04642045b89777f87"
+    ],
+    [
+      "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
+      54,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "bool_typing", "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.Buffer.MUT@tok",
@@ -3449,19 +3558,12 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
-        "equation_FStar.HyperStack.ST.equal_domains",
-        "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_tip",
-        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
-        "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Hacl.Bignum.Definitions.bn_v",
         "equation_Hacl.Bignum.Definitions.limb",
         "equation_Hacl.Impl.K256.Verify.lbytes",
-        "equation_Hacl.K256.Field.nlimb",
         "equation_Hacl.K256.Scalar.qas_nat",
         "equation_Hacl.K256.Scalar.qelem",
         "equation_Hacl.K256.Scalar.qnlimb",
@@ -3472,18 +3574,14 @@
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
         "equation_Lib.Buffer.modifies",
         "equation_Lib.Buffer.op_Bar_Plus_Bar", "equation_Lib.Buffer.union",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
-        "equation_Prims.squash", "equation_Spec.K256.uu___0",
-        "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Spec.K256.uu___0", "int_inversion",
-        "int_typing", "lemma_FStar.Int.pow2_values",
-        "lemma_FStar.UInt32.vu_inv",
+        "int_typing", "lemma_FStar.UInt32.vu_inv",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_gsub_buffer",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
@@ -3491,96 +3589,43 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_GreaterThan", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Negation",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_3109849c947f86ba6634dfbc63de210a",
         "refinement_interpretation_Tm_refine_448314089a7eb91c6bada742aa904fea",
         "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_654cec261e35fcb94e822e5f6b7c4bc2",
         "refinement_interpretation_Tm_refine_6fb50075f93a7382e91191e7f6fe0feb",
+        "refinement_interpretation_Tm_refine_798ef6aa40f93fde5849957f4e535eab",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
         "refinement_interpretation_Tm_refine_9310924c0f6615a20c31e6189acbaf39",
         "refinement_interpretation_Tm_refine_9327a471ab579597fe92bd9e1ba29dc5",
-        "refinement_interpretation_Tm_refine_933131d3d6e82a88980ec1fc2f2558a5",
         "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185",
         "refinement_interpretation_Tm_refine_94b6bb77ac63b00719e80a97ae821381",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_a2bd50e76eb284927bf57817ca049f85",
-        "refinement_interpretation_Tm_refine_ac67baac401b91c97b1f4fe6e594fc07",
         "refinement_interpretation_Tm_refine_ac96207ae24a30a1ae7ea1aba69e9193",
         "refinement_interpretation_Tm_refine_adae3ae9e71c243b3c65bbba05507aa3",
         "refinement_interpretation_Tm_refine_b3ac59c1196dea0287a0f32cdd505f44",
         "refinement_interpretation_Tm_refine_b64671e12b7bed191ea1ef66664f5256",
         "refinement_interpretation_Tm_refine_c1feff4f65faf6f5bfdfe24c5b9da414",
-        "refinement_interpretation_Tm_refine_c619c9be0855680e08b091538a3dd905",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_de6d2d3f39326fe1952edc7f29c146df",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
-        "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
-        "typing_FStar.UInt32.v", "typing_Hacl.K256.Field.nlimb",
-        "typing_Hacl.K256.Scalar.qnlimb", "typing_Lib.Buffer.length",
-        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.int_t",
+        "typing_FStar.UInt32.v", "typing_Hacl.K256.Scalar.qnlimb",
+        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
+        "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.int_t",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "768e59193619662c8d31de604dc8472a"
-    ],
-    [
-      "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
-      54,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.Buffer.MUT",
-        "equality_tok_Lib.Buffer.MUT@tok",
-        "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U64@tok",
-        "equation_Hacl.Bignum.Definitions.bn_v",
-        "equation_Hacl.Bignum.Definitions.limb",
-        "equation_Hacl.K256.Scalar.qas_nat",
-        "equation_Hacl.K256.Scalar.qelem",
-        "equation_Hacl.K256.Scalar.qnlimb",
-        "equation_Hacl.Spec.Bignum.Definitions.limb",
-        "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies",
-        "equation_Lib.Buffer.op_Bar_Plus_Bar", "equation_Lib.Buffer.union",
-        "equation_Lib.IntTypes.int_t", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
-        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
-        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
-        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
-        "refinement_interpretation_Tm_refine_448314089a7eb91c6bada742aa904fea",
-        "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
-        "refinement_interpretation_Tm_refine_6fb50075f93a7382e91191e7f6fe0feb",
-        "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185",
-        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_ac96207ae24a30a1ae7ea1aba69e9193",
-        "refinement_interpretation_Tm_refine_b64671e12b7bed191ea1ef66664f5256",
-        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
-        "typing_Lib.IntTypes.int_t",
-        "typing_LowStar.Buffer.trivial_preorder",
-        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U64@tok"
-      ],
-      0,
-      "378b146432db8b93bc2e57178a7c755c"
+      "8f764ac8047bfbec2f759f74621b167e"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
@@ -3732,7 +3777,141 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5f90a19888bd4c25d6e9c748893a5cf6"
+      "7356e7948a191f774e290b2a381e4f3b"
+    ],
+    [
+      "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg_prealloc",
+      56,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "bool_typing",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Bignum.Definitions.bn_v",
+        "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Impl.K256.Point.point",
+        "equation_Hacl.Impl.K256.Point.point_eval",
+        "equation_Hacl.Impl.K256.Verify.lbytes",
+        "equation_Hacl.K256.Field.as_felem5",
+        "equation_Hacl.K256.Field.as_nat", "equation_Hacl.K256.Field.feval",
+        "equation_Hacl.K256.Field.nlimb",
+        "equation_Hacl.K256.Scalar.qas_nat",
+        "equation_Hacl.K256.Scalar.qnlimb",
+        "equation_Hacl.Spec.Bignum.Definitions.limb",
+        "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
+        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.gsub",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
+        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
+        "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies0",
+        "equation_Lib.Buffer.op_Bar_Plus_Bar", "equation_Lib.Buffer.union",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
+        "equation_Spec.K256.PointOps.finv",
+        "equation_Spec.K256.PointOps.is_on_proj_curve",
+        "equation_Spec.K256.PointOps.op_Slash_Percent",
+        "equation_Spec.K256.PointOps.op_Star_Hat",
+        "equation_Spec.K256.PointOps.op_Star_Percent",
+        "equation_Spec.K256.PointOps.point_inv",
+        "equation_Spec.K256.PointOps.proj_point",
+        "equation_Spec.K256.PointOps.qinv",
+        "equation_Spec.K256.PointOps.qmul",
+        "equation_Spec.K256.ecdsa_verify_hashed_msg",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Spec.K256.PointOps.proj_point",
+        "int_inversion", "int_typing",
+        "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
+        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
+        "lemma_Lib.Buffer.as_seq_gsub", "lemma_Lib.Buffer.modifies_sub",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.len_gsub",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_gsub_buffer",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
+        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
+        "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
+        "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Negation",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_3109849c947f86ba6634dfbc63de210a",
+        "refinement_interpretation_Tm_refine_448314089a7eb91c6bada742aa904fea",
+        "refinement_interpretation_Tm_refine_488320e9b43f750e38fc2cd892cbef78",
+        "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_654cec261e35fcb94e822e5f6b7c4bc2",
+        "refinement_interpretation_Tm_refine_69e4afeb975ebecff9dcac8cd9e7fb84",
+        "refinement_interpretation_Tm_refine_6fb50075f93a7382e91191e7f6fe0feb",
+        "refinement_interpretation_Tm_refine_798ef6aa40f93fde5849957f4e535eab",
+        "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936",
+        "refinement_interpretation_Tm_refine_89ed01c957fb823937a01c58c39687a3",
+        "refinement_interpretation_Tm_refine_8cc8cfcb64d575010750a5c00af3e912",
+        "refinement_interpretation_Tm_refine_9310924c0f6615a20c31e6189acbaf39",
+        "refinement_interpretation_Tm_refine_9327a471ab579597fe92bd9e1ba29dc5",
+        "refinement_interpretation_Tm_refine_933131d3d6e82a88980ec1fc2f2558a5",
+        "refinement_interpretation_Tm_refine_94263fe32adf05acb8e89b158e19f185",
+        "refinement_interpretation_Tm_refine_946d91136c65b8f6b4e6ed84b00a4a0b",
+        "refinement_interpretation_Tm_refine_94b6bb77ac63b00719e80a97ae821381",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_ac96207ae24a30a1ae7ea1aba69e9193",
+        "refinement_interpretation_Tm_refine_adae3ae9e71c243b3c65bbba05507aa3",
+        "refinement_interpretation_Tm_refine_b3ac59c1196dea0287a0f32cdd505f44",
+        "refinement_interpretation_Tm_refine_b64671e12b7bed191ea1ef66664f5256",
+        "refinement_interpretation_Tm_refine_b6c2c6118c365f640c7298127e900fbb",
+        "refinement_interpretation_Tm_refine_c1feff4f65faf6f5bfdfe24c5b9da414",
+        "refinement_interpretation_Tm_refine_c619c9be0855680e08b091538a3dd905",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_cb0a37d34a0203f2b2899fecdf6f96d7",
+        "refinement_interpretation_Tm_refine_de6d2d3f39326fe1952edc7f29c146df",
+        "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f815b50a6b9f2d33319b49c241820185",
+        "typing_FStar.Pervasives.Native.uu___is_Some",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
+        "typing_FStar.UInt32.v", "typing_Hacl.Impl.K256.Point.point_eval",
+        "typing_Hacl.K256.Field.nlimb", "typing_Hacl.K256.Scalar.qnlimb",
+        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
+        "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.int_t",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
+        "typing_LowStar.Monotonic.Buffer.len",
+        "typing_LowStar.Monotonic.Buffer.loc_none",
+        "typing_LowStar.Monotonic.Buffer.mgsub",
+        "typing_Spec.K256.PointOps.is_on_proj_curve",
+        "typing_Spec.K256.PointOps.load_point",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
+      ],
+      0,
+      "2e3d2d9271915ef250232b49f6d0e058"
     ],
     [
       "Hacl.Impl.K256.Verify.ecdsa_verify_hashed_msg",
@@ -3877,7 +4056,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1cd9fcc0394a6ea1a3a11dee73d36aa8"
+      "8981c5b8545c0c23debe523aaf3b167a"
     ]
   ]
 ]

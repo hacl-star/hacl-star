@@ -1,5 +1,5 @@
 [
-  "a3eb37a855fd93aaec79f90f337b4fde",
+  "4d4cd54b13d27e20fd2c78fbb7f363ca",
   [
     [
       "Hacl.Impl.P256.Group.linv_ctx",
@@ -16,7 +16,22 @@
         "typing_Prims.pow2"
       ],
       0,
-      "b3fe9cc7bbf4535bfb6aba88a4e1dea0"
+      "ce3a46d5c19afd8057403d6d1a1c3d0c"
+    ],
+    [
+      "Hacl.Impl.P256.Group.linv",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "bb21749af60ef2c84c9571f35476cc92"
     ],
     [
       "Hacl.Impl.P256.Group.refl",
@@ -24,16 +39,26 @@
       0,
       0,
       [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_4d1eac7f4ea989fc73fe70ab469a756e"
+      ],
+      0,
+      "1a8084d331e9826e48f2873c07ff2f88"
+    ],
+    [
+      "Hacl.Impl.P256.Group.refl",
+      2,
+      0,
+      0,
+      [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d33c5470da60d7be052709b72e76f5d3"
+      "519d15c01cf9a9c78a4f39fa5adb62f1"
     ],
     [
       "Hacl.Impl.P256.Group.mk_to_p256_comm_monoid",
@@ -58,7 +83,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "bba17b430e8a1c1632e76c852fdf39c5"
+      "bef03217d9f9795cbd10b10d884274f3"
     ],
     [
       "Hacl.Impl.P256.Group.point_add",
@@ -86,7 +111,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "a6eaf6f6dacbc7fba27fa5e8e2fde347"
+      "5e7f658ce04936ef64f6880b689ebab6"
     ],
     [
       "Hacl.Impl.P256.Group.point_add",
@@ -94,19 +119,23 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equation_Hacl.Impl.P256.Group.mk_to_p256_comm_monoid",
         "equation_Hacl.Impl.P256.Point.as_point_nat",
         "equation_Hacl.Impl.P256.Point.point_inv",
         "equation_Lib.Buffer.as_seq", "equation_Lib.IntTypes.int_t",
-        "equation_Spec.P256.PointOps.aff_point",
+        "equation_Spec.P256.PointOps.point_inv",
         "equation_Spec.P256.PointOps.to_aff_point",
+        "equation_Spec.P256.aff_point_add_c",
+        "equation_Spec.P256.aff_point_c",
         "equation_Spec.P256.mk_p256_comm_monoid",
-        "function_token_typing_Hacl.Impl.P256.Point.point_inv_seq",
-        "function_token_typing_Spec.P256.PointOps.aff_point_add",
-        "interpretation_Tm_abs_5695eb1358311d1b686ba5abb0a31c7d",
+        "equation_Spec.P256.to_aff_point_c",
+        "interpretation_Tm_abs_f66f20f421a4b19da0159f36b406442a",
+        "interpretation_Tm_abs_fcf4066011f07a1cad223f23caed2da9",
+        "l_and-interp",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_@a_spec",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_@comm_monoid",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_@linv",
@@ -121,11 +150,13 @@
         "refinement_interpretation_Tm_refine_9a3cae647771a0edc19370757456f79a",
         "token_correspondence_Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__linv",
         "token_correspondence_Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__refl",
-        "token_correspondence_Hacl.Impl.P256.Point.point_inv_seq",
-        "token_correspondence_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__mul"
+        "token_correspondence_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__mul",
+        "token_correspondence_Spec.P256.aff_point_add_c",
+        "typing_Spec.P256.PointOps.point_add",
+        "typing_Spec.P256.PointOps.point_inv"
       ],
       0,
-      "1105f73424e10d94d7721796a758d8c0"
+      "0dd9470f13e726099f94abb245be6669"
     ],
     [
       "Hacl.Impl.P256.Group.point_double",
@@ -153,7 +184,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "d8fd3d9df3cac9f3c9458fc1f79ea4ed"
+      "54a847e2d1c7bd849ba881bc175720f3"
     ],
     [
       "Hacl.Impl.P256.Group.point_double",
@@ -161,7 +192,8 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equation_Hacl.Impl.Exponentiation.Definitions.refl",
@@ -169,11 +201,15 @@
         "equation_Hacl.Impl.P256.Point.as_point_nat",
         "equation_Hacl.Impl.P256.Point.point_inv",
         "equation_Lib.Buffer.as_seq", "equation_Lib.IntTypes.int_t",
-        "equation_Spec.P256.PointOps.aff_point",
+        "equation_Spec.P256.PointOps.point_inv",
+        "equation_Spec.P256.aff_point_add_c",
+        "equation_Spec.P256.aff_point_c",
         "equation_Spec.P256.mk_p256_comm_monoid",
-        "function_token_typing_Hacl.Impl.P256.Point.point_inv_seq",
-        "interpretation_Tm_abs_5695eb1358311d1b686ba5abb0a31c7d",
+        "equation_Spec.P256.to_aff_point_c",
         "interpretation_Tm_abs_977a6d9c88d8fc539fad411ea86abe6b",
+        "interpretation_Tm_abs_f66f20f421a4b19da0159f36b406442a",
+        "interpretation_Tm_abs_fcf4066011f07a1cad223f23caed2da9",
+        "l_and-interp",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_@a_spec",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_@comm_monoid",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_@linv",
@@ -189,12 +225,13 @@
         "token_correspondence_Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__linv",
         "token_correspondence_Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__refl",
         "token_correspondence_Hacl.Impl.Exponentiation.Definitions.refl",
-        "token_correspondence_Hacl.Impl.P256.Point.point_inv_seq",
         "token_correspondence_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__mul",
-        "token_correspondence_Spec.P256.PointOps.aff_point_add"
+        "token_correspondence_Spec.P256.aff_point_add_c",
+        "typing_Spec.P256.PointOps.point_double",
+        "typing_Spec.P256.PointOps.point_inv"
       ],
       0,
-      "b7b5ade3d3b07792881bb157d282683a"
+      "64188b3bda97f7ac237500bfe59bc79a"
     ],
     [
       "Hacl.Impl.P256.Group.point_zero",
@@ -222,7 +259,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "d157df29be48625663ab208f676c0d16"
+      "5a003c26c987bf7cf4709a82617f4087"
     ],
     [
       "Hacl.Impl.P256.Group.point_zero",
@@ -230,17 +267,22 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equation_Hacl.Impl.P256.Group.mk_to_p256_comm_monoid",
         "equation_Hacl.Impl.P256.Point.as_point_nat",
         "equation_Hacl.Impl.P256.Point.point_inv",
         "equation_Lib.IntTypes.int_t",
-        "equation_Spec.P256.PointOps.aff_point",
+        "equation_Spec.P256.PointOps.point_at_inf",
+        "equation_Spec.P256.PointOps.point_inv",
+        "equation_Spec.P256.aff_point_c",
         "equation_Spec.P256.mk_p256_comm_monoid",
-        "function_token_typing_Hacl.Impl.P256.Point.point_inv_seq",
-        "interpretation_Tm_abs_5695eb1358311d1b686ba5abb0a31c7d",
+        "equation_Spec.P256.to_aff_point_c",
+        "interpretation_Tm_abs_f66f20f421a4b19da0159f36b406442a",
+        "interpretation_Tm_abs_fcf4066011f07a1cad223f23caed2da9",
+        "l_and-interp",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_@comm_monoid",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_@linv",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_@refl",
@@ -255,7 +297,7 @@
         "token_correspondence_Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__refl"
       ],
       0,
-      "bcf1b108bf073e48af42de349c3b211f"
+      "183b84cc719ca64433a91d798a37982a"
     ],
     [
       "Hacl.Impl.P256.Group.mk_p256_concrete_ops",
@@ -287,7 +329,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f8921189872c3c7d1b314e0be413e0ef"
+      "6b0aaa99482f586115ae31d141629e55"
     ]
   ]
 ]

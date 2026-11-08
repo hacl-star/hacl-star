@@ -1,5 +1,5 @@
 [
-  "4647da7b443c75dbfecdc1673893375b",
+  "ca59a82b06b1373f10a86d54d0861edf",
   [
     [
       "Hacl.Spec.K256.ECSM.Lemmas.lemma_order_of_curve_group",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "5cd5b7acf1f2a68220072e5bc19d063a"
+      "d4e020b9f540c1892bc3443d9aaa9fd0"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.lemma_aff_point_mul_neg_add",
@@ -18,10 +18,10 @@
       [
         "@query", "equation_Hacl.Spec.K256.ECSM.Lemmas.aff_point_mul_neg",
         "equation_Lib.Exponentiation.Definition.cm",
-        "equation_Spec.K256.PointOps.aff_point",
+        "equation_Spec.K256.aff_point_c",
         "equation_Spec.K256.mk_k256_abelian_group",
         "equation_Spec.K256.mk_k256_comm_monoid",
-        "function_token_typing_Spec.K256.PointOps.aff_point_add",
+        "function_token_typing_Spec.K256.aff_point_add_c",
         "interpretation_Tm_abs_fcfc8309967f95f9a7d2ea1f3249cfde",
         "primitive_Prims.op_Addition",
         "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_@mul",
@@ -31,7 +31,7 @@
         "token_correspondence_Lib.Exponentiation.Definition.cm"
       ],
       0,
-      "8ab7dc742301592bc50e2becb79f2ea1"
+      "629d90f803f8f2cb17ac9301e9d521cc"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.lemma_aff_point_mul_neg_mul",
@@ -43,7 +43,7 @@
         "primitive_Prims.op_Multiply"
       ],
       0,
-      "a84b27584352e208cd035f31ed27638f"
+      "24e81cef86297fa2c84107858400db1e"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.lemma_aff_point_mul_neg_mul_add",
@@ -52,7 +52,7 @@
       0,
       [ "@query" ],
       0,
-      "d947238cc12310413b38e35e9ca00f0f"
+      "07f3e10b2468d722980e01a4c1b860b1"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.lemma_aff_point_mul_neg_modq",
@@ -65,7 +65,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "9cbc0bfe112c41139c758805fad76c2e"
+      "e8844c3c93d7ded990db108f4b0d3196"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.lemma_aff_point_mul_neg_modq",
@@ -81,29 +81,33 @@
         "equation_Spec.K256.PointOps.aff_point",
         "equation_Spec.K256.PointOps.aff_point_add",
         "equation_Spec.K256.PointOps.aff_point_at_inf",
+        "equation_Spec.K256.PointOps.aff_point_inv",
         "equation_Spec.K256.PointOps.felem",
         "equation_Spec.K256.PointOps.is_aff_point_at_inf",
         "equation_Spec.K256.PointOps.q", "equation_Spec.K256.PointOps.zero",
-        "equation_Spec.K256.aff_point_mul",
+        "equation_Spec.K256.aff_point_add_c",
+        "equation_Spec.K256.aff_point_c", "equation_Spec.K256.aff_point_mul",
         "equation_Spec.K256.mk_k256_abelian_group",
         "equation_Spec.K256.mk_k256_comm_monoid",
         "equation_Spec.K256.uu___0",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "function_token_typing_Spec.K256.uu___0", "int_inversion",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_Modulus",
         "proj_equation_Lib.Exponentiation.Definition.Mkabelian_group_@cm",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2_@_2",
         "projection_inverse_Lib.Exponentiation.Definition.Mkabelian_group_@cm",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_cb6679677c7b28729e28fdfe065cbe24"
       ],
       0,
-      "1cca85ed3156d3cc6b1277a99b202515"
+      "eb0c28398bdafb88e5b52b32d9cdc790"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.lemma_aff_point_mul_neg",
@@ -115,7 +119,7 @@
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1f9986d6d7dd5fcae2a38def69abb7c1"
+      "77ad7e81fe92499ade21b2fd8096d955"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.lemma_aff_point_mul_neg",
@@ -133,13 +137,12 @@
         "equation_Spec.K256.PointOps.aff_point",
         "equation_Spec.K256.PointOps.felem", "equation_Spec.K256.PointOps.q",
         "equation_Spec.K256.PointOps.qelem",
-        "equation_Spec.K256.PointOps.zero",
-        "equation_Spec.K256.aff_point_mul",
+        "equation_Spec.K256.aff_point_c", "equation_Spec.K256.aff_point_mul",
         "equation_Spec.K256.mk_k256_abelian_group",
         "equation_Spec.K256.mk_k256_comm_monoid",
         "equation_Spec.K256.uu___0",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
-        "function_token_typing_Spec.K256.PointOps.aff_point_negate",
+        "function_token_typing_Spec.K256.aff_point_negate_c",
         "function_token_typing_Spec.K256.uu___0", "int_inversion",
         "int_typing",
         "interpretation_Tm_abs_0a3bf51a05f75632b23a3bfd82ec9d6d",
@@ -156,12 +159,13 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_3abfe4124fc12c50f5f1600a0293cedd",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_cb6679677c7b28729e28fdfe065cbe24",
         "token_correspondence_Lib.Exponentiation.Definition.__proj__Mkabelian_group__item__inverse",
         "token_correspondence_Lib.Exponentiation.Definition.cm",
         "token_correspondence_Lib.Exponentiation.Definition.inverse"
       ],
       0,
-      "c1d0c1e60b786f15fa2e99b732db382c"
+      "d0d826e0410a221e7e61441fbd43aada"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.aff_point_mul_mul_lemma",
@@ -180,7 +184,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "071cd88cd03844509a43382097b96fff"
+      "ecb3a5974bee08f33526a2da40998c6b"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.aff_point_mul_neg_lemma",
@@ -188,16 +192,12 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.K256.ECSM.Lemmas.aff_point_mul",
+        "@query", "equation_Hacl.Spec.K256.ECSM.Lemmas.aff_point_mul",
         "equation_Lib.Exponentiation.Definition.cm",
         "equation_Lib.Exponentiation.Definition.inverse",
-        "equation_Spec.K256.PointOps.aff_point",
-        "equation_Spec.K256.PointOps.felem",
-        "equation_Spec.K256.aff_point_mul",
+        "equation_Spec.K256.aff_point_c", "equation_Spec.K256.aff_point_mul",
         "equation_Spec.K256.mk_k256_abelian_group",
-        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
-        "function_token_typing_Spec.K256.PointOps.aff_point_negate",
+        "function_token_typing_Spec.K256.aff_point_negate_c",
         "interpretation_Tm_abs_0a3bf51a05f75632b23a3bfd82ec9d6d",
         "interpretation_Tm_abs_fcfc8309967f95f9a7d2ea1f3249cfde",
         "projection_inverse_Lib.Exponentiation.Definition.Mkabelian_group_@cm",
@@ -206,7 +206,7 @@
         "token_correspondence_Lib.Exponentiation.Definition.inverse"
       ],
       0,
-      "cf858069784b70c07fabe59bb645c078"
+      "ddde0aed68b367d2895e7a38383d9d84"
     ],
     [
       "Hacl.Spec.K256.ECSM.Lemmas.aff_point_mul_mul_neg_lemma",
@@ -215,7 +215,7 @@
       0,
       [ "@query" ],
       0,
-      "41d6a96be109c828c32b640dd69c8bdf"
+      "fdbd7b8c21ff07051207b0985d11bb17"
     ]
   ]
 ]

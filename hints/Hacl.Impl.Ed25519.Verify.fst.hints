@@ -1,51 +1,6 @@
 [
-  "65f70b0b857ee952ab7a79f23f03508f",
+  "2c9ec8cf3c6fc1bd0cb866c9c41610e4",
   [
-    [
-      "Hacl.Impl.Ed25519.Verify.stack_frame_equal_domains",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "equation_FStar.HyperStack.ST.equal_domains",
-        "equation_FStar.HyperStack.ST.inline_stack_inv",
-        "equation_FStar.Monotonic.Heap.equal_dom",
-        "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.fresh_frame",
-        "equation_FStar.Monotonic.HyperStack.is_tip",
-        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
-        "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.Monotonic.HyperStack.popped",
-        "equation_FStar.Monotonic.HyperStack.remove_elt",
-        "function_token_typing_FStar.Monotonic.Heap.heap",
-        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
-        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_intro",
-        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
-        "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.Map.lemma_InDomRestrict",
-        "lemma_FStar.Map.lemma_InDomUpd1", "lemma_FStar.Map.lemma_InDomUpd2",
-        "lemma_FStar.Map.lemma_SelRestrict", "lemma_FStar.Map.lemma_SelUpd2",
-        "lemma_FStar.Map.lemma_equal_elim",
-        "lemma_FStar.Set.lemma_equal_elim",
-        "lemma_FStar.Set.lemma_equal_intro",
-        "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
-        "lemma_FStar.Set.mem_singleton", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
-        "typing_FStar.Map.restrict", "typing_FStar.Monotonic.Heap.emp",
-        "typing_FStar.Monotonic.HyperHeap.rid",
-        "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
-        "typing_FStar.Monotonic.HyperStack.remove_elt",
-        "typing_FStar.Set.complement", "typing_FStar.Set.intersect",
-        "typing_FStar.Set.mem", "typing_FStar.Set.singleton"
-      ],
-      0,
-      "86159808fadfef64c82f12bbda1e5381"
-    ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
       1,
@@ -343,7 +298,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok", "unit_typing"
       ],
       0,
-      "91f1b2641622ef4d13e2b9d2fdee5706"
+      "03fb6fb5179efc450d96fb4800a284a7"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -390,7 +345,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0e7f9e8132fb2173d6cdfd3131551ad4"
+      "814b1a9cb87c2e98d687943b20e0ceca"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -406,7 +361,7 @@
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a"
       ],
       0,
-      "8117be8b9313a9bb6831c9288d558d31"
+      "d6b9ce238e6d5398220db7257bb6fcfa"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -419,7 +374,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "4322a52f2019104e75ab1f5a83e4f1a4"
+      "4dfe05164e3f9df9f4895e47ea829d31"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -452,7 +407,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "67bd116747a7a08bf5913bdf308224d2"
+      "2c1ef9782a61dda0eb0c2b8e14517498"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -485,7 +440,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "10429732e2b60e4fd3706d56a655ed78"
+      "86fb2b044a2656b5b0eb2c20a071c59b"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -518,7 +473,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "5930c9d1ab07075632abff93e3b14d27"
+      "7a8bd221c05547ce09d2ee14eab29585"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -538,7 +493,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c9dc49ffdb32be15e9ad2aaf10d99c65"
+      "d33431236ae6fed496d59c536f6c1c88"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -558,7 +513,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "163c561f5c07cb2dfbc98f02c0158891"
+      "8485c4824719d4479a82f160ed58b66f"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -578,7 +533,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "dc46b965360af488050b2ab77c1a39fe"
+      "71c3a07e9745fcdd2f76ceea8a3840b1"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -662,7 +617,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "cf640adb26a7a4413fd6b5fdeb7e7b42"
+      "ef18e0a5c015c6c0c07386018a346bb5"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -763,7 +718,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "ec8923e2c5c45f19b2af7dad6d3a5358"
+      "449055879f9000654d16b8835a304960"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -781,7 +736,7 @@
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b"
       ],
       0,
-      "9c6937d79ca46ea0d265168be3b096ec"
+      "81da0108e1e920e9a5e8148d49525f98"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -862,7 +817,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "53ef60212fad64622f99ba343b2ef8ca"
+      "98a1c3997fb4124d610a03cd982b7910"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -932,7 +887,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "55707784045f127f6ea904c18ca4c3e0"
+      "a15654cbcb1d2290b257a909725b231c"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -946,7 +901,7 @@
         "refinement_interpretation_Tm_refine_d874354792f54594fa52a8b02b750c7c"
       ],
       0,
-      "beb0c6981adb640f75ebcf3219994f1f"
+      "db75b8ee05733310d5bde4a0294369d5"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1008,7 +963,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "9e8bbb827d99fe208febc53322584f86"
+      "a5fb164cfccb66c368ecb9378ac9f76f"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1026,7 +981,7 @@
         "refinement_interpretation_Tm_refine_cbe907c3e2adf70327a95c09d7f38e79"
       ],
       0,
-      "ac1c7716db631b819f6bde31ec4c6354"
+      "809f524bfba83b955082490b33913f01"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1097,7 +1052,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "12a7fa46f850a06c5750e316c1d58487"
+      "a8ec6223f7005ca1ee6f083d1a025ab4"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1140,7 +1095,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "18f242e569334eb63b0e9481a2250777"
+      "3ac038b4b5af45eacc5c169b3c335aa7"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1154,7 +1109,7 @@
         "refinement_interpretation_Tm_refine_d874354792f54594fa52a8b02b750c7c"
       ],
       0,
-      "880811828f2f58b81868b5583ca2bf8d"
+      "a1c00aba99de260ce8226416213ea63a"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1222,7 +1177,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8bce68d6cdc51a7724c5606fd46158cc"
+      "0ac8b36b9cc16c745e116957fb1d2866"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1240,7 +1195,7 @@
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b"
       ],
       0,
-      "579ab0f1455e97a6febee5c215a47807"
+      "424f26e606e928d4f7f901369e79ca0f"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1333,7 +1288,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8b55f434129fdb76209e42c79da3d622"
+      "c9731fa3d3af1ad06d061465953955f1"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1415,7 +1370,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "df9b693ee8611f8953f44f46d8f338f0"
+      "2d74bc0cbeff587a72f5e7a8e7faae2d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1429,7 +1384,7 @@
         "refinement_interpretation_Tm_refine_d874354792f54594fa52a8b02b750c7c"
       ],
       0,
-      "585268efe007ccd0725cb5471df0a449"
+      "61eccb919ac67eeb28ce32e72980cfe0"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1495,7 +1450,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fe3acfcf113afd19c6050fa08480b96c"
+      "6ead2ac86de3082dc5c30e590d2d9e09"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1513,7 +1468,7 @@
         "refinement_interpretation_Tm_refine_ce7e56806a554004c1bf46ca6222475c"
       ],
       0,
-      "e90abbb2675356736c71009953aee16d"
+      "d85b87cbd42af0266d29565aa40bbd18"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1605,7 +1560,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ad30d33d7fc052ed6e5222d93357d5fc"
+      "eb35c26ab86308d74bf42dfd855da4fe"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1686,7 +1641,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1daf4ef85e55f22901d7b0a4e444ec74"
+      "03de76e4937697a8ead505f6078e08d4"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1700,7 +1655,7 @@
         "refinement_interpretation_Tm_refine_d874354792f54594fa52a8b02b750c7c"
       ],
       0,
-      "a55a130b01f440fc6c0f85a01a237322"
+      "1b6ce47a8eeb31d49167eaf17087e4a1"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1727,7 +1682,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "f5a2d530d4360fd391293d85af075d84"
+      "88960476fd41fdf522e3013a83a29182"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1763,7 +1718,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "6ad29ed75fe6eb3524ef7e9d178bfc0e"
+      "95d1932198fd37cb6822eeb069d58c2f"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -1776,7 +1731,7 @@
         "refinement_interpretation_Tm_refine_d874354792f54594fa52a8b02b750c7c"
       ],
       0,
-      "f7d3f10d339676ba4dcedf85606e9272"
+      "6ea476173b789cb1cbc3de302527f5e3"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -2089,7 +2044,7 @@
         "refinement_interpretation_Tm_refine_8e8b14377c219c89567160ddac81bf0d"
       ],
       0,
-      "1d0539a468dbe241808cbb7a12eba04c"
+      "4f1d06b306b6f95d55a54e4e174b1093"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -2209,7 +2164,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fc75b9bac52480351041f991fcc28210"
+      "1f73f72b2d5bd9370fadc11056d082f6"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -2303,7 +2258,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "710d967151d9ae0c35fd1825665c38e1"
+      "396789ce18f7a69784f95ce32180711a"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -2324,7 +2279,7 @@
         "refinement_interpretation_Tm_refine_d874354792f54594fa52a8b02b750c7c"
       ],
       0,
-      "a6d9f0e848b5fed0553e7dc5eff68dfc"
+      "0632e8d0ae4f6e6f036e1cfd9ff60d35"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -2475,7 +2430,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b51d4027c725db996a5ab7d13e272640"
+      "2a234b2bf288c5a9bd8bfc57691671d6"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -2538,7 +2493,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fd66832aa1549d90cd3546a5cb86f151"
+      "09ebd4744d87c72aa685d304bf049bfe"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -2601,7 +2556,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a8e3c95bb4b9ec20db72f6907a9400b7"
+      "43498548d71a7ce9ff230c50ebfa1f57"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -2664,7 +2619,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "de35cfcf7fcefae4681ee192dddf2a6c"
+      "843e464f866e3d962b78ed5b6ed357e7"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_all_valid_hb",
@@ -2727,7 +2682,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0b76d13be5aa58656be798fc50727517"
+      "eae73bd778685102a039dc67f057cf54"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_sb",
@@ -2900,7 +2855,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "67187d8440ed08af282f75d3d8c55e38"
+      "98ea076d5ee2dd5a121705b8a961dfb6"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -2958,7 +2913,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "42c956101f96ae2ada91885f080232b4"
+      "73822c45c115cb72f672be3d4d99280d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3015,7 +2970,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "525410c3f2d498f07fa49c55033ed0db"
+      "7640d16ea6100b4e35fc4a59e52e5825"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3027,7 +2982,7 @@
         "refinement_interpretation_Tm_refine_dfca7201e77d0546739c304931ca78dd"
       ],
       0,
-      "ba453b356a02be42c91f018413094a84"
+      "be79f641bcfd1cd3a5a2841449544282"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3085,7 +3040,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d85eb100ee692f58bda5811b058a64e8"
+      "42aa8628f60ce42fa8537a0230601a8e"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3097,7 +3052,7 @@
         "refinement_interpretation_Tm_refine_ac48c789860e5d452cbd8b7e4405f821"
       ],
       0,
-      "c9e6d242a6e0326824355ea21af72e5a"
+      "0b80778d1d9ec228bcfbc4692a02e0a9"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3109,7 +3064,7 @@
         "refinement_interpretation_Tm_refine_8367d52f7eccfdef7fe7f5b53484f52a"
       ],
       0,
-      "c3757a9dcdf8aaeedda18b3dfd33e2a5"
+      "d529f44c750452994bb84a0f75252d7d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3195,7 +3150,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "bb3feff4e2793c2f097856542059b7b7"
+      "8b81546c4af5e67135f6837ad2a262ae"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3223,7 +3178,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6afc8c136c45c846b579340f473fa5b6"
+      "e41a8e87b7829192d018fb3653d46909"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3251,7 +3206,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "700aa34de23a1c59de67573bd5478732"
+      "11222c53771b98a8a71dae29cd3b3e1d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3278,7 +3233,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3edc4ee9fae1690e294b8aac657e6e02"
+      "1a4d7f625342dd932d9afd82c074beb4"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3306,7 +3261,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6613c1cc1e6f5615793f28f0cccb61a5"
+      "0b3f6b677fa0ff8e2f73699f00bc995c"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3359,7 +3314,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "797ff83726eff68b6f4a0d7baa72fa91"
+      "80b720c4ec5de91465ed70251a8b2127"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3379,7 +3334,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "859549360b0d015a3e86cc08918cc41a"
+      "e1d433c8b49449dc49d358d1d8c8cfa7"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3391,7 +3346,7 @@
         "refinement_interpretation_Tm_refine_dfca7201e77d0546739c304931ca78dd"
       ],
       0,
-      "eaa9a20e88fc35d3933f8cabe103d0cb"
+      "057be642ca715066b347f0994c9ed29c"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3420,7 +3375,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "32adc6452d344d917a219db1acb9f976"
+      "18ceec1c70b59542f8c11fd96976a0e9"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3446,7 +3401,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a613060934817a7bfc905fa2e40fa406"
+      "c6106b4eb6a2ab834b9a88dc177810ce"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3478,7 +3433,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "d32865ce4159566c570d6b939aa88884"
+      "68afcafdbbcb896969b98b6c148d6263"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3510,7 +3465,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "26b56b069ca4d26c3d8e2264b4676e2f"
+      "4d1cb5703e25dce47e9a8606aa28f621"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3608,7 +3563,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e134aeb4504a1895d131251bdf717bbb"
+      "edcb53c80043829e922d00acf6913115"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3700,7 +3655,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7dd91413069cca515fb05675414352e7"
+      "4aec2a65e87031aa7364a6ab9ec4578e"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs_prealloc",
@@ -3826,7 +3781,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c4d4eb1d7c3c2a7b3f1f25b7bf688db8"
+      "6865e0dec71edc2cb4bf647b0211db36"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -3927,7 +3882,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "f4e742b90733515f8b60da7be8067163"
+      "e2a43f7be10405d43556482dc5ee719c"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4187,7 +4142,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok", "unit_typing"
       ],
       0,
-      "014e6c44e8c4f70466237c05e9e2549b"
+      "dbcafdefe33f1ef6e53aa689aa0bfd9a"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4237,7 +4192,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "9d2cb83f52b749347582801776277da4"
+      "20f31936d8171beaa02a5bb011e3fa10"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4257,7 +4212,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "c9481f3c1fa7b246dfd58def1236dfa4"
+      "15aab27c1670441c7733171f38fe645c"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4269,7 +4224,7 @@
         "refinement_interpretation_Tm_refine_c20cb0187d40e7a01a2cc2121535ba54"
       ],
       0,
-      "20b34182832dd9a8336c69c23bf59a4a"
+      "570ae972f7e578cf4219bc7367bc8fd4"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4301,7 +4256,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2561d5d71cba113e28a2df24b0e93034"
+      "c8505db64adc7e6f32a7c135accad4d5"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4323,7 +4278,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3ad49017cf9d8f8f581318c3525b5e51"
+      "4ef715fd443b339170e2eb0060896774"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4355,7 +4310,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3ed7a7c27a5e09532582322f1ab6ae26"
+      "8a8685ba0d8deb4028ef07c574929922"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4377,7 +4332,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "318e8a77fe0ce155badd2e54478045cd"
+      "5df9fc3293105ced270e691f40c8a17e"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4409,7 +4364,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5ab583a4cd9e0999bf334bc000f89ba5"
+      "16de292d3b8386f4b5342c14f5068276"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4421,7 +4376,7 @@
         "refinement_interpretation_Tm_refine_c20cb0187d40e7a01a2cc2121535ba54"
       ],
       0,
-      "3a0f9c425453baf83490cd3d7ee41e71"
+      "ed0a1981f4035032e6e6e0dbcb26c273"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4434,7 +4389,7 @@
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "90cd0c33687829e6f7487703f8ed292b"
+      "5a129c573c5923cf8c58ec0176fe08a7"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4491,7 +4446,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "cd5664b468b49348479846b0fe6761db"
+      "a050125be7a8ab550109b4343935a223"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4504,7 +4459,7 @@
         "refinement_interpretation_Tm_refine_7711b400aec97971c97b69de44fa7667"
       ],
       0,
-      "c870551792f21595d8f5008dac78cbdf"
+      "8d5172e6de5148d822dfb7d651057c4f"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4517,7 +4472,7 @@
         "refinement_interpretation_Tm_refine_c20cb0187d40e7a01a2cc2121535ba54"
       ],
       0,
-      "e7a0841b16631c42988251023ef4fe44"
+      "3fe1ebaf37b753917d62c1b35dc04c07"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4573,7 +4528,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a1fcb7b77af0419f9fa364794379c56b"
+      "47bd854459e5b025aced69df443a8148"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4629,7 +4584,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fd04b2c2b379a518831881da70c9d914"
+      "d6828b5df2482e9d0def6b4c9b634e1e"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4685,7 +4640,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "89f1c6a092e6ca12b52db509459b7534"
+      "bff783b2ed7b2d3c4632bf51af4357ab"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4743,7 +4698,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2ff92fa869a430910d7b6234df42bfc4"
+      "09e0aaa46538dc10f445a19e9e9fcfcb"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4801,7 +4756,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2da132e15699d0781c5061efb4c7a1b4"
+      "bdc048ee0771591e4641f4020d2bc912"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4833,7 +4788,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d27ea1841184e44eb54ed16ec0d56d1f"
+      "8ab76ead7eabab39b47b2a17914bbca9"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4865,7 +4820,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "019775da413c30a19e7913a11c74c1e6"
+      "fe781c1de82cd329d33540d107456079"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4897,7 +4852,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "23790d12423f15064c14385696c9235a"
+      "fe316af811b8facb988c87e0f6ee718d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4931,7 +4886,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0d7c25e72c1a029061c733405aadff91"
+      "c8fab25bae8b5a8fbb2fbc255d5af08e"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4965,7 +4920,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "ab2b671b9ae9f14d97739267b3897c42"
+      "3b5514762164acd01a52d8d123b5200c"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -4979,7 +4934,7 @@
         "refinement_interpretation_Tm_refine_969fa4c2bd20e842a89b462e081a4cd9"
       ],
       0,
-      "9e80b1693aaf0eabd008e2be9c7ca5db"
+      "634667effc1f4ba305e98e9823ccffea"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5066,7 +5021,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2d2eacf237ea694b0e30b6473fae577d"
+      "c6ab50f5912bf5bfcd943f0e28e4f392"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5145,7 +5100,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6b8ea50ca095b08f63cd1ce5396492b6"
+      "0658c97e8947d36d743839be6e2ef3ce"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5159,7 +5114,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "911196f1147921dfef61dd43bc650a0c"
+      "87eeaf08b0e2439c2c6ca274cc84173d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5246,7 +5201,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3e70d6af10352f54e744ee8608a5ab80"
+      "639f3a2a828d0db08c7c498272f71b31"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5326,7 +5281,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "68aad0706d73743215445d0d75c98bfa"
+      "5ad9018a947f06f82db3445bcc45820b"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5346,7 +5301,7 @@
         "refinement_interpretation_Tm_refine_c20cb0187d40e7a01a2cc2121535ba54"
       ],
       0,
-      "5576b989dc8f22ec1ba053c9acc6780a"
+      "aa08d5e82467f649b3128b6c1ca63b91"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5358,7 +5313,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "d494bd3790c8c10a23383ab266635500"
+      "66a716534b93cbd9cc9bd1d8545144f3"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5412,7 +5367,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2c4443a5dd6524dfbab94ce0cc985c54"
+      "d3d5aa6a78543de9090b54f1dd6efa6d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5428,7 +5383,7 @@
         "refinement_interpretation_Tm_refine_c20cb0187d40e7a01a2cc2121535ba54"
       ],
       0,
-      "0beea589f00655a2f14ceb4f99288910"
+      "7141dcb24f62973c6238b7a1c0376347"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5441,7 +5396,7 @@
         "refinement_interpretation_Tm_refine_8d363eb15ccb3e6af8bbaa9c30adfae1"
       ],
       0,
-      "c406831f7c5735d28552896083676bc7"
+      "a0d923fc08f12a98b981a203fb19b2f4"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5453,7 +5408,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "68f2b5dfc1068e46530da8a91c11578f"
+      "227e09d04982ff8b3ceb09498fb9b0c7"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5466,7 +5421,7 @@
         "refinement_interpretation_Tm_refine_c20cb0187d40e7a01a2cc2121535ba54"
       ],
       0,
-      "dc26023c1264b7a165a5feb37547800c"
+      "86584f5c8756e9365071675d581bcfb6"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5479,7 +5434,7 @@
         "refinement_interpretation_Tm_refine_8cd6ef0897d277f033c40f3b6a056dea"
       ],
       0,
-      "5a51fbaacdd4da173784ecc93502ada9"
+      "a706dc5d7c395460e3bd4fc914f332f0"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5492,7 +5447,7 @@
         "refinement_interpretation_Tm_refine_8d363eb15ccb3e6af8bbaa9c30adfae1"
       ],
       0,
-      "05ea02137625ab21e0fa8858a866a857"
+      "7f429b65136bfdb4ede5a330c142b269"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5514,7 +5469,7 @@
         "refinement_interpretation_Tm_refine_f9b3bbf7ea23f7e755f737660c4fb081"
       ],
       0,
-      "7ec7e7d96b605314bfcec05d6dd3b3f8"
+      "2ff352544bac4ce90d6c51024bf7224d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5546,7 +5501,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ef5464e033e16061bf9d439844d801e3"
+      "cf1a71a28b68b1830de4754677224d90"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5578,7 +5533,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c0c1e1ff16b13c0c7d022c31c0f6affd"
+      "f17aad820948e1f55f125828948f5d2a"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5610,7 +5565,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "bf4cdc060effe2dd32c35f61d1ec3aa8"
+      "40f6fde6146d4540eadc58c1d532e695"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_rs",
@@ -5666,7 +5621,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3aefef0fb69793d4c008b3abe63b7a20"
+      "d48a5c60b9e889ce31fd3485ecfbe305"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5701,7 +5656,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b054dff5e5f6d1d603a31c46a33a5e0d"
+      "b03ce1e972a28609f20b661b08740fa2"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5758,7 +5713,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c5ec4c581ce50f162360361810e5692c"
+      "682f9c48f99deefed05450ae1dbf9857"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5770,7 +5725,7 @@
         "refinement_interpretation_Tm_refine_2aac6bac56766182b7caf44c2c0ccd63"
       ],
       0,
-      "bf3dee627a14d2b8534bae02550d4eed"
+      "648d721c2142de2eab3d1b4f4db47922"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5784,7 +5739,7 @@
         "refinement_interpretation_Tm_refine_ac48c789860e5d452cbd8b7e4405f821"
       ],
       0,
-      "54ef1ccc493838882f5ff936d7ae8ccc"
+      "c82be317f311eb2c72de66204779c78b"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5797,7 +5752,7 @@
         "refinement_interpretation_Tm_refine_ac48c789860e5d452cbd8b7e4405f821"
       ],
       0,
-      "a7d7c7c99a1ad2d16db459003aa94ca8"
+      "8035eb160ac2c2eaf523441c774a99da"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5826,7 +5781,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f0a4d164ae01a612a33715e358d415ff"
+      "ac1ba21318cc2beec04c26634ca1f477"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5855,7 +5810,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8340fb0d6661e5218c3fec35a228f28b"
+      "a0e42ac8ac61f3fe08d04c7d40bb0e1d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5883,7 +5838,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b44207cf109626e04996c86f3dcb5ed9"
+      "7082cb3b62039ad96dd9cc7263d32913"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5913,7 +5868,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e4d4a0f5d261ff25d6c6d9f8b205db8a"
+      "bea70ef9c98326d882271ed0f490768d"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5941,7 +5896,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "62de4a04d430879f5277782c9c8b9116"
+      "cb56fd2e66b424b51acf88c87c8d4331"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -5990,7 +5945,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b73ea88a462f729df0f0a7f68015f6bf"
+      "7312ddcc591a0f9395515e501a123503"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -6077,7 +6032,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "96eac03e06e92c82807acb935802f99c"
+      "424903db0f45939796553340034f2561"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -6152,7 +6107,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "96fd26e3686883a048d76b38924ea0cb"
+      "5b90b592ce3e9412abdc001d46332810"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -6219,7 +6174,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6178d6c5863ff9af363e2d7763d92dda"
+      "ee611002bf722613b4f734784a82f647"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -6292,7 +6247,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e9cd55c7d3a96e3be2abfe07495d2b2a"
+      "3c7586b8e5269a127ed81c0400d8f686"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -6355,7 +6310,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1476c059ae29178e4fd279a775d18315"
+      "c765f70dd6977c5324ea1f7e8a68f35b"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -6406,7 +6361,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6a1e25b406ccefdf0a79166c8bbfb489"
+      "81a1ad5adeb6c3163654778e53118904"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk_prealloc",
@@ -6509,7 +6464,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3acfab5ec8eac06806d057235e48e290"
+      "c8f8be1603f96a8cfff4f994e285bd76"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -6540,7 +6495,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "48af7114be1e1fcf2377a50cff85b1ed"
+      "990ba72f05a53c3840e6fd8d88e60b72"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -6782,7 +6737,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok", "unit_typing"
       ],
       0,
-      "bf0f1575526e30311ae74293534dae81"
+      "93c51301834f5e6678d06981c3e455d3"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -6844,7 +6799,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "31241b107ed392407e2c15c787a30038"
+      "c344b3e3c02e0eec6e80fdd337412bfe"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -6864,7 +6819,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "1fa6474a5348f2b7fe46d4127855519f"
+      "d91cba45994968be6a962f868657af82"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -6886,7 +6841,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "70831c8fea46a58c6e896a238d807815"
+      "b1535ff40d53e78b56c66fe4c732fefd"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -6918,7 +6873,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a81117cc96efd97ede4fb8b3b90516d5"
+      "204d59d9dbde4f3cbc137edc342f9b2a"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -6940,7 +6895,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c38dbaa320c91431a2befdef7266a75e"
+      "3374a0c1b1ab28f2f75c1e91a864ad42"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -6972,7 +6927,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0efa51cb6df24d7ed40fba1a67d55bb1"
+      "23dd8e841217021385cc1df1f4e99eeb"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -6994,7 +6949,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0f54414fe5d95dcf9195180973c9e059"
+      "aedfda23a1300ffbd81b99c26986949a"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7026,7 +6981,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "79bdb9d91158b36598f78bed0d356987"
+      "565b3bffc9a7a64144fb06cc86be2646"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7039,7 +6994,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "4321cf4aaf9252b16455806d98696e36"
+      "815a4153162fffe17e10011a01f88018"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7099,7 +7054,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c0b6a1f428a3a13862796aad3e6c75cf"
+      "e4c5d9dc16ba5cf2749de097d15bcfdf"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7159,7 +7114,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ca9fe4dff627028faa0e9df9087d0195"
+      "400a6b55df7e53c40ec199f0c264ae5f"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7219,7 +7174,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d1305058008da5245c1043acb178c209"
+      "2c46928e5f533a095686cabe3bb93305"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7280,7 +7235,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "fae501a5b510e777fedc577926f94151"
+      "4f673ad96484c72160099463ddd9ab39"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7313,7 +7268,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "af3707e02f754a6d9d269e4964ca953c"
+      "da95802eb19983eab2052f6dc1ed7cb3"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7346,7 +7301,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7d2485dc03890b2cdd6a72d46e264c61"
+      "4005da53c261749cc4fdec1d23f70fe5"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7379,7 +7334,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9ca8d390403094d2b31ceeaa847e7776"
+      "24d05f3ec7919a4590f962cc7ba92d8f"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7412,7 +7367,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "f8df35e5b4c0a257980c779ff39d1e19"
+      "ec81907e0a00f910cced37f0fe53feff"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7426,7 +7381,7 @@
         "refinement_interpretation_Tm_refine_969fa4c2bd20e842a89b462e081a4cd9"
       ],
       0,
-      "a3b0382d21b023ddf0bccf7b9b8a4d59"
+      "9a8bb26ef67c985af9fc64ef921a12cf"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7516,7 +7471,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "19002cb9da021767e0b57996d4a1a9dd"
+      "dc155d0ad98276b28ed9184f672218d9"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7600,7 +7555,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d9b2faf48c268fe6f3de2b214a05e3b4"
+      "da45393c0dd4a72de7b855c591f4fccd"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7620,7 +7575,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "573b46ed1ef954f5c638d9fd1410406d"
+      "0312dfbe0a6c2950c90257d2a34cea18"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7632,7 +7587,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "66f4662288da19da0983d54be3093bb2"
+      "2d83ed82496b6f6c2b1c703823c2a072"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7690,7 +7645,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "1e208f78660aa5875daf332e4d04f3b2"
+      "d3bce949fc9b97a7b9211996369057a4"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7706,7 +7661,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "cedeaeec68f8b419626294fa33cb5f72"
+      "dca5fd872fe1e423902a68f466b1d0ee"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7719,7 +7674,7 @@
         "refinement_interpretation_Tm_refine_8d363eb15ccb3e6af8bbaa9c30adfae1"
       ],
       0,
-      "556dc29488182b413fbfd4aad6da4ce2"
+      "645192e9c1a14e8003962be2e51490c7"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7731,7 +7686,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "0639563d2117e396e128f54f8f11ff3f"
+      "0b988b0b719e7680c2d4c6a776ba2e3b"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7744,7 +7699,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "0949811feb333d31fa3a7cbfcad3f0bc"
+      "f3a70b12267ccd2296cffd5838e14947"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7757,7 +7712,7 @@
         "refinement_interpretation_Tm_refine_89b796908cece79a7bde86d77f35e936"
       ],
       0,
-      "b2d2cb1d26cec332081c557b5c70a91c"
+      "8371ba6f5cfebab054365297d2f19989"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7770,7 +7725,7 @@
         "refinement_interpretation_Tm_refine_8d363eb15ccb3e6af8bbaa9c30adfae1"
       ],
       0,
-      "ca4f53e67f566e3a6641957f33869989"
+      "a27c29417061b19d5920f30ae8ddd272"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7792,7 +7747,7 @@
         "refinement_interpretation_Tm_refine_f9b3bbf7ea23f7e755f737660c4fb081"
       ],
       0,
-      "9af98df8d92d73b64438fc453c4dd86c"
+      "dbd5a74d0d82a32a3f1c8e182000de0f"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7825,7 +7780,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8ce05a26eb0f1cde4219c8db6dec0e2d"
+      "008a456d27f45515c358e7d11dcacfcc"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7858,7 +7813,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7851e2a622ffcd29e7bc249ceea86d86"
+      "1093aabac377eab001ff3757ca60984c"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify_valid_pk",
@@ -7891,7 +7846,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ab1dae9aa3d689181cb151d833c1ad4f"
+      "e60cc17bc9cf2e5f542c58508ef540f5"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify",
@@ -7954,7 +7909,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c98b357a5d74870fd0e264cfa3ac65e9"
+      "beed544fdafd5788bf5f258d84b0f8d0"
     ],
     [
       "Hacl.Impl.Ed25519.Verify.verify",
@@ -8125,7 +8080,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "23140bf1165c2e057b76fe3919d25613"
+      "fd95a4afc9717406dcbf773c9f90527c"
     ]
   ]
 ]
